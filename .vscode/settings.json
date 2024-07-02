@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "d_event.h": "c",
+        "doomtype.h": "c",
+        "IPXSETUP.C": "cpp",
+        "SERSETUP.C": "cpp",
+        "r_data.h": "c",
+        "m_menu.h": "c"
+    }
+}

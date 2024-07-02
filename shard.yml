@@ -1,0 +1,19 @@
+name: doo-cr
+version: 0.1.0
+
+authors:
+  - D. Shwagginz <mynameisformat@gmail.com>
+
+targets:
+  doo-cr:
+    main: src/doo-cr.cr
+
+dependencies:
+  raylib-cr:
+    github: sol-vin/raylib-cr
+  wa-cr:
+    github: D-Shwagginz/wa-cr
+
+crystal: '>= 1.12.1'
+
+license: MIT
