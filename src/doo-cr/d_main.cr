@@ -212,11 +212,23 @@ module Doocr
       # Ouch.
     end
 
-    puts "m_init: Init menu"
+    puts "m_init: Init menu."
     m_init()
 
-    puts "r_init: Init DOOM refresh daemon - "
+    print "r_init: Init DOOM refresh daemon - "
     r_init()
+
+    puts "\np_init: Init Playloop state."
+    p_init()
+
+    puts "i_init: Setting up machine state."
+    i_init()
+
+    puts "d_check_net_game: Checking network game status."
+    d_check_net_game()
+
+    puts "s_init: Setting up sound."
+    s_init(@@config["sfx_volume"].as(Int32), @@config["music_volume"].as(Int32))
   end
 
   # Finds a response file and loads it in

@@ -19,6 +19,8 @@ module Doocr
                          File |
                          String).new
 
+  @@spritelumps = Hash(String, WAD::Graphic).new
+
   @@reloadname : String = ""
   @@reloadlump : Int32 = 0
 
@@ -123,7 +125,23 @@ module Doocr
           @@lumps[directory.name] = wad.pnames
         when "Graphic"
           @@lumps[directory.name] = wad.graphics[directory.name]
+        when "Sprite"
+          if @@lumps.keys.any?("S_START") && !@@lumps.keys.any?("S_END")
+            @@spritelumps[directory.name] = wad.sprites[directory.name]
+          else
+            @@lumps[directory.name] = wad.sprites[directory.name]
+          end
         when "Flat"
+          if !@@lumps.keys.any?("F_START")
+            puts "warning: Flat found before F_START and won't be included"
+            next
+          end
+
+          if @@lumps.keys.any?("F_END")
+            puts "warning: Flat found after F_END and won't be included"
+            next
+          end
+
           @@lumps[directory.name] = wad.flats[directory.name]
         when "Demo"
           @@lumps[directory.name] = wad.demos[directory.name]

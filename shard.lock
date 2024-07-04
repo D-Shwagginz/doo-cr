@@ -6,5 +6,5 @@ shards:
 
   wa-cr:
     git: https://github.com/d-shwagginz/wa-cr.git
-    version: 1.0.0+git.commit.802d4f8598355f98cd52a7a579efc8036c7044a3
+    version: 1.0.0+git.commit.84883eab078d99419ecc6808785692e198d2c468
 

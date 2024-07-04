@@ -8,6 +8,9 @@ require "raylib-cr/audio"
 require "wa-cr"
 require "wa-cr/raylib"
 
+require "./libadlmidi.cr"
+require "./libopnmidi.cr"
+
 # All important printed strings.
 # Language selection (message strings).
 # Use -DFRENCH etc.
@@ -55,6 +58,35 @@ require "./a_sounds.cr"
 require "./hu_stuff.cr"
 
 require "./m_swap.cr"
+
+require "./r_main.cr"
+
+require "./r_data.cr"
+
+require "./m_fixed.cr"
+
+require "./r_sky.cr"
+
+require "./r_draw.cr"
+
+require "./p_setup.cr"
+
+require "./p_switch.cr"
+
+require "./p_spec.cr"
+
+require "./r_things.cr"
+
+require "./info.cr"
+
+require "./r_defs.cr"
+
+require "./i_sound.cr"
+require "./i_system.cr"
+
+require "./d_net.cr"
+
+require "./s_sound.cr"
 
 module Doocr
   # Prints Raylib Log
