@@ -7,6 +7,7 @@ require "raylib-cr/audio"
 # Wa-cr
 require "wa-cr"
 require "wa-cr/raylib"
+require "wa-cr/write"
 
 require "./libadlmidi.cr"
 require "./libopnmidi.cr"
@@ -87,6 +88,20 @@ require "./i_system.cr"
 require "./d_net.cr"
 
 require "./s_sound.cr"
+
+require "./st_stuff.cr"
+
+require "./g_game.cr"
+
+require "./m_random.cr"
+
+require "./d_think.cr"
+
+require "./p_mobj.cr"
+
+require "./d_player.cr"
+
+require "./am_map.cr"
 
 module Doocr
   # Prints Raylib Log

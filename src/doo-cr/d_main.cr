@@ -6,6 +6,8 @@ module Doocr
   FGCOLOR     =   8
   MAXARGS     = 100
 
+  @@statcopy : String | Nil = nil
+
   def self.doom_main
     find_response_file()
 
@@ -229,6 +231,60 @@ module Doocr
 
     puts "s_init: Setting up sound."
     s_init(@@config["sfx_volume"].as(Int32), @@config["music_volume"].as(Int32))
+
+    puts "hu_init: Setting up heads up display."
+    hu_init()
+
+    puts "st_init: Init status bar."
+    st_init()
+
+    # check for a driver that wants intermission stats
+    p = @@argv.index("-statcopy")
+    if (p && p < @@argv.size - 1)
+      @@statcopy = @@argv[p + 1]
+      puts "External statistics registered."
+    end
+
+    # start the apropriate game based on parms
+    p = @@argv.index("-record")
+    if (p && p < @@argv.size - 1)
+      g_record_demo(@@argv[p + 1])
+      @@autostart
+    end
+
+    p = @@argv.index("-playdemo")
+    if (p && p < @@argv.size - 1)
+      @@singledemo = true
+      g_defered_play_demo(@@argv[p + 1])
+      d_doomloop()
+    end
+
+    p = @@argv.index("-timedemo")
+    if (p && p < @@argv.size - 1)
+      g_timedemo(@@argv[p + 1])
+      d_doomloop()
+    end
+
+    p = @@argv.index("-loadgame")
+    if (p && p < @@argv.size - 1)
+      file = ""
+      if @@argv.index("-cdrom")
+        file = "c:/doomdata/#{SAVEGAMENAME}#{@@argv[p + 1][0]}.dsg"
+      else
+        file = "#{SAVEGAMENAME}#{@@argv[p + 1][0]}.dsg"
+      end
+      g_loadgame(file)
+    end
+
+    if @@gameaction != GameAction::Loadgame
+      if @@autostart || @@netgame
+        g_initnew(@@start_skill, @@start_episode, @@start_map)
+      else
+        d_starttitle() # start up intro loop
+      end
+    end
+
+    d_doomloop() # never returns
   end
 
   # Finds a response file and loads it in

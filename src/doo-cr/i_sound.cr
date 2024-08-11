@@ -24,7 +24,7 @@ module Doocr
   @@adl_bank_name : String = "./midibanks/adl/DMXOPL3-by-sneakernets-GS.wopl"
   @@opn_bank_name : String = "./midibanks/opn/xg.wopn"
 
-  @@use_adl : Bool = true
+  @@use_adl : Bool = false
 
   def self.i_init_sound
     RAudio.init_audio_device

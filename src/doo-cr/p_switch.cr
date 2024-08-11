@@ -70,7 +70,6 @@ module Doocr
       end
 
       if @@alph_switch_list[i].episode <= episode
-        index += 1
         x = @@textures.index { |tex| tex.name == @@alph_switch_list[i].name1 }
         raise "p_init_switch_list: Missing Switch Texture. Looking for #{@@alph_switch_list[i].name1}" unless x
         y = @@textures.index { |tex| tex.name == @@alph_switch_list[i].name2 }
@@ -78,6 +77,7 @@ module Doocr
         @@switchlist[index] = x
         index += 1
         @@switchlist[index] = y
+        index += 1
       end
     end
   end

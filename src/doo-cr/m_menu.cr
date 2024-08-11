@@ -402,7 +402,7 @@ module Doocr
 
   def self.m_verify_nightmare(ch : Int32)
     return nil if ch != 'y'.to_i
-    # g_defered_init_new(NewGame::Nightmare, @@epi + 1, 1)
+    g_defered_init_new(NewGame::Nightmare, @@epi + 1, 1)
     m_clear_menus()
 
     return nil
@@ -414,7 +414,7 @@ module Doocr
       return nil
     end
 
-    # g_defered_init_new(choice, @@epi + 1, 1)
+    g_defered_init_new(choice, @@epi + 1, 1)
     m_clear_menus()
     return nil
   end
@@ -452,7 +452,7 @@ module Doocr
 
     @@current_menu.last_on = @@itemon
     m_clear_menus()
-    # d_start_title()
+    d_start_title()
 
     return nil
   end
@@ -460,7 +460,7 @@ module Doocr
   def self.m_end_game(choice : Int32)
     choice = 0
     if !@@usergame
-      # s_start_sound(nil, SFX::Oof)
+      s_start_sound(nil, SFX::Oof)
       return nil
     end
 
@@ -490,13 +490,13 @@ module Doocr
 
     if !@@netgame
       if @@gamemode == GameMode::Commercial
-        # s_start_sound(nil, @@quitsounds2[(@@gametic >> 2) & 7])
+        s_start_sound(nil, @@quitsounds2[(@@gametic >> 2) & 7])
       else
-        # s_start_sound(nil, @@quitsounds[(@@gametic >> 2) & 2])
+        s_start_sound(nil, @@quitsounds[(@@gametic >> 2) & 2])
       end
-      # i_wait_vbl(105)
+      i_wait_vbl(105)
     end
-    # i_quit()
+    i_quit()
 
     return nil
   end
@@ -556,7 +556,7 @@ module Doocr
       end
     end
 
-    # s_set_sfx_volume(@@config["sfx_volume"]) # *8 )
+    s_set_sfx_volume(@@config["sfx_volume"]) # *8 )
     return nil
   end
 
@@ -572,7 +572,7 @@ module Doocr
       end
     end
 
-    # s_set_music_volume(@@config["music_volume"]) # *8 )
+    s_set_music_volume(@@config["music_volume"]) # *8 )
     return nil
   end
 
@@ -631,7 +631,7 @@ module Doocr
       name = "./#{SAVEGAMENAME}#{choice}.dsg"
     end
 
-    # g_load_game(name)
+    g_load_game(name)
     m_clear_menus()
 
     return nil
@@ -677,14 +677,14 @@ module Doocr
   def self.m_quick_save_response(ch : Int32)
     if ch = 'y'.to_i
       m_do_save(@@quick_save_slot)
-      # s_start_sound(nil, SFX::Swtchx)
+      s_start_sound(nil, SFX::Swtchx)
     end
     return nil
   end
 
   def self.m_quick_save
     if !@@usergame
-      # s_start_sound(nil, SFX::Oof)
+      s_start_sound(nil, SFX::Oof)
       return nil
     end
 
@@ -706,7 +706,7 @@ module Doocr
   def self.m_quick_load_response(ch : Int32)
     if ch = 'y'.to_i
       m_load_select(@@quick_save_slot)
-      # s_start_sound(nil, SFX::Swtchx)
+      s_start_sound(nil, SFX::Swtchx)
     end
     return nil
   end
