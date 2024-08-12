@@ -13,6 +13,8 @@ dependencies:
     github: sol-vin/raylib-cr
   wa-cr:
     github: D-Shwagginz/wa-cr
+  term-reader:
+    github: crystal-term/reader
 
 crystal: '>= 1.12.1'
 
