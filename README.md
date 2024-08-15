@@ -32,4 +32,7 @@ TODO: Write development instructions here
 Doo-cr is distributed under the [GNU GPLv3](https://github.com/D-Shwagginz/doo-cr/blob/master/LICENSE) license. <br>
 Doo-cr uses the following libraries in it's code: <br>
 [Raylib](https://github.com/raysan5/raylib) by raysan5 ([zlib](https://github.com/raysan5/raylib/blob/master/LICENSE)) <br>
-[Raylib-cr](https://github.com/sol-vin/raylib-cr) by sol-vin ([Apache License 2.0](https://github.com/sol-vin/raylib-cr/blob/master/LICENSE))
+[Raylib-cr](https://github.com/sol-vin/raylib-cr) by sol-vin ([Apache License 2.0](https://github.com/sol-vin/raylib-cr/blob/master/LICENSE)) <br>
+[Reader](https://github.com/crystal-term/reader) ([MIT License](https://github.com/crystal-term/reader/blob/master/LICENSE)) <br>
+[LibADLMIDI](https://github.com/Wohlstand/libADLMIDI) by Wohlstand ([LGPL-3.0](https://github.com/Wohlstand/libADLMIDI/blob/master/LICENSE)) <br>
+[LibOPNMIDI](https://github.com/Wohlstand/libOPNMIDI) by Wohlstand ([LGPL-3.0](https://github.com/Wohlstand/libOPNMIDI/blob/master/LICENSE)) <br>

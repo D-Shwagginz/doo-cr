@@ -20,7 +20,3 @@ shards:
     git: https://github.com/crystal-term/screen.git
     version: 0.1.0+git.commit.ea51ee8d1f6c286573c41a7e784d31c80af7b9bb
 
-  wa-cr:
-    git: https://github.com/d-shwagginz/wa-cr.git
-    version: 1.0.0+git.commit.84883eab078d99419ecc6808785692e198d2c468
-
