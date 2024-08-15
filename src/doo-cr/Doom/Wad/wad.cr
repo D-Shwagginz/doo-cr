@@ -55,14 +55,14 @@ module Doocr
         raise "The file is not a WAD file."
       end
 
-      data = Bytes.new(LumpInfo::DATASIZE * lump_count)
+      data = Bytes.new(LumpInfo.datasize * lump_count)
       stream.seek(lump_info_table_offset, IO::Seek::Set)
       if stream.read(data) != data.size
         raise "Failed to read the WAD file."
       end
 
       lump_count.times do |i|
-        offset = LumpInfo::DATASIZE * i
+        offset = LumpInfo.datasize * i
         lumpinfo = LumpInfo.new(
           String.new(data[offset + 8, 8]),
           stream,

@@ -1,6 +1,6 @@
 module Doocr
   class LumpInfo
-    DATASIZE = 16
+    class_getter datasize : Int32 = 16
 
     getter name : String
     getter stream : IO

@@ -29,7 +29,7 @@ module Doocr
       patch_count = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 20, 2])
       patches = TexturePatch[patch_count]
       patch_count.times do |i|
-        patch_offset = offset + 22 + TexturePatch::DATASIZE * i
+        patch_offset = offset + 22 + TexturePatch.datasize * i
         patches[i] = TexturePatch.from_data(data, patch_offset, patch_lookup)
       end
 

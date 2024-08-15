@@ -1,4 +1,4 @@
-require "./IFlatLookup.cr"
+require "../i_flat_lookup.cr"
 
 module Doocr
   class DummyFlatLookup

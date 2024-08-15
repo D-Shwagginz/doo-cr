@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("managed-doom")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1b06e65cbb670b22b1e7320c1f28afe6cd23eb10")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e33451d27721d5e824aa3a459fffe34ecccf8fa4")]
 [assembly: System.Reflection.AssemblyProductAttribute("managed-doom")]
 [assembly: System.Reflection.AssemblyTitleAttribute("managed-doom")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

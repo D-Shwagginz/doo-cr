@@ -1,6 +1,6 @@
 module Doocr
   class TexturePatch
-    DATASIZE = 10
+    class_getter datasize : Int32 = 10
 
     getter origin_x : Int32
     getter origin_y : Int32

@@ -1,6 +1,6 @@
 module Doocr
   class ColorMap
-    getter inverse : Int32 = 32
+    class_getter inverse : Int32 = 32
 
     @data : Array(Array(UInt8))
 

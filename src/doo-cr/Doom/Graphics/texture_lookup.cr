@@ -1,4 +1,4 @@
-require "./ITextureLookup.cr"
+require "./i_texture_lookup.cr"
 
 module Doocr
   class TextureLookup

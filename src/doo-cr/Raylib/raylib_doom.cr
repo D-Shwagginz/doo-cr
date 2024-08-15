@@ -6,7 +6,7 @@ module Doocr::Raylib
     @content : GameContent
 
     @video : RaylibVideo
-    
+
     def initialize(@args : CommandLineArgs)
       begin
       rescue e

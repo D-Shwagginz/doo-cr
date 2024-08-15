@@ -1,4 +1,4 @@
-require "./ISpriteLookup.cr"
+require "./i_sprite_lookup.cr"
 
 module Doocr
   class SpriteLookup
