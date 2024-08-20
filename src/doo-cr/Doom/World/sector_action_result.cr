@@ -15,9 +15,9 @@
 #
 
 module Doocr
-  enum ButtonPosition
-    Top
-    Middle
-    Bottom
+  enum SectorActionResult
+    OK
+    Crushed
+    PastDestination
   end
 end
