@@ -38,7 +38,7 @@ module Doocr
       return Seg.new(
         vertices[vertex1_number],
         vertices[vertex2_number],
-        Fixed.from_int(seg_offset),
+        Fixed.from_i(seg_offset),
         Angle.new(angle.to_u32 << 16),
         front_side,
         line_def,

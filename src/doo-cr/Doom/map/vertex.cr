@@ -12,7 +12,7 @@ module Doocr
       x = IO::ByteFormat::LittleEndian.decode(Int16, data[offset, 2])
       y = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 2, 2])
 
-      return Vertex.new(Fixed.from_int(x), Fixed.from_int(y))
+      return Vertex.new(Fixed.from_i(x), Fixed.from_i(y))
     end
 
     def self.from_wad(wad : Wad, lump : Int32) : Array(Vertex)

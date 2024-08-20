@@ -3,6 +3,6 @@ module Doocr
     abstract def get_number(name : String) : Int
     abstract def [](name : String) : Flat
     abstract def sky_flat_number : Int
-    abstract def sky_flat : Flat
+    abstract def sky_flat : Flat | Nil
   end
 end

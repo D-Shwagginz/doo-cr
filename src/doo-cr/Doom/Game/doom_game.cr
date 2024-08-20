@@ -1,22 +1,22 @@
 module Doocr
   class DoomGame
-    @content : GameContent
-    getter options : GameOptions
+    @content : GameContent | Nil
+    getter options : GameOptions | Nil
 
-    @game_action : GameAction
-    getter game_state : GameState
+    @game_action : GameAction | Nil
+    getter game_state : GameState | Nil
 
-    @game_tic : Int32
+    @game_tic : Int32 = 0
 
-    getter world : World
-    getter intermission : Intermission
-    getter finale : Finale
+    getter world : World | Nil
+    getter intermission : Intermission | Nil
+    getter finale : Finale | Nil
 
-    getter paused : Bool
+    getter paused : Bool = false
 
-    @load_game_slot_number : Int32
-    @save_game_slot_number : Int32
-    @save_game_description : String
+    @load_game_slot_number : Int32 = 0
+    @save_game_slot_number : Int32 = 0
+    @save_game_description : String | Nil
 
     def initialize(@content : GameContent, @options : GameOptions)
       @game_action = GameAction::Nothing

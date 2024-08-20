@@ -3,11 +3,11 @@ require "../i_texture_lookup.cr"
 module Doocr
   class DummyTextureLookup
     include ITextureLookup
-    @textures : Array(Texture)
-    @name_to_texture : Hash(String, Texture)
-    @name_to_number : Hash(String, Int32)
+    @textures : Array(Texture) = Array(Texture).new
+    @name_to_texture : Hash(String, Texture) = {} of String => Texture
+    @name_to_number : Hash(String, Int32) = {} of String => Int32
 
-    getter switch_list : Array(Int32)
+    getter switch_list : Array(Int32) = Array(Int32).new
 
     def each(&)
       @textures.each do |t|
@@ -23,7 +23,7 @@ module Doocr
       return @textures[num]
     end
 
-    def [](name : String)
+    def [](name : String) : Texture
       return @name_to_texture[name]
     end
 

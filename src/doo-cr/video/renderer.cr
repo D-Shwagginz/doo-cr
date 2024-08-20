@@ -14,12 +14,12 @@ module Doocr::Video
       0.50,
     ]
 
-    @config : Config
+    @config : Config | Nil
 
-    @palette : Palette
+    @palette : Palette | Nil
 
-    @screen : DrawScreen
+    @screen : DrawScreen | Nil
 
-    @menu : MenuRenderer
+    @menu : MenuRenderer | Nil
   end
 end

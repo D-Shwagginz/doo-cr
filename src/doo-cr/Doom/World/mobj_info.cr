@@ -7,7 +7,7 @@ module Doocr
     property see_sound : Sfx
     property reaction_time : Int32
     property attack_sound : Sfx
-    property pain_state : MobjInfo
+    property pain_state : MobjState
     property pain_chance : Int32
     property pain_sound : Sfx
     property melee_state : MobjState
@@ -32,7 +32,7 @@ module Doocr
       @see_sound : Sfx,
       @reaction_time : Int32,
       @attack_sound : Sfx,
-      @pain_state : MobjInfo,
+      @pain_state : MobjState,
       @pain_chance : Int32,
       @pain_sound : Sfx,
       @melee_state : MobjState,

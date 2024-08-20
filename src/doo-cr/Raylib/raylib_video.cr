@@ -1,5 +1,5 @@
 module Doocr::Raylib
   class RaylibVideo
-    @renderer : Renderer
+    # @renderer : Renderer
   end
 end

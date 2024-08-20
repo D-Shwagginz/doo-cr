@@ -2,31 +2,31 @@ module Doocr
   class LineDef
     class_getter datasize : Int32 = 14
 
-    getter vertex1 : Vertex
-    getter vertex2 : Vertex
+    getter vertex1 : Vertex | Nil
+    getter vertex2 : Vertex | Nil
 
-    getter dx : Fixed
-    getter dy : Fixed
+    getter dx : Fixed | Nil
+    getter dy : Fixed | Nil
 
-    property flags : LineFlags
-    property special : LineSpecial
-    property tag : Int16
+    property flags : LineFlags = LineFlags.new(0)
+    property special : LineSpecial = LineSpecial.new(0)
+    property tag : Int16 = 0_i16
 
-    getter from_side : SideDef
+    getter from_side : SideDef | Nil
     getter back_side : SideDef | Nil
 
-    getter bounding_box : Array(Fixed)
+    getter bounding_box : Array(Fixed) = Array(Fixed).new
 
-    getter slope_type : SlopeType
+    getter slope_type : SlopeType = SlopeType.new(0)
 
     getter front_sector : Sector | Nil
     getter back_sector : Sector | Nil
 
-    property valid_count : Int32
+    property valid_count : Int32 = 0
 
-    property special_data : Thinker
+    property special_data : Thinker | Nil
 
-    property sound_origin : Mobj
+    property sound_origin : Mobj | Nil
 
     def initialize(
       @vertex1 : Vertex,

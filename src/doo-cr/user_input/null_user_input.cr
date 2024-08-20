@@ -14,6 +14,18 @@ module Doocr::UserInput
       return @@instance
     end
 
+    def reset
+    end
+
+    def grab_mouse
+    end
+
+    def release_mouse
+    end
+
+    def mouse_sensitivity=(mouse_sensitivity : Int32)
+    end
+
     def build_tic_cmd(cmd : TicCmd)
       cmd.clear
     end

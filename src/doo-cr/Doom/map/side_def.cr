@@ -28,8 +28,8 @@ module Doocr
       sector_num = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 28, 2])
 
       return SideDef.new(
-        Fixed.from_int(texture_offset),
-        Fixed.from_int(row_offset),
+        Fixed.from_i(texture_offset),
+        Fixed.from_i(row_offset),
         textures.get_number(top_texture_name),
         textures.get_number(bottom_texture_name),
         textures.get_number(middle_texture_name),

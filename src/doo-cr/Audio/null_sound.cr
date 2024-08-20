@@ -14,6 +14,36 @@ module Doocr::Audio
       return @@instance
     end
 
+    def set_listener(listener : Mobj)
+    end
+
+    def update
+    end
+
+    def start_sound(mobj : Mobj, sfx : Sfx, type : SfxType, volume : Int32)
+    end
+
+    def start_sound(mobj : Mobj, sfx : Sfx, type : SfxType)
+    end
+
+    def start_sound(sfx : Sfx)
+    end
+
+    def stop_sound(mobj : Mobj)
+    end
+
+    def reset
+    end
+
+    def pause
+    end
+
+    def resume
+    end
+
+    def volume=(volume : Int32)
+    end
+
     def max_volume : Int32
       return 15
     end

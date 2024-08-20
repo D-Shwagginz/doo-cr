@@ -1,31 +1,31 @@
 module Doocr
   class GameOptions
-    property game_version : GameVersion
-    property game_mode : GameMode
-    property mission_pack : MissionPack
-    getter players : Array(Player)
-    property console_player : Int32
-    property episode : Int32
-    property map : Int32
-    property skill : GameSkill
-    property demo_playback : Bool
-    property net_game : Bool
-    property deathmatch : Int32
-    property fast_monsters : Bool
-    property respawn_monsters : Bool
-    property no_monsters : Bool
+    property game_version : GameVersion | Nil
+    property game_mode : GameMode | Nil
+    property mission_pack : MissionPack | Nil
+    getter players : Array(Player) = Array(Player).new
+    property console_player : Int32 = 0
+    property episode : Int32 = 0
+    property map : Int32 = 0
+    property skill : GameSkill | Nil
+    property demo_playback : Bool = false
+    property net_game : Bool = false
+    property deathmatch : Int32 = 0
+    property fast_monsters : Bool = false
+    property respawn_monsters : Bool = false
+    property no_monsters : Bool = false
 
-    getter intermission_info : IntermissionInfo
+    getter intermission_info : IntermissionInfo | Nil
 
-    getter random : DoomRandom
+    getter random : DoomRandom | Nil
 
-    property video : IVideo
+    property video : IVideo | Nil
 
-    property sound : Audio::ISound
+    property sound : Audio::ISound | Nil
 
-    property music : Audio::IMusic
+    property music : Audio::IMusic | Nil
 
-    property user_input : UserInput::IUserInput
+    property user_input : UserInput::IUserInput | Nil
 
     def initialize
       @game_version = GameVersion::Version109

@@ -3,13 +3,13 @@ require "./i_flat_lookup.cr"
 module Doocr
   class FlatLookup
     include IFlatLookup
-    @flats : Array(Flat)
+    @flats : Array(Flat) = Array(Flat).new
 
-    @name_to_flat : Hash(String, Flat)
-    @name_to_number : Hash(String, Int32)
+    @name_to_flat : Hash(String, Flat) = {} of String => Flat
+    @name_to_number : Hash(String, Int32) = {} of String => Int32
 
-    getter sky_flat_number : Int32
-    getter sky_flat : Flat
+    getter sky_flat_number : Int32 = 0
+    getter sky_flat : Flat | Nil
 
     def each(&)
       @flats.each do |t|
@@ -25,7 +25,7 @@ module Doocr
       return @flats[num]
     end
 
-    def [](name : String)
+    def [](name : String) : Flat
       @name_to_flat[name]
     end
 

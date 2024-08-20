@@ -12,11 +12,11 @@ module Doocr
     # Spawn functions for level start
     #
 
-    getter player_starts : StaticArray(MapThing, Player::MAX_PLAYER_COUNT)
-    getter deathmatch_starts : Array(MapThing)
+    getter player_starts : Array(MapThing | Nil) = Array(MapThing | Nil).new
+    getter deathmatch_starts : Array(MapThing) = Array(MapThing).new
 
     private def init_spawn_map_thing
-      @player_starts = uninitialized StaticArray(MapThing, Player::MAX_PLAYER_COUNT)
+      @player_starts = Array(MapThing | Nil).new(Player::MAX_PLAYER_COUNT, nil)
       @deathmatch_starts = Array(MapThing).new
     end
 
@@ -290,7 +290,7 @@ module Doocr
       missile = spawn_mobj(
         source.x,
         source.y,
-        source.z + Fixed.from_int(32), type)
+        source.z + Fixed.from_i(32), type)
 
       if missile.info.see_sound != 0
         world.start_sound(missile, missile.info.see_sound, SfxType::Misc)
@@ -339,15 +339,15 @@ module Doocr
 
       # See which target is to be aimed at.
       angle = source.angle
-      slope = hs.aim_line_attack(source, angle, Fixed.from_int(16 * 64))
+      slope = hs.aim_line_attack(source, angle, Fixed.from_i(16 * 64))
 
       if hs.line_target == nil
         angle += Angle.new(1 << 26)
-        slope = hs.aim_line_attack(source, angle, Fixed.from_int(16 * 64))
+        slope = hs.aim_line_attack(source, angle, Fixed.from_i(16 * 64))
 
         if hs.line_target == nil
           angle -= Angle.new(2 << 26)
-          slope = hs.aim_line_attack(source, angle, Fixed.from_int(16 * 64))
+          slope = hs.aim_line_attack(source, angle, Fixed.from_i(16 * 64))
         end
 
         if hs.line_target == nil
@@ -358,7 +358,7 @@ module Doocr
 
       x = source.x
       y = source.y
-      z = source.z + Fixed.from_int(32)
+      z = source.z + Fixed.from_i(32)
 
       missile = spawn_mobj(x, y, z, type)
 
@@ -380,8 +380,8 @@ module Doocr
     #
 
     @@body_que_size : Int32 = 32
-    @body_que_slot : Int32
-    @body_que : Array(Mobj)
+    @body_que_slot : Int32 = 0
+    @body_que : Array(Mobj) = Array(Mobj).new
 
     private def init_multi_player_respawn
       @body_que_slot = 0
@@ -490,10 +490,10 @@ module Doocr
     #
 
     @@item_que_size : Int32 = 128
-    @item_respawn_que : Array(MapThing)
-    @item_respawn_time : Array(Int32)
-    @item_que_head : Int32
-    @item_que_tail : Int32
+    @item_respawn_que : Array(MapThing) = Array(MapThing).new
+    @item_respawn_time : Array(Int32) = Array(Int32).new
+    @item_que_head : Int32 = 0
+    @item_que_tail : Int32 = 0
 
     private def init_respawn_specials
       @item_respawn_que = Array(MapThing).new(@@item_que_size)

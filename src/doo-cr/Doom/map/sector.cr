@@ -2,41 +2,41 @@ module Doocr
   class Sector
     class_getter datasize : Int32 = 26
 
-    getter number : Int32
-    property floor_height : Fixed
-    property ceiling_height : Fixed
-    property floor_flat : Int32
-    property ceiling_flat : Int32
-    property light_level : Int32
-    property special : SectorSpecial
-    property tag : Int32
+    getter number : Int32 = 0
+    property floor_height : Fixed | Nil
+    property ceiling_height : Fixed | Nil
+    property floor_flat : Int32 = 0
+    property ceiling_flat : Int32 = 0
+    property light_level : Int32 = 0
+    property special : SectorSpecial | Nil
+    property tag : Int32 = 0
 
     # 0 = untraversed, 1, 2 = sndlines - 1.
-    property sound_traversed : Int32
+    property sound_traversed : Int32 = 0
 
     # Thing that made a sound (or nil).
-    property sound_target : Mobj | Nil = nil
+    property sound_target : Mobj | Nil
 
     # Mapblock bounding box for height changes.
-    property block_box : Array(Int32)
+    property block_box : Array(Int32) = Array(Int32).new
 
     # Origin for any sounds played by the sector.
-    property sound_origin : Mobj
+    property sound_origin : Mobj | Nil
 
     # If == validcount, already checked.
-    property valid_count : Int32
+    property valid_count : Int32 = 0
 
     # List of mobjs in sector.
-    property thing_list : Mobj
+    property thing_list : Mobj | Nil
 
     # Thinker for reversable actions.
-    property special_data : Thinker
+    property special_data : Thinker | Nil
 
-    property lines : Array(LineDef)
+    property lines : Array(LineDef) = Array(LineDef).new
 
     # For frame interpolation.
-    @old_floor_height : Fixed
-    @old_ceiling_height : Fixed
+    @old_floor_height : Fixed | Nil
+    @old_ceiling_height : Fixed | Nil
 
     def initialize(
       @number : Int32,
@@ -63,8 +63,8 @@ module Doocr
 
       return Sector.new(
         number,
-        Fixed.from_int(floor_height),
-        Fixed.from_int(ceiling_height)
+        Fixed.from_i(floor_height),
+        Fixed.from_i(ceiling_height)
           .flats.get_number(floor_flat_name),
         flats.get_number(ceiling_flat_name),
         light_level,

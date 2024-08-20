@@ -3,17 +3,17 @@ module Doocr
     @@max_button_count : Int32 = 32
     @@buton_time : Int32 = 35
 
-    @world : World
+    @world : World | Nil
 
-    @level_timer : Bool
-    @level_time_count : Int32
+    @level_timer : Bool = false
+    @level_time_count : Int32 = 0
 
-    @button_list : Array(Button)
+    @button_list : Array(Button) = Array(Button).new
 
-    getter texture_translation : Array(Int32)
-    getter flat_translation : Array(Int32)
+    getter texture_translation : Array(Int32) = Array(Int32).new
+    getter flat_translation : Array(Int32) = Array(Int32).new
 
-    @scroll_lines : Array(LineDef)
+    @scroll_lines : Array(LineDef) = Array(LineDef).new
 
     def initialize(@world : World)
       @level_timer = false

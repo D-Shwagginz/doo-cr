@@ -1,45 +1,45 @@
 module Doocr
   class Intermission
-    getter options : GameOptions
+    getter options : GameOptions | Nil
 
     # Contains information passed into intermission.
-    getter info : IntermissionInfo
-    @scores : Array(PlayerScores)
+    getter info : IntermissionInfo | Nil
+    @scores : Array(PlayerScores) = Array(PlayerScores).new
 
     # Used to accelerate or skip a stage.
-    @accelerate_stage : Bool
+    @accelerate_stage : Bool = false
 
     # Specifies cureent state.
-    @state : IntermissionState
+    @state : IntermissionState | Nil
 
-    getter kill_count : Array(Int32)
-    getter item_count : Array(Int32)
-    getter secret_count : Array(Int32)
-    getter frag_count : Array(Int32)
-    getter time_count : Int32
-    getter par_count : Int32
-    @pause_count : Int32
+    getter kill_count : Array(Int32) = Array(Int32).new
+    getter item_count : Array(Int32) = Array(Int32).new
+    getter secret_count : Array(Int32) = Array(Int32).new
+    getter frag_count : Array(Int32) = Array(Int32).new
+    getter time_count : Int32 = 0
+    getter par_count : Int32 = 0
+    @pause_count : Int32 = 0
 
-    @sp_state : Int32
+    @sp_state : Int32 = 0
 
-    @ng_state : Int32
-    getter do_frags : Bool
+    @ng_state : Int32 = 0
+    getter do_frags : Bool = false
 
-    @dm_state : Int32
-    getter dm_frag_count : Array(Array(Int32))
-    getter dm_total_count : Array(Int32)
+    @dm_state : Int32 = 0
+    getter dm_frag_count : Array(Array(Int32)) = Array(Array(Int32)).new
+    getter dm_total_count : Array(Int32) = Array(Int32).new
 
-    getter random : DoomRandom
-    getter animations : Array(Animation)
-    getter show_you_are_here : Bool
+    getter random : DoomRandom | Nil
+    getter animations : Array(Animation) = Array(Animation).new
+    getter show_you_are_here : Bool = false
 
     # Used for general timing.
-    @count : Int32
+    @count : Int32 = 0
 
     # Used for timing of background animation.
-    @bg_count : Int32
+    @bg_count : Int32 = 0
 
-    @completed : Bool
+    @completed : Bool = false
 
     def initialize(@options : GameOptions, @info : IntermissionInfo)
       @scores = info.players

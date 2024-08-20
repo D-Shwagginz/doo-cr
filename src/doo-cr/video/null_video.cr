@@ -20,8 +20,17 @@ module Doocr::Video
     def initialize_wipe
     end
 
+    def display_message=(display_message : Bool)
+    end
+
+    def gamma_correction_level=(gamma_correction_level : Int32)
+    end
+
     def has_focus : Bool
       return true
+    end
+
+    def window_size=(window_size : Int32)
     end
 
     def max_window_size : Int32

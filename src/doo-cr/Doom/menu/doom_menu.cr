@@ -1,5 +1,5 @@
 module Doocr
   class DoomMenu
-    @doom : Doom
+    @doom : Doom | Nil
   end
 end

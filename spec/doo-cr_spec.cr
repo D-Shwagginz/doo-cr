@@ -1,6 +1,7 @@
 require "./spec_helper"
+require "./tests/**"
 
-describe Doo::Cr do
+describe Doocr do
   # TODO: Write tests
 
   it "works" do

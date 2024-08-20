@@ -1,15 +1,15 @@
 module Doocr
   class Doom
-    @args : CommandLineArgs
-    @config : Config
-    @content : GameContent
-    @video : IVideo
-    @sound : Audio::ISound
-    @music : Audio::IMusic
-    @user_input : UserInput::IUserInput
+    @args : CommandLineArgs | Nil
+    @config : Config | Nil
+    @content : GameContent | Nil
+    @video : IVideo | Nil
+    @sound : Audio::ISound | Nil
+    @music : Audio::IMusic | Nil
+    @user_input : UserInput::IUserInput | Nil
 
-    @events : Array(DoomEvent)
+    @events : Array(DoomEvent) = Array(DoomEvent).new
 
-    @options : GameOptions
+    @options : GameOptions | Nil
   end
 end

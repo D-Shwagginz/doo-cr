@@ -3,22 +3,22 @@ module Doocr
     class_getter text_speed : Int32 = 3
     class_getter text_wait : Int32 = 250
 
-    getter options : GameOptions
+    getter options : GameOptions | Nil
 
     # Stage of animation:
     # 0 = text, 1 = art screen, 2 = character cast.
-    getter stage : Int32
-    getter count : Int32
+    getter stage : Int32 = 0
+    getter count : Int32 = 0
 
-    getter flat : String
-    getter text : String
+    getter flat : String | Nil
+    getter text : String | Nil
 
     # For bunny scroll.
-    getter scrolled : Int32
-    getter show_the_end : Bool
-    getter the_end_index : Int32
+    getter scrolled : Int32 = 0
+    getter show_the_end : Bool = false
+    getter the_end_index : Int32 = 0
 
-    @update_result : UpdateResult
+    @update_result : UpdateResult | Nil
 
     def cast_name : String
       @@castorder[@cast_number].name
@@ -223,13 +223,13 @@ module Doocr
       CastInfo.new(DoomInfo::Strings::CC_HERO, MobjType::Player),
     ]
 
-    @cast_number : Int32
-    getter cast_state : MobjStateDef
-    @cast_tics : Int32
-    @cast_frames : Int32
-    @cast_death : Bool
-    @cast_on_melee : Bool
-    @cast_attacking : Bool
+    @cast_number : Int32 = 0
+    getter cast_state : MobjStateDef | Nil
+    @cast_tics : Int32 = 0
+    @cast_frames : Int32 = 0
+    @cast_death : Bool = false
+    @cast_on_melee : Bool = false
+    @cast_attacking : Bool = false
 
     private def start_cast
       @stage = 2

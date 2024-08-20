@@ -69,18 +69,18 @@ module Doocr
       back_child = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 26, 2])
 
       return Node.new(
-        Fixed.from_int(x),
-        Fixed.from_int(y),
-        Fixed.from_int(dx),
-        Fixed.from_int(dy),
-        Fixed.from_int(front_bounding_box_top),
-        Fixed.from_int(front_bounding_box_bottom),
-        Fixed.from_int(front_bounding_box_left),
-        Fixed.from_int(front_bounding_box_right),
-        Fixed.from_int(back_bounding_box_top),
-        Fixed.from_int(back_bounding_box_bottom),
-        Fixed.from_int(back_bounding_box_left),
-        Fixed.from_int(back_bounding_box_right),
+        Fixed.from_i(x),
+        Fixed.from_i(y),
+        Fixed.from_i(dx),
+        Fixed.from_i(dy),
+        Fixed.from_i(front_bounding_box_top),
+        Fixed.from_i(front_bounding_box_bottom),
+        Fixed.from_i(front_bounding_box_left),
+        Fixed.from_i(front_bounding_box_right),
+        Fixed.from_i(back_bounding_box_top),
+        Fixed.from_i(back_bounding_box_bottom),
+        Fixed.from_i(back_bounding_box_left),
+        Fixed.from_i(back_bounding_box_right),
         front_child,
         back_child
       )

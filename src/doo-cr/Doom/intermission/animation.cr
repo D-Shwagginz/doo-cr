@@ -10,8 +10,8 @@ module Doocr
     getter location_y : Int32
     getter data : Int32
     getter patches : Array(String)
-    getter patch_number : Int32
-    @next_tic : Int32
+    getter patch_number : Int32 = 0
+    @next_tic : Int32 = 0
 
     def initialize(@im : Intermission, info : AnimationInfo, @number : Int32)
       @type = info.type

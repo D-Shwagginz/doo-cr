@@ -7,7 +7,7 @@ module Doocr
       Fixed.zero,
       Angle.ang0,
       0,
-      0
+      ThingFlags.new(0)
     )
 
     getter x : Fixed
@@ -33,8 +33,8 @@ module Doocr
       flags = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 8, 2])
 
       return MapThing.new(
-        Fixed.from_int(x),
-        Fixed.from_int(y),
+        Fixed.from_i(x),
+        Fixed.from_i(y),
         Angle.new(Angle.ang45.data * (angle / 45).to_u32),
         type,
         ThingFlags.new(flags)

@@ -12,6 +12,6 @@ module Doocr::Audio
 
     abstract def max_volume : Int32
     abstract def volume : Int32
-    abstract def volume=(@volume : Int32) : Int32
+    abstract def volume=(@volume : Int32)
   end
 end

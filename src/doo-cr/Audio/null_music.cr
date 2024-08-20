@@ -14,6 +14,12 @@ module Doocr::Audio
       return @@instance
     end
 
+    def start_music(bgm : Bgm, loop : Bool)
+    end
+
+    def volume=(volume : Int32)
+    end
+
     def max_volume : Int32
       return 15
     end

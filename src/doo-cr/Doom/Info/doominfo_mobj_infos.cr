@@ -12,7 +12,7 @@ module Doocr
         MobjState::PlayPain,                                                                                         # painState
         255,                                                                                                         # painChance
         Sfx::PLPAIN,                                                                                                 # painSound
-        MobjState::Null,                                                                                             # meleeState
+        MobjState::Nil,                                                                                              # meleeState
         MobjState::PlayAtk1,                                                                                         # missileState
         MobjState::PlayDie1,                                                                                         # deathState
         MobjState::PlayXdie1,                                                                                        # xdeathState
@@ -24,7 +24,7 @@ module Doocr
         0,                                                                                                           # damage
         Sfx::NONE,                                                                                                   # activeSound
         MobjFlags::Solid | MobjFlags::Shootable | MobjFlags::DropOff | MobjFlags::PickUp | MobjFlags::NotDeathmatch, # flags
-        MobjState::Null                                                                                              # raiseState
+        MobjState::Nil                                                                                               # raiseState
       ),
 
       MobjInfo.new(                                                     # MobjType.Possessed
@@ -38,7 +38,7 @@ module Doocr
         MobjState::PossPain,                                            # painState
         200,                                                            # painChance
         Sfx::POPAIN,                                                    # painSound
-        MobjState::Null,                                                # meleeState
+        MobjState::Nil,                                                 # meleeState
         MobjState::PossAtk1,                                            # missileState
         MobjState::PossDie1,                                            # deathState
         MobjState::PossXdie1,                                           # xdeathState
@@ -64,7 +64,7 @@ module Doocr
         MobjState::SposPain,                                            # painState
         170,                                                            # painChance
         Sfx::POPAIN,                                                    # painSound
-        MobjState::Null,                                                # meleeState
+        MobjState::Nil,                                                 # meleeState
         MobjState::SposAtk1,                                            # missileState
         MobjState::SposDie1,                                            # deathState
         MobjState::SposXdie1,                                           # xdeathState
@@ -90,10 +90,10 @@ module Doocr
         MobjState::VilePain,                                            # painState
         10,                                                             # painChance
         Sfx::VIPAIN,                                                    # painSound
-        MobjState::Null,                                                # meleeState
+        MobjState::Nil,                                                 # meleeState
         MobjState::VileAtk1,                                            # missileState
         MobjState::VileDie1,                                            # deathState
-        MobjState::Null,                                                # xdeathState
+        MobjState::Nil,                                                 # xdeathState
         Sfx::VILDTH,                                                    # deathSound
         15,                                                             # speed
         Fixed.from_i(20),                                               # radius
@@ -102,24 +102,24 @@ module Doocr
         0,                                                              # damage
         Sfx::VILACT,                                                    # activeSound
         MobjFlags::Solid | MobjFlags::Shootable | MobjFlags::CountKill, # flags
-        MobjState::Null                                                 # raiseState
+        MobjState::Nil                                                  # raiseState
       ),
 
       MobjInfo.new(                                   # MobjType.Fire
 -1,                                                   # doomEdNum
         MobjState::Fire1,                             # spawnState
         1000,                                         # spawnHealth
-        MobjState::Null,                              # seeState
+        MobjState::Nil,                               # seeState
         Sfx::NONE,                                    # seeSound
         8,                                            # reactionTime
         Sfx::NONE,                                    # attackSound
-        MobjState::Null,                              # painState
+        MobjState::Nil,                               # painState
         0,                                            # painChance
         Sfx::NONE,                                    # painSound
-        MobjState::Null,                              # meleeState
-        MobjState::Null,                              # missileState
-        MobjState::Null,                              # deathState
-        MobjState::Null,                              # xdeathState
+        MobjState::Nil,                               # meleeState
+        MobjState::Nil,                               # missileState
+        MobjState::Nil,                               # deathState
+        MobjState::Nil,                               # xdeathState
         Sfx::NONE,                                    # deathSound
         0,                                            # speed
         Fixed.from_i(20),                             # radius
@@ -128,7 +128,7 @@ module Doocr
         0,                                            # damage
         Sfx::NONE,                                    # activeSound
         MobjFlags::NoBlockMap | MobjFlags::NoGravity, # flags
-        MobjState::Null                               # raiseState
+        MobjState::Nil                                # raiseState
       ),
 
       MobjInfo.new(                                                     # MobjType.Undead
@@ -145,7 +145,7 @@ module Doocr
         MobjState::SkelFist1,                                           # meleeState
         MobjState::SkelMiss1,                                           # missileState
         MobjState::SkelDie1,                                            # deathState
-        MobjState::Null,                                                # xdeathState
+        MobjState::Nil,                                                 # xdeathState
         Sfx::SKEDTH,                                                    # deathSound
         10,                                                             # speed
         Fixed.from_i(20),                                               # radius
@@ -161,43 +161,43 @@ module Doocr
 -1,                                                                                             # doomEdNum
         MobjState::Tracer,                                                                      # spawnState
         1000,                                                                                   # spawnHealth
-        MobjState::Null,                                                                        # seeState
+        MobjState::Nil,                                                                         # seeState
         Sfx::SKEATK,                                                                            # seeSound
         8,                                                                                      # reactionTime
         Sfx::NONE,                                                                              # attackSound
-        MobjState::Null,                                                                        # painState
+        MobjState::Nil,                                                                         # painState
         0,                                                                                      # painChance
         Sfx::NONE,                                                                              # painSound
-        MobjState::Null,                                                                        # meleeState
-        MobjState::Null,                                                                        # missileState
+        MobjState::Nil,                                                                         # meleeState
+        MobjState::Nil,                                                                         # missileState
         MobjState::Traceexp1,                                                                   # deathState
-        MobjState::Null,                                                                        # xdeathState
+        MobjState::Nil,                                                                         # xdeathState
         Sfx::BAREXP,                                                                            # deathSound
-        10 * Fixed.FracUnit,                                                                    # speed
+        10 * Fixed::FRAC_UNIT,                                                                  # speed
         Fixed.from_i(11),                                                                       # radius
         Fixed.from_i(8),                                                                        # height
         100,                                                                                    # mass
         10,                                                                                     # damage
         Sfx::NONE,                                                                              # activeSound
         MobjFlags::NoBlockMap | MobjFlags::Missile | MobjFlags::DropOff | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                                         # raiseState
+        MobjState::Nil                                                                          # raiseState
       ),
 
       MobjInfo.new(                                   # MobjType.Smoke
 -1,                                                   # doomEdNum
         MobjState::Smoke1,                            # spawnState
         1000,                                         # spawnHealth
-        MobjState::Null,                              # seeState
+        MobjState::Nil,                               # seeState
         Sfx::NONE,                                    # seeSound
         8,                                            # reactionTime
         Sfx::NONE,                                    # attackSound
-        MobjState::Null,                              # painState
+        MobjState::Nil,                               # painState
         0,                                            # painChance
         Sfx::NONE,                                    # painSound
-        MobjState::Null,                              # meleeState
-        MobjState::Null,                              # missileState
-        MobjState::Null,                              # deathState
-        MobjState::Null,                              # xdeathState
+        MobjState::Nil,                               # meleeState
+        MobjState::Nil,                               # missileState
+        MobjState::Nil,                               # deathState
+        MobjState::Nil,                               # xdeathState
         Sfx::NONE,                                    # deathSound
         0,                                            # speed
         Fixed.from_i(20),                             # radius
@@ -206,7 +206,7 @@ module Doocr
         0,                                            # damage
         Sfx::NONE,                                    # activeSound
         MobjFlags::NoBlockMap | MobjFlags::NoGravity, # flags
-        MobjState::Null                               # raiseState
+        MobjState::Nil                                # raiseState
       ),
 
       MobjInfo.new(                                                     # MobjType.Fatso
@@ -220,10 +220,10 @@ module Doocr
         MobjState::FattPain,                                            # painState
         80,                                                             # painChance
         Sfx::MNPAIN,                                                    # painSound
-        MobjState::Null,                                                # meleeState
+        MobjState::Nil,                                                 # meleeState
         MobjState::FattAtk1,                                            # missileState
         MobjState::FattDie1,                                            # deathState
-        MobjState::Null,                                                # xdeathState
+        MobjState::Nil,                                                 # xdeathState
         Sfx::MANDTH,                                                    # deathSound
         8,                                                              # speed
         Fixed.from_i(48),                                               # radius
@@ -239,26 +239,26 @@ module Doocr
 -1,                                                                                             # doomEdNum
         MobjState::Fatshot1,                                                                    # spawnState
         1000,                                                                                   # spawnHealth
-        MobjState::Null,                                                                        # seeState
+        MobjState::Nil,                                                                         # seeState
         Sfx::FIRSHT,                                                                            # seeSound
         8,                                                                                      # reactionTime
         Sfx::NONE,                                                                              # attackSound
-        MobjState::Null,                                                                        # painState
+        MobjState::Nil,                                                                         # painState
         0,                                                                                      # painChance
         Sfx::NONE,                                                                              # painSound
-        MobjState::Null,                                                                        # meleeState
-        MobjState::Null,                                                                        # missileState
+        MobjState::Nil,                                                                         # meleeState
+        MobjState::Nil,                                                                         # missileState
         MobjState::Fatshotx1,                                                                   # deathState
-        MobjState::Null,                                                                        # xdeathState
+        MobjState::Nil,                                                                         # xdeathState
         Sfx::FIRXPL,                                                                            # deathSound
-        20 * Fixed.FracUnit,                                                                    # speed
+        20 * Fixed::FRAC_UNIT,                                                                  # speed
         Fixed.from_i(6),                                                                        # radius
         Fixed.from_i(8),                                                                        # height
         100,                                                                                    # mass
         8,                                                                                      # damage
         Sfx::NONE,                                                                              # activeSound
         MobjFlags::NoBlockMap | MobjFlags::Missile | MobjFlags::DropOff | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                                         # raiseState
+        MobjState::Nil                                                                          # raiseState
       ),
 
       MobjInfo.new(                                                     # MobjType.Chainguy
@@ -272,7 +272,7 @@ module Doocr
         MobjState::CposPain,                                            # painState
         170,                                                            # painChance
         Sfx::POPAIN,                                                    # painSound
-        MobjState::Null,                                                # meleeState
+        MobjState::Nil,                                                 # meleeState
         MobjState::CposAtk1,                                            # missileState
         MobjState::CposDie1,                                            # deathState
         MobjState::CposXdie1,                                           # xdeathState
@@ -325,9 +325,9 @@ module Doocr
         180,                                                            # painChance
         Sfx::DMPAIN,                                                    # painSound
         MobjState::SargAtk1,                                            # meleeState
-        MobjState::Null,                                                # missileState
+        MobjState::Nil,                                                 # missileState
         MobjState::SargDie1,                                            # deathState
-        MobjState::Null,                                                # xdeathState
+        MobjState::Nil,                                                 # xdeathState
         Sfx::SGTDTH,                                                    # deathSound
         10,                                                             # speed
         Fixed.from_i(30),                                               # radius
@@ -351,9 +351,9 @@ module Doocr
         180,                                                                                # painChance
         Sfx::DMPAIN,                                                                        # painSound
         MobjState::SargAtk1,                                                                # meleeState
-        MobjState::Null,                                                                    # missileState
+        MobjState::Nil,                                                                     # missileState
         MobjState::SargDie1,                                                                # deathState
-        MobjState::Null,                                                                    # xdeathState
+        MobjState::Nil,                                                                     # xdeathState
         Sfx::SGTDTH,                                                                        # deathSound
         10,                                                                                 # speed
         Fixed.from_i(30),                                                                   # radius
@@ -376,10 +376,10 @@ module Doocr
         MobjState::HeadPain,                                                                                      # painState
         128,                                                                                                      # painChance
         Sfx::DMPAIN,                                                                                              # painSound
-        MobjState::Null,                                                                                          # meleeState
+        MobjState::Nil,                                                                                           # meleeState
         MobjState::HeadAtk1,                                                                                      # missileState
         MobjState::HeadDie1,                                                                                      # deathState
-        MobjState::Null,                                                                                          # xdeathState
+        MobjState::Nil,                                                                                           # xdeathState
         Sfx::CACDTH,                                                                                              # deathSound
         8,                                                                                                        # speed
         Fixed.from_i(31),                                                                                         # radius
@@ -405,7 +405,7 @@ module Doocr
         MobjState::BossAtk1,                                            # meleeState
         MobjState::BossAtk1,                                            # missileState
         MobjState::BossDie1,                                            # deathState
-        MobjState::Null,                                                # xdeathState
+        MobjState::Nil,                                                 # xdeathState
         Sfx::BRSDTH,                                                    # deathSound
         8,                                                              # speed
         Fixed.from_i(24),                                               # radius
@@ -421,26 +421,26 @@ module Doocr
 -1,                                                                                             # doomEdNum
         MobjState::Brball1,                                                                     # spawnState
         1000,                                                                                   # spawnHealth
-        MobjState::Null,                                                                        # seeState
+        MobjState::Nil,                                                                         # seeState
         Sfx::FIRSHT,                                                                            # seeSound
         8,                                                                                      # reactionTime
         Sfx::NONE,                                                                              # attackSound
-        MobjState::Null,                                                                        # painState
+        MobjState::Nil,                                                                         # painState
         0,                                                                                      # painChance
         Sfx::NONE,                                                                              # painSound
-        MobjState::Null,                                                                        # meleeState
-        MobjState::Null,                                                                        # missileState
+        MobjState::Nil,                                                                         # meleeState
+        MobjState::Nil,                                                                         # missileState
         MobjState::Brballx1,                                                                    # deathState
-        MobjState::Null,                                                                        # xdeathState
+        MobjState::Nil,                                                                         # xdeathState
         Sfx::FIRXPL,                                                                            # deathSound
-        15 * Fixed.FracUnit,                                                                    # speed
+        15 * Fixed::FRAC_UNIT,                                                                  # speed
         Fixed.from_i(6),                                                                        # radius
         Fixed.from_i(8),                                                                        # height
         100,                                                                                    # mass
         8,                                                                                      # damage
         Sfx::NONE,                                                                              # activeSound
         MobjFlags::NoBlockMap | MobjFlags::Missile | MobjFlags::DropOff | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                                         # raiseState
+        MobjState::Nil                                                                          # raiseState
       ),
 
       MobjInfo.new(                                                     # MobjType.Knight
@@ -457,7 +457,7 @@ module Doocr
         MobjState::Bos2Atk1,                                            # meleeState
         MobjState::Bos2Atk1,                                            # missileState
         MobjState::Bos2Die1,                                            # deathState
-        MobjState::Null,                                                # xdeathState
+        MobjState::Nil,                                                 # xdeathState
         Sfx::KNTDTH,                                                    # deathSound
         8,                                                              # speed
         Fixed.from_i(24),                                               # radius
@@ -480,10 +480,10 @@ module Doocr
         MobjState::SkullPain,                                                              # painState
         256,                                                                               # painChance
         Sfx::DMPAIN,                                                                       # painSound
-        MobjState::Null,                                                                   # meleeState
+        MobjState::Nil,                                                                    # meleeState
         MobjState::SkullAtk1,                                                              # missileState
         MobjState::SkullDie1,                                                              # deathState
-        MobjState::Null,                                                                   # xdeathState
+        MobjState::Nil,                                                                    # xdeathState
         Sfx::FIRXPL,                                                                       # deathSound
         8,                                                                                 # speed
         Fixed.from_i(16),                                                                  # radius
@@ -492,7 +492,7 @@ module Doocr
         3,                                                                                 # damage
         Sfx::DMACT,                                                                        # activeSound
         MobjFlags::Solid | MobjFlags::Shootable | MobjFlags::Float | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                                    # raiseState
+        MobjState::Nil                                                                     # raiseState
       ),
 
       MobjInfo.new(                                                     # MobjType.Spider
@@ -506,10 +506,10 @@ module Doocr
         MobjState::SpidPain,                                            # painState
         40,                                                             # painChance
         Sfx::DMPAIN,                                                    # painSound
-        MobjState::Null,                                                # meleeState
+        MobjState::Nil,                                                 # meleeState
         MobjState::SpidAtk1,                                            # missileState
         MobjState::SpidDie1,                                            # deathState
-        MobjState::Null,                                                # xdeathState
+        MobjState::Nil,                                                 # xdeathState
         Sfx::SPIDTH,                                                    # deathSound
         12,                                                             # speed
         Fixed.from_i(128),                                              # radius
@@ -518,7 +518,7 @@ module Doocr
         0,                                                              # damage
         Sfx::DMACT,                                                     # activeSound
         MobjFlags::Solid | MobjFlags::Shootable | MobjFlags::CountKill, # flags
-        MobjState::Null                                                 # raiseState
+        MobjState::Nil                                                  # raiseState
       ),
 
       MobjInfo.new(                                                     # MobjType.Baby
@@ -532,10 +532,10 @@ module Doocr
         MobjState::BspiPain,                                            # painState
         128,                                                            # painChance
         Sfx::DMPAIN,                                                    # painSound
-        MobjState::Null,                                                # meleeState
+        MobjState::Nil,                                                 # meleeState
         MobjState::BspiAtk1,                                            # missileState
         MobjState::BspiDie1,                                            # deathState
-        MobjState::Null,                                                # xdeathState
+        MobjState::Nil,                                                 # xdeathState
         Sfx::BSPDTH,                                                    # deathSound
         12,                                                             # speed
         Fixed.from_i(64),                                               # radius
@@ -558,10 +558,10 @@ module Doocr
         MobjState::CyberPain,                                           # painState
         20,                                                             # painChance
         Sfx::DMPAIN,                                                    # painSound
-        MobjState::Null,                                                # meleeState
+        MobjState::Nil,                                                 # meleeState
         MobjState::CyberAtk1,                                           # missileState
         MobjState::CyberDie1,                                           # deathState
-        MobjState::Null,                                                # xdeathState
+        MobjState::Nil,                                                 # xdeathState
         Sfx::CYBDTH,                                                    # deathSound
         16,                                                             # speed
         Fixed.from_i(40),                                               # radius
@@ -570,7 +570,7 @@ module Doocr
         0,                                                              # damage
         Sfx::DMACT,                                                     # activeSound
         MobjFlags::Solid | MobjFlags::Shootable | MobjFlags::CountKill, # flags
-        MobjState::Null                                                 # raiseState
+        MobjState::Nil                                                  # raiseState
       ),
 
       MobjInfo.new(                                                                                               # MobjType.Pain
@@ -584,10 +584,10 @@ module Doocr
         MobjState::PainPain,                                                                                      # painState
         128,                                                                                                      # painChance
         Sfx::PEPAIN,                                                                                              # painSound
-        MobjState::Null,                                                                                          # meleeState
+        MobjState::Nil,                                                                                           # meleeState
         MobjState::PainAtk1,                                                                                      # missileState
         MobjState::PainDie1,                                                                                      # deathState
-        MobjState::Null,                                                                                          # xdeathState
+        MobjState::Nil,                                                                                           # xdeathState
         Sfx::PEDTH,                                                                                               # deathSound
         8,                                                                                                        # speed
         Fixed.from_i(31),                                                                                         # radius
@@ -610,7 +610,7 @@ module Doocr
         MobjState::SswvPain,                                            # painState
         170,                                                            # painChance
         Sfx::POPAIN,                                                    # painSound
-        MobjState::Null,                                                # meleeState
+        MobjState::Nil,                                                 # meleeState
         MobjState::SswvAtk1,                                            # missileState
         MobjState::SswvDie1,                                            # deathState
         MobjState::SswvXdie1,                                           # xdeathState
@@ -629,17 +629,17 @@ module Doocr
 72,                                                                                                                      # doomEdNum
         MobjState::Keenstnd,                                                                                             # spawnState
         100,                                                                                                             # spawnHealth
-        MobjState::Null,                                                                                                 # seeState
+        MobjState::Nil,                                                                                                  # seeState
         Sfx::NONE,                                                                                                       # seeSound
         8,                                                                                                               # reactionTime
         Sfx::NONE,                                                                                                       # attackSound
         MobjState::Keenpain,                                                                                             # painState
         256,                                                                                                             # painChance
         Sfx::KEENPN,                                                                                                     # painSound
-        MobjState::Null,                                                                                                 # meleeState
-        MobjState::Null,                                                                                                 # missileState
+        MobjState::Nil,                                                                                                  # meleeState
+        MobjState::Nil,                                                                                                  # missileState
         MobjState::Commkeen,                                                                                             # deathState
-        MobjState::Null,                                                                                                 # xdeathState
+        MobjState::Nil,                                                                                                  # xdeathState
         Sfx::KEENDT,                                                                                                     # deathSound
         0,                                                                                                               # speed
         Fixed.from_i(16),                                                                                                # radius
@@ -648,24 +648,24 @@ module Doocr
         0,                                                                                                               # damage
         Sfx::NONE,                                                                                                       # activeSound
         MobjFlags::Solid | MobjFlags::SpawnCeiling | MobjFlags::NoGravity | MobjFlags::Shootable | MobjFlags::CountKill, # flags
-        MobjState::Null                                                                                                  # raiseState
+        MobjState::Nil                                                                                                   # raiseState
       ),
 
       MobjInfo.new(                              # MobjType.Bossbrain
 88,                                              # doomEdNum
         MobjState::Brain,                        # spawnState
         250,                                     # spawnHealth
-        MobjState::Null,                         # seeState
+        MobjState::Nil,                          # seeState
         Sfx::NONE,                               # seeSound
         8,                                       # reactionTime
         Sfx::NONE,                               # attackSound
         MobjState::BrainPain,                    # painState
         255,                                     # painChance
         Sfx::BOSPN,                              # painSound
-        MobjState::Null,                         # meleeState
-        MobjState::Null,                         # missileState
+        MobjState::Nil,                          # meleeState
+        MobjState::Nil,                          # missileState
         MobjState::BrainDie1,                    # deathState
-        MobjState::Null,                         # xdeathState
+        MobjState::Nil,                          # xdeathState
         Sfx::BOSDTH,                             # deathSound
         0,                                       # speed
         Fixed.from_i(16),                        # radius
@@ -674,7 +674,7 @@ module Doocr
         0,                                       # damage
         Sfx::NONE,                               # activeSound
         MobjFlags::Solid | MobjFlags::Shootable, # flags
-        MobjState::Null                          # raiseState
+        MobjState::Nil                           # raiseState
       ),
 
       MobjInfo.new(                                  # MobjType.Bossspit
@@ -685,13 +685,13 @@ module Doocr
         Sfx::NONE,                                   # seeSound
         8,                                           # reactionTime
         Sfx::NONE,                                   # attackSound
-        MobjState::Null,                             # painState
+        MobjState::Nil,                              # painState
         0,                                           # painChance
         Sfx::NONE,                                   # painSound
-        MobjState::Null,                             # meleeState
-        MobjState::Null,                             # missileState
-        MobjState::Null,                             # deathState
-        MobjState::Null,                             # xdeathState
+        MobjState::Nil,                              # meleeState
+        MobjState::Nil,                              # missileState
+        MobjState::Nil,                              # deathState
+        MobjState::Nil,                              # xdeathState
         Sfx::NONE,                                   # deathSound
         0,                                           # speed
         Fixed.from_i(20),                            # radius
@@ -700,24 +700,24 @@ module Doocr
         0,                                           # damage
         Sfx::NONE,                                   # activeSound
         MobjFlags::NoBlockMap | MobjFlags::NoSector, # flags
-        MobjState::Null                              # raiseState
+        MobjState::Nil                               # raiseState
       ),
 
       MobjInfo.new(                                  # MobjType.Bosstarget
 87,                                                  # doomEdNum
-        MobjState::Null,                             # spawnState
+        MobjState::Nil,                              # spawnState
         1000,                                        # spawnHealth
-        MobjState::Null,                             # seeState
+        MobjState::Nil,                              # seeState
         Sfx::NONE,                                   # seeSound
         8,                                           # reactionTime
         Sfx::NONE,                                   # attackSound
-        MobjState::Null,                             # painState
+        MobjState::Nil,                              # painState
         0,                                           # painChance
         Sfx::NONE,                                   # painSound
-        MobjState::Null,                             # meleeState
-        MobjState::Null,                             # missileState
-        MobjState::Null,                             # deathState
-        MobjState::Null,                             # xdeathState
+        MobjState::Nil,                              # meleeState
+        MobjState::Nil,                              # missileState
+        MobjState::Nil,                              # deathState
+        MobjState::Nil,                              # xdeathState
         Sfx::NONE,                                   # deathSound
         0,                                           # speed
         Fixed.from_i(20),                            # radius
@@ -726,50 +726,50 @@ module Doocr
         0,                                           # damage
         Sfx::NONE,                                   # activeSound
         MobjFlags::NoBlockMap | MobjFlags::NoSector, # flags
-        MobjState::Null                              # raiseState
+        MobjState::Nil                               # raiseState
       ),
 
       MobjInfo.new(                                                                                                 # MobjType.Spawnshot
 -1,                                                                                                                 # doomEdNum
         MobjState::Spawn1,                                                                                          # spawnState
         1000,                                                                                                       # spawnHealth
-        MobjState::Null,                                                                                            # seeState
+        MobjState::Nil,                                                                                             # seeState
         Sfx::BOSPIT,                                                                                                # seeSound
         8,                                                                                                          # reactionTime
         Sfx::NONE,                                                                                                  # attackSound
-        MobjState::Null,                                                                                            # painState
+        MobjState::Nil,                                                                                             # painState
         0,                                                                                                          # painChance
         Sfx::NONE,                                                                                                  # painSound
-        MobjState::Null,                                                                                            # meleeState
-        MobjState::Null,                                                                                            # missileState
-        MobjState::Null,                                                                                            # deathState
-        MobjState::Null,                                                                                            # xdeathState
+        MobjState::Nil,                                                                                             # meleeState
+        MobjState::Nil,                                                                                             # missileState
+        MobjState::Nil,                                                                                             # deathState
+        MobjState::Nil,                                                                                             # xdeathState
         Sfx::FIRXPL,                                                                                                # deathSound
-        10 * Fixed.FracUnit,                                                                                        # speed
+        10 * Fixed::FRAC_UNIT,                                                                                      # speed
         Fixed.from_i(6),                                                                                            # radius
         Fixed.from_i(32),                                                                                           # height
         100,                                                                                                        # mass
         3,                                                                                                          # damage
         Sfx::NONE,                                                                                                  # activeSound
         MobjFlags::NoBlockMap | MobjFlags::Missile | MobjFlags::DropOff | MobjFlags::NoGravity | MobjFlags::NoClip, # flags
-        MobjState::Null                                                                                             # raiseState
+        MobjState::Nil                                                                                              # raiseState
       ),
 
       MobjInfo.new(                                   # MobjType.Spawnfire
 -1,                                                   # doomEdNum
         MobjState::Spawnfire1,                        # spawnState
         1000,                                         # spawnHealth
-        MobjState::Null,                              # seeState
+        MobjState::Nil,                               # seeState
         Sfx::NONE,                                    # seeSound
         8,                                            # reactionTime
         Sfx::NONE,                                    # attackSound
-        MobjState::Null,                              # painState
+        MobjState::Nil,                               # painState
         0,                                            # painChance
         Sfx::NONE,                                    # painSound
-        MobjState::Null,                              # meleeState
-        MobjState::Null,                              # missileState
-        MobjState::Null,                              # deathState
-        MobjState::Null,                              # xdeathState
+        MobjState::Nil,                               # meleeState
+        MobjState::Nil,                               # missileState
+        MobjState::Nil,                               # deathState
+        MobjState::Nil,                               # xdeathState
         Sfx::NONE,                                    # deathSound
         0,                                            # speed
         Fixed.from_i(20),                             # radius
@@ -778,24 +778,24 @@ module Doocr
         0,                                            # damage
         Sfx::NONE,                                    # activeSound
         MobjFlags::NoBlockMap | MobjFlags::NoGravity, # flags
-        MobjState::Null                               # raiseState
+        MobjState::Nil                                # raiseState
       ),
 
       MobjInfo.new(                                                   # MobjType.Barrel
 2035,                                                                 # doomEdNum
         MobjState::Bar1,                                              # spawnState
         20,                                                           # spawnHealth
-        MobjState::Null,                                              # seeState
+        MobjState::Nil,                                               # seeState
         Sfx::NONE,                                                    # seeSound
         8,                                                            # reactionTime
         Sfx::NONE,                                                    # attackSound
-        MobjState::Null,                                              # painState
+        MobjState::Nil,                                               # painState
         0,                                                            # painChance
         Sfx::NONE,                                                    # painSound
-        MobjState::Null,                                              # meleeState
-        MobjState::Null,                                              # missileState
+        MobjState::Nil,                                               # meleeState
+        MobjState::Nil,                                               # missileState
         MobjState::Bexp,                                              # deathState
-        MobjState::Null,                                              # xdeathState
+        MobjState::Nil,                                               # xdeathState
         Sfx::BAREXP,                                                  # deathSound
         0,                                                            # speed
         Fixed.from_i(10),                                             # radius
@@ -804,180 +804,180 @@ module Doocr
         0,                                                            # damage
         Sfx::NONE,                                                    # activeSound
         MobjFlags::Solid | MobjFlags::Shootable | MobjFlags::NoBlood, # flags
-        MobjState::Null                                               # raiseState
+        MobjState::Nil                                                # raiseState
       ),
 
       MobjInfo.new(                                                                             # MobjType.Troopshot
 -1,                                                                                             # doomEdNum
         MobjState::Tball1,                                                                      # spawnState
         1000,                                                                                   # spawnHealth
-        MobjState::Null,                                                                        # seeState
+        MobjState::Nil,                                                                         # seeState
         Sfx::FIRSHT,                                                                            # seeSound
         8,                                                                                      # reactionTime
         Sfx::NONE,                                                                              # attackSound
-        MobjState::Null,                                                                        # painState
+        MobjState::Nil,                                                                         # painState
         0,                                                                                      # painChance
         Sfx::NONE,                                                                              # painSound
-        MobjState::Null,                                                                        # meleeState
-        MobjState::Null,                                                                        # missileState
+        MobjState::Nil,                                                                         # meleeState
+        MobjState::Nil,                                                                         # missileState
         MobjState::Tballx1,                                                                     # deathState
-        MobjState::Null,                                                                        # xdeathState
+        MobjState::Nil,                                                                         # xdeathState
         Sfx::FIRXPL,                                                                            # deathSound
-        10 * Fixed.FracUnit,                                                                    # speed
+        10 * Fixed::FRAC_UNIT,                                                                  # speed
         Fixed.from_i(6),                                                                        # radius
         Fixed.from_i(8),                                                                        # height
         100,                                                                                    # mass
         3,                                                                                      # damage
         Sfx::NONE,                                                                              # activeSound
         MobjFlags::NoBlockMap | MobjFlags::Missile | MobjFlags::DropOff | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                                         # raiseState
+        MobjState::Nil                                                                          # raiseState
       ),
 
       MobjInfo.new(                                                                             # MobjType.Headshot
 -1,                                                                                             # doomEdNum
         MobjState::Rball1,                                                                      # spawnState
         1000,                                                                                   # spawnHealth
-        MobjState::Null,                                                                        # seeState
+        MobjState::Nil,                                                                         # seeState
         Sfx::FIRSHT,                                                                            # seeSound
         8,                                                                                      # reactionTime
         Sfx::NONE,                                                                              # attackSound
-        MobjState::Null,                                                                        # painState
+        MobjState::Nil,                                                                         # painState
         0,                                                                                      # painChance
         Sfx::NONE,                                                                              # painSound
-        MobjState::Null,                                                                        # meleeState
-        MobjState::Null,                                                                        # missileState
+        MobjState::Nil,                                                                         # meleeState
+        MobjState::Nil,                                                                         # missileState
         MobjState::Rballx1,                                                                     # deathState
-        MobjState::Null,                                                                        # xdeathState
+        MobjState::Nil,                                                                         # xdeathState
         Sfx::FIRXPL,                                                                            # deathSound
-        10 * Fixed.FracUnit,                                                                    # speed
+        10 * Fixed::FRAC_UNIT,                                                                  # speed
         Fixed.from_i(6),                                                                        # radius
         Fixed.from_i(8),                                                                        # height
         100,                                                                                    # mass
         5,                                                                                      # damage
         Sfx::NONE,                                                                              # activeSound
         MobjFlags::NoBlockMap | MobjFlags::Missile | MobjFlags::DropOff | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                                         # raiseState
+        MobjState::Nil                                                                          # raiseState
       ),
 
       MobjInfo.new(                                                                             # MobjType.Rocket
 -1,                                                                                             # doomEdNum
         MobjState::Rocket,                                                                      # spawnState
         1000,                                                                                   # spawnHealth
-        MobjState::Null,                                                                        # seeState
+        MobjState::Nil,                                                                         # seeState
         Sfx::RLAUNC,                                                                            # seeSound
         8,                                                                                      # reactionTime
         Sfx::NONE,                                                                              # attackSound
-        MobjState::Null,                                                                        # painState
+        MobjState::Nil,                                                                         # painState
         0,                                                                                      # painChance
         Sfx::NONE,                                                                              # painSound
-        MobjState::Null,                                                                        # meleeState
-        MobjState::Null,                                                                        # missileState
+        MobjState::Nil,                                                                         # meleeState
+        MobjState::Nil,                                                                         # missileState
         MobjState::Explode1,                                                                    # deathState
-        MobjState::Null,                                                                        # xdeathState
+        MobjState::Nil,                                                                         # xdeathState
         Sfx::BAREXP,                                                                            # deathSound
-        20 * Fixed.FracUnit,                                                                    # speed
+        20 * Fixed::FRAC_UNIT,                                                                  # speed
         Fixed.from_i(11),                                                                       # radius
         Fixed.from_i(8),                                                                        # height
         100,                                                                                    # mass
         20,                                                                                     # damage
         Sfx::NONE,                                                                              # activeSound
         MobjFlags::NoBlockMap | MobjFlags::Missile | MobjFlags::DropOff | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                                         # raiseState
+        MobjState::Nil                                                                          # raiseState
       ),
 
       MobjInfo.new(                                                                             # MobjType.Plasma
 -1,                                                                                             # doomEdNum
         MobjState::Plasball,                                                                    # spawnState
         1000,                                                                                   # spawnHealth
-        MobjState::Null,                                                                        # seeState
+        MobjState::Nil,                                                                         # seeState
         Sfx::PLASMA,                                                                            # seeSound
         8,                                                                                      # reactionTime
         Sfx::NONE,                                                                              # attackSound
-        MobjState::Null,                                                                        # painState
+        MobjState::Nil,                                                                         # painState
         0,                                                                                      # painChance
         Sfx::NONE,                                                                              # painSound
-        MobjState::Null,                                                                        # meleeState
-        MobjState::Null,                                                                        # missileState
+        MobjState::Nil,                                                                         # meleeState
+        MobjState::Nil,                                                                         # missileState
         MobjState::Plasexp,                                                                     # deathState
-        MobjState::Null,                                                                        # xdeathState
+        MobjState::Nil,                                                                         # xdeathState
         Sfx::FIRXPL,                                                                            # deathSound
-        25 * Fixed.FracUnit,                                                                    # speed
+        25 * Fixed::FRAC_UNIT,                                                                  # speed
         Fixed.from_i(13),                                                                       # radius
         Fixed.from_i(8),                                                                        # height
         100,                                                                                    # mass
         5,                                                                                      # damage
         Sfx::NONE,                                                                              # activeSound
         MobjFlags::NoBlockMap | MobjFlags::Missile | MobjFlags::DropOff | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                                         # raiseState
+        MobjState::Nil                                                                          # raiseState
       ),
 
       MobjInfo.new(                                                                             # MobjType.Bfg
 -1,                                                                                             # doomEdNum
         MobjState::Bfgshot,                                                                     # spawnState
         1000,                                                                                   # spawnHealth
-        MobjState::Null,                                                                        # seeState
+        MobjState::Nil,                                                                         # seeState
         Sfx::NONE,                                                                              # seeSound
         8,                                                                                      # reactionTime
         Sfx::NONE,                                                                              # attackSound
-        MobjState::Null,                                                                        # painState
+        MobjState::Nil,                                                                         # painState
         0,                                                                                      # painChance
         Sfx::NONE,                                                                              # painSound
-        MobjState::Null,                                                                        # meleeState
-        MobjState::Null,                                                                        # missileState
+        MobjState::Nil,                                                                         # meleeState
+        MobjState::Nil,                                                                         # missileState
         MobjState::Bfgland,                                                                     # deathState
-        MobjState::Null,                                                                        # xdeathState
+        MobjState::Nil,                                                                         # xdeathState
         Sfx::RXPLOD,                                                                            # deathSound
-        25 * Fixed.FracUnit,                                                                    # speed
+        25 * Fixed::FRAC_UNIT,                                                                  # speed
         Fixed.from_i(13),                                                                       # radius
         Fixed.from_i(8),                                                                        # height
         100,                                                                                    # mass
         100,                                                                                    # damage
         Sfx::NONE,                                                                              # activeSound
         MobjFlags::NoBlockMap | MobjFlags::Missile | MobjFlags::DropOff | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                                         # raiseState
+        MobjState::Nil                                                                          # raiseState
       ),
 
       MobjInfo.new(                                                                             # MobjType.Arachplaz
 -1,                                                                                             # doomEdNum
         MobjState::ArachPlaz,                                                                   # spawnState
         1000,                                                                                   # spawnHealth
-        MobjState::Null,                                                                        # seeState
+        MobjState::Nil,                                                                         # seeState
         Sfx::PLASMA,                                                                            # seeSound
         8,                                                                                      # reactionTime
         Sfx::NONE,                                                                              # attackSound
-        MobjState::Null,                                                                        # painState
+        MobjState::Nil,                                                                         # painState
         0,                                                                                      # painChance
         Sfx::NONE,                                                                              # painSound
-        MobjState::Null,                                                                        # meleeState
-        MobjState::Null,                                                                        # missileState
+        MobjState::Nil,                                                                         # meleeState
+        MobjState::Nil,                                                                         # missileState
         MobjState::ArachPlex,                                                                   # deathState
-        MobjState::Null,                                                                        # xdeathState
+        MobjState::Nil,                                                                         # xdeathState
         Sfx::FIRXPL,                                                                            # deathSound
-        25 * Fixed.FracUnit,                                                                    # speed
+        25 * Fixed::FRAC_UNIT,                                                                  # speed
         Fixed.from_i(13),                                                                       # radius
         Fixed.from_i(8),                                                                        # height
         100,                                                                                    # mass
         5,                                                                                      # damage
         Sfx::NONE,                                                                              # activeSound
         MobjFlags::NoBlockMap | MobjFlags::Missile | MobjFlags::DropOff | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                                         # raiseState
+        MobjState::Nil                                                                          # raiseState
       ),
 
       MobjInfo.new(                                   # MobjType.Puff
 -1,                                                   # doomEdNum
         MobjState::Puff1,                             # spawnState
         1000,                                         # spawnHealth
-        MobjState::Null,                              # seeState
+        MobjState::Nil,                               # seeState
         Sfx::NONE,                                    # seeSound
         8,                                            # reactionTime
         Sfx::NONE,                                    # attackSound
-        MobjState::Null,                              # painState
+        MobjState::Nil,                               # painState
         0,                                            # painChance
         Sfx::NONE,                                    # painSound
-        MobjState::Null,                              # meleeState
-        MobjState::Null,                              # missileState
-        MobjState::Null,                              # deathState
-        MobjState::Null,                              # xdeathState
+        MobjState::Nil,                               # meleeState
+        MobjState::Nil,                               # missileState
+        MobjState::Nil,                               # deathState
+        MobjState::Nil,                               # xdeathState
         Sfx::NONE,                                    # deathSound
         0,                                            # speed
         Fixed.from_i(20),                             # radius
@@ -986,24 +986,24 @@ module Doocr
         0,                                            # damage
         Sfx::NONE,                                    # activeSound
         MobjFlags::NoBlockMap | MobjFlags::NoGravity, # flags
-        MobjState::Null                               # raiseState
+        MobjState::Nil                                # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Blood
 -1,                            # doomEdNum
         MobjState::Blood1,     # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(20),      # radius
@@ -1012,24 +1012,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::NoBlockMap, # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(                                   # MobjType.Tfog
 -1,                                                   # doomEdNum
         MobjState::Tfog,                              # spawnState
         1000,                                         # spawnHealth
-        MobjState::Null,                              # seeState
+        MobjState::Nil,                               # seeState
         Sfx::NONE,                                    # seeSound
         8,                                            # reactionTime
         Sfx::NONE,                                    # attackSound
-        MobjState::Null,                              # painState
+        MobjState::Nil,                               # painState
         0,                                            # painChance
         Sfx::NONE,                                    # painSound
-        MobjState::Null,                              # meleeState
-        MobjState::Null,                              # missileState
-        MobjState::Null,                              # deathState
-        MobjState::Null,                              # xdeathState
+        MobjState::Nil,                               # meleeState
+        MobjState::Nil,                               # missileState
+        MobjState::Nil,                               # deathState
+        MobjState::Nil,                               # xdeathState
         Sfx::NONE,                                    # deathSound
         0,                                            # speed
         Fixed.from_i(20),                             # radius
@@ -1038,24 +1038,24 @@ module Doocr
         0,                                            # damage
         Sfx::NONE,                                    # activeSound
         MobjFlags::NoBlockMap | MobjFlags::NoGravity, # flags
-        MobjState::Null                               # raiseState
+        MobjState::Nil                                # raiseState
       ),
 
       MobjInfo.new(                                   # MobjType.Ifog
 -1,                                                   # doomEdNum
         MobjState::Ifog,                              # spawnState
         1000,                                         # spawnHealth
-        MobjState::Null,                              # seeState
+        MobjState::Nil,                               # seeState
         Sfx::NONE,                                    # seeSound
         8,                                            # reactionTime
         Sfx::NONE,                                    # attackSound
-        MobjState::Null,                              # painState
+        MobjState::Nil,                               # painState
         0,                                            # painChance
         Sfx::NONE,                                    # painSound
-        MobjState::Null,                              # meleeState
-        MobjState::Null,                              # missileState
-        MobjState::Null,                              # deathState
-        MobjState::Null,                              # xdeathState
+        MobjState::Nil,                               # meleeState
+        MobjState::Nil,                               # missileState
+        MobjState::Nil,                               # deathState
+        MobjState::Nil,                               # xdeathState
         Sfx::NONE,                                    # deathSound
         0,                                            # speed
         Fixed.from_i(20),                             # radius
@@ -1064,24 +1064,24 @@ module Doocr
         0,                                            # damage
         Sfx::NONE,                                    # activeSound
         MobjFlags::NoBlockMap | MobjFlags::NoGravity, # flags
-        MobjState::Null                               # raiseState
+        MobjState::Nil                                # raiseState
       ),
 
       MobjInfo.new(                                  # MobjType.Teleportman
 14,                                                  # doomEdNum
-        MobjState::Null,                             # spawnState
+        MobjState::Nil,                              # spawnState
         1000,                                        # spawnHealth
-        MobjState::Null,                             # seeState
+        MobjState::Nil,                              # seeState
         Sfx::NONE,                                   # seeSound
         8,                                           # reactionTime
         Sfx::NONE,                                   # attackSound
-        MobjState::Null,                             # painState
+        MobjState::Nil,                              # painState
         0,                                           # painChance
         Sfx::NONE,                                   # painSound
-        MobjState::Null,                             # meleeState
-        MobjState::Null,                             # missileState
-        MobjState::Null,                             # deathState
-        MobjState::Null,                             # xdeathState
+        MobjState::Nil,                              # meleeState
+        MobjState::Nil,                              # missileState
+        MobjState::Nil,                              # deathState
+        MobjState::Nil,                              # xdeathState
         Sfx::NONE,                                   # deathSound
         0,                                           # speed
         Fixed.from_i(20),                            # radius
@@ -1090,24 +1090,24 @@ module Doocr
         0,                                           # damage
         Sfx::NONE,                                   # activeSound
         MobjFlags::NoBlockMap | MobjFlags::NoSector, # flags
-        MobjState::Null                              # raiseState
+        MobjState::Nil                               # raiseState
       ),
 
       MobjInfo.new(                                   # MobjType.Extrabfg
 -1,                                                   # doomEdNum
         MobjState::Bfgexp,                            # spawnState
         1000,                                         # spawnHealth
-        MobjState::Null,                              # seeState
+        MobjState::Nil,                               # seeState
         Sfx::NONE,                                    # seeSound
         8,                                            # reactionTime
         Sfx::NONE,                                    # attackSound
-        MobjState::Null,                              # painState
+        MobjState::Nil,                               # painState
         0,                                            # painChance
         Sfx::NONE,                                    # painSound
-        MobjState::Null,                              # meleeState
-        MobjState::Null,                              # missileState
-        MobjState::Null,                              # deathState
-        MobjState::Null,                              # xdeathState
+        MobjState::Nil,                               # meleeState
+        MobjState::Nil,                               # missileState
+        MobjState::Nil,                               # deathState
+        MobjState::Nil,                               # xdeathState
         Sfx::NONE,                                    # deathSound
         0,                                            # speed
         Fixed.from_i(20),                             # radius
@@ -1116,24 +1116,24 @@ module Doocr
         0,                                            # damage
         Sfx::NONE,                                    # activeSound
         MobjFlags::NoBlockMap | MobjFlags::NoGravity, # flags
-        MobjState::Null                               # raiseState
+        MobjState::Nil                                # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc0
 2018,                       # doomEdNum
         MobjState::Arm1,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1142,24 +1142,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc1
 2019,                       # doomEdNum
         MobjState::Arm2,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1168,24 +1168,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(                                # MobjType.Misc2
 2014,                                              # doomEdNum
         MobjState::Bon1,                           # spawnState
         1000,                                      # spawnHealth
-        MobjState::Null,                           # seeState
+        MobjState::Nil,                            # seeState
         Sfx::NONE,                                 # seeSound
         8,                                         # reactionTime
         Sfx::NONE,                                 # attackSound
-        MobjState::Null,                           # painState
+        MobjState::Nil,                            # painState
         0,                                         # painChance
         Sfx::NONE,                                 # painSound
-        MobjState::Null,                           # meleeState
-        MobjState::Null,                           # missileState
-        MobjState::Null,                           # deathState
-        MobjState::Null,                           # xdeathState
+        MobjState::Nil,                            # meleeState
+        MobjState::Nil,                            # missileState
+        MobjState::Nil,                            # deathState
+        MobjState::Nil,                            # xdeathState
         Sfx::NONE,                                 # deathSound
         0,                                         # speed
         Fixed.from_i(20),                          # radius
@@ -1194,24 +1194,24 @@ module Doocr
         0,                                         # damage
         Sfx::NONE,                                 # activeSound
         MobjFlags::Special | MobjFlags::CountItem, # flags
-        MobjState::Null                            # raiseState
+        MobjState::Nil                             # raiseState
       ),
 
       MobjInfo.new(                                # MobjType.Misc3
 2015,                                              # doomEdNum
         MobjState::Bon2,                           # spawnState
         1000,                                      # spawnHealth
-        MobjState::Null,                           # seeState
+        MobjState::Nil,                            # seeState
         Sfx::NONE,                                 # seeSound
         8,                                         # reactionTime
         Sfx::NONE,                                 # attackSound
-        MobjState::Null,                           # painState
+        MobjState::Nil,                            # painState
         0,                                         # painChance
         Sfx::NONE,                                 # painSound
-        MobjState::Null,                           # meleeState
-        MobjState::Null,                           # missileState
-        MobjState::Null,                           # deathState
-        MobjState::Null,                           # xdeathState
+        MobjState::Nil,                            # meleeState
+        MobjState::Nil,                            # missileState
+        MobjState::Nil,                            # deathState
+        MobjState::Nil,                            # xdeathState
         Sfx::NONE,                                 # deathSound
         0,                                         # speed
         Fixed.from_i(20),                          # radius
@@ -1220,24 +1220,24 @@ module Doocr
         0,                                         # damage
         Sfx::NONE,                                 # activeSound
         MobjFlags::Special | MobjFlags::CountItem, # flags
-        MobjState::Null                            # raiseState
+        MobjState::Nil                             # raiseState
       ),
 
       MobjInfo.new(                                    # MobjType.Misc4
 5,                                                     # doomEdNum
         MobjState::Bkey,                               # spawnState
         1000,                                          # spawnHealth
-        MobjState::Null,                               # seeState
+        MobjState::Nil,                                # seeState
         Sfx::NONE,                                     # seeSound
         8,                                             # reactionTime
         Sfx::NONE,                                     # attackSound
-        MobjState::Null,                               # painState
+        MobjState::Nil,                                # painState
         0,                                             # painChance
         Sfx::NONE,                                     # painSound
-        MobjState::Null,                               # meleeState
-        MobjState::Null,                               # missileState
-        MobjState::Null,                               # deathState
-        MobjState::Null,                               # xdeathState
+        MobjState::Nil,                                # meleeState
+        MobjState::Nil,                                # missileState
+        MobjState::Nil,                                # deathState
+        MobjState::Nil,                                # xdeathState
         Sfx::NONE,                                     # deathSound
         0,                                             # speed
         Fixed.from_i(20),                              # radius
@@ -1246,24 +1246,24 @@ module Doocr
         0,                                             # damage
         Sfx::NONE,                                     # activeSound
         MobjFlags::Special | MobjFlags::NotDeathmatch, # flags
-        MobjState::Null                                # raiseState
+        MobjState::Nil                                 # raiseState
       ),
 
       MobjInfo.new(                                    # MobjType.Misc5
 13,                                                    # doomEdNum
         MobjState::Rkey,                               # spawnState
         1000,                                          # spawnHealth
-        MobjState::Null,                               # seeState
+        MobjState::Nil,                                # seeState
         Sfx::NONE,                                     # seeSound
         8,                                             # reactionTime
         Sfx::NONE,                                     # attackSound
-        MobjState::Null,                               # painState
+        MobjState::Nil,                                # painState
         0,                                             # painChance
         Sfx::NONE,                                     # painSound
-        MobjState::Null,                               # meleeState
-        MobjState::Null,                               # missileState
-        MobjState::Null,                               # deathState
-        MobjState::Null,                               # xdeathState
+        MobjState::Nil,                                # meleeState
+        MobjState::Nil,                                # missileState
+        MobjState::Nil,                                # deathState
+        MobjState::Nil,                                # xdeathState
         Sfx::NONE,                                     # deathSound
         0,                                             # speed
         Fixed.from_i(20),                              # radius
@@ -1272,24 +1272,24 @@ module Doocr
         0,                                             # damage
         Sfx::NONE,                                     # activeSound
         MobjFlags::Special | MobjFlags::NotDeathmatch, # flags
-        MobjState::Null                                # raiseState
+        MobjState::Nil                                 # raiseState
       ),
 
       MobjInfo.new(                                    # MobjType.Misc6
 6,                                                     # doomEdNum
         MobjState::Ykey,                               # spawnState
         1000,                                          # spawnHealth
-        MobjState::Null,                               # seeState
+        MobjState::Nil,                                # seeState
         Sfx::NONE,                                     # seeSound
         8,                                             # reactionTime
         Sfx::NONE,                                     # attackSound
-        MobjState::Null,                               # painState
+        MobjState::Nil,                                # painState
         0,                                             # painChance
         Sfx::NONE,                                     # painSound
-        MobjState::Null,                               # meleeState
-        MobjState::Null,                               # missileState
-        MobjState::Null,                               # deathState
-        MobjState::Null,                               # xdeathState
+        MobjState::Nil,                                # meleeState
+        MobjState::Nil,                                # missileState
+        MobjState::Nil,                                # deathState
+        MobjState::Nil,                                # xdeathState
         Sfx::NONE,                                     # deathSound
         0,                                             # speed
         Fixed.from_i(20),                              # radius
@@ -1298,24 +1298,24 @@ module Doocr
         0,                                             # damage
         Sfx::NONE,                                     # activeSound
         MobjFlags::Special | MobjFlags::NotDeathmatch, # flags
-        MobjState::Null                                # raiseState
+        MobjState::Nil                                 # raiseState
       ),
 
       MobjInfo.new(                                    # MobjType.Misc7
 39,                                                    # doomEdNum
         MobjState::Yskull,                             # spawnState
         1000,                                          # spawnHealth
-        MobjState::Null,                               # seeState
+        MobjState::Nil,                                # seeState
         Sfx::NONE,                                     # seeSound
         8,                                             # reactionTime
         Sfx::NONE,                                     # attackSound
-        MobjState::Null,                               # painState
+        MobjState::Nil,                                # painState
         0,                                             # painChance
         Sfx::NONE,                                     # painSound
-        MobjState::Null,                               # meleeState
-        MobjState::Null,                               # missileState
-        MobjState::Null,                               # deathState
-        MobjState::Null,                               # xdeathState
+        MobjState::Nil,                                # meleeState
+        MobjState::Nil,                                # missileState
+        MobjState::Nil,                                # deathState
+        MobjState::Nil,                                # xdeathState
         Sfx::NONE,                                     # deathSound
         0,                                             # speed
         Fixed.from_i(20),                              # radius
@@ -1324,24 +1324,24 @@ module Doocr
         0,                                             # damage
         Sfx::NONE,                                     # activeSound
         MobjFlags::Special | MobjFlags::NotDeathmatch, # flags
-        MobjState::Null                                # raiseState
+        MobjState::Nil                                 # raiseState
       ),
 
       MobjInfo.new(                                    # MobjType.Misc8
 38,                                                    # doomEdNum
         MobjState::Rskull,                             # spawnState
         1000,                                          # spawnHealth
-        MobjState::Null,                               # seeState
+        MobjState::Nil,                                # seeState
         Sfx::NONE,                                     # seeSound
         8,                                             # reactionTime
         Sfx::NONE,                                     # attackSound
-        MobjState::Null,                               # painState
+        MobjState::Nil,                                # painState
         0,                                             # painChance
         Sfx::NONE,                                     # painSound
-        MobjState::Null,                               # meleeState
-        MobjState::Null,                               # missileState
-        MobjState::Null,                               # deathState
-        MobjState::Null,                               # xdeathState
+        MobjState::Nil,                                # meleeState
+        MobjState::Nil,                                # missileState
+        MobjState::Nil,                                # deathState
+        MobjState::Nil,                                # xdeathState
         Sfx::NONE,                                     # deathSound
         0,                                             # speed
         Fixed.from_i(20),                              # radius
@@ -1350,24 +1350,24 @@ module Doocr
         0,                                             # damage
         Sfx::NONE,                                     # activeSound
         MobjFlags::Special | MobjFlags::NotDeathmatch, # flags
-        MobjState::Null                                # raiseState
+        MobjState::Nil                                 # raiseState
       ),
 
       MobjInfo.new(                                    # MobjType.Misc9
 40,                                                    # doomEdNum
         MobjState::Bskull,                             # spawnState
         1000,                                          # spawnHealth
-        MobjState::Null,                               # seeState
+        MobjState::Nil,                                # seeState
         Sfx::NONE,                                     # seeSound
         8,                                             # reactionTime
         Sfx::NONE,                                     # attackSound
-        MobjState::Null,                               # painState
+        MobjState::Nil,                                # painState
         0,                                             # painChance
         Sfx::NONE,                                     # painSound
-        MobjState::Null,                               # meleeState
-        MobjState::Null,                               # missileState
-        MobjState::Null,                               # deathState
-        MobjState::Null,                               # xdeathState
+        MobjState::Nil,                                # meleeState
+        MobjState::Nil,                                # missileState
+        MobjState::Nil,                                # deathState
+        MobjState::Nil,                                # xdeathState
         Sfx::NONE,                                     # deathSound
         0,                                             # speed
         Fixed.from_i(20),                              # radius
@@ -1376,24 +1376,24 @@ module Doocr
         0,                                             # damage
         Sfx::NONE,                                     # activeSound
         MobjFlags::Special | MobjFlags::NotDeathmatch, # flags
-        MobjState::Null                                # raiseState
+        MobjState::Nil                                 # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc10
 2011,                       # doomEdNum
         MobjState::Stim,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1402,24 +1402,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc11
 2012,                       # doomEdNum
         MobjState::Medi,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1428,24 +1428,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(                                # MobjType.Misc12
 2013,                                              # doomEdNum
         MobjState::Soul,                           # spawnState
         1000,                                      # spawnHealth
-        MobjState::Null,                           # seeState
+        MobjState::Nil,                            # seeState
         Sfx::NONE,                                 # seeSound
         8,                                         # reactionTime
         Sfx::NONE,                                 # attackSound
-        MobjState::Null,                           # painState
+        MobjState::Nil,                            # painState
         0,                                         # painChance
         Sfx::NONE,                                 # painSound
-        MobjState::Null,                           # meleeState
-        MobjState::Null,                           # missileState
-        MobjState::Null,                           # deathState
-        MobjState::Null,                           # xdeathState
+        MobjState::Nil,                            # meleeState
+        MobjState::Nil,                            # missileState
+        MobjState::Nil,                            # deathState
+        MobjState::Nil,                            # xdeathState
         Sfx::NONE,                                 # deathSound
         0,                                         # speed
         Fixed.from_i(20),                          # radius
@@ -1454,24 +1454,24 @@ module Doocr
         0,                                         # damage
         Sfx::NONE,                                 # activeSound
         MobjFlags::Special | MobjFlags::CountItem, # flags
-        MobjState::Null                            # raiseState
+        MobjState::Nil                             # raiseState
       ),
 
       MobjInfo.new(                                # MobjType.Inv
 2022,                                              # doomEdNum
         MobjState::Pinv,                           # spawnState
         1000,                                      # spawnHealth
-        MobjState::Null,                           # seeState
+        MobjState::Nil,                            # seeState
         Sfx::NONE,                                 # seeSound
         8,                                         # reactionTime
         Sfx::NONE,                                 # attackSound
-        MobjState::Null,                           # painState
+        MobjState::Nil,                            # painState
         0,                                         # painChance
         Sfx::NONE,                                 # painSound
-        MobjState::Null,                           # meleeState
-        MobjState::Null,                           # missileState
-        MobjState::Null,                           # deathState
-        MobjState::Null,                           # xdeathState
+        MobjState::Nil,                            # meleeState
+        MobjState::Nil,                            # missileState
+        MobjState::Nil,                            # deathState
+        MobjState::Nil,                            # xdeathState
         Sfx::NONE,                                 # deathSound
         0,                                         # speed
         Fixed.from_i(20),                          # radius
@@ -1480,24 +1480,24 @@ module Doocr
         0,                                         # damage
         Sfx::NONE,                                 # activeSound
         MobjFlags::Special | MobjFlags::CountItem, # flags
-        MobjState::Null                            # raiseState
+        MobjState::Nil                             # raiseState
       ),
 
       MobjInfo.new(                                # MobjType.Misc13
 2023,                                              # doomEdNum
         MobjState::Pstr,                           # spawnState
         1000,                                      # spawnHealth
-        MobjState::Null,                           # seeState
+        MobjState::Nil,                            # seeState
         Sfx::NONE,                                 # seeSound
         8,                                         # reactionTime
         Sfx::NONE,                                 # attackSound
-        MobjState::Null,                           # painState
+        MobjState::Nil,                            # painState
         0,                                         # painChance
         Sfx::NONE,                                 # painSound
-        MobjState::Null,                           # meleeState
-        MobjState::Null,                           # missileState
-        MobjState::Null,                           # deathState
-        MobjState::Null,                           # xdeathState
+        MobjState::Nil,                            # meleeState
+        MobjState::Nil,                            # missileState
+        MobjState::Nil,                            # deathState
+        MobjState::Nil,                            # xdeathState
         Sfx::NONE,                                 # deathSound
         0,                                         # speed
         Fixed.from_i(20),                          # radius
@@ -1506,24 +1506,24 @@ module Doocr
         0,                                         # damage
         Sfx::NONE,                                 # activeSound
         MobjFlags::Special | MobjFlags::CountItem, # flags
-        MobjState::Null                            # raiseState
+        MobjState::Nil                             # raiseState
       ),
 
       MobjInfo.new(                                # MobjType.Ins
 2024,                                              # doomEdNum
         MobjState::Pins,                           # spawnState
         1000,                                      # spawnHealth
-        MobjState::Null,                           # seeState
+        MobjState::Nil,                            # seeState
         Sfx::NONE,                                 # seeSound
         8,                                         # reactionTime
         Sfx::NONE,                                 # attackSound
-        MobjState::Null,                           # painState
+        MobjState::Nil,                            # painState
         0,                                         # painChance
         Sfx::NONE,                                 # painSound
-        MobjState::Null,                           # meleeState
-        MobjState::Null,                           # missileState
-        MobjState::Null,                           # deathState
-        MobjState::Null,                           # xdeathState
+        MobjState::Nil,                            # meleeState
+        MobjState::Nil,                            # missileState
+        MobjState::Nil,                            # deathState
+        MobjState::Nil,                            # xdeathState
         Sfx::NONE,                                 # deathSound
         0,                                         # speed
         Fixed.from_i(20),                          # radius
@@ -1532,24 +1532,24 @@ module Doocr
         0,                                         # damage
         Sfx::NONE,                                 # activeSound
         MobjFlags::Special | MobjFlags::CountItem, # flags
-        MobjState::Null                            # raiseState
+        MobjState::Nil                             # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc14
 2025,                       # doomEdNum
         MobjState::Suit,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1558,24 +1558,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(                                # MobjType.Misc15
 2026,                                              # doomEdNum
         MobjState::Pmap,                           # spawnState
         1000,                                      # spawnHealth
-        MobjState::Null,                           # seeState
+        MobjState::Nil,                            # seeState
         Sfx::NONE,                                 # seeSound
         8,                                         # reactionTime
         Sfx::NONE,                                 # attackSound
-        MobjState::Null,                           # painState
+        MobjState::Nil,                            # painState
         0,                                         # painChance
         Sfx::NONE,                                 # painSound
-        MobjState::Null,                           # meleeState
-        MobjState::Null,                           # missileState
-        MobjState::Null,                           # deathState
-        MobjState::Null,                           # xdeathState
+        MobjState::Nil,                            # meleeState
+        MobjState::Nil,                            # missileState
+        MobjState::Nil,                            # deathState
+        MobjState::Nil,                            # xdeathState
         Sfx::NONE,                                 # deathSound
         0,                                         # speed
         Fixed.from_i(20),                          # radius
@@ -1584,24 +1584,24 @@ module Doocr
         0,                                         # damage
         Sfx::NONE,                                 # activeSound
         MobjFlags::Special | MobjFlags::CountItem, # flags
-        MobjState::Null                            # raiseState
+        MobjState::Nil                             # raiseState
       ),
 
       MobjInfo.new(                                # MobjType.Misc16
 2045,                                              # doomEdNum
         MobjState::Pvis,                           # spawnState
         1000,                                      # spawnHealth
-        MobjState::Null,                           # seeState
+        MobjState::Nil,                            # seeState
         Sfx::NONE,                                 # seeSound
         8,                                         # reactionTime
         Sfx::NONE,                                 # attackSound
-        MobjState::Null,                           # painState
+        MobjState::Nil,                            # painState
         0,                                         # painChance
         Sfx::NONE,                                 # painSound
-        MobjState::Null,                           # meleeState
-        MobjState::Null,                           # missileState
-        MobjState::Null,                           # deathState
-        MobjState::Null,                           # xdeathState
+        MobjState::Nil,                            # meleeState
+        MobjState::Nil,                            # missileState
+        MobjState::Nil,                            # deathState
+        MobjState::Nil,                            # xdeathState
         Sfx::NONE,                                 # deathSound
         0,                                         # speed
         Fixed.from_i(20),                          # radius
@@ -1610,24 +1610,24 @@ module Doocr
         0,                                         # damage
         Sfx::NONE,                                 # activeSound
         MobjFlags::Special | MobjFlags::CountItem, # flags
-        MobjState::Null                            # raiseState
+        MobjState::Nil                             # raiseState
       ),
 
       MobjInfo.new(                                # MobjType.Mega
 83,                                                # doomEdNum
         MobjState::Mega,                           # spawnState
         1000,                                      # spawnHealth
-        MobjState::Null,                           # seeState
+        MobjState::Nil,                            # seeState
         Sfx::NONE,                                 # seeSound
         8,                                         # reactionTime
         Sfx::NONE,                                 # attackSound
-        MobjState::Null,                           # painState
+        MobjState::Nil,                            # painState
         0,                                         # painChance
         Sfx::NONE,                                 # painSound
-        MobjState::Null,                           # meleeState
-        MobjState::Null,                           # missileState
-        MobjState::Null,                           # deathState
-        MobjState::Null,                           # xdeathState
+        MobjState::Nil,                            # meleeState
+        MobjState::Nil,                            # missileState
+        MobjState::Nil,                            # deathState
+        MobjState::Nil,                            # xdeathState
         Sfx::NONE,                                 # deathSound
         0,                                         # speed
         Fixed.from_i(20),                          # radius
@@ -1636,24 +1636,24 @@ module Doocr
         0,                                         # damage
         Sfx::NONE,                                 # activeSound
         MobjFlags::Special | MobjFlags::CountItem, # flags
-        MobjState::Null                            # raiseState
+        MobjState::Nil                             # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Clip
 2007,                       # doomEdNum
         MobjState::Clip,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1662,24 +1662,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc17
 2048,                       # doomEdNum
         MobjState::Ammo,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1688,24 +1688,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc18
 2010,                       # doomEdNum
         MobjState::Rock,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1714,24 +1714,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc19
 2046,                       # doomEdNum
         MobjState::Brok,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1740,24 +1740,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc20
 2047,                       # doomEdNum
         MobjState::Cell,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1766,24 +1766,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc21
 17,                         # doomEdNum
         MobjState::Celp,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1792,24 +1792,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc22
 2008,                       # doomEdNum
         MobjState::Shel,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1818,24 +1818,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc23
 2049,                       # doomEdNum
         MobjState::Sbox,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1844,24 +1844,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc24
 8,                          # doomEdNum
         MobjState::Bpak,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1870,24 +1870,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc25
 2006,                       # doomEdNum
         MobjState::Bfug,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1896,24 +1896,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Chaingun
 2002,                       # doomEdNum
         MobjState::Mgun,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1922,24 +1922,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc26
 2005,                       # doomEdNum
         MobjState::Csaw,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1948,24 +1948,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc27
 2003,                       # doomEdNum
         MobjState::Laun,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -1974,24 +1974,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc28
 2004,                       # doomEdNum
         MobjState::Plas,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -2000,24 +2000,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Shotgun
 2001,                       # doomEdNum
         MobjState::Shot,    # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -2026,24 +2026,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Supershotgun
 82,                         # doomEdNum
         MobjState::Shot2,   # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(20),   # radius
@@ -2052,24 +2052,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Special, # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(          # MobjType.Misc29
 85,                          # doomEdNum
         MobjState::Techlamp, # spawnState
         1000,                # spawnHealth
-        MobjState::Null,     # seeState
+        MobjState::Nil,      # seeState
         Sfx::NONE,           # seeSound
         8,                   # reactionTime
         Sfx::NONE,           # attackSound
-        MobjState::Null,     # painState
+        MobjState::Nil,      # painState
         0,                   # painChance
         Sfx::NONE,           # painSound
-        MobjState::Null,     # meleeState
-        MobjState::Null,     # missileState
-        MobjState::Null,     # deathState
-        MobjState::Null,     # xdeathState
+        MobjState::Nil,      # meleeState
+        MobjState::Nil,      # missileState
+        MobjState::Nil,      # deathState
+        MobjState::Nil,      # xdeathState
         Sfx::NONE,           # deathSound
         0,                   # speed
         Fixed.from_i(16),    # radius
@@ -2078,24 +2078,24 @@ module Doocr
         0,                   # damage
         Sfx::NONE,           # activeSound
         MobjFlags::Solid,    # flags
-        MobjState::Null      # raiseState
+        MobjState::Nil       # raiseState
       ),
 
       MobjInfo.new(           # MobjType.Misc30
 86,                           # doomEdNum
         MobjState::Tech2Lamp, # spawnState
         1000,                 # spawnHealth
-        MobjState::Null,      # seeState
+        MobjState::Nil,       # seeState
         Sfx::NONE,            # seeSound
         8,                    # reactionTime
         Sfx::NONE,            # attackSound
-        MobjState::Null,      # painState
+        MobjState::Nil,       # painState
         0,                    # painChance
         Sfx::NONE,            # painSound
-        MobjState::Null,      # meleeState
-        MobjState::Null,      # missileState
-        MobjState::Null,      # deathState
-        MobjState::Null,      # xdeathState
+        MobjState::Nil,       # meleeState
+        MobjState::Nil,       # missileState
+        MobjState::Nil,       # deathState
+        MobjState::Nil,       # xdeathState
         Sfx::NONE,            # deathSound
         0,                    # speed
         Fixed.from_i(16),     # radius
@@ -2104,24 +2104,24 @@ module Doocr
         0,                    # damage
         Sfx::NONE,            # activeSound
         MobjFlags::Solid,     # flags
-        MobjState::Null       # raiseState
+        MobjState::Nil        # raiseState
       ),
 
       MobjInfo.new(       # MobjType.Misc31
 2028,                     # doomEdNum
         MobjState::Colu,  # spawnState
         1000,             # spawnHealth
-        MobjState::Null,  # seeState
+        MobjState::Nil,   # seeState
         Sfx::NONE,        # seeSound
         8,                # reactionTime
         Sfx::NONE,        # attackSound
-        MobjState::Null,  # painState
+        MobjState::Nil,   # painState
         0,                # painChance
         Sfx::NONE,        # painSound
-        MobjState::Null,  # meleeState
-        MobjState::Null,  # missileState
-        MobjState::Null,  # deathState
-        MobjState::Null,  # xdeathState
+        MobjState::Nil,   # meleeState
+        MobjState::Nil,   # missileState
+        MobjState::Nil,   # deathState
+        MobjState::Nil,   # xdeathState
         Sfx::NONE,        # deathSound
         0,                # speed
         Fixed.from_i(16), # radius
@@ -2130,24 +2130,24 @@ module Doocr
         0,                # damage
         Sfx::NONE,        # activeSound
         MobjFlags::Solid, # flags
-        MobjState::Null   # raiseState
+        MobjState::Nil    # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc32
 30,                            # doomEdNum
         MobjState::Tallgrncol, # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(16),      # radius
@@ -2156,24 +2156,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::Solid,      # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc33
 31,                            # doomEdNum
         MobjState::Shrtgrncol, # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(16),      # radius
@@ -2182,24 +2182,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::Solid,      # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc34
 32,                            # doomEdNum
         MobjState::Tallredcol, # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(16),      # radius
@@ -2208,24 +2208,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::Solid,      # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc35
 33,                            # doomEdNum
         MobjState::Shrtredcol, # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(16),      # radius
@@ -2234,24 +2234,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::Solid,      # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(          # MobjType.Misc36
 37,                          # doomEdNum
         MobjState::Skullcol, # spawnState
         1000,                # spawnHealth
-        MobjState::Null,     # seeState
+        MobjState::Nil,      # seeState
         Sfx::NONE,           # seeSound
         8,                   # reactionTime
         Sfx::NONE,           # attackSound
-        MobjState::Null,     # painState
+        MobjState::Nil,      # painState
         0,                   # painChance
         Sfx::NONE,           # painSound
-        MobjState::Null,     # meleeState
-        MobjState::Null,     # missileState
-        MobjState::Null,     # deathState
-        MobjState::Null,     # xdeathState
+        MobjState::Nil,      # meleeState
+        MobjState::Nil,      # missileState
+        MobjState::Nil,      # deathState
+        MobjState::Nil,      # xdeathState
         Sfx::NONE,           # deathSound
         0,                   # speed
         Fixed.from_i(16),    # radius
@@ -2260,24 +2260,24 @@ module Doocr
         0,                   # damage
         Sfx::NONE,           # activeSound
         MobjFlags::Solid,    # flags
-        MobjState::Null      # raiseState
+        MobjState::Nil       # raiseState
       ),
 
       MobjInfo.new(          # MobjType.Misc37
 36,                          # doomEdNum
         MobjState::Heartcol, # spawnState
         1000,                # spawnHealth
-        MobjState::Null,     # seeState
+        MobjState::Nil,      # seeState
         Sfx::NONE,           # seeSound
         8,                   # reactionTime
         Sfx::NONE,           # attackSound
-        MobjState::Null,     # painState
+        MobjState::Nil,      # painState
         0,                   # painChance
         Sfx::NONE,           # painSound
-        MobjState::Null,     # meleeState
-        MobjState::Null,     # missileState
-        MobjState::Null,     # deathState
-        MobjState::Null,     # xdeathState
+        MobjState::Nil,      # meleeState
+        MobjState::Nil,      # missileState
+        MobjState::Nil,      # deathState
+        MobjState::Nil,      # xdeathState
         Sfx::NONE,           # deathSound
         0,                   # speed
         Fixed.from_i(16),    # radius
@@ -2286,24 +2286,24 @@ module Doocr
         0,                   # damage
         Sfx::NONE,           # activeSound
         MobjFlags::Solid,    # flags
-        MobjState::Null      # raiseState
+        MobjState::Nil       # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc38
 41,                         # doomEdNum
         MobjState::Evileye, # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(16),   # radius
@@ -2312,24 +2312,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Solid,   # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc39
 42,                            # doomEdNum
         MobjState::Floatskull, # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(16),      # radius
@@ -2338,24 +2338,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::Solid,      # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(           # MobjType.Misc40
 43,                           # doomEdNum
         MobjState::Torchtree, # spawnState
         1000,                 # spawnHealth
-        MobjState::Null,      # seeState
+        MobjState::Nil,       # seeState
         Sfx::NONE,            # seeSound
         8,                    # reactionTime
         Sfx::NONE,            # attackSound
-        MobjState::Null,      # painState
+        MobjState::Nil,       # painState
         0,                    # painChance
         Sfx::NONE,            # painSound
-        MobjState::Null,      # meleeState
-        MobjState::Null,      # missileState
-        MobjState::Null,      # deathState
-        MobjState::Null,      # xdeathState
+        MobjState::Nil,       # meleeState
+        MobjState::Nil,       # missileState
+        MobjState::Nil,       # deathState
+        MobjState::Nil,       # xdeathState
         Sfx::NONE,            # deathSound
         0,                    # speed
         Fixed.from_i(16),     # radius
@@ -2364,24 +2364,24 @@ module Doocr
         0,                    # damage
         Sfx::NONE,            # activeSound
         MobjFlags::Solid,     # flags
-        MobjState::Null       # raiseState
+        MobjState::Nil        # raiseState
       ),
 
       MobjInfo.new(           # MobjType.Misc41
 44,                           # doomEdNum
         MobjState::Bluetorch, # spawnState
         1000,                 # spawnHealth
-        MobjState::Null,      # seeState
+        MobjState::Nil,       # seeState
         Sfx::NONE,            # seeSound
         8,                    # reactionTime
         Sfx::NONE,            # attackSound
-        MobjState::Null,      # painState
+        MobjState::Nil,       # painState
         0,                    # painChance
         Sfx::NONE,            # painSound
-        MobjState::Null,      # meleeState
-        MobjState::Null,      # missileState
-        MobjState::Null,      # deathState
-        MobjState::Null,      # xdeathState
+        MobjState::Nil,       # meleeState
+        MobjState::Nil,       # missileState
+        MobjState::Nil,       # deathState
+        MobjState::Nil,       # xdeathState
         Sfx::NONE,            # deathSound
         0,                    # speed
         Fixed.from_i(16),     # radius
@@ -2390,24 +2390,24 @@ module Doocr
         0,                    # damage
         Sfx::NONE,            # activeSound
         MobjFlags::Solid,     # flags
-        MobjState::Null       # raiseState
+        MobjState::Nil        # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc42
 45,                            # doomEdNum
         MobjState::Greentorch, # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(16),      # radius
@@ -2416,24 +2416,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::Solid,      # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(          # MobjType.Misc43
 46,                          # doomEdNum
         MobjState::Redtorch, # spawnState
         1000,                # spawnHealth
-        MobjState::Null,     # seeState
+        MobjState::Nil,      # seeState
         Sfx::NONE,           # seeSound
         8,                   # reactionTime
         Sfx::NONE,           # attackSound
-        MobjState::Null,     # painState
+        MobjState::Nil,      # painState
         0,                   # painChance
         Sfx::NONE,           # painSound
-        MobjState::Null,     # meleeState
-        MobjState::Null,     # missileState
-        MobjState::Null,     # deathState
-        MobjState::Null,     # xdeathState
+        MobjState::Nil,      # meleeState
+        MobjState::Nil,      # missileState
+        MobjState::Nil,      # deathState
+        MobjState::Nil,      # xdeathState
         Sfx::NONE,           # deathSound
         0,                   # speed
         Fixed.from_i(16),    # radius
@@ -2442,24 +2442,24 @@ module Doocr
         0,                   # damage
         Sfx::NONE,           # activeSound
         MobjFlags::Solid,    # flags
-        MobjState::Null      # raiseState
+        MobjState::Nil       # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc44
 55,                            # doomEdNum
         MobjState::Btorchshrt, # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(16),      # radius
@@ -2468,24 +2468,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::Solid,      # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc45
 56,                            # doomEdNum
         MobjState::Gtorchshrt, # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(16),      # radius
@@ -2494,24 +2494,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::Solid,      # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc46
 57,                            # doomEdNum
         MobjState::Rtorchshrt, # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(16),      # radius
@@ -2520,24 +2520,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::Solid,      # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc47
 47,                            # doomEdNum
         MobjState::Stalagtite, # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(16),      # radius
@@ -2546,24 +2546,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::Solid,      # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc48
 48,                            # doomEdNum
         MobjState::Techpillar, # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(16),      # radius
@@ -2572,24 +2572,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::Solid,      # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc49
 34,                            # doomEdNum
         MobjState::Candlestik, # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(20),      # radius
@@ -2597,25 +2597,25 @@ module Doocr
         100,                   # mass
         0,                     # damage
         Sfx::NONE,             # activeSound
-        0,                     # flags
-        MobjState::Null        # raiseState
+        MobjFlags.new(0),      # flags
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc50
 35,                            # doomEdNum
         MobjState::Candelabra, # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(16),      # radius
@@ -2624,24 +2624,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::Solid,      # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(                                                        # MobjType.Misc51
 49,                                                                        # doomEdNum
         MobjState::Bloodytwitch,                                           # spawnState
         1000,                                                              # spawnHealth
-        MobjState::Null,                                                   # seeState
+        MobjState::Nil,                                                    # seeState
         Sfx::NONE,                                                         # seeSound
         8,                                                                 # reactionTime
         Sfx::NONE,                                                         # attackSound
-        MobjState::Null,                                                   # painState
+        MobjState::Nil,                                                    # painState
         0,                                                                 # painChance
         Sfx::NONE,                                                         # painSound
-        MobjState::Null,                                                   # meleeState
-        MobjState::Null,                                                   # missileState
-        MobjState::Null,                                                   # deathState
-        MobjState::Null,                                                   # xdeathState
+        MobjState::Nil,                                                    # meleeState
+        MobjState::Nil,                                                    # missileState
+        MobjState::Nil,                                                    # deathState
+        MobjState::Nil,                                                    # xdeathState
         Sfx::NONE,                                                         # deathSound
         0,                                                                 # speed
         Fixed.from_i(16),                                                  # radius
@@ -2650,24 +2650,24 @@ module Doocr
         0,                                                                 # damage
         Sfx::NONE,                                                         # activeSound
         MobjFlags::Solid | MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                    # raiseState
+        MobjState::Nil                                                     # raiseState
       ),
 
       MobjInfo.new(                                                        # MobjType.Misc52
 50,                                                                        # doomEdNum
         MobjState::Meat2,                                                  # spawnState
         1000,                                                              # spawnHealth
-        MobjState::Null,                                                   # seeState
+        MobjState::Nil,                                                    # seeState
         Sfx::NONE,                                                         # seeSound
         8,                                                                 # reactionTime
         Sfx::NONE,                                                         # attackSound
-        MobjState::Null,                                                   # painState
+        MobjState::Nil,                                                    # painState
         0,                                                                 # painChance
         Sfx::NONE,                                                         # painSound
-        MobjState::Null,                                                   # meleeState
-        MobjState::Null,                                                   # missileState
-        MobjState::Null,                                                   # deathState
-        MobjState::Null,                                                   # xdeathState
+        MobjState::Nil,                                                    # meleeState
+        MobjState::Nil,                                                    # missileState
+        MobjState::Nil,                                                    # deathState
+        MobjState::Nil,                                                    # xdeathState
         Sfx::NONE,                                                         # deathSound
         0,                                                                 # speed
         Fixed.from_i(16),                                                  # radius
@@ -2676,24 +2676,24 @@ module Doocr
         0,                                                                 # damage
         Sfx::NONE,                                                         # activeSound
         MobjFlags::Solid | MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                    # raiseState
+        MobjState::Nil                                                     # raiseState
       ),
 
       MobjInfo.new(                                                        # MobjType.Misc53
 51,                                                                        # doomEdNum
         MobjState::Meat3,                                                  # spawnState
         1000,                                                              # spawnHealth
-        MobjState::Null,                                                   # seeState
+        MobjState::Nil,                                                    # seeState
         Sfx::NONE,                                                         # seeSound
         8,                                                                 # reactionTime
         Sfx::NONE,                                                         # attackSound
-        MobjState::Null,                                                   # painState
+        MobjState::Nil,                                                    # painState
         0,                                                                 # painChance
         Sfx::NONE,                                                         # painSound
-        MobjState::Null,                                                   # meleeState
-        MobjState::Null,                                                   # missileState
-        MobjState::Null,                                                   # deathState
-        MobjState::Null,                                                   # xdeathState
+        MobjState::Nil,                                                    # meleeState
+        MobjState::Nil,                                                    # missileState
+        MobjState::Nil,                                                    # deathState
+        MobjState::Nil,                                                    # xdeathState
         Sfx::NONE,                                                         # deathSound
         0,                                                                 # speed
         Fixed.from_i(16),                                                  # radius
@@ -2702,24 +2702,24 @@ module Doocr
         0,                                                                 # damage
         Sfx::NONE,                                                         # activeSound
         MobjFlags::Solid | MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                    # raiseState
+        MobjState::Nil                                                     # raiseState
       ),
 
       MobjInfo.new(                                                        # MobjType.Misc54
 52,                                                                        # doomEdNum
         MobjState::Meat4,                                                  # spawnState
         1000,                                                              # spawnHealth
-        MobjState::Null,                                                   # seeState
+        MobjState::Nil,                                                    # seeState
         Sfx::NONE,                                                         # seeSound
         8,                                                                 # reactionTime
         Sfx::NONE,                                                         # attackSound
-        MobjState::Null,                                                   # painState
+        MobjState::Nil,                                                    # painState
         0,                                                                 # painChance
         Sfx::NONE,                                                         # painSound
-        MobjState::Null,                                                   # meleeState
-        MobjState::Null,                                                   # missileState
-        MobjState::Null,                                                   # deathState
-        MobjState::Null,                                                   # xdeathState
+        MobjState::Nil,                                                    # meleeState
+        MobjState::Nil,                                                    # missileState
+        MobjState::Nil,                                                    # deathState
+        MobjState::Nil,                                                    # xdeathState
         Sfx::NONE,                                                         # deathSound
         0,                                                                 # speed
         Fixed.from_i(16),                                                  # radius
@@ -2728,24 +2728,24 @@ module Doocr
         0,                                                                 # damage
         Sfx::NONE,                                                         # activeSound
         MobjFlags::Solid | MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                    # raiseState
+        MobjState::Nil                                                     # raiseState
       ),
 
       MobjInfo.new(                                                        # MobjType.Misc55
 53,                                                                        # doomEdNum
         MobjState::Meat5,                                                  # spawnState
         1000,                                                              # spawnHealth
-        MobjState::Null,                                                   # seeState
+        MobjState::Nil,                                                    # seeState
         Sfx::NONE,                                                         # seeSound
         8,                                                                 # reactionTime
         Sfx::NONE,                                                         # attackSound
-        MobjState::Null,                                                   # painState
+        MobjState::Nil,                                                    # painState
         0,                                                                 # painChance
         Sfx::NONE,                                                         # painSound
-        MobjState::Null,                                                   # meleeState
-        MobjState::Null,                                                   # missileState
-        MobjState::Null,                                                   # deathState
-        MobjState::Null,                                                   # xdeathState
+        MobjState::Nil,                                                    # meleeState
+        MobjState::Nil,                                                    # missileState
+        MobjState::Nil,                                                    # deathState
+        MobjState::Nil,                                                    # xdeathState
         Sfx::NONE,                                                         # deathSound
         0,                                                                 # speed
         Fixed.from_i(16),                                                  # radius
@@ -2754,24 +2754,24 @@ module Doocr
         0,                                                                 # damage
         Sfx::NONE,                                                         # activeSound
         MobjFlags::Solid | MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                    # raiseState
+        MobjState::Nil                                                     # raiseState
       ),
 
       MobjInfo.new(                                     # MobjType.Misc56
 59,                                                     # doomEdNum
         MobjState::Meat2,                               # spawnState
         1000,                                           # spawnHealth
-        MobjState::Null,                                # seeState
+        MobjState::Nil,                                 # seeState
         Sfx::NONE,                                      # seeSound
         8,                                              # reactionTime
         Sfx::NONE,                                      # attackSound
-        MobjState::Null,                                # painState
+        MobjState::Nil,                                 # painState
         0,                                              # painChance
         Sfx::NONE,                                      # painSound
-        MobjState::Null,                                # meleeState
-        MobjState::Null,                                # missileState
-        MobjState::Null,                                # deathState
-        MobjState::Null,                                # xdeathState
+        MobjState::Nil,                                 # meleeState
+        MobjState::Nil,                                 # missileState
+        MobjState::Nil,                                 # deathState
+        MobjState::Nil,                                 # xdeathState
         Sfx::NONE,                                      # deathSound
         0,                                              # speed
         Fixed.from_i(20),                               # radius
@@ -2780,24 +2780,24 @@ module Doocr
         0,                                              # damage
         Sfx::NONE,                                      # activeSound
         MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                 # raiseState
+        MobjState::Nil                                  # raiseState
       ),
 
       MobjInfo.new(                                     # MobjType.Misc57
 60,                                                     # doomEdNum
         MobjState::Meat4,                               # spawnState
         1000,                                           # spawnHealth
-        MobjState::Null,                                # seeState
+        MobjState::Nil,                                 # seeState
         Sfx::NONE,                                      # seeSound
         8,                                              # reactionTime
         Sfx::NONE,                                      # attackSound
-        MobjState::Null,                                # painState
+        MobjState::Nil,                                 # painState
         0,                                              # painChance
         Sfx::NONE,                                      # painSound
-        MobjState::Null,                                # meleeState
-        MobjState::Null,                                # missileState
-        MobjState::Null,                                # deathState
-        MobjState::Null,                                # xdeathState
+        MobjState::Nil,                                 # meleeState
+        MobjState::Nil,                                 # missileState
+        MobjState::Nil,                                 # deathState
+        MobjState::Nil,                                 # xdeathState
         Sfx::NONE,                                      # deathSound
         0,                                              # speed
         Fixed.from_i(20),                               # radius
@@ -2806,24 +2806,24 @@ module Doocr
         0,                                              # damage
         Sfx::NONE,                                      # activeSound
         MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                 # raiseState
+        MobjState::Nil                                  # raiseState
       ),
 
       MobjInfo.new(                                     # MobjType.Misc58
 61,                                                     # doomEdNum
         MobjState::Meat3,                               # spawnState
         1000,                                           # spawnHealth
-        MobjState::Null,                                # seeState
+        MobjState::Nil,                                 # seeState
         Sfx::NONE,                                      # seeSound
         8,                                              # reactionTime
         Sfx::NONE,                                      # attackSound
-        MobjState::Null,                                # painState
+        MobjState::Nil,                                 # painState
         0,                                              # painChance
         Sfx::NONE,                                      # painSound
-        MobjState::Null,                                # meleeState
-        MobjState::Null,                                # missileState
-        MobjState::Null,                                # deathState
-        MobjState::Null,                                # xdeathState
+        MobjState::Nil,                                 # meleeState
+        MobjState::Nil,                                 # missileState
+        MobjState::Nil,                                 # deathState
+        MobjState::Nil,                                 # xdeathState
         Sfx::NONE,                                      # deathSound
         0,                                              # speed
         Fixed.from_i(20),                               # radius
@@ -2832,24 +2832,24 @@ module Doocr
         0,                                              # damage
         Sfx::NONE,                                      # activeSound
         MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                 # raiseState
+        MobjState::Nil                                  # raiseState
       ),
 
       MobjInfo.new(                                     # MobjType.Misc59
 62,                                                     # doomEdNum
         MobjState::Meat5,                               # spawnState
         1000,                                           # spawnHealth
-        MobjState::Null,                                # seeState
+        MobjState::Nil,                                 # seeState
         Sfx::NONE,                                      # seeSound
         8,                                              # reactionTime
         Sfx::NONE,                                      # attackSound
-        MobjState::Null,                                # painState
+        MobjState::Nil,                                 # painState
         0,                                              # painChance
         Sfx::NONE,                                      # painSound
-        MobjState::Null,                                # meleeState
-        MobjState::Null,                                # missileState
-        MobjState::Null,                                # deathState
-        MobjState::Null,                                # xdeathState
+        MobjState::Nil,                                 # meleeState
+        MobjState::Nil,                                 # missileState
+        MobjState::Nil,                                 # deathState
+        MobjState::Nil,                                 # xdeathState
         Sfx::NONE,                                      # deathSound
         0,                                              # speed
         Fixed.from_i(20),                               # radius
@@ -2858,24 +2858,24 @@ module Doocr
         0,                                              # damage
         Sfx::NONE,                                      # activeSound
         MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                 # raiseState
+        MobjState::Nil                                  # raiseState
       ),
 
       MobjInfo.new(                                     # MobjType.Misc60
 63,                                                     # doomEdNum
         MobjState::Bloodytwitch,                        # spawnState
         1000,                                           # spawnHealth
-        MobjState::Null,                                # seeState
+        MobjState::Nil,                                 # seeState
         Sfx::NONE,                                      # seeSound
         8,                                              # reactionTime
         Sfx::NONE,                                      # attackSound
-        MobjState::Null,                                # painState
+        MobjState::Nil,                                 # painState
         0,                                              # painChance
         Sfx::NONE,                                      # painSound
-        MobjState::Null,                                # meleeState
-        MobjState::Null,                                # missileState
-        MobjState::Null,                                # deathState
-        MobjState::Null,                                # xdeathState
+        MobjState::Nil,                                 # meleeState
+        MobjState::Nil,                                 # missileState
+        MobjState::Nil,                                 # deathState
+        MobjState::Nil,                                 # xdeathState
         Sfx::NONE,                                      # deathSound
         0,                                              # speed
         Fixed.from_i(20),                               # radius
@@ -2884,24 +2884,24 @@ module Doocr
         0,                                              # damage
         Sfx::NONE,                                      # activeSound
         MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                 # raiseState
+        MobjState::Nil                                  # raiseState
       ),
 
       MobjInfo.new(          # MobjType.Misc61
 22,                          # doomEdNum
         MobjState::HeadDie6, # spawnState
         1000,                # spawnHealth
-        MobjState::Null,     # seeState
+        MobjState::Nil,      # seeState
         Sfx::NONE,           # seeSound
         8,                   # reactionTime
         Sfx::NONE,           # attackSound
-        MobjState::Null,     # painState
+        MobjState::Nil,      # painState
         0,                   # painChance
         Sfx::NONE,           # painSound
-        MobjState::Null,     # meleeState
-        MobjState::Null,     # missileState
-        MobjState::Null,     # deathState
-        MobjState::Null,     # xdeathState
+        MobjState::Nil,      # meleeState
+        MobjState::Nil,      # missileState
+        MobjState::Nil,      # deathState
+        MobjState::Nil,      # xdeathState
         Sfx::NONE,           # deathSound
         0,                   # speed
         Fixed.from_i(20),    # radius
@@ -2909,25 +2909,25 @@ module Doocr
         100,                 # mass
         0,                   # damage
         Sfx::NONE,           # activeSound
-        0,                   # flags
-        MobjState::Null      # raiseState
+        MobjFlags.new(0),    # flags
+        MobjState::Nil       # raiseState
       ),
 
       MobjInfo.new(          # MobjType.Misc62
 15,                          # doomEdNum
         MobjState::PlayDie7, # spawnState
         1000,                # spawnHealth
-        MobjState::Null,     # seeState
+        MobjState::Nil,      # seeState
         Sfx::NONE,           # seeSound
         8,                   # reactionTime
         Sfx::NONE,           # attackSound
-        MobjState::Null,     # painState
+        MobjState::Nil,      # painState
         0,                   # painChance
         Sfx::NONE,           # painSound
-        MobjState::Null,     # meleeState
-        MobjState::Null,     # missileState
-        MobjState::Null,     # deathState
-        MobjState::Null,     # xdeathState
+        MobjState::Nil,      # meleeState
+        MobjState::Nil,      # missileState
+        MobjState::Nil,      # deathState
+        MobjState::Nil,      # xdeathState
         Sfx::NONE,           # deathSound
         0,                   # speed
         Fixed.from_i(20),    # radius
@@ -2935,25 +2935,25 @@ module Doocr
         100,                 # mass
         0,                   # damage
         Sfx::NONE,           # activeSound
-        0,                   # flags
-        MobjState::Null      # raiseState
+        MobjFlags.new(0),    # flags
+        MobjState::Nil       # raiseState
       ),
 
       MobjInfo.new(          # MobjType.Misc63
 18,                          # doomEdNum
         MobjState::PossDie5, # spawnState
         1000,                # spawnHealth
-        MobjState::Null,     # seeState
+        MobjState::Nil,      # seeState
         Sfx::NONE,           # seeSound
         8,                   # reactionTime
         Sfx::NONE,           # attackSound
-        MobjState::Null,     # painState
+        MobjState::Nil,      # painState
         0,                   # painChance
         Sfx::NONE,           # painSound
-        MobjState::Null,     # meleeState
-        MobjState::Null,     # missileState
-        MobjState::Null,     # deathState
-        MobjState::Null,     # xdeathState
+        MobjState::Nil,      # meleeState
+        MobjState::Nil,      # missileState
+        MobjState::Nil,      # deathState
+        MobjState::Nil,      # xdeathState
         Sfx::NONE,           # deathSound
         0,                   # speed
         Fixed.from_i(20),    # radius
@@ -2961,25 +2961,25 @@ module Doocr
         100,                 # mass
         0,                   # damage
         Sfx::NONE,           # activeSound
-        0,                   # flags
-        MobjState::Null      # raiseState
+        MobjFlags.new(0),    # flags
+        MobjState::Nil       # raiseState
       ),
 
       MobjInfo.new(          # MobjType.Misc64
 21,                          # doomEdNum
         MobjState::SargDie6, # spawnState
         1000,                # spawnHealth
-        MobjState::Null,     # seeState
+        MobjState::Nil,      # seeState
         Sfx::NONE,           # seeSound
         8,                   # reactionTime
         Sfx::NONE,           # attackSound
-        MobjState::Null,     # painState
+        MobjState::Nil,      # painState
         0,                   # painChance
         Sfx::NONE,           # painSound
-        MobjState::Null,     # meleeState
-        MobjState::Null,     # missileState
-        MobjState::Null,     # deathState
-        MobjState::Null,     # xdeathState
+        MobjState::Nil,      # meleeState
+        MobjState::Nil,      # missileState
+        MobjState::Nil,      # deathState
+        MobjState::Nil,      # xdeathState
         Sfx::NONE,           # deathSound
         0,                   # speed
         Fixed.from_i(20),    # radius
@@ -2987,25 +2987,25 @@ module Doocr
         100,                 # mass
         0,                   # damage
         Sfx::NONE,           # activeSound
-        0,                   # flags
-        MobjState::Null      # raiseState
+        MobjFlags.new(0),    # flags
+        MobjState::Nil       # raiseState
       ),
 
       MobjInfo.new(           # MobjType.Misc65
 23,                           # doomEdNum
         MobjState::SkullDie6, # spawnState
         1000,                 # spawnHealth
-        MobjState::Null,      # seeState
+        MobjState::Nil,       # seeState
         Sfx::NONE,            # seeSound
         8,                    # reactionTime
         Sfx::NONE,            # attackSound
-        MobjState::Null,      # painState
+        MobjState::Nil,       # painState
         0,                    # painChance
         Sfx::NONE,            # painSound
-        MobjState::Null,      # meleeState
-        MobjState::Null,      # missileState
-        MobjState::Null,      # deathState
-        MobjState::Null,      # xdeathState
+        MobjState::Nil,       # meleeState
+        MobjState::Nil,       # missileState
+        MobjState::Nil,       # deathState
+        MobjState::Nil,       # xdeathState
         Sfx::NONE,            # deathSound
         0,                    # speed
         Fixed.from_i(20),     # radius
@@ -3013,25 +3013,25 @@ module Doocr
         100,                  # mass
         0,                    # damage
         Sfx::NONE,            # activeSound
-        0,                    # flags
-        MobjState::Null       # raiseState
+        MobjFlags.new(0),     # flags
+        MobjState::Nil        # raiseState
       ),
 
       MobjInfo.new(          # MobjType.Misc66
 20,                          # doomEdNum
         MobjState::TrooDie5, # spawnState
         1000,                # spawnHealth
-        MobjState::Null,     # seeState
+        MobjState::Nil,      # seeState
         Sfx::NONE,           # seeSound
         8,                   # reactionTime
         Sfx::NONE,           # attackSound
-        MobjState::Null,     # painState
+        MobjState::Nil,      # painState
         0,                   # painChance
         Sfx::NONE,           # painSound
-        MobjState::Null,     # meleeState
-        MobjState::Null,     # missileState
-        MobjState::Null,     # deathState
-        MobjState::Null,     # xdeathState
+        MobjState::Nil,      # meleeState
+        MobjState::Nil,      # missileState
+        MobjState::Nil,      # deathState
+        MobjState::Nil,      # xdeathState
         Sfx::NONE,           # deathSound
         0,                   # speed
         Fixed.from_i(20),    # radius
@@ -3039,25 +3039,25 @@ module Doocr
         100,                 # mass
         0,                   # damage
         Sfx::NONE,           # activeSound
-        0,                   # flags
-        MobjState::Null      # raiseState
+        MobjFlags.new(0),    # flags
+        MobjState::Nil       # raiseState
       ),
 
       MobjInfo.new(          # MobjType.Misc67
 19,                          # doomEdNum
         MobjState::SposDie5, # spawnState
         1000,                # spawnHealth
-        MobjState::Null,     # seeState
+        MobjState::Nil,      # seeState
         Sfx::NONE,           # seeSound
         8,                   # reactionTime
         Sfx::NONE,           # attackSound
-        MobjState::Null,     # painState
+        MobjState::Nil,      # painState
         0,                   # painChance
         Sfx::NONE,           # painSound
-        MobjState::Null,     # meleeState
-        MobjState::Null,     # missileState
-        MobjState::Null,     # deathState
-        MobjState::Null,     # xdeathState
+        MobjState::Nil,      # meleeState
+        MobjState::Nil,      # missileState
+        MobjState::Nil,      # deathState
+        MobjState::Nil,      # xdeathState
         Sfx::NONE,           # deathSound
         0,                   # speed
         Fixed.from_i(20),    # radius
@@ -3065,25 +3065,25 @@ module Doocr
         100,                 # mass
         0,                   # damage
         Sfx::NONE,           # activeSound
-        0,                   # flags
-        MobjState::Null      # raiseState
+        MobjFlags.new(0),    # flags
+        MobjState::Nil       # raiseState
       ),
 
       MobjInfo.new(           # MobjType.Misc68
 10,                           # doomEdNum
         MobjState::PlayXdie9, # spawnState
         1000,                 # spawnHealth
-        MobjState::Null,      # seeState
+        MobjState::Nil,       # seeState
         Sfx::NONE,            # seeSound
         8,                    # reactionTime
         Sfx::NONE,            # attackSound
-        MobjState::Null,      # painState
+        MobjState::Nil,       # painState
         0,                    # painChance
         Sfx::NONE,            # painSound
-        MobjState::Null,      # meleeState
-        MobjState::Null,      # missileState
-        MobjState::Null,      # deathState
-        MobjState::Null,      # xdeathState
+        MobjState::Nil,       # meleeState
+        MobjState::Nil,       # missileState
+        MobjState::Nil,       # deathState
+        MobjState::Nil,       # xdeathState
         Sfx::NONE,            # deathSound
         0,                    # speed
         Fixed.from_i(20),     # radius
@@ -3091,25 +3091,25 @@ module Doocr
         100,                  # mass
         0,                    # damage
         Sfx::NONE,            # activeSound
-        0,                    # flags
-        MobjState::Null       # raiseState
+        MobjFlags.new(0),     # flags
+        MobjState::Nil        # raiseState
       ),
 
       MobjInfo.new(           # MobjType.Misc69
 12,                           # doomEdNum
         MobjState::PlayXdie9, # spawnState
         1000,                 # spawnHealth
-        MobjState::Null,      # seeState
+        MobjState::Nil,       # seeState
         Sfx::NONE,            # seeSound
         8,                    # reactionTime
         Sfx::NONE,            # attackSound
-        MobjState::Null,      # painState
+        MobjState::Nil,       # painState
         0,                    # painChance
         Sfx::NONE,            # painSound
-        MobjState::Null,      # meleeState
-        MobjState::Null,      # missileState
-        MobjState::Null,      # deathState
-        MobjState::Null,      # xdeathState
+        MobjState::Nil,       # meleeState
+        MobjState::Nil,       # missileState
+        MobjState::Nil,       # deathState
+        MobjState::Nil,       # xdeathState
         Sfx::NONE,            # deathSound
         0,                    # speed
         Fixed.from_i(20),     # radius
@@ -3117,25 +3117,25 @@ module Doocr
         100,                  # mass
         0,                    # damage
         Sfx::NONE,            # activeSound
-        0,                    # flags
-        MobjState::Null       # raiseState
+        MobjFlags.new(0),     # flags
+        MobjState::Nil        # raiseState
       ),
 
       MobjInfo.new(              # MobjType.Misc70
 28,                              # doomEdNum
         MobjState::Headsonstick, # spawnState
         1000,                    # spawnHealth
-        MobjState::Null,         # seeState
+        MobjState::Nil,          # seeState
         Sfx::NONE,               # seeSound
         8,                       # reactionTime
         Sfx::NONE,               # attackSound
-        MobjState::Null,         # painState
+        MobjState::Nil,          # painState
         0,                       # painChance
         Sfx::NONE,               # painSound
-        MobjState::Null,         # meleeState
-        MobjState::Null,         # missileState
-        MobjState::Null,         # deathState
-        MobjState::Null,         # xdeathState
+        MobjState::Nil,          # meleeState
+        MobjState::Nil,          # missileState
+        MobjState::Nil,          # deathState
+        MobjState::Nil,          # xdeathState
         Sfx::NONE,               # deathSound
         0,                       # speed
         Fixed.from_i(16),        # radius
@@ -3144,24 +3144,24 @@ module Doocr
         0,                       # damage
         Sfx::NONE,               # activeSound
         MobjFlags::Solid,        # flags
-        MobjState::Null          # raiseState
+        MobjState::Nil           # raiseState
       ),
 
       MobjInfo.new(       # MobjType.Misc71
 24,                       # doomEdNum
         MobjState::Gibs,  # spawnState
         1000,             # spawnHealth
-        MobjState::Null,  # seeState
+        MobjState::Nil,   # seeState
         Sfx::NONE,        # seeSound
         8,                # reactionTime
         Sfx::NONE,        # attackSound
-        MobjState::Null,  # painState
+        MobjState::Nil,   # painState
         0,                # painChance
         Sfx::NONE,        # painSound
-        MobjState::Null,  # meleeState
-        MobjState::Null,  # missileState
-        MobjState::Null,  # deathState
-        MobjState::Null,  # xdeathState
+        MobjState::Nil,   # meleeState
+        MobjState::Nil,   # missileState
+        MobjState::Nil,   # deathState
+        MobjState::Nil,   # xdeathState
         Sfx::NONE,        # deathSound
         0,                # speed
         Fixed.from_i(20), # radius
@@ -3169,25 +3169,25 @@ module Doocr
         100,              # mass
         0,                # damage
         Sfx::NONE,        # activeSound
-        0,                # flags
-        MobjState::Null   # raiseState
+        MobjFlags.new(0), # flags
+        MobjState::Nil    # raiseState
       ),
 
       MobjInfo.new(              # MobjType.Misc72
 27,                              # doomEdNum
         MobjState::Headonastick, # spawnState
         1000,                    # spawnHealth
-        MobjState::Null,         # seeState
+        MobjState::Nil,          # seeState
         Sfx::NONE,               # seeSound
         8,                       # reactionTime
         Sfx::NONE,               # attackSound
-        MobjState::Null,         # painState
+        MobjState::Nil,          # painState
         0,                       # painChance
         Sfx::NONE,               # painSound
-        MobjState::Null,         # meleeState
-        MobjState::Null,         # missileState
-        MobjState::Null,         # deathState
-        MobjState::Null,         # xdeathState
+        MobjState::Nil,          # meleeState
+        MobjState::Nil,          # missileState
+        MobjState::Nil,          # deathState
+        MobjState::Nil,          # xdeathState
         Sfx::NONE,               # deathSound
         0,                       # speed
         Fixed.from_i(16),        # radius
@@ -3196,24 +3196,24 @@ module Doocr
         0,                       # damage
         Sfx::NONE,               # activeSound
         MobjFlags::Solid,        # flags
-        MobjState::Null          # raiseState
+        MobjState::Nil           # raiseState
       ),
 
       MobjInfo.new(             # MobjType.Misc73
 29,                             # doomEdNum
         MobjState::Headcandles, # spawnState
         1000,                   # spawnHealth
-        MobjState::Null,        # seeState
+        MobjState::Nil,         # seeState
         Sfx::NONE,              # seeSound
         8,                      # reactionTime
         Sfx::NONE,              # attackSound
-        MobjState::Null,        # painState
+        MobjState::Nil,         # painState
         0,                      # painChance
         Sfx::NONE,              # painSound
-        MobjState::Null,        # meleeState
-        MobjState::Null,        # missileState
-        MobjState::Null,        # deathState
-        MobjState::Null,        # xdeathState
+        MobjState::Nil,         # meleeState
+        MobjState::Nil,         # missileState
+        MobjState::Nil,         # deathState
+        MobjState::Nil,         # xdeathState
         Sfx::NONE,              # deathSound
         0,                      # speed
         Fixed.from_i(16),       # radius
@@ -3222,24 +3222,24 @@ module Doocr
         0,                      # damage
         Sfx::NONE,              # activeSound
         MobjFlags::Solid,       # flags
-        MobjState::Null         # raiseState
+        MobjState::Nil          # raiseState
       ),
 
       MobjInfo.new(           # MobjType.Misc74
 25,                           # doomEdNum
         MobjState::Deadstick, # spawnState
         1000,                 # spawnHealth
-        MobjState::Null,      # seeState
+        MobjState::Nil,       # seeState
         Sfx::NONE,            # seeSound
         8,                    # reactionTime
         Sfx::NONE,            # attackSound
-        MobjState::Null,      # painState
+        MobjState::Nil,       # painState
         0,                    # painChance
         Sfx::NONE,            # painSound
-        MobjState::Null,      # meleeState
-        MobjState::Null,      # missileState
-        MobjState::Null,      # deathState
-        MobjState::Null,      # xdeathState
+        MobjState::Nil,       # meleeState
+        MobjState::Nil,       # missileState
+        MobjState::Nil,       # deathState
+        MobjState::Nil,       # xdeathState
         Sfx::NONE,            # deathSound
         0,                    # speed
         Fixed.from_i(16),     # radius
@@ -3248,24 +3248,24 @@ module Doocr
         0,                    # damage
         Sfx::NONE,            # activeSound
         MobjFlags::Solid,     # flags
-        MobjState::Null       # raiseState
+        MobjState::Nil        # raiseState
       ),
 
       MobjInfo.new(           # MobjType.Misc75
 26,                           # doomEdNum
         MobjState::Livestick, # spawnState
         1000,                 # spawnHealth
-        MobjState::Null,      # seeState
+        MobjState::Nil,       # seeState
         Sfx::NONE,            # seeSound
         8,                    # reactionTime
         Sfx::NONE,            # attackSound
-        MobjState::Null,      # painState
+        MobjState::Nil,       # painState
         0,                    # painChance
         Sfx::NONE,            # painSound
-        MobjState::Null,      # meleeState
-        MobjState::Null,      # missileState
-        MobjState::Null,      # deathState
-        MobjState::Null,      # xdeathState
+        MobjState::Nil,       # meleeState
+        MobjState::Nil,       # missileState
+        MobjState::Nil,       # deathState
+        MobjState::Nil,       # xdeathState
         Sfx::NONE,            # deathSound
         0,                    # speed
         Fixed.from_i(16),     # radius
@@ -3274,24 +3274,24 @@ module Doocr
         0,                    # damage
         Sfx::NONE,            # activeSound
         MobjFlags::Solid,     # flags
-        MobjState::Null       # raiseState
+        MobjState::Nil        # raiseState
       ),
 
       MobjInfo.new(         # MobjType.Misc76
 54,                         # doomEdNum
         MobjState::Bigtree, # spawnState
         1000,               # spawnHealth
-        MobjState::Null,    # seeState
+        MobjState::Nil,     # seeState
         Sfx::NONE,          # seeSound
         8,                  # reactionTime
         Sfx::NONE,          # attackSound
-        MobjState::Null,    # painState
+        MobjState::Nil,     # painState
         0,                  # painChance
         Sfx::NONE,          # painSound
-        MobjState::Null,    # meleeState
-        MobjState::Null,    # missileState
-        MobjState::Null,    # deathState
-        MobjState::Null,    # xdeathState
+        MobjState::Nil,     # meleeState
+        MobjState::Nil,     # missileState
+        MobjState::Nil,     # deathState
+        MobjState::Nil,     # xdeathState
         Sfx::NONE,          # deathSound
         0,                  # speed
         Fixed.from_i(32),   # radius
@@ -3300,24 +3300,24 @@ module Doocr
         0,                  # damage
         Sfx::NONE,          # activeSound
         MobjFlags::Solid,   # flags
-        MobjState::Null     # raiseState
+        MobjState::Nil      # raiseState
       ),
 
       MobjInfo.new(       # MobjType.Misc77
 70,                       # doomEdNum
         MobjState::Bbar1, # spawnState
         1000,             # spawnHealth
-        MobjState::Null,  # seeState
+        MobjState::Nil,   # seeState
         Sfx::NONE,        # seeSound
         8,                # reactionTime
         Sfx::NONE,        # attackSound
-        MobjState::Null,  # painState
+        MobjState::Nil,   # painState
         0,                # painChance
         Sfx::NONE,        # painSound
-        MobjState::Null,  # meleeState
-        MobjState::Null,  # missileState
-        MobjState::Null,  # deathState
-        MobjState::Null,  # xdeathState
+        MobjState::Nil,   # meleeState
+        MobjState::Nil,   # missileState
+        MobjState::Nil,   # deathState
+        MobjState::Nil,   # xdeathState
         Sfx::NONE,        # deathSound
         0,                # speed
         Fixed.from_i(16), # radius
@@ -3326,24 +3326,24 @@ module Doocr
         0,                # damage
         Sfx::NONE,        # activeSound
         MobjFlags::Solid, # flags
-        MobjState::Null   # raiseState
+        MobjState::Nil    # raiseState
       ),
 
       MobjInfo.new(                                                        # MobjType.Misc78
 73,                                                                        # doomEdNum
         MobjState::Hangnoguts,                                             # spawnState
         1000,                                                              # spawnHealth
-        MobjState::Null,                                                   # seeState
+        MobjState::Nil,                                                    # seeState
         Sfx::NONE,                                                         # seeSound
         8,                                                                 # reactionTime
         Sfx::NONE,                                                         # attackSound
-        MobjState::Null,                                                   # painState
+        MobjState::Nil,                                                    # painState
         0,                                                                 # painChance
         Sfx::NONE,                                                         # painSound
-        MobjState::Null,                                                   # meleeState
-        MobjState::Null,                                                   # missileState
-        MobjState::Null,                                                   # deathState
-        MobjState::Null,                                                   # xdeathState
+        MobjState::Nil,                                                    # meleeState
+        MobjState::Nil,                                                    # missileState
+        MobjState::Nil,                                                    # deathState
+        MobjState::Nil,                                                    # xdeathState
         Sfx::NONE,                                                         # deathSound
         0,                                                                 # speed
         Fixed.from_i(16),                                                  # radius
@@ -3352,24 +3352,24 @@ module Doocr
         0,                                                                 # damage
         Sfx::NONE,                                                         # activeSound
         MobjFlags::Solid | MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                    # raiseState
+        MobjState::Nil                                                     # raiseState
       ),
 
       MobjInfo.new(                                                        # MobjType.Misc79
 74,                                                                        # doomEdNum
         MobjState::Hangbnobrain,                                           # spawnState
         1000,                                                              # spawnHealth
-        MobjState::Null,                                                   # seeState
+        MobjState::Nil,                                                    # seeState
         Sfx::NONE,                                                         # seeSound
         8,                                                                 # reactionTime
         Sfx::NONE,                                                         # attackSound
-        MobjState::Null,                                                   # painState
+        MobjState::Nil,                                                    # painState
         0,                                                                 # painChance
         Sfx::NONE,                                                         # painSound
-        MobjState::Null,                                                   # meleeState
-        MobjState::Null,                                                   # missileState
-        MobjState::Null,                                                   # deathState
-        MobjState::Null,                                                   # xdeathState
+        MobjState::Nil,                                                    # meleeState
+        MobjState::Nil,                                                    # missileState
+        MobjState::Nil,                                                    # deathState
+        MobjState::Nil,                                                    # xdeathState
         Sfx::NONE,                                                         # deathSound
         0,                                                                 # speed
         Fixed.from_i(16),                                                  # radius
@@ -3378,24 +3378,24 @@ module Doocr
         0,                                                                 # damage
         Sfx::NONE,                                                         # activeSound
         MobjFlags::Solid | MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                    # raiseState
+        MobjState::Nil                                                     # raiseState
       ),
 
       MobjInfo.new(                                                        # MobjType.Misc80
 75,                                                                        # doomEdNum
         MobjState::Hangtlookdn,                                            # spawnState
         1000,                                                              # spawnHealth
-        MobjState::Null,                                                   # seeState
+        MobjState::Nil,                                                    # seeState
         Sfx::NONE,                                                         # seeSound
         8,                                                                 # reactionTime
         Sfx::NONE,                                                         # attackSound
-        MobjState::Null,                                                   # painState
+        MobjState::Nil,                                                    # painState
         0,                                                                 # painChance
         Sfx::NONE,                                                         # painSound
-        MobjState::Null,                                                   # meleeState
-        MobjState::Null,                                                   # missileState
-        MobjState::Null,                                                   # deathState
-        MobjState::Null,                                                   # xdeathState
+        MobjState::Nil,                                                    # meleeState
+        MobjState::Nil,                                                    # missileState
+        MobjState::Nil,                                                    # deathState
+        MobjState::Nil,                                                    # xdeathState
         Sfx::NONE,                                                         # deathSound
         0,                                                                 # speed
         Fixed.from_i(16),                                                  # radius
@@ -3404,24 +3404,24 @@ module Doocr
         0,                                                                 # damage
         Sfx::NONE,                                                         # activeSound
         MobjFlags::Solid | MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                    # raiseState
+        MobjState::Nil                                                     # raiseState
       ),
 
       MobjInfo.new(                                                        # MobjType.Misc81
 76,                                                                        # doomEdNum
         MobjState::Hangtskull,                                             # spawnState
         1000,                                                              # spawnHealth
-        MobjState::Null,                                                   # seeState
+        MobjState::Nil,                                                    # seeState
         Sfx::NONE,                                                         # seeSound
         8,                                                                 # reactionTime
         Sfx::NONE,                                                         # attackSound
-        MobjState::Null,                                                   # painState
+        MobjState::Nil,                                                    # painState
         0,                                                                 # painChance
         Sfx::NONE,                                                         # painSound
-        MobjState::Null,                                                   # meleeState
-        MobjState::Null,                                                   # missileState
-        MobjState::Null,                                                   # deathState
-        MobjState::Null,                                                   # xdeathState
+        MobjState::Nil,                                                    # meleeState
+        MobjState::Nil,                                                    # missileState
+        MobjState::Nil,                                                    # deathState
+        MobjState::Nil,                                                    # xdeathState
         Sfx::NONE,                                                         # deathSound
         0,                                                                 # speed
         Fixed.from_i(16),                                                  # radius
@@ -3430,24 +3430,24 @@ module Doocr
         0,                                                                 # damage
         Sfx::NONE,                                                         # activeSound
         MobjFlags::Solid | MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                    # raiseState
+        MobjState::Nil                                                     # raiseState
       ),
 
       MobjInfo.new(                                                        # MobjType.Misc82
 77,                                                                        # doomEdNum
         MobjState::Hangtlookup,                                            # spawnState
         1000,                                                              # spawnHealth
-        MobjState::Null,                                                   # seeState
+        MobjState::Nil,                                                    # seeState
         Sfx::NONE,                                                         # seeSound
         8,                                                                 # reactionTime
         Sfx::NONE,                                                         # attackSound
-        MobjState::Null,                                                   # painState
+        MobjState::Nil,                                                    # painState
         0,                                                                 # painChance
         Sfx::NONE,                                                         # painSound
-        MobjState::Null,                                                   # meleeState
-        MobjState::Null,                                                   # missileState
-        MobjState::Null,                                                   # deathState
-        MobjState::Null,                                                   # xdeathState
+        MobjState::Nil,                                                    # meleeState
+        MobjState::Nil,                                                    # missileState
+        MobjState::Nil,                                                    # deathState
+        MobjState::Nil,                                                    # xdeathState
         Sfx::NONE,                                                         # deathSound
         0,                                                                 # speed
         Fixed.from_i(16),                                                  # radius
@@ -3456,24 +3456,24 @@ module Doocr
         0,                                                                 # damage
         Sfx::NONE,                                                         # activeSound
         MobjFlags::Solid | MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                    # raiseState
+        MobjState::Nil                                                     # raiseState
       ),
 
       MobjInfo.new(                                                        # MobjType.Misc83
 78,                                                                        # doomEdNum
         MobjState::Hangtnobrain,                                           # spawnState
         1000,                                                              # spawnHealth
-        MobjState::Null,                                                   # seeState
+        MobjState::Nil,                                                    # seeState
         Sfx::NONE,                                                         # seeSound
         8,                                                                 # reactionTime
         Sfx::NONE,                                                         # attackSound
-        MobjState::Null,                                                   # painState
+        MobjState::Nil,                                                    # painState
         0,                                                                 # painChance
         Sfx::NONE,                                                         # painSound
-        MobjState::Null,                                                   # meleeState
-        MobjState::Null,                                                   # missileState
-        MobjState::Null,                                                   # deathState
-        MobjState::Null,                                                   # xdeathState
+        MobjState::Nil,                                                    # meleeState
+        MobjState::Nil,                                                    # missileState
+        MobjState::Nil,                                                    # deathState
+        MobjState::Nil,                                                    # xdeathState
         Sfx::NONE,                                                         # deathSound
         0,                                                                 # speed
         Fixed.from_i(16),                                                  # radius
@@ -3482,24 +3482,24 @@ module Doocr
         0,                                                                 # damage
         Sfx::NONE,                                                         # activeSound
         MobjFlags::Solid | MobjFlags::SpawnCeiling | MobjFlags::NoGravity, # flags
-        MobjState::Null                                                    # raiseState
+        MobjState::Nil                                                     # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc84
 79,                            # doomEdNum
         MobjState::Colongibs,  # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(20),      # radius
@@ -3508,24 +3508,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::NoBlockMap, # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc85
 80,                            # doomEdNum
         MobjState::Smallpool,  # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(20),      # radius
@@ -3534,24 +3534,24 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::NoBlockMap, # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
 
       MobjInfo.new(            # MobjType.Misc86
 81,                            # doomEdNum
         MobjState::Brainstem,  # spawnState
         1000,                  # spawnHealth
-        MobjState::Null,       # seeState
+        MobjState::Nil,        # seeState
         Sfx::NONE,             # seeSound
         8,                     # reactionTime
         Sfx::NONE,             # attackSound
-        MobjState::Null,       # painState
+        MobjState::Nil,        # painState
         0,                     # painChance
         Sfx::NONE,             # painSound
-        MobjState::Null,       # meleeState
-        MobjState::Null,       # missileState
-        MobjState::Null,       # deathState
-        MobjState::Null,       # xdeathState
+        MobjState::Nil,        # meleeState
+        MobjState::Nil,        # missileState
+        MobjState::Nil,        # deathState
+        MobjState::Nil,        # xdeathState
         Sfx::NONE,             # deathSound
         0,                     # speed
         Fixed.from_i(20),      # radius
@@ -3560,7 +3560,7 @@ module Doocr
         0,                     # damage
         Sfx::NONE,             # activeSound
         MobjFlags::NoBlockMap, # flags
-        MobjState::Null        # raiseState
+        MobjState::Nil         # raiseState
       ),
     ]
   end

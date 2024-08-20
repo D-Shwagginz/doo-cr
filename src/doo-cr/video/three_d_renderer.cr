@@ -2,20 +2,20 @@ module Doocr::Video
   class ThreeDRenderer
     class_getter max_screen_size : Int32 = 9
 
-    @colormap : ColorMap
-    @textures : ITextureLookup
-    @flats : IFlatLookup
-    @sprites : ISpriteLookup
+    @colormap : ColorMap | Nil
+    @textures : ITextureLookup | Nil
+    @flats : IFlatLookup | Nil
+    @sprites : ISpriteLookup | Nil
 
-    @screen : DrawScreen
-    @screen_width : Int32
-    @screen_height : Int32
-    @screen_data : Bytes
-    @draw_scale : Int32
+    @screen : DrawScreen | Nil
+    @screen_width : Int32 = 0
+    @screen_height : Int32 = 0
+    @screen_data : Bytes = Bytes.new(0)
+    @draw_scale : Int32 = 0
 
-    @window_size : Int32
+    @window_size : Int32 = 0
 
-    @frame_frac : Fixed
+    @frame_frac : Fixed | Nil
 
     def initialize(content : GameContent, @screen : DrawScreen, @window_size : Int32)
       @colormap = content.colormap
@@ -72,15 +72,15 @@ module Doocr::Video
     # Window settings
     #
 
-    @window_x : Int32
-    @window_y : Int32
-    @window_width : Int32
-    @window_height : Int32
-    @center_x : Int32
-    @center_y : Int32
-    @center_x_frac : Fixed
-    @center_y_frac : Fixed
-    @projection : Fixed
+    @window_x : Int32 = 0
+    @window_y : Int32 = 0
+    @window_width : Int32 = 0
+    @window_height : Int32 = 0
+    @center_x : Int32 = 0
+    @center_y : Int32 = 0
+    @center_x_frac : Fixed | Nil
+    @center_y_frac : Fixed | Nil
+    @projection : Fixed | Nil
 
     private def reset_window(x : Int32, y : Int32, width : Int32, height : Int32)
       @window_x = x
@@ -89,8 +89,8 @@ module Doocr::Video
       @window_height = height
       @center_x = @window_width / 2
       @center_y = @window_height / 2
-      @center_x_frac = Fixed.from_int(@center_x)
-      @center_y_frac = Fixed.from_int(@center_y)
+      @center_x_frac = Fixed.from_i(@center_x)
+      @center_y_frac = Fixed.from_i(@center_y)
       @projection = @center_x_frac
     end
 
@@ -100,10 +100,10 @@ module Doocr::Video
 
     FINE_FOV = 2048
 
-    @angle_to_x : Array(Int32)
-    @x_to_angle : Array(Angle)
-    @clip_angle : Angle
-    @clip_angle2 : Angle
+    @angle_to_x : Array(Int32) = Array(Int32).new
+    @x_to_angle : Array(Angle) = Array(Angle).new
+    @clip_angle : Angle | Nil
+    @clip_angle2 : Angle | Nil
 
     private def init_wall_rendering
       @angle_to_x = Array(Int).new(Trig::FINE_ANGLE_COUNT / 2)
@@ -116,9 +116,9 @@ module Doocr::Video
       (Trig::FINE_ANGLE_COUNT / 2).times do |i|
         t : Int32
 
-        if Trig.tan(i) > Fixed.from_int(2)
+        if Trig.tan(i) > Fixed.from_i(2)
           t = -1
-        elsif Trig.tan(i) < Fixed.from_int(-2)
+        elsif Trig.tan(i) < Fixed.from_i(-2)
           t = @window_width + 1
         else
           t = (@center_x_frac - Trig.tan(i) * focal_length).to_int_ceiling
@@ -159,30 +159,30 @@ module Doocr::Video
     # Plane rendering
     #
 
-    @plane_y_slope : Array(Fixed)
-    @plane_dist_scale : Array(Fixed)
-    @plane_base_x_scale : Fixed
-    @plane_base_y_scale : Fixed
+    @plane_y_slope : Array(Fixed) = Array(Fixed).new
+    @plane_dist_scale : Array(Fixed) = Array(Fixed).new
+    @plane_base_x_scale : Fixed | Nil
+    @plane_base_y_scale : Fixed | Nil
 
     @ceiling_prev_sector : Sector | Nil
-    @ceiling_prev_x : Int32
-    @ceiling_prev_y1 : Int32
-    @ceiling_prev_y2 : Int32
-    @ceiling_x_frac : Array(Fixed)
-    @ceiling_y_frac : Array(Fixed)
-    @ceiling_x_step : Array(Fixed)
-    @ceiling_y_step : Array(Fixed)
-    @ceiling_lights : Array(Array(UInt8))
+    @ceiling_prev_x : Int32 = 0
+    @ceiling_prev_y1 : Int32 = 0
+    @ceiling_prev_y2 : Int32 = 0
+    @ceiling_x_frac : Array(Fixed) = Array(Fixed).new
+    @ceiling_y_frac : Array(Fixed) = Array(Fixed).new
+    @ceiling_x_step : Array(Fixed) = Array(Fixed).new
+    @ceiling_y_step : Array(Fixed) = Array(Fixed).new
+    @ceiling_lights : Array(Array(UInt8)) = Array(Array(UInt8)).new
 
     @floor_prev_sector : Sector | Nil
-    @floor_prev_x : Int32
-    @floor_prev_y1 : Int32
-    @floor_prev_y2 : Int32
-    @floor_x_frac : Array(Fixed)
-    @floor_y_frac : Array(Fixed)
-    @floor_x_step : Array(Fixed)
-    @floor_y_step : Array(Fixed)
-    @floor_lights : Array(Array(UInt8))
+    @floor_prev_x : Int32 = 0
+    @floor_prev_y1 : Int32 = 0
+    @floor_prev_y2 : Int32 = 0
+    @floor_x_frac : Array(Fixed) = Array(Fixed).new
+    @floor_y_frac : Array(Fixed) = Array(Fixed).new
+    @floor_x_step : Array(Fixed) = Array(Fixed).new
+    @floor_y_step : Array(Fixed) = Array(Fixed).new
+    @floor_lights : Array(Array(UInt8)) = Array(Array(UInt8)).new
 
     private def init_plane_rendering
       @plane_y_slope = Array(Fixed).new(@screen_height)
@@ -202,9 +202,9 @@ module Doocr::Video
     private def reset_plane_rendering
       @plane_y_slope.clear
       @window_height.times do |i|
-        dy = Fixed.from_int(i - @window_height / 2) + Fixed.one / 2
+        dy = Fixed.from_i(i - @window_height / 2) + Fixed.one / 2
         dy = dy.abs
-        @plane_y_slope << Fixed.from_int(@window_width / 2) / dy
+        @plane_y_slope << Fixed.from_i(@window_width / 2) / dy
       end
 
       @plane_dist_scale.clear
@@ -231,11 +231,11 @@ module Doocr::Video
     #
 
     ANGLE_TO_SKY_SHIFT = 22
-    @sky_texture_alt : Fixed
-    @sky_inv_scale : Fixed
+    @sky_texture_alt : Fixed | Nil
+    @sky_inv_scale : Fixed | Nil
 
     private def init_sky_rendering
-      @sky_texture_alt = Fixed.from_int(100)
+      @sky_texture_alt = Fixed.from_i(100)
     end
 
     private def reset_sky_rendering
@@ -255,18 +255,18 @@ module Doocr::Video
     Z_LIGHT_SHIFT     = 20
     COLORMAP_COUNT    = 32
 
-    @max_scale_light : Int32
+    @max_scale_light : Int32 = 0
     MAX_Z_LIGHT = 128
 
-    @diminishing_scale_light : Array(Array(Array(UInt32)))
-    @diminishing_z_light : Array(Array(Array(UInt32)))
-    @fixed_light : Array(Array(Array(UInt32 | Nil)))
+    @diminishing_scale_light : Array(Array(Array(UInt32))) = Array(Array(Array(UInt32))).new
+    @diminishing_z_light : Array(Array(Array(UInt32))) = Array(Array(Array(UInt32))).new
+    @fixed_light : Array(Array(Array(UInt32))) = Array(Array(Array(UInt32))).new
 
-    @scale_light : Array(Array(Array(UInt32)))
-    @z_light : Array(Array(Array(UInt32)))
+    @scale_light : Array(Array(Array(UInt32))) = Array(Array(Array(UInt32))).new
+    @z_light : Array(Array(Array(UInt32))) = Array(Array(Array(UInt32))).new
 
-    @extra_light : Int32
-    @fixed_colormap : Int32
+    @extra_light : Int32 = 0
+    @fixed_colormap : Int32 = 0
 
     private def init_lighting
       @max_scale_light = 48 * (@screen_width / 320)
@@ -288,7 +288,7 @@ module Doocr::Video
         start = (LIGHT_LEVEL_COUNT - 1 - i) * 2 * COLORMAP_COUNT / LIGHT_LEVEL_COUNT
         arrayj = [] of Array(UInt32)
         MAX_Z_LIGHT.times do |j|
-          scale = Fixed.from_int(320 / 2) / Fixed.new((j + 1) << Z_LIGHT_SHIFT)
+          scale = Fixed.from_i(320 / 2) / Fixed.new((j + 1) << Z_LIGHT_SHIFT)
           scale = Fixed.new(scale.data >> SCALE_LIGHT_SHIFT)
 
           level = start - scale.data / distmap
@@ -340,19 +340,19 @@ module Doocr::Video
     # Rendering history
     #
 
-    @upper_clip : Array(Int16)
-    @lower_clip : Array(Int16)
+    @upper_clip : Array(Int16) = Array(Int16).new
+    @lower_clip : Array(Int16) = Array(Int16).new
 
-    @neg_one_array : Int32
-    @window_height_array : Int32
-    @clip_range_count : Int32
-    @clip_ranges : Array(ClipRange)
+    @neg_one_array : Int32 = 0
+    @window_height_array : Int32 = 0
+    @clip_range_count : Int32 = 0
+    @clip_ranges : Array(ClipRange) = Array(ClipRange).new
 
-    @clip_data_length : Int32
-    @clip_data : Array(Int16)
+    @clip_data_length : Int32 = 0
+    @clip_data : Array(Int16) = Array(Int16).new
 
-    @vis_wall_range_count : Int32
-    @vis_wall_ranges : Array(VisWallRange)
+    @vis_wall_range_count : Int32 = 0
+    @vis_wall_ranges : Array(VisWallRange) = Array(VisWallRange).new
 
     private def init_rendering_history
       @upper_clip = Array(Short).new(@screen_width)
@@ -406,10 +406,10 @@ module Doocr::Video
     # Sprite rendering
     #
 
-    @@min_z : Fixed = Fixed.from_int(4)
+    @@min_z : Fixed = Fixed.from_i(4)
 
-    @vis_sprite_count : Int32
-    @vis_sprites : Array(VisSprite)
+    @vis_sprite_count : Int32 = 0
+    @vis_sprites : Array(VisSprite) = Array(VisSprite).new
 
     private def init_sprite_rendering
       @vis_sprites = Array(VisSprite).new(256)
@@ -426,9 +426,9 @@ module Doocr::Video
     # Weapon rendering
     #
 
-    @weapon_sprite : VisSprite
-    @weapon_scale : Fixed
-    @weapon_inv_scale : Fixed
+    @weapon_sprite : VisSprite | Nil
+    @weapon_scale : Fixed | Nil
+    @weapon_inv_scale : Fixed | Nil
 
     private def init_weapon_rendering
       @weapon_sprite = VisSprite()
@@ -453,7 +453,7 @@ module Doocr::Video
       1, 1, -1, 1, 1, -1, 1,
     ]
 
-    @fuzz_pos : Int32
+    @fuzz_pos : Int32 = 0
 
     private def init_fuzz_effect
       @fuzz_pos = 0
@@ -463,14 +463,14 @@ module Doocr::Video
     # Color translation
     #
 
-    @green_to_gray : Array(UInt8)
-    @green_to_brown : Array(UInt8)
-    @green_to_red : Array(UInt8)
+    @green_to_gray : Array(UInt8) = Array(UInt8).new
+    @green_to_brown : Array(UInt8) = Array(UInt8).new
+    @green_to_red : Array(UInt8) = Array(UInt8).new
 
     private def init_color_translation
-      @green_to_gray = Array(UInt8).new(256)
-      @green_to_brown = Array(UInt8).new(256)
-      @green_to_red = Array(UInt8).new(256)
+      @green_to_gray = Array(UInt8).new(256, 0_u8)
+      @green_to_brown = Array(UInt8).new(256, 0_u8)
+      @green_to_red = Array(UInt8).new(256, 0_u8)
       256.times do |i|
         @green_to_gray << i.to_u8
         @green_to_brown << i.to_u8
@@ -490,15 +490,15 @@ module Doocr::Video
     # Window border
     #
 
-    @border_top_left : Patch
-    @border_top_right : Patch
-    @border_bottom_left : Patch
-    @border_bottom_right : Patch
-    @border_top : Patch
-    @border_bottom : Patch
-    @border_left : Patch
-    @border_right : Patch
-    @back_flat : Flat
+    @border_top_left : Patch | Nil
+    @border_top_right : Patch | Nil
+    @border_bottom_left : Patch | Nil
+    @border_bottom_right : Patch | Nil
+    @border_top : Patch | Nil
+    @border_bottom : Patch | Nil
+    @border_left : Patch | Nil
+    @border_right : Patch | Nil
+    @back_flat : Flat | Nil
 
     private def init_window_border(wad : Wad)
       @border_top_left = Patch.from_wad(wad, "BRDR_TL")
@@ -571,17 +571,17 @@ module Doocr::Video
     # Camera view
     #
 
-    @world : World
+    @world : World | Nil
 
-    @view_x : Fixed
-    @view_y : Fixed
-    @view_z : Fixed
-    @view_angle : Fixed
+    @view_x : Fixed | Nil
+    @view_y : Fixed | Nil
+    @view_z : Fixed | Nil
+    @view_angle : Fixed | Nil
 
-    @view_sin : Fixed
-    @view_cos : Fixed
+    @view_sin : Fixed | Nil
+    @view_cos : Fixed | Nil
 
-    @valid_count : Int32
+    @valid_count : Int32 = 0
 
     def render(player : Player, frame_frac : Fixed)
       @frame_frac = frame_frac
@@ -956,13 +956,13 @@ module Doocr::Video
       if den.data > num.data >> 16
         scale = num / den
 
-        if scale > Fixed.from_int(64)
-          scale = Fixed.from_int(64)
+        if scale > Fixed.from_i(64)
+          scale = Fixed.from_i(64)
         elsif scale.data < 256
           scale = Fixed.new(256)
         end
       else
-        scale = Fixed.from_int(64)
+        scale = Fixed.from_i(64)
       end
 
       return scale
@@ -1011,7 +1011,7 @@ module Doocr::Video
 
       middle_texture_alt : Fixed
       if (line.flags & LineFlags::DontPegBottom).to_i32 != 0
-        v_top = front_sector_floor_height + Fixed.from_int(wall_texture.height)
+        v_top = front_sector_floor_height + Fixed.from_i(wall_texture.height)
         middle_texture_alt = v_top - @view_z
       else
         middle_texture_alt = world_front_z1
@@ -1268,7 +1268,7 @@ module Doocr::Video
         if (line.flags & LineFlags::DontPegTop).to_i32 != 0
           upper_texture_alt = world_front_z1
         else
-          v_top = back_sector_ceiling_height + Fixed.from_int(upper_wall_texture.height)
+          v_top = back_sector_ceiling_height + Fixed.from_i(upper_wall_texture.height)
           upper_texture_alt = v_top - @view_z
         end
         upper_texture_alt += side.row_offset
@@ -1628,7 +1628,7 @@ module Doocr::Video
       mid_texture_alt : Fixed
       if (seg.line_def.flags & LineFlags::DontPegBottom).to_i32 != 0
         mid_texture_alt = draw_seg.front_sector_floor_height > draw_seg.back_sector_floor_height ? draw_seg.front_sector_floor_height : draw_seg.back_sector_floor_height
-        mid_texture_alt = mid_texture_alt + Fixed.from_int(wall_texture.height) - @view_z
+        mid_texture_alt = mid_texture_alt + Fixed.from_i(wall_texture.height) - @view_z
       else
         mid_texture_alt = draw_seg.front_sector_ceiling_height > draw_seg.back_sector_ceiling_height ? draw_seg.front_sector_ceiling_height : draw_seg.back_sector_ceiling_height
         mid_texture_alt = mid_texture_alt - @view_z
@@ -2163,13 +2163,13 @@ module Doocr::Video
       end
 
       # Calculate edges of the shape.
-      tx -= Fixed.from_int(lump.left_offset)
+      tx -= Fixed.from_i(lump.left_offset)
       x1 = (@center_x_frac + (tx * x_scale)).data >> Fixed::FRAC_BITS
 
       # Off the right side?
       return if x1 > @window_width
 
-      tx += Fixed.from_int(lump.width)
+      tx += Fixed.from_i(lump.width)
       x2 = ((@center_x_frac + (tx * x_scale)).data >> Fixed::FRAC_BITS) - 1
 
       # Off the left side?
@@ -2185,7 +2185,7 @@ module Doocr::Video
       vis.global_x = thing_x
       vis.global_y = thing_y
       vis.global_bottom_z = thing_z
-      vis.global_top_z = thing_z + Fixed.from_int(lump.top_offset)
+      vis.global_top_z = thing_z + Fixed.from_i(lump.top_offset)
       vis.texture_alt = vis.global_top_z - @view_z
       vis.x1 = x1 < 0 ? 0 : x1
       vis.x2 = x2 >= @window_width ? @window_width - 1 : x2
@@ -2193,7 +2193,7 @@ module Doocr::Video
       inv_scale = Fixed.one / x_scale
 
       if flip
-        vis.start_frac = Fixed.new(Fixed.from_int(lump.width).data - 1)
+        vis.start_frac = Fixed.new(Fixed.from_i(lump.width).data - 1)
         vis.inv_scale = -inv_scale
       else
         vis.start_frac = Fixed.zero
@@ -2419,14 +2419,14 @@ module Doocr::Video
       flip = sprite_frame.flip[0]
 
       # Calculate edges of the shape.
-      tx = psp.sx - Fixed.from_int(160)
-      tx -= Fixed.from_int(lump.left_offset)
+      tx = psp.sx - Fixed.from_i(160)
+      tx -= Fixed.from_i(lump.left_offset)
       x1 = (@center_x_frac + tx * @weapon_scale).data >> Fixed::FRAC_BITS
 
       # Off the right side?
       return if x1 > @window_height
 
-      tx += Fixed.from_int(lump.width)
+      tx += Fixed.from_i(lump.width)
       x2 = ((@center_x_frac + tx * @weapon_scale).data >> Fixed::FRAC_BITS) - 1
 
       # Off the left side?
@@ -2436,14 +2436,14 @@ module Doocr::Video
       vis = @weapon_sprite
       vis.mobj_flags = 0
       # The code below is based on Crispy Doom's weapon rendering code.
-      vis.texture_alt = Fixed.from_int(100) + Fixed.one / 4 - (psp.sy - Fixed.from_int(lump.top_offset))
+      vis.texture_alt = Fixed.from_i(100) + Fixed.one / 4 - (psp.sy - Fixed.from_i(lump.top_offset))
       vis.x1 = x1 < 0 ? 0 : x1
       vis.x2 = x2 >= @window_width ? @window_width - 1 : x2
       vis.scale = @weapon_scale
 
       if flip
         vis.inv_scale = -@weapon_inv_scale
-        vis.start_frac = Fixed.from_int(lump.width) - Fixed.new(1)
+        vis.start_frac = Fixed.from_i(lump.width) - Fixed.new(1)
       else
         vis.inv_scale = @weapon_inv_scale
         vis.start_frac = Fixed.zero
@@ -2546,8 +2546,8 @@ module Doocr::Video
     end
 
     private class ClipRange
-      getter first : Int32
-      getter last : Int32
+      getter first : Int32 = 0
+      getter last : Int32 = 0
 
       def copy_from(range : ClipRange)
         @first = range.first
@@ -2556,27 +2556,27 @@ module Doocr::Video
     end
 
     private class VisWallRange
-      property seg : Seg
+      property seg : Seg | Nil
 
-      property x1 : Int32
-      property x2 : Int32
+      property x1 : Int32 = 0
+      property x2 : Int32 = 0
 
-      property scale1 : Fixed
-      property scale2 : Fixed
-      property scale_step : Fixed
+      property scale1 : Fixed | Nil
+      property scale2 : Fixed | Nil
+      property scale_step : Fixed | Nil
 
-      property silhouette : Silhouette
-      property upper_sil_height : Fixed
-      property lower_sil_height : Fixed
+      property silhouette : Silhouette = Silhouette.new(0)
+      property upper_sil_height : Fixed | Nil
+      property lower_sil_height : Fixed | Nil
 
-      property upper_clip : Int32
-      property lower_clip : Int32
-      property masked_texture_column : Int32
+      property upper_clip : Int32 = 0
+      property lower_clip : Int32 = 0
+      property masked_texture_column : Int32 = 0
 
-      property front_sector_floor_height : Fixed
-      property front_sector_ceiling_height : Fixed
-      property back_sector_floor_height : Fixed
-      property back_sector_ceiling_height : Fixed
+      property front_sector_floor_height : Fixed | Nil
+      property front_sector_ceiling_height : Fixed | Nil
+      property back_sector_floor_height : Fixed | Nil
+      property back_sector_ceiling_height : Fixed | Nil
     end
 
     @[Flags]
@@ -2587,32 +2587,32 @@ module Doocr::Video
     end
 
     private class VisSprite
-      property x1 : Int32
-      property x2 : Int32
+      property x1 : Int32 = 0
+      property x2 : Int32 = 0
 
       # For line side calculation.
-      property global_x : Fixed
-      property global_y : Fixed
+      property global_x : Fixed | Nil
+      property global_y : Fixed | Nil
 
       # Global bottom / top for silhouette clipping
-      property global_bottom_z : Fixed
-      property global_top_z : Fixed
+      property global_bottom_z : Fixed | Nil
+      property global_top_z : Fixed | Nil
 
       # Horizontal position of x1
-      property start_frac : Fixed
+      property start_frac : Fixed | Nil
 
-      property scale : Fixed
+      property scale : Fixed | Nil
 
       # Negative if flipped.
-      property inv_scale : Fixed
+      property inv_scale : Fixed | Nil
 
-      property texture_alt : Fixed
-      property patch : Patch
+      property texture_alt : Fixed | Nil
+      property patch : Patch | Nil
 
       # For color translation and shadow draw.
-      property colormap : Array(UInt8)
+      property colormap : Array(UInt8) = Array(UInt8).new
 
-      property mobj_flags : MobjFlags
+      property mobj_flags : MobjFlags = MobjFlags.new(0)
     end
   end
 end

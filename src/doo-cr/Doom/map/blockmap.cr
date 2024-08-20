@@ -1,7 +1,7 @@
 module Doocr
   class BlockMap
     class_getter int_block_size : Int32 = 128
-    class_getter block_size : Fixed = Fixed.from_int(@@int_block_size)
+    class_getter block_size : Fixed = Fixed.from_i(@@int_block_size)
     class_getter block_mask : Int32 = @@block_size.data - 1
     class_getter frac_to_block_shift = Fixed::FRACBITS + 7
     class_getter block_to_frac_shift = @@frac_to_block_shift - Fixed::FRACBITS
@@ -37,8 +37,8 @@ module Doocr
         table << IO::ByteFormat::LittleEndian.decode(Int16, data[offset, 2])
       end
 
-      origin_x = Fixed.from_int(table[0])
-      origin_y = Fixed.from_int(table[1])
+      origin_x = Fixed.from_i(table[0])
+      origin_y = Fixed.from_i(table[1])
       width = table[2]
       height = table[3]
 

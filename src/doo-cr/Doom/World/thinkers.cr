@@ -6,7 +6,7 @@ module Doocr
       init_thinkers()
     end
 
-    @cap : Thinker
+    @cap : Thinker | Nil
 
     private def init_thinkers
       @cap = Thinker.new

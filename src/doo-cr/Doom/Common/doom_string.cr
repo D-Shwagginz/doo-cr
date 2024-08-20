@@ -3,8 +3,8 @@ module Doocr
     @@value_table : Hash(String, DoomString) = {} of String => DoomString
     @@name_table : Hash(String, DoomString) = {} of String => DoomString
 
-    @original : String
-    @replaced : String
+    @original : String | Nil
+    @replaced : String | Nil
 
     def initialize(@original : String)
       @replaced = @original

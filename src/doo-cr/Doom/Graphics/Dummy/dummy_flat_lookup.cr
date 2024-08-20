@@ -25,7 +25,7 @@ module Doocr
       return @flats[num]
     end
 
-    def [](name : String)
+    def [](name : String) : Flat
       @name_to_flat[name]
     end
 

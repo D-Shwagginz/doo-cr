@@ -1,11 +1,11 @@
 module Doocr::Raylib
   class RaylibDoom
-    @args : CommandLineArgs
+    @args : CommandLineArgs | Nil
 
-    @config : Config
-    @content : GameContent
+    @config : Config | Nil
+    @content : GameContent | Nil
 
-    @video : RaylibVideo
+    @video : RaylibVideo | Nil
 
     def initialize(@args : CommandLineArgs)
       begin

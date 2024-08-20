@@ -7,6 +7,6 @@ module Doocr::UserInput
 
     abstract def max_mouse_sensitivity : Int32
     abstract def mouse_sensitivity : Int32
-    abstract def mouse_sensitivity=(@mouse_sensitivity : Int32) : Int32
+    abstract def mouse_sensitivity=(@mouse_sensitivity : Int32)
   end
 end

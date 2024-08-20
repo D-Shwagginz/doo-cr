@@ -14,7 +14,7 @@ module Doocr
     class_getter change : UInt8 = 4
 
     # The 3bit weapon mask and shift, convenience.
-    class_getter weapon_mask : UInt8 = 8 + 16 + 32
+    class_getter weapon_mask : UInt8 = 8_u8 + 16_u8 + 32_u8
     class_getter weapon_shift : UInt8 = 3
 
     # Pause the game.

@@ -68,6 +68,6 @@ module Doocr
     @@on_floor_z : Fixed = Fixed.min_value
     @@on_ceiling_z : Fixed = Fixed.max_value
 
-    @world : World
+    @world : World | Nil
   end
 end

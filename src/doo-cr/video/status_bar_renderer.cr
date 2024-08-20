@@ -358,27 +358,27 @@ module Doocr::Video
     end
 
     private class NumberWidget
-      property x : Int32
-      property y : Int32
-      property width : Int32
-      property patches : Array(Patch)
+      property x : Int32 = 0
+      property y : Int32 = 0
+      property width : Int32 = 0
+      property patches : Array(Patch) = Array(Patch).new
 
       def initialize(@x : Int32, @y : Int32, @width : Int32, @patches : Array(Patch))
       end
     end
 
     private class PercentWidget
-      property number_widget : NumberWidget
-      property patch : Patch
+      property number_widget : NumberWidget | Nil
+      property patch : Patch | Nil
 
       def initialize(@number_width : NumberWidget, @patch : Patch)
       end
     end
 
     private class MultIconWidget
-      property x : Int32
-      property y : Int32
-      property patches : Array(Patch)
+      property x : Int32 = 0
+      property y : Int32 = 0
+      property patches : Array(Patch) = Array(Patch).new
 
       def initialize(@x : Int32, @y : Int32, @patches : Array(Patch))
       end
