@@ -22,8 +22,8 @@ module Doocr
     class_getter zero : Fixed = Fixed.new(0)
     class_getter one : Fixed = Fixed.new(FRAC_UNIT)
 
-    class_getter maxvalue : Fixed = Fixed.new(Int32::MAX)
-    class_getter minvalue : Fixed = Fixed.new(Int32::MIN)
+    class_getter max_value : Fixed = Fixed.new(Int32::MAX)
+    class_getter min_value : Fixed = Fixed.new(Int32::MIN)
 
     class_getter epsilon : Fixed = Fixed.new(1)
     class_getter one_plus_epsilon = Fixed.new(FRAC_UNIT + 1)
@@ -102,14 +102,14 @@ module Doocr
       c = (a.data.to_f64 / b.data.to_f64) * FRAC_UNIT
 
       if c >= 2147483648.0 || c < -2147483648.0
-        raise DivisionByZeroError
+        raise DivisionByZeroError.new
       end
 
       return Fixed.new(c.to_i32)
     end
 
     def /(b : Int32) : Fixed
-      return Fixed.new(@data / b)
+      return Fixed.new((@data / b).to_i32)
     end
 
     def <<(b : Int32) : Fixed

@@ -23,7 +23,7 @@ module Doocr::Raylib
       quit_message : String = ""
 
       app = RaylibDoom.new(CommandLineArgs.new(ARGV))
-      app.Run
+      # app.Run
       quit_message = app.quit_message
       app = nil
 

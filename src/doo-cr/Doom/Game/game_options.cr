@@ -16,14 +16,14 @@
 
 module Doocr
   class GameOptions
-    property game_version : GameVersion | Nil
-    property game_mode : GameMode | Nil
-    property mission_pack : MissionPack | Nil
+    property game_version : GameVersion | Nil = nil
+    property game_mode : GameMode | Nil = nil
+    property mission_pack : MissionPack | Nil = nil
     getter players : Array(Player) = Array(Player).new
     property console_player : Int32 = 0
     property episode : Int32 = 0
     property map : Int32 = 0
-    property skill : GameSkill | Nil
+    property skill : GameSkill | Nil = nil
     property demo_playback : Bool = false
     property net_game : Bool = false
     property deathmatch : Int32 = 0
@@ -31,17 +31,17 @@ module Doocr
     property respawn_monsters : Bool = false
     property no_monsters : Bool = false
 
-    getter intermission_info : IntermissionInfo | Nil
+    getter intermission_info : IntermissionInfo | Nil = nil
 
-    getter random : DoomRandom | Nil
+    getter random : DoomRandom | Nil = nil
 
-    property video : IVideo | Nil
+    property video : IVideo | Nil = nil
 
-    property sound : Audio::ISound | Nil
+    property sound : Audio::ISound | Nil = nil
 
-    property music : Audio::IMusic | Nil
+    property music : Audio::IMusic | Nil = nil
 
-    property user_input : UserInput::IUserInput | Nil
+    property user_input : UserInput::IUserInput | Nil = nil
 
     def initialize
       @game_version = GameVersion::Version109
@@ -71,10 +71,10 @@ module Doocr
 
       @random = DoomRandom.new
 
-      @video = NullVideo.get_instance
-      @sound = NullSound.get_instance
-      @music = NullMusic.get_instance
-      @user_input = NullUserInput.get_instance
+      @video = Video::NullVideo.get_instance
+      @sound = Audio::NullSound.get_instance
+      @music = Audio::NullMusic.get_instance
+      @user_input = UserInput::NullUserInput.get_instance
     end
 
     def initialize(args : CommandLineArgs, content : GameContent)

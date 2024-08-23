@@ -36,11 +36,11 @@ module Doocr
       return Reject.new(wad.read_lump(lump), sectors.size)
     end
 
-    def check(sector1 : Sector, sector2 : Sector2) : Bool
+    def check(sector1 : Sector, sector2 : Sector) : Bool
       s1 = sector1.number
       s2 = sector2.number
 
-      p = s1 * sector_count + s2
+      p = s1 * @sector_count + s2
       byte_index = p >> 3
       bit_index = 1 << (p & 7)
 

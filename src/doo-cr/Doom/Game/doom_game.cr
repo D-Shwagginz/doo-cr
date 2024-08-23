@@ -16,23 +16,23 @@
 
 module Doocr
   class DoomGame
-    @content : GameContent | Nil
-    getter options : GameOptions | Nil
+    @content : GameContent | Nil = nil
+    getter options : GameOptions | Nil = nil
 
-    @game_action : GameAction | Nil
-    getter game_state : GameState | Nil
+    @game_action : GameAction | Nil = nil
+    getter game_state : GameState | Nil = nil
 
-    @game_tic : Int32 = 0
+    getter game_tic : Int32 = 0
 
-    getter world : World | Nil
-    getter intermission : Intermission | Nil
-    getter finale : Finale | Nil
+    getter world : World | Nil = nil
+    getter intermission : Intermission | Nil = nil
+    getter finale : Finale | Nil = nil
 
     getter paused : Bool = false
 
     @load_game_slot_number : Int32 = 0
     @save_game_slot_number : Int32 = 0
-    @save_game_description : String | Nil
+    @save_game_description : String | Nil = nil
 
     def initialize(@content : GameContent, @options : GameOptions)
       @game_action = GameAction::Nothing
@@ -53,9 +53,9 @@ module Doocr
     # Start a new game.
     # Can be called by the startup code or the menu task.
     def defered_init_new(skill : GameSkill, episode : Int32, map : Int32)
-      @options.skill = skill
-      @options.episode = episode
-      @options.map = map
+      @options.as(GameOptions).skill = skill
+      @options.as(GameOptions).episode = episode
+      @options.as(GameOptions).map = map
       @game_action = GameAction::NewGame
     end
 
@@ -120,8 +120,8 @@ module Doocr
 
           # Check for turbo cheats.
           if (cmd.forward_move > GameConst.turbo_threshold &&
-             (@world.level_time & 31) == 0 &&
-             ((@world.level_time >> 5) & 3) == i)
+             (@world.as(World).level_time & 31) == 0 &&
+             ((@world.as(World).level_time >> 5) & 3) == i)
             player = players[@options.console_player]
             player.send_message(players[i].name + " is turbo!")
           end
@@ -148,8 +148,8 @@ module Doocr
       result = UpdateResult::None
       case @game_state
       when GameState::Level
-        if !@paused || @world.first_tic_is_not_yet_done
-          result = @world.update
+        if !@paused || @world.as(World).first_tic_is_not_yet_done
+          result = @world.as(World).update
           if result == UpdateResult::Completed
             @game_action = GameAction::Completed
           end
@@ -160,7 +160,7 @@ module Doocr
         if result == UpdateResult::Completed
           @game_action = GameAction::WorldDone
 
-          if @world.secret_exit
+          if @world.as(World).secret_exit
             players[@options.console_player].did_secret = true
           end
 
@@ -171,7 +171,7 @@ module Doocr
               result = UpdateResult::NeedWipe
               break
             when 15, 31
-              if @world.secret_exit
+              if @world.as(World).secret_exit
                 do_finale
                 result = UpdateResult::NeedWipe
               end
@@ -290,7 +290,7 @@ module Doocr
 
       # IntermissionInfo.Next is 0 biased, unlike GameOptions.Map.
       if @options.game_mode == GameMode::Commercial
-        if @world.secret_exit
+        if @world.as(World).secret_exit
           case @options.map
           when 15
             im_info.next_level = 30
@@ -309,7 +309,7 @@ module Doocr
           end
         end
       else
-        if @world.sector_exit
+        if @world.as(World).sector_exit
           # Go to secret level.
           im_info.next_level = 8
         elsif @options.map == 9
@@ -334,9 +334,9 @@ module Doocr
         end
       end
 
-      im_info.max_kill_count = @world.total_kills
-      im_info.max_item_count = @world.total_items
-      im_info.max_secret_count = @world.total_secrets
+      im_info.max_kill_count = @world.as(World).total_kills
+      im_info.max_item_count = @world.as(World).total_items
+      im_info.max_secret_count = @world.as(World).total_secrets
       im_info.total_frags = 0
       if @options.game_mode == GameMode::Commercial
         im_info.par_time = 35 * DoomInfo::ParTimes.doom2[@options.map - 1]
@@ -350,7 +350,7 @@ module Doocr
         im_info.players[i].kill_count = players[i].kill_count
         im_info.players[i].item_count = players[i].item_count
         im_info.players[i].secret_count = players[i].secret_count
-        im_info.players[i].time = @world.level_time
+        im_info.players[i].time = @world.as(World).level_time
         im_info.players[i].frags = players[i].frags[..Player::MAX_PLAYER_COUNT]
       end
 
@@ -406,7 +406,7 @@ module Doocr
 
     def do_event(e : DoomEvent) : Bool
       if @game_state == GameState::Level
-        return @world.do_event(e)
+        return @world.as(World).do_event(e)
       elsif @game_state == GameState::Finale
         return @finale.do_event(e)
       end
@@ -424,7 +424,7 @@ module Doocr
         # First dissasociate the corpse.
         @options.players[player_number].mobj_player = nil
 
-        ta = @world.thing_allocation
+        ta = @world.as(World).thing_allocation
 
         # Spawn at random spot if in death match.
         if @options.deathmatch != 0
@@ -443,7 +443,7 @@ module Doocr
             # Fake as other player
             ta.player_starts[i].type = player_number + 1
 
-            @world.thing_allocation.spawn_player(ta.player_starts[i])
+            @world.as(World).thing_allocation.spawn_player(ta.player_starts[i])
 
             # Restore.
             ta.player_starts[i].type = i + 1
@@ -454,7 +454,7 @@ module Doocr
 
         # He's going to be inside something.
         # Too bad.
-        @world.thing_allocation.spawn_player(ta.player_starts[player_number])
+        @world.as(World).thing_allocation.spawn_player(ta.player_starts[player_number])
       end
     end
 

@@ -153,7 +153,7 @@ module Doocr
 
     private def process_thing_block(data : Array())
       thing_number = data[0].split(' ')[1].to_i32 - 1
-      info = DoomInfo.mobjinfos[thing_number]
+      info = DoomInfo.mobj_infos[thing_number]
       dic = get_key_value_pairs(data)
 
       info.doomednum = get_int(dic, "ID #", info.doomednum)

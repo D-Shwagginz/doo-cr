@@ -16,18 +16,18 @@
 
 module Doocr
   class PathTraversal
-    @world : World | Nil
+    @world : World | Nil = nil
 
     @intercepts : Array(Intercept) = [] of Intercept
     @intercept_count : Int32 = 0
 
     @early_out : Bool = false
 
-    @target : DivLine | Nil
-    getter trace : DivLine | Nil
+    @target : DivLine | Nil = nil
+    getter trace : DivLine | Nil = nil
 
-    @line_intercept_func : Proc(LineDef, Bool) | Nil
-    @thing_intercept_func : Proc(Mobj, Bool) | Nil
+    @line_intercept_func : Proc(LineDef, Bool) | Nil = nil
+    @thing_intercept_func : Proc(Mobj, Bool) | Nil = nil
 
     def initialize(@world)
       @intercepts = Array(Intercept).new(256)
@@ -51,10 +51,10 @@ module Doocr
       s2 : Int32 = 0
 
       # Avoid precision problems with two routines.
-      if (@trace.dx > Fixed.from_int(16) ||
-         @trace.dy > Fixed.from_int(16) ||
-         @trace.dx < -Fixed.from_int(16) ||
-         @trace.dy < -Fixed.from_int(16))
+      if (@trace.dx > Fixed.from_i(16) ||
+         @trace.dy > Fixed.from_i(16) ||
+         @trace.dx < -Fixed.from_i(16) ||
+         @trace.dy < -Fixed.from_i(16))
         s1 = Geometry.point_on_div_line_side(line.vertex1.x, line.vertex1.y, @trace)
         s2 = Geometry.point_on_div_line_side(line.vertex2.x, line.vertex2.y, @trace)
       else
@@ -177,12 +177,12 @@ module Doocr
           return true
         end
 
-        if !func(intercept)
+        if !func.call(intercept.as(Intercept))
           # Don't bother going farther.
           return false
         end
 
-        intercept.frac = Fixed.max_value
+        intercept.as(Intercept).frac = Fixed.max_value
       end
 
       # Everything was traversed.
@@ -194,9 +194,9 @@ module Doocr
     def path_traverse(x1 : Fixed, y1 : Fixed, x2 : Fixed, y2 : Fixed, flags : PathTraverseFlags, trav : Proc(Intercept, Bool)) : Bool
       @early_out = (flags & PathTraverseFlags::EarlyOut) != 0
 
-      valid_count = @world.get_new_valid_count
+      valid_count = @world.as(World).get_new_valid_count
 
-      bm = @world.map.block_map
+      bm = @world.as(World).map.as(Map).blockmap
 
       @intercept_count = 0
 
@@ -210,10 +210,10 @@ module Doocr
         y1 += Fixed.one
       end
 
-      @trace.x = x1
-      @trace.y = y1
-      @trace.dx = x2 - x1
-      @trace.dy = y2 - y1
+      @trace.as(DivLine).x = x1
+      @trace.as(DivLine).y = y1
+      @trace.as(DivLine).dx = x2 - x1
+      @trace.as(DivLine).dy = y2 - y1
 
       x1 -= bm.origin_x
       y1 -= bm.origin_y
@@ -246,7 +246,7 @@ module Doocr
       else
         block_step_x = 0
         partial = Fixed.one
-        step_y = Fixed.from_int(256)
+        step_y = Fixed.from_i(256)
       end
 
       intercept_y = Fixed.new(y1.data >> BlockMap.block_to_frac_shift) + (partial * step_y)
@@ -262,7 +262,7 @@ module Doocr
       else
         block_step_y = 0
         partial = Fixed.one
-        step_x = Fixed.from_int(256)
+        step_x = Fixed.from_i(256)
       end
 
       intercept_x = Fixed.new(x1.data >> BlockMap.block_to_frac_shift) + (partial * step_x)
@@ -274,14 +274,14 @@ module Doocr
 
       64.times do |count|
         if (flags & PathTraverseFlags::AddLines) != 0
-          if !bm.iterate_lines(bx, by, @line_intercept_func, valid_count)
+          if !bm.iterate_lines(bx, by, @line_intercept_func.as(Proc(LineDef, Bool)), valid_count)
             # Early out.
             return false
           end
         end
 
         if (flags & PathTraverseFlags::AddThings) != 0
-          if !bm.iterate_things(bx, by, @thing_intercept_func)
+          if !bm.iterate_things(bx, by, @thing_intercept_func.as(Proc(Mobj, Bool)))
             # Early out.
             return false
           end
@@ -289,10 +289,10 @@ module Doocr
 
         break if bx == block_x2 && by == block_y2
 
-        if intercept_y.to_int_floor == by
+        if intercept_y.to_i_floor == by
           intercept_y += step_y
           bx += block_step_x
-        elsif intercept_x.to_int_floor == bx
+        elsif intercept_x.to_i_floor == bx
           intercept_x += step_x
           by += block_step_y
         end

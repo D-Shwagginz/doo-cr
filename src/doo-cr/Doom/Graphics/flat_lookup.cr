@@ -25,7 +25,7 @@ module Doocr
     @name_to_number : Hash(String, Int32) = {} of String => Int32
 
     getter sky_flat_number : Int32 = 0
-    getter sky_flat : Flat | Nil
+    getter sky_flat : Flat | Nil = nil
 
     def each(&)
       @flats.each do |t|

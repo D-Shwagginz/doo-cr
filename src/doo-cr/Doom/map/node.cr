@@ -118,11 +118,11 @@ module Doocr
       return nodes
     end
 
-    def is_subsector(node : Int32) : Bool
+    def self.is_subsector(node : Int32) : Bool
       return (node & 0xFFFF8000) != 0
     end
 
-    def get_subsector(node : Int32) : Int32
+    def self.get_subsector(node : Int32) : Int32
       return node ^ 0xFFFF8000
     end
   end

@@ -20,22 +20,22 @@ module Doocr
     property sprite : Sprite
     property frame : Int32
     property tics : Int32
-    property player_action : Proc(World, Player, PlayerSpriteDef, Nil) | Nil
-    property mobj_action : Proc(World, Mobj, Nil) | Nil
+    property player_action : Proc(World, Player, PlayerSpriteDef, Nil) | Nil = nil
+    property mobj_action : Proc(World, Mobj, Nil) | Nil = nil
     property next : MobjState
     property misc1 : Int32
     property misc2 : Int32
 
     def initialize(
-      @number : Int32,
-      @sprite : Sprite,
-      @frame : Int32,
-      @tics : Int32,
-      @player_action : Proc(World, Player, PlayerSpriteDef, Nil) | Nil,
-      @mobj_action : Proc(World, Mobj, Nil) | Nil,
-      @next : MobjState,
-      @misc1 : Int32,
-      @misc2 : Int32
+      @number,
+      @sprite,
+      @frame,
+      @tics,
+      @player_action,
+      @mobj_action,
+      @next,
+      @misc1,
+      @misc2
     )
     end
   end

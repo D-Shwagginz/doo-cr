@@ -23,7 +23,7 @@ module Doocr
     property top_texture : Int32
     property bottom_texture : Int32
     property middle_texture : Int32
-    getter sector : Sector | Nil
+    getter sector : Sector | Nil = nil
 
     def initialize(
       @texture_offset : Fixed,
@@ -31,7 +31,7 @@ module Doocr
       @top_texture : Int32,
       @bottom_texture : Int32,
       @middle_texture : Int32,
-      @sector : Sector | Nil
+      @sector : Sector | Nil = nil
     )
     end
 

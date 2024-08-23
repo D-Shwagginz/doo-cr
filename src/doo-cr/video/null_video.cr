@@ -24,7 +24,7 @@ module Doocr::Video
 
     def self.get_instance
       if @@instance == nil
-        @@instance = NulLVideo.new
+        @@instance = Video::NullVideo.new
       end
 
       return @@instance

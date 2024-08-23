@@ -33,7 +33,7 @@ module Doocr
       @item_count = 0
       @secret_count = 0
       @time = 0
-      @frags = Array.new
+      @frags = Array.new(Player::MAX_PLAYER_COUNT, 0)
     end
   end
 end

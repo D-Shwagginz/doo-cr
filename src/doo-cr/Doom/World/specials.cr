@@ -17,9 +17,9 @@
 module Doocr
   class Specials
     @@max_button_count : Int32 = 32
-    @@buton_time : Int32 = 35
+    @@button_time : Int32 = 35
 
-    @world : World | Nil
+    @world : World | Nil = nil
 
     @level_timer : Bool = false
     @level_time_count : Int32 = 0
@@ -36,13 +36,13 @@ module Doocr
 
       @button_list = Array.new(@@max_button_count, Button.new)
 
-      @texture_translation = Array.new(@world.map.textures.size)
-      @world.map.textures.size.times do |i|
+      @texture_translation = Array.new(@world.as(World).map.textures.size)
+      @world.as(World).map.textures.size.times do |i|
         @texture_translation << i
       end
 
-      @flat_translation = Array.new(@world.map.flats.size)
-      @world.map.flats.size.times do |i|
+      @flat_translation = Array.new(@world.as(World).map.flats.size)
+      @world.as(World).map.flats.size.times do |i|
         @flat_translation << i
       end
     end
@@ -57,9 +57,9 @@ module Doocr
     # After the map has been loaded, scan for specials that spawn thinkers.
     def spawn_specials
       # Init special sectors.
-      lc = @world.lighting_change
-      sa = @world.sector_actiong
-      @world.map.sectors.each do |sector|
+      lc = @world.as(World).lighting_change
+      sa = @world.as(World).sector_actiong
+      @world.as(World).map.sectors.each do |sector|
         next if sector.special == 0
 
         case sector.special.to_i
@@ -86,7 +86,7 @@ module Doocr
           break
         when 9
           # Secret sector.
-          @world.total_secrets += 1
+          @world.as(World).total_secrets += 1
           break
         when 10
           # Door close in 30 seconds.
@@ -111,7 +111,7 @@ module Doocr
       end
 
       scroll_list = [] of LineDef
-      @world.map.lines.each do |line|
+      @world.as(World).map.lines.each do |line|
         case line.special.to_i32
         when 48
           # Texture scroll.
@@ -124,23 +124,23 @@ module Doocr
     end
 
     def change_switch_texture(line : LineDef, use_again : Bool)
-      line.special = 0 if !use_again
+      line.special = LineSpecial.new(0) if !use_again
 
-      front_side = line.front_side
-      top_texture = front_side.top_texture
-      middle_texture = front_side.middle_texture
-      bottom_texture = front_side.bottom_texture
+      front_side = line.front_side.as(SideDef)
+      top_texture = front_side.as(SideDef).top_texture
+      middle_texture = front_side.as(SideDef).middle_texture
+      bottom_texture = front_side.as(SideDef).bottom_texture
 
       sound = Sfx::SWTCHN
 
       # Exit switch?
       sound = Sfx::SWTCHX if line.special.to_i32 == 11
 
-      switch_list = @world.map.textures.switch_list
+      switch_list = @world.as(World).map.as(Map).textures.switch_list
 
       switch_list.size.times do |i|
         if switch_list[i] == top_texture
-          @world.start_sound(line.sound_origin, sound, SfxType::Misc)
+          @world.as(World).start_sound(line.sound_origin.as(Mobj), sound, SfxType::Misc)
           front_side.top_texture = switch_list[i ^ 1]
 
           if use_again
@@ -149,7 +149,7 @@ module Doocr
 
           return
         elsif switch_list[i] == middle_texture
-          @world.start_sound(line.sound_origin, sound, SfxType::Misc)
+          @world.as(World).start_sound(line.sound_origin.as(Mobj), sound, SfxType::Misc)
           front_side.middle_texture = switch_list[i ^ 1]
 
           if use_again
@@ -158,7 +158,7 @@ module Doocr
 
           return
         elsif switch_list[i] == bottom_texture
-          @world.start_sound(line.sound_origin, sound, SfxType::Misc)
+          @world.as(World).start_sound(line.sound_origin.as(Mobj), sound, SfxType::Misc)
           front_side.bottom_texture = switch_list[i ^ 1]
 
           if use_again
@@ -196,17 +196,17 @@ module Doocr
       if @level_timer
         @level_time_count -= 1
         if @level_time_count == 0
-          @world.exit_level
+          @world.as(World).exit_level
         end
       end
 
       # Animate flats and textures globally.
-      animations = @world.map.animation.animations
+      animations = @world.as(World).map.animation.animations
       animations.size.times do |k|
         anim = animations[k]
         i = anim.base_pic
         while i < anim.base_pic + anim.num_pics
-          pic = anim.base_pic + ((@world.level_time / anim.speed + i) % anim.num_pics)
+          pic = anim.base_pic + ((@world.as(World).level_time / anim.speed + i) % anim.num_pics)
           if anim.is_texture
             @texture_translation[i] = pic
           else
@@ -240,7 +240,7 @@ module Doocr
               break
             end
 
-            @world.start_sound(@button_list[i].sound_origin, Sfx::SWTCHN, SfxType::Misc, 50)
+            @world.as(World).start_sound(@button_list[i].sound_origin, Sfx::SWTCHN, SfxType::Misc, 50)
             @button_list[i].clear
           end
         end

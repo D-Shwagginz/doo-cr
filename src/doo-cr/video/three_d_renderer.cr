@@ -18,12 +18,12 @@ module Doocr::Video
   class ThreeDRenderer
     class_getter max_screen_size : Int32 = 9
 
-    @colormap : ColorMap | Nil
-    @textures : ITextureLookup | Nil
-    @flats : IFlatLookup | Nil
-    @sprites : ISpriteLookup | Nil
+    @colormap : ColorMap | Nil = nil
+    @textures : ITextureLookup | Nil = nil
+    @flats : IFlatLookup | Nil = nil
+    @sprites : ISpriteLookup | Nil = nil
 
-    @screen : DrawScreen | Nil
+    @screen : DrawScreen | Nil = nil
     @screen_width : Int32 = 0
     @screen_height : Int32 = 0
     @screen_data : Bytes = Bytes.new(0)
@@ -31,7 +31,7 @@ module Doocr::Video
 
     @window_size : Int32 = 0
 
-    @frame_frac : Fixed | Nil
+    @frame_frac : Fixed = Fixed.zero
 
     def initialize(content : GameContent, @screen : DrawScreen, @window_size : Int32)
       @colormap = content.colormap
@@ -94,9 +94,9 @@ module Doocr::Video
     @window_height : Int32 = 0
     @center_x : Int32 = 0
     @center_y : Int32 = 0
-    @center_x_frac : Fixed | Nil
-    @center_y_frac : Fixed | Nil
-    @projection : Fixed | Nil
+    @center_x_frac : Fixed = Fixed.zero
+    @center_y_frac : Fixed = Fixed.zero
+    @projection : Fixed = Fixed.zero
 
     private def reset_window(x : Int32, y : Int32, width : Int32, height : Int32)
       @window_x = x
@@ -118,8 +118,8 @@ module Doocr::Video
 
     @angle_to_x : Array(Int32) = Array(Int32).new
     @x_to_angle : Array(Angle) = Array(Angle).new
-    @clip_angle : Angle | Nil
-    @clip_angle2 : Angle | Nil
+    @clip_angle : Angle = Angle.ang0
+    @clip_angle2 : Angle = Angle.ang0
 
     private def init_wall_rendering
       @angle_to_x = Array(Int).new(Trig::FINE_ANGLE_COUNT / 2)
@@ -177,10 +177,10 @@ module Doocr::Video
 
     @plane_y_slope : Array(Fixed) = Array(Fixed).new
     @plane_dist_scale : Array(Fixed) = Array(Fixed).new
-    @plane_base_x_scale : Fixed | Nil
-    @plane_base_y_scale : Fixed | Nil
+    @plane_base_x_scale : Fixed = Fixed.zero
+    @plane_base_y_scale : Fixed = Fixed.zero
 
-    @ceiling_prev_sector : Sector | Nil
+    @ceiling_prev_sector : Sector | Nil = nil
     @ceiling_prev_x : Int32 = 0
     @ceiling_prev_y1 : Int32 = 0
     @ceiling_prev_y2 : Int32 = 0
@@ -190,7 +190,7 @@ module Doocr::Video
     @ceiling_y_step : Array(Fixed) = Array(Fixed).new
     @ceiling_lights : Array(Array(UInt8)) = Array(Array(UInt8)).new
 
-    @floor_prev_sector : Sector | Nil
+    @floor_prev_sector : Sector | Nil = nil
     @floor_prev_x : Int32 = 0
     @floor_prev_y1 : Int32 = 0
     @floor_prev_y2 : Int32 = 0
@@ -247,8 +247,8 @@ module Doocr::Video
     #
 
     ANGLE_TO_SKY_SHIFT = 22
-    @sky_texture_alt : Fixed | Nil
-    @sky_inv_scale : Fixed | Nil
+    @sky_texture_alt : Fixed = Fixed.zero
+    @sky_inv_scale : Fixed = Fixed.zero
 
     private def init_sky_rendering
       @sky_texture_alt = Fixed.from_i(100)
@@ -442,9 +442,9 @@ module Doocr::Video
     # Weapon rendering
     #
 
-    @weapon_sprite : VisSprite | Nil
-    @weapon_scale : Fixed | Nil
-    @weapon_inv_scale : Fixed | Nil
+    @weapon_sprite : VisSprite | Nil = nil
+    @weapon_scale : Fixed = Fixed.zero
+    @weapon_inv_scale : Fixed = Fixed.zero
 
     private def init_weapon_rendering
       @weapon_sprite = VisSprite()
@@ -460,13 +460,13 @@ module Doocr::Video
     #
 
     @@fuzz_table : Array(Int8) = [
-      1, -1, 1, -1, 1, 1, -1,
-      1, 1, -1, 1, 1, 1, -1,
-      1, 1, 1, -1, -1, -1, -1,
-      1, -1, -1, 1, 1, 1, 1, -1,
-      1, -1, 1, 1, -1, -1, 1,
-      1, -1, -1, -1, -1, 1, 1,
-      1, 1, -1, 1, 1, -1, 1,
+      1_i8, -1_i8, 1_i8, -1_i8, 1_i8, 1_i8, -1_i8,
+      1_i8, 1_i8, -1_i8, 1_i8, 1_i8, 1_i8, -1_i8,
+      1_i8, 1_i8, 1_i8, -1_i8, -1_i8, -1_i8, -1_i8,
+      1_i8, -1_i8, -1_i8, 1_i8, 1_i8, 1_i8, 1_i8, -1_i8,
+      1_i8, -1_i8, 1_i8, 1_i8, -1_i8, -1_i8, 1_i8,
+      1_i8, -1_i8, -1_i8, -1_i8, -1_i8, 1_i8, 1_i8,
+      1_i8, 1_i8, -1_i8, 1_i8, 1_i8, -1_i8, 1_i8,
     ]
 
     @fuzz_pos : Int32 = 0
@@ -506,15 +506,15 @@ module Doocr::Video
     # Window border
     #
 
-    @border_top_left : Patch | Nil
-    @border_top_right : Patch | Nil
-    @border_bottom_left : Patch | Nil
-    @border_bottom_right : Patch | Nil
-    @border_top : Patch | Nil
-    @border_bottom : Patch | Nil
-    @border_left : Patch | Nil
-    @border_right : Patch | Nil
-    @back_flat : Flat | Nil
+    @border_top_left : Patch | Nil = nil
+    @border_top_right : Patch | Nil = nil
+    @border_bottom_left : Patch | Nil = nil
+    @border_bottom_right : Patch | Nil = nil
+    @border_top : Patch | Nil = nil
+    @border_bottom : Patch | Nil = nil
+    @border_left : Patch | Nil = nil
+    @border_right : Patch | Nil = nil
+    @back_flat : Flat | Nil = nil
 
     private def init_window_border(wad : Wad)
       @border_top_left = Patch.from_wad(wad, "BRDR_TL")
@@ -572,11 +572,11 @@ module Doocr::Video
       x_frac = inv_scale - Fixed.epsilon
 
       width.times do |i|
-        src = ((src_x + x_frac.to_int_floor) & 63) << 6
+        src = ((src_x + x_frac.to_i_floor) & 63) << 6
         dst = @screen_height * (x + i) + y
         y_frac = inv_scale - Fixed.epsilon
         height.times do |j|
-          @screen_data[dst + j] = data[src | ((src_y + y_frac.to_int_floor) & 63)]
+          @screen_data[dst + j] = data[src | ((src_y + y_frac.to_i_floor) & 63)]
           y_frac += inv_scale
         end
         x_frac += inv_scale
@@ -587,15 +587,15 @@ module Doocr::Video
     # Camera view
     #
 
-    @world : World | Nil
+    @world : World | Nil = nil
 
-    @view_x : Fixed | Nil
-    @view_y : Fixed | Nil
-    @view_z : Fixed | Nil
-    @view_angle : Fixed | Nil
+    @view_x : Fixed = Fixed.zero
+    @view_y : Fixed = Fixed.zero
+    @view_z : Fixed = Fixed.zero
+    @view_angle : Fixed = Fixed.zero
 
-    @view_sin : Fixed | Nil
-    @view_cos : Fixed | Nil
+    @view_sin : Fixed = Fixed.zero
+    @view_cos : Fixed = Fixed.zero
 
     @valid_count : Int32 = 0
 
@@ -622,7 +622,7 @@ module Doocr::Video
       clear_rendering_history()
       clear_sprite_rendering()
 
-      render_bsp_node(@world.map.nodes.size - 1)
+      render_bsp_node(@world.as(World).map.nodes.size - 1)
       render_sprites()
       render_masked_textures()
       draw_player_sprites(player)
@@ -642,7 +642,7 @@ module Doocr::Video
         return
       end
 
-      bsp = @world.map.nodes[node]
+      bsp = @world.as(World).map.nodes[node]
 
       # Decide which side the view point is on.
       side = Geometry.point_on_side(@view_x, @view_y, bsp)
@@ -657,12 +657,12 @@ module Doocr::Video
     end
 
     private def draw_subsector(subsector : Int32)
-      target = @world.map.subsectors[subsector]
+      target = @world.as(World).map.subsectors[subsector]
 
       add_sprites(target.sector, @valid_count)
 
       target.seg_count.times do |i|
-        draw_seg(@world.map.segs[target.first_seg + i])
+        draw_seg(@world.as(World).map.segs[target.first_seg + i])
       end
     end
 
@@ -1022,7 +1022,7 @@ module Doocr::Video
       # Determine how the wall textures are vertically aligned.
       #
 
-      wall_texture = @textures[@world.specials.texture_translation[side.middle]]
+      wall_texture = @textures[@world.as(World).specials.texture_translation[side.middle]]
       wall_width_mask = wall_texture.width - 1
 
       middle_texture_alt : Fixed
@@ -1141,8 +1141,8 @@ module Doocr::Video
       # Floor and ceiling.
       #
 
-      ceiling_flat = @flats[@world.specials.flat_translation[front_sector.ceiling_flat]]
-      floor_flat = @flats[@world.specials.flat_translation[front_sector.floor_flat]]
+      ceiling_flat = @flats[@world.as(World).specials.flat_translation[front_sector.ceiling_flat]]
+      floor_flat = @flats[@world.as(World).specials.flat_translation[front_sector.floor_flat]]
 
       #
       # Now the rendering is carried out.
@@ -1166,7 +1166,7 @@ module Doocr::Video
           angle = rw_center_angle + @x_to_angle[x]
           angle = Angle.new(angle.data & 0x7FFFFFFF)
 
-          texture_column = (rw_offset - Trig.tan(angle) * rw_distance).to_int_floor
+          texture_column = (rw_offset - Trig.tan(angle) * rw_distance).to_i_floor
           source = wall_texture.composite.columns[texture_column & wall_width_mask]
 
           if source.size > 0
@@ -1278,7 +1278,7 @@ module Doocr::Video
       upper_wall_width_mask : Int32
       upper_texture_alt : Fixed
       if draw_upper_wall
-        upper_wall_texture = @textures[@world.specials.texture_translation[side.top_texture]]
+        upper_wall_texture = @textures[@world.as(World).specials.texture_translation[side.top_texture]]
         upper_wall_width_mask = upper_wall_texture.width - 1
 
         if (line.flags & LineFlags::DontPegTop).to_i32 != 0
@@ -1294,7 +1294,7 @@ module Doocr::Video
       lower_wall_width_mask : Int32
       lower_texture_alt : Fixed
       if draw_lower_wall
-        lower_wall_texture = @textures[@world.specials.texture_translation[side.bottom_texture]]
+        lower_wall_texture = @textures[@world.as(World).specials.texture_translation[side.bottom_texture]]
         lower_wall_width_mask = lower_wall_texture.width - 1
 
         if (line.flags & LineFlags::DontPegTop).to_i32 != 0
@@ -1480,8 +1480,8 @@ module Doocr::Video
       # Floor and ceiling.
       #
 
-      ceiling_flat = @flats[@world.specials.flat_translation[front_sector.ceiling_flat]]
-      floor_flat = @flats[@world.specials.flat_translation[front_sector.floor_flat]]
+      ceiling_flat = @flats[@world.as(World).specials.flat_translation[front_sector.ceiling_flat]]
+      floor_flat = @flats[@world.as(World).specials.flat_translation[front_sector.floor_flat]]
 
       #
       # Now the rendering is carried out.
@@ -1498,7 +1498,7 @@ module Doocr::Video
         if seg_textured
           angle = rw_center_angle + @x_to_angle[x]
           angle = Angle.new(angle.data & 0x7FFFFFFF)
-          texture_column = (rw_offset - Trig.tan(angle) * rw_distance).to_int_floor
+          texture_column = (rw_offset - Trig.tan(angle) * rw_distance).to_i_floor
 
           light_index = rw_scale.data >> SCALE_LIGHT_SHIFT
           if light_index >= @max_scale_light
@@ -1638,7 +1638,7 @@ module Doocr::Video
 
       wall_lights = @scale_light[Math.clamp(wall_light_level, 0, LIGHT_LEVEL_COUNT - 1)]
 
-      wall_texture = @textures[@world.specials.texture_translation[seg.side_def.middle_texture]]
+      wall_texture = @textures[@world.as(World).specials.texture_translation[seg.side_def.middle_texture]]
       mask = wall_texture.width - 1
 
       mid_texture_alt : Fixed
@@ -2026,8 +2026,8 @@ module Doocr::Video
 
     private def draw_sky_column(x : Int32, y1 : Int32, y2 : Int32)
       angle = (@view_angle + @x_to_angle[x]).data >> ANGLE_TO_SKY_SHIFT
-      mask = @world.map.sky_texture.width - 1
-      source = @world.map.sky_texture.composite.columns[angle & mask]
+      mask = @world.as(World).map.sky_texture.width - 1
+      source = @world.as(World).map.sky_texture.composite.columns[angle & mask]
       draw_column(source[0], @colormap[0], x, y1, y2, @sky_inv_scale, @sky_texture_alt)
     end
 
@@ -2123,9 +2123,9 @@ module Doocr::Video
 
       # Handle all things in sector.
       things = sector.get_enumerator
-      valid_thing = true
-      while things.move_next
+      while true
         project_sprite(things.current, sprite_lights)
+        break if !things.move_next
       end
     end
 
@@ -2356,7 +2356,7 @@ module Doocr::Video
         frac = sprite.start_frac
         x = sprite.x1
         while x <= sprite.x2
-          texture_column = frac.to_int_floor
+          texture_column = frac.to_i_floor
           draw_masked_fuzz_column(
             sprite.patch.columns[texture_column],
             x,
@@ -2385,7 +2385,7 @@ module Doocr::Video
         frac = sprite.start_frac
         x = sprite.x1
         while x <= sprite.x2
-          texture_column = frac.to_int_floor
+          texture_column = frac.to_i_floor
           draw_masked_column_translation(
             sprite.patch.columns[texture_column],
             translation,
@@ -2406,7 +2406,7 @@ module Doocr::Video
         frac = sprite.start_frac
         x = sprite.x1
         while x <= sprite.x2
-          texture_column = frac.to_int_floor
+          texture_column = frac.to_i_floor
           draw_masked_column(
             sprite.patch.columns[texture_column],
             sprite.colormap,
@@ -2572,27 +2572,27 @@ module Doocr::Video
     end
 
     private class VisWallRange
-      property seg : Seg | Nil
+      property seg : Seg | Nil = nil
 
       property x1 : Int32 = 0
       property x2 : Int32 = 0
 
-      property scale1 : Fixed | Nil
-      property scale2 : Fixed | Nil
-      property scale_step : Fixed | Nil
+      property scale1 : Fixed = Fixed.zero
+      property scale2 : Fixed = Fixed.zero
+      property scale_step : Fixed = Fixed.zero
 
       property silhouette : Silhouette = Silhouette.new(0)
-      property upper_sil_height : Fixed | Nil
-      property lower_sil_height : Fixed | Nil
+      property upper_sil_height : Fixed = Fixed.zero
+      property lower_sil_height : Fixed = Fixed.zero
 
       property upper_clip : Int32 = 0
       property lower_clip : Int32 = 0
       property masked_texture_column : Int32 = 0
 
-      property front_sector_floor_height : Fixed | Nil
-      property front_sector_ceiling_height : Fixed | Nil
-      property back_sector_floor_height : Fixed | Nil
-      property back_sector_ceiling_height : Fixed | Nil
+      property front_sector_floor_height : Fixed = Fixed.zero
+      property front_sector_ceiling_height : Fixed = Fixed.zero
+      property back_sector_floor_height : Fixed = Fixed.zero
+      property back_sector_ceiling_height : Fixed = Fixed.zero
     end
 
     @[Flags]
@@ -2607,23 +2607,23 @@ module Doocr::Video
       property x2 : Int32 = 0
 
       # For line side calculation.
-      property global_x : Fixed | Nil
-      property global_y : Fixed | Nil
+      property global_x : Fixed = Fixed.zero
+      property global_y : Fixed = Fixed.zero
 
       # Global bottom / top for silhouette clipping
-      property global_bottom_z : Fixed | Nil
-      property global_top_z : Fixed | Nil
+      property global_bottom_z : Fixed = Fixed.zero
+      property global_top_z : Fixed = Fixed.zero
 
       # Horizontal position of x1
-      property start_frac : Fixed | Nil
+      property start_frac : Fixed = Fixed.zero
 
-      property scale : Fixed | Nil
+      property scale : Fixed = Fixed.zero
 
       # Negative if flipped.
-      property inv_scale : Fixed | Nil
+      property inv_scale : Fixed = Fixed.zero
 
-      property texture_alt : Fixed | Nil
-      property patch : Patch | Nil
+      property texture_alt : Fixed = Fixed.zero
+      property patch : Patch | Nil = nil
 
       # For color translation and shadow draw.
       property colormap : Array(UInt8) = Array(UInt8).new

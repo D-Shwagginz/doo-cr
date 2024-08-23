@@ -16,17 +16,17 @@
 
 module Doocr
   class Intermission
-    getter options : GameOptions | Nil
+    getter options : GameOptions | Nil = nil
 
     # Contains information passed into intermission.
-    getter info : IntermissionInfo | Nil
+    getter info : IntermissionInfo | Nil = nil
     @scores : Array(PlayerScores) = Array(PlayerScores).new
 
     # Used to accelerate or skip a stage.
     @accelerate_stage : Bool = false
 
     # Specifies cureent state.
-    @state : IntermissionState | Nil
+    @state : IntermissionState | Nil = nil
 
     getter kill_count : Array(Int32) = Array(Int32).new
     getter item_count : Array(Int32) = Array(Int32).new
@@ -45,7 +45,7 @@ module Doocr
     getter dm_frag_count : Array(Array(Int32)) = Array(Array(Int32)).new
     getter dm_total_count : Array(Int32) = Array(Int32).new
 
-    getter random : DoomRandom | Nil
+    getter random : DoomRandom | Nil = nil
     getter animations : Array(Animation) = Array(Animation).new
     getter show_you_are_here : Bool = false
 

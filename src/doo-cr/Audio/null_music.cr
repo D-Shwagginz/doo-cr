@@ -20,7 +20,7 @@ module Doocr::Audio
   class NullMusic
     include IMusic
 
-    @@instance : NullMusic | Nil
+    @@instance : NullMusic | Nil = nil
 
     def self.get_instance
       if @@instance == nil

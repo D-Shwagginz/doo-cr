@@ -56,7 +56,7 @@ module Doocr::Video
       end
 
       while i < draw_width
-        draw_column(patch.columns[frac.to_int_floor], draw_x + i, draw_y, scale)
+        draw_column(patch.columns[frac.to_i_floor], draw_x + i, draw_y, scale)
         frac += step
         i += 1
       end
@@ -83,7 +83,7 @@ module Doocr::Video
       end
 
       while i < draw_width
-        col = patch.width - frac.to_int_floor - 1
+        col = patch.width - frac.to_i_floor - 1
         draw_column(patch.columns[col], draw_x + i, draw_y, scale)
         frac += step
         i += 1
@@ -118,7 +118,7 @@ module Doocr::Video
         end
 
         while i < draw_length
-          @data[p] = column.data[source_index + fra.to_int_floor]
+          @data[p] = column.data[source_index + fra.to_i_floor]
           p += 1
           frac += step
           i += 1

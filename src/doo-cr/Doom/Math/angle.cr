@@ -78,7 +78,7 @@ module Doocr
     end
 
     def /(b : UInt32) : Angle
-      return Angle.new(@data / b)
+      return Angle.new((@data / b).to_i32)
     end
 
     def ==(b : Angle) : Bool

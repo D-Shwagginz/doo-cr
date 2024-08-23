@@ -16,7 +16,7 @@
 
 module Doocr
   module DoomInfo
-    class_getter weaponinfos : Array(WeaponInfo) = [
+    class_getter weapon_infos : Array(WeaponInfo) = [
       # fist
       WeaponInfo.new(
         AmmoType::NoAmmo,
@@ -24,7 +24,7 @@ module Doocr
         MobjState::Punchdown,
         MobjState::Punch,
         MobjState::Punch1,
-        MobjState::Null
+        MobjState::Nil
       ),
 
       # pistol
@@ -94,7 +94,7 @@ module Doocr
         MobjState::Sawdown,
         MobjState::Saw,
         MobjState::Saw1,
-        MobjState::Null
+        MobjState::Nil
       ),
 
       # # super shotgun

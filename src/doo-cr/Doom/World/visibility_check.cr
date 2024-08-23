@@ -16,19 +16,19 @@
 
 module Doocr
   class VisibilityCheck
-    @world : World | Nil
+    @world : World | Nil = nil
 
     # Eye z of looker.
-    @sight_z_start : Fixed | Nil
-    @bottom_slope : Fixed | Nil
-    @top_slope : Fixed | Nil
+    @sight_z_start : Fixed = Fixed.zero
+    @bottom_slope : Fixed = Fixed.zero
+    @top_slope : Fixed = Fixed.zero
 
     # From looker to target.
-    @trace : DivLine | Nil
-    @target_x : Fixed | Nil
-    @target_y : Fixed | Nil
+    @trace : DivLine | Nil = nil
+    @target_x : Fixed = Fixed.zero
+    @target_y : Fixed = Fixed.zero
 
-    @occluder : DivLine | Nil
+    @occluder : DivLine | Nil = nil
 
     def initialize(@world)
       @trace = DivLine.new
@@ -51,8 +51,8 @@ module Doocr
 
     # Returns true if strace crosses the given subsector successfully.
     private def cross_subsector(subsector_number : Int32, valid_count : Int32) : Bool
-      map = @world.map
-      subsector = @map.subsectors[subsector_number]
+      map = @world.as(World).map.as(Map)
+      subsector = map.subsectors[subsector_number]
       count = subsector.seg_count
 
       # Check lines.
@@ -65,17 +65,17 @@ module Doocr
 
         line.valid_count = valid_count
 
-        v1 = line.vertex1
-        v2 = line.vertex2
-        s1 = Geometry.div_line_side(v1.x, v1.y, @trace)
-        s2 = Geometry.div_line_side(v2.x, v2.y, @trace)
+        v1 = line.vertex1.as(Vertex)
+        v2 = line.vertex2.as(Vertex)
+        s1 = Geometry.div_line_side(v1.x, v1.y, @trace.as(DivLine))
+        s2 = Geometry.div_line_side(v2.x, v2.y, @trace.as(DivLine))
 
         # Line isn't crossed?
         next if s1 == s2
 
-        @occluder.make_from(line)
-        s1 = Geometry.div_line_side(@trace.x, @trace.y, @occluder)
-        s2 = Geometry.div_line_side(@target_x, @target_y, @occluder)
+        @occluder.as(DivLine).make_from(line)
+        s1 = Geometry.div_line_side(@trace.as(DivLine).x, @trace.as(DivLine).y, @occluder.as(DivLine))
+        s2 = Geometry.div_line_side(@target_x, @target_y, @occluder.as(DivLine))
 
         # Line isn't crossed?
         next if s1 == s2
@@ -89,8 +89,8 @@ module Doocr
         return false if (line.flags & LineFlags::TwoSided) == 0
 
         # Crosses a two sided line.
-        front = seg.front_sector
-        back = seg.back_sector
+        front = seg.front_sector.as(Sector)
+        back = seg.back_sector.as(Sector)
 
         # No wall to block sight with?
         if (front.floor_height == back.floor_height &&
@@ -120,7 +120,7 @@ module Doocr
           return false
         end
 
-        frac = intercept_vector(@trace, @occluder)
+        frac = intercept_vector(@trace.as(DivLine), @occluder.as(DivLine))
 
         if front.floor_height != back.floor_height
           slope = (open_bottom - @sight_z_start) / frac
@@ -152,10 +152,10 @@ module Doocr
         end
       end
 
-      node = @world.map.nodes[node_number]
+      node = @world.as(World).map.as(Map).nodes[node_number]
 
       # Decide which side the start point is on.
-      side = Geometry.div_line_side(@trace.x, @trace.y, node)
+      side = Geometry.div_line_side(@trace.as(DivLine).x, @trace.as(DivLine).y, node)
       if side == 2
         # An "on" should cross both sides.
         side = 0
@@ -176,11 +176,11 @@ module Doocr
 
     # Returns true if a straight line between the looker and target is unobstructed.
     def check_sight(looker : Mobj, target : Mobj) : Bool
-      map = @world.map
+      map = @world.as(World).map.as(Map)
 
       # First check for trivial rejection.
       # Check in REJECT table.
-      if map.reject.check(looker.subsector.sector, target.subsector.sector)
+      if map.reject.check(looker.subsector.as(Subsector).sector, target.subsector.as(Subsector).sector)
         # Can't possibly be connected.
         return false
       end
@@ -192,16 +192,16 @@ module Doocr
       @top_slope = target.z + target.height - @sight_z_start
       @bottom_slope = target.z - @sight_z_start
 
-      @trace.x = looker.x
-      @trace.y = looker.y
-      @trace.dx = target.x - looker.x
-      @trace.dy = target.y - looker.y
+      @trace.as(DivLine).x = looker.x
+      @trace.as(DivLine).y = looker.y
+      @trace.as(DivLine).dx = target.x - looker.x
+      @trace.as(DivLine).dy = target.y - looker.y
 
       @target_x = target.x
       @target_y = target.y
 
       # The head node is the last node output.
-      return cross_bsp_node(map.nodes.length - 1, @world.get_new_valid_count)
+      return cross_bsp_node(map.nodes.size - 1, @world.as(World).get_new_valid_count)
     end
   end
 end

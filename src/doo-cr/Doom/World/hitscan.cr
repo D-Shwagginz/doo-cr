@@ -16,29 +16,29 @@
 
 module Doocr
   class Hitscan
-    @world : World | Nil
+    @world : World | Nil = nil
 
     def initialize(@world)
       @aim_traverse_func = aim_traverse()
       @shoot_traverse_func = shoot_traverse()
     end
 
-    @aim_traverse_func : Proc(Intercept, Bool) | Nil
-    @shoot_traverse_func : Proc(Intercept, Bool) | Nil
+    @aim_traverse_func : Proc(Intercept, Bool) | Nil = nil
+    @shoot_traverse_func : Proc(Intercept, Bool) | Nil = nil
 
     # Who got hit (or nil).
-    getter line_target : Mobj | Nil
+    getter line_target : Mobj | Nil = nil
 
-    @current_shooter : Mobj | Nil
-    @current_shooter_z : Fixed | Nil
+    @current_shooter : Mobj | Nil = nil
+    @current_shooter_z : Fixed = Fixed.zero
 
-    @current_range : Fixed | Nil
-    @current_aim_slope : Fixed | Nil
+    @current_range : Fixed = Fixed.zero
+    @current_aim_slope : Fixed = Fixed.zero
     @current_damage : Int32 = 0
 
     # Slopes to top and bottom of target.
-    getter top_slope : Fixed
-    getter bottom_slope : Fixed
+    getter top_slope : Fixed = Fixed.zero
+    getter bottom_slope : Fixed = Fixed.zero
 
     # Find a thing or wall which is on the aiming line.
     # Sets lineTaget and aimSlope when a target is aimed at.
@@ -51,7 +51,7 @@ module Doocr
           return false
         end
 
-        mc = @world.map_collision
+        mc = @world.as(World).map_collision
 
         # Crosses a two sided line.
         # A two sided line will restrict the possible target ranges.
@@ -125,8 +125,8 @@ module Doocr
 
     # Fire a hitscan bullet along the aiming line.
     private def shoot_traverse(intercept : Intercept) : Bool
-      mi = @world.map_interaction
-      pt = @world.path_traversal
+      mi = @world.as(World).map_interaction
+      pt = @world.as(World).path_traversal
 
       if intercept.line != nil
         line = intercept.line
@@ -138,7 +138,7 @@ module Doocr
         begin
           raise if (line.flags & LineFlags::TwoSided) == 0
 
-          mc = @world.map_collision
+          mc = @world.as(World).map_collision
 
           # Crosses a two sided line.
           mc.line_opening(line)
@@ -170,17 +170,17 @@ module Doocr
         # Hit line.
 
         # Position a bit closer.
-        frac = intercept.frac - Fixed.from_int(4) / @current_range
+        frac = intercept.frac - Fixed.from_i(4) / @current_range
         x = pt.trace.x + pt.trace.dx * frac
         y = pt.trace.y + pt.trace.dy * frac
         z = @current_shooter_z + @current_aim_slope * (frac * @current_range)
 
-        if line.front_sector.ceiling_flat == @world.map.sky_flat_number
+        if line.front_sector.ceiling_flat == @world.as(World).map.sky_flat_number
           # Don't shoot the sky!
           return false if z > line.front_sector.ceiling_height
 
           # It's a sky hack wall.
-          return false if line.back_sector != nil && line.back_sector.ceiling_flat == @world.map.sky_flat_number
+          return false if line.back_sector != nil && line.back_sector.ceiling_flat == @world.as(World).map.sky_flat_number
         end
 
         # Spawn bullet puffs.
@@ -220,7 +220,7 @@ module Doocr
 
       # Hit thing.
       # Position a bit closer.
-      frac = intercept.frac - Fixed.from_int(10) / @current_range
+      frac = intercept.frac - Fixed.from_i(10) / @current_range
 
       x = pt.trace.x + pt.trace.dx * frac
       y = pt.trace.y + pt.trace.dy * frac
@@ -234,7 +234,7 @@ module Doocr
       end
 
       if @current_damage != 0
-        @world.thing_interaction.damage_mobj(thing, @current_shooter, @current_shooter, @current_damage)
+        @world.as(World).thing_interaction.damage_mobj(thing, @current_shooter, @current_shooter, @current_damage)
       end
 
       # Don't go any farther
@@ -244,26 +244,26 @@ module Doocr
     # Find a target on the aiming line.
     # Sets LineTaget when a target is aimed at.
     def aim_line_attack(shooter : Mobj, angle : Angle, range : Fixed) : Fixed
-      shooter = @world.subst_null_mobj(shoter)
+      shooter = @world.as(World).subst_nil_mobj(shooter)
 
       @current_shooter = shooter
-      @current_shooter_z = shooter.z + (shooter.height >> 1) + Fixed.from_int(8)
+      @current_shooter_z = shooter.z + (shooter.height >> 1) + Fixed.from_i(8)
       @current_range = range
 
-      target_x = shooter.x + range.to_int_floor * Trig.cos(angle)
-      target_y = shooter.y + range.to_int_floor * Trig.sin(angle)
+      target_x = shooter.x + Trig.cos(angle) * range.to_i_floor
+      target_y = shooter.y + Trig.sin(angle) * range.to_i_floor
 
       # Can't shoot outside view angles.
-      @top_slope = Fixed.from_int(100) / 160
-      @bottom_slope = Fixed.from_int(-100) / 160
+      @top_slope = Fixed.from_i(100) / 160
+      @bottom_slope = Fixed.from_i(-100) / 160
 
       @line_target = nil
 
-      @world.path_traversal.path_traverse(
+      @world.as(World).path_traversal.as(PathTraversal).path_traverse(
         shooter.x, shooter.y,
         target_x, target_y,
         PathTraverseFlags::AddLines | PathTraverseFlags::AddThings,
-        @aim_traverse_func
+        @aim_traverse_func.as(Proc(Intercept, Bool))
       )
 
       return @current_aim_slope if @line_target != nil
@@ -275,29 +275,29 @@ module Doocr
     # If damage == 0, it is just a test trace that will leave linetarget set.
     def line_attack(shooter : Mobj, angle : Angle, range : Fixed, slope : Fixed, damage : Int32)
       @current_shooter = shooter
-      @current_shooter_z = shooter.z + (shooter.height >> 1) + Fixed.from_int(8)
+      @current_shooter_z = shooter.z + (shooter.height >> 1) + Fixed.from_i(8)
       @current_range = range
       @current_aim_slope = slope
       @current_damage = damage
 
-      target_x = shooter.x + range.to_int_floor * Trig.cos(angle)
-      target_y = shooter.y + range.to_int_floor * Trig.sin(angle)
+      target_x = shooter.x + Trig.cos(angle) * range.to_i_floor
+      target_y = shooter.y + Trig.sin(angle) * range.to_i_floor
 
-      @world.path_traversal.path_traverse(
+      @world.as(World).path_traversal.as(PathTraversal).path_traverse(
         shooter.x, shooter.y,
         target_x, target_y,
         PathTraverseFlags::AddLines | PathTraverseFlags::AddThings,
-        @aim_traverse_func
+        @aim_traverse_func.as(Proc(Intercept, Bool))
       )
     end
 
     # Spawn a bullet puff.
     def spawn_puff(x : Fixed, y : Fixed, z : Fixed)
-      random = @world.random
+      random = @world.as(World).random
 
       z += Fixed.new((random.next - random.next) << 10)
 
-      thing = @world.thing_allocation.spawn_mobj(x, y, z, MobjType::Puff)
+      thing = @world.as(World).thing_allocation.as(ThingAllocation).spawn_mobj(x, y, z, MobjType::Puff)
       thing.mom_z = Fixed.one
       thing.tics -= random.next & 3
 
@@ -311,12 +311,12 @@ module Doocr
 
     # Spawn blood.
     def spawn_blood(x : Fixed, y : Fixed, z : Fixed, damage : Int32)
-      random = @world.random
+      random = @world.as(World).random
 
       z += Fixed.new((random.next - random.next) << 10)
 
-      thing = @world.thing_allocation.spawn_mobj(x, y, z, MobjType::Blood)
-      thing.mom_z = Fixed.from_int(2)
+      thing = @world.as(World).thing_allocation.spawn_mobj(x, y, z, MobjType::Blood)
+      thing.mom_z = Fixed.from_i(2)
       thing.tics -= random.next & 3
 
       thing.tics = 1 if thing.tics < 1

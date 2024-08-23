@@ -19,40 +19,40 @@ module Doocr
     class_getter datasize : Int32 = 26
 
     getter number : Int32 = 0
-    property floor_height : Fixed | Nil
-    property ceiling_height : Fixed | Nil
+    property floor_height : Fixed = Fixed.zero
+    property ceiling_height : Fixed = Fixed.zero
     property floor_flat : Int32 = 0
     property ceiling_flat : Int32 = 0
     property light_level : Int32 = 0
-    property special : SectorSpecial | Nil
+    property special : SectorSpecial | Nil = nil
     property tag : Int32 = 0
 
     # 0 = untraversed, 1, 2 = sndlines - 1.
     property sound_traversed : Int32 = 0
 
     # Thing that made a sound (or nil).
-    property sound_target : Mobj | Nil
+    property sound_target : Mobj | Nil = nil
 
     # Mapblock bounding box for height changes.
     property block_box : Array(Int32) = Array(Int32).new
 
     # Origin for any sounds played by the sector.
-    property sound_origin : Mobj | Nil
+    property sound_origin : Mobj | Nil = nil
 
     # If == validcount, already checked.
     property valid_count : Int32 = 0
 
     # List of mobjs in sector.
-    property thing_list : Mobj | Nil
+    property thing_list : Mobj | Nil = nil
 
     # Thinker for reversable actions.
-    property special_data : Thinker | Nil
+    property special_data : Thinker | Nil = nil
 
     property lines : Array(LineDef) = Array(LineDef).new
 
     # For frame interpolation.
-    @old_floor_height : Fixed | Nil
-    @old_ceiling_height : Fixed | Nil
+    @old_floor_height : Fixed = Fixed.zero
+    @old_ceiling_height : Fixed = Fixed.zero
 
     def initialize(
       @number : Int32,

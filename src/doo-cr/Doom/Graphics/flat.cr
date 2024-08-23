@@ -16,7 +16,7 @@
 
 module Doocr
   class Flat
-    getter name : String | Nil
+    getter name : String | Nil = nil
     getter data : Bytes = Bytes.new(0)
 
     def to_s

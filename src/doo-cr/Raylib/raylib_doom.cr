@@ -16,12 +16,17 @@
 
 module Doocr::Raylib
   class RaylibDoom
-    @args : CommandLineArgs | Nil
+    @args : CommandLineArgs | Nil = nil
 
-    @config : Config | Nil
-    @content : GameContent | Nil
+    @config : Config | Nil = nil
+    @content : GameContent | Nil = nil
 
-    @video : RaylibVideo | Nil
+    @video : RaylibVideo | Nil = nil
+
+    def quit_message : String
+      # return @doom.quit_message
+      return "Exit"
+    end
 
     def initialize(@args : CommandLineArgs)
       begin

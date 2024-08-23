@@ -19,8 +19,8 @@ module Doocr
     class_getter int_block_size : Int32 = 128
     class_getter block_size : Fixed = Fixed.from_i(@@int_block_size)
     class_getter block_mask : Int32 = @@block_size.data - 1
-    class_getter frac_to_block_shift = Fixed::FRACBITS + 7
-    class_getter block_to_frac_shift = @@frac_to_block_shift - Fixed::FRACBITS
+    class_getter frac_to_block_shift : Int32 = Fixed::FRACBITS + 7
+    class_getter block_to_frac_shift : Int32 = @@frac_to_block_shift - Fixed::FRACBITS
 
     getter origin_x : Fixed
     getter origin_y : Fixed
@@ -86,7 +86,7 @@ module Doocr
 
     def get_index(x : Fixed, y : Fixed) : Int32
       block_x = get_block_x(x)
-      block_y = get_block_y
+      block_y = get_block_y(y)
       return get_index(block_x, block_y)
     end
 
@@ -96,21 +96,21 @@ module Doocr
       return true if index == -1
 
       offset = @table[4 + index]?
-      while offset != nil && @table[offset]? != nil && @table[offset] != -1
-        line = @lines[@table[offset]]
+      while offset != nil && @table[offset.as(Int16)]? != nil && @table[offset.as(Int16)] != -1
+        line = @lines[@table[offset.as(Int16)]]
 
         if line.valid_count == valid_count
-          offset += 1
+          offset = offset.as(Int16) + 1
           next
         end
 
         line.valid_count = valid_count
 
-        if !proc(line)
+        if !proc.call(line)
           return false
         end
 
-        offset += 1
+        offset = offset.as(Int16) + 1
       end
 
       return true
@@ -123,11 +123,11 @@ module Doocr
 
       mobj = @thing_lists[index]?
       while mobj != nil
-        if !func(mobj)
+        if !proc.call(mobj.as(Mobj))
           return false
         end
 
-        mobj = mobj.block_next
+        mobj = mobj.as(Mobj).block_next
       end
 
       return true

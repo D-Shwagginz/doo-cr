@@ -14,8 +14,11 @@
 # GNU General Public License for more details.
 #
 
+require "../video/i_video.cr"
+
 module Doocr::Raylib
   class RaylibVideo
-    # @renderer : Renderer
+    # include IVideo
+    @renderer : Video::Renderer | Nil = nil
   end
 end

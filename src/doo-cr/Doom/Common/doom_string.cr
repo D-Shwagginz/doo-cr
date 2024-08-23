@@ -19,8 +19,8 @@ module Doocr
     @@value_table : Hash(String, DoomString) = {} of String => DoomString
     @@name_table : Hash(String, DoomString) = {} of String => DoomString
 
-    @original : String | Nil
-    @replaced : String | Nil
+    @original : String | Nil = nil
+    @replaced : String | Nil = nil
 
     def initialize(@original : String)
       @replaced = @original

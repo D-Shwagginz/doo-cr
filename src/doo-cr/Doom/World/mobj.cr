@@ -81,9 +81,273 @@ module Doocr
   # Any questions?
   #
   class Mobj < Thinker
-    @@on_floor_z : Fixed = Fixed.min_value
-    @@on_ceiling_z : Fixed = Fixed.max_value
+    class_getter on_floor_z : Fixed = Fixed.min_value
+    class_getter on_ceiling_z : Fixed = Fixed.max_value
 
-    @world : World | Nil
+    getter world : World | Nil = nil
+
+    # Info for drawing: position.
+    property x : Fixed = Fixed.zero
+    property y : Fixed = Fixed.zero
+    property z : Fixed = Fixed.zero
+
+    # More list: links in sector (if needed).
+    property sector_next : Mobj | Nil = nil
+    property sector_prev : Mobj | Nil = nil
+
+    # More drawing info: to determine current sprite.
+    property angle : Angle = Angle.ang0      # Orientation
+    property sprite : Sprite = Sprite.new(0) # Used to find patch_t and flip value.
+    property frame : Int32 = 0               # Might be ORed with FF_FULLBRIGHT.
+
+    # Interaction info, by BLOCKMAP.
+    # Links in blocks (if needed).
+    property block_next : Mobj | Nil = nil
+    property block_prev : Mobj | Nil = nil
+
+    property subsector : Subsector | Nil = nil
+
+    # The closest interval over all contacted Sectors.
+    property floor_z : Fixed = Fixed.zero
+    property ceiling_z : Fixed = Fixed.zero
+
+    # For movement checking.
+    property radius : Fixed = Fixed.zero
+    property height : Fixed = Fixed.zero
+
+    # Momentums, used to update position.
+    property mom_x : Fixed = Fixed.zero
+    property mom_y : Fixed = Fixed.zero
+    property mom_z : Fixed = Fixed.zero
+
+    # If == valid_count, already checked.
+    property valid_count : Int32 = 0
+
+    property type : MobjType = MobjType.new(0)
+    property info : MobjInfo | Nil = nil
+
+    property tics : Int32 = 0 # State tic counter.
+    property state : MobjStateDef | Nil = nil
+    property flags : MobjFlags = MobjFlags.new(0)
+    property health : Int32 = 0
+
+    # Movement direction, movement generation (zig-zagging).
+    property move_dir : Direction = Direction.new(0)
+    property move_count : Int32 = 0 # When 0, select a new dir.
+
+    # Thing being chased / attacked (or null),
+    # also the originator for missiles.
+    property target : Mobj | Nil = nil
+
+    # Reaction time: if non 0, don't attack yet.
+    # Used by player to freeze a bit after teleporting.
+    property reaction_time : Int32 = 0
+
+    # If >0, the target will be chased
+    # no matter what (even if shot).
+    property threshold : Int32 = 0
+
+    # Additional info record for player avatars only.
+    # Only valid if type == MT_PLAYER
+    property player : Player | Nil = nil
+
+    # Player number last looked for.
+    property last_look : Int32 = 0
+
+    # For nightmare respawn.
+    property spawn_point : MapThing | Nil = nil
+
+    # Thing being chased/attacked for tracers.
+    property tracer : Mobj | Nil = nil
+
+    # For frame interpolation.
+    @interpolate : Bool = false
+    @old_x : Fixed = Fixed.zero
+    @old_y : Fixed = Fixed.zero
+    @old_z : Fixed = Fixed.zero
+
+    def initialize(@world)
+    end
+
+    def run
+      # Momentum movement.
+      if (@mom_x != Fixed.zero || @mom_y != Fixed.zero ||
+         (@flags & MobjFlags::SkullFly) != 0)
+        @world.as(World).thing_movement.x_y_movement(self)
+
+        # Mobj was removed.
+        return if @thinker_state == ThinkerState::Removed
+      end
+
+      if (@z != @floor_z) || @mom_z != Fixed.zero
+        @world.as(World).thing_movement.z_movement(self)
+
+        # Mobj was removed.
+        return if @thinker_state == ThinkerState::Removed
+      end
+
+      # Cycle through states,
+      # calling action functions at transitions.
+      if @tics != -1
+        @tics -= 1
+
+        # You can cycle through multiple states in a tic.
+        if @tics == 0
+          if !set_state(@state.next)
+            # Freed itself.
+            return
+          end
+        end
+      else
+        # Check for nightmare respawn.
+        return if (@flags & MobjFlags::CountKill) == 0
+
+        options = @world.as(World).options
+        return if !(options.skill == GameSkill::Nightmare || options.respawn_mosters)
+
+        @move_count += 1
+
+        return if @move_count < 12 * 35
+
+        return if (@world.as(World).level_time & 31 != 0)
+
+        return if @world.as(World).random.next > 4
+
+        nightmare_respawn()
+      end
+    end
+
+    def set_state(state : MobjState) : Bool
+      x = true
+      while x || @tics == 0
+        x = false
+        if state == MobjState::Nil
+          @state = DoomInfo.states[MobjState::Nil.to_i32]
+          @world.as(World).thing_allocation.as(ThingAllocation).remove_mobj(self)
+          return false
+        end
+
+        st = DoomInfo.states[state.to_i32]
+        @state = st
+        @tics = get_tics(st)
+        @sprite = st.sprite
+        @frame = st.frame
+
+        # Modified handling.
+        # Call action functions when the state is set.
+        st.mobj_action.as(Proc(World, Mobj, Nil)).call(@world.as(World), self) if st.mobj_action != nil
+
+        state = st.next
+      end
+
+      return true
+    end
+
+    private def get_tics(state : MobjStateDef) : Int32
+      options = @world.as(World).options
+      if options.fast_monsters || options.skill == GameSkill::Nightmare
+        if (MobjState::SargRun1.to_i32 <= @state.as(MobjStateDef).number &&
+           @state.as(MobjStateDef).number <= MobjState::SargPain2.to_i32)
+          return @state.as(MobjStateDef).tics >> 1
+        else
+          return @state.as(MobjStateDef).tics
+        end
+      else
+        return @state.as(MobjStateDef).tics
+      end
+    end
+
+    private def nightmare_respawn
+      sp : MapThing
+      if @spawn_point != nil
+        sp = @spawn_point
+      else
+        sp = MapThing.empty
+      end
+
+      # Something is occupying it's position?
+      if !@world.as(World).thing_movement.check_position(self, sp.x, sp.y)
+        # No respawn.
+        return
+      end
+
+      ta = @world.as(World).thing_allocation.as(ThingAllocation)
+
+      # Spawn a teleport fog at old spot.
+      fog1 = ta.spawn_mobj(
+        @x, @y,
+        @subsector.sector.floor_height,
+        MobjType::Tfog
+      )
+
+      # Initiate teleport sound.
+      @world.as(World).start_sound(fog1, Sfx::TELEPT, SfxType::Misc)
+
+      # Spawn a teleport fog at the new spot.
+      ss = Geometry.point_in_subsector(sp.x, sp.y, @world.as(World).map)
+
+      fog2 = ta.spawn_mobj(
+        sp.x, sp.y,
+        ss.sector.floor_height, MobjType::Tfog
+      )
+      @world.as(World).start_sound(fog2, Sfx::TELEPT, SfxType::Misc)
+
+      # Spawn the new monster.
+      z : Fixed
+      if (@info.flags & MobjFlags::SpawnCeiling) != 0
+        z = @@on_ceiling_z
+      else
+        z = @@on_floor_z
+      end
+
+      # Inherit attributes from deceased one.
+      mobj = ta.spawn_mobj(sp.x, sp.y, z, type)
+      mobj.spawn_point = @spawn_point
+      mobj.angle = sp.angle
+
+      if (sp.flags & ThingFlags::Ambush) != 0
+        mobj.flags |= MobjFlags::Ambush
+      end
+
+      mobj.reaction_time = 18
+
+      # Remove the old monster.
+      @world.as(World).thing_allocation.as(ThingAllocation).remove_mobj(self)
+    end
+
+    def update_frame_interpolation_info
+      @interpolate = true
+      @old_x = @x
+      @old_y = @y
+      @old_z = @z
+    end
+
+    def disable_frame_interpolation_for_one_frame
+      @interpolate = false
+    end
+
+    def get_interpolated_x(frame_frac : Fixed) : Fixed
+      if @interpolate
+        return @old_x + frame_frac * (@x - @old_x)
+      else
+        return @x
+      end
+    end
+
+    def get_interpolated_y(frame_frac : Fixed) : Fixed
+      if @interpolate
+        return @old_y + frame_frac * (@y - @old_y)
+      else
+        return @y
+      end
+    end
+
+    def get_interpolated_z(frame_frac : Fixed) : Fixed
+      if @interpolate
+        return @old_z + frame_frac * (@z - @old_z)
+      else
+        return @z
+      end
+    end
   end
 end

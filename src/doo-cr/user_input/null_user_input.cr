@@ -20,7 +20,7 @@ module Doocr::UserInput
   class NullUserInput
     include IUserInput
 
-    @@instance : NullUserInput | Nil
+    @@instance : NullUserInput | Nil = nil
 
     def self.get_instance
       if @@instance == nil

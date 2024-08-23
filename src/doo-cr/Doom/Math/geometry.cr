@@ -21,9 +21,9 @@ module Doocr
     FRAC_TO_SLOPE_SHIFT = Fixed::FRACBITS - SLOPEBITS
 
     private def self.slope_div(num : Fixed, den : Fixed) : UInt32
-      return SLOPERANGE if den.data.to_u32 < 512
+      return SLOPERANGE.to_u32 if den.data.to_u32 < 512
       ans = (num.data.to_u32 << 3) / (den.data.to_u32 >> 8)
-      return ans <= SLOPERANGE ? ans : SLOPERANGE
+      return ans <= SLOPERANGE ? ans.to_u32 : SLOPERANGE.to_u32
     end
 
     # Calculate the distance between the two points.
@@ -227,7 +227,7 @@ module Doocr
     # returns: 0 (front) or 1 (back).
     def self.point_on_line_side(x : Fixed, y : Fixed, line : LineDef) : Int32
       if line.dx == Fixed.zero
-        if x <= line.vertex1.x
+        if x <= line.vertex1.as(Vertex).x
           return line.dy > Fixed.zero ? 1 : 0
         else
           return line.dy < Fixed.zero ? 1 : 0
@@ -235,15 +235,15 @@ module Doocr
       end
 
       if line.dy == Fixed.zero
-        if y <= line.vertex1.y
+        if y <= line.vertex1.as(Vertex).y
           return line.dx < Fixed.zero ? 1 : 0
         else
           return line.dx > Fixed.zero ? 1 : 0
         end
       end
 
-      dx = x - line.vertex1.x
-      dy = y - line.vertex1.y
+      dx = x - line.vertex1.as(Vertex).x
+      dy = y - line.vertex1.as(Vertex).y
 
       left = Fixed.new(line.dy.data >> Fixed::FRACBITS) * dx
       right = dy * Fixed.new(line.dx.data >> Fixed::FRACBITS)
@@ -431,7 +431,7 @@ module Doocr
       dx = x - node.x
       dy = y - node.y
 
-      left = Fixed.new((node.dy.data >> Fixed::FRACBITS) * (d.data >> Fixed::FRACBITS))
+      left = Fixed.new((node.dy.data >> Fixed::FRACBITS) * (dx.data >> Fixed::FRACBITS))
       right = Fixed.new((dy.data >> Fixed::FRACBITS) * (node.dx.data >> Fixed::FRACBITS))
 
       if right < left

@@ -16,9 +16,9 @@
 
 module Doocr
   class Intercept
-    property frac : Fixed | Nil
-    getter thing : Mobj | Nil
-    getter line : LineDef | Nil
+    property frac : Fixed = Fixed.zero
+    getter thing : Mobj | Nil = nil
+    getter line : LineDef | Nil = nil
 
     def make(@frac : Fixed, @thing : Mobj)
       line = nil

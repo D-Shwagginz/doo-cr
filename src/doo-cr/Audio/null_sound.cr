@@ -20,7 +20,7 @@ module Doocr::Audio
   class NullSound
     include ISound
 
-    @@instance : NullSound | Nil
+    @@instance : NullSound | Nil = nil
 
     def self.get_instance
       if @@instance == nil

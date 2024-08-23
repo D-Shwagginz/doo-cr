@@ -16,10 +16,10 @@
 
 module Doocr
   class PlayerSpriteDef
-    property state : MobjStateDef | Nil
+    property state : MobjStateDef | Nil = nil
     property tics : Int32 = 0
-    property sx : Fixed | Nil
-    property sy : Fixed | Nil
+    property sx : Fixed = Fixed.zero
+    property sy : Fixed = Fixed.zero
 
     def clear
       @state = nil

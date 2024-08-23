@@ -25,7 +25,7 @@ module Doocr
     getter side_def : SideDef
     getter line_def : LineDef
     getter front_sector : Sector
-    getter back_sector : Sector | Nil
+    getter back_sector : Sector | Nil = nil
 
     def initialize(
       @vertex1 : Vertex,

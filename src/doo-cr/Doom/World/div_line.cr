@@ -22,8 +22,8 @@ module Doocr
     property dy : Fixed = Fixed.zero
 
     def make_from(line : LineDef)
-      @x = line.vertex1.x
-      @y = line.vertex1.y
+      @x = line.vertex1.as(Vertex).x
+      @y = line.vertex1.as(Vertex).y
       @dx = line.dx
       @dy = line.dy
     end

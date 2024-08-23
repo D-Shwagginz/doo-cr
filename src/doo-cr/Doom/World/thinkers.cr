@@ -22,7 +22,7 @@ module Doocr
       init_thinkers()
     end
 
-    @cap : Thinker | Nil
+    getter cap : Thinker | Nil = nil
 
     private def init_thinkers
       @cap = Thinker.new
@@ -31,10 +31,10 @@ module Doocr
     end
 
     def add(thinker : Thinker)
-      @cap.prev.next = thinker
-      thinker.next = cap
-      thinker.prev = cap.prev
-      cap.prev = thinker
+      @cap.as(Thinker).prev.as(Thinker).next = thinker
+      thinker.next = @cap
+      thinker.prev = @cap.as(Thinker).prev
+      @cap.as(Thinker).prev = thinker
     end
 
     def remove(thinker : Thinker)
@@ -78,13 +78,13 @@ module Doocr
       getter current : Thinker
 
       def initialize(@thinkers : Thinkers)
-        @current = @thinkers.cap
+        @current = @thinkers.cap.as(Thinker)
       end
 
       def move_next
         while true
-          @current = @current.next
-          if @current == @thinkers.cap
+          @current = @current.next.as(Thinker)
+          if @current == @thinkers.cap.as(Thinker)
             return false
           elsif @current.thinker_state != ThinkerState::Removed
             return true

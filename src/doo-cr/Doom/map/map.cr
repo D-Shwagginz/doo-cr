@@ -112,7 +112,7 @@ module Doocr
 
       @lines.each do |line|
         if line.special.to_i32 != 0
-          so = Mobj.new(@world)
+          so = Mobj.new(@world.as(World))
           so.x = (line.vertex1.x + line.vertex2.x) / 2
           so.y = (line.vertex1.y + line.vertex2.y) / 2
           line.sound_origin = so
@@ -134,7 +134,7 @@ module Doocr
         sector.lines = sector_lines.to_a
 
         # Set the degenmobj_t to the middle of the bounding box.
-        sector.sound_origin = Mobj.new(@world)
+        sector.sound_origin = Mobj.new(@world.as(World))
         sector.sound_origin.x = (bounding_box[Box::RIGHT] + bounding_box[Box::LEFT]) / 2
         sector.sound_origin.y = (bounding_box[Box::TOP] + bounding_box[Box::BOTTOM]) / 2
 
@@ -197,7 +197,7 @@ module Doocr
 
     def self.get_map_bgm(options : GameOptions) : Bgm
       bgm : Bgm
-      if options.gamemode == GameMode::Commercial
+      if options.game_mode == GameMode::Commercial
         bgm = Bgm::RUNNIN + options.map - 1
       else
         if options.episode < 4

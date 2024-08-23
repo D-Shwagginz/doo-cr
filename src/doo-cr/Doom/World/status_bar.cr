@@ -42,7 +42,7 @@ module Doocr
 
     def initialize(@world : World)
       @old_health = -1
-      @old_weapons_owned = @world.console_player.weapons_owned.clone
+      @old_weapons_owned = @world.as(World).console_player.weapons_owned.clone
       @face_count = 0
       @face_index = 0
       @random_number = 0
@@ -55,7 +55,7 @@ module Doocr
 
     def reset
       @old_health = -1
-      @old_weapons_owned = @world.console_player.weapons_owned.clone
+      @old_weapons_owned = @world.as(World).console_player.weapons_owned.clone
       @face_count = 0
       @face_index = 0
       @random_number = 0
@@ -70,7 +70,7 @@ module Doocr
     end
 
     private def update_face
-      player = @world.console_player
+      player = @world.as(World).console_player
 
       if @priority < 10
         # Dead.
@@ -199,7 +199,7 @@ module Doocr
     end
 
     private def calc_pain_offset : Int32
-      player = @world.options.players[@world.options.console_player]
+      player = @world.as(World).options.players[@world.as(World).options.console_player]
 
       health = player.health > 100 ? 100 : player.health
 
@@ -213,7 +213,7 @@ module Doocr
 
     module Face
       class_getter pain_face_count : Int32 = 5
-      class_getter straigt_face_count : Int32 = 3
+      class_getter straight_face_count : Int32 = 3
       class_getter turn_face_count : Int32 = 2
       class_getter special_face_count : Int32 = 3
 
@@ -229,7 +229,7 @@ module Doocr
       class_getter dead_index : Int32 = @@god_index + 1
 
       class_getter evil_grin_duration : Int32 = 2 * GameConst.tic_rate
-      class_getter straight_face_duration : Int32 = GameConst.tic_rate / 2
+      class_getter straight_face_duration : Int32 = (GameConst.tic_rate / 2).to_i32
       class_getter turn_duration : Int32 = 1 * GameConst.tic_rate
       class_getter ouch_duration : Int32 = 1 * GameConst.tic_rate
       class_getter rampage_delay : Int32 = 2 * GameConst.tic_rate

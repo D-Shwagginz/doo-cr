@@ -43,7 +43,7 @@ module Doocr
       end
     end
 
-    @@dummy_textures : Hash(Int, Texture)
+    @@dummy_textures : Hash(Int32, Texture) = {} of Int32 => Texture
 
     def self.get_texture(height : Int32) : Texture
       if @@dummy_textures.has_key?(height)

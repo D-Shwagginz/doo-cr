@@ -148,7 +148,7 @@ module Doocr
 
     class ArgV(T)
       getter present : Bool
-      getter value : T | Nil
+      getter value : T | Nil = nil
 
       def initialize
         @present = false

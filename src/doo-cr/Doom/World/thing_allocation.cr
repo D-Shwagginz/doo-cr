@@ -58,7 +58,7 @@ module Doocr
         # Save spots for respawning in network games.
         @player_starts[player_number] = mt
 
-        spawn_player(mt) if @world.options.deathmatch == 0
+        spawn_player(mt) if @world.as(World).options.deathmatch == 0
 
         return
       end
@@ -66,15 +66,15 @@ module Doocr
       return if mt.type == 11 || mt.type <= 4
 
       # Check for apropriate skill level.
-      return if !@world.options.net_game && (mt.flags.to_i32 & 16) != 0
+      return if !@world.as(World).options.net_game && (mt.flags.to_i32 & 16) != 0
 
       bit : Int32
-      if @world.options.skill == GameSkill::Baby
+      if @world.as(World).options.skill == GameSkill::Baby
         bit = 1
-      elsif @world.options.skill == GameSkill::Nightmare
+      elsif @world.as(World).options.skill == GameSkill::Nightmare
         bit = 4
       else
-        bit = 1 << (@world.options.skill.to_i32 - 1)
+        bit = 1 << (@world.as(World).options.skill.to_i32 - 1)
       end
 
       return if (mt.flags.to_i32 & bit) == 0
@@ -89,13 +89,13 @@ module Doocr
       raise "Unknown type!" if i == DoomInfo.mobj_infos.size
 
       # Don't spawn keycards and players in deathmatch.
-      if (@world.options.deathmatch != 0 &&
+      if (@world.as(World).options.deathmatch != 0 &&
          (DoomInfo.mobj_infos[i].flags & MobjFlags::NotDeathmatch) != 0)
         return
       end
 
       # Don't spawn any monsters if -nomonsters.
-      if (@world.options.no_monsters &&
+      if (@world.as(World).options.no_monsters &&
          (i == MobjType::Skull.to_i32 ||
          (DoomInfo.mobj_infos[i].flags & MobjFlags::CountKill) != 0))
         return
@@ -116,14 +116,14 @@ module Doocr
       mobj.spawn_point = mt
 
       if mobj.tics > 0
-        mobj.tics = 1 + (@world.random.next % mobj.tics)
+        mobj.tics = 1 + (@world.as(World).random.next % mobj.tics)
       end
 
       if (mobj.flags & MobjFlags::CountKill) != 0
-        @world.total_kills += 1
+        @world.as(World).total_kills += 1
       end
       if (mobj.flags & MobjFlags::CountItem) != 0
-        @world.total_items += 1
+        @world.as(World).total_items += 1
       end
 
       mobj.angle = mt.angle
@@ -136,7 +136,7 @@ module Doocr
     # Called when a player is spawned on the level.
     # Most of the player structure stays unchanged between levels.
     def spawn_player(mt : MapThing)
-      players = @world.options.players
+      players = @world.as(World).options.players
       player_number = mt.type - 1
 
       # Not playing?
@@ -153,9 +153,9 @@ module Doocr
       z = Mobj.on_floor_z
       mobj = spawn_mobj(x, y, z, MobjType::Player)
 
-      if my.type - 1 == @world.options.console_player
-        @world.status_bar.reset
-        @world.options.sound.set_listener(mobj)
+      if my.type - 1 == @world.as(World).options.console_player
+        @world.as(World).status_bar.reset
+        @world.as(World).options.sound.set_listener(mobj)
       end
 
       # Set color translations for player sprites.
@@ -179,10 +179,10 @@ module Doocr
       player.view_height = Player.normal_view_height
 
       # Setup gun psprite.
-      @world.player_behavior.setup_player_sprites(player)
+      @world.as(World).player_behavior.setup_player_sprites(player)
 
       # Give all cards in death match mode.
-      if @world.options.deathmatch != 0
+      if @world.as(World).options.deathmatch != 0
         CardType::Count.to_i32.times do |i|
           player.cards[i] = true
         end
@@ -195,7 +195,7 @@ module Doocr
 
     # Spawn a mobj at the given position as the given type.
     def spawn_mobj(x : Fixed, y : Fixed, z : Fixed, type : MobjType) : Mobj
-      mobj = Mobj.new(@world)
+      mobj = Mobj.new(@world.as(World))
 
       info = DoomInfo.mobj_infos[type.to_i32]
 
@@ -208,11 +208,11 @@ module Doocr
       mobj.flags = info.flags
       mobj.health = info.spawn_health
 
-      if @world.options.skill != GameSkill::Nightmare
+      if @world.as(World).options.skill != GameSkill::Nightmare
         mobj.reaction_time = info.reaction_time
       end
 
-      mobj.last_look = @world.random.next % Player::MAX_PLAYER_COUNT
+      mobj.last_look = @world.as(World).random.next % Player::MAX_PLAYER_COUNT
 
       # Do not set the state with P_SetMobjState,
       # because action routines can not be called yet.
@@ -224,34 +224,34 @@ module Doocr
       mobj.frame = st.frame
 
       # Set subsector and/or block links.
-      @world.thing_movement.set_thing_position(mobj)
+      @world.as(World).thing_movement.as(ThingMovement).set_thing_position(mobj)
 
-      mobj.floor_z = mobj.subsector.sector.floor_height
-      mobj.ceiling_z = mobj.subsector.sector.ceiling_height
+      mobj.floor_z = mobj.subsector.as(Subsector).sector.floor_height
+      mobj.ceiling_z = mobj.subsector.as(Subsector).sector.ceiling_height
 
       if z == Mobj.on_floor_z
         mobj.z = mobj.floor_z
       elsif z == Mobj.on_ceiling_z
-        mobj.z = mobj.ceiling_z - mobj.info.height
+        mobj.z = mobj.ceiling_z - mobj.info.as(MobjInfo).height
       else
         mobj.z = z
       end
 
-      @world.thinkers.add(mobj)
+      @world.as(World).thinkers.as(Thinkers).add(mobj)
 
       return mobj
     end
 
     # Remove the mobj from the level.
     def remove_mobj(mobj : Mobj)
-      tm = @world.thing_movement
+      tm = @world.as(World).thing_movement.as(ThingMovement)
 
       if ((mobj.flags & MobjFlags::Special) != 0 &&
          (mobj.flags & MobjFlags::Dropped) == 0 &&
          (mobj.type != MobjType::Inv) &&
          (mobj.type != MobjType::Ins))
-        @item_respawn_que[@item_que_head] = mobj.spawn_point
-        @item_respawn_time[@item_que_head] = world.level_time
+        @item_respawn_que[@item_que_head] = mobj.spawn_point.as(MapThing)
+        @item_respawn_time[@item_que_head] = @world.as(World).level_time
         @item_que_head = (@item_que_head + 1) & (@@item_que_size - 1)
 
         # Lose one off the end?
@@ -264,16 +264,16 @@ module Doocr
       tm.unset_thing_position(mobj)
 
       # Stop any playing sound.
-      @world.stop_sound(mobj)
+      @world.as(World).stop_sound(mobj)
 
       # Free block.
-      @world.thinkers.remove(mobj)
+      @world.as(World).thinkers.as(Thinkers).remove(mobj)
     end
 
     # Get the speed of the given missile type.
     # Some missiles have different speeds according to the game setting.
     private def get_missile_speed(type : MobjType) : Int32
-      if @world.options.fast_monsters || @world.options.skill == GameSkill::Nightmare
+      if @world.as(World).options.fast_monsters || @world.as(World).options.skill == GameSkill::Nightmare
         case type
         when MobjType::Bruisershot, MobjType::Headshot, MobjType::Troopshot
           return 20 * Fixed::FRAC_UNIT
@@ -287,7 +287,7 @@ module Doocr
 
     # Moves the missile forward a bit and possibly explodes it right there.
     private def check_missile_spawn(missile : Mobj)
-      missile.tice -= @world.rangom.next & 3
+      missile.tics -= @world.as(World).random.next & 3
       missile.tics = 1 if missile.tics < 1
 
       # Move a little forward so an angle can be computed if it immediately explodes.
@@ -295,8 +295,8 @@ module Doocr
       missile.y += missile.mom_y >> 1
       missile.z += missile.mom_z >> 1
 
-      if !world.thing_movement.try_move(missile, missile.x, missile.y)
-        @world.thing_interaction.explode_missile(missile)
+      if !@world.thing_movement.as(ThingMovement).try_move(missile, missile.x, missile.y)
+        @world.as(World).thing_interaction.as(ThingInteraction).explode_missile(missile)
       end
     end
 
@@ -308,8 +308,8 @@ module Doocr
         source.y,
         source.z + Fixed.from_i(32), type)
 
-      if missile.info.see_sound != 0
-        world.start_sound(missile, missile.info.see_sound, SfxType::Misc)
+      if missile.info.as(MobjInfo).see_sound != 0
+        @world.as(World).start_sound(missile, missile.info.as(MobjInfo).see_sound, SfxType::Misc)
       end
 
       # Where it came from?
@@ -322,8 +322,8 @@ module Doocr
 
       # Fuzzy player.
       if (dest.flags & MobjFlags::Shadow) != 0
-        random = world.random
-        angle += Angle.new((@random.next - @random.next) << 20)
+        random = @world.as(World).random
+        angle += Angle.new((random.next - random.next) << 20)
       end
 
       speed = get_missile_speed(missile.type)
@@ -341,7 +341,7 @@ module Doocr
       den = (dist / speed).data
       den = 1 if den < 1
 
-      missile.mom_z = Fixed.new(num / den)
+      missile.mom_z = Fixed.new((num / den).to_i32)
 
       check_missile_spawn(missile)
 
@@ -351,7 +351,7 @@ module Doocr
     # Shoot a missile from the source.
     # For players.
     def spawn_player_missile(source : Mobj, type : MobjType)
-      hs = @world.hitscan
+      hs = @world.as(World).hitscan.as(Hitscan)
 
       # See which target is to be aimed at.
       angle = source.angle
@@ -378,15 +378,15 @@ module Doocr
 
       missile = spawn_mobj(x, y, z, type)
 
-      if missile.info.see_sound != 0
-        @world.start_sound(missile, missile.info.see_sound, SfxType::Misc)
+      if missile.info.as(MobjInfo).see_sound != 0
+        @world.as(World).start_sound(missile, missile.info.as(MobjInfo).see_sound, SfxType::Misc)
       end
 
       missile.target = source
       missile.angle = angle
-      missile.mom_x = Fixed.new(missile.info.speed) * Trig.cos(angle)
-      missile.mom_y = Fixed.new(missile.info.speed) * Trig.sin(angle)
-      missile.mom_z = Fixed.new(missile.info.speed) * slope
+      missile.mom_x = Fixed.new(missile.info.as(MobjInfo).speed) * Trig.cos(angle)
+      missile.mom_y = Fixed.new(missile.info.as(MobjInfo).speed) * Trig.sin(angle)
+      missile.mom_z = Fixed.new(missile.info.as(MobjInfo).speed) * slope
 
       check_missile_spawn(missile)
     end
@@ -407,7 +407,7 @@ module Doocr
     # Returns false if the player cannot be respawned at the given
     # mapthing spot because something is occupying it.
     def check_spot(playernum : Int32, mthing : MapThing) : Bool
-      players = @world.options.players
+      players = @world.as(World).options.players
 
       if players[playernum].mobj == nil
         # First spawn of level, before corpses.
@@ -420,7 +420,7 @@ module Doocr
       x = mthing.x
       y = mthing.y
 
-      return false if !@world.thing_movement.check_position(players[playernum].mobj, x, y)
+      return false if !@world.as(World).thing_movement.check_position(players[playernum].mobj, x, y)
 
       # Flush an old corpse if needed.
       if @body_que_slot >= @@body_que_size
@@ -430,7 +430,7 @@ module Doocr
       @body_que_slot += 1
 
       # Spawn a teleport fog.
-      subsector = Geometry.point_in_subsector(x, y, @world.map)
+      subsector = Geometry.point_in_subsector(x, y, @world.as(World).map)
 
       angle = (Angle.ang45.data >> Trig::ANGLE_TO_FINE_SHIFT) *
               (mthing.angle.to_degree.round_even.to_i32 / 45)
@@ -471,9 +471,9 @@ module Doocr
         MobjType::Tfog
       )
 
-      if !@world.first_tic_is_not_yet_done
+      if !@world.as(World).first_tic_is_not_yet_done
         # Don't start sound on first frame.
-        @world.start_sound(mo, Sfx::TELEPT, SfxType::Misc)
+        @world.as(World).start_sound(mo, Sfx::TELEPT, SfxType::Misc)
       end
 
       return true
@@ -487,7 +487,7 @@ module Doocr
         raise "Only #{selections} + deathmatch spots, 4 required"
       end
 
-      random = @world.random
+      random = @world.as(World).random
       20.times do |j|
         i = @random.next % selections
         if check_spot(player_number, @deathmatch_starts[i])
@@ -521,13 +521,13 @@ module Doocr
     # Respawn items if the game mode is altdeath.
     def respawn_specials
       # Only respawn items in deathmatch.
-      return if @world.options.deathmatch != 2
+      return if @world.as(World).options.deathmatch != 2
 
       # Nothing left to respawn?
       return if @item_que_head == @item_que_tail
 
       # Wait at least 30 seconds.
-      return if @world.level_time - @item_respawn_time[@item_que_tail] < 30 * 35
+      return if @world.as(World).level_time - @item_respawn_time[@item_que_tail] < 30 * 35
 
       mthing = @item_respawn_que[@item_que_tail]
 
@@ -535,9 +535,9 @@ module Doocr
       y = mthing.y
 
       # Spawn a teleport fog at the new spot.
-      ss = Geometry.point_in_subsector(x, y, @world.map)
+      ss = Geometry.point_in_subsector(x, y, @world.as(World).map)
       mo = spawn_mobj(x, y, ss.sector.floor_height, MobjType::Ifog)
-      @world.start_sound(mo, Sfx::ITMBK, SfxType::Misc)
+      @world.as(World).start_sound(mo, Sfx::ITMBK, SfxType::Misc)
 
       i : Int32 = 0
       # Find which type to spawn.

@@ -16,7 +16,7 @@
 
 module Doocr
   module DoomInfo
-    class_getter mobjinfos : Array(MobjInfo) = [
+    class_getter mobj_infos : Array(MobjInfo) = [
       MobjInfo.new(                                                                                                  # MobjType.Player
 -1,                                                                                                                  # doomEdNum
         MobjState::Play,                                                                                             # spawnState

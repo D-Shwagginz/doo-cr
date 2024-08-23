@@ -16,26 +16,26 @@
 
 module Doocr
   class MapCollision
-    @world : World | Nil
+    @world : World | Nil = nil
 
-    getter open_top : Fixed | Nil
-    getter open_bottom : Fixed | Nil
-    getter open_range : Fixed | Nil
-    getter low_floor : Fixed | Nil
+    getter open_top : Fixed = Fixed.zero
+    getter open_bottom : Fixed = Fixed.zero
+    getter open_range : Fixed = Fixed.zero
+    getter low_floor : Fixed = Fixed.zero
 
     def initialize(@world)
     end
 
     # Sets opentop and openbottom to the window through a two sided line.
     def line_opening(line : LineDef)
-      if line.back_side = nil
+      if line.back_side == nil
         # If the line is single sided, nothing can pass through.
         @open_range = Fixed.zero
         return
       end
 
-      front = line.front_sector
-      back = line.back_sector
+      front = line.front_sector.as(Sector)
+      back = line.back_sector.as(Sector)
 
       if front.ceiling_height < back.ceiling_height
         @open_top = front.ceiling_height

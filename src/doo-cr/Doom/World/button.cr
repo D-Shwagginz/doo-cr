@@ -16,11 +16,11 @@
 
 module Doocr
   class Button
-    property line : LineDef | Nil
+    property line : LineDef | Nil = nil
     property position : ButtonPosition = ButtonPosition.new(0)
     property texture : Int32 = 0
     property timer : Int32 = 0
-    property sound_origin : Mobj | Nil
+    property sound_origin : Mobj | Nil = nil
 
     def clear
       @line = nil

@@ -384,8 +384,8 @@ module Doocr::Video
     end
 
     private class PercentWidget
-      property number_widget : NumberWidget | Nil
-      property patch : Patch | Nil
+      property number_widget : NumberWidget | Nil = nil
+      property patch : Patch | Nil = nil
 
       def initialize(@number_width : NumberWidget, @patch : Patch)
       end

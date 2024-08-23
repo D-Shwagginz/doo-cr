@@ -16,7 +16,7 @@
 
 module Doocr
   class ThingMovement
-    @world : World | Nil
+    @world : World | Nil = nil
 
     def initialize(@world : World)
       init_thing_movement()
@@ -28,30 +28,30 @@ module Doocr
     # General thing movement
     #
 
-    @@float_speed : Fixed = Fixed.from_i(4)
+    class_getter float_speed : Fixed = Fixed.from_i(4)
 
     @@max_special_cross_count : Int32 = 64
     @@max_move : Fixed = Fixed.from_i(30)
     @gravity : Fixed = Fixed.one
 
-    @current_thing : Mobj | Nil
+    @current_thing : Mobj | Nil = nil
     @current_flags : MobjFlags = MobjFlags.new(0)
-    @current_x : Fixed | Nil
-    @current_y : Fixed | Nil
+    @current_x : Fixed = Fixed.zero
+    @current_y : Fixed = Fixed.zero
     @current_box : Array(Fixed) = Array(Fixed).new
 
-    getter current_floor_z : Fixed | Nil
-    getter current_ceiling_z : Fixed | Nil
-    getter current_dropoff_z : Fixed | Nil
+    getter current_floor_z : Fixed = Fixed.zero
+    getter current_ceiling_z : Fixed = Fixed.zero
+    getter current_dropoff_z : Fixed = Fixed.zero
     getter float_ok : Bool = false
 
-    @current_ceiling_line : LineDef | Nil
+    @current_ceiling_line : LineDef | Nil = nil
 
-    @crossed_special_count : Int32 = 0
-    @crossed_specials : Array(LineDef) = Array(LineDef).new
+    property crossed_special_count : Int32 = 0
+    getter crossed_specials : Array(LineDef) = Array(LineDef).new
 
-    @check_line_func : Proc(LineDef, Bool) | Nil
-    @check_thing_func : Proc(Mobj, Bool) | Nil
+    @check_line_func : Proc(LineDef, Bool) | Nil = nil
+    @check_thing_func : Proc(Mobj, Bool) | Nil = nil
 
     private def initialize
       @current_box = Array(Fixed).new(4)
@@ -63,7 +63,7 @@ module Doocr
     # Links a thing into both a block and a subsector based on
     # its x and y. Sets thing.Subsector properly.
     def set_thing_position(thing : Mobj)
-      map = @world.map
+      map = @world.as(World).map.as(Map)
 
       subsector = Geometry.point_in_subsector(thing.x, thing.y, map)
 
@@ -77,7 +77,7 @@ module Doocr
         thing.sector_next = sector.thing_list
 
         if sector.thing_list != nil
-          sector.thing_list.sector_prev = thing
+          sector.thing_list.as(Mobj).sector_prev = thing
         end
 
         sector.thing_list = thing
@@ -110,20 +110,20 @@ module Doocr
     # On each position change, BLOCKMAP and other lookups
     # maintaining lists ot things inside these structures
     # need to be updated.
-    def unset_thing_position(things : Mobj)
-      map = @world.map
+    def unset_thing_position(thing : Mobj)
+      map = @world.as(World).map
 
       # Invisible things don't go into the sector links.
       if (thing.flags & MobjFlags::NoSector) == 0
         # Unlink from subsector.
         if thing.sector_next != nil
-          thing.sector_next.sector_prev = thing.sector_prev
+          thing.sector_next.as(Mobj).sector_prev = thing.sector_prev
         end
 
         if thing.sector_prev != nil
-          thing.sector_prev.sector_next = thing.sector_next
+          thing.sector_prev.as(Mobj).sector_next = thing.sector_next
         else
-          thing.subsector.sector.thing_list = thing.sector_next
+          thing.subsector.as(Subsector).sector.thing_list = thing.sector_next
         end
       end
 
@@ -131,16 +131,16 @@ module Doocr
       if (thing.flags & MobjFlags::NoBlockMap) == 0
         # Unlink from block map.
         if thing.block_next != nil
-          thing.block_next.block_prev = thing.block_prev
+          thing.block_next.as(Mobj).block_prev = thing.block_prev
         end
 
         if thing.block_prev != nil
-          thing.block_prev.block_next = thing.block_next
+          thing.block_prev.as(Mobj).block_next = thing.block_next
         else
-          index = map.block_map.get_index(thing.x, thing.y)
+          index = map.as(Map).blockmap.get_index(thing.x, thing.y)
 
           if index != -1
-            map.block_map.thing_lists[index] = thing.block_next
+            map.as(Map).blockmap.thing_lists[index] = thing.block_next.as(Mobj)
           end
         end
       end
@@ -148,7 +148,7 @@ module Doocr
 
     # Adjusts currentFloorZ and currentCeilingZ as lines are contacted.
     private def check_line(line : LineDef) : Bool
-      mc = @world.map_collision
+      mc = @world.as(World).map_collision
 
       if (@current_box.right <= line.bounding_box.left ||
          @current_box.left >= line.bounding_box.right ||
@@ -232,9 +232,9 @@ module Doocr
 
       # Check for skulls slamming into things.
       if (@current_thing.flags & MobjFlags::SkullFly) != 0
-        damage = ((@world.random.next % 8) + 1) * @current_thing.info.damage
+        damage = ((@world.as(World).random.next % 8) + 1) * @current_thing.info.damage
 
-        @world.thing_interaction.damage_mobj(thing, @current_thing, @current_thing, damage)
+        @world.as(World).thing_interaction.damage_mobj(thing, @current_thing, @current_thing, damage)
 
         @current_thing.flags &= ~MobjFlags::SkullFly
         @current_thing.mom_x = Fixed.zero
@@ -282,8 +282,8 @@ module Doocr
         end
 
         # Damage / explode.
-        damage = ((@world.damage.next % 8) + 1) * @current_thing.info.damage
-        @world.thing_interaction.damage_mobj(thing, @current_thing, @current_thing.target, damage)
+        damage = ((@world.as(World).damage.next % 8) + 1) * @current_thing.info.damage
+        @world.as(World).thing_interaction.damage_mobj(thing, @current_thing, @current_thing.target, damage)
 
         # Don't traverse any more.
         return false
@@ -294,7 +294,7 @@ module Doocr
         solid = (thing.flags & MobjFlags::Solid) != 0
         if (@current_flags & MobjFlags::PickUp) != 0
           # Can remove thing.
-          @world.item_pickup.touch_special_thing(thing, @current_thing)
+          @world.as(World).item_pickup.touch_special_thing(thing, @current_thing)
         end
         return !solid
       end
@@ -324,8 +324,8 @@ module Doocr
     #     crossedSpecials[]
     #     crossedSpecialCount
     def check_position(thing : Mobj, x : Fixed, y : Fixed) : Bool
-      map = @world.map
-      bm = map.block_map
+      map = @world.as(World).map.as(Map)
+      bm = map.as(Map).blockmap
 
       @current_thing = thing
       @current_flags = thing.flags
@@ -333,12 +333,12 @@ module Doocr
       @current_x = x
       @current_y = y
 
-      @current_box[Box::TOP] = y + @current_thing.radius
-      @current_box[Box::BOTTOM] = y - @current_thing.radius
-      @current_box[Box::RIGHT] = x + @current_thing.radius
-      @current_box[Box::LEFT] = x - @current_thing.radius
+      @current_box[Box::TOP] = y + @current_thing.as(Mobj).radius
+      @current_box[Box::BOTTOM] = y - @current_thing.as(Mobj).radius
+      @current_box[Box::RIGHT] = x + @current_thing.as(Mobj).radius
+      @current_box[Box::LEFT] = x - @current_thing.as(Mobj).radius
 
-      new_subsector = Geometry.point_in_subsector(x, y, map)
+      new_subsector = Geometry.point_in_subsector(x, y, map.as(Map))
 
       @current_ceiling_line = nil
 
@@ -348,7 +348,7 @@ module Doocr
       @current_dropoff_z = new_subsector.sector.floor_height
       @current_ceiling_z = new_subsector.sector.ceiling_height
 
-      valid_count = @world.get_new_valid_count
+      valid_count = @world.as(World).get_new_valid_count
 
       @crossed_special_count = 0
 
@@ -369,7 +369,7 @@ module Doocr
       while bx <= block_x2
         by = block_y1
         while by <= block_y2
-          if !map.block_map.iterate_things(bx, by, @check_thing_func)
+          if !map.blockmap.iterate_things(bx, by, @check_thing_func.as(Proc(Mobj, Bool)))
             return false
           end
           by += 1
@@ -387,7 +387,7 @@ module Doocr
       while bx <= block_x2
         by = block_y1
         while by <= block_y2
-          if !map.block_map.iterate_things(bx, by, @check_thing_func, valid_count)
+          if !map.blockmap.iterate_lines(bx, by, @check_line_func.as(Proc(LineDef, Bool)), valid_count)
             return false
           end
           by += 1
@@ -423,13 +423,13 @@ module Doocr
         end
 
         if ((thing.flags & MobjFlags::Teleport) == 0 &&
-           @current_floor_z - thing.z < Fixed.from_int(24))
+           @current_floor_z - thing.z < Fixed.from_i(24))
           # Too big a step up.
           return false
         end
 
         if ((thing.flags & (MobjFlags::DropOff | MobjFlags::Float)) == 0 &&
-           @current_floor_z - @current_dropoff_z > Fixed.from_int(24))
+           @current_floor_z - @current_dropoff_z > Fixed.from_i(24))
           # Don't stand over a dropoff.
           return false
         end
@@ -458,7 +458,7 @@ module Doocr
           old_side = Geometry.point_on_line_side(oldx, oldy, line)
           if new_side != old_side
             if line.special != 0
-              @world.map_interaction.cross_special_line(line, old_side, thing)
+              @world.as(World).map_interaction.as(MapInteraction).cross_special_line(line, old_side, thing)
             end
           end
         end
@@ -502,7 +502,9 @@ module Doocr
       move_x = thing.mom_x
       move_y = thing.mom_y
 
-      while move_x != Fixed.zero || move_y != Fixed.zero
+      j = true
+      while j || move_x != Fixed.zero || move_y != Fixed.zero
+        j = false
         p_move_x : Fixed
         p_move_y : Fixed
 
@@ -527,13 +529,13 @@ module Doocr
             # Explode a missile.
             if (@current_ceiling_line != nil &&
                @current_ceiling_line.back_sector != nil &&
-               @current_ceiling_line.back_sector.ceiling_flat == @world.map.sky_flat_number)
+               @current_ceiling_line.back_sector.ceiling_flat == @world.as(World).map.sky_flat_number)
               # Hack to prevent missiles exploding against the sky.
               # Does not handle sky floors.
-              @world.thing_allocation.remove_mobj(thing)
+              @world.as(World).thing_allocation.remove_mobj(thing)
               return
             end
-            @world.thing_interaction.explode_missile(thing)
+            @world.as(World).thing_interaction.explode_missile(thing)
           else
             thing.mom_x = Fixed.zero
             thing.mom_y = Fixed.zero
@@ -625,7 +627,7 @@ module Doocr
         # The lost soul bounce fix below is based on Chocolate Doom's implementation.
         #
 
-        correct_lost_soul_bounce = @world.options.game_version >= GameVersion::Ultimate
+        correct_lost_soul_bounce = @world.as(World).options.game_version >= GameVersion::Ultimate
 
         if correct_lost_soul_bounce && (thing.flags & MobjFlags::SkullFly) != 0
           # The skull slammed into something
@@ -638,7 +640,7 @@ module Doocr
             # Decrease viewheight for a moment after hitting the ground (hard),
             # and utter appropriate sound.
             thing.player.delta_view_height = thing.mom_z >> 3
-            @world.start_sound(thing, Sfx::OOF, SfxType::Voice)
+            @world.as(World).start_sound(thing, Sfx::OOF, SfxType::Voice)
           end
           thing.mom_z = Fixed.zero
         end
@@ -651,7 +653,7 @@ module Doocr
 
         if ((thing.flags & MobjFlags::Missile) != 0 &&
            (thing.flags & MobjFlags::NoClip) == 0)
-          @world.thing_interaction.explode_missile(thing)
+          @world.as(World).thing_interaction.explode_missile(thing)
           return
         end
       elsif (thing.flags & MobjFlags::NoGravity) == 0
@@ -677,7 +679,7 @@ module Doocr
 
         if ((thing.flags & MobjFlags::Missile) != 0 &&
            (thing.flags & MobjFlags::NoClip) == 0)
-          @world.thing_interaction.explode_missile(thing)
+          @world.as(World).thing_interaction.explode_missile(thing)
           return
         end
       end
@@ -687,17 +689,17 @@ module Doocr
     # Player's slide movement
     #
 
-    @best_slide_frac : Fixed | Nil
-    @second_slide_frac : Fixed | Nil
+    @best_slide_frac : Fixed = Fixed.zero
+    @second_slide_frac : Fixed = Fixed.zero
 
-    @best_slide_line : LineDef | Nil
-    @second_slide_line : LineDef | Nil
+    @best_slide_line : LineDef | Nil = nil
+    @second_slide_line : LineDef | Nil = nil
 
-    @slide_thing : Mobj | Nil
-    @slide_move_x : Fixed | Nil
-    @slide_move_y : Fixed | Nil
+    @slide_thing : Mobj | Nil = nil
+    @slide_move_x : Fixed = Fixed.zero
+    @slide_move_y : Fixed = Fixed.zero
 
-    @slide_traverse_func : Proc(Intercept, Bool) | Nil
+    @slide_traverse_func : Proc(Intercept, Bool) | Nil = nil
 
     private def init_slide_movement
       @slide_traverse_func = slide_traverse
@@ -738,7 +740,7 @@ module Doocr
     end
 
     private def slide_traverse(intercept : Intercept) : Bool
-      mc = @world.map_collision
+      mc = @world.as(World).map_collision
 
       if intercept.line == nil
         raise "thing_movement.slide_traverse: Not a line?"
@@ -771,7 +773,7 @@ module Doocr
           x = true
         end
 
-        if mc.open_bottom - @slide_thing.z > Fixed.from_int(24)
+        if mc.open_bottom - @slide_thing.z > Fixed.from_i(24)
           # Too big a step up.
           x = true
         end
@@ -798,7 +800,7 @@ module Doocr
     # Find the first line hit, move flush to it, and slide along it.
     # This is a kludgy mess.
     private def slide_move(thing : Mobj)
-      pt = @world.path_traversal
+      pt = @world.as(World).path_traversal
 
       @slide_thing = thing
 
@@ -907,7 +909,7 @@ module Doocr
     # Teleport movement
     #
 
-    @stomp_thing_func : Proc(Mobj, Bool) | Nil
+    @stomp_thing_func : Proc(Mobj, Bool) | Nil = nil
 
     private def init_teleport_movement
       @stomp_thing_func = stomp_thing()
@@ -928,9 +930,9 @@ module Doocr
       return true if thing == @current_thing
 
       # Monsters don't stomp things except on boss level.
-      return false if @current_thing.player == nil && @world.options.map != 30
+      return false if @current_thing.player == nil && @world.as(World).options.map != 30
 
-      @world.thing_interaction.damage_mobj(thing, @current_thing, @current_thing, 10000)
+      @world.as(World).thing_interaction.damage_mobj(thing, @current_thing, @current_thing, 10000)
 
       return true
     end
@@ -943,12 +945,12 @@ module Doocr
       @current_x = x
       @current_y = y
 
-      @current_box[Box::TOP] = y + @current_thing.radius
-      @current_box[Box::BOTTOM] = y - @current_thing.radius
-      @current_box[Box::RIGHT] = x + @current_thing.radius
-      @current_box[Box::LEFT] = x - @current_thing.radius
+      @current_box[Box::TOP] = y + @current_thing.as(Mobj).radius
+      @current_box[Box::BOTTOM] = y - @current_thing.as(Mobj).radius
+      @current_box[Box::RIGHT] = x + @current_thing.as(Mobj).radius
+      @current_box[Box::LEFT] = x - @current_thing.as(Mobj).radius
 
-      ss = Geometry.point_in_subsector(x, y, @world.map)
+      ss = Geometry.point_in_subsector(x, y, @world.as(World).map.as(Map))
 
       @current_ceiling_line = nil
 
@@ -957,12 +959,12 @@ module Doocr
       @current_floor_z = ss.sector.floor_height
       @current_dropoff_z = ss.sector.floor_height
 
-      valid_count = @world.get_new_valid_count
+      valid_count = @world.as(World).get_new_valid_count
 
       @crossed_special_count = 0
 
       # Stomp on any things contacted.
-      bm = @world.map.block_map
+      bm = @world.as(World).map.as(Map).blockmap
       block_x1 = bm.get_block_x(@current_box[Box::LEFT] - GameConst.max_thing_radius)
       block_x2 = bm.get_block_x(@current_box[Box::RIGHT] + GameConst.max_thing_radius)
       block_y1 = bm.get_block_y(@current_box[Box::BOTTOM] - GameConst.max_thing_radius)
@@ -972,7 +974,7 @@ module Doocr
       while bx <= block_x2
         by = block_y1
         while by <= block_y2
-          return false if !bm.iterate_things(bx, by, @stomp_thing_func)
+          return false if !bm.iterate_things(bx, by, @stomp_thing_func.as(Proc(Mobj, Bool)))
           by += 1
         end
         bx += 1

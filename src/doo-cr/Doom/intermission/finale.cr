@@ -19,22 +19,22 @@ module Doocr
     class_getter text_speed : Int32 = 3
     class_getter text_wait : Int32 = 250
 
-    getter options : GameOptions | Nil
+    getter options : GameOptions | Nil = nil
 
     # Stage of animation:
     # 0 = text, 1 = art screen, 2 = character cast.
     getter stage : Int32 = 0
     getter count : Int32 = 0
 
-    getter flat : String | Nil
-    getter text : String | Nil
+    getter flat : String | Nil = nil
+    getter text : String | Nil = nil
 
     # For bunny scroll.
     getter scrolled : Int32 = 0
     getter show_the_end : Bool = false
     getter the_end_index : Int32 = 0
 
-    @update_result : UpdateResult | Nil
+    @update_result : UpdateResult | Nil = nil
 
     def cast_name : String
       @@castorder[@cast_number].name
@@ -240,7 +240,7 @@ module Doocr
     ]
 
     @cast_number : Int32 = 0
-    getter cast_state : MobjStateDef | Nil
+    getter cast_state : MobjStateDef | Nil = nil
     @cast_tics : Int32 = 0
     @cast_frames : Int32 = 0
     @cast_death : Bool = false
@@ -440,7 +440,9 @@ module Doocr
       property name : String
       property type : MobjType
 
-      def initialize(@name : String, @type : MobjType)
+      def initialize(name : String | DoomString, @type : MobjType)
+        name = name.to_s
+        @name = name == nil ? "ERROR" : name.as(String)
       end
     end
   end
