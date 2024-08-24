@@ -9,8 +9,9 @@ targets:
     main: src/doo-cr.cr
 
 dependencies:
-  raylib-cr:
-    github: sol-vin/raylib-cr
+  crsfml:
+    github: oprypin/crsfml
+    version: ~> 2.5.2
   term-reader:
     github: crystal-term/reader
 

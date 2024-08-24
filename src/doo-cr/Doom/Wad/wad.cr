@@ -48,7 +48,7 @@ module Doocr
         puts("OK ( #{s} )")
       rescue e
         puts("Failed")
-        dispose()
+        finalize()
         raise e
       end
     end
@@ -108,7 +108,7 @@ module Doocr
     def read_lump(number : Int) : Bytes
       lumpinfo = @lump_infos[number]
 
-      dara = Bytes.new(lumpinfo.size)
+      data = Bytes.new(lumpinfo.size)
 
       lumpinfo.stream.seek(lumpinfo.position, IO::Seek::Set)
       read = lumpinfo.stream.read(data)
@@ -129,7 +129,7 @@ module Doocr
       return read_lump(lumpnumber)
     end
 
-    def dispose
+    def finalize
       puts("Close WAD files.")
 
       @streams.each do |stream|

@@ -65,9 +65,9 @@ module Doocr
       return gc
     end
 
-    def dispose
+    def finalize
       if @wad != nil
-        @wad.as(Wad).dispose
+        @wad.as(Wad).finalize
         @wad = nil
       end
     end

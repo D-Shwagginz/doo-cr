@@ -1,12 +1,12 @@
 version: 2.0
 shards:
+  crsfml:
+    git: https://github.com/oprypin/crsfml.git
+    version: 2.5.3
+
   ioctl:
     git: https://github.com/crystal-posix/ioctl.cr.git
     version: 1.0.0
-
-  raylib-cr:
-    git: https://github.com/sol-vin/raylib-cr.git
-    version: 5.0+git.commit.79c5e17c72732ee62558eefe787a3a2170d6c17d
 
   term-cursor:
     git: https://github.com/crystal-term/cursor.git

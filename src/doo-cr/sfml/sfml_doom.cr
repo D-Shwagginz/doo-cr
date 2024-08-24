@@ -14,11 +14,29 @@
 # GNU General Public License for more details.
 #
 
-require "../video/i_video.cr"
+module Doocr::SFML
+  class SFMLDoom
+    @args : CommandLineArgs | Nil = nil
 
-module Doocr::Raylib
-  class RaylibVideo
-    # include IVideo
-    @renderer : Video::Renderer | Nil = nil
+    @config : Config | Nil = nil
+    @content : GameContent | Nil = nil
+
+    @window : SF::RenderWindow | Nil = nil
+
+    @video : SFMLVideo | Nil = nil
+
+    @sound : SFMLSound | Nil = nil
+    @music : SFMLMusic | Nil = nil
+
+    def quit_message : String
+      # return @doom.quit_message
+      return "Exit"
+    end
+
+    def initialize(@args : CommandLineArgs)
+      begin
+      rescue e
+      end
+    end
   end
 end

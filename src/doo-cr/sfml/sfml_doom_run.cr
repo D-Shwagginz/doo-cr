@@ -14,24 +14,10 @@
 # GNU General Public License for more details.
 #
 
-module Doocr::Raylib
-  class RaylibDoom
-    @args : CommandLineArgs | Nil = nil
-
-    @config : Config | Nil = nil
-    @content : GameContent | Nil = nil
-
-    @video : RaylibVideo | Nil = nil
-
-    def quit_message : String
-      # return @doom.quit_message
-      return "Exit"
-    end
-
-    def initialize(@args : CommandLineArgs)
-      begin
-      rescue e
-      end
-    end
+module Doocr::SFML
+  class SFMLDoom
+    {% if !flag?(:windows) %}
+    {% else %}
+    {% end %}
   end
 end
