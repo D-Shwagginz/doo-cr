@@ -24,7 +24,7 @@ module Doocr
     property floor_flat : Int32 = 0
     property ceiling_flat : Int32 = 0
     property light_level : Int32 = 0
-    property special : SectorSpecial | Nil = nil
+    property special : SectorSpecial = SectorSpecial.new(0)
     property tag : Int32 = 0
 
     # 0 = untraversed, 1, 2 = sndlines - 1.
@@ -80,8 +80,8 @@ module Doocr
       return Sector.new(
         number,
         Fixed.from_i(floor_height),
-        Fixed.from_i(ceiling_height)
-          .flats.get_number(floor_flat_name),
+        Fixed.from_i(ceiling_height),
+        flats.get_number(floor_flat_name),
         flats.get_number(ceiling_flat_name),
         light_level,
         SectorSpecial.new(special),
@@ -91,10 +91,10 @@ module Doocr
 
     def self.from_wad(wad : Wad, lump : Int32, flats : IFlatLookup) : Array(Sector)
       length = wad.get_lump_size(lump)
-      raise if length % @@datasize != 0
+      raise "" if length % @@datasize != 0
 
       data = wad.read_lump(lump)
-      count = length / @@datasize
+      count = (length / @@datasize).to_i32
       sectors = Array(Sector).new(count)
       count.times do |i|
         offset = @@datasize * i
@@ -129,17 +129,17 @@ module Doocr
     struct ThingEnumerator
       @sector : Sector
       @thing : Mobj
-      getter current : Mobj
+      getter current : Mobj | Nil
 
       def initialize(@sector : Sector)
-        @thing = @sector.thing_list
+        @thing = @sector.as(Sector).thing_list.as(Mobj)
         @current = nil
       end
 
       def move_next : Bool
         if @thing != nil
           @current = @thing
-          @thing = @thing.sector_next
+          @thing = @thing.sector_next.as(Mobj)
           return true
         else
           @current = nil
@@ -148,7 +148,7 @@ module Doocr
       end
 
       def reset
-        @thing = @sector.thing_list
+        @thing = @sector.as(Sector).thing_list
         @current = nil
       end
     end

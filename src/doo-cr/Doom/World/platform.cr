@@ -34,71 +34,61 @@ module Doocr
     end
 
     def run
-      sa = @world.as(World).sector_action
+      sa = @world.as(World).sector_action.as(SectorAction)
 
       result : SectorActionResult
 
       case @status
       when PlatformState::Up
-        result = sa.move_plane(@sector, @speed, @high, @crush, 0, 1)
+        result = sa.move_plane(@sector.as(Sector), @speed, @high, @crush, 0, 1)
 
         if (type == PlatformType::RaiseAndChange ||
            type == PlatformType::RaiseToNearestAndChange)
-          if ((@world.as(World).level_time + @sector.number) & 7) == 0
-            @world.as(World).start_sound(@sector.sound_origin, Sfx::STNMOV, SfxType::Misc)
+          if ((@world.as(World).level_time + @sector.as(Sector).number) & 7) == 0
+            @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::STNMOV, SfxType::Misc)
           end
         end
 
         if result == SectorActionResult::Crushed && !@crush
           @count = @wait
           @status = PlatformState::Down
-          @world.as(World).start_sound(@sector.sound_origin, Sfx::PSTART, SfxType::Misc)
+          @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::PSTART, SfxType::Misc)
         else
           if result == SectorActionResult::PastDestination
             @count = @wait
             @status = PlatformState::Waiting
-            @world.as(World).start_sound(@sector.sound_origin, Sfx::PSTOP, SfxType::Misc)
+            @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::PSTOP, SfxType::Misc)
 
             case type
             when PlatformType::BlazeDwus, PlatformType::DownWaitUpStay
               sa.remove_active_platform(self)
-              @sector.disable_frame_interpolation_for_one_frame
-              break
+              @sector.as(Sector).disable_frame_interpolation_for_one_frame
             when PlatformType::RaiseAndChange, PlatformType::RaiseToNearestAndChange
               sa.remove_active_platform(self)
-              @sector.disable_frame_interpolation_for_one_frame
-              break
+              @sector.as(Sector).disable_frame_interpolation_for_one_frame
             else
-              break
             end
           end
         end
-
-        break
       when PlatformState::Down
-        result = sa.move_plane(@sector, @speed, @low, false, 0, -1)
+        result = sa.move_plane(@sector.as(Sector), @speed, @low, false, 0, -1)
 
         if result == SectorActionResult::PastDestination
           @count = @wait
           @status = PlatformState::Waiting
-          @world.as(World).start_sound(@sector.sound_origin, Sfx::PSTOP, SfxType::Misc)
+          @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::PSTOP, SfxType::Misc)
         end
-
-        break
       when PlatformState::Waiting
         @count -= 1
         if @count == 0
-          if @sector.floor_height == @low
+          if @sector.as(Sector).floor_height == @low
             @status = PlatformState::Up
           else
             @status = PlatformState::Down
           end
-          @world.as(World).start_sound(@sector.sound_origin, Sfx::PSTART, SfxType::Misc)
+          @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::PSTART, SfxType::Misc)
         end
-
-        break
       when PlatformState::InStasis
-        break
       end
     end
   end

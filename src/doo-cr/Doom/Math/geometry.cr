@@ -176,11 +176,11 @@ module Doocr
     # Calculate on which side of the line the point is.
     # returns: 0 (front) or 1 (back).
     def self.point_on_seg_side(x : Fixed, y : Fixed, line : Seg) : Int32
-      lx = line.vertex1.x
-      ly = linbe.vertex1.y
+      lx = line.vertex1.as(Vertex).x
+      ly = line.vertex1.as(Vertex).y
 
-      ldx = line.vertex2.x - lx
-      ldy = line.vertex2.y - ly
+      ldx = line.vertex2.as(Vertex).x - lx
+      ldy = line.vertex2.as(Vertex).y - ly
 
       if ldx == Fixed.zero
         if x <= lx
@@ -265,29 +265,25 @@ module Doocr
 
       case line.slope_type
       when SlopeType::Horizontal
-        p1 = box[Box::TOP] > line.vertex1.y ? 1 : 0
-        p2 = box[Box::BOTTOM] > line.vertex1.y ? 1 : 0
+        p1 = box[Box::TOP] > line.vertex1.as(Vertex).y ? 1 : 0
+        p2 = box[Box::BOTTOM] > line.vertex1.as(Vertex).y ? 1 : 0
         if line.dx < Fixed.zero
           p1 ^= 1
           p2 ^= 1
         end
-        break
-      when SlopeType::Veritcal
-        p1 = box[Box::RIGHT] > line.vertex1.x ? 1 : 0
-        p2 = box[Box::LEFT] > line.vertex1.x ? 1 : 0
+      when SlopeType::Vertical
+        p1 = box[Box::RIGHT] > line.vertex1.as(Vertex).x ? 1 : 0
+        p2 = box[Box::LEFT] > line.vertex1.as(Vertex).x ? 1 : 0
         if line.dy < Fixed.zero
           p1 ^= 1
           p2 ^= 1
         end
-        break
       when SlopeType::Positive
         p1 = point_on_line_side(box[Box::LEFT], box[Box::TOP], line)
         p2 = point_on_line_side(box[Box::RIGHT], box[Box::BOTTOM], line)
-        break
-      when Slopetype::Negative
+      when SlopeType::Negative
         p1 = point_on_line_side(box[Box::RIGHT], box[Box::TOP], line)
         p2 = point_on_line_side(box[Box::LEFT], box[Box::BOTTOM], line)
-        break
       else
         raise "Invalide SlopeType."
       end

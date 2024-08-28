@@ -29,7 +29,7 @@ module Doocr::SFML
     @@close_dist : Float32 = 160
     @@attenuator : Float32 = @@clip_dist - @@close_dist
 
-    @config : Config | Nil
+    @config : Config
 
     @buffers : Array(SF::SoundBuffer) = [] of SF::SoundBuffer
     @amplitudes : Array(Float32) = [] of Float32
@@ -52,7 +52,7 @@ module Doocr::SFML
       begin
         print("Initialize sound: ")
 
-        @config.audio_soundvolume = Math.clamp(@config.audio_soundvolume, 0, max_volume)
+        @config.audio_soundvolume = @config.audio_soundvolume.clamp(0, max_volume)
 
         @buffers = Array.new(DoomInfo.sfx_names.size, SF::SoundBuffer.new)
         @amplitudes = Array.new(DoomInfo.sfx_names.size, 0_f32)
@@ -61,10 +61,10 @@ module Doocr::SFML
 
         DoomInfo.sfx_names.size.times do |i|
           name = "DS" + DoomInfo.sfx_names[i].to_s.upcase
-          lump = content.wad.get_lump_number(name)
+          lump = content.wad.as(Wad).get_lump_number(name)
           next if lump == -1
 
-          samples = get_samples(content.wad, name)
+          samples = get_samples(content.wad.as(Wad), name)
           sample_rate = samples[1]
           sample_count = samples[2]
           samples = samples[0]
@@ -87,21 +87,21 @@ module Doocr::SFML
         puts "OK"
       rescue e
         puts "Failed"
-        finalize()
         raise e
       end
     end
 
     private def get_samples(wad : Wad, name : String) : Tuple(Array(Int16), Int32, Int32)
-      data = wad.read_lump(name)
-      data.each.with_index do |d, i|
-        data[i] = d.to_i16
+      bytedata = wad.read_lump(name)
+      data = [] of Int16
+      bytedata.each.with_index do |d, i|
+        data << d.to_i16
       end
 
       return {[] of Int16, -1, -1} if data.size < 8
 
-      sample_rate = IO::ByteFormat::LittleEndian.decode(UInt16, data[2, 2])
-      sample_count = sample_rate = IO::ByteFormat::LittleEndian.decode(Int32, data[4, 4])
+      sample_rate = IO::ByteFormat::LittleEndian.decode(UInt16, bytedata[2, 2])
+      sample_count = sample_rate = IO::ByteFormat::LittleEndian.decode(Int32, bytedata[4, 4])
 
       offset = 8
       if contains_dmx_padding(data)
@@ -121,7 +121,12 @@ module Doocr::SFML
     # the data should contain pad bytes.
     # https://doomwiki.org/wiki/Sound
     private def contains_dmx_padding(data : Array(Int16)) : Bool
-      sample_count = IO::ByteFormat::LittleEndian.decode(Int32, data[4, 4])
+      bytedata = Bytes.new(data.size * 2)
+      data.each.with_index do |d, i|
+        bytedata[i * 2] = d.to_u8
+        bytedata[i * 2 + 1] = (d >> 2).to_u8
+      end
+      sample_count = IO::ByteFormat::LittleEndian.decode(Int32, bytedata[0, 4])
       if sample_count < 32
         return false
       else
@@ -146,7 +151,7 @@ module Doocr::SFML
     private def get_amplitude(samples : Array(Int16), sample_rate : Int32, sample_count : Int32) : Float32
       max = 0
       if sample_count > 0
-        count = Math.min(sample_rate / 5, sample_count)
+        count = Math.min((sample_rate / 5).to_i32, sample_count)
         count.times do |t|
           a = samples[t] - 128
           a = -a if a < 0
@@ -172,7 +177,7 @@ module Doocr::SFML
         sound = @sounds[i]
 
         if info.playing != Sfx::NONE
-          if channel.state != SoundSource::Status::Stopped
+          if sound.status != SF::SoundSource::Status::Stopped
             if info.type == SfxType::Diffuse
               info.priority *= @@slow_decay
             else
@@ -200,13 +205,13 @@ module Doocr::SFML
       end
 
       if @ui_reserved != Sfx::NONE
-        if @ui_sound.status == SF::SoundSource::Status::Playing
-          @ui_sound.stop
+        if @ui_sound.as(SF::Sound).status == SF::SoundSource::Status::Playing
+          @ui_sound.as(SF::Sound).stop
         end
-        @ui_sound.position = SF::Vector3f.new(0, 0, -1)
-        @ui_sound.volume = @master_volume_decay
-        @ui_sound.buffer = @buffers[@ui_reserved.to_i32]
-        @ui_sound.play
+        @ui_sound.as(SF::Sound).position = SF::Vector3f.new(0, 0, -1)
+        @ui_sound.as(SF::Sound).volume = @master_volume_decay
+        @ui_sound.as(SF::Sound).buffer = @buffers[@ui_reserved.to_i32]
+        @ui_sound.as(SF::Sound).play
         @ui_reserved = Sfx::NONE
       end
 
@@ -290,7 +295,7 @@ module Doocr::SFML
     end
 
     def reset
-      @random.clear if @random != nil
+      @random.as(DoomRandom).clear if @random != nil
 
       @infos.size.times do |i|
         @sounds[i].stop
@@ -305,7 +310,7 @@ module Doocr::SFML
         sound = @sounds[i]
 
         if (sound.status == SF::SoundSource::Status::Playing &&
-           sound.buffer.duration - sound.playing_offset > Time::Span.new(nanoseconds: 200_000_000))
+           sound.buffer.as(SF::SoundBuffer).duration - sound.playing_offset > SF.milliseconds(200))
           @sounds[i].pause
         end
       end
@@ -387,7 +392,7 @@ module Doocr::SFML
 
       @buffers.clear
 
-      @ui_sound.finalize
+      @ui_sound.as(SF::Sound).finalize if @ui_sound != nil
       @ui_sound = nil
     end
 

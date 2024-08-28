@@ -27,7 +27,6 @@ module Doocr
     def update
     end
 
-    def do_event(e : DoomEvent) : Bool
-    end
+    abstract def do_event(e : DoomEvent) : Bool
   end
 end

@@ -104,10 +104,10 @@ module Doocr
 
     def self.from_wad(wad : Wad, lump : Int32, subsectors : Array(Subsector)) : Array(Node)
       length = wad.get_lump_size(lump)
-      raise if length % @@datasize != 0
+      raise "" if length % @@datasize != 0
 
       data = wad.read_lump(lump)
-      count = length / @@datasize
+      count = (length / @@datasize).to_i32
       nodes = Array(Node).new(count)
 
       count.times do |i|

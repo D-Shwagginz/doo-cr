@@ -37,7 +37,7 @@ module Doocr
       @name = [name]
       @title_x = [title_x]
       @title_y = [title_y]
-      @items = items
+      @items = items.to_a.as(Array(TextBoxMenuItem))
 
       @index = first_choice
       @choice = @items[@index]
@@ -46,14 +46,14 @@ module Doocr
     end
 
     def open
-      if (@menu.doom.state != DoomState::Game ||
-         @menu.doom.game.state != GameState::Level)
+      if (@menu.doom.current_state != DoomState::Game ||
+         @menu.doom.game.as(DoomGame).game_state != GameState::Level)
         @menu.notify_save_failed
         return
       end
 
       @items.size.times do |i|
-        @items[i].set_text(@menu.save_slots[i])
+        @items[i].set_text(@menu.save_slots.as(SaveSlots)[i])
       end
     end
 
@@ -73,11 +73,11 @@ module Doocr
       return true if e.type != EventType::KeyDown
 
       if @text_input != nil
-        result = @text_input.do_event(e)
+        result = @text_input.as(TextInput).do_event(e)
 
-        if @text_input.state == TextInputState::Canceled
+        if @text_input.as(TextInput).state == TextInputState::Canceled
           @text_input = nil
-        elsif @text_input.state == TextInputState::Finished
+        elsif @text_input.as(TextInput).state == TextInputState::Finished
           @text_input = nil
         end
 
@@ -95,7 +95,7 @@ module Doocr
       end
 
       if e.key == DoomKey::Enter
-        @text_input = @choice.edit(->{ do_save(index) })
+        @text_input = @choice.edit(->{ do_save(@index) })
         @menu.start_sound(Sfx::PISTOL)
       end
 
@@ -113,8 +113,8 @@ module Doocr
           buffer << char
         end
       end
-      @menu.save_slots[slot_number] = string
-      if @menu.doom.save_game(slot_number, @menu.save_slots[slot_number])
+      @menu.save_slots.as(SaveSlots)[slot_number] = string
+      if @menu.doom.save_game(slot_number, @menu.save_slots.as(SaveSlots)[slot_number])
         @menu.close
         @last_save_slot = slot_number
       else

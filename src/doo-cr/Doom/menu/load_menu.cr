@@ -33,7 +33,7 @@ module Doocr
       @name = [name]
       @title_x = [title_x]
       @title_y = [title_y]
-      @items = items
+      @items = items.to_a.as(Array(TextBoxMenuItem))
 
       @index = first_choice
       @choice = @items[@index]
@@ -41,7 +41,7 @@ module Doocr
 
     def open
       @items.size.times do |i|
-        @items[i].set_text(@menu.save_slots[i])
+        @items[i].set_text(@menu.save_slots.as(SaveSlots)[i])
       end
     end
 
@@ -57,7 +57,7 @@ module Doocr
       @choice = @items[@index]
     end
 
-    def do_event(e : DoomEvent)
+    def do_event(e : DoomEvent) : Bool
       return true if e.type != EventType::KeyDown
 
       if e.key == DoomKey::Up
@@ -84,7 +84,7 @@ module Doocr
     end
 
     def do_load(slot_number : Int32) : Bool
-      if @menu.save_slots[slot_number] != nil
+      if @menu.save_slots.as(SaveSlots)[slot_number]? != nil
         @menu.doom.load_game(slot_number)
         return true
       else

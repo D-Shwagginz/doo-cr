@@ -38,13 +38,13 @@ module Doocr
     def initialize(args : CommandLineArgs)
       @wad = Wad.new(ConfigUtilities.get_wad_paths(args))
 
-      DeHackedEd.initialize(args, @wad)
+      DeHackedEd.initialize(args, @wad.as(Wad))
 
-      @palette = Palette.new(@wad)
-      @colormap = ColorMap.new(@wad)
-      @textures = TextureLookup.new(@wad)
-      @flats = FlatLookup.new(@wad)
-      @sprites = SpriteLookup.new(@wad)
+      @palette = Palette.new(@wad.as(Wad))
+      @colormap = ColorMap.new(@wad.as(Wad))
+      @textures = TextureLookup.new(@wad.as(Wad))
+      @flats = FlatLookup.new(@wad.as(Wad))
+      @sprites = SpriteLookup.new(@wad.as(Wad))
       @animation = TextureAnimation.new(@textures, @flats)
     end
 

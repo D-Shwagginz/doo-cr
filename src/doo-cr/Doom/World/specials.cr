@@ -36,13 +36,13 @@ module Doocr
 
       @button_list = Array.new(@@max_button_count, Button.new)
 
-      @texture_translation = Array.new(@world.as(World).map.textures.size)
-      @world.as(World).map.textures.size.times do |i|
+      @texture_translation = Array.new(@world.as(World).map.as(Map).textures.as(ITextureLookup).size, 0)
+      @world.as(World).map.as(Map).textures.as(ITextureLookup).size.times do |i|
         @texture_translation << i
       end
 
-      @flat_translation = Array.new(@world.as(World).map.flats.size)
-      @world.as(World).map.flats.size.times do |i|
+      @flat_translation = Array.new(@world.as(World).map.as(Map).flats.as(IFlatLookup).size, 0)
+      @world.as(World).map.as(Map).flats.as(IFlatLookup).size.times do |i|
         @flat_translation << i
       end
     end
@@ -57,12 +57,12 @@ module Doocr
     # After the map has been loaded, scan for specials that spawn thinkers.
     def spawn_specials
       # Init special sectors.
-      lc = @world.as(World).lighting_change
-      sa = @world.as(World).sector_actiong
-      @world.as(World).map.sectors.each do |sector|
-        next if sector.special == 0
+      lc = @world.as(World).lighting_change.as(LightingChange)
+      sa = @world.as(World).sector_action.as(SectorAction)
+      @world.as(World).map.as(Map).sectors.each do |sector|
+        next if sector.special.to_i32 == 0
 
-        case sector.special.to_i
+        case sector.special.to_i32
         when 1
           # Flickering lights.
           lc.spawn_light_flash(sector)
@@ -77,7 +77,7 @@ module Doocr
           break
         when 4
           # Strobe fast / death slime.
-          lc.spawn_strobe_flash(sector.StrobeFlash.fast_dark, false)
+          lc.spawn_strobe_flash(sector, StrobeFlash.fast_dark, false)
           sector.special = SectorSpecial.new(4)
           break
         when 8
@@ -111,7 +111,7 @@ module Doocr
       end
 
       scroll_list = [] of LineDef
-      @world.as(World).map.lines.each do |line|
+      @world.as(World).map.as(Map).lines.each do |line|
         case line.special.to_i32
         when 48
           # Texture scroll.
@@ -136,7 +136,7 @@ module Doocr
       # Exit switch?
       sound = Sfx::SWTCHX if line.special.to_i32 == 11
 
-      switch_list = @world.as(World).map.as(Map).textures.switch_list
+      switch_list = @world.as(World).map.as(Map).textures.as(ITextureLookup).switch_list
 
       switch_list.size.times do |i|
         if switch_list[i] == top_texture
@@ -201,16 +201,16 @@ module Doocr
       end
 
       # Animate flats and textures globally.
-      animations = @world.as(World).map.animation.animations
+      animations = @world.as(World).map.as(Map).animation.as(TextureAnimation).animations
       animations.size.times do |k|
         anim = animations[k]
         i = anim.base_pic
         while i < anim.base_pic + anim.num_pics
           pic = anim.base_pic + ((@world.as(World).level_time / anim.speed + i) % anim.num_pics)
           if anim.is_texture
-            @texture_translation[i] = pic
+            @texture_translation[i] = pic.to_i32
           else
-            @flat_translation[i] = pic
+            @flat_translation[i] = pic.to_i32
 
             i += 1
           end
@@ -219,7 +219,7 @@ module Doocr
 
       # Animate line specials.
       @scroll_lines.each do |line|
-        line.front_side.texture_offset += Fixed.one
+        line.front_side.as(SideDef).texture_offset += Fixed.one
       end
 
       # Do buttons.
@@ -230,17 +230,17 @@ module Doocr
           if @button_list[i].timer == 0
             case @button_list[i].position
             when ButtonPosition::Top
-              @button_list[i].line.front_side.top_texture = @button_list[i].texture
+              @button_list[i].line.as(LineDef).front_side.as(SideDef).top_texture = @button_list[i].texture
               break
             when ButtonPosition::Middle
-              @button_list[i].line.front_side.middle_texture = @button_list[i].texture
+              @button_list[i].line.as(LineDef).front_side.as(SideDef).middle_texture = @button_list[i].texture
               break
             when ButtonPosition::Bottom
-              @button_list[i].line.front_side.bottom_texture = @button_list[i].texture
+              @button_list[i].line.as(LineDef).front_side.as(SideDef).bottom_texture = @button_list[i].texture
               break
             end
 
-            @world.as(World).start_sound(@button_list[i].sound_origin, Sfx::SWTCHN, SfxType::Misc, 50)
+            @world.as(World).start_sound(@button_list[i].sound_origin.as(Mobj), Sfx::SWTCHN, SfxType::Misc, 50)
             @button_list[i].clear
           end
         end

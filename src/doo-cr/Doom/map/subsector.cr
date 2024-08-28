@@ -30,7 +30,7 @@ module Doocr
       first_seg_number = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 2, 2])
 
       return Subsector.new(
-        segs[first_seg_number].side_def.sector,
+        segs[first_seg_number].side_def.sector.as(Sector),
         seg_count,
         first_seg_number
       )
@@ -38,10 +38,10 @@ module Doocr
 
     def self.from_wad(wad : Wad, lump : Int32, segs : Array(Seg)) : Array(Subsector)
       length = wad.get_lump_size(lump)
-      raise if length % @@datasize != 0
+      raise "" if length % @@datasize != 0
 
       data = wad.read_lump(lump)
-      count = length / @@datasize
+      count = (length / @@datasize).to_i32
       subsectors = Array(Subsector).new(count)
 
       count.times do |i|

@@ -16,11 +16,11 @@
 
 module Doocr
   module DeHackedEd
-    @source_pointer_table : Array(Tuple(Proc(World, Player, PlayerSpriteDef, Nil), Proc(World, Mobj, Nil)))
+    @@source_pointer_table : Array(Tuple(Proc(World, Player, PlayerSpriteDef, Nil), Proc(World, Mobj, Nil))) = [] of Tuple(Proc(World, Player, PlayerSpriteDef, Nil), Proc(World, Mobj, Nil))
 
     def self.initialize(args : CommandLineArgs, wad : Wad)
       if args.deh.present
-        read_files(args.deh.value)
+        read_files(args.deh.value.as(Array(String)))
       end
 
       if !args.nodeh.present
@@ -28,7 +28,11 @@ module Doocr
       end
     end
 
-    private def read_files(*filenames : String)
+    private def self.read_files(*filenames : String)
+      read_files(filenames.to_a)
+    end
+
+    private def self.read_files(filenames : Array(String))
       last_file_name = ""
       begin
         print("Load DeHackEd patches: ")
@@ -39,7 +43,7 @@ module Doocr
         end
 
         s = ""
-        filenames.select { |x| Path.basename(x) }.each do |v|
+        filenames.select { |x| Path[x].basename }.each do |v|
           s = s + v + ", "
         end
         s = s.rchop
@@ -50,7 +54,7 @@ module Doocr
       end
     end
 
-    private def read_dehacked_lump(wad : Wad)
+    private def self.read_dehacked_lump(wad : Wad)
       lump = wad.get_lump_number("DEHACKED")
 
       if lump != -1
@@ -67,18 +71,18 @@ module Doocr
       end
     end
 
-    private def read_lines(data : Bytes) : Array(String)
+    private def self.read_lines(data : Bytes) : Array(String)
       sr = String.new(data)
       return sr.lines
     end
 
-    private def process_lines(lines : Array(String))
-      if @source_pointer_table == nil
-        @source_pointer_table = Array(Tuple(Proc(World, Player, PlayerSpriteDef, Nil), Proc(World, Mobj, Nil))).new(DoomInfo::States::LENGTH)
-        @source_pointer_table.size.times do |i|
-          player_action = DoomInfo.states[i].player_action
-          mobj_action = DoomInfo.states[i].mobj_action
-          @source_pointer_table[i] = {player_action, mobj_action}
+    private def self.process_lines(lines : Array(String))
+      if @@source_pointer_table == nil
+        @@source_pointer_table = Array(Tuple(Proc(World, Player, PlayerSpriteDef, Nil), Proc(World, Mobj, Nil))).new(DoomInfo.states.size)
+        @@source_pointer_table.size.times do |i|
+          player_action = DoomInfo.states[i].player_action.as(Proc(World, Player, PlayerSpriteDef, Nil))
+          mobj_action = DoomInfo.states[i].mobj_action.as(Proc(World, Mobj, Nil))
+          @@source_pointer_table[i] = {player_action, mobj_action}
         end
       end
 
@@ -106,52 +110,40 @@ module Doocr
       process_block(last_block, data, last_block_line)
     end
 
-    private def process_block(type : Block, data : Array(String), line_number : Int32)
+    private def self.process_block(type : Block, data : Array(String), line_number : Int32)
       begin
         case type
         when Block::Thing
           process_thing_block(data)
-          break
         when Block::Frame
           process_frame_block(data)
-          break
         when Block::Pointer
           process_pointer_block(data)
-          break
         when Block::Sound
           process_sound_block(data)
-          break
         when Block::Ammo
           process_ammo_block(data)
-          break
         when Block::Weapon
           process_weapon_block(data)
-          break
         when Block::Cheat
           process_cheat_block(data)
-          break
         when Block::Misc
           process_misc_block(data)
-          break
         when Block::Text
           process_text_block(data)
-          break
         when Block::Sprite
           process_sprite_block(data)
-          break
         when Block::BexStrings
           process_bexstrings_block(data)
-          break
         when Block::BexPars
           process_bexpars_block(data)
-          break
         end
       rescue e
         raise "Failed to process block: #{type} (line #{line_number}) #{e}"
       end
     end
 
-    private def process_thing_block(data : Array())
+    private def self.process_thing_block(data : Array(String))
       thing_number = data[0].split(' ')[1].to_i32 - 1
       info = DoomInfo.mobj_infos[thing_number]
       dic = get_key_value_pairs(data)
@@ -181,7 +173,7 @@ module Doocr
       info.raise_state = MobjState.new(get_int(dic, "Respawn frame", info.raise_state.to_i))
     end
 
-    private def process_frame_block(data : Array(String))
+    private def self.process_frame_block(data : Array(String))
       frame_number = data[0].split(' ')[1].to_i32
       info = DoomInfo.states[frame_number]
       dic = get_key_value_pairs(data)
@@ -194,37 +186,37 @@ module Doocr
       info.misc2 = get_int(dic, "Unknown 2", info.misc2)
     end
 
-    private def process_pointer_block(data : Array(String))
+    private def self.process_pointer_block(data : Array(String))
       dic = get_key_value_pairs(data)
-      start = data[0].index('(') ? data[0].index('(') : -1
+      start = data[0].index('(') ? data[0].index!('(') : -1
       start += 1
-      endnum = data[0].index(')') ? data[0].index(')') : -1
+      endnum = data[0].index(')') ? data[0].index!(')') : -1
       length = endnum - start
-      target_frame_number = data[0][start, length].split(' ')[1]
+      target_frame_number = data[0][start, length].split(' ')[1].to_i32
       source_frame_number = get_int(dic, "Codep Frame", -1)
       return if source_frame_number == -1
       info = DoomInfo.states[target_frame_number]
 
-      info.player_action = @source_pointer_table[source_frame_number][0]
-      info.mobj_action = @source_pointer_table[source_frame_number][1]
+      info.player_action = @@source_pointer_table[source_frame_number][0]
+      info.mobj_action = @@source_pointer_table[source_frame_number][1]
     end
 
-    private def process_sound_block(data : Array(String))
+    private def self.process_sound_block(data : Array(String))
     end
 
-    private def process_ammo_block(data : Array(String))
+    private def self.process_ammo_block(data : Array(String))
       ammo_number = data[0].split(' ')[1].to_i32
       dic = get_key_value_pairs(data)
-      max = Doominfo::AmmoInfos.max
+      max = DoomInfo::AmmoInfos.max
       clip = DoomInfo::AmmoInfos.clip
 
       max[ammo_number] = get_int(dic, "Max ammo", max[ammo_number])
       clip[ammo_number] = get_int(dic, "Per ammo", clip[ammo_number])
     end
 
-    private def process_weapon_block(data : Array(String))
+    private def self.process_weapon_block(data : Array(String))
       weapon_number = data[0].split(' ')[1].to_i32
-      info = DoomInfo.weaponinfos[weapon_number]
+      info = DoomInfo.weapon_infos[weapon_number]
       dic = get_key_value_pairs(data)
 
       info.ammo = AmmoType.new(get_int(dic, "Ammo type", info.ammo.to_i))
@@ -235,10 +227,10 @@ module Doocr
       info.flash_state = MobjState.new(get_int(dic, "Firing frame", info.flash_state.to_i))
     end
 
-    private def process_cheat_block(data : Array(String))
+    private def self.process_cheat_block(data : Array(String))
     end
 
-    private def process_misc_block(data : Array(String))
+    private def self.process_misc_block(data : Array(String))
       dic = get_key_value_pairs(data)
 
       DoomInfo::DeHackEdConst.initial_health = get_int(dic, "Initial Health", DoomInfo::DeHackEdConst.initial_health)
@@ -259,7 +251,7 @@ module Doocr
       DoomInfo::DeHackEdConst.monsters_infight = get_int(dic, "Monsters Infight", 0) == 221
     end
 
-    private def process_text_block(data : Array(String))
+    private def self.process_text_block(data : Array(String))
       split = data[0].split(' ')
       length1 = split[1].to_i32
       length2 = split[2].to_i32
@@ -296,10 +288,10 @@ module Doocr
       DoomString.replace_by_value(sb1, sb2)
     end
 
-    private def process_sprite_block(data : Array(String))
+    private def self.process_sprite_block(data : Array(String))
     end
 
-    private def process_bexstrings_block(data : Array(String))
+    private def self.process_bexstrings_block(data : Array(String))
       name = ""
       sb = ""
       data.skip(1).each do |line|
@@ -330,7 +322,7 @@ module Doocr
       end
     end
 
-    private def process_bexpars_block(data : Array(String))
+    private def self.process_bexpars_block(data : Array(String))
       data.skip(1).each do |line|
         split = line.split(' ', remove_empty: true)
 
@@ -358,7 +350,7 @@ module Doocr
       end
     end
 
-    private def get_block_type(split : Array(String))
+    private def self.get_block_type(split : Array(String))
       if is_thing_block_start(split)
         return Block::Thing
       elsif is_frame_block_start(split)
@@ -388,62 +380,62 @@ module Doocr
       end
     end
 
-    private def is_thing_block_start(split : Array(String)) : Bool
+    private def self.is_thing_block_start(split : Array(String)) : Bool
       return false if split.size < 2
       return false if split[0] != "Thing"
       return false if !is_number(split[1])
       return true
     end
 
-    private def is_frame_block_start(split : Array(String)) : Bool
+    private def self.is_frame_block_start(split : Array(String)) : Bool
       return false if split.size < 2
       return false if split[0] != "Frame"
       return false if !is_number(split[1])
       return true
     end
 
-    private def is_pointer_block_start(split : Array(String)) : Bool
+    private def self.is_pointer_block_start(split : Array(String)) : Bool
       return false if split.size < 2
       return false if split[0] != "Pointer"
       return true
     end
 
-    private def is_sound_block_start(split : Array(String)) : Bool
+    private def self.is_sound_block_start(split : Array(String)) : Bool
       return false if split.size < 2
       return false if split[0] != "Sound"
       return false if !is_number(split[1])
       return true
     end
 
-    private def is_ammo_block_start(split : Array(String)) : Bool
+    private def self.is_ammo_block_start(split : Array(String)) : Bool
       return false if split.size < 2
       return false if split[0] != "Ammo"
       return false if !is_number(split[1])
       return true
     end
 
-    private def is_weapon_block_start(split : Array(String)) : Bool
+    private def self.is_weapon_block_start(split : Array(String)) : Bool
       return false if split.size < 2
       return false if split[0] != "Weapon"
       return false if !is_number(split[1])
       return true
     end
 
-    private def is_cheat_block_start(split : Array(String)) : Bool
+    private def self.is_cheat_block_start(split : Array(String)) : Bool
       return false if split.size < 2
       return false if split[0] != "Cheat"
       return false if split[1] != "0"
       return true
     end
 
-    private def is_misc_block_start(split : Array(String)) : Bool
+    private def self.is_misc_block_start(split : Array(String)) : Bool
       return false if split.size < 2
       return false if split[0] != "Misc"
       return false if split[1] != "0"
       return true
     end
 
-    private def is_text_block_start(split : Array(String)) : Bool
+    private def self.is_text_block_start(split : Array(String)) : Bool
       return false if split.size < 3
       return false if split[0] != "Text"
       return false if !is_number(split[1])
@@ -451,31 +443,31 @@ module Doocr
       return true
     end
 
-    private def is_sprite_block_start(split : Array(String)) : Bool
+    private def self.is_sprite_block_start(split : Array(String)) : Bool
       return false if split.size < 2
       return false if split[0] != "Sprite"
       return false if !is_number(split[1])
       return true
     end
 
-    private def is_bexstrings_block_start(split : Array(String)) : Bool
+    private def self.is_bexstrings_block_start(split : Array(String)) : Bool
       return true if split[0] == "[STRINGS]"
       return false
     end
 
-    private def is_bexpars_block_start(split : Array(String)) : Bool
+    private def self.is_bexpars_block_start(split : Array(String)) : Bool
       return true if split[0] == "[PARS]"
       return false
     end
 
-    private def is_number(value : String) : Bool
+    private def self.is_number(value : String) : Bool
       value.each_char do |ch|
         return false if !('0' <= ch && ch <= '9')
       end
       return true
     end
 
-    private def get_key_value_pairs(data : Array(String)) : Hash(String, String)
+    private def self.get_key_value_pairs(data : Array(String)) : Hash(String, String)
       dic = {} of String => String
       data.each do |line|
         split = line.split('=')
@@ -487,7 +479,7 @@ module Doocr
       return dic
     end
 
-    private def get_int(dic : Hash(String, String), key : String, default_value : Int32) : Int32
+    private def self.get_int(dic : Hash(String, String), key : String, default_value : Int32) : Int32
       if value = dic[key]?
         if int_value = value.to_i32?
           return int_value

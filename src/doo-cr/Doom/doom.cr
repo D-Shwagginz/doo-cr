@@ -19,7 +19,7 @@ module Doocr
     @args : CommandLineArgs
     @config : Config
     @content : GameContent
-    @video : IVideo
+    @video : Video::IVideo
     @sound : Audio::ISound
     @music : Audio::IMusic
     @user_input : UserInput::IUserInput
@@ -51,19 +51,19 @@ module Doocr
 
     @mouse_grabbed : Bool = false
 
-    def initialize(@args, @config, @content, video : IVideo | Nil = nil, sound : ISound | Nil = nil, music : IMusic | Nil = nil, user_input : IUserInput | Nil = nil)
-      @video = video == nil ? NullVideo.get_instance : video
-      @sound = sound == nil ? NullSound.get_instance : sound
-      @music = music == nil ? NullMusic.get_instance : music
-      @user_input = user_input == nil ? NullUserInput.get_instance : user_input
+    def initialize(@args, @config, @content, video : Video::IVideo | Nil = nil, sound : Audio::ISound | Nil = nil, music : Audio::IMusic | Nil = nil, user_input : UserInput::IUserInput | Nil = nil)
+      @video = video == nil ? Video::NullVideo.get_instance.as(Video::IVideo) : video.as(Video::IVideo)
+      @sound = sound == nil ? Audio::NullSound.get_instance.as(Audio::ISound) : sound.as(Audio::ISound)
+      @music = music == nil ? Audio::NullMusic.get_instance.as(Audio::IMusic) : music.as(Audio::IMusic)
+      @user_input = user_input == nil ? UserInput::NullUserInput.get_instance.as(UserInput::IUserInput) : user_input.as(UserInput::IUserInput)
 
       @events = Array(DoomEvent).new
 
       @options = GameOptions.new(@args, @content)
-      @options.video = @video
-      @options.sound = @sound
-      @options.music = @music
-      @options.user_input = @user_input
+      @options.as(GameOptions).video = @video
+      @options.as(GameOptions).sound = @sound
+      @options.as(GameOptions).music = @music
+      @options.as(GameOptions).user_input = @user_input
 
       @menu = DoomMenu.new(self)
 
@@ -72,7 +72,7 @@ module Doocr
       @cmds = Array.new(Player::MAX_PLAYER_COUNT, TicCmd.new)
       @game = DoomGame.new(@content, @options)
 
-      @wipe_effect = WipeEffect.new(@video.wipe_band_count, @video.wipe_height)
+      @wipe_effect = Video::WipeEffect.new(@video.wipe_band_count, @video.wipe_height)
       @wiping = false
 
       @current_state = DoomState::None
@@ -92,48 +92,48 @@ module Doocr
     private def check_game_args
       if @args.warp.present
         @next_state = DoomState::Game
-        @options.episode = @args.warp.value.item1
-        @options.map = @args.warp.value.item2
-        @game.defered_init_new
+        @options.as(GameOptions).episode = @args.warp.value.as(Tuple(Int32, Int32))[0]
+        @options.as(GameOptions).map = @args.warp.value.as(Tuple(Int32, Int32))[1]
+        @game.as(DoomGame).defered_init_new
       elsif @args.episode.present
         @next_state = DoomState::Game
-        @options.episode = @args.episode.value
-        @options.map = 1
-        @game.defered_init_new
+        @options.as(GameOptions).episode = @args.episode.value.as(Int32)
+        @options.as(GameOptions).map = 1
+        @game.as(DoomGame).defered_init_new
       end
 
       if @args.skill.present
-        @options.skill = GameSkill.new(@args.skill.value - 1)
+        @options.as(GameOptions).skill = GameSkill.new(@args.skill.value.as(Int32) - 1)
       end
 
-      @options.deathmatch = 1 if @args.deathmatch.present
+      @options.as(GameOptions).deathmatch = 1 if @args.deathmatch.present
 
-      @options.deathmatch = 2 if @args.altdeath.present
+      @options.as(GameOptions).deathmatch = 2 if @args.altdeath.present
 
-      @options.fast_monsters = true if @args.fast.present
+      @options.as(GameOptions).fast_monsters = true if @args.fast.present
 
-      @options.respawn_monsters = true if @args.respawn.present
+      @options.as(GameOptions).respawn_monsters = true if @args.respawn.present
 
-      @options.no_monsters = true if @args.nomonsters.present
+      @options.as(GameOptions).no_monsters = true if @args.nomonsters.present
 
       if @args.loadgame.present
         @next_state = DoomState::Game
-        @game.load_game(@args.loadgame.value)
+        @game.as(DoomGame).load_game(@args.loadgame.value.as(Int32))
       end
 
       if @args.playdemo.present
         @next_state = DoomState::DemoPlayback
-        @demo_playback = DemoPlayback.new(@args, @content, @options, @args.playdemo.value)
+        @demo_playback = DemoPlayback.new(@args, @content, @options, @args.playdemo.value.as(String))
       end
 
       if @args.timedemo.present
         @next_state = DoomState::DemoPlayback
-        @demo_playback = DemoPlayback.new(@args, @content, @options, @args.timedemo.value)
+        @demo_playback = DemoPlayback.new(@args, @content, @options, @args.timedemo.value.as(String))
       end
     end
 
     def new_game(skill : GameSkill, episode : Int32, map : Int32)
-      @game.defered_init_new(skill, episode, map)
+      @game.as(DoomGame).defered_init_new(skill, episode, map)
       @next_state = DoomState::Game
     end
 
@@ -145,7 +145,7 @@ module Doocr
       return if @wiping
 
       @events.each do |e|
-        next if @menu.do_event(e)
+        next if @menu.as(DoomMenu).do_event(e)
 
         next if e.type == EventType::KeyDown && check_function_key(e.key)
 
@@ -155,9 +155,9 @@ module Doocr
             next
           end
 
-          next if @game.do_event(e)
+          next if @game.as(DoomGame).do_event(e)
         elsif @current_state == DoomState::DemoPlayback
-          @demo_playback.do_event(e)
+          @demo_playback.as(DemoPlayback).do_event(e)
         end
       end
 
@@ -167,65 +167,65 @@ module Doocr
     private def check_function_key(key : DoomKey) : Bool
       case key
       when DoomKey::F1
-        @menu.show_help_screen
+        @menu.as(DoomMenu).show_help_screen
         return true
       when DoomKey::F2
-        @menu.show_save_screen
+        @menu.as(DoomMenu).show_save_screen
         return true
       when DoomKey::F3
-        @menu.show_load_screen
-        retun true
+        @menu.as(DoomMenu).show_load_screen
+        return true
       when DoomKey::F4
-        @menu.show_volume_control
+        @menu.as(DoomMenu).show_volume_control
         return true
       when DoomKey::F6
-        @menu.quick_save
+        @menu.as(DoomMenu).quick_save
         return true
       when DoomKey::F7
         if @current_state == DoomState::Game
-          @menu.end_game
+          @menu.as(DoomMenu).end_game
         else
-          @options.sound.start_sound(Sfx::OOF)
+          @options.as(GameOptions).sound.as(Audio::ISound).start_sound(Sfx::OOF)
         end
         return true
       when DoomKey::F8
         @video.display_message = !@video.display_message
-        if @current_state == DoomState::Game && @game.state == GameState::Level
-          msg : String
+        if @current_state == DoomState::Game && @game.as(DoomGame).game_state == GameState::Level
+          msg = ""
           if @video.display_message
-            msg = DoomInfo::Strings::MSGON
+            msg = DoomInfo::Strings::MSGON.to_s
           else
-            msg = DoomInfo::Strings::MSGOFF
+            msg = DoomInfo::Strings::MSGOFF.to_s
           end
-          @game.world.console_player.send_message(msg)
+          @game.as(DoomGame).world.as(World).console_player.send_message(msg)
         end
-        @menu.start_sound(Sfx::SWTCHN)
+        @menu.as(DoomMenu).start_sound(Sfx::SWTCHN)
         return true
       when DoomKey::F9
-        @menu.quick_load
+        @menu.as(DoomMenu).quick_load
         return true
       when DoomKey::F10
-        @menu.quit
+        @menu.as(DoomMenu).quit
         return true
       when DoomKey::F11
         gcl = @video.gamma_correction_level
         gcl += 1
         gcl = 0 if gcl > @video.max_gamma_correction_level
         @video.gamma_correction_level = gcl
-        if @current_state == DoomState::Game && @game.state == GameState::Level
-          msg : String
+        if @current_state == DoomState::Game && @game.as(DoomGame).game_state == GameState::Level
+          msg = ""
           if gcl == 0
             msg = DoomInfo::Strings::GAMMALVL0
           else
             msg = "Gamma correction level #{gcl}"
           end
-          @game.world.console_player.send_message(msg)
+          @game.as(DoomGame).world.as(World).console_player.send_message(msg)
         end
         return true
       when DoomKey::Add, DoomKey::Quote, DoomKey::Equal
         if (@current_state == DoomState::Game &&
-           @game.state == GameState::Level &&
-           @game.world.auto_map.visible)
+           @game.as(DoomGame).game_state == GameState::Level &&
+           @game.as(DoomGame).world.as(World).auto_map.as(AutoMap).visible)
           return false
         else
           @video.window_size = Math.min(@video.window_size + 1, @video.max_window_size)
@@ -234,8 +234,8 @@ module Doocr
         end
       when DoomKey::Subtract, DoomKey::Hyphen, DoomKey::Semicolon
         if (@current_state == DoomState::Game &&
-           @game.state == GameState::Level &&
-           @game.world.auto_map.visible)
+           @game.as(DoomGame).game_state == GameState::Level &&
+           @game.as(DoomGame).world.as(World).auto_map.as(AutoMap).visible)
           return false
         else
           @video.window_size = Math.max(@video.window_size - 1, 0)
@@ -251,10 +251,10 @@ module Doocr
       do_events()
 
       if !@wiping
-        @menu.update
+        @menu.as(DoomMenu).update
 
         if @next_state != @current_state
-          @opening.reset if @next_state != DoomState::Opening
+          @opening.as(OpeningSequence).reset if @next_state != DoomState::Opening
 
           @demo_playback = nil if @next_state != DoomState::DemoPlayback
 
@@ -272,31 +272,28 @@ module Doocr
       if !@wiping
         case @current_state
         when DoomState::Opening
-          start_wipe() if @opening.update == UpdateResult::NeedWipe
-          break
+          start_wipe() if @opening.as(OpeningSequence).update == UpdateResult::NeedWipe
         when DoomState::DemoPlayback
-          result = @demo_playback.update
+          result = @demo_playback.as(DemoPlayback).update
           if result == UpdateResult::NeedWipe
             start_wipe()
           elsif result == UpdateResult::Completed
-            quit("FPS: #{@demo_playback.fps.to_s}")
+            quit("FPS: #{@demo_playback.as(DemoPlayback).fps.to_s}")
           end
-          break
         when DoomState::Game
-          @user_input.build_tic_cmd(@cmds[@options.console_player])
+          @user_input.build_tic_cmd(@cmds[@options.as(GameOptions).console_player])
           if @send_pause
             @send_pause = false
-            @cmds[@options.console_player].buttons |= (TicCmdButtons.special | TicCmdButtons.pause).to_u8
+            @cmds[@options.as(GameOptions).console_player].buttons |= (TicCmdButtons.special | TicCmdButtons.pause).to_u8
           end
-          start_wipe() if @game.update(@cmds) == UpdateResult::NeedWipe
-          break
+          start_wipe() if @game.as(DoomGame).update(@cmds) == UpdateResult::NeedWipe
         else
           raise "Invalid application state!"
         end
       end
 
       if @wiping
-        @wiping = false if @wipe_effect.update == UpdateResult::Completed
+        @wiping = false if @wipe_effect.as(Video::WipeEffect).update == UpdateResult::Completed
       end
 
       @sound.update
@@ -313,7 +310,7 @@ module Doocr
       elsif @config.video_fullscreen
         mouse_should_be_grabbed = true
       else
-        mouse_should_be_grabbed = @current_state == DoomState::Game && !@menu.active
+        mouse_should_be_grabbed = @current_state == DoomState::Game && !@menu.as(DoomMenu).active
       end
 
       if @mouse_grabbed
@@ -330,30 +327,30 @@ module Doocr
     end
 
     private def start_wipe
-      @wipe_effect.start
+      @wipe_effect.as(Video::WipeEffect).start
       @video.initialize_wipe
       @wiping = true
     end
 
     def pause_game
       if (@current_state == DoomState::Game &&
-         @game.state == GameState::Level &&
-         !@game.pause && !@send_pause)
+         @game.as(DoomGame).game_state == GameState::Level &&
+         !@game.as(DoomGame).paused && !@send_pause)
         @send_pause = true
       end
     end
 
     def resume_game
       if (@current_state == DoomState::Game &&
-         @game.state == GameState::Level &&
-         @game.pause && !@send_pause)
+         @game.as(DoomGame).game_state == GameState::Level &&
+         @game.as(DoomGame).paused && !@send_pause)
         @send_pause = true
       end
     end
 
     def save_game(slot_number : Int32, description : String) : Bool
-      if @current_state == DoomState::Game && @game.state == GameState::Level
-        @game.save_game(slot_number, description)
+      if @current_state == DoomState::Game && @game.as(DoomGame).game_state == GameState::Level
+        @game.as(DoomGame).save_game(slot_number, description)
         return true
       else
         return false
@@ -361,7 +358,7 @@ module Doocr
     end
 
     def load_game(slot_number : Int32)
-      @game.load_game(slot_number)
+      @game.as(DoomGame).load_game(slot_number)
       @next_state = DoomState::Game
     end
 

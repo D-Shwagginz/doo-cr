@@ -20,7 +20,7 @@ module Doocr
     @@name_table : Hash(String, DoomString) = {} of String => DoomString
 
     @original : String | Nil = nil
-    @replaced : String | Nil = nil
+    setter replaced : String | Nil = nil
 
     def initialize(@original : String)
       @replaced = @original
@@ -35,7 +35,7 @@ module Doocr
     end
 
     def to_s
-      return @replaced
+      return @replaced ? @replaced.as(String) : ""
     end
 
     def [](index : Int32) : Char

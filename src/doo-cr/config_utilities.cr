@@ -31,20 +31,20 @@ module Doocr
     end
 
     def self.get_config_path : String
-      return Path.new(get_exe_directory(), "doo-cr.cfg")
+      return Path.new(get_exe_directory(), "doo-cr.cfg").to_s
     end
 
     def self.get_default_iwad_path : String
       exe_directory = get_exe_directory()
       @@iwad_names.each do |name|
         path = Path.new(exe_directory, name)
-        return path if File.exists?(path)
+        return path.to_s if File.exists?(path)
       end
 
       current_directory = Dir.current
       @@iwad_names.each do |name|
         path = Path.new(current_directory, name)
-        return path if File.exists?(path)
+        return path.to_s if File.exists?(path)
       end
 
       raise "No IWAD was found!"
@@ -59,12 +59,12 @@ module Doocr
       wad_paths = [] of String
 
       if args.iwad.present
-        wad_paths << args.iwad.value
+        wad_paths << args.iwad.value.as(String)
       else
         wad_paths << ConfigUtilities.get_default_iwad_path
       end
 
-      wad_paths << args.file.value if args.file.present
+      wad_paths += args.file.value.as(Array(String)) if args.file.present
 
       return wad_paths
     end

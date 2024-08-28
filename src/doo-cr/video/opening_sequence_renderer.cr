@@ -28,18 +28,15 @@ module Doocr::Video
     end
 
     def render(sequence : OpeningSequence, frame_frac : Fixed)
-      scale = @screen.width / 320
+      scale = (@screen.width / 320).to_i32
 
       case sequence.state
       when OpeningSequenceState::Title
         @screen.draw_patch(@cache["TITLEPIC"], 0, 0, scale)
-        break
       when OpeningSequenceState::Demo
-        @parent.render_game(sequence.demo_game, frame_frac)
-        break
+        @parent.render_game(sequence.game.as(DoomGame), frame_frac)
       when OpeningSequenceState::Credit
-        screen.draw_patch(@cache["CREDIT"], 0, 0, scale)
-        break
+        @screen.draw_patch(@cache["CREDIT"], 0, 0, scale)
       end
     end
   end

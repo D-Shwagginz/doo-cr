@@ -32,20 +32,18 @@ module Doocr
       case @direction
       when -1
         # Down.
-        @sector.light_level -= @@glow_speed
-        if @sector.light_level <= @min_light
-          @sector.light_level += @@glow_speed
+        @sector.as(Sector).light_level -= @@glow_speed
+        if @sector.as(Sector).light_level <= @min_light
+          @sector.as(Sector).light_level += @@glow_speed
           @direction = 1
         end
-        break
       when 1
         # Up.
-        @sector.light_level += @@glow_speed
-        if @sector.light_level >= @max_light
-          @sector.light_level -= @@glow_speed
+        @sector.as(Sector).light_level += @@glow_speed
+        if @sector.as(Sector).light_level >= @max_light
+          @sector.as(Sector).light_level -= @@glow_speed
           @direction = -1
         end
-        break
       end
     end
   end

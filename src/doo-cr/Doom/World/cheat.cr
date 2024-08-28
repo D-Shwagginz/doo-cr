@@ -47,7 +47,7 @@ module Doocr
 
     def do_event(e : DoomEvent) : Bool
       if e.type == EventType::KeyDown
-        @buffer[p] - e.key.get_char
+        @buffer[@p] - e.key.get_char
 
         @p = (@p + 1) % @buffer.size
 
@@ -58,7 +58,7 @@ module Doocr
     end
 
     def check_buffer
-      list.size.times do |i|
+      @@list.size.times do |i|
         code = @@list[i].code
         q = @p
         j : Int32 = 0
@@ -68,7 +68,7 @@ module Doocr
             q = @buffer.size - 1
           end
           ch = code[code.size - j - 1]
-          break if buffer[q] != ch && ch != '?'
+          break if @buffer[q] != ch && ch != '?'
           j += 1
         end
 
@@ -92,7 +92,7 @@ module Doocr
                 buffer << char
               end
             end
-            @@list[i].action(self, string)
+            @@list[i].action.call(self, string)
           end
         end
       end
@@ -143,7 +143,7 @@ module Doocr
 
     def god_mode
       player = @world.as(World).console_player
-      if (player.cheats & CheatFlags::GodMode) != 0
+      if (player.cheats & CheatFlags::GodMode).to_i32 != 0
         player.cheats &= ~CheatFlags::GodMode
         player.send_message(DoomInfo::Strings::STSTR_DQDOFF)
       else
@@ -156,7 +156,7 @@ module Doocr
 
     def no_clip
       player = @world.as(World).console_player
-      if (player.cheats & CheatFlags::NoClip) != 0
+      if (player.cheats & CheatFlags::NoClip).to_i32 != 0
         player.cheats &= ~CheatFlags::NoClip
         player.send_message(DoomInfo::Strings::STSTR_NCOFF)
       else
@@ -268,7 +268,7 @@ module Doocr
         mobj = thinker.as?(Mobj)
         if (mobj != nil &&
            mobj.as(Mobj).player != nil &&
-           ((mobj.as(Mobj).flags & MobjFlags::CountKill) != 0 || mobj.as(Mobj).type == MobjType::Skull) &&
+           ((mobj.as(Mobj).flags & MobjFlags::CountKill).to_i32 != 0 || mobj.as(Mobj).type == MobjType::Skull) &&
            mobj.as(Mobj).health > 0)
           @world.as(World).thing_interaction.as(ThingInteraction).damage_mobj(mobj.as(Mobj), nil, player.mobj, 10000)
           count += 1

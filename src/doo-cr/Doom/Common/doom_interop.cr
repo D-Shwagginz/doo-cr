@@ -16,7 +16,7 @@
 
 module Doocr
   module DoomInterop
-    def self.to_string(data : Bytes, offset : Int32, max_length : Int32)
+    def self.to_s(data : Bytes, offset : Int32, max_length : Int32)
       length = 0
       max_length.times do |i|
         break if data[offset + i] == 0
@@ -25,7 +25,7 @@ module Doocr
       chars = Array.new(length, '\0')
       chars.size.times do |i|
         c = data[offset + i]
-        c -= 0x20 if 'a' <= c && c <= 'z'
+        c -= 0x20 if 'a' <= c.chr && c.chr <= 'z'
         chars[i] = c.chr
       end
       string = String.build do |buffer|

@@ -32,16 +32,16 @@ module Doocr
     @use_traverse_func : Proc(Intercept, Bool) | Nil = nil
 
     private def init_use
-      @use_traverse_func = use_traverse()
+      @use_traverse_func = ->use_traverse(Intercept)
     end
 
     private def use_traverse(intercept : Intercept) : Bool
-      mc = @world.as(World).map_collision
+      mc = @world.as(World).map_collision.as(MapCollision)
 
-      if intercept.line.special == 0
-        mc.line_opening(intercept.line)
+      if intercept.line.as(LineDef).special == 0
+        mc.line_opening(intercept.line.as(LineDef))
         if mc.open_range <= Fixed.zero
-          @world.as(World).start_sound(@use_thing, Sfx::NOWAY, SfxType::Voice)
+          @world.as(World).start_sound(@use_thing.as(Mobj), Sfx::NOWAY, SfxType::Voice)
 
           # Can't use through a wall.
           return false
@@ -52,9 +52,9 @@ module Doocr
       end
 
       side = 0
-      side = 1 if Geometry.point_on_line_side(@use_thing.x, @use_thing.y, intercept.line) == 1
+      side = 1 if Geometry.point_on_line_side(@use_thing.as(Mobj).x, @use_thing.as(Mobj).y, intercept.line.as(LineDef)) == 1
 
-      use_special_line(@use_thing, intercept.line, side)
+      use_special_line(@use_thing.as(Mobj), intercept.line.as(LineDef), side)
 
       # Can't use for more than one special line in a row
       return false
@@ -62,18 +62,18 @@ module Doocr
 
     # Looks for special lines in front of the player to activate.
     def use_lines(player : Player)
-      pt = @world.as(World).path_traversal
+      pt = @world.as(World).path_traversal.as(PathTraversal)
 
-      @use_thing = player.Mobj
+      @use_thing = player.mobj.as(Mobj)
 
-      angle = player.mobj.angle
+      angle = player.mobj.as(Mobj).angle
 
-      x1 = player.mobj.x
-      y1 = player.mobj.y
-      x2 = x1 + @@use_range.to_i_floor * Trig.cos(angle)
-      y2 = y1 + @@use_range.to_i_floor * Trig.sin(angle)
+      x1 = player.mobj.as(Mobj).x
+      y1 = player.mobj.as(Mobj).y
+      x2 = x1 + Trig.cos(angle) * @@use_range.to_i_floor
+      y2 = y1 + Trig.sin(angle) * @@use_range.to_i_floor
 
-      pt.path_traverse(x1, y1, x2, y2, PathTraverseFlags::AddLines)
+      pt.path_traverse(x1, y1, x2, y2, PathTraverseFlags::AddLines, @use_traverse_func.as(Proc(Intercept, Bool)))
     end
 
     # Called when a thing uses a special line.
@@ -97,7 +97,7 @@ module Doocr
       # Switches that other things can activate.
       if thing.player == nil
         # Never open secret doors.
-        if (line.flags & LineFlags::Secret) != 0
+        if (line.flags & LineFlags::Secret).to_i32 != 0
           return false
         end
 
@@ -686,8 +686,8 @@ module Doocr
         return if !ok
       end
 
-      sa = @world.as(World).sector_action
-      specials = @world.as(World).specials
+      sa = @world.as(World).sector_action.as(SectorAction)
+      specials = @world.as(World).specials.as(Specials)
 
       case line.special.to_i32
       when 24

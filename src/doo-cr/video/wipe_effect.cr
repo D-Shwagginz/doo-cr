@@ -20,9 +20,9 @@ module Doocr::Video
     @height : Int32
     @random : DoomRandom
 
-    def initialize(width : Intew, @height)
+    def initialize(width : Int32, @height)
       @y = Array.new(width, 0_i16)
-      @random = DoomRandom.new(Time.utc.milliseconds)
+      @random = DoomRandom.new(Time.utc.millisecond)
     end
 
     def start

@@ -104,11 +104,11 @@ module Doocr
 
     # Current PLAYPAL, ???
     # can be set to REDCOLORMAP for pain, etc
-    property fixed_color_map : Int32 = 0
+    property fixed_colormap : Int32 = 0
 
     # Player skin colorshift,
     # 0-3 for which color to draw player.
-    property color_map : Int32 = 0
+    property colormap : Int32 = 0
 
     # Overlay view sprites (gun, etc).
     getter player_sprites : Array(PlayerSpriteDef) = [] of PlayerSpriteDef
@@ -140,8 +140,8 @@ module Doocr
 
     def clear
       @mobj = nil
-      @player_state = 0
-      @cmd.clear
+      @player_state = PlayerState.new(0)
+      @cmd.as(TicCmd).clear
 
       @view_z = Fixed.zero
       @view_height = Fixed.zero
@@ -159,7 +159,7 @@ module Doocr
       @use_down = false
       @attack_down = false
 
-      @cheats = 0
+      @cheats = CheatFlags.new(0)
 
       @refire = 0
 
@@ -177,9 +177,9 @@ module Doocr
 
       @extra_light = 0
 
-      @fixed_color_map = 0
+      @fixed_colormap = 0
 
-      @color_map = 0
+      @colormap = 0
 
       @player_sprites.each do |psp|
         psp.clear
@@ -195,7 +195,7 @@ module Doocr
     def reborn
       @mobj = nil
       @player_state = PlayerState::Live
-      @cmd.clear
+      @cmd.as(TicCmd).clear
 
       @view_z = Fixed.zero
       @view_height = Fixed.zero
@@ -228,7 +228,7 @@ module Doocr
       @use_down = true
       @attack_down = true
 
-      @cheats = 0
+      @cheats = CheatFlags.new(0)
 
       @refire = 0
 
@@ -242,9 +242,9 @@ module Doocr
 
       @extra_light = 0
 
-      @fixed_color_map = 0
+      @fixed_colormap = 0
 
-      @color_map = 0
+      @colormap = 0
 
       @player_sprites.each do |psp|
         psp.clear
@@ -262,13 +262,13 @@ module Doocr
       @cards.fill(false)
 
       # Cancel invisibility.
-      @mobj.flags &= ~MobjFlags::Shadow
+      @mobj.as(Mobj).flags &= ~MobjFlags::Shadow
 
       # Cancel gun flashes.
       @extra_light = 0
 
       # Cancel ir gogles.
-      @fixed_color_map = 0
+      @fixed_colormap = 0
 
       # No palette changes.
       @damage_count = 0
@@ -289,7 +289,7 @@ module Doocr
     def update_frame_interpolation_info
       @interpolate = true
       @old_view_z = @view_z
-      @old_angle = @mobj.angle
+      @old_angle = @mobj.as(Mobj).angle
     end
 
     def disable_frame_interpolation_for_one_frame
@@ -298,7 +298,7 @@ module Doocr
 
     def get_interpolated_view_z(frame_frac : Fixed) : Fixed
       # Without the second condition, flicker will occur on the first frame.
-      if @interpolate && @mobj.world.level_time > 1
+      if @interpolate && @mobj.as(Mobj).world.as(World).level_time > 1
         return @old_view_z + frame_frac * (@view_z - @old_view_z)
       else
         return @view_z
@@ -307,14 +307,14 @@ module Doocr
 
     def get_interpolated_angle(frame_frac : Fixed) : Angle
       if @interpolate
-        delta = @mobj.angle - @old_angle
+        delta = @mobj.as(Mobj).angle - @old_angle
         if delta < Angle.ang180
           return @old_angle + Angle.from_degree(frame_frac.to_f64 * delta.to_degree)
         else
           return @old_angle - Angle.from_degree(frame_frac.to_f64 * (360.0 - delta.to_degree))
         end
       else
-        return @mobj.angle
+        return @mobj.as(Mobj).angle
       end
     end
   end

@@ -18,7 +18,7 @@ module Doocr
   class MapThing
     class_getter datasize : Int32 = 10
 
-    getter empty : MapThing = MapThing.new(
+    class_getter empty : MapThing = MapThing.new(
       Fixed.zero,
       Fixed.zero,
       Angle.ang0,
@@ -59,10 +59,10 @@ module Doocr
 
     def self.from_wad(wad : Wad, lump : Int32) : Array(MapThing)
       length = wad.get_lump_size(lump)
-      raise if length % @@datasize != 0
+      raise "" if length % @@datasize != 0
 
       data = wad.read_lump(lump)
-      count = length / @@datasize
+      count = (length / @@datasize).to_i32
       things = Array(MapThing).new(count)
 
       count.times do |i|

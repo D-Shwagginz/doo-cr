@@ -18,67 +18,67 @@ require "../video/i_video.cr"
 
 module Doocr::SFML
   class SFMLVideo
-    include IVideo
-    @renderer : Video::Renderer | Nil = nil
+    include Video::IVideo
+    @renderer : Video::Renderer | Nil
 
     @texture_width : Int32 = 0
     @texture_height : Int32 = 0
 
-    @texture_data : Bytes = Bytes.new(0)
-    @texture : SF::Texture | Nil = nil
-    @sprite : SF::Sprite | Nil = nil
+    @texture_data : Array(UInt8) = [] of UInt8
+    @texture : SF::Texture | Nil
+    @sprite : SF::Sprite | Nil
 
     @window_width : Int32 = 0
     @window_height : Int32 = 0
-    @window : SF::RenderWindow | Nil = nil
+    @window : SF::RenderWindow
 
     def wipe_band_count : Int32
-      return @renderer.wipe_band_count
+      return @renderer.as(Video::Renderer).wipe_band_count
     end
 
     def wipe_height : Int32
-      return @renderer.wipe_height
+      return @renderer.as(Video::Renderer).wipe_height
     end
 
     def max_window_size : Int32
-      return @renderer.max_window_size
+      return @renderer.as(Video::Renderer).max_window_size
     end
 
     def window_size : Int32
-      return @renderer.window_size
+      return @renderer.as(Video::Renderer).window_size
     end
 
     def window_size=(window_size : Int32)
-      @renderer.window_size = value
+      @renderer.as(Video::Renderer).window_size = window_size
     end
 
     def display_message : Bool
-      return @renderer.display_message
+      return @renderer.as(Video::Renderer).display_message
     end
 
     def display_message=(display_message : Bool)
-      @renderer.display_message = value
+      @renderer.as(Video::Renderer).display_message = display_message
     end
 
     def max_gamma_correction_level : Int32
-      return @renderer.max_gamma_correction_level
+      return @renderer.as(Video::Renderer).max_gamma_correction_level
     end
 
     def gamma_correction_level : Int32
-      return @renderer.gamma_correction_level
+      return @renderer.as(Video::Renderer).gamma_correction_level
     end
 
     def gamma_correction_level=(gamma_correction_level : Int32)
-      @renderer.gamma_correction_level = value
+      @renderer.as(Video::Renderer).gamma_correction_level = gamma_correction_level
     end
 
     def initialize(config : Config, content : GameContent, @window : SF::RenderWindow)
       begin
         print("Initialize video: ")
 
-        @renderer = Renderer.new(config, content)
+        @renderer = Video::Renderer.new(config, content)
 
-        if config.video_hightresolution
+        if config.video_highresolution
           @texture_width = 512
           @texture_height = 1024
         else
@@ -86,59 +86,54 @@ module Doocr::SFML
           @texture_height = 512
         end
 
-        @texture_data = Bytes.new(4 * @renderer.width * @renderer.height)
-        @texture = SF::RenderTexture.new(@texture_width, @texture_height)
-        @sprite = SF::Sprite.new(@texture)
+        @texture_data = Array.new(4 * @renderer.as(Video::Renderer).width * @renderer.as(Video::Renderer).height, 0_u8)
+        @texture = SF::Texture.new(@texture_width, @texture_height)
+        @sprite = SF::Sprite.new(@texture.as(SF::Texture))
 
         resize(@window.size.x, @window.size.y)
 
         puts "OK"
       rescue e
         puts "Failed"
-        finalize()
         raise e
       end
     end
 
-    def render(doom : Doom, frame_frac : Fixed) : SF::Sprite
-      @renderer.render(doom, @texture_data, frame_frac)
+    def render(doom : Doom, frame_frac : Fixed)
+      @renderer.as(Video::Renderer).render(doom, @texture_data, frame_frac)
 
-      @texture.update(@texture_data, @renderer.width, @renderer.height, 0, 0)
+      @texture.as(SF::Texture).update(@texture_data.to_unsafe, @renderer.as(Video::Renderer).width, @renderer.as(Video::Renderer).height, 0, 0)
 
       @window.clear(SF::Color::Black)
-      @window.draw(@sprite)
+      @window.draw(@sprite.as(SF::Sprite))
       @window.display
     end
 
     def resize(width : Int32, height : Int32)
       @window_width = width
       @window_height = height
-      @window.view = RF::View.new(RF::FloatRect.new(0, 0, width, height))
+      @window.view = SF::View.new(SF::FloatRect.new(0_f32, 0_f32, width.to_f32, height.to_f32))
     end
 
     def initialize_wipe
-      @renderer.initialize_wipe
+      @renderer.as(Video::Renderer).initialize_wipe
     end
 
     def has_focus : Bool
-      return true
+      @window.focus?
     end
 
     def finalize
       puts "Shutdown video."
 
       if @texture != nil
-        @texture.finalize
+        @texture.as(SF::Texture).finalize
         @texture = nil
       end
 
       if @sprite != nil
-        @sprite.finalize
+        @sprite.as(SF::Sprite).finalize
         @sprite = nil
-      end
-
-      if @window != nil
-        @window = nil
       end
     end
   end

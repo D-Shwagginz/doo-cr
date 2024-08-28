@@ -39,13 +39,13 @@ module Doocr
     @crush_thing_func : Proc(Mobj, Bool) | Nil = nil
 
     private def init_sector_change
-      @crush_thing_func = crush_thing()
+      @crush_thing_func = ->crush_thing(Mobj)
     end
 
     private def thing_height_clip(thing : Mobj) : Bool
       on_floor = thing.z == thing.floor_z
 
-      tm = @world.as(World).thing_movement
+      tm = @world.as(World).thing_movement.as(ThingMovement).as(ThingMovement)
 
       tm.check_position(thing, thing.x, thing.y)
       # What about stranding a monster partially off an edge?
@@ -59,7 +59,7 @@ module Doocr
       else
         # Don't adjust a floating monster unless forced to.
         if thing.z + thing.height > thing.ceiling_z
-          thing = thing.ceiling_z - thing.height
+          thing.z = thing.ceiling_z - thing.height
         end
       end
 
@@ -86,14 +86,14 @@ module Doocr
       end
 
       # Crunch dropped items.
-      if (thing.flags & MobjFlags::Dropped) != 0
-        @world.as(World).thing_allocation.remove_mobj(thing)
+      if (thing.flags & MobjFlags::Dropped).to_i32 != 0
+        @world.as(World).thing_allocation.as(ThingAllocation).remove_mobj(thing)
 
         # Keep checking.
         return true
       end
 
-      if (thing.flags & MobjFlags::Shootable) == 0
+      if (thing.flags & MobjFlags::Shootable).to_i32 == 0
         # Assume it is bloody gibs or something
         return true
       end
@@ -101,10 +101,10 @@ module Doocr
       @no_fit = true
 
       if @crush_change && (@world.as(World).level_time & 3) == 0
-        @world.as(World).thing_interaction.damage_mobj(thing, nil, nil, 10)
+        @world.as(World).thing_interaction.as(ThingInteraction).damage_mobj(thing, nil, nil, 10)
 
         # Spray blood in a random direction.
-        blood = @world.as(World).thing_allocation.spawn_mobj(
+        blood = @world.as(World).thing_allocation.as(ThingAllocation).spawn_mobj(
           thing.x,
           thing.y,
           thing.z + thing.height / 2,
@@ -124,15 +124,15 @@ module Doocr
       @no_fit = false
       @crush_change = crunch
 
-      bm = @world.as(World).map.blockmap
+      bm = @world.as(World).map.as(Map).blockmap.as(BlockMap)
       block_box = sector.block_box
 
       # Re-check heights for all things near the moving sector.
-      x = block_box.left
-      while x <= block_box.right
-        y = block_box.bottom
-        while y <= block_box.top
-          bm.iterate_things(x, y, @crush_thing_func)
+      x = block_box[Box::LEFT]
+      while x <= block_box[Box::RIGHT]
+        y = block_box[Box::BOTTOM]
+        while y <= block_box[Box::TOP]
+          bm.iterate_things(x, y, @crush_thing_func.as(Proc(Mobj, Bool)))
           y += 1
         end
         x += 1
@@ -247,7 +247,7 @@ module Doocr
     end
 
     private def get_next_sector(line : LineDef, sector : Sector) : Sector | Nil
-      return nil if (line.flags & LineFlags::TwoSided) == 0
+      return nil if (line.flags & LineFlags::TwoSided).to_i32 == 0
 
       return line.back_sector if line.front_sector == sector
 
@@ -705,8 +705,8 @@ module Doocr
     def remove_active_platform(platform : Platform)
       @active_platforms.size.times do |i|
         if platform == @active_platforms[i]
-          @active_platforms[i].sector.special_data = nil
-          @world.as(World).thinkers.remove(@active_platforms[i])
+          @active_platforms[i].as(Platform).sector.as(Sector).special_data = nil
+          @world.as(World).thinkers.as(Thinkers).remove(@active_platforms[i].as(Platform))
           @active_platforms[i] = nil
           return
         end
@@ -799,17 +799,17 @@ module Doocr
           floor.speed = @@floor_speed
           textures = @world.as(World).map.as(Map).textures
           sector.lines.size.times do |i|
-            if (sector.lines[i].flags & LineFlags::TwoSided) != 0
+            if (sector.lines[i].flags & LineFlags::TwoSided).to_i32 != 0
               front_side = sector.lines[i].front_side.as(SideDef)
               if front_side.bottom_texture >= 0
-                if textures[front_side.bottom_texture].height < min
-                  min = textures[front_side.bottom_texture].height
+                if textures.as(ITextureLookup)[front_side.bottom_texture].height < min
+                  min = textures.as(ITextureLookup)[front_side.bottom_texture].height
                 end
               end
               back_side = sector.lines[i].back_side.as(SideDef)
               if back_side.bottom_texture >= 0
-                if textures[back_side.bottom_texture].height < min
-                  min = textures[back_side.bottom_texture].height
+                if textures.as(ITextureLookup)[back_side.bottom_texture].height < min
+                  min = textures.as(ITextureLookup)[back_side.bottom_texture].height
                 end
               end
             end
@@ -822,7 +822,7 @@ module Doocr
           floor.floor_dest_height = find_lowest_floor_surrounding(sector)
           floor.texture = sector.floor_flat
           sector.lines.size.times do |i|
-            if (sector.as(Sector).lines[i].flags & LineFlags::TwoSided) != 0
+            if (sector.as(Sector).lines[i].flags & LineFlags::TwoSided).to_i32 != 0
               if sector.as(Sector).lines[i].front_side.as(SideDef).sector.as(Sector).number == sector_number
                 sector = sector.as(Sector).lines[i].back_side.as(SideDef).sector
                 if sector.as(Sector).floor_height == floor.floor_dest_height
@@ -893,7 +893,7 @@ module Doocr
           ok = false
 
           sector.lines.size.times do |i|
-            next if (sector.lines[i].flags & LineFlags::TwoSided) == 0
+            next if (sector.lines[i].flags & LineFlags::TwoSided).to_i32 == 0
 
             target = sector.lines[i].front_sector.as(Sector)
             new_sector_number = target.number
@@ -991,7 +991,7 @@ module Doocr
       return result
     end
 
-    @@ceiling_speed : Fixed = Fixed.one
+    class_getter ceiling_speed : Fixed = Fixed.one
     @@ceiling_w_wait : Int32 = 150
 
     @@max_ceiling_count : Int32 = 30
@@ -1011,8 +1011,8 @@ module Doocr
     def remove_active_ceiling(ceiling : CeilingMove)
       @active_ceilings.size.times do |i|
         if @active_ceilings[i] == ceiling
-          @active_ceilings[i].sector.special_data = nil
-          @world.as(World).thinkers.remove(@active_ceilings[i])
+          @active_ceilings[i].as(CeilingMove).sector.as(Sector).special_data = nil
+          @world.as(World).thinkers.as(Thinkers).remove(@active_ceilings[i].as(CeilingMove))
           @active_ceilings[i] = nil
           break
         end
@@ -1063,7 +1063,7 @@ module Doocr
 
     def teleport(line : LineDef, side : Int32, thing : Mobj) : Bool
       # Don't teleport missiles.
-      return false if (thing.flags & MobjFlags::Missile) != 0
+      return false if (thing.flags & MobjFlags::Missile).to_i32 != 0
 
       # Don't teleport if hit back of line, so you can get out of teleporter.
       return false if side == 1
@@ -1284,7 +1284,7 @@ module Doocr
     def spawn_door_close_in_30(sector : Sector)
       door = VerticalDoor.new(@world.as(World))
 
-      @world.as(World).thinkers.add(door)
+      @world.as(World).thinkers.as(Thinkers).add(door)
 
       sector.special_data = door
       sector.special = SectorSpecial.new(0)
@@ -1299,7 +1299,7 @@ module Doocr
     def spawn_door_raise_in_5_mins(sector : Sector)
       door = VerticalDoor.new(@world.as(World))
 
-      @world.as(World).thinkers.add(door)
+      @world.as(World).thinkers.as(Thinkers).add(door)
 
       sector.special_data = door
       sector.special = SectorSpecial.new(0)

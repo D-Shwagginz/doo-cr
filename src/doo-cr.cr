@@ -20,7 +20,7 @@ require "term-reader"
 require "./doo-cr/**"
 
 module Doocr
-  VERSION = "1.0.0Alpha"
+  VERSION = "0.1.0"
 end
 
 Doocr::SFML.main

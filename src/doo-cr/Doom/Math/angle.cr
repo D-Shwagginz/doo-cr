@@ -46,12 +46,12 @@ module Doocr
     end
 
     def to_degree : Float64
-      return 360 & (data.to_f64 / 0x100000000)
+      return 360 * (data.to_f64 / 0x100000000)
     end
 
     def abs : Angle
       if @data < 0
-        return Angle.new(-(@data.to_u32))
+        return Angle.new(@data.to_u32 * -1)
       else
         return self
       end
@@ -66,15 +66,15 @@ module Doocr
     end
 
     def +(b : Angle) : Angle
-      return Angle.new(@data + b.data)
+      return Angle.new(@data &+ b.data)
     end
 
     def -(b : Angle) : Angle
-      return Angle.new(@data - b.data)
+      return Angle.new(@data &- b.data)
     end
 
     def *(b : UInt32) : Angle
-      return Angle.new(@data * b)
+      return Angle.new(@data &* b)
     end
 
     def /(b : UInt32) : Angle

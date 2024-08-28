@@ -28,14 +28,14 @@ module Doocr
     getter back_sector : Sector | Nil = nil
 
     def initialize(
-      @vertex1 : Vertex,
-      @vertex2 : Vertex,
-      @offset : Fixed,
-      @angle : Angle,
-      @side_def : SideDef,
-      @line_def : LineDef,
-      @front_sector : Sector,
-      @back_sector : Sector
+      @vertex1,
+      @vertex2,
+      @offset,
+      @angle,
+      @side_def,
+      @line_def,
+      @front_sector,
+      @back_sector
     )
     end
 
@@ -55,20 +55,20 @@ module Doocr
         vertices[vertex1_number],
         vertices[vertex2_number],
         Fixed.from_i(seg_offset),
-        Angle.new(angle.to_u32 << 16),
-        front_side,
+        Angle.new(angle.to_u32! << 16),
+        front_side.as(SideDef),
         line_def,
-        front_side.sector,
+        front_side.as(SideDef).sector.as(Sector),
         (line_def.flags & LineFlags::TwoSided).to_i32 != 0 ? back_side.as?(SideDef).try &.sector : nil
       )
     end
 
     def self.from_wad(wad : Wad, lump : Int32, vertices : Array(Vertex), lines : Array(LineDef)) : Array(Seg)
       length = wad.get_lump_size(lump)
-      raise if length % @@datasize != 0
+      raise "" if length % @@datasize != 0
 
       data = wad.read_lump(lump)
-      count = length / @@datasize
+      count = (length / @@datasize).to_i32
       segs = Array(Seg).new(count)
 
       count.times do |i|

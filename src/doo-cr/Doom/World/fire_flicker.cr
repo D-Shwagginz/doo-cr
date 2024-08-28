@@ -32,10 +32,10 @@ module Doocr
 
       amount = (@world.as(World).random.next & 3) * 16
 
-      if @sector.light_level - amount < @min_light
-        @sector.light_level = @min_light
+      if @sector.as(Sector).light_level - amount < @min_light
+        @sector.as(Sector).light_level = @min_light
       else
-        @sector.light_level = @max_light - amount
+        @sector.as(Sector).light_level = @max_light - amount
       end
 
       @count = 4

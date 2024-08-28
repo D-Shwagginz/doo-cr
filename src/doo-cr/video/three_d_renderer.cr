@@ -26,7 +26,7 @@ module Doocr::Video
     @screen : DrawScreen | Nil = nil
     @screen_width : Int32 = 0
     @screen_height : Int32 = 0
-    @screen_data : Bytes = Bytes.new(0)
+    @screen_data : Array(UInt8) = [] of UInt8
     @draw_scale : Int32 = 0
 
     @window_size : Int32 = 0
@@ -39,10 +39,10 @@ module Doocr::Video
       @flats = content.flats
       @sprites = content.sprites
 
-      @screen_width = @screen.width
-      @screen_height = @screen.height
-      @screen_data = @screen.data
-      @draw_scale = @screen_width / 320
+      @screen_width = @screen.as(DrawScreen).width
+      @screen_height = @screen.as(DrawScreen).height
+      @screen_data = @screen.as(DrawScreen).data
+      @draw_scale = (@screen_width / 320).to_i32
 
       init_wall_rendering()
       init_plane_rendering()
@@ -53,7 +53,7 @@ module Doocr::Video
       init_weapon_rendering()
       init_fuzz_effect()
       init_color_translation()
-      init_window_border(content.wad)
+      init_window_border(content.wad.as(Wad))
 
       set_window_size(@window_size)
     end
@@ -65,11 +65,11 @@ module Doocr::Video
         height = scale * (48 + 16 * size)
         x = (@screen_width - width) / 2
         y = (@screen_height - StatusBarRenderer.height * scale - height) / 2
-        reset_window(x, y, width, height)
+        reset_window(x.to_i32, y.to_i32, width.to_i32, height.to_i32)
       elsif size == 7
         width = @screen_width
         height = @screen_height - StatusBarRenderer.height * scale
-        reset_window(0, 0, width, height)
+        reset_window(0, 0, width, height.to_i32)
       else
         width = @screen_height
         height = @screen_height
@@ -103,8 +103,8 @@ module Doocr::Video
       @window_y = y
       @window_width = width
       @window_height = height
-      @center_x = @window_width / 2
-      @center_y = @window_height / 2
+      @center_x = (@window_width / 2).to_i32
+      @center_y = (@window_height / 2).to_i32
       @center_x_frac = Fixed.from_i(@center_x)
       @center_y_frac = Fixed.from_i(@center_y)
       @projection = @center_x_frac
@@ -122,14 +122,14 @@ module Doocr::Video
     @clip_angle2 : Angle = Angle.ang0
 
     private def init_wall_rendering
-      @angle_to_x = Array(Int).new(Trig::FINE_ANGLE_COUNT / 2)
-      @x_to_angle = Array(Angle).new(@screen_width)
+      @angle_to_x = Array(Int32).new((Trig::FINE_ANGLE_COUNT / 2).to_i32, 0)
+      @x_to_angle = Array(Angle).new(@screen_width, Angle.ang0)
     end
 
     private def reset_wall_rendering
-      focal_length = @center_x_frac / Tric.tan(Trig::FINE_ANGLE_COUNT / 4 + FINE_FOV / 2)
+      focal_length = @center_x_frac / Trig.tan((Trig::FINE_ANGLE_COUNT / 4 + FINE_FOV / 2).to_i32)
 
-      (Trig::FINE_ANGLE_COUNT / 2).times do |i|
+      @angle_to_x.size.times do |i|
         t : Int32
 
         if Trig.tan(i) > Fixed.from_i(2)
@@ -137,29 +137,26 @@ module Doocr::Video
         elsif Trig.tan(i) < Fixed.from_i(-2)
           t = @window_width + 1
         else
-          t = (@center_x_frac - Trig.tan(i) * focal_length).to_int_ceiling
+          t = (@center_x_frac - Trig.tan(i) * focal_length).to_i_ceiling
 
           if t < -1
             t = -1
           elsif t > @window_width + 1
             t = @window_height + 1
           end
-
-          @angle_to_x.clear
-          @angle_to_x << t
         end
+        @angle_to_x[i] = t
       end
 
-      @x_to_angle.clear
       @window_width.times do |x|
         i = 0
-        while @angle_to_x[i]? && @angle_to_x[i] > x
+        while @angle_to_x[i] > x
           i += 1
         end
-        @x_to_angle << Angle.new((i << Trig::ANGLE_TO_FINE_SHIFT).to_u32) - Angle.ang90
+        @x_to_angle[x] = Angle.new((i << Trig::ANGLE_TO_FINE_SHIFT).to_u32) - Angle.ang90
       end
 
-      (Trig::FINE_ANGLE_COUNT / 2).times do |i|
+      (Trig::FINE_ANGLE_COUNT / 2).to_i32.times do |i|
         if @angle_to_x[i] == -1
           @angle_to_x[i] = 0
         elsif @angle_to_x[i] == @window_width + 1
@@ -168,7 +165,7 @@ module Doocr::Video
       end
 
       @clip_angle = @x_to_angle[0]
-      @clip_angle2 = Angle.new(2 * @clip_angle.data)
+      @clip_angle2 = Angle.new(2_u32 * @clip_angle.data)
     end
 
     #
@@ -207,20 +204,20 @@ module Doocr::Video
       @ceiling_y_frac = Array(Fixed).new(@screen_height)
       @ceiling_x_step = Array(Fixed).new(@screen_height)
       @ceiling_y_step = Array(Fixed).new(@screen_height)
-      @ceiling_lights = Array(Array(UInt32)).new(@screen_height)
+      @ceiling_lights = Array(Array(UInt8)).new(@screen_height)
       @floor_x_frac = Array(Fixed).new(@screen_height)
       @floor_y_frac = Array(Fixed).new(@screen_height)
       @floor_x_step = Array(Fixed).new(@screen_height)
       @floor_y_step = Array(Fixed).new(@screen_height)
-      @floor_lights = Array(Array(UInt32)).new(@screen_height)
+      @floor_lights = Array(Array(UInt8)).new(@screen_height)
     end
 
     private def reset_plane_rendering
       @plane_y_slope.clear
       @window_height.times do |i|
-        dy = Fixed.from_i(i - @window_height / 2) + Fixed.one / 2
+        dy = Fixed.from_i((i - @window_height / 2).to_i32) + Fixed.one / 2
         dy = dy.abs
-        @plane_y_slope << Fixed.from_i(@window_width / 2) / dy
+        @plane_y_slope << Fixed.from_i((@window_width / 2).to_i32) / dy
       end
 
       @plane_dist_scale.clear
@@ -274,27 +271,27 @@ module Doocr::Video
     @max_scale_light : Int32 = 0
     MAX_Z_LIGHT = 128
 
-    @diminishing_scale_light : Array(Array(Array(UInt32))) = Array(Array(Array(UInt32))).new
-    @diminishing_z_light : Array(Array(Array(UInt32))) = Array(Array(Array(UInt32))).new
-    @fixed_light : Array(Array(Array(UInt32))) = Array(Array(Array(UInt32))).new
+    @diminishing_scale_light : Array(Array(Array(UInt8))) = Array(Array(Array(UInt8))).new
+    @diminishing_z_light : Array(Array(Array(UInt8))) = Array(Array(Array(UInt8))).new
+    @fixed_light : Array(Array(Array(UInt8))) = Array(Array(Array(UInt8))).new
 
-    @scale_light : Array(Array(Array(UInt32))) = Array(Array(Array(UInt32))).new
-    @z_light : Array(Array(Array(UInt32))) = Array(Array(Array(UInt32))).new
+    @scale_light : Array(Array(Array(UInt8))) = Array(Array(Array(UInt8))).new
+    @z_light : Array(Array(Array(UInt8))) = Array(Array(Array(UInt8))).new
 
     @extra_light : Int32 = 0
     @fixed_colormap : Int32 = 0
 
     private def init_lighting
-      @max_scale_light = 48 * (@screen_width / 320)
+      @max_scale_light = 48 * (@screen_width / 320).to_i32
 
-      @diminishing_scale_light = Array(Array(Array(UInt32))).new(LIGHT_LEVEL_COUNT)
-      @diminishing_z_light = Array(Array(Array(UInt32))).new(LIGHT_LEVEL_COUNT)
-      @fixed_light = Array(Array(Array(UInt32))).new(LIGHT_LEVEL_COUNT)
+      @diminishing_scale_light = Array(Array(Array(UInt8))).new(LIGHT_LEVEL_COUNT)
+      @diminishing_z_light = Array(Array(Array(UInt8))).new(LIGHT_LEVEL_COUNT)
+      @fixed_light = Array(Array(Array(UInt8))).new(LIGHT_LEVEL_COUNT)
 
       LIGHT_LEVEL_COUNT.times do |i|
-        @diminishing_scale_light << Array(Array(UInt32)).new(@max_scale_light)
-        @diminishing_z_light << Array(Array(UInt32)).new(MAX_Z_LIGHT)
-        @fixed_light << Array(Array(Uint32)).new(Math.max(@max_scale_light, MAX_Z_LIGHT))
+        @diminishing_scale_light << Array(Array(UInt8)).new(@max_scale_light)
+        @diminishing_z_light << Array(Array(UInt8)).new(MAX_Z_LIGHT)
+        @fixed_light << Array(Array(UInt8)).new(Math.max(@max_scale_light, MAX_Z_LIGHT))
       end
 
       distmap = 2
@@ -302,16 +299,16 @@ module Doocr::Video
       # Calculate the light levels to use for each level / distance combination.
       LIGHT_LEVEL_COUNT.times do |i|
         start = (LIGHT_LEVEL_COUNT - 1 - i) * 2 * COLORMAP_COUNT / LIGHT_LEVEL_COUNT
-        arrayj = [] of Array(UInt32)
+        arrayj = [] of Array(UInt8)
         MAX_Z_LIGHT.times do |j|
-          scale = Fixed.from_i(320 / 2) / Fixed.new((j + 1) << Z_LIGHT_SHIFT)
+          scale = Fixed.from_i((320 / 2).to_i32) / Fixed.new((j + 1) << Z_LIGHT_SHIFT)
           scale = Fixed.new(scale.data >> SCALE_LIGHT_SHIFT)
 
           level = start - scale.data / distmap
           level = 0 if level < 0
           level = COLORMAP_COUNT - 1 if level >= COLORMAP_COUNT
 
-          arrayj << @colormap[level]
+          arrayj << @colormap.as(ColorMap)[level.to_i32]
         end
         @diminishing_z_light << arrayj
       end
@@ -323,12 +320,12 @@ module Doocr::Video
       # Calculate the light levels to use for each level / scale combination.
       LIGHT_LEVEL_COUNT.times do |i|
         start = (LIGHT_LEVEL_COUNT - 1 - i) * 2 * COLORMAP_COUNT / LIGHT_LEVEL_COUNT
-        arrayj = [] of Array(UInt32)
+        arrayj = [] of Array(UInt8)
         @max_scale_light.times do |j|
           level = start - j * 320 / @window_width / distmap
           level = 0 if level < 0
           level = COLORMAP_COUNT - 1 if level >= COLORMAP_COUNT
-          arrayj << @colormap[level]
+          arrayj << @colormap.as(ColorMap)[level.to_i32]
         end
         @diminishing_scale_light << arrayj
       end
@@ -338,12 +335,12 @@ module Doocr::Video
       if @fixed_colormap == 0
         @scale_light = @diminishing_scale_light
         @z_light = @diminishing_z_light
-        @fixed_light[0][0] = nil
-      elsif @fixed_light[0][0] != @colormap[@fixed_colormap]
+        @fixed_light[0][0] = Array(UInt8).new
+      elsif @fixed_light[0][0] != @colormap.as(ColorMap)[@fixed_colormap]
         LIGHT_LEVEL_COUNT.times do |i|
-          arrayj = [] of Array(UInt32)
+          arrayj = [] of Array(UInt8)
           @fixed_light[i].size.times do |j|
-            arrayj << @colormap[@fixed_colormap]
+            arrayj << @colormap.as(ColorMap)[@fixed_colormap]
           end
           @fixed_light << arrayj
         end
@@ -371,15 +368,15 @@ module Doocr::Video
     @vis_wall_ranges : Array(VisWallRange) = Array(VisWallRange).new
 
     private def init_rendering_history
-      @upper_clip = Array(Short).new(@screen_width)
-      @lower_clip = Array(Short).new(@screen_width)
+      @upper_clip = Array(Int16).new(@screen_width)
+      @lower_clip = Array(Int16).new(@screen_width)
 
       @clip_ranges = Array(ClipRange).new(256)
       256.times do |i|
         @clip_ranges << ClipRange.new
       end
 
-      @clip_data = Array(Int16).new(128 * @screen_width)
+      @clip_data = Array(Int16).new(128 * @screen_width, 0)
 
       @vis_wall_ranges = Array(VisWallRange).new(512)
       512.times do |i|
@@ -447,12 +444,12 @@ module Doocr::Video
     @weapon_inv_scale : Fixed = Fixed.zero
 
     private def init_weapon_rendering
-      @weapon_sprite = VisSprite()
+      @weapon_sprite = VisSprite.new
     end
 
     private def reset_weapon_rendering
-      @weapon_scale = Fixed.new(Fixed::FRAC_UNIT * @window_width / 320)
-      @weapon_inv_scale = Fixed.new(Fixed::FRAC_UNIT * 320 / @window_width)
+      @weapon_scale = Fixed.new((Fixed::FRAC_UNIT * @window_width / 320).to_i32)
+      @weapon_inv_scale = Fixed.new((Fixed::FRAC_UNIT * 320 / @window_width).to_i32)
     end
 
     #
@@ -484,9 +481,9 @@ module Doocr::Video
     @green_to_red : Array(UInt8) = Array(UInt8).new
 
     private def init_color_translation
-      @green_to_gray = Array(UInt8).new(256, 0_u8)
-      @green_to_brown = Array(UInt8).new(256, 0_u8)
-      @green_to_red = Array(UInt8).new(256, 0_u8)
+      @green_to_gray = Array(UInt8).new(256)
+      @green_to_brown = Array(UInt8).new(256)
+      @green_to_red = Array(UInt8).new(256)
       256.times do |i|
         @green_to_gray << i.to_u8
         @green_to_brown << i.to_u8
@@ -526,10 +523,10 @@ module Doocr::Video
       @border_left = Patch.from_wad(wad, "BRDR_L")
       @border_right = Patch.from_wad(wad, "BRDR_R")
 
-      if wad.gamemode == GameMode::Commercial
-        @back_flat = @flats["GRNROCK"]
+      if wad.game_mode == GameMode::Commercial
+        @back_flat = @flats.as(IFlatLookup)["GRNROCK"]
       else
-        @back_flat = @flats["FLOOR7_2"]
+        @back_flat = @flats.as(IFlatLookup)["FLOOR7_2"]
       end
     end
 
@@ -544,29 +541,29 @@ module Doocr::Video
 
       x = @window_x
       while x < @screen_width - @window_x
-        @screen.draw_patch(@border_top, x, @window_y - step, @draw_scale)
-        @screen.draw_patch(@border_bottom, x, fill_height - @window_y, @draw_scale)
+        @screen.as(DrawScreen).draw_patch(@border_top.as(Patch), x, @window_y - step, @draw_scale)
+        @screen.as(DrawScreen).draw_patch(@border_bottom.as(Patch), x, fill_height - @window_y, @draw_scale)
         x += step
       end
 
       y = @window_y
       while y < fill_height - @window_y
-        @screen.draw_patch(@border_left, @window_x - step, y, @draw_scale)
-        @screen.draw_patch(@border_right, @screen_width - @window_x, y, @draw_scale)
+        @screen.as(DrawScreen).draw_patch(@border_left.as(Patch), @window_x - step, y, @draw_scale)
+        @screen.as(DrawScreen).draw_patch(@border_right.as(Patch), @screen_width - @window_x, y, @draw_scale)
         y += step
       end
 
-      @screen.draw_patch(@border_top_left, @window_x - step, @window_y - step, @draw_scale)
-      @screen.draw_patch(@border_top_right, @screen_width - @window_x, @window_y - step, @draw_scale)
-      @screen.draw_patch(@border_bottom_left, @window_x - step, fill_height - @window_y, @draw_scale)
-      @screen.draw_patch(@border_bottom_right, @screen_width - @window_x, fill_height - @window_y, @draw_scale)
+      @screen.as(DrawScreen).draw_patch(@border_top_left.as(Patch), @window_x - step, @window_y - step, @draw_scale)
+      @screen.as(DrawScreen).draw_patch(@border_top_right.as(Patch), @screen_width - @window_x, @window_y - step, @draw_scale)
+      @screen.as(DrawScreen).draw_patch(@border_bottom_left.as(Patch), @window_x - step, fill_height - @window_y, @draw_scale)
+      @screen.as(DrawScreen).draw_patch(@border_bottom_right.as(Patch), @screen_width - @window_x, fill_height - @window_y, @draw_scale)
     end
 
     private def fill_rect(x : Int32, y : Int32, width : Int32, height : Int32)
-      data = @back_flat.data
+      data = @back_flat.as(Flat).data
 
-      src_x = x / @draw_scale
-      src_y = y / @draw_scale
+      src_x = (x / @draw_scale).to_i32
+      src_y = (y / @draw_scale).to_i32
 
       inv_scale = Fixed.one / @draw_scale
       x_frac = inv_scale - Fixed.epsilon
@@ -592,7 +589,7 @@ module Doocr::Video
     @view_x : Fixed = Fixed.zero
     @view_y : Fixed = Fixed.zero
     @view_z : Fixed = Fixed.zero
-    @view_angle : Fixed = Fixed.zero
+    @view_angle : Angle = Angle.ang0
 
     @view_sin : Fixed = Fixed.zero
     @view_cos : Fixed = Fixed.zero
@@ -602,17 +599,17 @@ module Doocr::Video
     def render(player : Player, frame_frac : Fixed)
       @frame_frac = frame_frac
 
-      @world = player.mobj.world
+      @world = player.mobj.as(Mobj).world
 
-      @view_x = player.mobj.get_interpolated_x(frame_frac)
-      @view_y = player.mobj.get_interpolated_y(frame_frac)
+      @view_x = player.mobj.as(Mobj).get_interpolated_x(frame_frac)
+      @view_y = player.mobj.as(Mobj).get_interpolated_y(frame_frac)
       @view_z = player.get_interpolated_view_z(frame_frac)
       @view_angle = player.get_interpolated_angle(frame_frac)
 
       @view_sin = Trig.sin(@view_angle)
       @view_cos = Trig.cos(@view_angle)
 
-      @valid_count = world.get_new_valid_count
+      @valid_count = @world.as(World).get_new_valid_count
 
       @extra_light = player.extra_light
       @fixed_colormap = player.fixed_colormap
@@ -622,7 +619,7 @@ module Doocr::Video
       clear_rendering_history()
       clear_sprite_rendering()
 
-      render_bsp_node(@world.as(World).map.nodes.size - 1)
+      render_bsp_node(@world.as(World).map.as(Map).nodes.size - 1)
       render_sprites()
       render_masked_textures()
       draw_player_sprites(player)
@@ -642,7 +639,7 @@ module Doocr::Video
         return
       end
 
-      bsp = @world.as(World).map.nodes[node]
+      bsp = @world.as(World).map.as(Map).nodes[node]
 
       # Decide which side the view point is on.
       side = Geometry.point_on_side(@view_x, @view_y, bsp)
@@ -657,12 +654,12 @@ module Doocr::Video
     end
 
     private def draw_subsector(subsector : Int32)
-      target = @world.as(World).map.subsectors[subsector]
+      target = @world.as(World).map.as(Map).subsectors[subsector]
 
       add_sprites(target.sector, @valid_count)
 
       target.seg_count.times do |i|
-        draw_seg(@world.as(World).map.segs[target.first_seg + i])
+        draw_seg(@world.as(World).map.as(Map).segs[target.first_seg + i])
       end
     end
 
@@ -703,7 +700,7 @@ module Doocr::Video
       end
 
       view_pos = (by << 2) + bx
-      return if view_pos == 5
+      return true if view_pos == 5
 
       x1 = bbox[@@view_pos_to_frustum_tangent[view_pos][0]]
       y1 = bbox[@@view_pos_to_frustum_tangent[view_pos][1]]
@@ -816,12 +813,12 @@ module Doocr::Video
 
       # Single sided line?
       if back_sector == nil
-        draw_solid_wall(seg, rw_angle1)
+        draw_solid_wall(seg, rw_angle1, x1, x2 - 1)
         return
       end
 
-      back_sector_floor_height = back_sector.get_interpolated_floor_height(@frame_frac)
-      back_sector_ceiling_height = back_sector.get_interpolated_ceiling_height(@frame_frac)
+      back_sector_floor_height = back_sector.as(Sector).get_interpolated_floor_height(@frame_frac)
+      back_sector_ceiling_height = back_sector.as(Sector).get_interpolated_ceiling_height(@frame_frac)
 
       # Closed door.
       if (back_sector_ceiling_height <= front_sector_floor_height ||
@@ -840,9 +837,9 @@ module Doocr::Video
       # Reject empty lines used for triggers and special events.
       # Identical floor and ceiling on both sides, identical
       # light levels on both sides, and no middle texture.
-      if (back_sector.ceiling_flat == front_sector.ceiling_flat &&
-         back_sector.floor_flat == front_sector.floor_flat &&
-         back_sector.light_level == front_sector.light_level &&
+      if (back_sector.as(Sector).ceiling_flat == front_sector.ceiling_flat &&
+         back_sector.as(Sector).floor_flat == front_sector.floor_flat &&
+         back_sector.as(Sector).light_level == front_sector.light_level &&
          seg.side_def.middle_texture == 0)
         return
       end
@@ -964,9 +961,9 @@ module Doocr::Video
       draw_pass_wall_range(seg, rw_angle1, @clip_ranges[start].last + 1, x2, false)
     end
 
-    private def scale_from_global_angle(vis_angle : Angle, view_angle : Angle, rw_normal : Angle, rw_distance : Angle) : Fixed
+    private def scale_from_global_angle(vis_angle : Angle, @view_angle : Angle, rw_normal : Angle, rw_distance : Fixed) : Fixed
       num = @projection * Trig.sin(Angle.ang90 + (vis_angle - rw_normal))
-      den = rw_distance * Trig.sin(Angle.ang90 + (vis_angle - view_angle))
+      den = rw_distance * Trig.sin(Angle.ang90 + (vis_angle - @view_angle))
 
       scale : Fixed
       if den.data > num.data >> 16
@@ -1015,14 +1012,14 @@ module Doocr::Video
 
       # Check which parts must be rendered.
       draw_wall = side.middle_texture != 0
-      draw_ceiling = world_front_z1 > Fixed.zero || front_sector.ceiling_flat == @flats.sky_flat_number
+      draw_ceiling = world_front_z1 > Fixed.zero || front_sector.ceiling_flat == @flats.as(IFlatLookup).sky_flat_number
       draw_floor = world_front_z2 < Fixed.zero
 
       #
       # Determine how the wall textures are vertically aligned.
       #
 
-      wall_texture = @textures[@world.as(World).specials.texture_translation[side.middle]]
+      wall_texture = @textures.as(ITextureLookup)[@world.as(World).specials.as(Specials).texture_translation[side.middle_texture]]
       wall_width_mask = wall_texture.width - 1
 
       middle_texture_alt : Fixed
@@ -1051,13 +1048,13 @@ module Doocr::Video
 
       rw_distance = hypotenuse * Trig.sin(dist_angle)
 
-      rw_scale = scale_from_global_angle(view_angle + @x_to_angle[x1], view_angle, rw_normal_angle, rw_distance)
+      rw_scale = scale_from_global_angle(@view_angle + @x_to_angle[x1], @view_angle, rw_normal_angle, rw_distance)
 
       scale1 : Fixed = rw_scale
       scale2 : Fixed
       rw_scale_step : Fixed
       if x2 > x1
-        scale2 = scale_from_global_angle(view_angle + @x_to_angle[x2], view_angle, rw_normal_angle, rw_distance)
+        scale2 = scale_from_global_angle(@view_angle + @x_to_angle[x2], @view_angle, rw_normal_angle, rw_distance)
         rw_scale_step = (scale2 - rw_scale) / (x2 - x1)
       else
         scale2 = scale1
@@ -1083,7 +1080,7 @@ module Doocr::Video
       end
       rw_offset += seg.offset + side.texture_offset
 
-      rw_center_angle = Angle.ang90 + view_angle - rw_normal_angle
+      rw_center_angle = Angle.ang90 + @view_angle - rw_normal_angle
 
       wall_light_level = (front_sector.light_level >> LIGHT_SEG_SHIFT) + @extra_light
       if seg.vertex1.y == seg.vertex2.y
@@ -1092,7 +1089,7 @@ module Doocr::Video
         wall_light_level += 1
       end
 
-      wall_lights = @scale_light[Math.clamp(wall_light_level, 0, LIGHT_LEVEL_COUNT - 1)]
+      wall_lights = @scale_light[wall_light_level.clamp(0, LIGHT_LEVEL_COUNT - 1)]
 
       #
       # Determine where on the screen the wall is drawn.
@@ -1113,7 +1110,7 @@ module Doocr::Video
       #
 
       plane_light_level = (front_sector.light_level >> LIGHT_SEG_SHIFT) + @extra_light
-      plane_lights = @z_light[Math.clamp(plane_light_level, 0, LIGHT_LEVEL_COUNT - 1)]
+      plane_lights = @z_light[plane_light_level.clamp(0, LIGHT_LEVEL_COUNT - 1)]
 
       #
       # Prepare to record the rendering history.
@@ -1141,8 +1138,8 @@ module Doocr::Video
       # Floor and ceiling.
       #
 
-      ceiling_flat = @flats[@world.as(World).specials.flat_translation[front_sector.ceiling_flat]]
-      floor_flat = @flats[@world.as(World).specials.flat_translation[front_sector.floor_flat]]
+      ceiling_flat = @flats.as(IFlatLookup)[@world.as(World).specials.as(Specials).flat_translation[front_sector.ceiling_flat]]
+      floor_flat = @flats.as(IFlatLookup)[@world.as(World).specials.as(Specials).flat_translation[front_sector.floor_flat]]
 
       #
       # Now the rendering is carried out.
@@ -1154,14 +1151,14 @@ module Doocr::Video
         draw_wall_y2 = wall_y2_frac.data >> HEIGHT_BITS
 
         if draw_ceiling
-          cy1 = upper_clip[x] + 1
-          cy2 = Math.min(draw_wall_y1 - 1, lower_clip[x] - 1)
-          draw_ceiling_column(front_sector, ceiling_flat, plane_lights, x, cy1, cy2, front_sector_ceiling_height)
+          cy1 = @upper_clip[x] + 1
+          cy2 = Math.min(draw_wall_y1 - 1, @lower_clip[x] - 1)
+          draw_ceiling_column(front_sector, ceiling_flat, plane_lights, x, cy1.to_i32, cy2.to_i32, front_sector_ceiling_height)
         end
 
         if draw_wall
-          wy1 = Math.max(draw_wall_y1, upper_clip[x] + 1)
-          wy2 = Math.min(draw_wall_y2, lower_clip[x] - 1)
+          wy1 = Math.max(draw_wall_y1, @upper_clip[x] + 1)
+          wy2 = Math.min(draw_wall_y2, @lower_clip[x] - 1)
 
           angle = rw_center_angle + @x_to_angle[x]
           angle = Angle.new(angle.data & 0x7FFFFFFF)
@@ -1176,14 +1173,14 @@ module Doocr::Video
             end
 
             inv_scale = Fixed.new((0xffffffff_u32 / rw_scale.data.to_u32).to_i32)
-            draw_column(source[0], wall_lights[light_index], x, wy1, wy2, inv_scale, middle_texture_alt)
+            draw_column(source[0], wall_lights[light_index], x, wy1.to_i32, wy2.to_i32, inv_scale, middle_texture_alt)
           end
         end
 
         if draw_floor
-          fy1 = Math.max(draw_wall_y2 + 1, upper_clip[x] + 1)
-          fy2 = lower_clip[x] - 1
-          draw_floor_column(front_sector, floor_flat, plane_lights, x, fy1, fy2, front_sector_floor_height)
+          fy1 = Math.max(draw_wall_y2 + 1, @upper_clip[x] + 1)
+          fy2 = @lower_clip[x] - 1
+          draw_floor_column(front_sector, floor_flat, plane_lights, x, fy1.to_i32, fy2.to_i32, front_sector_floor_height)
         end
 
         rw_scale += rw_scale_step
@@ -1214,8 +1211,8 @@ module Doocr::Video
 
       front_sector_floor_height = front_sector.get_interpolated_floor_height(@frame_frac)
       front_sector_ceiling_height = front_sector.get_interpolated_ceiling_height(@frame_frac)
-      back_sector_floor_height = back_sector.get_interpolated_floor_height(@frame_frac)
-      back_sector_ceiling_height = back_sector.get_interpolated_ceiling_height(@frame_frac)
+      back_sector_floor_height = back_sector.as(Sector).get_interpolated_floor_height(@frame_frac)
+      back_sector_ceiling_height = back_sector.as(Sector).get_interpolated_ceiling_height(@frame_frac)
 
       # Mark the segment as visible for auto map.
       line.flags |= LineFlags::Mapped
@@ -1228,8 +1225,8 @@ module Doocr::Video
       world_back_z2 = back_sector_floor_height - @view_z
 
       # The hack below enables ceiling height change in outdoor area without showing the upper wall.
-      if (front_sector.ceiling_flat == @flats.sky_flat_number &&
-         back_sector.ceiling_flat == @flats.sky_flat_number)
+      if (front_sector.ceiling_flat == @flats.as(IFlatLookup).sky_flat_number &&
+         back_sector.as(Sector).ceiling_flat == @flats.as(IFlatLookup).sky_flat_number)
         world_front_z1 = world_back_z1
       end
 
@@ -1241,10 +1238,10 @@ module Doocr::Video
       draw_ceiling : Bool
       if (draw_as_solid_wall ||
          world_front_z1 != world_back_z1 ||
-         front_sector.ceiling_flat != back_sector.ceiling_flat ||
-         front_sector.light_level != back_sector.light_level)
+         front_sector.ceiling_flat != back_sector.as(Sector).ceiling_flat ||
+         front_sector.light_level != back_sector.as(Sector).light_level)
         draw_upper_wall = side.top_texture != 0 && world_back_z1 < world_front_z1
-        draw_ceiling = world_front_z1 >= Fixed.zero || front_sector.ceiling_flat == @flats.sky_flat_number
+        draw_ceiling = world_front_z1 >= Fixed.zero || front_sector.ceiling_flat == @flats.as(IFlatLookup).sky_flat_number
       else
         draw_upper_wall = false
         draw_ceiling = false
@@ -1254,8 +1251,8 @@ module Doocr::Video
       draw_floor : Bool
       if (draw_as_solid_wall ||
          world_front_z2 != world_back_z2 ||
-         front_sector.floor_flat != back_sector.floor_flat ||
-         front_sector.light_level != back_sector.light_level)
+         front_sector.floor_flat != back_sector.as(Sector).floor_flat ||
+         front_sector.light_level != back_sector.as(Sector).light_level)
         draw_lower_wall = side.bottom_texture != 0 && world_back_z2 > world_front_z2
         draw_floor = world_front_z2 <= Fixed.zero
       else
@@ -1274,11 +1271,11 @@ module Doocr::Video
       # Determine how the wall textures are vertically aligned (if necessary).
       #
 
-      upper_wall_texture : Texture
-      upper_wall_width_mask : Int32
-      upper_texture_alt : Fixed
+      upper_wall_texture : Texture | Nil
+      upper_wall_width_mask : Int32 = 0
+      upper_texture_alt : Fixed = Fixed.zero
       if draw_upper_wall
-        upper_wall_texture = @textures[@world.as(World).specials.texture_translation[side.top_texture]]
+        upper_wall_texture = @textures.as(ITextureLookup)[@world.as(World).specials.as(Specials).texture_translation[side.top_texture]]
         upper_wall_width_mask = upper_wall_texture.width - 1
 
         if (line.flags & LineFlags::DontPegTop).to_i32 != 0
@@ -1290,11 +1287,11 @@ module Doocr::Video
         upper_texture_alt += side.row_offset
       end
 
-      lower_wall_texture : Texture
-      lower_wall_width_mask : Int32
-      lower_texture_alt : Fixed
+      lower_wall_texture : Texture | Nil
+      lower_wall_width_mask : Int32 = 0
+      lower_texture_alt : Fixed = Fixed.zero
       if draw_lower_wall
-        lower_wall_texture = @textures[@world.as(World).specials.texture_translation[side.bottom_texture]]
+        lower_wall_texture = @textures.as(ITextureLookup)[@world.as(World).specials.as(Specials).texture_translation[side.bottom_texture]]
         lower_wall_width_mask = lower_wall_texture.width - 1
 
         if (line.flags & LineFlags::DontPegTop).to_i32 != 0
@@ -1317,15 +1314,15 @@ module Doocr::Video
 
       hypotenuse = Geometry.point_to_dist(@view_x, @view_y, seg.vertex1.x, seg.vertex1.y)
 
-      rw_distance = hypotenuse * Tric.sin(dist_angle)
+      rw_distance = hypotenuse * Trig.sin(dist_angle)
 
-      rw_scale = scale_from_global_angle(view_angle + @x_to_angle[x1], view_angle, rw_normal_angle, rw_distance)
+      rw_scale = scale_from_global_angle(@view_angle + @x_to_angle[x1], @view_angle, rw_normal_angle, rw_distance)
 
       scale1 : Fixed = rw_scale
-      scale2 : Fixed
-      rw_scale_step : Fixed
+      scale2 : Fixed = Fixed.zero
+      rw_scale_step : Fixed = Fixed.zero
       if x2 > x1
-        scale2 = scale_from_global_angle(view_angle + @x_to_angle[x2], view_angle, rw_normal_angle, rw_distance)
+        scale2 = scale_from_global_angle(@view_angle + @x_to_angle[x2], @view_angle, rw_normal_angle, rw_distance)
         rw_scale_step = (scale2 - rw_scale) / (x2 - x1)
       else
         scale2 = scale1
@@ -1337,9 +1334,9 @@ module Doocr::Video
       # and which color map is used according to the light level (if necessary).
       #
 
-      rw_offset : Fixed
-      rw_center_angle : Fixed
-      wall_lights : Array(Array(UInt8))
+      rw_offset : Fixed = Fixed.zero
+      rw_center_angle : Angle = Angle.ang0
+      wall_lights : Array(Array(UInt8)) = [] of Array(UInt8)
       if seg_textured
         texture_offset_angle = rw_normal_angle - rw_angle1
         if texture_offset_angle > Angle.ang180
@@ -1355,7 +1352,7 @@ module Doocr::Video
         end
         rw_offset += seg.offset + side.texture_offset
 
-        rw_center_angle = Angle.ang90 + view_angle - rw_normal_angle
+        rw_center_angle = Angle.ang90 + @view_angle - rw_normal_angle
 
         wall_light_level = (front_sector.light_level >> LIGHT_SEG_SHIFT) + @extra_light
         if seg.vertex1.y == seg.vertex2.y
@@ -1364,7 +1361,7 @@ module Doocr::Video
           wall_light_level
         end
 
-        wall_lights = @scale_light[Math.clamp(wall_light_level, 0, LIGHT_LEVEL_COUNT - 1)]
+        wall_lights = @scale_light[wall_light_level.clamp(0, LIGHT_LEVEL_COUNT - 1)]
       end
 
       #
@@ -1384,8 +1381,8 @@ module Doocr::Video
       wall_y2_step = -(rw_scale_step * world_front_z2)
 
       # The Y position of the top edge of the portal (if visible).
-      portal_y1_frac : Fixed
-      portal_y1_step : Fixed
+      portal_y1_frac : Fixed = Fixed.zero
+      portal_y1_step : Fixed = Fixed.zero
       if draw_upper_wall
         if world_back_z1 > world_front_z2
           portal_y1_frac = (@center_y_frac >> 4) - world_back_z1 * rw_scale
@@ -1397,8 +1394,8 @@ module Doocr::Video
       end
 
       # The Y position of the bottom edge of the portal (if visible).
-      portal_y2_frac : Fixed
-      portal_y2_step : Fixed
+      portal_y2_frac : Fixed = Fixed.zero
+      portal_y2_step : Fixed = Fixed.zero
       if draw_lower_wall
         if world_back_z2 < world_front_z1
           portal_y2_frac = (@center_y_frac >> 4) - world_back_z2 * rw_scale
@@ -1414,7 +1411,7 @@ module Doocr::Video
       #
 
       plane_light_level = (front_sector.light_level >> LIGHT_SEG_SHIFT) + @extra_light
-      plane_lights = @z_light[Math.clamp(plane_light_level, 0, LIGHT_LEVEL_COUNT - 1)]
+      plane_lights = @z_light[plane_light_level.clamp(0, LIGHT_LEVEL_COUNT - 1)]
 
       #
       # Prepare to record the rendering history.
@@ -1432,7 +1429,7 @@ module Doocr::Video
 
       vis_wall_range.upper_clip = -1
       vis_wall_range.lower_clip = -1
-      vis_wall_range.silhouette = 0
+      vis_wall_range.silhouette = Silhouette.new(0)
 
       if front_sector_floor_height > back_sector_floor_height
         vis_wall_range.silhouette = Silhouette::Lower
@@ -1446,7 +1443,7 @@ module Doocr::Video
         vis_wall_range.silhouette |= Silhouette::Upper
         vis_wall_range.upper_sil_height = front_sector_ceiling_height
       elsif back_sector_ceiling_height < @view_z
-        vis_wall_range.silhouette | -Silhouette::Upper
+        vis_wall_range.silhouette |= Silhouette::Upper
         vis_wall_range.upper_sil_height = Fixed.min_value
       end
 
@@ -1462,7 +1459,7 @@ module Doocr::Video
         vis_wall_range.silhouette |= Silhouette::Upper
       end
 
-      masked_texture_column : Int32
+      masked_texture_column : Int32 = 0
       if draw_masked_texture
         masked_texture_column = @clip_data_length - x1
         vis_wall_range.masked_texture_column = masked_texture_column
@@ -1480,8 +1477,8 @@ module Doocr::Video
       # Floor and ceiling.
       #
 
-      ceiling_flat = @flats[@world.as(World).specials.flat_translation[front_sector.ceiling_flat]]
-      floor_flat = @flats[@world.as(World).specials.flat_translation[front_sector.floor_flat]]
+      ceiling_flat = @flats.as(IFlatLookup)[@world.as(World).specials.as(Specials).flat_translation[front_sector.ceiling_flat]]
+      floor_flat = @flats.as(IFlatLookup)[@world.as(World).specials.as(Specials).flat_translation[front_sector.floor_flat]]
 
       #
       # Now the rendering is carried out.
@@ -1492,9 +1489,9 @@ module Doocr::Video
         draw_wall_y1 = (wall_y1_frac.data + HEIGHT_UNIT - 1) >> HEIGHT_BITS
         draw_wall_y2 = wall_y2_frac.data >> HEIGHT_BITS
 
-        texture_column : Int32
-        light_index : Int32
-        inv_scale : Fixed
+        texture_column : Int32 = 0
+        light_index : Int32 = 0
+        inv_scale : Fixed = Fixed.zero
         if seg_textured
           angle = rw_center_angle + @x_to_angle[x]
           angle = Angle.new(angle.data & 0x7FFFFFFF)
@@ -1513,32 +1510,32 @@ module Doocr::Video
           draw_upper_wall_y2 = portal_y1_frac.data >> HEIGHT_BITS
 
           if draw_ceiling
-            cy1 = upper_clip[x] + 1
-            cy2 = Math.min(draw_wall_y1 - 1, lower_clip[x] - 1)
-            draw_ceiling_column(front_sector, ceiling_flat, plane_lights, x, cy1, cy2, front_sector_ceiling_height)
+            cy1 = @upper_clip[x] + 1
+            cy2 = Math.min(draw_wall_y1 - 1, @lower_clip[x] - 1)
+            draw_ceiling_column(front_sector, ceiling_flat, plane_lights, x, cy1.to_i32, cy2.to_i32, front_sector_ceiling_height)
           end
 
-          wy1 = Math.max(draw_upper_wall_y1, upper_clip[x] + 1)
-          wy2 = Math.min(draw_upper_wall_y2, lower_clip[x] - 1)
+          wy1 = Math.max(draw_upper_wall_y1, @upper_clip[x] + 1)
+          wy2 = Math.min(draw_upper_wall_y2, @lower_clip[x] - 1)
           if upper_wall_texture != nil
-            source = upper_wall_texture.composite.columns[texture_column & upper_wall_width_mask]
+            source = upper_wall_texture.as(Texture).composite.columns[texture_column & upper_wall_width_mask]
             if source.size > 0
-              draw_column(source[0], wall_lights[light_index], x, wy1, wy2, inv_scale, upper_texture_alt)
+              draw_column(source[0], wall_lights[light_index], x, wy1.to_i32, wy2.to_i32, inv_scale, upper_texture_alt)
             end
           end
 
-          if upper_clip[x] < wy2
-            upper_clip[x] = wy2.to_i16
+          if @upper_clip[x] < wy2
+            @upper_clip[x] = wy2.to_i16
           end
 
           portal_y1_frac += portal_y1_step
         elsif draw_ceiling
-          cy1 = upper_clip[x] + 1
-          cy2 = Math.min(draw_wall_y1 - 1, lower_clip[x] - 1)
-          draw_ceiling_column(front_sector, ceiling_flat, plane_lights, x, cy1, cy2, front_sector_ceiling_height)
+          cy1 = @upper_clip[x] + 1
+          cy2 = Math.min(draw_wall_y1 - 1, @lower_clip[x] - 1)
+          draw_ceiling_column(front_sector, ceiling_flat, plane_lights, x, cy1.to_i32, cy2.to_i32, front_sector_ceiling_height)
 
-          if upper_clip[x] < cy2
-            upper_clip[x] = cy2.to_i16
+          if @upper_clip[x] < cy2
+            @upper_clip[x] = cy2.to_i16
           end
         end
 
@@ -1546,33 +1543,33 @@ module Doocr::Video
           draw_lower_wall_y1 = (portal_y2_frac.data + HEIGHT_UNIT - 1) >> HEIGHT_BITS
           draw_lower_wall_y2 = wall_y2_frac.data >> HEIGHT_BITS
 
-          wy1 = Math.max(draw_lower_wall_y1, upper_clip[x] + 1)
-          wy2 = Math.min(draw_lower_wall_y2, lower_clip[x] - 1)
+          wy1 = Math.max(draw_lower_wall_y1, @upper_clip[x] + 1)
+          wy2 = Math.min(draw_lower_wall_y2, @lower_clip[x] - 1)
           if lower_wall_texture != nil
-            source = lower_wall_texture.composite.columns[texture_column & lower_wall_width_mask]
+            source = lower_wall_texture.as(Texture).composite.columns[texture_column & lower_wall_width_mask]
             if source.size > 0
-              draw_column(source[0], wall_lights[light_index], x, wy1, wy2, inv_scale, lower_texture_alt)
+              draw_column(source[0], wall_lights[light_index], x, wy1.to_i32, wy2.to_i32, inv_scale, lower_texture_alt)
             end
           end
 
           if draw_floor
-            fy1 = Math.max(draw_wall_y2 + 1, upper_clip[x] + 1)
-            fy2 = lower_clip[x] - 1
-            draw_floor_column(front_sector, floor_flat, plane_lights, x, fy1, fy2, front_sector_floor_height)
+            fy1 = Math.max(draw_wall_y2 + 1, @upper_clip[x] + 1)
+            fy2 = @lower_clip[x] - 1
+            draw_floor_column(front_sector, floor_flat, plane_lights, x, fy1.to_i32, fy2.to_i32, front_sector_floor_height)
           end
 
-          if lower_clip[x] > wy1
-            lower_clip[x] = wy1.to_i16
+          if @lower_clip[x] > wy1
+            @lower_clip[x] = wy1.to_i16
           end
 
           portal_y2_frac += portal_y2_step
         elsif draw_floor
-          fy1 = Math.max(draw_wall_y2 + 1, upper_clip[x] + 1)
-          fy2 = lower_clip[x] - 1
-          draw_floor_column(front_sector, floor_flat, plane_lights, x, fy1, fy2, front_sector_floor_height)
+          fy1 = Math.max(draw_wall_y2 + 1, @upper_clip[x] + 1)
+          fy2 = @lower_clip[x] - 1
+          draw_floor_column(front_sector, floor_flat, plane_lights, x, fy1.to_i32, fy2.to_i32, front_sector_floor_height)
 
-          if lower_clip[x] > draw_wall_y2 + 1
-            lower_clip[x] = fy1.to_i16
+          if @lower_clip[x] > draw_wall_y2 + 1
+            @lower_clip[x] = fy1.to_i16
           end
         end
 
@@ -1593,14 +1590,14 @@ module Doocr::Video
 
       if (((vis_wall_range.silhouette & Silhouette::Upper).to_i32 != 0 ||
          draw_masked_texture) && vis_wall_range.upper_clip == -1)
-        @clip_data[@clip_data_length..range] == upper_clip[x1..range]
+        @clip_data[@clip_data_length..range] == @upper_clip[x1..range]
         vis_wall_range.upper_clip = @clip_data_length - x1
         @clip_data_length += range
       end
 
       if (((vis_wall_range.silhouette & Silhouette::Lower).to_i32 != 0 ||
          draw_masked_texture) && vis_wall_range.lower_clip == -1)
-        @clip_data[@clip_data_length..range] = lower_clip[x1..range]
+        @clip_data[@clip_data_length..range] = @lower_clip[x1..range]
       end
 
       if draw_masked_texture && (vis_wall_range.silhouette & Silhouette::Upper).to_i32 == 0
@@ -1629,28 +1626,30 @@ module Doocr::Video
     private def draw_masked_range(draw_seg : VisWallRange, x1 : Int32, x2 : Int32)
       seg = draw_seg.seg
 
-      wall_light_level = (seg.front_sector.light_level >> LIGHT_SEG_SHIFT) + @extra_light
-      if seg.vertex1.y == seg.vertex2.y
+      wall_light_level = (seg.as(Seg).front_sector.light_level >> LIGHT_SEG_SHIFT) + @extra_light
+      if seg.as(Seg).vertex1.as(Vertex).y == seg.as(Seg).vertex2.as(Vertex).y
         wall_light_level -= 1
-      elsif seg.vertex1.x == seg.vertex2.x
+      elsif seg.as(Seg).vertex1.as(Vertex).x == seg.as(Seg).vertex2.as(Vertex).x
         wall_light_level += 1
       end
 
-      wall_lights = @scale_light[Math.clamp(wall_light_level, 0, LIGHT_LEVEL_COUNT - 1)]
+      wall_lights = @scale_light[wall_light_level.clamp(0, LIGHT_LEVEL_COUNT - 1)]
 
-      wall_texture = @textures[@world.as(World).specials.texture_translation[seg.side_def.middle_texture]]
+      wall_texture = @textures.as(ITextureLookup)[@world.as(World).specials.as(Specials).texture_translation[seg.as(Seg).side_def.middle_texture]]
       mask = wall_texture.width - 1
 
       mid_texture_alt : Fixed
-      if (seg.line_def.flags & LineFlags::DontPegBottom).to_i32 != 0
+      if (seg.as(Seg).line_def.flags & LineFlags::DontPegBottom).to_i32 != 0
         mid_texture_alt = draw_seg.front_sector_floor_height > draw_seg.back_sector_floor_height ? draw_seg.front_sector_floor_height : draw_seg.back_sector_floor_height
         mid_texture_alt = mid_texture_alt + Fixed.from_i(wall_texture.height) - @view_z
       else
         mid_texture_alt = draw_seg.front_sector_ceiling_height > draw_seg.back_sector_ceiling_height ? draw_seg.front_sector_ceiling_height : draw_seg.back_sector_ceiling_height
         mid_texture_alt = mid_texture_alt - @view_z
       end
-      mid_texture_alt += seg.side_def.scale_step
-      scale = draw_seg.scale1 + (x1 - draw_seg.x1) * scale_step
+      mid_texture_alt += seg.as(Seg).side_def.row_offset
+
+      scale_step = draw_seg.scale_step
+      scale = draw_seg.scale1 + scale_step * (x1 - draw_seg.x1)
 
       x = x1
       while x <= x2
@@ -1693,7 +1692,7 @@ module Doocr::Video
       y2 : Int32,
       ceiling_height : Fixed
     )
-      if flat == @flats.sky_flat
+      if flat == @flats.as(IFlatLookup).sky_flat
         draw_sky_column(x, y1, y2)
         return
       end
@@ -1738,7 +1737,7 @@ module Doocr::Video
           x_frac = @ceiling_x_frac[y] + @ceiling_x_step[y]
           y_frac = @ceiling_y_frac[y] + @ceiling_y_step[y]
 
-          spot - ((y_frac.data >> (16 - 6)) & (63 * 64)) + ((x_frac.data >> 16) & 63)
+          spot = ((y_frac.data >> (16 - 6)) & (63 * 64)) + ((x_frac.data >> 16) & 63)
           @screen_data[pos] = @ceiling_lights[y][flat_data[spot]]
           pos += 1
 
@@ -1812,7 +1811,7 @@ module Doocr::Video
       y2 : Int32,
       floor_height : Fixed
     )
-      if flat == @flats.sky_flat
+      if flat == @flats.as(IFlatLookup).sky_flat
         draw_sky_column(x, y1, y2)
         return
       end
@@ -1857,7 +1856,7 @@ module Doocr::Video
           x_frac = @floor_x_frac[y] + @floor_x_step[y]
           y_frac = @floor_y_frac[y] + @floor_y_step[y]
 
-          spot - ((y_frac.data >> (16 - 6)) & (63 * 64)) + ((x_frac.data >> 16) & 63)
+          spot = ((y_frac.data >> (16 - 6)) & (63 * 64)) + ((x_frac.data >> 16) & 63)
           @screen_data[pos] = @floor_lights[y][flat_data[spot]]
           pos += 1
 
@@ -1941,7 +1940,7 @@ module Doocr::Video
 
       # Determine scaling, which is the only mapping to be done.
       frac_step = inv_scale
-      frac = texture_alt + (y1 - @center_y) * frac_step
+      frac = texture_alt + frac_step * (y1 - @center_y)
 
       # Inner loop that does the actual texture mapping,
       # e.g. a DDA-lile scaling.
@@ -1952,7 +1951,7 @@ module Doocr::Video
       while pos <= pos2
         # Re-map color indices from wall texture column
         # using a lighting/special effects LUT.
-        @screen_data[pos] = map[source[offset + ((frac.data >> Fixed::FRAC_BITS) & 127)]]
+        @screen_data[pos] = map[source[offset + ((frac.data >> Fixed::FRACBITS) & 127)]]
         frac += frac_step
         pos += 1
       end
@@ -1978,7 +1977,7 @@ module Doocr::Video
 
       # Determine scaling, which is the only mapping to be done.
       frac_step = inv_scale
-      frac = texture_alt + (y1 - @center_y) * frac_step
+      frac = texture_alt + frac_step * (y1 - @center_y)
 
       # Inner loop that does the actual texture mapping,
       # e.g. a DDA-lile scaling.
@@ -1989,7 +1988,7 @@ module Doocr::Video
       while pos <= pos2
         # Re-map color indices from wall texture column
         # using a lighting/special effects LUT.
-        @screen_data[pos] = map[translation[source[offset + ((frac.data >> Fixed::FRAC_BITS) & 127)]]]
+        @screen_data[pos] = map[translation[source[offset + ((frac.data >> Fixed::FRACBITS) & 127)]]]
         frac += frac_step
         pos += 1
       end
@@ -2010,7 +2009,7 @@ module Doocr::Video
       pos1 = @screen_height * (@window_x + x) + @window_y + y1
       pos2 = pos1 + (y2 - y1)
 
-      map = @colormap[6]
+      map = @colormap.as(ColorMap)[6]
       pos = pos1
       while pos <= pos2
         @screen_data[pos] = map[@screen_data[pos + @@fuzz_table[@fuzz_pos]]]
@@ -2026,9 +2025,9 @@ module Doocr::Video
 
     private def draw_sky_column(x : Int32, y1 : Int32, y2 : Int32)
       angle = (@view_angle + @x_to_angle[x]).data >> ANGLE_TO_SKY_SHIFT
-      mask = @world.as(World).map.sky_texture.width - 1
-      source = @world.as(World).map.sky_texture.composite.columns[angle & mask]
-      draw_column(source[0], @colormap[0], x, y1, y2, @sky_inv_scale, @sky_texture_alt)
+      mask = @world.as(World).map.as(Map).sky_texture.as(Texture).width - 1
+      source = @world.as(World).map.as(Map).sky_texture.as(Texture).composite.columns[angle & mask]
+      draw_column(source[0], @colormap.as(ColorMap)[0], x, y1, y2, @sky_inv_scale, @sky_texture_alt)
     end
 
     private def draw_masked_column(
@@ -2045,14 +2044,14 @@ module Doocr::Video
       columns.each do |column|
         y1_frac = top_y + scale * column.top_delta
         y2_frac = y1_frac + scale * column.length
-        y1 = (y1_frac.data + Fixed::FRAC_UNIT - 1) >> Fixed::FRAC_BITS
-        y2 = (y2_frac.data - 1) >> Fixed::FRAC_BITS
+        y1 = (y1_frac.data + Fixed::FRAC_UNIT - 1) >> Fixed::FRACBITS
+        y2 = (y2_frac.data - 1) >> Fixed::FRACBITS
 
         y1 = Math.max(y1, upper_clip + 1)
         y2 = Math.min(y2, lower_clip - 1)
 
-        if y1 <= y2_frac
-          alt = Fixed.new(texture_alt.data - (column.top_delta << Fixed::FRAC_BITS))
+        if y1 <= y2
+          alt = Fixed.new(texture_alt.data - (column.top_delta << Fixed::FRACBITS))
           draw_column(column, map, x, y1, y2, inv_scale, alt)
         end
       end
@@ -2073,14 +2072,14 @@ module Doocr::Video
       columns.each do |column|
         y1_frac = top_y + scale * column.top_delta
         y2_frac = y1_frac + scale * column.length
-        y1 = (y1_frac.data + Fixed::FRAC_UNIT - 1) >> Fixed::FRAC_BITS
-        y2 = (y2_frac.data - 1) >> Fixed::FRAC_BITS
+        y1 = (y1_frac.data + Fixed::FRAC_UNIT - 1) >> Fixed::FRACBITS
+        y2 = (y2_frac.data - 1) >> Fixed::FRACBITS
 
         y1 = Math.max(y1, upper_clip + 1)
         y2 = Math.min(y2, lower_clip - 1)
 
-        if y1 <= y2_frac
-          alt = Fixed.new(texture_alt.data - (column.top_delta << Fixed::FRAC_BITS))
+        if y1 <= y2
+          alt = Fixed.new(texture_alt.data - (column.top_delta << Fixed::FRACBITS))
           draw_column_translation(column, translation, map, x, y1, y2, inv_scale, alt)
         end
       end
@@ -2097,8 +2096,8 @@ module Doocr::Video
       columns.each do |column|
         y1_frac = top_y + scale * column.top_delta
         y2_frac = y1_frac + scale * column.length
-        y1 = (y1_frac.data + Fixed::FRAC_UNIT - 1) >> Fixed::FRAC_BITS
-        y2 = (y2_frac.data - 1) >> Fixed::FRAC_BITS
+        y1 = (y1_frac.data + Fixed::FRAC_UNIT - 1) >> Fixed::FRACBITS
+        y2 = (y2_frac.data - 1) >> Fixed::FRACBITS
 
         y1 = Math.max(y1, upper_clip + 1)
         y2 = Math.min(y2, lower_clip - 1)
@@ -2113,23 +2112,23 @@ module Doocr::Video
       # BSP is traversed by subsector.
       # A sector might have been split into several subsectors during BSP building.
       # Thus we check whether its already added.
-      return if secor.valid_count == valid_count
+      return if sector.valid_count == valid_count
 
       # Well, now it will be done
       sector.valid_count = valid_count
 
       sprite_light_level = (sector.light_level >> LIGHT_SEG_SHIFT) + @extra_light
-      sprite_lights = @scale_light[Math.clamp(sprite_light_level, 0, LIGHT_LEVEL_COUNT - 1)]
+      sprite_lights = @scale_light[sprite_light_level.clamp(0, LIGHT_LEVEL_COUNT - 1)]
 
       # Handle all things in sector.
       things = sector.get_enumerator
       while true
-        project_sprite(things.current, sprite_lights)
+        project_sprite(things.current.as(Mobj), sprite_lights)
         break if !things.move_next
       end
     end
 
-    private def project_sprite(things : Mobj, sprite_lights : Array(Array(UInt8)))
+    private def project_sprite(thing : Mobj, sprite_lights : Array(Array(UInt8)))
       if @vis_sprite_count == @vis_sprites.size
         # Too many sprites.
         return
@@ -2180,13 +2179,13 @@ module Doocr::Video
 
       # Calculate edges of the shape.
       tx -= Fixed.from_i(lump.left_offset)
-      x1 = (@center_x_frac + (tx * x_scale)).data >> Fixed::FRAC_BITS
+      x1 = (@center_x_frac + (tx * x_scale)).data >> Fixed::FRACBITS
 
       # Off the right side?
       return if x1 > @window_width
 
       tx += Fixed.from_i(lump.width)
-      x2 = ((@center_x_frac + (tx * x_scale)).data >> Fixed::FRAC_BITS) - 1
+      x2 = ((@center_x_frac + (tx * x_scale)).data >> Fixed::FRACBITS) - 1
 
       # Off the left side?
       return if x2 < 0
@@ -2229,7 +2228,7 @@ module Doocr::Video
           vis.colormap.@colormap.full_bright
         end
       else
-        vis.colormap = @colormap[@fixed_colormap]
+        vis.colormap = @colormap.as(ColorMap)[@fixed_colormap]
       end
     end
 
@@ -2281,7 +2280,7 @@ module Doocr::Video
 
         if (scale < sprite.scale ||
            (low_scale < sprite.scale &&
-           Geometry.point_on_seg_side(sprite.global_x, sprite.global_y, wall.seg) == 0))
+           Geometry.point_on_seg_side(sprite.global_x, sprite.global_y, wall.seg.as(Seg)) == 0))
           # Masked mid texture?
           if wall.masked_texture_column != -1
             draw_masked_range(wall, r1, r2)
@@ -2292,7 +2291,7 @@ module Doocr::Video
         end
 
         # Clip this piece of the sprite.
-        silhouette = wall.Silhouette
+        silhouette = wall.silhouette
 
         if sprite.global_bottom_z >= wall.lower_sil_height
           silhouette &= ~Silhouette::Lower
@@ -2358,7 +2357,7 @@ module Doocr::Video
         while x <= sprite.x2
           texture_column = frac.to_i_floor
           draw_masked_fuzz_column(
-            sprite.patch.columns[texture_column],
+            sprite.patch.as(Patch).columns[texture_column],
             x,
             @center_y_frac - (sprite.texture_alt * sprite.scale),
             sprite.scale,
@@ -2374,20 +2373,17 @@ module Doocr::Video
         case ((sprite.mobj_flags & MobjFlags::Translation).to_i32 >> MobjFlags::TransShift.to_i32)
         when 1
           translation = @green_to_gray
-          break
         when 2
           translation = @green_to_brown
-          break
         else
           translation = @green_to_red
-          break
         end
         frac = sprite.start_frac
         x = sprite.x1
         while x <= sprite.x2
           texture_column = frac.to_i_floor
           draw_masked_column_translation(
-            sprite.patch.columns[texture_column],
+            sprite.patch.as(Patch).columns[texture_column],
             translation,
             sprite.colormap,
             x,
@@ -2408,7 +2404,7 @@ module Doocr::Video
         while x <= sprite.x2
           texture_column = frac.to_i_floor
           draw_masked_column(
-            sprite.patch.columns[texture_column],
+            sprite.patch.as(Patch).columns[texture_column],
             sprite.colormap,
             x,
             @center_y_frac - (sprite.texture_alt * sprite.scale),
@@ -2427,9 +2423,9 @@ module Doocr::Video
 
     private def draw_player_sprite(psp : PlayerSpriteDef, sprite_lights : Array(Array(UInt8)), fuzz : Bool)
       # Decide which patch to use.
-      sprite_def = @sprites[psp.state.sprite]
+      sprite_def = @sprites.as(ISpriteLookup)[psp.state.as(MobjStateDef).sprite]
 
-      sprite_frame = sprite_def.frames[psp.state.frame & 0x7FFF]
+      sprite_frame = sprite_def.frames[psp.state.as(MobjStateDef).frame & 0x7FFF]
 
       lump = sprite_frame.patches[0]
       flip = sprite_frame.flip[0]
@@ -2437,20 +2433,20 @@ module Doocr::Video
       # Calculate edges of the shape.
       tx = psp.sx - Fixed.from_i(160)
       tx -= Fixed.from_i(lump.left_offset)
-      x1 = (@center_x_frac + tx * @weapon_scale).data >> Fixed::FRAC_BITS
+      x1 = (@center_x_frac + tx * @weapon_scale).data >> Fixed::FRACBITS
 
       # Off the right side?
       return if x1 > @window_height
 
       tx += Fixed.from_i(lump.width)
-      x2 = ((@center_x_frac + tx * @weapon_scale).data >> Fixed::FRAC_BITS) - 1
+      x2 = ((@center_x_frac + tx * @weapon_scale).data >> Fixed::FRACBITS) - 1
 
       # Off the left side?
       return if x2 < 0
 
       # Store information in a vissprite.
-      vis = @weapon_sprite
-      vis.mobj_flags = 0
+      vis = @weapon_sprite.as(VisSprite)
+      vis.mobj_flags = MobjFlags.new(0)
       # The code below is based on Crispy Doom's weapon rendering code.
       vis.texture_alt = Fixed.from_i(100) + Fixed.one / 4 - (psp.sy - Fixed.from_i(lump.top_offset))
       vis.x1 = x1 < 0 ? 0 : x1
@@ -2472,22 +2468,22 @@ module Doocr::Video
       vis.patch = lump
 
       if @fixed_colormap == 0
-        if (psp.state.frame & 0x8000) == 0
+        if (psp.state.as(MobjStateDef).frame & 0x8000) == 0
           vis.colormap = sprite_lights[@max_scale_light - 1]
         else
-          vis.colormap = @colormap.full_bright
+          vis.colormap = @colormap.as(ColorMap).full_bright
         end
       else
-        vis.colormap = @colormap[@fixed_colormap]
+        vis.colormap = @colormap.as(ColorMap)[@fixed_colormap]
       end
 
       if fuzz
         frac = vis.start_frac
         x = vis.x1
         while x <= vis.x2
-          texture_column = frac.data >> Fixed::FRAC_BITS
+          texture_column = frac.data >> Fixed::FRACBITS
           draw_masked_fuzz_column(
-            vis.patch.columns[texture_column],
+            vis.patch.as(Patch).columns[texture_column],
             x,
             @center_y_frac - (vis.texture_alt * vis.scale),
             vis.scale,
@@ -2502,9 +2498,9 @@ module Doocr::Video
         frac = vis.start_frac
         x = vis.x1
         while x <= vis.x2
-          texture_column = frac.data >> Fixed::FRAC_BITS
+          texture_column = frac.data >> Fixed::FRACBITS
           draw_masked_column(
-            vis.patch.columns[texture_column],
+            vis.patch.as(Patch).columns[texture_column],
             vis.colormap,
             x,
             @center_y_frac = (vis.texture_alt * vis.scale),
@@ -2523,7 +2519,7 @@ module Doocr::Video
 
     private def draw_player_sprites(player : Player)
       # Get light level.
-      sprite_light_level = (player.mobj.subsector.sector.light_level >> LIGHT_SEG_SHIFT) + @extra_light
+      sprite_light_level = (player.mobj.as(Mobj).subsector.as(Subsector).sector.as(Sector).light_level >> LIGHT_SEG_SHIFT) + @extra_light
 
       sprite_lights : Array(Array(UInt8))
       if sprite_light_level
@@ -2544,7 +2540,7 @@ module Doocr::Video
       end
 
       # Add all active psprites.
-      PlayerSprite::Count.times do |i|
+      PlayerSprite::Count.to_i32.times do |i|
         psp = player.player_sprites[i]
         if psp.state != nil
           draw_player_sprite(psp, sprite_lights, fuzz)
@@ -2562,8 +2558,8 @@ module Doocr::Video
     end
 
     private class ClipRange
-      getter first : Int32 = 0
-      getter last : Int32 = 0
+      property first : Int32 = 0
+      property last : Int32 = 0
 
       def copy_from(range : ClipRange)
         @first = range.first

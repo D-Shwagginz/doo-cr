@@ -39,7 +39,7 @@ module Doocr
     # Spawn a mobj at the mapthing
     def spawn_map_thing(mt : MapThing)
       # Count deathmatch start positions.
-      if my.type == 11
+      if mt.type == 11
         if @deathmatch_starts.size < 10
           @deathmatch_starts << mt
         end
@@ -90,14 +90,14 @@ module Doocr
 
       # Don't spawn keycards and players in deathmatch.
       if (@world.as(World).options.deathmatch != 0 &&
-         (DoomInfo.mobj_infos[i].flags & MobjFlags::NotDeathmatch) != 0)
+         (DoomInfo.mobj_infos[i].flags & MobjFlags::NotDeathmatch).to_i32 != 0)
         return
       end
 
       # Don't spawn any monsters if -nomonsters.
       if (@world.as(World).options.no_monsters &&
          (i == MobjType::Skull.to_i32 ||
-         (DoomInfo.mobj_infos[i].flags & MobjFlags::CountKill) != 0))
+         (DoomInfo.mobj_infos[i].flags & MobjFlags::CountKill).to_i32 != 0))
         return
       end
 
@@ -105,7 +105,7 @@ module Doocr
       x : Fixed = mt.x
       y : Fixed = mt.y
       z : Fixed
-      if (DoomInfo.mobj_infos[i].flags & MobjFlags.spawn_ceiling) != 0
+      if (DoomInfo.mobj_infos[i].flags & MobjFlags::SpawnCeiling).to_i32 != 0
         z = Mobj.on_ceiling_z
       else
         z = Mobj.on_floor_z
@@ -119,16 +119,16 @@ module Doocr
         mobj.tics = 1 + (@world.as(World).random.next % mobj.tics)
       end
 
-      if (mobj.flags & MobjFlags::CountKill) != 0
+      if (mobj.flags & MobjFlags::CountKill).to_i32 != 0
         @world.as(World).total_kills += 1
       end
-      if (mobj.flags & MobjFlags::CountItem) != 0
+      if (mobj.flags & MobjFlags::CountItem).to_i32 != 0
         @world.as(World).total_items += 1
       end
 
       mobj.angle = mt.angle
 
-      if (mt.flags & ThingFlags::Ambush) != 0
+      if (mt.flags & ThingFlags::Ambush).to_i32 != 0
         mobj.flags |= MobjFlags::Ambush
       end
     end
@@ -153,9 +153,9 @@ module Doocr
       z = Mobj.on_floor_z
       mobj = spawn_mobj(x, y, z, MobjType::Player)
 
-      if my.type - 1 == @world.as(World).options.console_player
-        @world.as(World).status_bar.reset
-        @world.as(World).options.sound.set_listener(mobj)
+      if mt.type - 1 == @world.as(World).options.console_player
+        @world.as(World).status_bar.as(StatusBar).reset
+        @world.as(World).options.sound.as(Audio::ISound).set_listener(mobj)
       end
 
       # Set color translations for player sprites.
@@ -179,7 +179,7 @@ module Doocr
       player.view_height = Player.normal_view_height
 
       # Setup gun psprite.
-      @world.as(World).player_behavior.setup_player_sprites(player)
+      @world.as(World).player_behavior.as(PlayerBehavior).setup_player_sprites(player)
 
       # Give all cards in death match mode.
       if @world.as(World).options.deathmatch != 0
@@ -244,10 +244,10 @@ module Doocr
 
     # Remove the mobj from the level.
     def remove_mobj(mobj : Mobj)
-      tm = @world.as(World).thing_movement.as(ThingMovement)
+      tm = @world.as(World).thing_movement.as(ThingMovement).as(ThingMovement)
 
-      if ((mobj.flags & MobjFlags::Special) != 0 &&
-         (mobj.flags & MobjFlags::Dropped) == 0 &&
+      if ((mobj.flags & MobjFlags::Special).to_i32 != 0 &&
+         (mobj.flags & MobjFlags::Dropped).to_i32 == 0 &&
          (mobj.type != MobjType::Inv) &&
          (mobj.type != MobjType::Ins))
         @item_respawn_que[@item_que_head] = mobj.spawn_point.as(MapThing)
@@ -321,7 +321,7 @@ module Doocr
       )
 
       # Fuzzy player.
-      if (dest.flags & MobjFlags::Shadow) != 0
+      if (dest.flags & MobjFlags::Shadow).to_i32 != 0
         random = @world.as(World).random
         angle += Angle.new((random.next - random.next) << 20)
       end
@@ -412,7 +412,7 @@ module Doocr
       if players[playernum].mobj == nil
         # First spawn of level, before corpses.
         playernum.times do |i|
-          return false if players[i].mobj.x == mthing.x && players[i].mobj.y == mthing.y
+          return false if players[i].mobj.as(Mobj).x == mthing.x && players[i].mobj.as(Mobj).y == mthing.y
         end
         return true
       end
@@ -420,17 +420,17 @@ module Doocr
       x = mthing.x
       y = mthing.y
 
-      return false if !@world.as(World).thing_movement.check_position(players[playernum].mobj, x, y)
+      return false if !@world.as(World).thing_movement.as(ThingMovement).check_position(players[playernum].mobj.as(Mobj), x, y)
 
       # Flush an old corpse if needed.
       if @body_que_slot >= @@body_que_size
         remove_mobj(@body_que[@body_que_slot % @@body_que_size])
       end
-      @body_que[@body_que_slot % @@body_que_size] = players[playernum].mobj
+      @body_que[@body_que_slot % @@body_que_size] = players[playernum].mobj.as(Mobj)
       @body_que_slot += 1
 
       # Spawn a teleport fog.
-      subsector = Geometry.point_in_subsector(x, y, @world.as(World).map)
+      subsector = Geometry.point_in_subsector(x, y, @world.as(World).map.as(Map))
 
       angle = (Angle.ang45.data >> Trig::ANGLE_TO_FINE_SHIFT) *
               (mthing.angle.to_degree.round_even.to_i32 / 45)
@@ -444,29 +444,28 @@ module Doocr
       when 4096             # -4096
         xa = Trig.tan(2048) # finecosine[-4096]
         ya = Trig.tan(0)    # finesine[-4096]
-        break
+
       when 5120             # -3072
         xa = Trig.tan(3072) # finecosine[-3072]
         ya = Trig.tan(1024) # finesine[-3072]
-        break
+
       when 6144             # -2048
         xa = Trig.sin(0)    # finecosine[-2048]
         ya = Trig.tan(2048) # finesine[-2048]
-        break
+
       when 7168             # -1024
         xa = Trig.sin(1024) # finecosine[-1024]
         ya = Trig.tan(3072) # finesine[-1024]
-        break
+
       when 0, 1024, 2048, 3072
         xa = Trig.cos(angle.to_i32)
         ya = Trig.sin(angle.to_i32)
-        break
       else
         raise "Unexpected angle: #{angle}"
       end
 
       mo = spawn_mobj(
-        x + 20 * xa, y + 20 * ya,
+        x + xa * 20, y + ya * 20,
         subsector.sector.floor_height,
         MobjType::Tfog
       )
@@ -489,7 +488,7 @@ module Doocr
 
       random = @world.as(World).random
       20.times do |j|
-        i = @random.next % selections
+        i = random.next % selections
         if check_spot(player_number, @deathmatch_starts[i])
           @deathmatch_starts[i].type = player_number + 1
           spawn_player(@deathmatch_starts[i])
@@ -498,7 +497,7 @@ module Doocr
       end
 
       # No good spot, so the player will probably get stuck.
-      spawn_player(@player_starts[player_number])
+      spawn_player(@player_starts[player_number].as(MapThing))
     end
 
     #
@@ -535,7 +534,7 @@ module Doocr
       y = mthing.y
 
       # Spawn a teleport fog at the new spot.
-      ss = Geometry.point_in_subsector(x, y, @world.as(World).map)
+      ss = Geometry.point_in_subsector(x, y, @world.as(World).map.as(Map))
       mo = spawn_mobj(x, y, ss.sector.floor_height, MobjType::Ifog)
       @world.as(World).start_sound(mo, Sfx::ITMBK, SfxType::Misc)
 
@@ -548,7 +547,7 @@ module Doocr
 
       # Spawn it
       z : Fixed
-      if (DoomInfo.mobj_infos[i].flags & MobjFlags::SpawnCeiling) != 0
+      if (DoomInfo.mobj_infos[i].flags & MobjFlags::SpawnCeiling).to_i32 != 0
         z = Mobj.on_ceiling_z
       else
         z = Mobj.on_floor_z

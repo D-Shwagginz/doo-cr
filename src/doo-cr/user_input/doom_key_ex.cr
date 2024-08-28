@@ -15,9 +15,9 @@
 #
 
 module Doocr
-  module DoomKeyEx
-    def self.get_char(key : DoomKey)
-      case key
+  enum DoomKey
+    def get_char
+      case self
       when DoomKey::A
         return 'a'
       when DoomKey::B
@@ -145,8 +145,8 @@ module Doocr
       end
     end
 
-    def self.to_s(key : DoomKey)
-      case key
+    def to_s
+      case self
       when DoomKey::A
         return "a"
       when DoomKey::B

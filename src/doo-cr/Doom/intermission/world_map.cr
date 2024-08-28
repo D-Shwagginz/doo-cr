@@ -16,7 +16,7 @@
 
 module Doocr
   module WorldMap
-    @@locations : Array(Array(Point)) = [
+    class_getter locations : Array(Array(Point)) = [
       # Episode 0 world map.
       [
         Point.new(185, 164), # location of level 0 (CJ)

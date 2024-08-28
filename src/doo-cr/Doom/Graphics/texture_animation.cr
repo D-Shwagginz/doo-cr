@@ -16,7 +16,7 @@
 
 module Doocr
   class TextureAnimation
-    getter animations : Array(TextureAnimationInfo)
+    getter animations : Array(TextureAnimationInfo) = [] of TextureAnimationInfo
 
     def initialize(textures : ITextureLookup, flats : IFlatLookup)
       begin

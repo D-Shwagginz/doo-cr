@@ -16,17 +16,17 @@
 
 module Doocr
   class Palette
-    getter damagestart : Int32 = 1
-    getter damagecount : Int32 = 8
+    class_getter damage_start : Int32 = 1
+    class_getter damage_count : Int32 = 8
 
-    getter bonusstart : Int32 = 9
-    getter bonuscount : Int32 = 4
+    class_getter bonus_start : Int32 = 9
+    class_getter bonus_count : Int32 = 4
 
-    getter ironfeet : Int32 = 13
+    class_getter ironfeet : Int32 = 13
 
-    @data : Bytes
+    @data : Bytes = Bytes.new(0)
 
-    @palettes : Array(Array(UInt32))
+    @palettes : Array(Array(UInt32)) = [] of Array(UInt32)
 
     def [](palette_number : Int)
       return @palettes[palette_number]
@@ -39,7 +39,7 @@ module Doocr
         @data = wad.read_lump("PLAYPAL")
 
         count = @data.size / (3 * 256)
-        @palettes = Array.new(count, [] of UInt32)
+        @palettes = Array.new(count.to_i32, [] of UInt32)
         @palettes.size.times do |i|
           @palettes[i] = Array(UInt32).new(256)
         end
@@ -61,11 +61,11 @@ module Doocr
           g = @data[color_offset + 1]
           b = @data[color_offset + 2]
 
-          r = ().round_even(255 * ((r / 255.0)**p)).to_u8
-          g = ().round_even(255 * ((g / 255.0)**p)).to_u8
-          b = ().round_even(255 * ((b / 255.0)**p)).to_u8
+          r = (255 * ((r / 255.0)**p)).round_even.to_u8
+          g = (255 * ((g / 255.0)**p)).round_even.to_u8
+          b = (255 * ((b / 255.0)**p)).round_even.to_u8
 
-          @palettes[i][j] = ((r << 0) | (g << 8) | (b << 16) | (255 << 24)).to_u32
+          @palettes[i] << ((r << 0) | (g << 8) | (b << 16) | (255 << 24)).to_u32
         end
       end
     end

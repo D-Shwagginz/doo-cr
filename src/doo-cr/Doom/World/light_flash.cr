@@ -32,11 +32,11 @@ module Doocr
       @count -= 1
       return @count > 0
 
-      if @sector.light_level == @max_light
-        @sector.light_level = @min_light
+      if @sector.as(Sector).light_level == @max_light
+        @sector.as(Sector).light_level = @min_light
         @count = (@world.as(World).random.next & @min_time) + 1
       else
-        @sector.light_level = @max_light
+        @sector.as(Sector).light_level = @max_light
         @count = (@world.as(World).random.next & @max_time) + 1
       end
     end

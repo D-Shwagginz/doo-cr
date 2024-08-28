@@ -28,32 +28,32 @@ module Doocr
     end
 
     def initialize(
-      @name : String,
-      @masked : Bool,
-      @width : Int32,
-      @height : Int32,
-      @patches : TexturePatch
+      @name,
+      @masked,
+      @width,
+      @height,
+      @patches
     )
       @composite = generate_composite(@name, @width, @height, @patches)
     end
 
-    def self.from_data(data : Bytes, offset : Int32, patch_lookup : Patch) : Texture
+    def self.from_data(data : Bytes, offset : Int32, patch_lookup : Array(Patch)) : Texture
       name = String.new(data[offset, 8])
       masked = IO::ByteFormat::LittleEndian.decode(Int32, data[offset + 8, 4])
       width = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 12, 2])
       height = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 14, 2])
       patch_count = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 20, 2])
-      patches = TexturePatch[patch_count]
+      patches = Array(TexturePatch).new(patch_count)
       patch_count.times do |i|
         patch_offset = offset + 22 + TexturePatch.datasize * i
-        patches[i] = TexturePatch.from_data(data, patch_offset, patch_lookup)
+        patches << TexturePatch.from_data(data, patch_offset, patch_lookup)
       end
 
       return Texture.new(
         name,
         masked != 0,
-        width,
-        height,
+        width.to_i32,
+        height.to_i32,
         patches
       )
     end
@@ -66,17 +66,17 @@ module Doocr
       width = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 14, 2])
     end
 
-    private def generate_composite(name : String, width : Int32, height : Int32, patches : TexturePatch) : Patch
-      patch_count = Array(Int32).new(width)
-      columns = Array.new(width, [] of Patch)
+    private def generate_composite(name : String, width : Int32, height : Int32, patches : Array(TexturePatch)) : Patch
+      patch_count = Array(Int32).new(width, 0)
+      columns = Array.new(width, [] of Column)
       composite_column_count = 0
 
       patches.each do |patch|
         left = patch.origin_x
         right = left + patch.width
 
-        start = left > 0 ? left : 0
-        ending = right > width ? right : width
+        start = Math.max(left, 0)
+        ending = Math.min(right, width)
 
         x = start
         while x < ending
@@ -146,7 +146,9 @@ module Doocr
         length -= bottom_exceedance if bottom_exceedance > 0
 
         if length > 0
-          column.data[source_index, length] = destination[destination_index, length]
+          length.times do |i|
+            column.data[source_index + i] = destination[destination_index + i]
+          end
         end
       end
     end

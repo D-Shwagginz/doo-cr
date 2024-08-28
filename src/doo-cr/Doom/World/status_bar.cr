@@ -42,7 +42,7 @@ module Doocr
 
     def initialize(@world : World)
       @old_health = -1
-      @old_weapons_owned = @world.as(World).console_player.weapons_owned.clone
+      @old_weapons_owned = @world.as(World).console_player.weapon_owned.clone
       @face_count = 0
       @face_index = 0
       @random_number = 0
@@ -55,7 +55,7 @@ module Doocr
 
     def reset
       @old_health = -1
-      @old_weapons_owned = @world.as(World).console_player.weapons_owned.clone
+      @old_weapons_owned = @world.as(World).console_player.weapon_owned.clone
       @face_count = 0
       @face_index = 0
       @random_number = 0
@@ -86,10 +86,10 @@ module Doocr
           # Picking up bonus.
           do_evil_grin = false
 
-          DoomInfo.weaponinfos.size.times do |i|
-            if @old_weapons_owned[i] != player.weapons_owned[i]
+          DoomInfo.weapon_infos.size.times do |i|
+            if @old_weapons_owned[i] != player.weapon_owned[i]
               do_evil_grin = true
-              @old_weapons_owned[i] = player.weapons_owned[i]
+              @old_weapons_owned[i] = player.weapon_owned[i]
             end
           end
 
@@ -114,19 +114,19 @@ module Doocr
             @face_index = calc_pain_offset() + Face.ouch_offset
           else
             attacker_angle = Geometry.point_to_angle(
-              player.mobj.x, player.mobj.y,
-              player.attacker.x, player.attacker.y
+              player.mobj.as(Mobj).x, player.mobj.as(Mobj).y,
+              player.attacker.as(Mobj).x, player.attacker.as(Mobj).y
             )
 
             diff : Angle
             right : Bool
-            if attacker_angle > player.mobj.angle
+            if attacker_angle > player.mobj.as(Mobj).angle
               # Whether right or left.
-              diff = attacker_angle - player.mobj.angle
+              diff = attacker_angle - player.mobj.as(Mobj).angle
               right = diff > Angle.ang180
             else
               # Whether left or right.
-              diff = player.mobj.angle - attacker_angle
+              diff = player.mobj.as(Mobj).angle - attacker_angle
               right = diff <= Angle.ang180
             end
 
@@ -204,7 +204,7 @@ module Doocr
       health = player.health > 100 ? 100 : player.health
 
       if health != @old_health
-        @last_pain_offset = Face.stride * ((100 - health) * Face.pain_face_count) / 101
+        @last_pain_offset = (Face.stride * ((100 - health) * Face.pain_face_count) / 101).to_i32
         @old_health = health
       end
 

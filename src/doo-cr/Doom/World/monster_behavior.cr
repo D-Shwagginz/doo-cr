@@ -92,10 +92,10 @@ module Doocr
 
       x = false
 
-      if target != nil && (target.as(Mobj).flags & MobjFlags::Shootable) != 0
+      if target != nil && (target.as(Mobj).flags & MobjFlags::Shootable).to_i32 != 0
         actor.target = target
 
-        if (actor.flags & MobjFlags::Ambush) != 0
+        if (actor.flags & MobjFlags::Ambush).to_i32 != 0
           x = true if @world.as(World).visibility_check.as(VisibilityCheck).check_sight(actor, actor.target.as(Mobj))
         else
           x = true
@@ -166,13 +166,13 @@ module Doocr
       try_x = actor.x + @@x_speed[actor.move_dir.to_i32] * actor.info.as(MobjInfo).speed
       try_y = actor.y + @@y_speed[actor.move_dir.to_i32] * actor.info.as(MobjInfo).speed
 
-      tm = @world.as(World).thing_movement.as(ThingMovement)
+      tm = @world.as(World).thing_movement.as(ThingMovement).as(ThingMovement)
 
       try_ok = tm.try_move(actor, try_x, try_y)
 
       if !try_ok
         # Open any specials.
-        if (actor.flags & MobjFlags::Float) != 0 && tm.float_ok
+        if (actor.flags & MobjFlags::Float).to_i32 != 0 && tm.float_ok
           # Must adjust height.
           if actor.z < tm.current_floor_z
             actor.z += ThingMovement.float_speed
@@ -202,7 +202,7 @@ module Doocr
         actor.flags &= ~MobjFlags::InFloat
       end
 
-      if (actor.flags & MobjFlags::Float) == 0
+      if (actor.flags & MobjFlags::Float).to_i32 == 0
         actor.z = actor.floor_z
       end
 
@@ -354,7 +354,7 @@ module Doocr
     private def check_missile_range(actor : Mobj)
       return false if !@world.as(World).visibility_check.as(VisibilityCheck).check_sight(actor, actor.target.as(Mobj))
 
-      if (actor.flags & MobjFlags::JustHit) != 0
+      if (actor.flags & MobjFlags::JustHit).to_i32 != 0
         # The target just hit the enemy, so fight back!
         actor.flags &= ~MobjFlags::JustHit
 
@@ -424,7 +424,7 @@ module Doocr
         end
       end
 
-      if actor.target == nil || (actor.target.as(Mobj).flags & MobjFlags::Shootable) == 0
+      if actor.target == nil || (actor.target.as(Mobj).flags & MobjFlags::Shootable).to_i32 == 0
         # Look for a new target.
         if look_for_players(actor, true)
           # Got a new target.
@@ -437,7 +437,7 @@ module Doocr
       end
 
       # Do not attack twice in a row.
-      if (actor.flags & MobjFlags::JustAttacked) != 0
+      if (actor.flags & MobjFlags::JustAttacked).to_i32 != 0
         actor.flags &= ~MobjFlags::JustAttacked
 
         if (@world.as(World).options.skill != GameSkill::Nightmare &&
@@ -557,7 +557,7 @@ module Doocr
 
       random = @world.as(World).random
 
-      if (actor.target.as(Mobj).flags & MobjFlags::Shadow) != 0
+      if (actor.target.as(Mobj).flags & MobjFlags::Shadow).to_i32 != 0
         actor.angle += Angle.new((random.next - random.next) << 21)
       end
     end
@@ -849,15 +849,15 @@ module Doocr
 
     private def vile_check(thing : Mobj)
       # Not a monster.
-      return true if (thing.flags & MobjFlags::Corpse) == 0
+      return true if (thing.flags & MobjFlags::Corpse).to_i32 == 0
 
       # Not lying still yet.
       return true if thing.tics != -1
 
       # Monster doesn't have a raise state.
-      return true if thing.info.raise_state == MobjState::Nil
+      return true if thing.info.as(MobjInfo).raise_state == MobjState::Nil
 
-      max_dist = thing.info.radius + DoomInfo.mobj_infos[MobjType::Vile.to_i32].radius
+      max_dist = thing.info.as(MobjInfo).radius + DoomInfo.mobj_infos[MobjType::Vile.to_i32].radius
 
       if ((thing.x - @vile_try_x).abs > max_dist ||
          (thing.y - @vile_try_y).abs > max_dist)
@@ -866,17 +866,17 @@ module Doocr
       end
 
       @vile_target_corpse = thing
-      @vile_target_corpse.mom_x = Fixed.zero
-      @vile_target_corpse.mom_y = Fixed.zero
-      @vile_target_corpse.height <<= 2
+      @vile_target_corpse.as(Mobj).mom_x = Fixed.zero
+      @vile_target_corpse.as(Mobj).mom_y = Fixed.zero
+      @vile_target_corpse.as(Mobj).height <<= 2
 
-      check = @world.as(World).thing_movement.check_position(
-        @vile_target_corpse,
-        @vile_target_corpse.x,
-        @vile_target_corpse.y
+      check = @world.as(World).thing_movement.as(ThingMovement).check_position(
+        @vile_target_corpse.as(Mobj),
+        @vile_target_corpse.as(Mobj).x,
+        @vile_target_corpse.as(Mobj).y
       )
 
-      @vile_target_corpse.height >>= 2
+      @vile_target_corpse.as(Mobj).height >>= 2
 
       # Doesn't fir here.
       return true if !check
@@ -891,7 +891,7 @@ module Doocr
         @vile_try_x = actor.x + @@x_speed[actor.move_dir.to_i32] * actor.info.as(MobjInfo).speed
         @vile_try_y = actor.y + @@y_speed[actor.move_dir.to_i32] * actor.info.as(MobjInfo).speed
 
-        bm = @world.as(World).map.as(Map).blockmap
+        bm = @world.as(World).map.as(Map).blockmap.as(BlockMap)
 
         max_radius = GameConst.max_thing_radius * 2
         block_x1 = bm.get_block_x(@vile_try_x - max_radius)
@@ -914,7 +914,7 @@ module Doocr
 
               @world.as(World).start_sound(@vile_target_corpse.as(Mobj), Sfx::SLOP, SfxType::Misc)
 
-              info = @vile_target_corpse.as(Mobj).info.as(MobjInfo)
+              info = @vile_target_corpse.as(Mobj).info.as(MobjInfo).as(MobjInfo)
               @vile_target_corpse.as(Mobj).set_state(info.raise_state)
               @vile_target_corpse.as(Mobj).height <<= 2
               @vile_target_corpse.as(Mobj).flags = info.flags
@@ -960,14 +960,14 @@ module Doocr
       # Don't move it if the vile lost sight.
       return !@world.as(World).visibility_check.as(VisibilityCheck).check_sight(target, dest)
 
-      @world.as(World).thing_movement.unset_thing_position(actor)
+      @world.as(World).thing_movement.as(ThingMovement).unset_thing_position(actor)
 
       angle = dest.angle
       actor.x = dest.x + Fixed.from_i(24) * Trig.cos(angle)
       actor.y = dest.y + Fixed.from_i(24) * Trig.sin(angle)
       actor.z = dest.z
 
-      @world.as(World).thing_movement.set_thing_position(actor)
+      @world.as(World).thing_movement.as(ThingMovement).set_thing_position(actor)
     end
 
     def vile_target(actor : Mobj)
@@ -996,8 +996,8 @@ module Doocr
       return if !@world.as(World).visibility_check.check_sight(actor, actor.target)
 
       @world.as(World).start_sound(actor, Sfx::BAREXP, SfxType::Weapon)
-      @world.as(World).thing_interaction.damage_mobj(actor.target, actor, actor, 20)
-      actor.target.mom_z = Fixed.from_i(1000) / actor.target.info.mass
+      @world.as(World).thing_interaction.as(ThingInteraction).damage_mobj(actor.target, actor, actor, 20)
+      actor.target.mom_z = Fixed.from_i(1000) / actor.target.info.as(MobjInfo).mass
 
       fire = actor.tracer
       return if fire == nil
@@ -1186,7 +1186,7 @@ module Doocr
 
     private def init_boss_death
       v = Vertex.new(Fixed.zero, Fixed.zero)
-      @junk = LineDef.new(v, v, 0, 0, 0, nil, nil)
+      @junk = LineDef.new(v, v, LineFlags.new(0), LineSpecial.new(0), 0_i16, nil, nil)
     end
 
     def boss_death(actor : Mobj)
@@ -1315,7 +1315,7 @@ module Doocr
     @easy : Bool = false
 
     private def init_brain
-      @brain_targets = Array.new(32, nil)
+      @brain_targets = Array(Mobj | Nil).new(32, nil)
       @brain_target_count = 0
       @current_brain_target = 0
       @easy = false

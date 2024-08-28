@@ -35,7 +35,8 @@ module Doocr
       @name = [name]
       @title_x = [title_x]
       @title_y = [title_y]
-      @items = items
+      @items = [] of MenuItem
+      items.each { |item| @items << item.as(MenuItem) }
 
       @index = first_choice
       @choice = @items[@index]
@@ -51,7 +52,8 @@ module Doocr
       @name = [name1, name2]
       @title_x = [title_x1, title_x2]
       @title_y = [title_y1, title_y2]
-      @items = items
+      @items = [] of MenuItem
+      items.each { |item| @items << item.as(MenuItem) }
 
       @index = first_choice
       @choice = @items[@index]
@@ -60,10 +62,10 @@ module Doocr
     def open
       @items.each do |item|
         toggle = item.as?(ToggleMenuItem)
-        toggle.reset if toggle != nil
+        toggle.as(ToggleMenuItem).reset if toggle != nil
 
-        slide = item.as?(SliderMenuItem)
-        slider.reset if slider != nil
+        slider = item.as?(SliderMenuItem)
+        slider.as(SliderMenuItem).reset if slider != nil
       end
     end
 
@@ -83,11 +85,11 @@ module Doocr
       return true if e.type != EventType::KeyDown
 
       if @text_input != nil
-        result = @text_input.do_event(e)
+        result = @text_input.as(TextInput).do_event(e)
 
-        if @text_input.state == TextInputState::Canceled
+        if @text_input.as(TextInput).state == TextInputState::Canceled
           @text_input = nil
-        elsif @text_input.state == TextInputState::Finished
+        elsif @text_input.as(TextInput).state == TextInputState::Finished
           @text_input = nil
         end
 
@@ -107,13 +109,13 @@ module Doocr
       if e.key == DoomKey::Left
         toggle = @choice.as?(ToggleMenuItem)
         if toggle != nil
-          toggle.down
+          toggle.as(ToggleMenuItem).down
           @menu.start_sound(Sfx::PISTOL)
         end
 
         slider = @choice.as?(SliderMenuItem)
         if slider != nil
-          slider.down
+          slider.as(SliderMenuItem).down
           @menu.start_sound(Sfx::STNMOV)
         end
       end
@@ -121,13 +123,13 @@ module Doocr
       if e.key == DoomKey::Right
         toggle = @choice.as?(ToggleMenuItem)
         if toggle != nil
-          toggle.up
+          toggle.as(ToggleMenuItem).up
           @menu.start_sound(Sfx::PISTOL)
         end
 
         slider = @choice.as?(SliderMenuItem)
         if slider != nil
-          slider.up
+          slider.as(SliderMenuItem).up
           @menu.start_sound(Sfx::STNMOV)
         end
       end
@@ -135,18 +137,17 @@ module Doocr
       if e.key == DoomKey::Enter
         toggle = @choice.as?(ToggleMenuItem)
         if toggle != nil
-          toggle.up
+          toggle.as(ToggleMenuItem).up
           @menu.start_sound(Sfx::PISTOL)
         end
 
-        simple = @choice.as?(SimpleMenuItem)
-        if simple != nil
+        if simple = @choice.as?(SimpleMenuItem)
           if simple.selectable
-            if simple.action != nil
-              simple.action.call
+            if x = simple.action
+              x.call
             end
-            if simple.next != nil
-              @menu.set_current(simple.next)
+            if simple.next
+              @menu.set_current(simple.next.as(MenuDef))
             else
               @menu.close
             end
@@ -156,7 +157,7 @@ module Doocr
         end
 
         if @choice.next != nil
-          @menu.set_current(@choice.next)
+          @menu.set_current(@choice.next.as(MenuDef))
           @menu.start_sound(Sfx::PISTOL)
         end
       end

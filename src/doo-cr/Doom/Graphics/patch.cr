@@ -74,7 +74,7 @@ module Doocr
       return from_data(name, wad.read_lump(name))
     end
 
-    private def pad_data(data : Bytes, width : Int) : Bytes
+    private def self.pad_data(data : Bytes, width : Int) : Bytes
       need = 0
       width.times do |x|
         p = IO::ByteFormat::LittleEndian.decode(Int32, data[8 + 4 * x, 4])

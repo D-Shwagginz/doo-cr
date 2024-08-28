@@ -19,7 +19,7 @@ module Doocr
     @@slot_count : Int32 = 6
     @@description_size : Int32 = 24
 
-    @slots : Array(String) | Nil = nil
+    @slots : Array(String) = [] of String
 
     private def read_slots
       @slots = Array.new(@@slot_count, "")
@@ -31,21 +31,29 @@ module Doocr
         if File.exists?(path)
           File.open(path) do |file|
             buffer = file.getb_to_end
-            @slots[i] = DoomInterop.to_string(buffer, 0, buffer.size)
+            @slots[i] = DoomInterop.to_s(buffer, 0, buffer.size)
           end
         end
       end
     end
 
     def [](number : Int32) : String
-      if @slots == nil
+      if @slots.empty?
         read_slots()
       end
 
       return @slots[number]
     end
 
-    def []=(number : Int32, value : Int32)
+    def []?(number : Int32) : String | Nil
+      if @slots.empty?
+        read_slots()
+      end
+
+      return @slots[number]?
+    end
+
+    def []=(number : Int32, value : String)
       @slots[number] = value
     end
 

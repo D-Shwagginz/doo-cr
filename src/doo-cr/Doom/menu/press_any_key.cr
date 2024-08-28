@@ -20,12 +20,12 @@ module Doocr
     @action : Proc(Nil) | Nil = nil
 
     def initialize(@menu, text, @action)
-      @text = text.split('\n')
+      @text = text.to_s.split('\n')
     end
 
     def do_event(e : DoomEvent) : Bool
       if e.type == EventType::KeyDown
-        @action.call if @action != nil
+        @action.as(Proc(Nil)).call if @action != nil
 
         @menu.close
         @menu.start_sound(Sfx::SWTCHX)

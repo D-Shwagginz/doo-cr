@@ -24,7 +24,7 @@ module Doocr
 
     def clear
       @line = nil
-      @position = 0
+      @position = ButtonPosition.new(0)
       @texture = 0
       @timer = 0
       @sound_origin = nil

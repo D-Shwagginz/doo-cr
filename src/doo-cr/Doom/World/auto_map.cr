@@ -48,7 +48,7 @@ module Doocr
       @max_x = Fixed.min_value
       @min_y = Fixed.max_value
       @max_y = Fixed.min_value
-      @world.as(World).map.vertices.each do |vertex|
+      @world.as(World).map.as(Map).vertices.each do |vertex|
         @min_x = vertex.x if vertex.x < @min_x
         @max_x = vertex.x if vertex.x > @max_x
         @min_y = vertex.y if vertex.y < @min_y
@@ -86,13 +86,13 @@ module Doocr
         @zoom = Fixed.one * 32
       end
 
-      @view_x -= 64 / @zoom if @left
+      @view_x -= Fixed.from_i(64) / @zoom if @left
 
-      @view_x += 64 / @zoom if @right
+      @view_x += Fixed.from_i(64) / @zoom if @right
 
-      @view_y += 64 / @zoom if @up
+      @view_y += Fixed.from_i(64) / @zoom if @up
 
-      @view_y -= 64 / @zoom if @down
+      @view_y -= Fixed.from_i(64) / @zoom if @down
 
       if @view_x < @min_x
         @view_x = @min_x
@@ -107,7 +107,7 @@ module Doocr
       end
 
       if @follow
-        player = @world.as(World).console_player.mobj
+        player = @world.as(World).console_player.mobj.as(Mobj)
         @view_x = player.x
         @view_y = player.y
       end

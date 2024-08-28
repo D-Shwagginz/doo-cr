@@ -18,12 +18,12 @@ module Doocr::Video
   class DrawScreen
     getter width : Int32
     getter height : Int32
-    getter data : Bytes
+    getter data : Array(UInt8)
 
     @chars : Array(Patch)
 
     def initialize(@wad : Wad, @width : Int32, @height : Int32)
-      @data = Bytes.new(@width * @height)
+      @data = Array.new(@width * @height, 0_u8)
 
       @chars = Array(Patch).new(128)
       128.times do |i|
@@ -46,7 +46,7 @@ module Doocr::Video
 
       if draw_x < 0
         exceed = -draw_x
-        frac += exceed * step
+        frac += step * exceed
         i += exceed
       end
 
@@ -73,7 +73,7 @@ module Doocr::Video
 
       if draw_x < 0
         exceed = -draw_x
-        frac += exceed * step
+        frac += step * exceed
         i += exceed
       end
 
@@ -91,10 +91,10 @@ module Doocr::Video
     end
 
     private def draw_column(source : Array(Column), x : Int32, y : Int32, scale : Int32)
-      step = fixed.one / scale
+      step = Fixed.one / scale
 
       source.each do |column|
-        ex_top_delta = scale * column.ex_top_delta
+        ex_top_delta = scale * column.top_delta
         ex_length = scale * column.length
 
         source_index = column.offset
@@ -108,7 +108,7 @@ module Doocr::Video
         if draw_y < 0
           exceed = -draw_y
           p += exceed
-          frac += exceed * step
+          frac += step * exceed
           i += exceed
         end
 
@@ -118,7 +118,7 @@ module Doocr::Video
         end
 
         while i < draw_length
-          @data[p] = column.data[source_index + fra.to_i_floor]
+          @data[p] = column.data[source_index + frac.to_i_floor]
           p += 1
           frac += step
           i += 1
@@ -138,11 +138,12 @@ module Doocr::Video
 
         index = ch
         if 'a' <= index && index <= 'z'
-          index = index - 'a' + 'A'
+          index = index - 'a'.ord + 'A'.ord
         end
 
         patch = @chars[index.ord]?
         next if patch == nil
+        patch = patch.as(Patch)
 
         draw_patch(patch, draw_x, draw_y, scale)
 
@@ -154,16 +155,17 @@ module Doocr::Video
       draw_x = x
       draw_y = y - 7 * scale
 
-      next if ch.ord >= @chars.size
-      next if ch.ord == 32
+      return if ch.ord >= @chars.size
+      return if ch.ord == 32
 
       index = ch
       if 'a' <= index && index <= 'z'
-        index = index - 'a' + 'A'
+        index = index - 'a'.ord + 'A'.ord
       end
 
       patch = @chars[index.ord]?
       return if patch == nil
+      patch = patch.as(Patch)
 
       draw_patch(patch, draw_x, draw_y, scale)
     end
@@ -180,11 +182,12 @@ module Doocr::Video
 
         index = ch
         if 'a' <= index && index <= 'z'
-          index = index - 'a' + 'A'
+          index = index - 'a'.ord + 'A'.ord
         end
 
         patch = @chars[index.ord]?
         next if patch == nil
+        patch = patch.as(Patch)
 
         draw_patch(patch, draw_x, draw_y, scale)
 
@@ -198,11 +201,12 @@ module Doocr::Video
 
       index = ch
       if 'a' <= index && index <= 'z'
-        index = index - 'a' + 'A'
+        index = index - 'a'.ord + 'A'.ord
       end
 
       patch = @chars[index.ord]?
       return 0 if patch == nil
+      patch = patch.as(Patch)
 
       return scale * patch.width
     end
@@ -219,11 +223,12 @@ module Doocr::Video
 
         index = ch
         if 'a' <= index && index <= 'z'
-          index = index - 'a' + 'A'
+          index = index - 'a'.ord + 'A'.ord
         end
 
         patch = @chars[index.ord]?
         next if patch == nil
+        patch = patch.as(Patch)
 
         width = scale * patch.width
       end
@@ -243,11 +248,12 @@ module Doocr::Video
 
         index = ch
         if 'a' <= index && index <= 'z'
-          index = index - 'a' + 'A'
+          index = index - 'a'.ord + 'A'.ord
         end
 
         patch = @chars[index.ord]?
         next if patch == nil
+        patch = patch.as(Patch)
 
         width = scale * patch.width
       end
@@ -282,9 +288,9 @@ module Doocr::Video
       code = OutCode::Inside
 
       if x < 0
-        code |= Outcode::Left
+        code |= OutCode::Left
       elsif x > width
-        code |= Outcode::Right
+        code |= OutCode::Right
       end
 
       if y < 0
@@ -314,16 +320,16 @@ module Doocr::Video
 
           outcode_out = out_code2.to_i32 > out_code1.to_i32 ? out_code2 : out_code1
 
-          if (outcode_out & OutCode::Top) != 0
+          if (outcode_out & OutCode::Top).to_i32 != 0
             x = x1 + (x2 - x1) * (@height - y1) / (y2 - y1)
             y = @height
-          elsif (outcode_out & OutCode::Bottom) != 0
+          elsif (outcode_out & OutCode::Bottom).to_i32 != 0
             x = x1 + (x2 - x1) * (0 - y1) / (y2 - y1)
             y = 0
-          elsif (outcode_out & OutCode::Right) != 0
+          elsif (outcode_out & OutCode::Right).to_i32 != 0
             y = y1 + (y2 - y1) * (@width - x1) / (x2 - x1)
             x = @width
-          elsif (outcode_out & OutCode::Left) != 0
+          elsif (outcode_out & OutCode::Left).to_i32 != 0
             y = y1 + (y2 - y1) * (0 - x1) / (x2 - x1)
             x = 0
           end
@@ -331,11 +337,11 @@ module Doocr::Video
           if outcode_out == out_code1
             x1 = x
             y1 = y
-            out_code1 = compute_out_code(x1, y1)
+            out_code1 = compute_out_code(x1.to_f32, y1.to_f32)
           else
             x2 = x
             y2 = x
-            out_code2 = compute_out_code(x2, y2)
+            out_code2 = compute_out_code(x2.to_f32, y2.to_f32)
           end
         end
       end
@@ -345,7 +351,7 @@ module Doocr::Video
         by1 = y1.clamp(0, @height - 1)
         bx2 = x2.clamp(0, @width - 1)
         by2 = y2.clamp(0, @height - 1)
-        bresenham(bx1, by1, bx2, by2, color)
+        bresenham(bx1.to_i32, by1.to_i32, bx2.to_i32, by2.to_i32, color)
       end
     end
 
@@ -386,7 +392,7 @@ module Doocr::Video
 
           if d >= 0
             x += sx
-            d -= at
+            d -= ax
           end
 
           y += sy

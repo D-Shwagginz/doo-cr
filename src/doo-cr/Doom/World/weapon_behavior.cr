@@ -62,7 +62,7 @@ module Doocr
 
       # Check for fire.
       # The missile launcher and bfg do not auto fire.
-      if (player.cmd.as(TicCmd).buttons & TicCmdButtons.attack) != 0
+      if (player.cmd.as(TicCmd).buttons & TicCmdButtons.attack).to_i32 != 0
         if (!player.attack_down ||
            (player.ready_weapon != WeaponType::Missile && player.ready_weapon != WeaponType::Bfg))
           player.attack_down = true
@@ -161,7 +161,7 @@ module Doocr
 
       sec.lines.size.times do |i|
         check = sec.lines[i]
-        next if (check.flags & LineFlags::TwoSided) == 0
+        next if (check.flags & LineFlags::TwoSided).to_i32 == 0
 
         mc.line_opening(check)
 
@@ -175,7 +175,7 @@ module Doocr
           other = check.front_side.as(SideDef).sector.as(Sector)
         end
 
-        if (check.flags & LineFlags::SoundBlock) != 0
+        if (check.flags & LineFlags::SoundBlock).to_i32 != 0
           if soundblocks == 0
             recursive_sound(other, 1, soundtarget, valid_count)
           end
@@ -324,7 +324,7 @@ module Doocr
     def refire(player : Player)
       # Check for fire.
       # If a weaponchange is pending, let it go through instead.
-      if ((player.cmd.as(TicCmd).buttons & TicCmdButtons.attack) != 0 &&
+      if ((player.cmd.as(TicCmd).buttons & TicCmdButtons.attack).to_i32 != 0 &&
          player.pending_weapon == WeaponType::NoChange &&
          player.health != 0)
         player.refire += 1

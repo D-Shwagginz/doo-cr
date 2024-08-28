@@ -18,7 +18,7 @@ module Doocr
   class ColorMap
     class_getter inverse : Int32 = 32
 
-    @data : Array(Array(UInt8))
+    @data : Array(Array(UInt8)) = [] of Array(UInt8)
 
     def [](index : Int)
       return @data[index]
@@ -30,13 +30,13 @@ module Doocr
 
     def initialize(wad : Wad)
       begin
-        print("Load color map: ")
+        print("Load colormap: ")
 
         raw = wad.read_lump("COLORMAP")
         num = raw.size / 256
-        @data = Array.new(num, [] of UInt8)
-        num.times do |i|
-          @data[i] = Array(UInt8).new(256)
+        @data = Array.new(num.to_i32, [] of UInt8)
+        num.to_i32.times do |i|
+          @data[i] = Array(UInt8).new(256, 0_u8)
           offset = 256 * i
           256.times do |c|
             @data[i][c] = raw[offset + c]

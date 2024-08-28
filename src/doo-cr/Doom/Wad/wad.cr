@@ -16,14 +16,18 @@
 
 module Doocr
   class Wad
-    getter names : Array(String)
-    getter lump_infos : Array(LumpInfo)
-    getter game_version : GameVersion
-    getter game_mode : GameMode
-    getter mission_pack : MissionPack
-    @streams : Array(File)
+    getter names : Array(String) = [] of String
+    getter lump_infos : Array(LumpInfo) = [] of LumpInfo
+    getter game_version : GameVersion = GameVersion.new(0)
+    getter game_mode : GameMode = GameMode.new(0)
+    getter mission_pack : MissionPack = MissionPack.new(0)
+    @streams : Array(File) = [] of File
 
     def initialize(*file_names : String)
+      initialize(file_names.to_a)
+    end
+
+    def initialize(file_names : Array(String))
       begin
         print("Open WAD files: ")
 
@@ -40,7 +44,7 @@ module Doocr
         @game_version = get_game_version(@names)
 
         s = ""
-        file_names.select { |x| Path.basename(x) }.each do |v|
+        file_names.select { |x| Path[x].basename }.each do |v|
           s = s + v + ", "
         end
         s = s.rchop
@@ -48,7 +52,6 @@ module Doocr
         puts("OK ( #{s} )")
       rescue e
         puts("Failed")
-        finalize()
         raise e
       end
     end
@@ -80,7 +83,7 @@ module Doocr
       lump_count.times do |i|
         offset = LumpInfo.datasize * i
         lumpinfo = LumpInfo.new(
-          String.new(data[offset + 8, 8]),
+          String.new(data[offset + 8, 8]).delete('\0').upcase.strip,
           stream,
           IO::ByteFormat::LittleEndian.decode(Int32, data[offset, 4]),
           IO::ByteFormat::LittleEndian.decode(Int32, data[offset + 4, 4])
@@ -92,7 +95,7 @@ module Doocr
     def get_lump_number(name : String) : Int
       i = @lump_infos.size - 1
       while i >= 0
-        if @lump_infos[i].name == name
+        if @lump_infos[i].name.delete('\0').upcase.strip == name.delete('\0').upcase.strip
           return i
         end
         i -= 1

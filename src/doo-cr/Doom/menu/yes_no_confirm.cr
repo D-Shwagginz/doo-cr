@@ -22,7 +22,7 @@ module Doocr
     def initialize(
       @menu, text, @action
     )
-      @text = text.split('\n')
+      @text = text.to_s.split('\n')
     end
 
     def do_event(e : DoomEvent) : Bool

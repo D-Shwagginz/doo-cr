@@ -19,14 +19,14 @@ module Doocr
     getter name : String
     getter item_x : Int32
     getter item_y : Int32
-    getter action : Proc(Nil)
+    getter action : Proc(Nil) | Nil = nil
     @selectable : Proc(Bool) | Nil = nil
 
     def selectable : Bool
       if @selectable == nil
         return true
       else
-        return @selectable.call
+        return @selectable.as(Proc(Bool)).call
       end
     end
 

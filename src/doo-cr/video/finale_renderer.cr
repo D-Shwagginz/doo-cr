@@ -29,11 +29,11 @@ module Doocr::Video
     @cache : PatchCache
 
     def initialize(content : GameContent, @screen)
-      @wad = content.wad
-      @flats = content.flats
-      @sprites = content.sprites
+      @wad = content.wad.as(Wad)
+      @flats = content.flats.as(IFlatLookup)
+      @sprites = content.sprites.as(ISpriteLookup)
 
-      @scale = @screen.width / 320
+      @scale = (@screen.width / 320).to_i32
 
       @cache = PatchCache.new(@wad)
     end
@@ -44,28 +44,24 @@ module Doocr::Video
         return
       end
 
-      if finale.state == 0
+      if finale.stage == 0
         render_text_screen(finale)
       else
         case finale.options.episode
         when 1
           draw_patch("CREDIT", 0, 0)
-          break
         when 2
           draw_patch("VICTORY2", 0, 0)
-          break
         when 3
           bunny_scroll(finale)
-          break
         when 4
           draw_patch("ENDPIC", 0, 0)
-          break
         end
       end
     end
 
     private def render_text_screen(finale : Finale)
-      fill_flat(@flats[finale.flat])
+      fill_flat(@flats[finale.flat.as(String)])
 
       # Draw some of the text onto the screen.
       cx = 10 * @scale
@@ -76,9 +72,9 @@ module Doocr::Video
       count = 0 if count < 0
 
       while count > 0
-        break if ch == finale.text.size
+        break if ch == finale.text.as(String).size
 
-        c = finale.text[ch]
+        c = finale.text.as(String)[ch]
         ch += 1
 
         if c == '\n'
@@ -105,28 +101,22 @@ module Doocr::Video
         case finale.the_end_index
         when 1
           patch = "END1"
-          break
         when 2
           patch = "END2"
-          break
         when 3
           patch = "END3"
-          break
         when 4
           patch = "END4"
-          break
         when 5
           patch = "END5"
-          break
         when 6
           patch = "END6"
-          break
         end
 
         draw_patch(
           patch,
-          (320 - 13 * 8) / 2,
-          (240 - 8 * 8) / 2
+          ((320 - 13 * 8) / 2).to_i32,
+          ((240 - 8 * 8) / 2).to_i32
         )
       end
     end
@@ -134,7 +124,7 @@ module Doocr::Video
     private def fill_flat(flat : Flat)
       src = flat.data
       dst = @screen.data
-      scale = @screen.width / 320
+      scale = (@screen.width / 320).to_i32
       x_frac = Fixed.one / scale - Fixed.epsilon
       step = Fixed.one / scale
       @screen.width.times do |x|
@@ -159,19 +149,19 @@ module Doocr::Video
     private def render_cast(finale : Finale)
       draw_patch("BOSSBACK", 0, 0)
 
-      frame = finale.cast_state.frame & 0x7fff
-      patch = @sprites[finale.cast_state.sprite].frames[frame].patches[0]
-      if sprites[finale.cast_state.sprite].frames[frame].flip[0]
+      frame = finale.cast_state.as(MobjStateDef).frame & 0x7fff
+      patch = @sprites[finale.cast_state.as(MobjStateDef).sprite].frames[frame].patches[0]
+      if @sprites[finale.cast_state.as(MobjStateDef).sprite].frames[frame].flip[0]
         @screen.draw_patch_flip(
           patch,
-          @screen.width / 2,
+          (@screen.width / 2).to_i32,
           @screen.height - @scale * 30,
           @scale
         )
       else
         @screen.draw_patch(
           patch,
-          @screen.width / 2,
+          (@screen.width / 2).to_i32,
           @screen.height - @scale * 30,
           @scale
         )
@@ -180,7 +170,7 @@ module Doocr::Video
       width = @screen.measure_text(finale.cast_name, @scale)
       @screen.draw_text(
         finale.cast_name,
-        (@screen.width - width) / 2,
+        ((@screen.width - width) / 2).to_i32,
         @screen.height - @scale * 13,
         @scale
       )

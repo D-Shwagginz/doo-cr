@@ -23,7 +23,7 @@ module Doocr::SFML
       quit_message : String = ""
 
       app = SFMLDoom.new(CommandLineArgs.new(ARGV))
-      # app.Run
+      app.run
       quit_message = app.quit_message
       app = nil
 
@@ -35,7 +35,7 @@ module Doocr::SFML
         end
       end
     rescue e
-      puts(e)
+      raise e
       puts("Press any key to exit.")
       while true
         break if reader.read_keypress

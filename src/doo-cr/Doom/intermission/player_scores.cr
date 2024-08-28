@@ -24,7 +24,7 @@ module Doocr
     property item_count : Int32
     property secret_count : Int32
     property time : Int32
-    getter frags : Array(Int32)
+    property frags : Array(Int32)
 
     def initialize
       @in_game = false

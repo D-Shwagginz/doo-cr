@@ -34,24 +34,24 @@ module Doocr
 
     def edit(finished : Proc(Nil)) : TextInput
       @edit = TextInput.new(
-        @text != nil ? @text : Array(Char).new,
+        @text != nil ? @text.as(Array(Char)) : Array(Char).new,
         ->(cs : Array(Char)) {},
         ->(cs : Array(Char)) { @text = cs; @edit = nil; finished.call },
         ->{ @edit = nil }
       )
 
-      return @edit
+      return @edit.as(TextInput)
     end
 
     def set_text(text : String | Nil)
-      @text = text.to_a if text != nil
+      @text = text.chars if text != nil
     end
 
     def text : Array(Char)
       if @edit == nil
-        return @text
+        return @text.as(Array(Char))
       else
-        return @edit.text
+        return @edit.as(TextInput).text
       end
     end
   end

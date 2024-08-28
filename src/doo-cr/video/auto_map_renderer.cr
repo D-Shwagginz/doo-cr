@@ -100,17 +100,20 @@ module Doocr
     def initialize(wad : Wad, @screen)
       @scale == @screen.width / 320
       @am_width = @screen.width
-      @am_height = @screen.height - @scale * StatusBarRenderer.height
-      @ppu = scale.to_f32 / 16
+      @am_height = @screen.height - @scale * Video::StatusBarRenderer.height
+      @ppu = @scale.to_f32 / 16
 
-      @mark_numbers = Array.new(10, Patch.from_wad(wad, "AMMNUM" + i))
+      @mark_numbers = Array(Patch).new(10)
+      10.times do |i|
+        @mark_numbers << Patch.from_wad(wad, "AMMNUM#{i}")
+      end
     end
 
     def render(player : Player)
       @screen.fill_rect(0, 0, @am_width, @am_height, @@background)
 
-      world = player.mobj.world
-      am = world.auto_map
+      world = player.mobj.as(Mobj).world.as(World)
+      am = world.auto_map.as(AutoMap)
 
       @min_x = am.min_x.to_f32
       @max_x = am.max_x.to_f32
@@ -127,32 +130,32 @@ module Doocr
       @render_view_x = (@zoom * @ppu * @actual_view_x).round_even / (@zoom * @ppu)
       @render_view_y = (@zoom * @ppu * @actual_view_y).round_even / (@zoom * @ppu)
 
-      world.map.lines.each do |line|
-        v1 = to_screen_pos(line.vertex1)
-        v2 = to_screen_pos(line.vertex2)
+      world.map.as(Map).lines.each do |line|
+        v1 = to_screen_pos(line.vertex1.as(Vertex))
+        v2 = to_screen_pos(line.vertex2.as(Vertex))
 
         cheating = am.state != AutoMapState::None
 
-        if cheating || (line.flags & LineFlags::Mapped) != 0
-          next if (line.flags & MobjFlags::DontDraw) != 0 && !cheating
+        if cheating || (line.flags & LineFlags::Mapped).to_i32 != 0
+          next if (line.flags & LineFlags::DontDraw).to_i32 != 0 && !cheating
 
           if line.back_sector == nil
             @screen.draw_line(v1.x, v1.y, v2.x, v2.y, @@wall_colors)
           else
             if line.special == LineSpecial.new(39)
               # Teleporters.
-              @screen.draw_line(v1.x, v1.y, v2.x, v2.y, @@wall_colors + @@wall_range / 2)
-            elsif (line.flags & LineFlags::Secret) != 0
+              @screen.draw_line(v1.x, v1.y, v2.x, v2.y, @@wall_colors + (@@wall_range / 2).to_i32)
+            elsif (line.flags & LineFlags::Secret).to_i32 != 0
               # Secret door.
               if cheating
                 @screen.draw_line(v1.x, v1.y, v2.x, v2.y, @@secret_wall_colors)
               else
                 @screen.draw_line(v1.x, v1.y, v2.x, v2.y, @@wall_colors)
               end
-            elsif line.back_sector.floor_height != line.front_sector.floor_height
+            elsif line.back_sector.as(Sector).floor_height != line.front_sector.as(Sector).floor_height
               # Floor level change.
               @screen.draw_line(v1.x, v1.y, v2.x, v2.y, @@fd_wall_colors)
-            elsif line.back_sector.ceiling_height != line.front_sector.ceiling_height
+            elsif line.back_sector.as(Sector).ceiling_height != line.front_sector.as(Sector).ceiling_height
               # Ceiling level change.
               @screen.draw_line(v1.x, v1.y, v2.x, v2.y, @@cd_wall_colors)
             elsif cheating
@@ -160,7 +163,7 @@ module Doocr
             end
           end
         elsif player.powers[PowerType::AllMap.to_i32] > 0
-          if (line.flags & LineFlags::DontDraw.to_i32) == 0
+          if (line.flags & LineFlags::DontDraw).to_i32 == 0
             @screen.draw_line(v1.x, v1.y, v2.x, v2.y, @@grays + 3)
           end
         end
@@ -182,20 +185,20 @@ module Doocr
 
       if !am.follow
         @screen.draw_line(
-          @am_width / 2 - 2 * @scale, @am_height / 2,
-          @am_width / 2 + 2 * @scale, @am_height / 2,
+          (@am_width / 2 - 2 * @scale).to_f32, (@am_height / 2).to_f32,
+          (@am_width / 2 + 2 * @scale).to_f32, (@am_height / 2).to_f32,
           @@grays
         )
 
         @screen.draw_line(
-          @am_width / 2, @am_height / 2 - 2 * @scale,
-          @am_width / 2, @am_height / 2 + 2 * @scale,
+          (@am_width / 2).to_f32, (@am_height / 2 - 2 * @scale).to_f32,
+          (@am_width / 2).to_f32, (@am_height / 2 + 2 * @scale).to_f32,
           @@grays
         )
       end
 
       @screen.draw_text(
-        world.map.title,
+        world.map.as(Map).title,
         0,
         @am_height - @scale,
         @scale
@@ -204,11 +207,11 @@ module Doocr
 
     private def draw_players(world : World)
       options = world.options
-      player = options.players
+      players = options.players
       console_player = world.console_player
 
       if !options.net_game
-        draw_character(console_player.mobj, @@player_arrow, @@white)
+        draw_character(console_player.mobj.as(Mobj), @@player_arrow, @@white)
         return
       end
 
@@ -219,21 +222,24 @@ module Doocr
         next if !player.in_game
 
         color : Int32
-        if player.powers[PowerType::Invisibility] > 0
+        if player.powers[PowerType::Invisibility.to_i32] > 0
           # Close to black.
           color = 246
         else
           color = @@player_colors[i]
         end
 
-        draw_character(player.mobj, @@player_arrow, color)
+        draw_character(player.mobj.as(Mobj), @@player_arrow, color)
       end
     end
 
     private def draw_things(world : World)
-      world.thinkers.each do |thinker|
+      enumerator = world.thinkers.as(Thinkers).get_enumerator
+      while true
+        thinker = enumerator.current
         mobj = thinker.as?(Mobj)
-        draw_character(mobj, @@thing_triangle, @@greens) if mobj != nil
+        draw_character(mobj.as(Mobj), @@thing_triangle, @@greens) if mobj != nil
+        break if !enumerator.move_next
       end
     end
 

@@ -16,24 +16,24 @@
 
 module Doocr
   class PlayerBehavior
-    @@forward_move : Array(Int32) = [
+    class_getter forward_move : Array(Int32) = [
       0x19,
       0x32,
     ]
 
-    @@side_move : Array(Int32) = [
+    class_getter side_move : Array(Int32) = [
       0x18,
       0x28,
     ]
 
-    @@angle_turn : Array(Int32) = [
+    class_getter angle_turn : Array(Int32) = [
       640,
       1280,
       320, # For slow turn.
     ]
 
-    @@max_move : Int32 = @@forward_move[1]
-    @@slow_turn_tics : Int32 = 6
+    class_getter max_move : Int32 = @@forward_move[1]
+    class_getter slow_turn_tics : Int32 = 6
 
     @world : World | Nil = nil
 
@@ -48,19 +48,19 @@ module Doocr
     def player_think(player : Player)
       player.message_time -= 1 if player.message_time > 0
 
-      if (player.cheats & CheatFlags::NoClip) != 0
-        player.mobj.flags |= MobjFlags::NoClip
+      if (player.cheats & CheatFlags::NoClip).to_i32 != 0
+        player.mobj.as(Mobj).flags |= MobjFlags::NoClip
       else
-        player.mobj.flags &= ~MobjFlags::NoClip
+        player.mobj.as(Mobj).flags &= ~MobjFlags::NoClip
       end
 
       # Chain saw run forward.
-      cmd = player.cmd
-      if (player.mobj.flags & MobjFlags::JustAttacked) != 0
+      cmd = player.cmd.as(TicCmd)
+      if (player.mobj.as(Mobj).flags & MobjFlags::JustAttacked).to_i32 != 0
         cmd.angle_turn = 0
-        cmd.forward_move = 0xC800 / 512
+        cmd.forward_move = (0xC800 / 512).to_i8
         cmd.side_move = 0
-        player.mobj.flags &= ~MobjFlags::JustAttacked
+        player.mobj.as(Mobj).flags &= ~MobjFlags::JustAttacked
       end
 
       if player.player_state == PlayerState::Dead
@@ -70,30 +70,30 @@ module Doocr
 
       # Move around.
       # Reactiontime is used to prevent movement for a bit after a teleport.
-      if player.mobj.reaction_time > 0
-        player.mobj.reaction_time -= 1
+      if player.mobj.as(Mobj).reaction_time > 0
+        player.mobj.as(Mobj).reaction_time -= 1
       else
         move_player(player)
       end
 
       calc_height(player)
 
-      if player.mobj.subsector.sector.special != 0
+      if player.mobj.as(Mobj).subsector.as(Subsector).sector.as(Sector).special != 0
         player_in_special_sector(player)
       end
 
       # Check for weapon change.
 
       # A special event has no other buttons.
-      cmd.buttons = 0 if (cmd.buttons & TicCmdButtons.special) != 0
+      cmd.buttons = 0 if (cmd.buttons & TicCmdButtons.special).to_i32 != 0
 
-      if (cmd.buttons & TicCmdButtons.change) != 0
+      if (cmd.buttons & TicCmdButtons.change).to_i32 != 0
         # The actual changing of the weapon is done when the weapon psprite can do it.
         # Not in the middle of an attack.
         new_weapon = (cmd.buttons & TicCmdButtons.weapon_mask) >> TicCmdButtons.weapon_shift
 
         if (new_weapon == WeaponType::Fist.to_i32 &&
-           player.weapon_owned[WeaponType::Chainsaw] &&
+           player.weapon_owned[WeaponType::Chainsaw.to_i32] &&
            !(player.ready_weapon == WeaponType::Chainsaw && player.powers[PowerType::Strength.to_i32] != 0))
           new_weapon = WeaponType::Chainsaw.to_i32
         end
@@ -110,15 +110,15 @@ module Doocr
           # Do not go to plasma or BFG in shareware, even if cheated.
           if ((new_weapon != WeaponType::Plasma && new_weapon != WeaponType::Bfg.to_i32) ||
              (@world.as(World).options.game_mode != GameMode::Shareware))
-            player.pending_weapon = WeaponType.new(new_weapon)
+            player.pending_weapon = WeaponType.new(new_weapon.to_i32)
           end
         end
       end
 
       # Check for use.
-      if (cmd.buttons & TicCmdButtons.use) != 0
+      if (cmd.buttons & TicCmdButtons.use).to_i32 != 0
         if !player.use_down
-          @world.as(World).map_interaction.use_lines(player)
+          @world.as(World).map_interaction.as(MapInteraction).use_lines(player)
           player.use_down = true
         end
       else
@@ -135,14 +135,14 @@ module Doocr
         player.powers[PowerType::Strength.to_i32] += 1
       end
 
-      if player.powers[PowerType::Invulnerabillity.to_i32] > 0
-        player.powers[PowerType::Invulnerabillity.to_i32] -= 1
+      if player.powers[PowerType::Invulnerability.to_i32] > 0
+        player.powers[PowerType::Invulnerability.to_i32] -= 1
       end
 
       if player.powers[PowerType::Invisibility.to_i32] > 0
         player.powers[PowerType::Invisibility.to_i32] -= 1
-        if player.powers[PowerType::Invisibility] == 0
-          player.mobj.flags &= ~MobjFlags::Shadow
+        if player.powers[PowerType::Invisibility.to_i32] == 0
+          player.mobj.as(Mobj).flags &= ~MobjFlags::Shadow
         end
       end
 
@@ -159,23 +159,23 @@ module Doocr
       player.bonus_count -= 1 if player.bonus_count > 0
 
       # Handling colormaps.
-      if player.powers[PowerType::Invulnerabillity.to_i32] > 0
-        if (player.powers[PowerType::Invulnerabillity.to_i32] > 4 * 32 ||
-           (player.powers[PowerType::Invulnerabillity] * 8) != 0)
-          player.fixed_color_map = ColorMap.inverse
+      if player.powers[PowerType::Invulnerability.to_i32] > 0
+        if (player.powers[PowerType::Invulnerability.to_i32] > 4 * 32 ||
+           (player.powers[PowerType::Invulnerability.to_i32] * 8) != 0)
+          player.fixed_colormap = ColorMap.inverse
         else
-          player.fixed_color_map = 0
+          player.fixed_colormap = 0
         end
       elsif player.powers[PowerType::Infrared.to_i32] > 0
         if (player.powers[PowerType::Infrared.to_i32] > 4 * 32 ||
-           (player.powers[PowerType::Infrared] * 8) != 0)
+           (player.powers[PowerType::Infrared.to_i32] * 8) != 0)
           # Almost full bright.
-          player.fixed_color_map = 1
+          player.fixed_colormap = 1
         else
-          player.fixed_color_map = 0
+          player.fixed_colormap = 0
         end
       else
-        player.fixed_color_map = 0
+        player.fixed_colormap = 0
       end
     end
 
@@ -185,24 +185,24 @@ module Doocr
 
     # Move the player according to TicCmd.
     def move_player(player : Player)
-      cmd = player.cmd
+      cmd = player.cmd.as(TicCmd)
 
-      player.mobj.angle += Angle.new(cmd.angle_turn << 16)
+      player.mobj.as(Mobj).angle += Angle.new(cmd.angle_turn << 16)
 
       # Do not let the player control movement if not onground.
-      @on_ground = player.mobj.z <= player.mobj.floor_z
+      @on_ground = player.mobj.as(Mobj).z <= player.mobj.as(Mobj).floor_z
 
       if cmd.forward_move != 0 && @on_ground
-        thrust(player, player.mobj.angle, Fixed.new(cmd.forward_move * 2048))
+        thrust(player, player.mobj.as(Mobj).angle, Fixed.new(cmd.forward_move * 2048))
       end
 
       if cmd.side_move != 0 && @on_ground
-        thrust(player, player.mobj.angle - Angle.ang90, Fixed.new(cmd.side_move * 2048))
+        thrust(player, player.mobj.as(Mobj).angle - Angle.ang90, Fixed.new(cmd.side_move * 2048))
       end
 
       if ((cmd.forward_move != 0 || cmd.side_move != 0) &&
-         player.mobj.state == DoomInfo.states[MobjState::Play.to_i32])
-        player.mobj.set_state(MobjState::PlayRun1)
+         player.mobj.as(Mobj).state == DoomInfo.states[MobjState::Play.to_i32])
+        player.mobj.as(Mobj).set_state(MobjState::PlayRun1)
       end
     end
 
@@ -210,23 +210,23 @@ module Doocr
     def calc_height(player : Player)
       # Regular movement bobbing.
       # It needs to be calculated for gun swing even if not on ground.
-      player.bob = player.mobj.mom_x * player.mobj.mom_x + player.mobj.mom_y * player.mobj.mom_y
+      player.bob = player.mobj.as(Mobj).mom_x * player.mobj.as(Mobj).mom_x + player.mobj.as(Mobj).mom_y * player.mobj.as(Mobj).mom_y
       player.bob >>= 2
       player.bob = @@max_bob if player.bob > @@max_bob
 
-      if (player.cheats & CheatFlags::NoMomentum) != 0 || !@on_ground
-        player.view_z = player.mobj.z + Player.normal_view_height
+      if (player.cheats & CheatFlags::NoMomentum).to_i32 != 0 || !@on_ground
+        player.view_z = player.mobj.as(Mobj).z + Player.normal_view_height
 
-        if player.view_z > player.mobj.ceiling_z - Fixed.from_i(4)
-          player.view_z = player.mobj.ceiling_z - Fixed.from_i(4)
+        if player.view_z > player.mobj.as(Mobj).ceiling_z - Fixed.from_i(4)
+          player.view_z = player.mobj.as(Mobj).ceiling_z - Fixed.from_i(4)
         end
 
-        player.view_z = player.mobj.z + player.view_height
+        player.view_z = player.mobj.as(Mobj).z + player.view_height
 
         return
       end
 
-      angle = (Trig::FINE_ANGLE_COUNT / 20 * @world.as(World).level_time) & Trig::FINE_MASK
+      angle = (Trig::FINE_ANGLE_COUNT / 20 * @world.as(World).level_time).to_i32 & Trig::FINE_MASK
 
       bob = player.bob / 2 * Trig.sin(angle)
 
@@ -248,68 +248,63 @@ module Doocr
         end
       end
 
-      player.view_z = player.mobj.z + player.view_height + bob
+      player.view_z = player.mobj.as(Mobj).z + player.view_height + bob
 
-      if player.view_z > player.mobj.ceiling_z - Fixed.from_i(4)
-        player.view_z = player.mobj.ceiling_z - Fixed.from_i(4)
+      if player.view_z > player.mobj.as(Mobj).ceiling_z - Fixed.from_i(4)
+        player.view_z = player.mobj.as(Mobj).ceiling_z - Fixed.from_i(4)
       end
     end
 
     # Moves the given origin along a given angle.
     def thrust(player : Player, angle : Angle, move : Fixed)
-      player.mobj.mom_x += move * Trig.cos(angle)
-      player.mobj.mom_y += move * Trig.sin(angle)
+      player.mobj.as(Mobj).mom_x += move * Trig.cos(angle)
+      player.mobj.as(Mobj).mom_y += move * Trig.sin(angle)
     end
 
     # Called every tic frame that the player origin is in a special sector.
     private def player_in_special_sector(player : Player)
-      sector = player.mobj.subsector.sector
+      sector = player.mobj.as(Mobj).subsector.as(Subsector).sector.as(Sector)
 
       # Falling, not all the way down yet?
-      return if player.mobj.z != sector.floor_height
+      return if player.mobj.as(Mobj).z != sector.floor_height
 
-      ti = @world.as(World).thing_interaction
+      ti = @world.as(World).thing_interaction.as(ThingInteraction)
 
       # Has hitten ground.
       case sector.special.to_i32
       when 5
         # Hell slime damage.
-        if player.powers[PowerType::IronFeet] == 0
+        if player.powers[PowerType::IronFeet.to_i32] == 0
           if (@world.as(World).level_time & 0x1f) == 0
-            ti.damage_mobj(player.mobj, nil, nil, 10)
+            ti.damage_mobj(player.mobj.as(Mobj), nil, nil, 10)
           end
         end
-        break
       when 7
         # Nukage damage.
-        if player.powers[PowerType::IronFeet] == 0
+        if player.powers[PowerType::IronFeet.to_i32] == 0
           if (@world.as(World).level_time & 0x1f) == 0
-            ti.damage_mobj(player.mobj, nil, nil, 5)
+            ti.damage_mobj(player.mobj.as(Mobj), nil, nil, 5)
           end
         end
-        break
       when 16, 4 # Super hell slime damage, strobe hurt.
-        if player.powers[PowerType::IronFeet] == 0 || (@world.as(World).random.next < 5)
+        if player.powers[PowerType::IronFeet.to_i32] == 0 || (@world.as(World).random.next < 5)
           if (@world.as(World).level_time & 0x1f) == 0
-            ti.damage_mobj(player.mobj, nil, nil, 20)
+            ti.damage_mobj(player.mobj.as(Mobj), nil, nil, 20)
           end
         end
-        break
       when 9
         # Secret sector.
         player.secret_count += 1
-        sector.special = 0
-        break
+        sector.special = SectorSpecial.new(0)
       when 11
         # Exit super damage for E1M8 finale.
         player.cheats &= ~CheatFlags::GodMode
         if (@world.as(World).level_time & 0x1f) == 0
-          ti.damage_mobj(player.mobj, nil, nil, 20)
+          ti.damage_mobj(player.mobj.as(Mobj), nil, nil, 20)
         end
         if player.health <= 10
           @world.as(World).exit_level
         end
-        break
       else
         raise "Unknown sector special: #{sector.special.to_i32}"
       end
@@ -332,32 +327,32 @@ module Doocr
       end
 
       player.delta_view_height = Fixed.zero
-      @on_ground = player.mobj <= player.mobj.floor_z
+      @on_ground = player.mobj.as(Mobj).z <= player.mobj.as(Mobj).floor_z
       calc_height(player)
 
       if player.attacker != nil && player.attacker != player.mobj
         angle = Geometry.point_to_angle(
-          player.mobj.x, player.mobj.y,
-          player.attacker.x, player.attacker.y
+          player.mobj.as(Mobj).x, player.mobj.as(Mobj).y,
+          player.attacker.as(Mobj).x, player.attacker.as(Mobj).y
         )
 
-        delta = angle - player.mobj.angle
+        delta = angle - player.mobj.as(Mobj).angle
 
         if delta < @@ang5 || delta.data > (-@@ang5).data
           # Looking at killer, so fade damage flash down.
-          player.mobj.angle = angle
+          player.mobj.as(Mobj).angle = angle
 
           player.damage_count -= 1 if player.damage_count > 0
         elsif delta < Angle.ang180
-          player.mobj.angle += @@ang5
+          player.mobj.as(Mobj).angle += @@ang5
         else
-          player.mobj.angle -= @@ang5
+          player.mobj.as(Mobj).angle -= @@ang5
         end
       elsif player.damage_count > 0
         player.damage_count -= 1
       end
 
-      if (player.cmd.buttons & TicCmdButtons.use) != 0
+      if (player.cmd.as(TicCmd).buttons & TicCmdButtons.use).to_i32 != 0
         player.player_state = PlayerState::Reborn
       end
     end
@@ -385,7 +380,7 @@ module Doocr
       end
 
       if player.pending_weapon == WeaponType::Chainsaw
-        @world.as(World).start_sound(player.mobj.as(Mobj), Sfx::SAWUP, SfxType::Weapon)
+        @world.as(World).start_sound(player.mobj.as(Mobj).as(Mobj), Sfx::SAWUP, SfxType::Weapon)
       end
 
       new_state = DoomInfo.weapon_infos[player.pending_weapon.to_i32].up_state
@@ -443,7 +438,7 @@ module Doocr
           if psp.tics != -1
             psp.tics -= 1
             if psp.tics == 0
-              set_player_sprite(player, PlayerState.new(i), psp.state.next)
+              set_player_sprite(player, PlayerSprite.new(i), psp.state.as(MobjStateDef).next)
             end
           end
         end

@@ -41,16 +41,16 @@ module Doocr
     def run
       result : SectorActionResult
 
-      sa = @world.as(World).sector_action
+      sa = @world.as(World).sector_action.as(SectorAction)
 
       case @direction
       when 0
         # In stasis.
-        break
+
       when 1
         # Up.
         result = sa.move_plane(
-          @sector,
+          @sector.as(Sector),
           @speed,
           @top_height,
           false,
@@ -58,13 +58,11 @@ module Doocr
           @direction
         )
 
-        if ((@world.as(World).level_time + sector.number) & 7) == 0
+        if ((@world.as(World).level_time + @sector.as(Sector).number) & 7) == 0
           case type
           when CeilingMoveType::SilentCrushAndRaise
-            break
           else
-            @world.as(World).start_sound(sector.sound_origin, Sfx::STNMOV, SfxType::Misc)
-            break
+            @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::STNMOV, SfxType::Misc)
           end
         end
 
@@ -72,23 +70,19 @@ module Doocr
           case type
           when CeilingMoveType::RaiseToHighest
             sa.remove_active_ceiling(self)
-            sector.disable_frame_interpolation_for_one_frame
-            break
+            @sector.as(Sector).disable_frame_interpolation_for_one_frame
           when CeilingMoveType::SilentCrushAndRaise, CeilingMoveType::FastCrushAndRaise, CeilingMoveType::CrushAndRaise
             if type == CeilingMoveType::SilentCrushAndRaise
-              @world.as(World).start_sound(sector.sound_origin, Sfx::PSTOP, SfxType::Misc)
+              @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::PSTOP, SfxType::Misc)
             end
             @direction = -1
-            break
           else
-            break
           end
         end
-        break
       when -1
         # Down.
         result = sa.move_plane(
-          @sector,
+          @sector.as(Sector),
           @speed,
           @bottom_height,
           false,
@@ -96,13 +90,11 @@ module Doocr
           @direction
         )
 
-        if ((@world.as(World).level_time + sector.number) & 7) == 0
+        if ((@world.as(World).level_time + sector.as(Sector).number) & 7) == 0
           case type
           when CeilingMoveType::SilentCrushAndRaise
-            break
           else
-            @world.as(World).start_sound(sector.sound_origin, Sfx::STNMOV, SfxType::Misc)
-            break
+            @world.as(World).start_sound(sector.as(Sector).sound_origin.as(Mobj), Sfx::STNMOV, SfxType::Misc)
           end
         end
 
@@ -110,33 +102,27 @@ module Doocr
           case type
           when CeilingMoveType::SilentCrushAndRaise, CeilingMoveType::CrushAndRaise, CeilingMoveType::FastCrushAndRaise
             if type == CeilingMoveType::SilentCrushAndRaise
-              @world.as(World).start_sound(sector.sound_origin, Sfx::PSTOP, SfxType::Misc)
+              @world.as(World).start_sound(sector.as(Sector).sound_origin.as(Mobj), Sfx::PSTOP, SfxType::Misc)
               @speed = SectorAction.ceiling_speed
             end
             if type == CeilingMoveType::CrushAndRaise
               @speed = SectorAction.ceiling_speed
             end
             @direction = 1
-            break
           when CeilingMoveType::LowerAndCrush, CeilingMoveType::LowerToFloor
             sa.remove_active_ceiling(self)
-            sector.disable_frame_interpolation_for_one_frame
-            break
+            sector.as(Sector).disable_frame_interpolation_for_one_frame
           else
-            break
           end
         else
           if result == SectorActionResult::Crushed
             case type
             when CeilingMoveType::SilentCrushAndRaise, CeilingMoveType::CrushAndRaise, CeilingMoveType::LowerAndCrush
               @speed = SectorAction.ceiling_speed / 8
-              break
             else
-              break
             end
           end
         end
-        break
       end
     end
   end

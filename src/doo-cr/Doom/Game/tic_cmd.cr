@@ -18,8 +18,8 @@ module Doocr
   class TicCmd
     property forward_move : Int8 = 0
     property side_move : Int8 = 0
-    property angle_turn : Int8 = 0
-    property buttons : Int8 = 0
+    property angle_turn : Int16 = 0
+    property buttons : UInt8 = 0
 
     def clear
       @forward_move = 0

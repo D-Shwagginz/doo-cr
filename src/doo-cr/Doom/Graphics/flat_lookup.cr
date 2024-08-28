@@ -74,8 +74,8 @@ module Doocr
 
       if standard || custom_flat_trick
         init_standard(wad)
-      elsif deutexmerge
-        init_deutex_merge
+      elsif deutex_merge
+        init_deutex_merge(wad)
       else
         raise "Failed to read flats."
       end
@@ -107,7 +107,7 @@ module Doocr
 
           @flats << flat
           @name_to_flat[name] = flat
-          @name_to_number = number
+          @name_to_number[name] = number
           lump += 1
         end
 
@@ -175,7 +175,7 @@ module Doocr
         @sky_flat = @name_to_flat["F_SKY1"]
 
         puts("OK (#{@name_to_flat.size} flats)")
-      rescue exception
+      rescue e
         puts("Failed")
         raise e
       end

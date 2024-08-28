@@ -23,7 +23,7 @@ module Doocr
     private def initialize(data : Bytes, sector_count : Int32)
       # If the reject table is too small, expand it to avoid crash.
       # https://doomwiki.org/wiki/Reject#Reject_Overflow
-      expected_length = (sector_count * sector_count + 7) / 8
+      expected_length = ((sector_count * sector_count + 7) / 8).to_i32
       if data.size < expected_length
         data += Bytes.new(expected_length - data.size)
       end
@@ -33,7 +33,7 @@ module Doocr
     end
 
     def self.from_wad(wad : Wad, lump : Int32, sectors : Array(Sector)) : Reject
-      return Reject.new(wad.read_lump(lump), sectors.size)
+      return new(wad.read_lump(lump), sectors.size)
     end
 
     def check(sector1 : Sector, sector2 : Sector) : Bool

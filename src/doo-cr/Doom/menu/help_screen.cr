@@ -35,7 +35,7 @@ module Doocr
     end
 
     def do_event(e : DoomEvent) : Bool
-      return if e.type != EventType::KeyDown
+      return true if e.type != EventType::KeyDown
 
       if (e.key == DoomKey::Enter ||
          e.key == DoomKey::Space ||

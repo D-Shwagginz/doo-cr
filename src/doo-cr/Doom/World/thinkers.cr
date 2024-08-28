@@ -26,8 +26,8 @@ module Doocr
 
     private def init_thinkers
       @cap = Thinker.new
-      @cap.prev = @cap
-      @cap.next = @cap
+      @cap.as(Thinker).prev = @cap
+      @cap.as(Thinker).next = @cap
     end
 
     def add(thinker : Thinker)
@@ -42,31 +42,31 @@ module Doocr
     end
 
     def run
-      current = @cap.next
+      current = @cap.as(Thinker).next.as(Thinker)
       while current != @cap
-        if current.thinker_state == ThinkerState::Removed
+        if current.as(Thinker).thinker_state == ThinkerState::Removed
           # Time to remove it
-          current.next.prev = current.prev
-          current.prev.next = current.next
+          current.as(Thinker).next.as(Thinker).prev = current.as(Thinker).prev
+          current.as(Thinker).prev.as(Thinker).next = current.as(Thinker).next
         else
-          if current.thinker_state = ThinkerState::Active
-            current.run
+          if current.as(Thinker).thinker_state = ThinkerState::Active
+            current.as(Thinker).run
           end
         end
-        current = current.next
+        current = current.next.as(Thinker)
       end
     end
 
     def update_frame_interpolation_info
-      current = @cap.next
+      current = @cap.as(Thinker).next.as(Thinker)
       while current != @cap
         current.update_frame_interpolation_info
-        current = current.next
+        current = current.next.as(Thinker)
       end
     end
 
     def reset
-      @cap.prev = @cap.next = @cap
+      @cap.as(Thinker).prev = @cap.as(Thinker).next = @cap
     end
 
     def get_enumerator : ThinkerEnumerator

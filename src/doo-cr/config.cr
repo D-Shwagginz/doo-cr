@@ -16,41 +16,80 @@
 
 module Doocr
   class Config
-    getter key_forward : KeyBinding
-    getter key_backward : KeyBinding
-    getter key_strafeleft : KeyBinding
-    getter key_straferight : KeyBinding
-    getter key_turnleft : KeyBinding
-    getter key_turnright : KeyBinding
-    getter key_fire : KeyBinding
-    getter key_use : KeyBinding
-    getter key_run : KeyBinding
-    getter key_strafe : KeyBinding
+    property key_forward : KeyBinding = KeyBinding.new(
+      [
+        DoomKey::Up,
+        DoomKey::W,
+      ])
+    property key_backward : KeyBinding = KeyBinding.new(
+      [
+        DoomKey::Down,
+        DoomKey::S,
+      ])
+    property key_strafeleft : KeyBinding = KeyBinding.new(
+      [
+        DoomKey::A,
+      ])
+    property key_straferight : KeyBinding = KeyBinding.new(
+      [
+        DoomKey::D,
+      ])
+    property key_turnleft : KeyBinding = KeyBinding.new(
+      [
+        DoomKey::Left,
+      ])
+    property key_turnright : KeyBinding = KeyBinding.new(
+      [
+        DoomKey::Right,
+      ])
+    property key_fire : KeyBinding = KeyBinding.new(
+      [
+        DoomKey::LControl,
+        DoomKey::RControl,
+      ],
+      [
+        DoomMouseButton::Mouse1,
+      ])
+    property key_use : KeyBinding = KeyBinding.new(
+      [
+        DoomKey::Space,
+      ],
+      [
+        DoomMouseButton::Mouse2,
+      ])
+    property key_run : KeyBinding = KeyBinding.new(
+      [
+        DoomKey::LShift,
+        DoomKey::RShift,
+      ])
+    property key_strafe : KeyBinding = KeyBinding.new(
+      [
+        DoomKey::LAlt,
+        DoomKey::RAlt,
+      ])
 
-    getter mouse_sensitivity : Int32
-    getter mouse_disableyaxis : Bool
+    property mouse_sensitivity : Int32 = 8
+    property mouse_disableyaxis : Bool = false
 
-    getter game_alwaysrun : Bool
+    property game_alwaysrun : Bool = true
 
-    getter video_screenwidth : Int32
-    getter video_screenheight : Int32
-    getter video_fullscreen : Bool
-    getter video_highresolution : Bool
-    getter video_displaymessage : Bool
-    getter video_gamescreensize : Int32
-    getter video_gammacorrection : Int32
-    getter video_fpsscale : Int32
+    property video_screenwidth : Int32 = 640
+    property video_screenheight : Int32 = 400
+    property video_fullscreen : Bool = false
+    property video_highresolution : Bool = true
+    property video_gamescreensize : Int32 = 7
+    property video_displaymessage : Bool = true
+    property video_gammacorrection : Int32 = 2
+    property video_fpsscale : Int32 = 2
 
-    getter audio_soundvolume : Int32
-    getter audio_musicvolume : Int32
-    getter audio_randompitch : Bool
-    getter audio_soundfont : String
-    getter audio_musiceffect : Bool
+    property audio_soundvolume : Int32 = 8
+    property audio_musicvolume : Int32 = 8
+    property audio_randompitch : Bool = true
 
-    getter is_restored_from_file : Bool
+    getter is_restored_from_file : Bool = false
 
     # Default settings.
-    def initialize
+    def load_default
       @key_forward = KeyBinding.new(
         [
           DoomKey::Up,
@@ -120,10 +159,137 @@ module Doocr
       @audio_soundvolume = 8
       @audio_musicvolume = 8
       @audio_randompitch = true
-      @audio_soundfont = "TimGM6mb.sf2"
-      @audio_musiceffect = true
+    end
 
-      @is_restored_from_file = false
+    def initialize
+      load_default
+    end
+
+    def initialize(path : String)
+      begin
+        print("Restore settings: ")
+
+        hash = {} of String => String
+        File.read_lines(path).each do |line|
+          split = line.split('=', remove_empty: true)
+          hash[split[0].strip] = split[1].strip if split.size == 2
+        end
+
+        @key_forward = get_key_binding(hash, "key_forward", @key_forward)
+        @key_backward = get_key_binding(hash, "key_backward", @key_backward)
+        @key_strafeleft = get_key_binding(hash, "key_strafeleft", @key_strafeleft)
+        @key_straferight = get_key_binding(hash, "key_straferight", @key_straferight)
+        @key_turnleft = get_key_binding(hash, "key_turnleft", @key_turnleft)
+        @key_turnright = get_key_binding(hash, "key_turnright", @key_turnright)
+        @key_fire = get_key_binding(hash, "key_fire", @key_fire)
+        @key_use = get_key_binding(hash, "key_use", @key_use)
+        @key_run = get_key_binding(hash, "key_run", @key_run)
+        @key_strafe = get_key_binding(hash, "key_strafe", @key_strafe)
+
+        @mouse_sensitivity = get_int(hash, "mouse_sensitivity", @mouse_sensitivity)
+        @mouse_disableyaxis = get_bool(hash, "mouse_disableyaxis", @mouse_disableyaxis)
+
+        @game_alwaysrun = get_bool(hash, "game_alwaysrun", @game_alwaysrun)
+
+        @video_screenwidth = get_int(hash, "video_screenwidth", @video_screenwidth)
+        @video_screenheight = get_int(hash, "video_screenheight", @video_screenheight)
+        @video_fullscreen = get_bool(hash, "video_fullscreen", @video_fullscreen)
+        @video_highresolution = get_bool(hash, "video_highresolution", @video_highresolution)
+        @video_displaymessage = get_bool(hash, "video_displaymessage", @video_displaymessage)
+        @video_gamescreensize = get_int(hash, "video_gamescreensize", @video_gamescreensize)
+        @video_gammacorrection = get_int(hash, "video_gammacorrection", @video_gammacorrection)
+        @video_fpsscale = get_int(hash, "video_fpsscale", @video_fpsscale)
+
+        @audio_soundvolume = get_int(hash, "audio_soundvolume", @audio_soundvolume)
+        @audio_musicvolume = get_int(hash, "audio_musicvolume", @audio_musicvolume)
+        @audio_randompitch = get_bool(hash, "audio_randompitch", @audio_randompitch)
+
+        @is_restored_from_file = true
+
+        puts "OK"
+      rescue e
+        puts "Failed"
+        load_default
+      end
+    end
+
+    def save(path : String)
+      begin
+        File.open(path, "w") do |file|
+          file.puts("key_forward = #{@key_forward}")
+          file.puts("key_backward = #{@key_backward}")
+          file.puts("key_strafeleft = #{@key_strafeleft}")
+          file.puts("key_straferight = #{@key_straferight}")
+          file.puts("key_turnleft = #{@key_turnleft}")
+          file.puts("key_turnright = #{@key_turnright}")
+          file.puts("key_fire = #{@key_fire}")
+          file.puts("key_use = #{@key_use}")
+          file.puts("key_run = #{@key_run}")
+          file.puts("key_strafe = #{@key_strafe}")
+
+          file.puts("mouse_sensitivity = #{@mouse_sensitivity}")
+          file.puts("mouse_disableyaxis = #{bool_to_string(@mouse_disableyaxis)}")
+
+          file.puts("game_alwaysrun = #{bool_to_string(@game_alwaysrun)}")
+
+          file.puts("video_screenwidth = #{@video_screenwidth}")
+          file.puts("video_screenheight = #{@video_screenheight}")
+          file.puts("video_fullscreen = #{bool_to_string(@video_fullscreen)}")
+          file.puts("video_highresolution = #{bool_to_string(@video_highresolution)}")
+          file.puts("video_displaymessage = #{bool_to_string(@video_displaymessage)}")
+          file.puts("video_gamescreensize = #{@video_gamescreensize}")
+          file.puts("video_gammacorrection = #{@video_gammacorrection}")
+          file.puts("video_fpsscale = #{@video_fpsscale}")
+
+          file.puts("audio_soundvolume = #{@audio_soundvolume}")
+          file.puts("audio_musicvolume = #{@audio_musicvolume}")
+          file.puts("audio_randompitch = #{bool_to_string(@audio_randompitch)}")
+        end
+      rescue e
+        raise e
+      end
+    end
+
+    private def get_int(hash : Hash(String, String), name : String, default_value : Int32) : Int32
+      if string_value = hash[name]?
+        if value = string_value.to_i32?
+          return value
+        end
+      end
+
+      return default_value
+    end
+
+    private def get_string(hash : Hash(String, String), name : String, default_value : String) : String
+      if string_value = hash[name]?
+        return string_value
+      end
+
+      return default_value
+    end
+
+    private def get_bool(hash : Hash(String, String), name : String, default_value : Bool) : Bool
+      if string_value = hash[name]?
+        if string_value == "true"
+          return true
+        elsif string_value == "false"
+          return false
+        end
+      end
+
+      return default_value
+    end
+
+    private def get_key_binding(hash : Hash(String, String), name : String, default_value : KeyBinding) : KeyBinding
+      if string_value = hash[name]?
+        return KeyBinding.parse(string_value)
+      end
+
+      return default_value
+    end
+
+    private def bool_to_string(value : Bool) : String
+      return value ? "true" : "false"
     end
   end
 end

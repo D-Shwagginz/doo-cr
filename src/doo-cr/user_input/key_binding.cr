@@ -34,7 +34,7 @@ module Doocr
     end
 
     def to_s
-      key_values = @keys.select { |key| DoomKeyEx.to_s(key) }
+      key_values = @keys.select { |key| key.to_s }
       mouse_values = @mouse_buttons.select { |button| DoomMouseButtonEx.to_s(button) }
       values = key_values + mouse_values
       if values.size > 0
@@ -51,14 +51,14 @@ module Doocr
     end
 
     def self.parse(value : String)
-      return @empty if value == "none"
+      return @@empty if value == "none"
 
       keys = [] of DoomKey
       mouse_buttons = [] of DoomMouseButton
 
       split = value.split(',').select { |x| x.strip }
       split.each do |s|
-        key = DoomKeyEx.parse(s)
+        key = DoomKey.parse(s)
         if key != DoomKey::Unknown
           keys << key
           next

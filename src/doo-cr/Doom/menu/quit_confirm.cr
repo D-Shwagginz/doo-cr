@@ -40,7 +40,7 @@ module Doocr
 
     @app : Doom
     @random : DoomRandom
-    getter text : Array(String) | Nil = nil
+    getter text : Array(String) = [] of String
 
     @end_count : Int32
 
@@ -53,7 +53,7 @@ module Doocr
       list : Array(DoomString)
       if @app.options.game_mode == GameMode::Commercial
         if @app.options.mission_pack == MissionPack::Doom2
-          list = DOomInfo::QuitMessages.doom2
+          list = DoomInfo::QuitMessages.doom2
         else
           list = DoomInfo::QuitMessages.final_doom
         end
@@ -61,7 +61,7 @@ module Doocr
         list = DoomInfo::QuitMessages.doom
       end
 
-      @text = (list[@random.next % list.size] + "\n\n" + DoomInfo::Strings::PRESSYN).split('\n')
+      @text = (list.to_s[@random.next % list.size] + "\n\n" + DoomInfo::Strings::PRESSYN.to_s).split('\n')
     end
 
     def do_event(e : DoomEvent) : Bool

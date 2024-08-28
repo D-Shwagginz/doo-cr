@@ -47,8 +47,8 @@ module Doocr
     def self.from_wad(wad : Wad, lump : Int32, lines : Array(LineDef)) : BlockMap
       data = wad.read_lump(lump)
 
-      table = Array(Int16).new(data.size / 2)
-      (data.size / 2).times do |i|
+      table = Array(Int16).new((data.size / 2).to_i32)
+      (data.size / 2).to_i32.times do |i|
         offset = 2 * i
         table << IO::ByteFormat::LittleEndian.decode(Int16, data[offset, 2])
       end
@@ -58,7 +58,7 @@ module Doocr
       width = table[2]
       height = table[3]
 
-      return BlockMap.new(
+      return new(
         origin_x,
         origin_y,
         width,

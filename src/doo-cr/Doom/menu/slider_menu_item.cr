@@ -15,7 +15,7 @@
 #
 
 module Doocr
-  class SilderMenuItem < MenuItem
+  class SliderMenuItem < MenuItem
     getter name : String
     getter item_x : Int32
     getter item_y : Int32
@@ -26,7 +26,7 @@ module Doocr
     @reset : Proc(Int32) | Nil = nil
     @action : Proc(Int32, Nil) | Nil = nil
 
-    def silder_x
+    def slider_x
       return @item_x
     end
 
@@ -46,17 +46,17 @@ module Doocr
     end
 
     def reset
-      @slider_position = @reset.call if @reset != nil
+      @slider_position = @reset.as(Proc(Int32)).call if @reset != nil
     end
 
     def up
       @slider_position += 1 if @slider_position < @slider_length - 1
-      @action.call(@slider_position) if @action != nil
+      @action.as(Proc(Int32, Nil)).call(@slider_position) if @action != nil
     end
 
     def down
       @slider_position -= 1 if @slider_position > 0
-      @action.call(@slider_position) if @action != nil
+      @action.as(Proc(Int32, Nil)).call(@slider_position) if @action != nil
     end
   end
 end

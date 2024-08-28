@@ -20,7 +20,7 @@ module Doocr::SFML
   class SFMLMusic
     include Audio::IMusic
 
-    @config : Config | Nil = nil
+    @config : Config
     @wad : Wad | Nil = nil
 
     @stream : MusStream | Nil = nil
@@ -35,13 +35,14 @@ module Doocr::SFML
       begin
         print("Initialize music: ")
 
+        @wad = content.wad.as(Wad)
+
         @stream = MusStream.new(self, @config)
         @current = Bgm::NONE
 
         puts "OK"
       rescue e
         puts "Failed"
-        finalize()
         raise e
       end
     end
@@ -79,7 +80,7 @@ module Doocr::SFML
       puts "Shutdown music."
 
       if @stream != nil
-        @stream.finalize
+        @stream.as(MusStream).finalize
         @stream = nil
       end
     end
@@ -111,7 +112,7 @@ module Doocr::SFML
       @samples = Slice(Int16).new(@@block_length)
 
       def initialize(@parent, @config)
-        @config.audio_musicvolume = Math.clamp(@config.audio_musicvolume, 0, @parent.max_volume)
+        @config.audio_musicvolume = @config.audio_musicvolume.clamp(0, @parent.max_volume)
 
         @left = Array.new(@@block_length, 0_i16)
         @right = Array.new(@@block_length, 0_i16)
@@ -171,12 +172,12 @@ module Doocr::SFML
       def finalize
         stop()
         if @current != nil
-          @current.finalize
+          @current.as(Decoder).finalize
           @current = nil
         end
 
         if @reserved != nil
-          @reserved.finalize
+          @reserved.as(Decoder).finalize
           @reserved = nil
         end
 
@@ -199,6 +200,8 @@ module Doocr::SFML
         'd'.ord.to_u8,
       ]
 
+      class_getter sample_rate : Int32 = 44100
+
       @adl_midi_audio_format : ADLMidi::AudioFormat = ADLMidi::AudioFormat.new(
         type: ADLMidi::SampleType::S16,
         container_size: sizeof(Int16),
@@ -216,8 +219,8 @@ module Doocr::SFML
       @data : Bytes
 
       def initialize(@data, loop)
-        @adl_midi_player = ADLMidi.init(44100)
-        @opn_midi_player = OPNMidi.init(44100)
+        @adl_midi_player = ADLMidi.init(@@sample_rate)
+        @opn_midi_player = OPNMidi.init(@@sample_rate)
 
         if x = @adl_midi_player.as?(Pointer(ADLMidi::MIDIPlayer))
           ADLMidi.switch_emulator(x, ADLMidi::Emulator::Dosbox)

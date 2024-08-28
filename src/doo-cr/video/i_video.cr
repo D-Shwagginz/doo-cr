@@ -14,7 +14,7 @@
 # GNU General Public License for more details.
 #
 
-module Doocr
+module Doocr::Video
   module IVideo
     abstract def render(doom : Doom, frame_frac : Fixed)
     abstract def initialize_wipe

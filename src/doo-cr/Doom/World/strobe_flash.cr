@@ -34,13 +34,13 @@ module Doocr
 
     def run
       @count -= 1
-      next if @count > 0
+      return if @count > 0
 
-      if @sector.light_level == @min_light
-        @sector.light_level = @max_light
+      if @sector.as(Sector).light_level == @min_light
+        @sector.as(Sector).light_level = @max_light
         @count = @bright_time
       else
-        @sector.light_level = @min_light
+        @sector.as(Sector).light_level = @min_light
         @count = @dark_time
       end
     end

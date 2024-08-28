@@ -86,7 +86,7 @@ module Doocr
 
         # Stop because it is not two sided anyway.
         # Might do this after updating validcount?
-        return false if (line.flags & LineFlags::TwoSided) == 0
+        return false if (line.flags & LineFlags::TwoSided).to_i32 == 0
 
         # Crosses a two sided line.
         front = seg.front_sector.as(Sector)
@@ -180,7 +180,7 @@ module Doocr
 
       # First check for trivial rejection.
       # Check in REJECT table.
-      if map.reject.check(looker.subsector.as(Subsector).sector, target.subsector.as(Subsector).sector)
+      if map.reject.as(Reject).check(looker.subsector.as(Subsector).sector, target.subsector.as(Subsector).sector)
         # Can't possibly be connected.
         return false
       end

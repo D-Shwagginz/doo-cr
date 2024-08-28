@@ -64,11 +64,11 @@ module Doocr
     end
 
     def console_player
-      return @options.players[@options.console_player]
+      return @options.as(GameOptions).players[@options.as(GameOptions).console_player]
     end
 
     def display_player
-      return @options.players[@display_player]
+      return @options.as(GameOptions).players[@display_player]
     end
 
     def first_tic_is_not_yet_done
@@ -76,7 +76,7 @@ module Doocr
     end
 
     def initialize(resources : GameContent, @options : GameOptions, @game : DoomGame)
-      @random = @options.random
+      @random = @options.as(GameOptions).random.as(DoomRandom)
 
       @map = Map.new(resources, self)
 
@@ -100,17 +100,17 @@ module Doocr
       @auto_map = AutoMap.new(self)
       @cheat = Cheat.new(self)
 
-      @options.intermission_info.total_frags = 0
-      @options.intermission_info.par_time = 180
+      @options.as(GameOptions).intermission_info.as(IntermissionInfo).total_frags = 0
+      @options.as(GameOptions).intermission_info.as(IntermissionInfo).par_time = 180
 
       Player::MAX_PLAYER_COUNT.times do |i|
-        @options.players[i].kill_count = 0
-        @options.players[i].secret_count = 0
-        @options.players[i].item_count = 0
+        @options.as(GameOptions).players[i].kill_count = 0
+        @options.as(GameOptions).players[i].secret_count = 0
+        @options.as(GameOptions).players[i].item_count = 0
       end
 
       # Initial height of view will be set by player think.
-      @options.players[@options.console_player].view_z = Fixed.epsilon
+      @options.as(GameOptions).players[@options.as(GameOptions).console_player].view_z = Fixed.epsilon
 
       @total_kills = 0
       @total_items = 0
@@ -119,16 +119,16 @@ module Doocr
       load_things()
 
       # If deathmatch, randomly spawn the active players.
-      if @options.deathmatch != 0
+      if @options.as(GameOptions).deathmatch != 0
         Player::MAX_PLAYER_COUNT.times do |i|
-          if @options.players[i].in_game
-            @options.players[i].mobj = nil
-            @thing_allocation.death_match_spawn_player(i)
+          if @options.as(GameOptions).players[i].in_game
+            @options.as(GameOptions).players[i].mobj = nil
+            @thing_allocation.as(ThingAllocation).death_match_spawn_player(i)
           end
         end
       end
 
-      @specials.spawn_specials
+      @specials.as(Specials).spawn_specials
 
       @level_time = 0
       @done_first_tic = false
@@ -137,35 +137,35 @@ module Doocr
 
       @valid_count = 0
 
-      @display_player = @options.console_player
+      @display_player = @options.as(GameOptions).console_player
 
       @dummy = Mobj.new(self)
 
-      @options.music.start_music(Map.get_map_bgm(@options), true)
+      @options.as(GameOptions).music.as(Audio::IMusic).start_music(Map.get_map_bgm(@options), true)
     end
 
     def update : UpdateResult
-      players = @options.players
+      players = @options.as(GameOptions).players
 
       Player::MAX_PLAYER_COUNT.times do |i|
         players[i].update_frame_interpolation_info if players[i].in_game
       end
-      @thinkers.update_frame_interpolation_info
+      @thinkers.as(Thinkers).update_frame_interpolation_info
 
-      @map.sectors.each do |sector|
+      @map.as(Map).sectors.each do |sector|
         sector.update_frame_interpolation_info
       end
 
       Player::MAX_PLAYER_COUNT.times do |i|
-        @player_behavior.player_think(players[i]) if players[i].in_game
+        @player_behavior.as(PlayerBehavior).player_think(players[i]) if players[i].in_game
       end
 
-      @thinkers.run
-      @specials.update
-      @thing_allocation.respawn_specials
+      @thinkers.as(Thinkers).run
+      @specials.as(Specials).update
+      @thing_allocation.as(ThingAllocation).respawn_specials
 
-      @status_bar.update
-      @auto_map.update
+      @status_bar.as(StatusBar).update
+      @auto_map.as(AutoMap).update
 
       @level_time += 1
 
@@ -182,13 +182,13 @@ module Doocr
     end
 
     private def load_things
-      @map.things.size.times do |i|
-        mt = @map.things[i]
+      @map.as(Map).things.size.times do |i|
+        mt = @map.as(Map).things[i]
 
         should_spawn = true
 
         # Do not spawn cool, new monsters if not commercial.
-        if @options.game_mode != GameMode::Commercial
+        if @options.as(GameOptions).game_mode != GameMode::Commercial
           case mt.type
           # Arachnotron, Archvile, Boss Brain, Boss Shooter, Hell Knight
           # Mancubus, Pain Elemental, Former Human Commando, Revenant, Wolf SS
@@ -200,7 +200,7 @@ module Doocr
 
         break if !should_spawn
 
-        @thing_allocation.spawn_map_thing(mt)
+        @thing_allocation.as(ThingAllocation).spawn_map_thing(mt)
       end
     end
 
@@ -215,15 +215,15 @@ module Doocr
     end
 
     def start_sound(mobj : Mobj, sfx : Sfx, type : SfxType)
-      @options.sound.as(Audio::ISound).start_sound(mobj, sfx, type)
+      @options.as(GameOptions).sound.as(Audio::ISound).start_sound(mobj, sfx, type)
     end
 
     def start_sound(mobj : Mobj, sfx : Sfx, type : SfxType, volume : Int32)
-      @options.sound.as(Audio::ISound).start_sound(mobj, sfx, type, volume)
+      @options.as(GameOptions).sound.as(Audio::ISound).start_sound(mobj, sfx, type, volume)
     end
 
     def stop_sound(mobj : Mobj)
-      @options.sound.as(Audio::ISound).stop_sound(mobj)
+      @options.as(GameOptions).sound.as(Audio::ISound).stop_sound(mobj)
     end
 
     def get_new_valid_count : Int32
@@ -232,21 +232,21 @@ module Doocr
     end
 
     def do_event(e : DoomEvent) : Bool
-      @cheat.do_event(e) if !@options.net_game && !@options.demo_playback
+      @cheat.as(Cheat).do_event(e) if !@options.as(GameOptions).net_game && !@options.as(GameOptions).demo_playback
 
-      return true if @auto_map.visible && @auto_map.do_event(e)
+      return true if @auto_map.as(AutoMap).visible && @auto_map.as(AutoMap).do_event(e)
 
       if e.key == DoomKey::Tab && e.type == EventType::KeyDown
-        if @auto_map.visible
-          @auto_map.close
+        if @auto_map.as(AutoMap).visible
+          @auto_map.as(AutoMap).close
         else
-          @auto_map.open
+          @auto_map.as(AutoMap).open
           return true
         end
       end
 
       if e.key == DoomKey::F12 && e.type == EventType::KeyDown
-        change_display_player() if @options.demo_playback || @options.deathmatch == 0
+        change_display_player() if @options.as(GameOptions).demo_playback || @options.as(GameOptions).deathmatch == 0
         return true
       end
 
@@ -256,7 +256,7 @@ module Doocr
     def change_display_player
       @display_player += 1
       if (@display_player == Player::MAX_PLAYER_COUNT ||
-         !@options.players[@display_player].in_game)
+         !@options.as(GameOptions).players[@display_player].in_game)
         @display_player = 0
       end
     end

@@ -23,7 +23,7 @@ module Doocr
       @cache = {} of String => Patch
     end
 
-    def [](name : String)
+    def [](name : String) : Patch
       if !@cache[name]?
         patch = Patch.from_wad(@wad, name)
         @cache[name] = patch
@@ -32,11 +32,11 @@ module Doocr
     end
 
     def get_width(name : String) : Int32
-      return [name].width
+      return self.[name].width
     end
 
     def get_height(name : String) : Int32
-      return [name].height
+      return self.[name].height
     end
   end
 end

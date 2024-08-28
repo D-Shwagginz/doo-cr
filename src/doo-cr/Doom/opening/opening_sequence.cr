@@ -63,28 +63,20 @@ module Doocr
         case @next_stage
         when 0
           start_title_screen()
-          break
         when 1
           start_demo("DEMO1")
-          break
         when 2
           start_credit_screen()
-          break
         when 3
           start_demo("DEMO2")
-          break
         when 4
           start_title_screen()
-          break
         when 5
           start_demo("DEMO3")
-          break
         when 6
           start_credit_screen()
-          break
         when 7
           start_demo("DEMO4")
-          break
         end
 
         @current_stage = @next_stage
@@ -95,58 +87,50 @@ module Doocr
       when 0
         @count += 1
         @next_stage = 1 if @count == @timer
-        break
       when 1
-        if !@demo.read_cmd(@cmds)
+        if !@demo.as(Demo).read_cmd(@cmds)
           @next_stage = 2
         else
-          @game.update(@cmds)
+          @game.as(DoomGame).update(@cmds)
         end
-        break
       when 2
         @count += 1
         @next_stage = 3 if @count == @timer
-        break
       when 3
-        if !@demo.read_cmd(@cmds)
+        if !@demo.as(Demo).read_cmd(@cmds)
           @next_stage = 4
         else
-          @game.update(@cmds)
+          @game.as(DoomGame).update(@cmds)
         end
-        break
       when 4
         @count += 1
         @next_stage = 5 if @count == @timer
-        break
       when 5
-        if !@demo.read_cmd(@cmds)
-          if @content.wad.get_lump_number("DEMO4") == -1
+        if !@demo.as(Demo).read_cmd(@cmds)
+          if @content.wad.as(Wad).get_lump_number("DEMO4") == -1
             @next_stage = 0
           else
             @next_stage = 6
           end
         else
-          @game.update(@cmds)
+          @game.as(DoomGame).update(@cmds)
         end
-        break
       when 6
         @count += 1
         @next_stage = 7 if @count == @timer
-        break
       when 7
-        if !@demo.read_cmd(@cmds)
+        if !@demo.as(Demo).read_cmd(@cmds)
           @next_stage = 0
         else
-          @game.update(@cmds)
+          @game.as(DoomGame).update(@cmds)
         end
-        break
       end
 
       if @state == OpeningSequenceState::Title && @count == 1
-        if @options.game_mode == GameMode::Commercial
-          @options.music.start_music(Bgm::DM2TTL, false)
+        if @options.as(GameOptions).game_mode == GameMode::Commercial
+          @options.as(GameOptions).music.as(Audio::IMusic).start_music(Bgm::DM2TTL, false)
         else
-          @options.music.start_music(Bgm::INTRO, false)
+          @options.as(GameOptions).music.as(Audio::IMusic).start_music(Bgm::INTRO, false)
         end
       end
 
@@ -162,7 +146,7 @@ module Doocr
       @state = OpeningSequenceState::Title
 
       @count = 0
-      if @options.game_mode == GmaeMode::Commercial
+      if @options.as(GameOptions).game_mode == GameMode::Commercial
         @timer = 35 * 11
       else
         @timer = 170
@@ -179,16 +163,16 @@ module Doocr
     private def start_demo(lump : String)
       @state = OpeningSequenceState::Demo
 
-      @demo = Demo.new(@content.wad.read_lump(lump))
-      @demo.options.game_version = @options.game_version
-      @demo.options.game_mode = @options.game_mode
-      @demo.options.mission_pack = @options.mission_pack
-      @demo.options.video = @options.video
-      @demo.options.sound = @options.sound
-      @demo.options.music = @options.music
+      @demo = Demo.new(@content.wad.as(Wad).read_lump(lump))
+      @demo.as(Demo).options.as(GameOptions).game_version = @options.as(GameOptions).game_version
+      @demo.as(Demo).options.as(GameOptions).game_mode = @options.as(GameOptions).game_mode
+      @demo.as(Demo).options.as(GameOptions).mission_pack = @options.as(GameOptions).mission_pack
+      @demo.as(Demo).options.as(GameOptions).video = @options.as(GameOptions).video
+      @demo.as(Demo).options.as(GameOptions).sound = @options.as(GameOptions).sound
+      @demo.as(Demo).options.as(GameOptions).music = @options.as(GameOptions).music
 
-      @game = DoomGame.new(@content, @demo.options)
-      @game.defered_init_new
+      @game = DoomGame.new(@content, @demo.as(Demo).options.as(GameOptions))
+      @game.as(DoomGame).defered_init_new
     end
   end
 end

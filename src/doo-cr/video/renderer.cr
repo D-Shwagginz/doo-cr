@@ -49,7 +49,7 @@ module Doocr::Video
     @wipe_band_width : Int32 = 0
     getter wipe_band_count : Int32 = 0
     getter wipe_height : Int32 = 0
-    @wipe_buffer : Bytes = Bytes.new(0)
+    @wipe_buffer : Array(UInt8) = [] of UInt8
 
     def width : Int32
       return @screen.width
@@ -93,54 +93,54 @@ module Doocr::Video
       @palette.reset_colors(@@gamma_correction_parameters[@config.video_gammacorrection])
     end
 
-    def initialize(@config, content : DoomContent)
+    def initialize(@config, content : GameContent)
       @palette = content.palette
 
       if @config.video_highresolution
-        @screen = DrawScreen.new(content.wad, 640, 400)
+        @screen = DrawScreen.new(content.wad.as(Wad), 640, 400)
       else
-        @screen = DrawScreen.new(content.wad, 320, 200)
+        @screen = DrawScreen.new(content.wad.as(Wad), 320, 200)
       end
 
-      @config.video_gamescreensize = Math.clamp(@config.video_gamescreensize, 0, max_window_size)
-      @config.video_gammacorrection = Math.clamp(@config.video_gammacorrection, 0, max_gamma_correction_level)
+      @config.video_gamescreensize = @config.video_gamescreensize.clamp(0, max_window_size)
+      @config.video_gammacorrection = @config.video_gammacorrection.clamp(0, max_gamma_correction_level)
 
-      @menu = MenuRenderer.new(content.wad, @screen)
+      @menu = MenuRenderer.new(content.wad.as(Wad), @screen)
       @three_d = ThreeDRenderer.new(content, @screen, @config.video_gamescreensize)
-      @status_bar = StatusBarRenderer.new(content.wad, @screen)
-      @intermission = IntermissionRenderer.new(content.wad, @screen)
-      @opening_sequence = OpeningSequenceRenderer.new(content.wad, @screen, self)
-      @auto_map = AutoMapRenderer.new(content.wad, @screen)
+      @status_bar = StatusBarRenderer.new(content.wad.as(Wad), @screen)
+      @intermission = IntermissionRenderer.new(content.wad.as(Wad), @screen)
+      @opening_sequence = OpeningSequenceRenderer.new(content.wad.as(Wad), @screen, self)
+      @auto_map = AutoMapRenderer.new(content.wad.as(Wad), @screen)
       @finale = FinaleRenderer.new(content, @screen)
 
-      @pause = Patch.from_wad(content.wad, "M_PAUSE")
+      @pause = Patch.from_wad(content.wad.as(Wad), "M_PAUSE")
 
-      scale = @screen.width / 320
+      scale = (@screen.width / 320).to_i32
       @wipe_band_width = 2 * scale
-      @wipe_band_count = @screen.width / @wipe_band_width + 1
-      @wipe_height = @screen.height / scale
-      @wipe_buffer = Bytes.new(@screen.data.size)
+      @wipe_band_count = (@screen.width / @wipe_band_width).to_i32 + 1
+      @wipe_height = (@screen.height / scale).to_i32
+      @wipe_buffer = Array.new(@screen.data.size, 0_u8)
 
       @palette.reset_colors(@@gamma_correction_parameters[@config.video_gammacorrection])
     end
 
     def render_doom(doom : Doom, frame_frac : Fixed)
-      if doom.state == DoomState::Opening
-        @opening_sequence.render(doom.opening, frame_frac)
-      elsif doom.state == DoomState::DemoPlayback
-        render_game(demo.demo_playback.game, frame_frac)
-      elsif doom.state == DoomState::Game
-        render_game(doom.game, frame_frac)
+      if doom.current_state == DoomState::Opening
+        @opening_sequence.as(OpeningSequenceRenderer).render(doom.opening.as(OpeningSequence), frame_frac)
+      elsif doom.current_state == DoomState::DemoPlayback
+        render_game(doom.demo_playback.as(DemoPlayback).game, frame_frac)
+      elsif doom.current_state == DoomState::Game
+        render_game(doom.game.as(DoomGame), frame_frac)
       end
 
-      if (!doom.menu.active &&
-         doom.state == DoomState::Game &&
-         doom.game.state == GameState::Level &&
-         doom.game.paused)
-        scale = @screen.width / 320
+      if (!doom.menu.as(DoomMenu).active &&
+         doom.current_state == DoomState::Game &&
+         doom.game.as(DoomGame).game_state == GameState::Level &&
+         doom.game.as(DoomGame).paused)
+        scale = (@screen.width / 320).to_i32
         @screen.draw_patch(
-          @pause,
-          (@screen.width - scale * @pause.width) / 2,
+          @pause.as(Patch),
+          ((@screen.width - scale * @pause.as(Patch).width) / 2).to_i32,
           4 * scale,
           scale
         )
@@ -148,42 +148,43 @@ module Doocr::Video
     end
 
     def render_menu(doom : Doom)
-      @menu.render(doom.menu) if doom.menu.active
+      @menu.render(doom.menu.as(DoomMenu)) if doom.menu.as(DoomMenu).active
     end
 
     def render_game(game : DoomGame, frame_frac : Fixed)
       frame_frac = Fixed.one if game.paused
 
-      if game.state == GameState::Level
-        console_player = game.world.console_player
-        display_player = game.world.display_player
+      if game.game_state == GameState::Level
+        console_player = game.world.as(World).console_player
+        display_player = game.world.as(World).display_player
 
-        if game.world.auto_map.visible
-          @auto_map.render(console_player)
-          @status_bar.render(console_player, true)
+        if game.world.as(World).auto_map.as(AutoMap).visible
+          @auto_map.as(AutoMapRenderer).render(console_player)
+          @status_bar.as(StatusBarRenderer).render(console_player, true)
         else
           @three_d.render(display_player, frame_frac)
           if @three_d.window_size < 8
-            @status_bar.render(console_player, frame_frac)
+            @status_bar.as(StatusBarRenderer).render(console_player, true)
           elsif @three_d.window_size == ThreeDRenderer.max_screen_size
-            @status_bar.render(console_player, false)
+            @status_bar.as(StatusBarRenderer).render(console_player, false)
           end
         end
 
-        if @config.video_displaymessage || console_player.message.same?(DoomInfo::Strings::MSGOFF.to_s)
+        message = console_player.message.nil? ? "NIL" : console_player.message.as(String)
+        if @config.video_displaymessage || message.same?(DoomInfo::Strings::MSGOFF.to_s)
           if console_player.message_time > 0
-            scale = @screen.width / 320
-            @screen.draw_text(console_player.message, 0, 7 * scale, scale)
+            scale = (@screen.width / 320).to_i32
+            @screen.draw_text(message, 0, 7 * scale, scale)
           end
         end
-      elsif game.state == GameState::Intermission
-        @intermission.render(game.intermission)
-      elsif game.state == GameState::Finale
-        @finale.render(game.finale)
+      elsif game.game_state == GameState::Intermission
+        @intermission.render(game.intermission.as(Intermission))
+      elsif game.game_state == GameState::Finale
+        @finale.as(FinaleRenderer).render(game.finale.as(Finale))
       end
     end
 
-    def render(doom : Doom, destination : Bytes, frame_frac : Fixed)
+    def render(doom : Doom, destination : Array(UInt8), frame_frac : Fixed)
       if doom.wiping
         render_wipe(doom, destination)
         return
@@ -193,26 +194,26 @@ module Doocr::Video
       render_menu(doom)
 
       colors = @palette[0]
-      if (doom.state == DoomState::Game &&
-         doom.game.state == GameState::Level)
-        colors = @palette[get_palette_number(doom.game.world.console_player)]
-      elsif (doom.state == DoomState::Opening &&
-            doom.opening.state == OpeningSequenceState::Demo &&
-            doom.opening.demo_game.state == GameState::Level)
-        colors = @palette[get_palette_number(doom.opening.demo_game.world.console_player)]
-      elsif (doom.state == DoomState::DemoPlayback &&
-            doom.demo_playback.game.state == GameState::Level)
-        colors = @palette[get_palette_number(doom.demo_playback.game.world.console_player)]
+      if (doom.current_state == DoomState::Game &&
+         doom.game.as(DoomGame).game_state == GameState::Level)
+        colors = @palette[get_palette_number(doom.game.as(DoomGame).world.as(World).console_player)]
+      elsif (doom.current_state == DoomState::Opening &&
+            doom.opening.as(OpeningSequence).state == OpeningSequenceState::Demo &&
+            doom.opening.as(OpeningSequence).game.as(DoomGame).game_state == GameState::Level)
+        colors = @palette[get_palette_number(doom.opening.as(OpeningSequence).game.as(DoomGame).world.as(World).console_player)]
+      elsif (doom.current_state == DoomState::DemoPlayback &&
+            doom.demo_playback.as(DemoPlayback).game.as(DoomGame).game_state == GameState::Level)
+        colors = @palette[get_palette_number(doom.demo_playback.as(DemoPlayback).game.as(DoomGame).world.as(World).console_player)]
       end
 
       write_data(colors, destination)
     end
 
-    private def render_wipe(doom : Doom, destination : Bytes)
+    private def render_wipe(doom : Doom, destination : Array(UInt8))
       render_doom(doom, Fixed.one)
 
-      wipe = doom.wipe_effect
-      scale = @screen.width / 320
+      wipe = doom.wipe_effect.as((WipeEffect))
+      scale = (@screen.width / 320).to_i32
       (@wipe_band_count - 1).times do |i|
         x1 = @wipe_band_width * i
         x2 = x1 + @wipe_band_width
@@ -241,16 +242,16 @@ module Doocr::Video
       @wipe_buffer = @screen.data.dup
     end
 
-    private def write_data(colors : Array(UInt32), destination : Bytes)
+    private def write_data(colors : Array(UInt32), destination : Array(UInt8))
       screen_data = @screen.data
       x = 0
       y = 0
       while x < destination.size
-        j = colors[screen_data[i]].to_s(2, precision: 32)
-        r = j[0, 8].to_i(2)
-        g = j[8, 8].to_i(2)
-        b = j[16, 8].to_i(2)
-        a = j[24, 8].to_i(2)
+        j = colors[screen_data[y]].to_s(2, precision: 32)
+        r = j[0, 8].to_i(2).to_u8
+        g = j[8, 8].to_i(2).to_u8
+        b = j[16, 8].to_i(2).to_u8
+        a = j[24, 8].to_i(2).to_u8
 
         destination[x] = r
         x += 1
@@ -264,7 +265,7 @@ module Doocr::Video
       end
     end
 
-    private def self.get_palette_number(player : Player) : Int32
+    private def get_palette_number(player : Player) : Int32
       count = player.damage_count
 
       if player.powers[PowerType::Strength.to_i32] != 0
@@ -293,7 +294,7 @@ module Doocr::Video
         palette += Palette.bonus_start
       elsif (player.powers[PowerType::IronFeet.to_i32] > 4 * 32 ||
             (player.powers[PowerType::IronFeet.to_i32] & 8) != 0)
-        palette = Palette::IronFeet
+        palette = Palette.ironfeet
       else
         palette = 0
       end

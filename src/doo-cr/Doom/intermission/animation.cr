@@ -40,8 +40,8 @@ module Doocr
       @patches = Array.new(@frame_count, "")
       @frame_count.times do |i|
         # MONDO HACK!
-        if @im.info.episode != 1 || @number != 8
-          @patches[i] = "WOA" + @im.info.episode + @number.to_s(precision: 2) + i.to_s(precision: 2)
+        if @im.info.as(IntermissionInfo).episode != 1 || @number != 8
+          @patches[i] = "WOA#{@im.info.as(IntermissionInfo).episode}" + @number.to_s(precision: 2) + i.to_s(precision: 2)
         else
           # HACK ALERT!
           @patches[i] = "WIA104" + i.to_s(precision: 2)
@@ -55,9 +55,9 @@ module Doocr
       # Specify the next time to draw it.
       case @type
       when AnimationType::Always
-        @next_tic = bg_count + 1 + (@im.random.next % @period)
+        @next_tic = bg_count + 1 + (@im.random.as(DoomRandom).next % @period)
       when AnimationType::Random
-        @next_tic = bg_count + 1 + (@im.random.next % @data)
+        @next_tic = bg_count + 1 + (@im.random.as(DoomRandom).next % @data)
       when AnimationType::Level
         @next_tic = bg_count + 1
       end
@@ -68,25 +68,22 @@ module Doocr
         case @type
         when AnimationType::Always
           @patch_number = 0 if @patch_number + 1 > @frame_count
-          @next_tic = bg_count + period
-          break
+          @next_tic = bg_count + @period
         when AnimationType::Random
           @patch_number += 1
           if @patch_number == @frame_count
             @patch_number = -1
-            @next_tic = bg_count + (@im.random.next % @data)
+            @next_tic = bg_count + (@im.random.as(DoomRandom).next % @data)
           else
-            @next_tic = bg_count + period
+            @next_tic = bg_count + @period
           end
-          break
         when AnimationType::Level
           # Gawd-awful hack for level anims.
-          if !(@im.state == IntermissionState::StatCount && @number == 7) && @im.info.next_level == @data
+          if !(@im.state == IntermissionState::StatCount && @number == 7) && @im.info.as(IntermissionInfo).next_level == @data
             @patch_number += 1
             @patch_number -= 1 if @patch_number == @frame_count
-            @next_tic = bg_count + period
+            @next_tic = bg_count + @period
           end
-          break
         end
       end
     end

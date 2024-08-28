@@ -26,7 +26,7 @@ module Doocr
     @accelerate_stage : Bool = false
 
     # Specifies cureent state.
-    @state : IntermissionState | Nil = nil
+    getter state : IntermissionState | Nil = nil
 
     getter kill_count : Array(Int32) = Array(Int32).new
     getter item_count : Array(Int32) = Array(Int32).new
@@ -71,9 +71,9 @@ module Doocr
       end
       @dm_total_count = Array.new(Player::MAX_PLAYER_COUNT, 0)
 
-      if @options.deathmatch != 0
+      if @options.as(GameOptions).deathmatch != 0
         init_deathmatch_stats()
-      elsif @options.net_game
+      elsif @options.as(GameOptions).net_game
         init_net_game_stats()
       else
         init_single_player_stats()
@@ -108,7 +108,7 @@ module Doocr
 
       frags = 0
       Player::MAX_PLAYER_COUNT.times do |i|
-        next if !@options.players[i].in_game
+        next if !@options.as(GameOptions).players[i].in_game
 
         @kill_count[i] = 0
         @item_count[i] = 0
@@ -129,9 +129,9 @@ module Doocr
       @pause_count = GameConst.tic_rate
 
       Player::MAX_PLAYER_COUNT.times do |i|
-        if @options.players[i].in_game
+        if @options.as(GameOptions).players[i].in_game
           Player::MAX_PLAYER_COUNT.times do |j|
-            if @options.players[j].in_game
+            if @options.as(GameOptions).players[j].in_game
               @dm_frag_count[i][j] = 0
             end
             @dm_total_count[i] = 0
@@ -159,14 +159,14 @@ module Doocr
     end
 
     private def init_animated_back
-      return if @options.game_mode == GameMode::Commercial
+      return if @options.as(GameOptions).game_mode == GameMode::Commercial
 
-      return if @info.episode > 2
+      return if @info.as(IntermissionInfo).episode > 2
 
       if @animations == nil
-        @animations = Array(Animation).new(ANimationInfo.episodes[@info.episode].size)
+        @animations = Array(Animation).new(AnimationInfo.episodes[@info.as(IntermissionInfo).episode].size)
         @animations.size.times do |i|
-          @animations[i] = Animation.new(self, AnimationInfo.episodes[@info.episode][i], i)
+          @animations[i] = Animation.new(self, AnimationInfo.episodes[@info.as(IntermissionInfo).episode][i], i)
         end
 
         @random = DoomRandom.new
@@ -189,29 +189,26 @@ module Doocr
 
       if @bg_count == 1
         # intermission music
-        if @options.game_mode == GameMode::Commercial
-          @options.music.start_music(Bgm::DM2INT, true)
+        if @options.as(GameOptions).game_mode == GameMode::Commercial
+          @options.as(GameOptions).music.as(Audio::IMusic).start_music(Bgm::DM2INT, true)
         else
-          @options.music.start_music(Bgm::INTER, true)
+          @options.as(GameOptions).music.as(Audio::IMusic).start_music(Bgm::INTER, true)
         end
       end
 
       case @state
       when IntermissionState::StatCount
-        if @options.deathmatch != 0
+        if @options.as(GameOptions).deathmatch != 0
           update_deathmatch_stats()
-        elsif @options.net_game
+        elsif @options.as(GameOptions).net_game
           update_net_game_stats()
         else
           update_single_player_stats()
         end
-        break
       when IntermissionState::ShowNextLoc
         update_show_next_loc()
-        break
       when IntermissionState::NoState
         update_no_state()
-        break
       end
 
       if @completed
@@ -230,11 +227,11 @@ module Doocr
 
       if @accelerate_stage && @sp_state != 10
         @accelerate_stage = false
-        @kill_count[0] = @scores[0].kill_count * 100 / @info.max_kill_count
-        @item_count[0] = @scores[0].item_count * 100 / @info.max_item_count
-        @secret_count[0] = @scores[0].secret_count * 100 / @info.max_secret_count
-        @time_count = @scores[0].time / GameConst.tic_rate
-        @par_count = @info.par_time / GameConst.tic_rate
+        @kill_count[0] = @scores[0].kill_count * (100 / @info.as(IntermissionInfo).max_kill_count).to_i32
+        @item_count[0] = @scores[0].item_count * (100 / @info.as(IntermissionInfo).max_item_count).to_i32
+        @secret_count[0] = @scores[0].secret_count * (100 / @info.as(IntermissionInfo).max_secret_count).to_i32
+        @time_count = (@scores[0].time / GameConst.tic_rate).to_i32
+        @par_count = (@info.as(IntermissionInfo).par_time / GameConst.tic_rate).to_i32
         start_sound(Sfx::BAREXP)
         @sp_state = 10
       end
@@ -246,8 +243,8 @@ module Doocr
           start_sound(Sfx::PISTOL)
         end
 
-        if @kill_count[0] >= @scores[0].kill_count * 100 / @info.max_kill_count
-          @kill_count[0] = @scores[0].kill_count * 100 / @info.max_kill_count
+        if @kill_count[0] >= @scores[0].kill_count * (100 / @info.as(IntermissionInfo).max_kill_count).to_i32
+          @kill_count[0] = @scores[0].kill_count * (100 / @info.as(IntermissionInfo).max_kill_count).to_i32
           start_sound(Sfx::BAREXP)
           @sp_state += 1
         end
@@ -258,8 +255,8 @@ module Doocr
           start_sound(Sfx::PISTOL)
         end
 
-        if @item_count[0] >= @scores[0].item_count * 100 / @info.max_item_count
-          @item_count[0] = @scores[0].item_count * 100 / @info.max_item_count
+        if @item_count[0] >= @scores[0].item_count * (100 / @info.as(IntermissionInfo).max_item_count).to_i32
+          @item_count[0] = @scores[0].item_count * (100 / @info.as(IntermissionInfo).max_item_count).to_i32
           start_sound(Sfx::BAREXP)
           @sp_state += 1
         end
@@ -270,8 +267,8 @@ module Doocr
           start_sound(Sfx::PISTOL)
         end
 
-        if @secret_count[0] >= @scores[0].secret_count * 100 / @info.max_secret_count
-          @secret_count[0] = @scores[0].secret_count * 100 / @info.max_secret_count
+        if @secret_count[0] >= @scores[0].secret_count * (100 / @info.as(IntermissionInfo).max_secret_count).to_i32
+          @secret_count[0] = @scores[0].secret_count * (100 / @info.as(IntermissionInfo).max_secret_count).to_i32
           start_sound(Sfx::BAREXP)
           @sp_state += 1
         end
@@ -282,16 +279,16 @@ module Doocr
 
         @time_count += 3
 
-        if @time_count >= @scores[0].time / GameConst.tic_rate
-          @time_count = @scores[0].time / GameConst.tic_rate
+        if @time_count >= (@scores[0].time / GameConst.tic_rate)
+          @time_count = (@scores[0].time / GameConst.tic_rate).to_i32
         end
 
         @par_count += 3
 
-        if @par_count >= @info.par_time / GameConst.tic_rate
-          @par_count = @info.par_time / GameConst.tic_rate
+        if @par_count >= (@info.as(IntermissionInfo).par_time / GameConst.tic_rate).to_i32
+          @par_count = (@info.as(IntermissionInfo).par_time / GameConst.tic_rate).to_i32
 
-          if @time_count >= @scores[0].time / GameConst.tic_rate
+          if @time_count >= (@scores[0].time / GameConst.tic_rate).to_i32
             start_sound(Sfx::BAREXP)
             @sp_state += 1
           end
@@ -300,7 +297,7 @@ module Doocr
         if @accelerate_stage
           start_sound(Sfx::SGCOCK)
 
-          if @options.game_mode == GameMode::Commercial
+          if @options.as(GameOptions).game_mode == GameMode::Commercial
             init_no_state()
           else
             init_show_next_loc()
@@ -324,11 +321,11 @@ module Doocr
         @accelerate_stage = false
 
         Player::MAX_PLAYER_COUNT.times do |i|
-          next if !@options.players[i].in_game
+          next if !@options.as(GameOptions).players[i].in_game
 
-          @kill_count[0] = @scores[0].kill_count * 100 / @info.max_kill_count
-          @item_count[0] = @scores[0].item_count * 100 / @info.max_item_count
-          @secret_count[0] = @scores[0].secret_count * 100 / @info.max_secret_count
+          @kill_count[0] = @scores[0].kill_count * (100 / @info.as(IntermissionInfo).max_kill_count).to_i32
+          @item_count[0] = @scores[0].item_count * (100 / @info.as(IntermissionInfo).max_item_count).to_i32
+          @secret_count[0] = @scores[0].secret_count * (100 / @info.as(IntermissionInfo).max_secret_count).to_i32
         end
 
         start_sound(Sfx::BAREXP)
@@ -344,11 +341,11 @@ module Doocr
         still_ticking = false
 
         Player::MAX_PLAYER_COUNT.times do |i|
-          next if !options.players[i].in_game
+          next if !@options.as(GameOptions).players[i].in_game
 
           @kill_count[i] += 2
-          if @kill_count[i] >= scores[i].kill_count * 100 / info.max_kill_count
-            @kill_count[i] = scores[i].kill_count * 100 / info.max_kill_count
+          if @kill_count[i] >= @scores[i].kill_count * (100 / @info.as(IntermissionInfo).max_kill_count).to_i32
+            @kill_count[i] = @scores[i].kill_count * (100 / @info.as(IntermissionInfo).max_kill_count).to_i32
           else
             still_ticking = true
           end
@@ -363,14 +360,14 @@ module Doocr
           start_sound(Sfx::PISTOL)
         end
 
-        still_ticking == false
+        still_ticking = false
 
         Player::MAX_PLAYER_COUNT.times do |i|
-          next if !@options.players[i].in_game
+          next if !@options.as(GameOptions).players[i].in_game
 
           @item_count[i] += 2
-          if @item_count[i] >= scores[i].item_count * 100 / info.max_item_count
-            @item_count[i] = scores[i].item_count * 100 / info.max_item_count
+          if @item_count[i] >= @scores[i].item_count * (100 / @info.as(IntermissionInfo).max_item_count).to_i32
+            @item_count[i] = @scores[i].item_count * (100 / @info.as(IntermissionInfo).max_item_count).to_i32
           else
             still_ticking = true
           end
@@ -385,14 +382,14 @@ module Doocr
           start_sound(Sfx::PISTOL)
         end
 
-        still_ticking == false
+        still_ticking = false
 
         Player::MAX_PLAYER_COUNT.times do |i|
-          next if !@options.players[i].in_game
+          next if !@options.as(GameOptions).players[i].in_game
 
           @secret_count[i] += 2
-          if @secret_count[i] >= scores[i].secret_count * 100 / info.max_secret_count
-            @secret_count[i] = scores[i].secret_count * 100 / info.max_secret_count
+          if @secret_count[i] >= @scores[i].secret_count * (100 / @info.as(IntermissionInfo).max_secret_count).to_i32
+            @secret_count[i] = @scores[i].secret_count * (100 / @info.as(IntermissionInfo).max_secret_count).to_i32
           else
             still_ticking = true
           end
@@ -414,7 +411,7 @@ module Doocr
         still_ticking = false
 
         Player::MAX_PLAYER_COUNT.times do |i|
-          next if !options.players[i].in_game
+          next if !options.as(GameOptions).players[i].in_game
 
           @frag_count[i] += 1
           sum = get_frag_sum(i)
@@ -433,7 +430,7 @@ module Doocr
         if @accelerate_stage
           start_sound(Sfx::SGCOCK)
 
-          if @options.game_mode == GameMode::Commercial
+          if @options.as(GameOptions).game_mode == GameMode::Commercial
             init_no_state()
           else
             init_show_next_loc()
@@ -457,9 +454,9 @@ module Doocr
         @accelerate_stage = false
 
         Player::MAX_PLAYER_COUNT.times do |i|
-          if @options.players[i].in_game
+          if @options.as(GameOptions).players[i].in_game
             Player::MAX_PLAYER_COUNT.times do |j|
-              if @options.players[j].in_game
+              if @options.as(GameOptions).players[j].in_game
                 @dm_frag_count[i][j] = @scores[i].frags[j]
               end
             end
@@ -481,9 +478,9 @@ module Doocr
         still_ticking = false
 
         Player::MAX_PLAYER_COUNT.times do |i|
-          if @options.players[i].in_game
-            Players.max_player_count.tims do |j|
-              if @options.players[j].in_game && @dm_frag_count[i][j] != @scores[i].frags[j]
+          if @options.as(GameOptions).players[i].in_game
+            Player::MAX_PLAYER_COUNT.times do |j|
+              if @options.as(GameOptions).players[j].in_game && @dm_frag_count[i][j] != @scores[i].frags[j]
                 if @scores[i].frags[j] < 0
                   @dm_frag_count[i][j] -= 1
                 else
@@ -522,7 +519,7 @@ module Doocr
         if @accelerate_stage
           start_sound(Sfx::SLOP)
 
-          if @options.game_mode == GameMode::Commercial
+          if @options.as(GameOptions).game_mode == GameMode::Commercial
             init_no_state()
           else
             init_show_next_loc()
@@ -558,8 +555,8 @@ module Doocr
     end
 
     private def update_animated_back
-      return if @options.game_mode == GameMode::Commercial
-      return if @info.episode > 2
+      return if @options.as(GameOptions).game_mode == GameMode::Commercial
+      return if @info.as(IntermissionInfo).episode > 2
       @animations.each do |a|
         a.update(@bg_count)
       end
@@ -572,9 +569,9 @@ module Doocr
     private def check_for_accelerate
       # Check for button presses to skip delays.
       Player::MAX_PLAYER_COUNT.times do |i|
-        player = @options.players[i]
+        player = @options.as(GameOptions).players[i]
         if player.in_game
-          if (player.cmd.buttons & TicCmdButtons.attack) != 0
+          if (player.cmd.as(TicCmd).buttons & TicCmdButtons.attack).to_i32 != 0
             if !player.attack_down
               @accelerate_stage = true
             end
@@ -583,7 +580,7 @@ module Doocr
             player.attack_down = false
           end
 
-          if (player.cmd.buttons & TicCmdButtons.use) != 0
+          if (player.cmd.as(TicCmd).buttons & TicCmdButtons.use).to_i32 != 0
             if !player.use_down
               @accelerate_stage = true
             end
@@ -603,7 +600,7 @@ module Doocr
       frags = 0
 
       Player::MAX_PLAYER_COUNT.times do |i|
-        if @options.players[i].in_game && i != player_number
+        if @options.as(GameOptions).players[i].in_game && i != player_number
           frags += @scores[player_number].frags[i]
         end
       end
@@ -614,7 +611,7 @@ module Doocr
     end
 
     private def start_sound(sfx : Sfx)
-      @options.sound.start_sound(sfx)
+      @options.as(GameOptions).sound.as(Audio::ISound).start_sound(sfx)
     end
   end
 end

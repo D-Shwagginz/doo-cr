@@ -45,16 +45,16 @@ module Doocr
     property sound_origin : Mobj | Nil = nil
 
     def initialize(
-      @vertex1 : Vertex,
-      @vertex2 : Vertex,
-      @flags : LineFlags,
-      @special : LineSpecial,
-      @tag : Int16,
-      @front_side : SideDef,
-      @back_side : SideDef | Nil = nil
+      @vertex1,
+      @vertex2,
+      @flags,
+      @special,
+      @tag,
+      @front_side,
+      @back_side
     )
-      @dx = @vertex2.x - @vertex1.x
-      @dy = @vertex2.y - @vertex1.y
+      @dx = @vertex2.as(Vertex).x - @vertex1.as(Vertex).x
+      @dy = @vertex2.as(Vertex).y - @vertex1.as(Vertex).y
 
       if dx == Fixed.zero
         @slope_type = SlopeType::Vertical
@@ -69,13 +69,13 @@ module Doocr
       end
 
       @bounding_box = Array(Fixed).new(4)
-      @bounding_box << Fixed.max(@vertex1.y, @vertex2.y)
-      @bounding_box << Fixed.min(@vertex1.y, @vertex2.y)
-      @bounding_box << Fixed.min(@vertex1.x, @vertex2.x)
-      @bounding_box << Fixed.max(@vertex1.x, @vertex2.x)
+      @bounding_box << Fixed.max(@vertex1.as(Vertex).y, @vertex2.as(Vertex).y)
+      @bounding_box << Fixed.min(@vertex1.as(Vertex).y, @vertex2.as(Vertex).y)
+      @bounding_box << Fixed.min(@vertex1.as(Vertex).x, @vertex2.as(Vertex).x)
+      @bounding_box << Fixed.max(@vertex1.as(Vertex).x, @vertex2.as(Vertex).x)
 
-      @front_sector = @front_side.as?(Sector).try &.sector
-      @back_sector = @back_side.as?(Sector).try &.sector
+      @front_sector = @front_side.as?(SideDef).try &.sector
+      @back_sector = @back_side.as?(SideDef).try &.sector
     end
 
     def self.from_data(data : Bytes, offset : Int32, vertices : Array(Vertex), sides : Array(SideDef)) : LineDef
@@ -100,10 +100,10 @@ module Doocr
 
     def self.from_wad(wad : Wad, lump : Int32, vertices : Array(Vertex), sides : Array(SideDef)) : Array(LineDef)
       length = wad.get_lump_size(lump)
-      raise if length % @@datasize != 0
+      raise "" if length % @@datasize != 0
 
       data = wad.read_lump(lump)
-      count = length / @@datasize
+      count = (length / @@datasize).to_i32
       lines = Array(LineDef).new(count)
       count.times do |i|
         offset = 14 * i

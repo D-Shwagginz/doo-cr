@@ -172,15 +172,15 @@ module Doocr
     def run
       # Momentum movement.
       if (@mom_x != Fixed.zero || @mom_y != Fixed.zero ||
-         (@flags & MobjFlags::SkullFly) != 0)
-        @world.as(World).thing_movement.x_y_movement(self)
+         (@flags & MobjFlags::SkullFly).to_i32 != 0)
+        @world.as(World).thing_movement.as(ThingMovement).x_y_movement(self)
 
         # Mobj was removed.
         return if @thinker_state == ThinkerState::Removed
       end
 
       if (@z != @floor_z) || @mom_z != Fixed.zero
-        @world.as(World).thing_movement.z_movement(self)
+        @world.as(World).thing_movement.as(ThingMovement).z_movement(self)
 
         # Mobj was removed.
         return if @thinker_state == ThinkerState::Removed
@@ -193,17 +193,17 @@ module Doocr
 
         # You can cycle through multiple states in a tic.
         if @tics == 0
-          if !set_state(@state.next)
+          if !set_state(@state.as(MobjStateDef).next)
             # Freed itself.
             return
           end
         end
       else
         # Check for nightmare respawn.
-        return if (@flags & MobjFlags::CountKill) == 0
+        return if (@flags & MobjFlags::CountKill).to_i32 == 0
 
         options = @world.as(World).options
-        return if !(options.skill == GameSkill::Nightmare || options.respawn_mosters)
+        return if !(options.skill == GameSkill::Nightmare || options.respawn_monsters)
 
         @move_count += 1
 
@@ -260,13 +260,13 @@ module Doocr
     private def nightmare_respawn
       sp : MapThing
       if @spawn_point != nil
-        sp = @spawn_point
+        sp = @spawn_point.as(MapThing)
       else
         sp = MapThing.empty
       end
 
       # Something is occupying it's position?
-      if !@world.as(World).thing_movement.check_position(self, sp.x, sp.y)
+      if !@world.as(World).thing_movement.as(ThingMovement).check_position(self, sp.x, sp.y)
         # No respawn.
         return
       end
@@ -276,7 +276,7 @@ module Doocr
       # Spawn a teleport fog at old spot.
       fog1 = ta.spawn_mobj(
         @x, @y,
-        @subsector.sector.floor_height,
+        @subsector.as(Subsector).sector.floor_height,
         MobjType::Tfog
       )
 
@@ -284,7 +284,7 @@ module Doocr
       @world.as(World).start_sound(fog1, Sfx::TELEPT, SfxType::Misc)
 
       # Spawn a teleport fog at the new spot.
-      ss = Geometry.point_in_subsector(sp.x, sp.y, @world.as(World).map)
+      ss = Geometry.point_in_subsector(sp.x, sp.y, @world.as(World).map.as(Map))
 
       fog2 = ta.spawn_mobj(
         sp.x, sp.y,
@@ -294,7 +294,7 @@ module Doocr
 
       # Spawn the new monster.
       z : Fixed
-      if (@info.flags & MobjFlags::SpawnCeiling) != 0
+      if (@info.as(MobjInfo).flags & MobjFlags::SpawnCeiling).to_i32 != 0
         z = @@on_ceiling_z
       else
         z = @@on_floor_z
@@ -305,7 +305,7 @@ module Doocr
       mobj.spawn_point = @spawn_point
       mobj.angle = sp.angle
 
-      if (sp.flags & ThingFlags::Ambush) != 0
+      if (sp.flags & ThingFlags::Ambush).to_i32 != 0
         mobj.flags |= MobjFlags::Ambush
       end
 

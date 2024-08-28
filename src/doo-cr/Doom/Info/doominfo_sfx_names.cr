@@ -15,7 +15,7 @@
 #
 
 module Doocr::DoomInfo
-  class_getter : Array(DoomString) = [
+  class_getter sfx_names : Array(DoomString) = [
     DoomString.new("none"),
     DoomString.new("pistol"),
     DoomString.new("shotgn"),

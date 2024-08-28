@@ -16,33 +16,33 @@
 
 module Doocr
   class Map
-    getter textures : ITextureLookup
-    getter flats : IFlatLookup
-    getter animation : TextureAnimation
+    getter textures : ITextureLookup | Nil
+    getter flats : IFlatLookup | Nil
+    getter animation : TextureAnimation | Nil
 
-    @world : World
+    @world : World | Nil
 
-    getter vertices : Array(Vertex)
-    getter sectors : Array(Sector)
-    getter sides : Array(SideDef)
-    getter lines : Array(LineDef)
-    getter segs : Array(Seg)
-    getter subsectors : Array(Subsector)
-    getter nodes : Array(Node)
-    getter things : Array(MapThing)
-    getter blockmap : BlockMap
-    getter reject : Reject
+    getter vertices : Array(Vertex) = [] of Vertex
+    getter sectors : Array(Sector) = [] of Sector
+    getter sides : Array(SideDef) = [] of SideDef
+    getter lines : Array(LineDef) = [] of LineDef
+    getter segs : Array(Seg) = [] of Seg
+    getter subsectors : Array(Subsector) = [] of Subsector
+    getter nodes : Array(Node) = [] of Node
+    getter things : Array(MapThing) = [] of MapThing
+    getter blockmap : BlockMap | Nil
+    getter reject : Reject | Nil
 
-    getter sky_texture : Texture
+    getter sky_texture : Texture | Nil
 
-    getter title : String
+    getter title : String = ""
 
     def sky_flat_number
-      return @flats.sky_flat_number
+      return @flats.as(IFlatLookup).sky_flat_number
     end
 
     def initialize(resources : GameContent, world : World)
-      initialize(resources.wad, resources.textures, resources.flats, resources.animation, world)
+      initialize(resources.wad.as(Wad), resources.textures, resources.flats, resources.animation, world)
     end
 
     def initialize(wad : Wad, textures : ITextureLookup, flats : IFlatLookup, animation : TextureAnimation, world : World)
@@ -55,10 +55,10 @@ module Doocr
         options = world.options
 
         name : String
-        if wad.gamemode == GameMode::Commercial
+        if wad.game_mode == GameMode::Commercial
           name = "MAP" + options.map.to_s(precision: 2)
         else
-          name = "E" + options.episode + "M" + options.map
+          name = "E#{options.episode}M#{options.map}"
         end
 
         print("Load map '#{name}': ")
@@ -84,19 +84,17 @@ module Doocr
 
         @sky_texture = get_sky_texture_by_map_name(name)
 
-        if options.gamemode == GameMode::Commercial
+        if options.game_mode == GameMode::Commercial
           case options.mission_pack
           when MissionPack::Plutonia
-            @title = DoomInfo::MapTitles.plutonia[options.map - 1]
-            break
+            @title = DoomInfo::MapTitles.plutonia[options.map - 1].to_s
           when MissionPack::Tnt
-            @title = DoomInfo::MapTitles.tnt[options.map - 1]
-            break
+            @title = DoomInfo::MapTitles.tnt[options.map - 1].to_s
           else
-            @title = DoomInfo::MapTitles.doom2[option.map - 1]
+            @title = DoomInfo::MapTitles.doom2[options.map - 1].to_s
           end
         else
-          @title = DoomInfo::MapTitle.doom[options.episode - 1][options.map - 1]
+          @title = DoomInfo::MapTitles.doom[options.episode - 1][options.map - 1].to_s
         end
 
         puts("OK")
@@ -113,8 +111,8 @@ module Doocr
       @lines.each do |line|
         if line.special.to_i32 != 0
           so = Mobj.new(@world.as(World))
-          so.x = (line.vertex1.x + line.vertex2.x) / 2
-          so.y = (line.vertex1.y + line.vertex2.y) / 2
+          so.x = (line.vertex1.as(Vertex).x + line.vertex2.as(Vertex).x) / 2
+          so.y = (line.vertex1.as(Vertex).y + line.vertex2.as(Vertex).y) / 2
           line.sound_origin = so
         end
       end
@@ -126,8 +124,8 @@ module Doocr
         @lines.each do |line|
           if line.front_sector == sector || line.back_sector == sector
             sector_lines << line
-            Box.add_point(bounding_box, line.vertex1.x, line.vertex1.y)
-            Box.add_point(bounding_box, line.vertex2.x, line.vertex2.y)
+            Box.add_point(bounding_box, line.vertex1.as(Vertex).x, line.vertex1.as(Vertex).y)
+            Box.add_point(bounding_box, line.vertex2.as(Vertex).x, line.vertex2.as(Vertex).y)
           end
         end
 
@@ -135,25 +133,25 @@ module Doocr
 
         # Set the degenmobj_t to the middle of the bounding box.
         sector.sound_origin = Mobj.new(@world.as(World))
-        sector.sound_origin.x = (bounding_box[Box::RIGHT] + bounding_box[Box::LEFT]) / 2
-        sector.sound_origin.y = (bounding_box[Box::TOP] + bounding_box[Box::BOTTOM]) / 2
+        sector.sound_origin.as(Mobj).x = (bounding_box[Box::RIGHT] + bounding_box[Box::LEFT]) / 2
+        sector.sound_origin.as(Mobj).y = (bounding_box[Box::TOP] + bounding_box[Box::BOTTOM]) / 2
 
         sector.block_box = Array(Int32).new(4)
 
         # Adjust bounding box to map blocks.
-        block = (bounding_box[Box::TOP] - @blockmap.origin_y + GameConst.max_thing_radius).data >> BlockMap.frac_to_block_shift
-        block = block >= @blockmap.height ? @blockmap.height - 1 : block
+        block = (bounding_box[Box::TOP] - @blockmap.as(BlockMap).origin_y + GameConst.max_thing_radius).data >> BlockMap.frac_to_block_shift
+        block = block >= @blockmap.as(BlockMap).height ? @blockmap.as(BlockMap).height - 1 : block
         sector.block_box[Box::TOP] = block
 
-        block = (bounding_box[Box::BOTTOM] - @blockmap.origin_y - GameConst.max_thing_radius).data >> BlockMap.frac_to_block_shift
+        block = (bounding_box[Box::BOTTOM] - @blockmap.as(BlockMap).origin_y - GameConst.max_thing_radius).data >> BlockMap.frac_to_block_shift
         block = block < 0 ? 0 : block
         sector.block_box[Box::BOTTOM] = block
 
-        block = (bounding_box[Box::RIGHT] - @blockmap.origin_x + GameConst.max_thing_radius).data >> BlockMap.frac_to_block_shift
-        block = block >= @blockmap.width ? @blockmap.width - 1 : block
+        block = (bounding_box[Box::RIGHT] - @blockmap.as(BlockMap).origin_x + GameConst.max_thing_radius).data >> BlockMap.frac_to_block_shift
+        block = block >= @blockmap.as(BlockMap).width ? @blockmap.as(BlockMap).width - 1 : block
         sector.block_box[Box::RIGHT] = block
 
-        block = (bounding_box[Box::LEFT] - @blockmap.origin_x - GameConst.max_thing_radius).data >> BlockMap.frac_to_block_shift
+        block = (bounding_box[Box::LEFT] - @blockmap.as(BlockMap).origin_x - GameConst.max_thing_radius).data >> BlockMap.frac_to_block_shift
         block = block < 0 ? 0 : block
         sector.block_box[Box::LEFT] = block
       end
@@ -163,22 +161,22 @@ module Doocr
       if name.size == 4
         case name[1]
         when '1'
-          return @textures["SKY1"]
+          return @textures.as(ITextureLookup)["SKY1"]
         when '2'
-          return @textures["SKY2"]
+          return @textures.as(ITextureLookup)["SKY2"]
         when '3'
-          return @textures["SKY3"]
+          return @textures.as(ITextureLookup)["SKY3"]
         else
-          return @textures["SKY4"]
+          return @textures.as(ITextureLookup)["SKY4"]
         end
       else
         number = name[3..].to_i32
         if number <= 11
-          return @textures["SKY1"]
+          return @textures.as(ITextureLookup)["SKY1"]
         elsif number <= 21
-          return @textures["SKY2"]
+          return @textures.as(ITextureLookup)["SKY2"]
         else
-          return @textuers["SKY3"]
+          return @textures.as(ITextureLookup)["SKY3"]
         end
       end
     end

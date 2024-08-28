@@ -38,8 +38,8 @@ module Doocr
       @target = DivLine.new
       @trace = DivLine.new
 
-      @line_intercept_func = add_line_intercepts()
-      @thing_intercept_func = add_thing_intercepts()
+      @line_intercept_func = ->add_line_intercepts(LineDef)
+      @thing_intercept_func = ->add_thing_intercepts(Mobj)
     end
 
     # Looks for lines in the given block that intercept the given trace
@@ -51,15 +51,15 @@ module Doocr
       s2 : Int32 = 0
 
       # Avoid precision problems with two routines.
-      if (@trace.dx > Fixed.from_i(16) ||
-         @trace.dy > Fixed.from_i(16) ||
-         @trace.dx < -Fixed.from_i(16) ||
-         @trace.dy < -Fixed.from_i(16))
-        s1 = Geometry.point_on_div_line_side(line.vertex1.x, line.vertex1.y, @trace)
-        s2 = Geometry.point_on_div_line_side(line.vertex2.x, line.vertex2.y, @trace)
+      if (@trace.as(DivLine).dx > Fixed.from_i(16) ||
+         @trace.as(DivLine).dy > Fixed.from_i(16) ||
+         @trace.as(DivLine).dx < -Fixed.from_i(16) ||
+         @trace.as(DivLine).dy < -Fixed.from_i(16))
+        s1 = Geometry.point_on_div_line_side(line.vertex1.as(Vertex).x, line.vertex1.as(Vertex).y, @trace.as(DivLine))
+        s2 = Geometry.point_on_div_line_side(line.vertex2.as(Vertex).x, line.vertex2.as(Vertex).y, @trace.as(DivLine))
       else
-        s1 = Geometry.point_on_line_side(@trace.x, @trace.y, line)
-        s2 = Geometry.point_on_line_side(@trace.x + @trace.dx, @trace.y + @trace.dy, line)
+        s1 = Geometry.point_on_line_side(@trace.as(DivLine).x, @trace.as(DivLine).y, line)
+        s2 = Geometry.point_on_line_side(@trace.as(DivLine).x + @trace.as(DivLine).dx, @trace.as(DivLine).y + @trace.as(DivLine).dy, line)
       end
 
       if s1 == s2
@@ -68,9 +68,9 @@ module Doocr
       end
 
       # Hit the line
-      @target.make_from(line)
+      @target.as(DivLine).make_from(line)
 
-      frac = intercept_vector(@trace, @target)
+      frac = intercept_vector(@trace.as(DivLine), @target.as(DivLine))
 
       if frac < Fixed.zero
         # Behind source.
@@ -92,7 +92,7 @@ module Doocr
 
     # Looks for things that intercept the given trace.
     private def add_thing_intercepts(thing : Mobj) : Bool
-      trace_positive = (@trace.dx.data ^ @trace.dy.data) > 0
+      trace_positive = (@trace.as(DivLine).dx.data ^ @trace.as(DivLine).dy.data) > 0
 
       x1 : Fixed
       y1 : Fixed
@@ -114,20 +114,20 @@ module Doocr
         y2 = thing.y + thing.radius
       end
 
-      s1 = Geometry.point_on_div_line_side(x1, y1, @trace)
-      s2 = Geometry.point_on_div_line_side(x2, y2, @trace)
+      s1 = Geometry.point_on_div_line_side(x1, y1, @trace.as(DivLine))
+      s2 = Geometry.point_on_div_line_side(x2, y2, @trace.as(DivLine))
 
       if s1 == s2
         # Line isn't crossed.
         return true
       end
 
-      @target.x = x1
-      @target.y = y1
-      @target.dx = x2 - x1
-      @target.dy = y2 - y1
+      @target.as(DivLine).x = x1
+      @target.as(DivLine).y = y1
+      @target.as(DivLine).dx = x2 - x1
+      @target.as(DivLine).dy = y2 - y1
 
-      frac = intercept_vector(@trace, @target)
+      frac = intercept_vector(@trace.as(DivLine), @target.as(DivLine))
 
       if frac < Fixed.zero
         # Behind source.
@@ -192,11 +192,11 @@ module Doocr
     # Traces a line from x1, y1 to x2, y2, calling the traverser function for each.
     # Returns true if the traverser function returns true for all lines.
     def path_traverse(x1 : Fixed, y1 : Fixed, x2 : Fixed, y2 : Fixed, flags : PathTraverseFlags, trav : Proc(Intercept, Bool)) : Bool
-      @early_out = (flags & PathTraverseFlags::EarlyOut) != 0
+      @early_out = (flags & PathTraverseFlags::EarlyOut).to_i32 != 0
 
       valid_count = @world.as(World).get_new_valid_count
 
-      bm = @world.as(World).map.as(Map).blockmap
+      bm = @world.as(World).map.as(Map).blockmap.as(BlockMap)
 
       @intercept_count = 0
 
@@ -273,14 +273,14 @@ module Doocr
       by = block_y1
 
       64.times do |count|
-        if (flags & PathTraverseFlags::AddLines) != 0
+        if (flags & PathTraverseFlags::AddLines).to_i32 != 0
           if !bm.iterate_lines(bx, by, @line_intercept_func.as(Proc(LineDef, Bool)), valid_count)
             # Early out.
             return false
           end
         end
 
-        if (flags & PathTraverseFlags::AddThings) != 0
+        if (flags & PathTraverseFlags::AddThings).to_i32 != 0
           if !bm.iterate_things(bx, by, @thing_intercept_func.as(Proc(Mobj, Bool)))
             # Early out.
             return false

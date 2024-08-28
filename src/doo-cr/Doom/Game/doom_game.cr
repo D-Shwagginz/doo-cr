@@ -16,11 +16,11 @@
 
 module Doocr
   class DoomGame
-    @content : GameContent | Nil = nil
-    getter options : GameOptions | Nil = nil
+    @content : GameContent
+    getter options : GameOptions
 
-    @game_action : GameAction | Nil = nil
-    getter game_state : GameState | Nil = nil
+    @game_action : GameAction = GameAction.new(0)
+    getter game_state : GameState = GameState.new(0)
 
     getter game_tic : Int32 = 0
 
@@ -53,9 +53,9 @@ module Doocr
     # Start a new game.
     # Can be called by the startup code or the menu task.
     def defered_init_new(skill : GameSkill, episode : Int32, map : Int32)
-      @options.as(GameOptions).skill = skill
-      @options.as(GameOptions).episode = episode
-      @options.as(GameOptions).map = map
+      @options.skill = skill
+      @options.episode = episode
+      @options.map = map
       @game_action = GameAction::NewGame
     end
 
@@ -89,33 +89,25 @@ module Doocr
         case GameAction
         when GameAction::LoadLevel
           do_load_level()
-          break
         when GameAction::NewGame
           do_new_game()
-          break
         when GameAction::LoadGame
           do_load_game()
-          break
         when GameAction::SaveGame
           do_save_game()
-          break
         when GameAction::Completed
           do_completed()
-          break
         when GameAction::Victory
           do_finale()
-          break
         when GameAction::WorldDone
           do_world_done()
-          break
         when GameAction::Nothing
-          break
         end
       end
 
       Player::MAX_PLAYER_COUNT.times do |i|
         if players[i].in_game
-          cmd = players[i].cmd
+          cmd = players[i].cmd.as(TicCmd)
           cmd.copy_from(cmds[i])
 
           # Check for turbo cheats.
@@ -123,7 +115,7 @@ module Doocr
              (@world.as(World).level_time & 31) == 0 &&
              ((@world.as(World).level_time >> 5) & 3) == i)
             player = players[@options.console_player]
-            player.send_message(players[i].name + " is turbo!")
+            player.send_message("#{players[i].name} is turbo!")
           end
         end
       end
@@ -131,13 +123,13 @@ module Doocr
       # Check for special buttons.
       Player::MAX_PLAYER_COUNT.times do |i|
         if players[i].in_game
-          if (players[i].cmd.buttons & TicCmdButtons.special) != 0
-            if (players[i].cmd.buttons & TicCmdButtons.special_mask) == TicCmdButtons.pause
+          if (players[i].cmd.as(TicCmd).buttons & TicCmdButtons.special).to_i32 != 0
+            if (players[i].cmd.as(TicCmd).buttons & TicCmdButtons.special_mask) == TicCmdButtons.pause
               @paused = !@paused
               if @paused
-                @options.sound.pause
+                @options.sound.as(Audio::ISound).pause
               else
-                @options.sound.resume
+                @options.sound.as(Audio::ISound).resume
               end
             end
           end
@@ -154,9 +146,8 @@ module Doocr
             @game_action = GameAction::Completed
           end
         end
-        break
       when GameState::Intermission
-        result = @intermission.update
+        result = @intermission.as(Intermission).update
         if result == UpdateResult::Completed
           @game_action = GameAction::WorldDone
 
@@ -169,23 +160,19 @@ module Doocr
             when 6, 11, 20, 30
               do_finale()
               result = UpdateResult::NeedWipe
-              break
             when 15, 31
               if @world.as(World).secret_exit
                 do_finale
                 result = UpdateResult::NeedWipe
               end
-              break
             end
           end
         end
-        break
       when GameState::Finale
-        result = @finale.update
+        result = @finale.as(Finale).update
         if result == UpdateResult::Completed
           @game_action = GameAction::WorldDone
         end
-        break
       end
 
       @game_tic += 1
@@ -220,16 +207,16 @@ module Doocr
         if players[i].in_game && players[i].player_state == PlayerState::Dead
           players[i].player_state = PlayerState::Reborn
         end
-        player[i].frags.fill(0)
+        players[i].frags.fill(0)
       end
 
       @intermission = nil
 
-      @options.sound.reset
+      @options.sound.as(Audio::ISound).reset
 
       @world = World.new(@content, @options, self)
 
-      @options.user_input.reset
+      @options.user_input.as(UserInput::IUserInput).reset
     end
 
     private def do_new_game
@@ -242,8 +229,18 @@ module Doocr
       @game_action = GameAction::Nothing
 
       directory = ConfigUtilities.get_exe_directory
-      path = Path.new(directory, "doomsav" + @load_game_slot_number + ".dsg")
-      SaveAndLoad.load(self, path)
+      path = Path.new(directory, "doomsav#{@load_game_slot_number}.dsg")
+      SaveAndLoad.load(self, path.to_s)
+    end
+
+    private def do_save_game
+      @game_action = GameAction::Nothing
+
+      directory = ConfigUtilities.get_exe_directory
+      path = Path[directory, "doomsav#{@save_game_slot_number}.dsg"]
+      description = @save_game_description.nil? ? "NIL" : @save_game_description.as(String)
+      SaveAndLoad.save(self, description, path.to_s)
+      @world.as(World).console_player.send_message(DoomInfo::Strings::GGSAVED)
     end
 
     private def do_completed
@@ -265,7 +262,6 @@ module Doocr
           Player::MAX_PLAYER_COUNT.times do |i|
             @options.players[i].did_secret = true
           end
-          break
         end
       end
 
@@ -282,7 +278,7 @@ module Doocr
         end
       end
 
-      im_info = @options.intermission_info
+      im_info = @options.intermission_info.as(IntermissionInfo)
 
       im_info.did_secret = @options.players[@options.console_player].did_secret
       im_info.episode = @options.episode - 1
@@ -294,22 +290,18 @@ module Doocr
           case @options.map
           when 15
             im_info.next_level = 30
-            break
           when 31
             im_info.next_level = 31
-            break
           end
         else
           case @options.map
           when 31, 32
             im_info.next_level = 15
-            break
           else im_info.next_level = @options.map
-          break
           end
         end
       else
-        if @world.as(World).sector_exit
+        if @world.as(World).secret_exit
           # Go to secret level.
           im_info.next_level = 8
         elsif @options.map == 9
@@ -317,16 +309,12 @@ module Doocr
           case @options.episode
           when 1
             im_info.next_level = 3
-            break
           when 2
             im_info.next_level = 5
-            break
           when 3
             im_info.next_level = 6
-            break
           when 4
             im_info.next_level = 2
-            break
           end
         else
           # Go to next level.
@@ -351,7 +339,7 @@ module Doocr
         im_info.players[i].item_count = players[i].item_count
         im_info.players[i].secret_count = players[i].secret_count
         im_info.players[i].time = @world.as(World).level_time
-        im_info.players[i].frags = players[i].frags[..Player::MAX_PLAYER_COUNT]
+        im_info.players[i].frags = players[i].frags.dup
       end
 
       @game_state = GameState::Intermission
@@ -362,7 +350,7 @@ module Doocr
       @game_action = GameAction::Nothing
 
       @game_state = GameState::Level
-      @options.map = @options.intermission_info.next_level + 1
+      @options.map = @options.intermission_info.as(IntermissionInfo).next_level + 1
       do_load_level()
     end
 
@@ -378,23 +366,23 @@ module Doocr
     #
 
     def init_new(skill : GameSkill, episode : Int32, map : Int32)
-      @options.skill = GameSkill.new(Math.clamp(skill.to_i32, GameSkill::Baby.to_i32, GameSkill::Nightmare.to_i32))
+      @options.skill = GameSkill.new(skill.to_i32.clamp(GameSkill::Baby.to_i32, GameSkill::Nightmare.to_i32))
 
       if @options.game_mode == GameMode::Retail
-        @options.episode = Math.clamp(episode, 1, 4)
+        @options.episode = episode.clamp(1, 4)
       elsif @options.game_mode == GameMode::Shareware
         @options.episode = 1
       else
-        @options.episode = Math.clamp(episode, 1, 4)
+        @options.episode = episode.clamp(1, 4)
       end
 
       if @options.game_mode == GameMode::Commercial
-        @options.map = Math.clamp(map, 1, 32)
+        @options.map = map.clamp(1, 32)
       else
-        @options.map = Math.clamp(map, 1, 9)
+        @options.map = map.clamp(1, 9)
       end
 
-      @options.random.clear
+      @options.random.as(DoomRandom).clear
 
       # Force players to be initialized upon first level load.
       Player::MAX_PLAYER_COUNT.times do |i|
@@ -408,7 +396,7 @@ module Doocr
       if @game_state == GameState::Level
         return @world.as(World).do_event(e)
       elsif @game_state == GameState::Finale
-        return @finale.do_event(e)
+        return @finale.as(Finale).do_event(e)
       end
 
       return false
@@ -422,31 +410,31 @@ module Doocr
         # Respawn at the start
 
         # First dissasociate the corpse.
-        @options.players[player_number].mobj_player = nil
+        @options.players[player_number].mobj = nil
 
-        ta = @world.as(World).thing_allocation
+        ta = @world.as(World).thing_allocation.as(ThingAllocation)
 
         # Spawn at random spot if in death match.
         if @options.deathmatch != 0
-          ta.death_match_spawn_player(player_number)
+          ta.as(ThingAllocation).death_match_spawn_player(player_number)
           return
         end
 
-        if ta.check_spot(player_number, ta.player_starts[player_number])
-          ta.spawn_player(ta.player_starts[player_number])
+        if ta.as(ThingAllocation).check_spot(player_number, ta.as(ThingAllocation).player_starts[player_number].as(MapThing))
+          ta.as(ThingAllocation).spawn_player(ta.as(ThingAllocation).player_starts[player_number].as(MapThing))
           return
         end
 
         # Try to spawn at one of the other players spots.
         Player::MAX_PLAYER_COUNT.times do |i|
-          if ta.check_spot(player_number, ta.player_starts[i])
+          if ta.as(ThingAllocation).check_spot(player_number, ta.as(ThingAllocation).player_starts[i].as(MapThing))
             # Fake as other player
-            ta.player_starts[i].type = player_number + 1
+            ta.as(ThingAllocation).player_starts[i].as(MapThing).type = player_number + 1
 
-            @world.as(World).thing_allocation.spawn_player(ta.player_starts[i])
+            @world.as(World).thing_allocation.as(ThingAllocation).spawn_player(ta.as(ThingAllocation).player_starts[i].as(MapThing))
 
             # Restore.
-            ta.player_starts[i].type = i + 1
+            ta.as(ThingAllocation).player_starts[i].as(MapThing).type = i + 1
 
             return
           end
@@ -454,7 +442,7 @@ module Doocr
 
         # He's going to be inside something.
         # Too bad.
-        @world.as(World).thing_allocation.spawn_player(ta.player_starts[player_number])
+        @world.as(World).thing_allocation.as(ThingAllocation).spawn_player(ta.as(ThingAllocation).player_starts[player_number].as(MapThing))
       end
     end
 

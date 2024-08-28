@@ -50,7 +50,7 @@ module Doocr::Video
     class_getter key0_y : Int32 = 171
     class_getter key1_width : Int32 = @@key0_width
     class_getter key1_x : Int32 = 239
-    class_getter key1_x : Int32 = 181
+    class_getter key1_y : Int32 = 181
     class_getter key2_width : Int32 = @@key0_width
     class_getter key2_x : Int32 = 239
     class_getter key2_y : Int32 = 191
@@ -111,7 +111,7 @@ module Doocr::Video
     def initialize(wad : Wad, @screen : DrawScreen)
       @patches = Patches.new(wad)
 
-      @scale = @screen.width / 320
+      @scale = (@screen.width / 320).to_i32
 
       @ready = NumberWidget.new(
         @@ammo_x,
@@ -121,22 +121,22 @@ module Doocr::Video
       )
 
       @health = PercentWidget.new(
-        NumerWidget.new(
+        NumberWidget.new(
           @@health_x,
           @@health_y,
           3,
           @patches.tall_numbers
         ),
-        @patches.tall_percent)
+        @patches.tall_percent.as(Patch))
 
       @armor = PercentWidget.new(
-        NumerWidget.new(
+        NumberWidget.new(
           @@armor_x,
           @@armor_y,
           3,
           @patches.tall_numbers
         ),
-        @patches.tall_percent)
+        @patches.tall_percent.as(Patch))
 
       @ammo = Array(NumberWidget).new(AmmoType::Count.to_i32)
       @ammo << NumberWidget.new(
@@ -165,25 +165,25 @@ module Doocr::Video
       )
 
       @max_ammo = Array(NumberWidget).new(AmmoType::Count.to_i)
-      max_ammo << NumberWidget.new(
+      @max_ammo << NumberWidget.new(
         @@max_ammo0_x,
         @@max_ammo0_y,
         @@max_ammo0_width,
         @patches.short_numbers
       )
-      max_ammo << NumberWidget.new(
+      @max_ammo << NumberWidget.new(
         @@max_ammo1_x,
         @@max_ammo1_y,
         @@max_ammo1_width,
         @patches.short_numbers
       )
-      max_ammo << NumberWidget.new(
+      @max_ammo << NumberWidget.new(
         @@max_ammo2_x,
         @@max_ammo2_y,
         @@max_ammo2_width,
         @patches.short_numbers
       )
-      max_ammo << NumberWidget.new(
+      @max_ammo << NumberWidget.new(
         @@max_ammo3_x,
         @@max_ammo3_y,
         @@max_ammo3_width,
@@ -194,7 +194,7 @@ module Doocr::Video
       6.times do |i|
         @weapons << MultIconWidget.new(
           @@arms_x + (i % 3) * @@arms_space_x,
-          @@arms_y + (i / 3) * @@arms_space_y,
+          @@arms_y + (i / 3).to_i32 * @@arms_space_y,
           @patches.arms[i]
         )
       end
@@ -202,7 +202,7 @@ module Doocr::Video
       @frags = NumberWidget.new(
         @@frags_x,
         @@frags_y,
-        @@fragts_width,
+        @@frags_width,
         @patches.tall_numbers
       )
 
@@ -227,16 +227,16 @@ module Doocr::Video
     def render(player : Player, draw_background : Bool)
       if draw_background
         @screen.draw_patch(
-          @patches.background,
+          @patches.background.as(Patch),
           0,
           @scale * (200 - @@height),
           @scale
         )
       end
 
-      if DoomInfo.weaponinfos[player.ready_weapon].ammo != AmmoType::NoAmmo
-        num = player.ammo[DoomInfo.weaponinfos[player.ready_weapon].ammo.to_i32]
-        draw_number(ready, num)
+      if DoomInfo.weapon_infos[player.ready_weapon.to_i32].ammo != AmmoType::NoAmmo
+        num = player.ammo[DoomInfo.weapon_infos[player.ready_weapon.to_i32].ammo.to_i32]
+        draw_number(@ready, num)
       end
 
       draw_percent(@health, player.health)
@@ -247,10 +247,10 @@ module Doocr::Video
         draw_number(@max_ammo[i], player.max_ammo[i])
       end
 
-      if player.mobj.world.options.deathmatch == 0
+      if player.mobj.as(Mobj).world.as(World).options.as(GameOptions).deathmatch == 0
         if draw_background
           @screen.draw_patch(
-            @patches.arms_background,
+            @patches.arms_background.as(Patch),
             @scale * @@arms_background_x,
             @scale * @@arms_background_y,
             @scale
@@ -269,7 +269,7 @@ module Doocr::Video
       end
 
       if draw_background
-        if player.mobj.world.options.net_game
+        if player.mobj.as(Mobj).world.as(World).options.as(GameOptions).net_game
           @screen.draw_patch(
             @patches.face_background[player.number],
             @scale * @@face_background_x,
@@ -279,7 +279,7 @@ module Doocr::Video
         end
 
         @screen.draw_patch(
-          @patches.faces[player.mobj.world.status_bar.face_index],
+          @patches.faces[player.mobj.as(Mobj).world.as(World).status_bar.as(StatusBar).face_index],
           @scale * @@face_x,
           @scale * @@face_y,
           @scale
@@ -340,12 +340,13 @@ module Doocr::Video
         )
 
         num /= 10
+        num = num.to_i32
       end
 
       # Draw a minus sign if necessary
       if neg
         @screen.draw_patch(
-          @patches.tall_minus,
+          @patches.tall_minus.as(Patch),
           @scale * (x - 8),
           @scale * widget.y,
           @scale
@@ -355,18 +356,18 @@ module Doocr::Video
 
     private def draw_percent(per : PercentWidget, value : Int32)
       @screen.draw_patch(
-        per.patch,
-        @scale * per.number_widget.x,
-        @scale * per.number_widget.y,
+        per.patch.as(Patch),
+        @scale * per.number_widget.as(NumberWidget).x,
+        @scale * per.number_widget.as(NumberWidget).y,
         @scale
       )
 
-      draw_number(per.number_widget, value)
+      draw_number(per.number_widget.as(NumberWidget), value)
     end
 
     private def draw_mult_icon(mi : MultIconWidget, value : Int32)
       @screen.draw_patch(
-        @mi.patches[value],
+        mi.patches[value],
         @scale * mi.x,
         @scale * mi.y,
         @scale
@@ -413,45 +414,46 @@ module Doocr::Video
       property faces : Array(Patch) = [] of Patch
 
       def initialize(wad : Wad)
-        @background = Patch.from_wad
+        @background = Patch.from_wad(wad, "STBAR")
 
         @tall_numbers = Array(Patch).new(10)
         @short_numbers = Array(Patch).new(10)
         10.times do |i|
-          @tall_numbers << Patch.from_wad(wad, "STTNUM" + i)
-          @short_numbers << Patch.from_wad(wad, "STYSNUM" + i)
+          @tall_numbers << Patch.from_wad(wad, "STTNUM#{i}")
+          @short_numbers << Patch.from_wad(wad, "STYSNUM#{i}")
         end
         @tall_minus = Patch.from_wad(wad, "STTMINUS")
         @tall_percent = Patch.from_wad(wad, "STTPRCNT")
 
         @keys = Array(Patch).new(CardType::Count.to_i32)
         CardType::Count.to_i32.times do |i|
-          @keys << Patch.from_wad(wad, "STKEYS" + i)
+          @keys << Patch.from_wad(wad, "STKEYS#{i}")
         end
 
         @arms_background = Patch.from_wad(wad, "STARMS")
         @arms = Array(Array(Patch)).new(6)
         6.times do |i|
           num = i + 2
-          @arms << Array(Patch).new(2)
-          @arms << Patch.from_wad(wad, "STGNUM" + num)
-          @arms << @short_numbers[num]
+          arms = Array(Patch).new(2)
+          arms << Patch.from_wad(wad, "STGNUM#{num}")
+          arms << @short_numbers[num]
+          @arms << arms
         end
 
         @face_background = Array(Patch).new(Player::MAX_PLAYER_COUNT)
         Player::MAX_PLAYER_COUNT.times do |i|
-          @face_background << Patch.from_wad(wad, "STFB" + i)
+          @face_background << Patch.from_wad(wad, "STFB#{i}")
         end
         @faces = Array(Patch).new(StatusBar::Face.face_count)
         StatusBar::Face.pain_face_count.times do |i|
           StatusBar::Face.straight_face_count.times do |j|
-            @faces << Patch.from_wad(wad, "STFST" + i + j)
+            @faces << Patch.from_wad(wad, "STFST#{i}#{j}")
           end
-          @faces << Patch.from_wad(wad, "STFTR" + i + "0")
-          @faces << Patch.from_wad(wad, "STFTL" + i + "0")
-          @faces << Patch.from_wad(wad, "STFOUCH" + i)
-          @faces << Patch.from_wad(wad, "STFEVL" + i)
-          @faces << Patch.from_wad(wad, "STFKILL" + i)
+          @faces << Patch.from_wad(wad, "STFTR#{i}0")
+          @faces << Patch.from_wad(wad, "STFTL#{i}0")
+          @faces << Patch.from_wad(wad, "STFOUCH#{i}")
+          @faces << Patch.from_wad(wad, "STFEVL#{i}")
+          @faces << Patch.from_wad(wad, "STFKILL#{i}")
         end
         @faces << Patch.from_wad(wad, "STFGOD0")
         @faces << Patch.from_wad(wad, "STFDEAD0")

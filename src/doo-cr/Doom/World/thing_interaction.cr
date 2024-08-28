@@ -35,14 +35,14 @@ module Doocr
 
       if source != nil && source.player != nil
         # Count for intermission.
-        if (target.flags & MobjFlags::CountKill) != 0
+        if (target.flags & MobjFlags::CountKill).to_i32 != 0
           source.player.as(Player).kill_count += 1
         end
 
         if target.player != nil
           source.player.as(Player).frags[target.player.as(Player).number] += 1
         end
-      elsif !@world.as(World).options.net_game && (target.flags & MobjFlags::CountKill) != 0
+      elsif !@world.as(World).options.net_game && (target.flags & MobjFlags::CountKill).to_i32 != 0
         # Count all monster deaths, even those caused by other monsters.
         @world.as(World).options.players[0].kill_count += 1
       end
@@ -105,14 +105,14 @@ module Doocr
     # Source can be null for slime, barrel explosions and other
     # environmental stuff.
     def damage_mobj(target : Mobj, inflictor : Mobj | Nil = nil, source : Mobj | Nil = nil, damage : Int32 = 0)
-      if (target.flags & MobjFlags::Shootable) == 0
+      if (target.flags & MobjFlags::Shootable).to_i32 == 0
         # Shouldn't happen...
         return
       end
 
       return if target.health <= 0
 
-      if (target.flags & MobjFlags::SkullFly) != 0
+      if (target.flags & MobjFlags::SkullFly).to_i32 != 0
         target.mom_x = Fixed.zero
         target.mom_y = Fixed.zero
         target.mom_z = Fixed.zero
@@ -126,12 +126,12 @@ module Doocr
 
       # Some close combat weapons should not inflict thrust and
       # push the victim out of reach, thus kick away unless using the chainsaw.
-      not_chainsaw_attack = (source == nil ||
+      not_chainsaw_attack = (source.not_nil! ||
                              source.as(Mobj).player == nil ||
                              source.as(Mobj).player.as(Player).ready_weapon != WeaponType::Chainsaw)
 
       inflictor.try do |inflictor|
-        if (target.flags & MobjFlags::NoClip) == 0 && not_chainsaw_attack
+        if (target.flags & MobjFlags::NoClip).to_i32 == 0 && not_chainsaw_attack
           ang = Geometry.point_to_angle(
             inflictor.x,
             inflictor.y,
@@ -164,7 +164,7 @@ module Doocr
         end
 
         # Below certain threshold, ignore damage in GOD mode, or with INVUL power.
-        if (damage < 1000 && ((player.cheats & CheatFlags::GodMode) != 0 ||
+        if (damage < 1000 && ((player.cheats & CheatFlags::GodMode).to_i32 != 0 ||
            player.powers[PowerType::Invulnerability.to_i32] > 0))
           return
         end
@@ -211,7 +211,7 @@ module Doocr
       end
 
       if ((@world.as(World).random.next < target.info.as(MobjInfo).pain_chance) &&
-         (target.flags & MobjFlags::SkullFly) == 0)
+         (target.flags & MobjFlags::SkullFly).to_i32 == 0)
         # Fight back!
         target.flags |= MobjFlags::JustHit
 
@@ -261,21 +261,21 @@ module Doocr
     @radius_attack_func : Proc(Mobj, Bool) | Nil = nil
 
     private def init_radius_attack
-      @radius_attack_func = do_radius_attack()
+      @radius_attack_func = ->do_radius_attack(Mobj)
     end
 
     # "bomb_source" is the creature that caused the explosion at "bomb_spot".
     private def do_radius_attack(thing : Mobj) : Bool
-      return true if (thing.flags & MobjFlags::Shootable) == 0
+      return true if (thing.flags & MobjFlags::Shootable).to_i32 == 0
 
       # Boss spider and cyborg take no damage from concussion.
       return true if thing.type == MobjType::Cyborg || thing.type == MobjType::Spider
 
-      dx = (thing.x - @bomb_spot.x).abs
-      dy = (thing.y - @bomb_spot.y).abs
+      dx = (thing.x - @bomb_spot.as(Mobj).x).abs
+      dy = (thing.y - @bomb_spot.as(Mobj).y).abs
 
       dist = dx > dy ? dx : dy
-      dist = Fixed.new((dist - thing.radius).data >> Fixed::FRAC_BITS)
+      dist = Fixed.new((dist - thing.radius).data >> Fixed::FRACBITS)
 
       dist = Fixed.zero if dist < Fixed.zero
 
@@ -284,9 +284,9 @@ module Doocr
         return true
       end
 
-      if @world.as(World).visibility_check.check_sight(thing, @bomb_spot)
+      if @world.as(World).visibility_check.as(VisibilityCheck).check_sight(thing, @bomb_spot.as(Mobj))
         # Must be in direct path.
-        damage_mobj(thing, @bomb_spot, @bomb_source, @bomb_damage - dist.data)
+        damage_mobj(thing, @bomb_spot.as(Mobj), @bomb_source.as(Mobj), @bomb_damage - dist.data)
       end
 
       return true
@@ -294,7 +294,7 @@ module Doocr
 
     # Source is the creature that caused the explosion at spot.
     def radius_attack(spot : Mobj, source : Mobj, damage : Int32)
-      bm = @world.as(World).map.as(Map).blockmap
+      bm = @world.as(World).map.as(Map).blockmap.as(BlockMap)
 
       dist = Fixed.from_i(damage + GameConst.max_thing_radius.data)
 

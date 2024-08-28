@@ -47,21 +47,21 @@ module Doocr
     end
 
     def reset
-      @state_number = @reset.call if @reset != nil
+      @state_number = @reset.as(Proc(Int32)).call if @reset != nil
     end
 
     def up
       @state_number += 1
       @state_number = 0 if @state_number == @states.size
 
-      @action.call(@state_number) if @action != nil
+      @action.as(Proc(Int32, Nil)).call(@state_number) if @action != nil
     end
 
     def down
       @state_number -= 1
       @state_number = @states.size - 1 if @state_number == -1
 
-      @action.call(@state_number) if @action != nil
+      @action.as(Proc(Int32, Nil)).call(@state_number) if @action != nil
     end
   end
 end

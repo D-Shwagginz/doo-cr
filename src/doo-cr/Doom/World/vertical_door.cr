@@ -37,7 +37,7 @@ module Doocr
     end
 
     def run
-      sa = @world.as(World).sector_action
+      sa = @world.as(World).sector_action.as(SectorAction)
 
       result : SectorActionResult
 
@@ -50,22 +50,17 @@ module Doocr
           when VerticalDoorType::BlazeRaise
             # Time to go back down.
             @direction = -1
-            @world.as(World).start_sound(@sector.sound_origin, Sfx::BDCLS, SfxType::Misc)
-            break
+            @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::BDCLS, SfxType::Misc)
           when VerticalDoorType::Normal
             # Time to go back down.
             @direction = -1
-            @world.as(World).start_sound(@sector.sound_origin, Sfx::DORCLS, SfxType::Misc)
-            break
+            @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::DORCLS, SfxType::Misc)
           when VerticalDoorType::Close30ThenOpen
             @direction = 1
-            @world.as(World).start_sound(@sector.sound_origin, Sfx::DOROPN, SfxType::Misc)
-            break
+            @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::DOROPN, SfxType::Misc)
           else
-            break
           end
         end
-        break
       when 2
         # Initial wait.
         @top_count_down -= 1
@@ -74,58 +69,49 @@ module Doocr
           when VerticalDoorType::RaiseIn5Mins
             @direction = 1
             @type = VerticalDoorType::Normal
-            @world.as(World).start_sound(@sector.sound_origin, Sfx::DOROPN, SfxType::Misc)
-            break
+            @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::DOROPN, SfxType::Misc)
           else
-            break
           end
         end
-        break
       when -1
         # Down.
-        result = sa.move_plane(
-          @sector,
+        result = sa.as(SectorAction).move_plane(
+          @sector.as(Sector).as(Sector),
           @speed,
-          @sector.floor_height,
+          @sector.as(Sector).floor_height,
           false, 1, @direction
         )
         if result == SectorActionResult::PastDestination
           case type
           when VerticalDoorType::BlazeRaise, VerticalDoorType::BlazeClose
-            @sector.special_data = nil
+            @sector.as(Sector).special_data = nil
             # Unlink and free.
-            @world.as(World).thinkers.remove(self)
-            @sector.disable_frame_interpolation_for_one_frame
-            @world.as(World).start_sound(@sector.sound_origin, Sfx::BDCLS, SfxType::Misc)
-            break
+            @world.as(World).thinkers.as(Thinkers).remove(self)
+            @sector.as(Sector).disable_frame_interpolation_for_one_frame
+            @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::BDCLS, SfxType::Misc)
           when VerticalDoorType::Normal, VerticalDoorType::Close
-            @sector.special_data = nil
+            @sector.as(Sector).special_data = nil
             # Unlink and free.
-            @world.as(World).thinkers.remove(self)
-            @sector.disable_frame_interpolation_for_one_frame
-            break
+            @world.as(World).thinkers.as(Thinkers).remove(self)
+            @sector.as(Sector).disable_frame_interpolation_for_one_frame
           when VerticalDoorType::Close30ThenOpen
             @direction = 0
             @top_count_down = 35 * 30
-            break
           else
-            break
           end
         elsif result == SectorActionResult::Crushed
           case type
           when VerticalDoorType::BlazeClose, VerticalDoorType::Close # Do not go back up!
-            break
+
           else
             @direction = 1
-            @world.as(World).start_sound(@sector.sound_origin, Sfx::DOROPN, SfxType::Misc)
-            break
+            @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::DOROPN, SfxType::Misc)
           end
         end
-        break
       when 1
         # Up
         result = sa.move_plane(
-          @sector,
+          @sector.as(Sector).as(Sector),
           @speed,
           @top_height,
           false, 1, @direction
@@ -137,18 +123,14 @@ module Doocr
             # Wait at top.
             @direction = 0
             @top_count_down = @top_wait
-            break
           when VerticalDoorType::Close30ThenOpen, VerticalDoorType::BlazeOpen, VerticalDoorType::Open
-            @sector.special_data = nil
+            @sector.as(Sector).special_data = nil
             # Unlink and free.
-            @world.as(World).thinkers.remove(self)
-            @sector.disable_frame_interpolation_for_one_frame
-            break
+            @world.as(World).thinkers.as(Thinkers).remove(self)
+            @sector.as(Sector).disable_frame_interpolation_for_one_frame
           else
-            break
           end
         end
-        break
       end
     end
   end

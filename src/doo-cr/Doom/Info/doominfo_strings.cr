@@ -20,29 +20,29 @@ module Doocr
       PRESSKEY  = DoomString.new("PRESSKEY", "press a key.")
       PRESSYN   = DoomString.new("PRESSYN", "press y or n.")
       QUITMSG   = DoomString.new("QUITMSG", "are you sure you want to\nquit this great game?")
-      LOADNET   = DoomString.new("LOADNET", "you can't do load while in a net game!\n\n" + PRESSKEY)
-      QLOADNET  = DoomString.new("QLOADNET", "you can't quickload during a netgame!\n\n" + PRESSKEY)
-      QSAVESPOT = DoomString.new("QSAVESPOT", "you haven't picked a quicksave slot yet!\n\n" + PRESSKEY)
-      SAVEDEAD  = DoomString.new("SAVEDEAD", "you can't save if you aren't playing!\n\n" + PRESSKEY)
-      QSPROMPT  = DoomString.new("QSPROMPT", "quicksave over your game named\n\n'%s'?\n\n" + PRESSYN)
-      QLPROMPT  = DoomString.new("QLPROMPT", "do you want to quickload the game named\n\n'%s'?\n\n" + PRESSYN)
+      LOADNET   = DoomString.new("LOADNET", "you can't do load while in a net game!\n\n" + PRESSKEY.to_s)
+      QLOADNET  = DoomString.new("QLOADNET", "you can't quickload during a netgame!\n\n" + PRESSKEY.to_s)
+      QSAVESPOT = DoomString.new("QSAVESPOT", "you haven't picked a quicksave slot yet!\n\n" + PRESSKEY.to_s)
+      SAVEDEAD  = DoomString.new("SAVEDEAD", "you can't save if you aren't playing!\n\n" + PRESSKEY.to_s)
+      QSPROMPT  = DoomString.new("QSPROMPT", "quicksave over your game named\n\n'%s'?\n\n" + PRESSYN.to_s)
+      QLPROMPT  = DoomString.new("QLPROMPT", "do you want to quickload the game named\n\n'%s'?\n\n" + PRESSYN.to_s)
 
       NEWGAME = DoomString.new("NEWGAME",
         "you can't start a new game\n" +
-        "while in a network game.\n\n" + PRESSKEY)
+        "while in a network game.\n\n" + PRESSKEY.to_s)
 
       NIGHTMARE = DoomString.new("NIGHTMARE",
         "are you sure? this skill level\n" +
-        "isn't even remotely fair.\n\n" + PRESSYN)
+        "isn't even remotely fair.\n\n" + PRESSYN.to_s)
 
       SWSTRING = DoomString.new("SWSTRING",
         "this is the shareware version of doom.\n\n" +
-        "you need to order the entire trilogy.\n\n" + PRESSKEY)
+        "you need to order the entire trilogy.\n\n" + PRESSKEY.to_s)
 
       MSGOFF             = DoomString.new("MSGOFF", "Messages OFF")
       MSGON              = DoomString.new("MSGON", "Messages ON")
-      NETEND             = DoomString.new("NETEND", "you can't end a netgame!\n\n" + PRESSKEY)
-      ENDGAME            = DoomString.new("ENDGAME", "are you sure you want to end the game?\n\n" + PRESSYN)
+      NETEND             = DoomString.new("NETEND", "you can't end a netgame!\n\n" + PRESSKEY.to_s)
+      ENDGAME            = DoomString.new("ENDGAME", "are you sure you want to end the game?\n\n" + PRESSYN.to_s)
       DOSY               = DoomString.new("DOSY", "(press y to quit)")
       GAMMALVL0          = DoomString.new("GAMMALVL0", "Gamma correction OFF")
       GAMMALVL1          = DoomString.new("GAMMALVL1", "Gamma correction level 1")

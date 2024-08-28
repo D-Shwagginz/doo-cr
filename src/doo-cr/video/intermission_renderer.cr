@@ -76,27 +76,30 @@ module Doocr::Video
     def initialize(@wad, @screen)
       if @@doom_levels.size == 0
         4.times do |e|
-          @@doom_levels[e] = Array.new(9, "")
+          @@doom_levels << Array.new(9, "")
           9.times do |m|
-            @@doom_levels[e][m] = "WILV" + e + m
+            @@doom_levels[e] << "WILV#{e}#{m}"
           end
         end
       end
 
       if @@doom2_levels.size == 0
         32.times do |m|
-          @@doom2_levels[m] = "CWILV" + m.to_s(precision: 2)
+          @@doom2_levels << "CWILV" + m.to_s(precision: 2)
         end
       end
 
       @cache = PatchCache.new(@wad)
 
       @minus = Patch.from_wad(@wad, "WIMINUS")
-      @numbers = Array.new(10, Patch.from_wad(@wad, "WINUM" + i))
+      @numbers = Array(Patch).new(10)
+      10.times do |i|
+        @numbers << Patch.from_wad(@wad, "WINUM#{i}")
+      end
       @percent = Patch.from_wad(@wad, "WIPCNT")
       @colon = Patch.from_wad(@wad, "WICOLON")
 
-      @scale = @screen.width / 320
+      @scale = (@screen.width / 320).to_i32
     end
 
     private def draw_patch(patch : Patch, x : Int32, y : Int32)
@@ -104,7 +107,7 @@ module Doocr::Video
     end
 
     private def draw_patch(name : String, x : Int32, y : Int32)
-      scale = @screen.width / 320
+      scale = (@screen.width / 320).to_i32
       @screen.draw_patch(@cache[name], scale * x, scale * y, scale)
     end
 
@@ -119,28 +122,25 @@ module Doocr::Video
     def render(im : Intermission)
       case im.state
       when IntermissionState::StatCount
-        if im.options.deathmatch != 0
+        if im.options.as(GameOptions).deathmatch != 0
           draw_deathmatch_stats(im)
-        elsif im.options.net_game
+        elsif im.options.as(GameOptions).net_game
           draw_net_game_stats(im)
         else
           draw_single_player_stats(im)
         end
-        break
       when IntermissionState::ShowNextLoc
         draw_show_next_loc(im)
-        break
       when IntermissionState::NoState
         draw_no_state(im)
-        break
       end
     end
 
     private def draw_background(im : Intermission)
-      if im.options.game_mode == GameMode::Commercial
+      if im.options.as(GameOptions).game_mode == GameMode::Commercial
         draw_patch("INTERPIC", 0, 0)
       else
-        e = im.options.episode - 1
+        e = im.options.as(GameOptions).episode - 1
         if e < @map_pictures.size
           draw_patch(@map_pictures[e], 0, 0)
         else
@@ -159,7 +159,7 @@ module Doocr::Video
       draw_finished_level_name(im)
 
       # Line height.
-      line_height = 3 * @numbers[0].height / 2
+      line_height = 3 * (@numbers[0].height / 2).to_i32
 
       draw_patch(
         "WIOSTK", # KILLS
@@ -204,15 +204,15 @@ module Doocr::Video
       )
 
       draw_time(
-        320 / 2 - @@sp_time_x,
+        (320 / 2).to_i32 - @@sp_time_x,
         @@sp_time_y,
         im.time_count
       )
 
-      if im.info.episode < 3
+      if im.info.as(IntermissionInfo).episode < 3
         draw_patch(
           "WIPAR", # PAR
-          320 / 2 + @@sp_time_x,
+          (320 / 2).to_i32 + @@sp_time_x,
           @@sp_time_y
         )
 
@@ -233,7 +233,7 @@ module Doocr::Video
       # Draw level name.
       draw_finished_level_name(im)
 
-      ng_stats_x = 32 + get_width("STFST01") / 2
+      ng_stats_x = 32 + (get_width("STFST01") / 2).to_i32
       ng_stats_x += 32 if !im.do_frags
 
       #  Draw stat titles (top line).
@@ -267,7 +267,7 @@ module Doocr::Video
       y = @@ng_stats_y + get_height("WIOSTK")
 
       Player::MAX_PLAYER_COUNT.times do |i|
-        next if !im.options.players[i].in_game
+        next if !im.options.as(GameOptions).players[i].in_game
 
         x = ng_stats_x
 
@@ -277,7 +277,7 @@ module Doocr::Video
           y
         )
 
-        if i == im.options.console_player
+        if i == im.options.as(GameOptions).console_player
           draw_patch(
             "STFST01", # Player face
             x - get_width(@@player_boxes[i]),
@@ -314,7 +314,7 @@ module Doocr::Video
       # Draw stat titles (top line).
       draw_patch(
         "WIMSTT", # TOTAL
-        @@dm_totals_x - get_width("WIMSTT") / 2,
+        @@dm_totals_x - (get_width("WIMSTT") / 2).to_i32,
         @@dm_matrix_y - @@spacing_y + 10
       )
 
@@ -335,29 +335,29 @@ module Doocr::Video
       y = @@dm_matrix_y
 
       Player::MAX_PLAYER_COUNT.times do |i|
-        if im.options.player[i].in_game
+        if im.options.as(GameOptions).players[i].in_game
           draw_patch(
             @@player_boxes[i],
-            x - get_width(@@player_boxes[i]) / 2,
+            x - (get_width(@@player_boxes[i]) / 2).to_i32,
             @@dm_matrix_y - @@spacing_y
           )
 
           draw_patch(
             @@player_boxes[i],
-            @@dm_matrix_x - get_width(@@player_boxes[i]) / 2,
+            @@dm_matrix_x - (get_width(@@player_boxes[i]) / 2).to_i32,
             y
           )
 
-          if i == im.options.console_player
+          if i == im.options.as(GameOptions).console_player
             draw_patch(
               "STFDEAD0", # Player face (dead)
-              x - get_width(@@player_boxes[i]) / 2,
+              x - (get_width(@@player_boxes[i]) / 2).to_i32,
               @@dm_matrix_y - @@spacing_y
             )
 
             draw_patch(
               "STFST01", # Player face
-              @@dm_matrix_x - get_width(@@player_boxes[i]) / 2,
+              @@dm_matrix_x - (get_width(@@player_boxes[i]) / 2).to_i32,
               y
             )
           end
@@ -379,16 +379,16 @@ module Doocr::Video
       Player::MAX_PLAYER_COUNT.times do |i|
         x = @@dm_matrix_x + @@dm_spacing_x
 
-        if im.options.players[i].in_game
+        if im.options.as(GameOptions).players[i].in_game
           Player::MAX_PLAYER_COUNT.times do |j|
-            if im.options.players[j].in_game
-              draw_number(x + w, y, im.deathmatch_frags[i][j], 2)
+            if im.options.as(GameOptions).players[j].in_game
+              draw_number(x + w, y, im.dm_frag_count[i][j], 2)
             end
 
             x += @@dm_spacing_x
           end
 
-          draw_number(@@dm_totals_x + w, y, im.deathmatch_totals[i], 2)
+          draw_number(@@dm_totals_x + w, y, im.dm_total_count[i], 2)
         end
 
         y += @@spacing_y
@@ -405,49 +405,49 @@ module Doocr::Video
       # Draw animated background.
       draw_background_animation(im)
 
-      if im.options.game_mode != GameMode::Commercial
-        if im.info.episode > 2
+      if im.options.as(GameOptions).game_mode != GameMode::Commercial
+        if im.info.as(IntermissionInfo).episode > 2
           draw_entering_level_name(im)
           return
         end
 
-        last = (im.info.last_level == 8) ? im.info.next_level - 1 : im.info.last_level
+        last = (im.info.as(IntermissionInfo).last_level == 8) ? im.info.as(IntermissionInfo).next_level - 1 : im.info.as(IntermissionInfo).last_level
 
         # Draw a splat on taken cities.
         last.times do |i|
-          x = WorldMap.locations[im.info.episode][i].x
-          y = WorldMap.locations[im.info.episode][i].y
+          x = WorldMap.locations[im.info.as(IntermissionInfo).episode][i].x
+          y = WorldMap.locations[im.info.as(IntermissionInfo).episode][i].y
           draw_patch("WISPLAT", x, y)
         end
 
         # Splat the secret level?
-        if im.info.did_secret
-          x = WorldMap.locations[im.info.episode][8].x
-          y = WorldMap.locations[im.info.episode][8].y
+        if im.info.as(IntermissionInfo).did_secret
+          x = WorldMap.locations[im.info.as(IntermissionInfo).episode][8].x
+          y = WorldMap.locations[im.info.as(IntermissionInfo).episode][8].y
           draw_patch("WISPLAT", x, y)
         end
 
         # Draw "you are here".
         if im.show_you_are_here
-          x = WorldMap.locations[im.info.episode][im.info.next_level].x
-          y = WorldMap.locations[im.info.episode][im.info.next_level].y
+          x = WorldMap.locations[im.info.as(IntermissionInfo).episode][im.info.as(IntermissionInfo).next_level].x
+          y = WorldMap.locations[im.info.as(IntermissionInfo).episode][im.info.as(IntermissionInfo).next_level].y
           draw_suitable_patch(@@you_are_here, x, y)
         end
       end
 
       # Draw next level name.
-      if (im.options.game_mode != GameMode::Commercial) || im.info.next_level != 30
+      if (im.options.as(GameOptions).game_mode != GameMode::Commercial) || im.info.as(IntermissionInfo).next_level != 30
         draw_entering_level_name(im)
       end
     end
 
     private def draw_finished_level_name(intermission : Intermission)
-      wbs = intermission.info
+      wbs = intermission.info.as(IntermissionInfo)
       y = @@title_y
 
-      level_name : String
-      if intermission.options.game_mode != GameMode::Commercial
-        e = intermission.options.episode - 1
+      level_name : String = ""
+      if intermission.options.as(GameOptions).game_mode != GameMode::Commercial
+        e = intermission.options.as(GameOptions).episode - 1
         level_name = @@doom_levels[e][wbs.last_level]
       else
         level_name = @@doom2_levels[wbs.last_level]
@@ -456,27 +456,27 @@ module Doocr::Video
       # Draw level name.
       draw_patch(
         level_name,
-        (320 - get_width(level_name)) / 2,
+        ((320 - get_width(level_name)) / 2).to_i32,
         y
       )
 
       # Draw "Finished!".
-      y += 5 * get_height(level_name) / 4
+      y += 5 * (get_height(level_name) / 4).to_i32
 
       draw_patch(
         "WIF",
-        (320 - get_width("WIF")) / 2,
+        ((320 - get_width("WIF")) / 2).to_i32,
         y
       )
     end
 
     private def draw_entering_level_name(im : Intermission)
-      wbs = im.info
+      wbs = im.info.as(IntermissionInfo)
       y = @@title_y
 
       level_name : String
-      if intermission.options.game_mode != GameMode::Commercial
-        e = intermission.options.episode - 1
+      if im.options.as(GameOptions).game_mode != GameMode::Commercial
+        e = im.options.as(GameOptions).episode - 1
         level_name = @@doom_levels[e][wbs.next_level]
       else
         level_name = @@doom2_levels[wbs.next_level]
@@ -485,16 +485,16 @@ module Doocr::Video
       # Draw level name.
       draw_patch(
         "WIENTER",
-        (320 - get_width("WIENTER")) / 2,
+        ((320 - get_width("WIENTER")) / 2).to_i32,
         y
       )
 
       # Draw "Finished!".
-      y += 5 * get_height(level_name) / 4
+      y += 5 * (get_height(level_name) / 4).to_i32
 
       draw_patch(
         level_name,
-        (320 - get_width(level_name)) / 2,
+        ((320 - get_width(level_name)) / 2).to_i32,
         y
       )
     end
@@ -527,12 +527,12 @@ module Doocr::Video
       while digits != 0
         digits -= 1
         x -= font_width
-        draw_patch(@numbers[n % 10], x, y)
+        draw_patch(@numbers[(n % 10).to_i32], x, y)
         n /= 10
       end
 
       # Draw a minus sign if necessary.
-      draw_patch(minus, x -= 8, y) if neg
+      draw_patch(@minus, x -= 8, y) if neg
 
       return x
     end
@@ -550,10 +550,10 @@ module Doocr::Video
       if t <= 61 * 59
         div = 1
 
-        x = true
-        while x || (t / div != 0)
-          x = false
-          n = t / div % 60
+        j = true
+        while j || (t / div != 0)
+          j = false
+          n = (t / div % 60).to_i32
           x = draw_number(x, y, n, 2) - @colon.width
           div *= 60
 
@@ -570,9 +570,9 @@ module Doocr::Video
     end
 
     private def draw_background_animation(im : Intermission)
-      return if im.options.game_mode == GameMOde; :Commercial
+      return if im.options.as(GameOptions).game_mode == GameMode::Commercial
 
-      return if im.info.episode > 2
+      return if im.info.as(IntermissionInfo).episode > 2
 
       im.animations.size.times do |i|
         a = im.animations[i]
@@ -586,9 +586,9 @@ module Doocr::Video
       fits = false
       i = 0
 
-      x = true
-      while x || (!fits && i < 2)
-        x = false
+      j = true
+      while j || (!fits && i < 2)
+        j = false
         patch = @cache[candidates[i]]
 
         left = x - patch.left_offset

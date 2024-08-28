@@ -79,7 +79,7 @@ module Doocr
     end
 
     def *(b : Fixed) : Fixed
-      return Fixed.new((@data.to_i64 * b.data.to_i64).to_i32)
+      return Fixed.new(((@data.to_i64 * b.data.to_i64) >> FRACBITS).to_i32)
     end
 
     def *(b : Int32) : Fixed
@@ -144,19 +144,19 @@ module Doocr
       return @data >= b.data
     end
 
-    def min(b : Fixed) : Fixed
-      if self < b
-        return self
+    def self.min(a : Fixed, b : Fixed) : Fixed
+      if a < b
+        return a
       else
         return b
       end
     end
 
-    def max(b : Fixed) : Fixed
-      if self < b
+    def self.max(a : Fixed, b : Fixed) : Fixed
+      if a < b
         return b
       else
-        return self
+        return a
       end
     end
 

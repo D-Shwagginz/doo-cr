@@ -90,17 +90,17 @@ module Doocr
 
         SimpleMenuItem.new(
           "M_ROUGH", 16, 74, 48, 79,
-          ->{ doom.NewGame(GameSkill::Easy, @selected_episode, 1) },
+          ->{ doom.new_game(GameSkill::Easy, @selected_episode, 1) },
           nil),
 
         SimpleMenuItem.new(
           "M_HURT", 16, 90, 48, 95,
-          ->{ doom.NewGame(GameSkill::Medium, @selected_episode, 1) },
+          ->{ doom.new_game(GameSkill::Medium, @selected_episode, 1) },
           nil),
 
         SimpleMenuItem.new(
           "M_ULTRA", 16, 106, 48, 111,
-          ->{ doom.NewGame(GameSkill::Hard, @selected_episode, 1) },
+          ->{ doom.new_game(GameSkill::Hard, @selected_episode, 1) },
           nil),
 
         SimpleMenuItem.new(
@@ -181,8 +181,8 @@ module Doocr
         end
       end
 
-      sound = @doom.options.sound
-      music = @doom.options.music
+      sound = @doom.options.sound.as(Audio::ISound)
+      music = @doom.options.music.as(Audio::IMusic)
       @volume = SelectableMenu.new(
         self,
         "M_SVOL", 60, 38,
@@ -203,8 +203,8 @@ module Doocr
         )
       )
 
-      video = @doom.options.video
-      user_input = @doom.options.user_input
+      video = @doom.options.video.as(Video::IVideo)
+      user_input = @doom.options.user_input.as(UserInput::IUserInput)
       @option_menu = SelectableMenu.new(
         self,
         "M_OPTTTL", 108, 15,
@@ -214,7 +214,7 @@ module Doocr
           "M_ENDGAM", 28, 32, 60, 37,
           nil,
           @end_game_confirm,
-          ->{ doom.state == DoomState::Game }),
+          ->{ @doom.current_state == DoomState::Game }),
 
         ToggleMenuItem.new(
           "M_MESSG", 28, 48, 60, 53, "M_MSGON", "M_MSGOFF", 180,
@@ -273,7 +273,7 @@ module Doocr
           SimpleMenuItem.new("M_OPTION", 65, 83, 97, 88, nil, @option_menu),
           SimpleMenuItem.new("M_LOADG", 65, 99, 97, 104, nil, @load),
           SimpleMenuItem.new("M_SAVEG", 65, 115, 97, 120, nil, @save,
-            {!(doom.State == DoomState.Game && doom.Game.State != GameState.Level)}),
+            ->{ !(doom.current_state == DoomState::Game && doom.game.as(DoomGame).game_state != GameState::Level) }),
           SimpleMenuItem.new("M_QUITG", 65, 131, 97, 136, nil, @quit_confirm)
         )
       else
@@ -285,7 +285,7 @@ module Doocr
           SimpleMenuItem.new("M_OPTION", 65, 75, 97, 80, nil, @option_menu),
           SimpleMenuItem.new("M_LOADG", 65, 91, 97, 96, nil, @load),
           SimpleMenuItem.new("M_SAVEG", 65, 107, 97, 112, nil, @save,
-            ->{ !(doom.State == DoomState.Game && doom.Game.State != GameState.Level) }),
+            ->{ !(doom.current_state == DoomState::Game && doom.game.as(DoomGame).game_state != GameState::Level) }),
           SimpleMenuItem.new("M_RDTHIS", 65, 123, 97, 128, nil, @help),
           SimpleMenuItem.new("M_QUITG", 65, 139, 97, 144, nil, @quit_confirm)
         )
@@ -303,26 +303,26 @@ module Doocr
 
     def do_event(e : DoomEvent) : Bool
       if @active
-        return true if @current.do_event(e)
+        return true if @current.as(MenuDef).do_event(e)
 
         close() if e.key == DoomKey::Escape && e.type == EventType::KeyDown
 
         return true
       else
         if e.key == DoomKey::Escape && e.type == EventType::KeyDown
-          set_current(@main)
+          set_current(@main.as(MenuDef))
           open()
           start_sound(Sfx::SWTCHN)
           return true
         end
 
-        if e.type == EventType::KeyDown && @doom.state == DoomState::Opening
+        if e.type == EventType::KeyDown && @doom.current_state == DoomState::Opening
           if (e.key == DoomKey::Enter ||
              e.key == DoomKey::Space ||
              e.key == DoomKey::LControl ||
              e.key == DoomKey::RControl ||
              e.key == DoomKey::Escape)
-            set_current(@main)
+            set_current(@main.as(MenuDef))
             open()
             start_sound(Sfx::SWTCHN)
             return true
@@ -336,14 +336,14 @@ module Doocr
     def update
       @tics += 1
 
-      @current.update if @current != nil
+      @current.as(MenuDef).update if @current != nil
 
       @doom.pause_game if @active && !@doom.options.net_game
     end
 
     def set_current(nextm : MenuDef)
       @current = nextm
-      @current.open
+      @current.as(MenuDef).open
     end
 
     def open
@@ -359,46 +359,46 @@ module Doocr
     end
 
     def start_sound(sfx : Sfx)
-      @doom.options.soun.start_sound(sfx)
+      @doom.options.sound.as(Audio::ISound).start_sound(sfx)
     end
 
     def notify_save_failed
-      set_current(@save_failed)
+      set_current(@save_failed.as(PressAnyKey))
     end
 
     def show_help_screen
-      set_current(@help)
+      set_current(@help.as(MenuDef))
       open()
       start_sound(Sfx::SWTCHN)
     end
 
     def show_save_screen
-      set_current(@save)
+      set_current(@save.as(MenuDef))
       open()
       start_sound(Sfx::SWTCHN)
     end
 
     def show_load_screen
-      set_current(@load)
+      set_current(@load.as(MenuDef))
       open()
       start_sound(Sfx::SWTCHN)
     end
 
     def show_volume_control
-      set_current(@volume)
+      set_current(@volume.as(MenuDef))
       open()
       start_sound(Sfx::SWTCHN)
     end
 
     def quick_save
-      if @save.last_save_slot == -1
+      if @save.as(SaveMenu).last_save_slot == -1
         show_save_screen()
       else
-        desc = @save_slots[@save.last_save_slot]
+        desc = @save_slots.as(SaveSlots)[@save.as(SaveMenu).last_save_slot]
         confirm = YesNoConfirm.new(
           self,
           DoomInfo::Strings::QSPROMPT.to_s.gsub("%s", desc),
-          ->{ @save.do_save(@save.last_save_slot) }
+          ->{ @save.as(SaveMenu).do_save(@save.as(SaveMenu).last_save_slot) }
         )
         set_current(confirm)
         open()
@@ -407,21 +407,21 @@ module Doocr
     end
 
     def quick_load
-      if @save.last_save_slot == -1
+      if @save.as(SaveMenu).last_save_slot == -1
         pak = PressAnyKey.new(
           self,
-          Doom::Strings::QSAVESPOT,
+          DoomInfo::Strings::QSAVESPOT,
           nil
         )
         set_current(pak)
         open()
         start_sound(Sfx::SWTCHN)
       else
-        desc = @save_slots[@save.last_save_slot]
+        desc = @save_slots.as(SaveSlots)[@save.as(SaveMenu).last_save_slot]
         confirm = YesNoConfirm.new(
           self,
           DoomInfo::Strings::QLPROMPT.to_s.gsub("%s", desc),
-          ->{ @load.do_load(@save.last_save_slot) }
+          ->{ @load.as(LoadMenu).do_load(@save.as(SaveMenu).last_save_slot) }
         )
         set_current(confirm)
         open()
@@ -430,13 +430,13 @@ module Doocr
     end
 
     def end_game
-      set_current(@end_game_confirm)
+      set_current(@end_game_confirm.as(MenuDef))
       open()
       start_sound(Sfx::SWTCHN)
     end
 
     def quit
-      set_current(@quit_confirm)
+      set_current(@quit_confirm.as(MenuDef))
       open()
       start_sound(Sfx::SWTCHN)
     end

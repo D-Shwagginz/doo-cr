@@ -16,14 +16,14 @@
 
 module Doocr
   class GameOptions
-    property game_version : GameVersion | Nil = nil
-    property game_mode : GameMode | Nil = nil
-    property mission_pack : MissionPack | Nil = nil
+    property game_version : GameVersion = GameVersion.new(0)
+    property game_mode : GameMode = GameMode.new(0)
+    property mission_pack : MissionPack = MissionPack.new(0)
     getter players : Array(Player) = Array(Player).new
     property console_player : Int32 = 0
     property episode : Int32 = 0
     property map : Int32 = 0
-    property skill : GameSkill | Nil = nil
+    property skill : GameSkill = GameSkill.new(0)
     property demo_playback : Bool = false
     property net_game : Bool = false
     property deathmatch : Int32 = 0
@@ -35,7 +35,7 @@ module Doocr
 
     getter random : DoomRandom | Nil = nil
 
-    property video : IVideo | Nil = nil
+    property video : Video::IVideo | Nil = nil
 
     property sound : Audio::ISound | Nil = nil
 
@@ -82,9 +82,9 @@ module Doocr
         @net_game = true
       end
 
-      @game_version = content.wad.game_version
-      @game_mode = content.wad.game_mode
-      @mission_pack = content.wad.mission_pack
+      @game_version = content.wad.as(Wad).game_version
+      @game_mode = content.wad.as(Wad).game_mode
+      @mission_pack = content.wad.as(Wad).mission_pack
     end
   end
 end

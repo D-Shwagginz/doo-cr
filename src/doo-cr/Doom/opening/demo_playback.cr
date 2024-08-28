@@ -27,34 +27,34 @@ module Doocr
     @frame_count : Int32 = 0
 
     def fps : Float64
-      return @counting ? (Time.monotonic - @start).seconds : @elapsed.seconds
+      return @counting ? (Time.monotonic - @start).total_seconds : @elapsed.total_seconds
     end
 
     def initialize(args : CommandLineArgs, content : GameContent, options : GameOptions, demo_name : String)
       if File.exists?(demo_name)
         @demo = Demo.new(demo_name)
-      elsif File.exists(demo_name + ".lmp")
+      elsif File.exists?(demo_name + ".lmp")
         @demo = Demo.new(demo_name + ".lmp")
       else
         lump_name = demo_name.upcase
-        if content.wad.get_lump_number(lump_name) == -1
+        if content.wad.as(Wad).get_lump_number(lump_name) == -1
           raise "Demo '#{demo_name}' was not found!"
         end
-        @demo = Demo.new(content.wad.read_lump(lump_name))
+        @demo = Demo.new(content.wad.as(Wad).read_lump(lump_name))
       end
 
-      @demo.options.game_version = options.game_version
-      @demo.options.game_mode = options.game_mode
-      @demo.options.mission_pack = options.mission_pack
-      @demo.options.video = options.video
-      @demo.options.sound = options.sound
-      @demo.options.music = options.music
+      @demo.options.as(GameOptions).game_version = options.game_version
+      @demo.options.as(GameOptions).game_mode = options.game_mode
+      @demo.options.as(GameOptions).mission_pack = options.mission_pack
+      @demo.options.as(GameOptions).video = options.video
+      @demo.options.as(GameOptions).sound = options.sound
+      @demo.options.as(GameOptions).music = options.music
 
-      @demo.options.net_game = true if args.solonet.present
+      @demo.options.as(GameOptions).net_game = true if args.solonet.present
 
       @cmds = Array.new(Player::MAX_PLAYER_COUNT, TicCmd.new)
 
-      @game = DoomGame.new(content, demo.options)
+      @game = DoomGame.new(content, @demo.options.as(GameOptions))
       @game.defered_init_new
 
       @start = Time.monotonic

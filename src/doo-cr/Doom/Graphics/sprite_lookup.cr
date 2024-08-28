@@ -20,7 +20,7 @@ module Doocr
   class SpriteLookup
     include ISpriteLookup
 
-    @spritedefs : Array(SpriteDef)
+    @spritedefs : Array(SpriteDef) = [] of SpriteDef
 
     def initialize(wad : Wad)
       begin
@@ -28,7 +28,7 @@ module Doocr
 
         temp = {} of String => Array(SpriteInfo)
         Sprite::Count.to_i32.times do |i|
-          temp[DoomInfo.sprite_names[i]] = [] of SpriteInfo if !temp[DoomInfo.sprite_names[i]]?
+          temp[DoomInfo.sprite_names[i].to_s] = [] of SpriteInfo if !temp[DoomInfo.sprite_names[i]]?
         end
 
         cache = {} of Int32 => Patch
@@ -47,7 +47,7 @@ module Doocr
             list << SpriteInfo.new
           end
 
-          if rotation.ord == 0
+          if rotation == 0
             8.times do |i|
               if list[frame].patches[i]? == nil
                 list[frame].patches << cached_read(lump, wad, cache)
@@ -64,7 +64,7 @@ module Doocr
 
         @spritedefs = Array(SpriteDef).new(Sprite::Count.to_i32)
         Sprite::Count.to_i32.times do |i|
-          list = temp[DoomInfo.sprite_names[i]]
+          list = temp[DoomInfo.sprite_names[i].to_s]
 
           frames = Array(SpriteFrame).new(list.size)
           list.size.times do |j|
@@ -135,7 +135,7 @@ module Doocr
       end
 
       def check_completion
-        8.times do |i|
+        @patches.size.times do |i|
           if @patches[i]? == nil
             raise("Missing sprite!")
           end

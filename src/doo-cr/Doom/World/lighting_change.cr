@@ -24,11 +24,11 @@ module Doocr
     def spawn_fire_flicker(sector : Sector)
       # Note that we are resetting sector attributes.
       # Nothing special about it during gameplay.
-      sector.special = 0
+      sector.special = SectorSpecial.new(0)
 
       flicker = FireFlicker.new(@world.as(World))
 
-      @world.as(World).thinkers.add(flicker)
+      @world.as(World).thinkers.as(Thinkers).add(flicker)
 
       flicker.sector = sector
       flicker.max_light = sector.light_level
@@ -38,11 +38,11 @@ module Doocr
 
     def spawn_light_flash(sector : Sector)
       # Nothing special about it during gameplay.
-      sector.special = 0
+      sector.special = SectorSpecial.new(0)
 
       light = LightFlash.new(@world.as(World))
 
-      @world.as(World).thinkers.add(light)
+      @world.as(World).thinkers.as(Thinkers).add(light)
 
       light.sector = sector
       light.max_light = sector.light_level
@@ -50,7 +50,7 @@ module Doocr
       light.min_light = find_min_surrounding_light(sector, sector.light_level)
       light.max_time = 64
       light.min_time = 7
-      light.count + (@world.as(World).random.next & light.max_time) + 1
+      light.count + (@world.as(World).random.as(DoomRandom).next & light.max_time) + 1
     end
 
     def spawn_strobe_flash(sector : Sector, time : Int32, in_sync : Bool)
@@ -79,14 +79,14 @@ module Doocr
     def spawn_glowing_light(sector : Sector)
       glowing = GlowingLight.new(@world.as(World))
 
-      @world.as(World).thinkers.add(glowing)
+      @world.as(World).thinkers.as(Thinkers).add(glowing)
 
       glowing.sector = sector
       glowing.min_light = find_min_surrounding_light(sector, sector.light_level)
       glowing.max_light = sector.light_level
       glowing.direction = -1
 
-      sector.special = 0
+      sector.special = SectorSpecial.new(0)
     end
 
     private def find_min_surrounding_light(sector : Sector, max : Int32) : Int32
@@ -106,7 +106,7 @@ module Doocr
     end
 
     private def get_next_sector(line : LineDef, sector : Sector) : Sector | Nil
-      return nil if (line.flags & LineFlags::TwoSided) == 0
+      return nil if (line.flags & LineFlags::TwoSided).to_i32 == 0
 
       return line.back_sector if line.front_sector == sector
 

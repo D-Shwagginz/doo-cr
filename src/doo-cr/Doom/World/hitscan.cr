@@ -19,8 +19,8 @@ module Doocr
     @world : World | Nil = nil
 
     def initialize(@world)
-      @aim_traverse_func = aim_traverse()
-      @shoot_traverse_func = shoot_traverse()
+      @aim_traverse_func = ->aim_traverse(Intercept)
+      @shoot_traverse_func = ->shoot_traverse(Intercept)
     end
 
     @aim_traverse_func : Proc(Intercept, Bool) | Nil = nil
@@ -44,14 +44,14 @@ module Doocr
     # Sets lineTaget and aimSlope when a target is aimed at.
     private def aim_traverse(intercept : Intercept) : Bool
       if intercept.line != nil
-        line = intercept.line
+        line = intercept.line.as(LineDef)
 
-        if (line.flags & LineFlags::TwoSided) == 0
+        if (line.flags & LineFlags::TwoSided).to_i32 == 0
           # Stop.
           return false
         end
 
-        mc = @world.as(World).map_collision
+        mc = @world.as(World).map_collision.as(MapCollision)
 
         # Crosses a two sided line.
         # A two sided line will restrict the possible target ranges.
@@ -69,7 +69,7 @@ module Doocr
         # These are imported from Chocolate Doom.
 
         if (line.back_sector == nil ||
-           line.front_sector.floor_height != line.back_sector.floor_height)
+           line.front_sector.as(Sector).floor_height != line.back_sector.as(Sector).floor_height)
           slope = (mc.open_bottom - @current_shooter_z) / dist
           @bottom_slope = slope if slope > @bottom_slope
         end
@@ -84,13 +84,13 @@ module Doocr
       end
 
       # Shoot a thing.
-      thing = intercept.thing
+      thing = intercept.thing.as(Mobj)
       if thing == @current_shooter
         # Can't shoot self.
         return true
       end
 
-      if (thing.flags & MobjFlags::Shootable) == 0
+      if (thing.flags & MobjFlags::Shootable).to_i32 == 0
         # Corpse or something.
         return true
       end
@@ -125,20 +125,20 @@ module Doocr
 
     # Fire a hitscan bullet along the aiming line.
     private def shoot_traverse(intercept : Intercept) : Bool
-      mi = @world.as(World).map_interaction
-      pt = @world.as(World).path_traversal
+      mi = @world.as(World).map_interaction.as(MapInteraction)
+      pt = @world.as(World).path_traversal.as(PathTraversal)
 
       if intercept.line != nil
-        line = intercept.line
+        line = intercept.line.as(LineDef)
 
         if line.special != 0
-          mi.shoot_special_line(@current_shooter, line)
+          mi.shoot_special_line(@current_shooter.as(Mobj), line)
         end
 
         begin
-          raise if (line.flags & LineFlags::TwoSided) == 0
+          raise "" if (line.flags & LineFlags::TwoSided).to_i32 == 0
 
-          mc = @world.as(World).map_collision
+          mc = @world.as(World).map_collision.as(MapCollision)
 
           # Crosses a two sided line.
           mc.line_opening(line)
@@ -148,19 +148,19 @@ module Doocr
           # Similar to AimTraverse, the code below is imported from Chocolate Doom.
           if line.back_sector == nil
             slope = (mc.open_bottom / @current_shooter_z) / dist
-            raise if slope > @current_aim_slope
+            raise "" if slope > @current_aim_slope
 
             slope = (mc.open_top - @current_shooter_z) - dist
-            raise if slope < @current_aim_slope
+            raise "" if slope < @current_aim_slope
           else
-            if line.front_sector.floor_height != line.back_sector.floor_height
-              slope = (mc.open_bottom - @current_shooter_z) / Digest
-              raise if slope > @current_aim_slope
+            if line.front_sector.as(Sector).floor_height != line.back_sector.as(Sector).floor_height
+              slope = (mc.open_bottom - @current_shooter_z) / dist
+              raise "" if slope > @current_aim_slope
             end
 
-            if line.front_sector.ceiling_height != line.back_sector.ceiling_height
+            if line.front_sector.as(Sector).ceiling_height != line.back_sector.as(Sector).ceiling_height
               slope = (mc.open_top - @current_shooter_z) - dist
-              raise if slope < @current_aim_slope
+              raise "" if slope < @current_aim_slope
             end
           end
 
@@ -175,12 +175,12 @@ module Doocr
         y = pt.trace.y + pt.trace.dy * frac
         z = @current_shooter_z + @current_aim_slope * (frac * @current_range)
 
-        if line.front_sector.ceiling_flat == @world.as(World).map.sky_flat_number
+        if line.front_sector.as(Sector).ceiling_flat == @world.as(World).map.as(Map).sky_flat_number
           # Don't shoot the sky!
-          return false if z > line.front_sector.ceiling_height
+          return false if z > line.front_sector.as(Sector).ceiling_height
 
           # It's a sky hack wall.
-          return false if line.back_sector != nil && line.back_sector.ceiling_flat == @world.as(World).map.sky_flat_number
+          return false if line.back_sector != nil && line.back_sector.as(Sector).ceiling_flat == @world.as(World).map.as(Map).sky_flat_number
         end
 
         # Spawn bullet puffs.
@@ -191,13 +191,13 @@ module Doocr
       end
 
       # Shoot a thing.
-      thing = intercept.thing
+      thing = intercept.thing.as(Mobj)
       if thing == @current_shooter
         # Can't shoot self.
         return true
       end
 
-      if (thing.flags & MobjFlags::Shootable) == 0
+      if (thing.flags & MobjFlags::Shootable).to_i32 == 0
         # Corpse or something
         return true
       end
@@ -222,19 +222,19 @@ module Doocr
       # Position a bit closer.
       frac = intercept.frac - Fixed.from_i(10) / @current_range
 
-      x = pt.trace.x + pt.trace.dx * frac
-      y = pt.trace.y + pt.trace.dy * frac
+      x = pt.trace.as(DivLine).x + pt.trace.as(DivLine).dx * frac
+      y = pt.trace.as(DivLine).y + pt.trace.as(DivLine).dy * frac
       z = @current_shooter_z + @current_aim_slope * (frac * @current_range)
 
       # Spawn bullet puffs or blod spots, depending on target type.
-      if (intercept.thing.flags & MobjFlags::NoBlood) != 0
+      if (intercept.thing.as(Mobj).flags & MobjFlags::NoBlood).to_i32 != 0
         spawn_puff(x, y, z)
       else
         spawn_blood(x, y, z, @current_damage)
       end
 
       if @current_damage != 0
-        @world.as(World).thing_interaction.damage_mobj(thing, @current_shooter, @current_shooter, @current_damage)
+        @world.as(World).thing_interaction.as(ThingInteraction).damage_mobj(thing, @current_shooter.as(Mobj), @current_shooter.as(Mobj), @current_damage)
       end
 
       # Don't go any farther
@@ -315,7 +315,7 @@ module Doocr
 
       z += Fixed.new((random.next - random.next) << 10)
 
-      thing = @world.as(World).thing_allocation.spawn_mobj(x, y, z, MobjType::Blood)
+      thing = @world.as(World).thing_allocation.as(ThingAllocation).spawn_mobj(x, y, z, MobjType::Blood)
       thing.mom_z = Fixed.from_i(2)
       thing.tics -= random.next & 3
 

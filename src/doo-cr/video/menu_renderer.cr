@@ -29,22 +29,22 @@ module Doocr::Video
 
     def render(menu : DoomMenu)
       selectable = menu.current.as?(SelectableMenu)
-      draw_selectable_menu(selectable) if selectable != nil
+      draw_selectable_menu(selectable.as(SelectableMenu)) if selectable != nil
 
       save = menu.current.as?(SaveMenu)
-      draw_save_menu(save) if save != nil
+      draw_save_menu(save.as(SaveMenu)) if save != nil
 
       yes_no = menu.current.as?(YesNoConfirm)
-      draw_text(yes_no.text) if yes_no != nil
+      draw_text(yes_no.as(YesNoConfirm).text) if yes_no != nil
 
       press_any_key = menu.current.as?(PressAnyKey)
-      draw_text(press_any_key.text) if press_any_key != nil
+      draw_text(press_any_key.as(PressAnyKey).text) if press_any_key != nil
 
       quit = menu.current.as?(QuitConfirm)
-      draw_text(quit.text) if quit != nil
+      draw_text(quit.as(QuitConfirm).text) if quit != nil
 
       help = menu.current.as?(HelpScreen)
-      draw_help(help) if help != nil
+      draw_help(help.as(HelpScreen)) if help != nil
     end
 
     private def draw_selectable_menu(selectable : SelectableMenu)
@@ -101,13 +101,31 @@ module Doocr::Video
       draw_menu_patch(skull, choice.skull_x, choice.skull_y)
     end
 
+    private def draw_menu_item(menu : DoomMenu, item : MenuItem)
+      if simple = item.as?(SimpleMenuItem)
+        draw_simple_menu_item(simple)
+      end
+
+      if toggle = item.as?(ToggleMenuItem)
+        draw_toggle_menu_item(toggle)
+      end
+
+      if slider = item.as?(SliderMenuItem)
+        draw_slider_menu_item(slider)
+      end
+
+      if text_box = item.as?(TextBoxMenuItem)
+        draw_text_box_menu_item(text_box, menu.tics)
+      end
+    end
+
     private def draw_menu_patch(name : String, x : Int32, y : Int32)
-      scale = @screen.width / 320
+      scale = (@screen.width / 320).to_i32
       @screen.draw_patch(@cache[name], scale * x, scale * y, scale)
     end
 
     private def draw_menu_text(text : Array(Char), x : Int32, y : Int32)
-      scale = @screen.width / 320
+      scale = (@screen.width / 320).to_i32
       @screen.draw_text(text, scale * x, scale * y, scale)
     end
 
@@ -151,7 +169,7 @@ module Doocr::Video
         text = item.text != nil ? item.text : @empty_text
         draw_menu_text(text, item.item_x + 8, item.item_y)
       else
-        draw_menu_item(item.text, item.item_x + 8, item.item_y)
+        draw_menu_text(item.text, item.item_x + 8, item.item_y)
         if tics / 3 % 2 == 0
           text_width = @screen.measure_text(item.text, 1)
           draw_menu_text(@@cursor, item.item_x + 8 + text_width, item.item_y)
@@ -160,13 +178,13 @@ module Doocr::Video
     end
 
     private def draw_text(text : Array(String))
-      scale = @screen.width / 320
+      scale = (@screen.width / 320).to_i32
       height = 7 * scale * text.size
 
       text.size.times do |i|
         x = (@screen.width - @screen.measure_text(text[i], scale)) / 2
         y = (@screen.height - height) / 2 + 7 * scale * (i + 1)
-        @screen.draw_text(text[i], x, y, scale)
+        @screen.draw_text(text[i], x.to_i32, y.to_i32, scale)
       end
     end
 
@@ -175,7 +193,7 @@ module Doocr::Video
 
       if help.menu.options.game_mode == GameMode::Commercial
         draw_menu_patch("HELP", 0, 0)
-        draw_menu_patch(skulll, 298, 160)
+        draw_menu_patch(skull, 298, 160)
       else
         if help.page == 0
           draw_menu_patch("HELP1", 0, 0)

@@ -19,7 +19,7 @@ module Doocr
     class_getter text_speed : Int32 = 3
     class_getter text_wait : Int32 = 250
 
-    getter options : GameOptions | Nil = nil
+    getter options : GameOptions
 
     # Stage of animation:
     # 0 = text, 1 = art screen, 2 = character cast.
@@ -47,92 +47,75 @@ module Doocr
       c4_text : String
       c5_text : String
       c6_text : String
-      case @options.mission_pack
+      case @options.as(GameOptions).mission_pack
       when MissionPack::Plutonia
-        c1_text = DoomInfo::Strings::P1TEXT
-        c2_text = DoomInfo::Strings::P2TEXT
-        c3_text = DoomInfo::Strings::P3TEXT
-        c4_text = DoomInfo::Strings::P4TEXT
-        c5_text = DoomInfo::Strings::P5TEXT
-        c6_text = DoomInfo::Strings::P6TEXT
-        break
+        c1_text = DoomInfo::Strings::P1TEXT.to_s
+        c2_text = DoomInfo::Strings::P2TEXT.to_s
+        c3_text = DoomInfo::Strings::P3TEXT.to_s
+        c4_text = DoomInfo::Strings::P4TEXT.to_s
+        c5_text = DoomInfo::Strings::P5TEXT.to_s
+        c6_text = DoomInfo::Strings::P6TEXT.to_s
       when MissionPack::Tnt
-        c1_text = DoomInfo::Strings::T1TEXT
-        c2_text = DoomInfo::Strings::T2TEXT
-        c3_text = DoomInfo::Strings::T3TEXT
-        c4_text = DoomInfo::Strings::T4TEXT
-        c5_text = DoomInfo::Strings::T5TEXT
-        c6_text = DoomInfo::Strings::T6TEXT
-        break
+        c1_text = DoomInfo::Strings::T1TEXT.to_s
+        c2_text = DoomInfo::Strings::T2TEXT.to_s
+        c3_text = DoomInfo::Strings::T3TEXT.to_s
+        c4_text = DoomInfo::Strings::T4TEXT.to_s
+        c5_text = DoomInfo::Strings::T5TEXT.to_s
+        c6_text = DoomInfo::Strings::T6TEXT.to_s
       else
-        c1_text = DoomInfo::Strings::C1TEXT
-        c2_text = DoomInfo::Strings::C2TEXT
-        c3_text = DoomInfo::Strings::C3TEXT
-        c4_text = DoomInfo::Strings::C4TEXT
-        c5_text = DoomInfo::Strings::C5TEXT
-        c6_text = DoomInfo::Strings::C6TEXT
-        break
+        c1_text = DoomInfo::Strings::C1TEXT.to_s
+        c2_text = DoomInfo::Strings::C2TEXT.to_s
+        c3_text = DoomInfo::Strings::C3TEXT.to_s
+        c4_text = DoomInfo::Strings::C4TEXT.to_s
+        c5_text = DoomInfo::Strings::C5TEXT.to_s
+        c6_text = DoomInfo::Strings::C6TEXT.to_s
       end
 
-      case @options.game_mode
+      case @options.as(GameOptions).game_mode
       when GameMode::Shareware, GameMode::Registered, GameMode::Retail
-        @options.music.start_music(Bgm::VICTOR, true)
-        case @options.episode
+        @options.as(GameOptions).music.as(Audio::IMusic).start_music(Bgm::VICTOR, true)
+        case @options.as(GameOptions).episode
         when 1
           @flat = "FLOOR4_8"
-          @text = DoomInfo::Strings::E1TEXT
-          break
+          @text = DoomInfo::Strings::E1TEXT.to_s
         when 2
           @flat = "SFLR6_1"
-          @text = DoomInfo::Strings::E2TEXT
-          break
+          @text = DoomInfo::Strings::E2TEXT.to_s
         when 3
           @flat = "MFLR8_4"
-          @text = DoomInfo::Strings::E3TEXT
-          break
+          @text = DoomInfo::Strings::E3TEXT.to_s
         when 4
           @flat = "MFLR8_3"
-          @text = DoomInfo::Strings::E4TEXT
-          break
+          @text = DoomInfo::Strings::E4TEXT.to_s
         else
-          break
         end
-        break
       when GameMode::Commercial
-        @options.music.start_music(Bgm::READ_M, true)
-        case @options.map
+        @options.as(GameOptions).music.as(Audio::IMusic).start_music(Bgm::READ_M, true)
+        case @options.as(GameOptions).map
         when 6
           @flat = "SLIME16"
           @text = c1_text
-          break
         when 11
           @flat = "RROCK14"
           @text = c2_text
-          break
         when 20
           @flat = "RROCK07"
           @text = c3_text
-          break
         when 30
           @flat = "RROCK17"
           @text = c4_text
-          break
         when 15
           @flat = "RROCK13"
           @text = c5_text
-          break
         when 31
           @flat = "RROCK19"
           @text = c6_text
-          break
         else
-          break
         end
       else
-        @options.music.start_music(Bgm::READ_M, true)
+        @options.as(GameOptions).music.as(Audio::IMusic).start_music(Bgm::READ_M, true)
         @flat = "F_SKY1"
-        @text = DoomInfo::Strings::C1TEXT
-        break
+        @text = DoomInfo::Strings::C1TEXT.to_s
       end
 
       @stage = 0
@@ -147,19 +130,19 @@ module Doocr
       @update_result = UpdateResult::None
 
       # Check for skipping.
-      if @options.game_mode == GameMode::Commercial && @count > 50
-        i : Int32
+      if @options.as(GameOptions).game_mode == GameMode::Commercial && @count > 50
+        i : Int32 = 0
 
         # Go on to the next level.
         Player::MAX_PLAYER_COUNT.times do |x|
-          if @options.players[x].cmd.buttons != 0
-            i = x
+          i = x
+          if @options.as(GameOptions).players[x].cmd.as(TicCmd).buttons != 0
             break
           end
         end
 
         if i < Player::MAX_PLAYER_COUNT && @stage != 2
-          if @options.map == 30
+          if @options.as(GameOptions).map == 30
             start_cast()
           else
             return UpdateResult::Completed
@@ -172,31 +155,31 @@ module Doocr
 
       if @stage == 2
         update_cast()
-        return @update_result
+        return @update_result.as(UpdateResult)
       end
 
-      if @options.game_mode == GameMode::Commercial
-        return @update_result
+      if @options.as(GameOptions).game_mode == GameMode::Commercial
+        return @update_result.as(UpdateResult)
       end
 
-      if @stage == 0 && @count > @text.size * @@text_speed + @@text_wait
+      if @stage == 0 && @count > @text.as(String).size * @@text_speed + @@text_wait
         @count = 0
         @stage = 1
         @update_result = UpdateResult::NeedWipe
-        if @options.episode == 3
-          @options.music.start_music(Bgm::BUNNY, true)
+        if @options.as(GameOptions).episode == 3
+          @options.as(GameOptions).music.as(Audio::IMusic).start_music(Bgm::BUNNY, true)
         end
       end
 
-      if @stage == 1 && @options.episode == 3
+      if @stage == 1 && @options.as(GameOptions).episode == 3
         bunny_scroll()
       end
 
-      return @update_result
+      return @update_result.as(UpdateResult)
     end
 
     private def bunny_scroll
-      @scrolled = 320 - (@count - 230) / 2
+      @scrolled = 320 - ((@count - 230) / 2).to_i32
       if @scrolled > 320
         @scrolled = 320
       end
@@ -211,7 +194,7 @@ module Doocr
         return
       end
 
-      stage = (@count - 1180) / 5
+      stage = ((@count - 1180) / 5).to_i32
       stage = 6 if stage > 6
       if stage > @the_end_index
         start_sound(Sfx::PISTOL)
@@ -252,7 +235,7 @@ module Doocr
 
       @cast_number = 0
       @cast_state = DoomInfo.states[DoomInfo.mobj_infos[@@castorder[@cast_number].type.to_i32].see_state.to_i32]
-      @cast_tics = @cast_state.tics
+      @cast_tics = @cast_state.as(MobjStateDef).tics
       @cast_frames = 0
       @cast_death = false
       @cast_on_melee = false
@@ -260,7 +243,7 @@ module Doocr
 
       @update_result = UpdateResult::NeedWipe
 
-      @options.music.start_music(Bgm::EVIL, true)
+      @options.as(GameOptions).music.as(Audio::IMusic).start_music(Bgm::EVIL, true)
     end
 
     private def update_cast
@@ -271,7 +254,7 @@ module Doocr
         return
       end
 
-      if @cast_state.tics == -1 || @cast_state.next == MobjState::Null
+      if @cast_state.as(MobjStateDef).tics == -1 || @cast_state.as(MobjStateDef).next == MobjState::Nil
         # Switch from deathstate to next monster.
         @cast_number += 1
         @cast_death = false
@@ -293,79 +276,61 @@ module Doocr
           x = false
         end
         if x
-          st = @cast_state.next
+          st = @cast_state.as(MobjStateDef).next
           @cast_state = DoomInfo.states[st.to_i32]
           @cast_frames += 1
 
           # Sound hacks....
-          sfx : Sfx
+          sfx : Sfx = Sfx.new(0)
           case st
           when MobjState::PlayAtk1
             sfx = Sfx::DSHTGN
-            break
           when MobjState::PossAtk2
             sfx = Sfx::PISTOL
-            break
           when MobjState::SposAtk2
             sfx = Sfx::SHOTGN
-            break
           when MobjState::VileAtk2
             sfx = Sfx::VILATK
-            break
           when MobjState::SkelFist2
             sfx = Sfx::SKESWG
-            break
           when MobjState::SkelFist4
             sfx = Sfx::SKEPCH
-            break
           when MobjState::SkelMiss2
             sfx = Sfx::SKEATK
-            break
           when MobjState::FattAtk8
           when MobjState::FattAtk5
           when MobjState::FattAtk2
             sfx = Sfx::FIRSHT
-            break
           when MobjState::CposAtk2
           when MobjState::CposAtk3
           when MobjState::CposAtk4
             sfx = Sfx::SHOTGN
-            break
           when MobjState::TrooAtk3
             sfx = Sfx::CLAW
-            break
           when MobjState::SargAtk2
             sfx = Sfx::SGTATK
-            break
           when MobjState::BossAtk2
           when MobjState::Bos2Atk2
           when MobjState::HeadAtk2
             sfx = Sfx::FIRSHT
-            break
           when MobjState::SkullAtk2
             sfx = Sfx::SKLATK
-            break
           when MobjState::SpidAtk2
           when MobjState::SpidAtk3
             sfx = Sfx::SHOTGN
-            break
           when MobjState::BspiAtk2
             sfx = Sfx::PLASMA
-            break
           when MobjState::CyberAtk2
           when MobjState::CyberAtk4
           when MobjState::CyberAtk6
             sfx = Sfx::RLAUNC
-            break
           when MobjState::PainAtk3
             sfx = Sfx::SKLATK
-            break
           else
-            sfx = 0
-            break
+            sfx = Sfx.new(0)
           end
 
-          if sfx != 0
+          if sfx.to_i32 != 0
             start_sound(sfx)
           end
         end
@@ -381,7 +346,7 @@ module Doocr
             end
 
             @cast_on_melee = !@cast_on_melee
-            if @cast_state == DoomInfo.states[MobjState::Null.to_i]
+            if @cast_state == DoomInfo.states[MobjState::Nil.to_i]
               if @cast_on_melee
                 @cast_state = DoomInfo.states[DoomInfo.mobj_infos[@@castorder[@cast_number].type.to_i32].melee_state.to_i32]
               else
@@ -400,7 +365,7 @@ module Doocr
           end
         end
 
-        @cast_tics = @cast_state.tics
+        @cast_tics = @cast_state.as(MobjStateDef).tics
         if @cast_tics == -1
           @cast_tics = 15
         end
@@ -419,7 +384,7 @@ module Doocr
         # Go into death frame.
         @cast_death = true
         @cast_state = DoomInfo.states[DoomInfo.mobj_infos[@@castorder[@cast_number].type.to_i32].death_state.to_i32]
-        @cast_tics = @cast_state.tics
+        @cast_tics = @cast_state.as(MobjStateDef).tics
         @cast_frames = 0
         @cast_attacking = false
         if DoomInfo.mobj_infos[@@castorder[@cast_number].type.to_i32].death_sound != 0
@@ -433,7 +398,7 @@ module Doocr
     end
 
     private def start_sound(sfx : Sfx)
-      @options.sound.start_sound(sfx)
+      @options.as(GameOptions).sound.as(Audio::ISound).start_sound(sfx)
     end
 
     private class CastInfo

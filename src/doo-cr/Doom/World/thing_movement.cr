@@ -32,7 +32,7 @@ module Doocr
 
     @@max_special_cross_count : Int32 = 64
     @@max_move : Fixed = Fixed.from_i(30)
-    @gravity : Fixed = Fixed.one
+    @@gravity : Fixed = Fixed.one
 
     @current_thing : Mobj | Nil = nil
     @current_flags : MobjFlags = MobjFlags.new(0)
@@ -53,11 +53,11 @@ module Doocr
     @check_line_func : Proc(LineDef, Bool) | Nil = nil
     @check_thing_func : Proc(Mobj, Bool) | Nil = nil
 
-    private def initialize
+    private def init_thing_movement
       @current_box = Array(Fixed).new(4)
       @crossed_specials = Array(LineDef).new(@@max_special_cross_count)
-      @check_line_func = check_line()
-      @check_thing_func = check_thing()
+      @check_line_func = ->check_line(LineDef)
+      @check_thing_func = ->check_thing(Mobj)
     end
 
     # Links a thing into both a block and a subsector based on
@@ -70,7 +70,7 @@ module Doocr
       thing.subsector = subsector
 
       # Invisible things don't go into the sector links.
-      if (thing.flags & MobjFlags::NoSector) == 0
+      if (thing.flags & MobjFlags::NoSector).to_i32 == 0
         sector = subsector.sector
 
         thing.sector_prev = nil
@@ -84,11 +84,11 @@ module Doocr
       end
 
       # Inert things don't need to be in blockmap.
-      if (thing.flags & MobjFlags::NoBlockMap) == 0
-        index = map.blockmap.get_index(thing.x, thing.y)
+      if (thing.flags & MobjFlags::NoBlockMap).to_i32 == 0
+        index = map.blockmap.as(BlockMap).get_index(thing.x, thing.y)
 
         if index != -1
-          link = map.blockmap.thing_lists[index]
+          link = map.blockmap.as(BlockMap).thing_lists[index]
 
           thing.block_prev = nil
           thing.block_next = link
@@ -97,7 +97,7 @@ module Doocr
             link.block_prev = thing
           end
 
-          map.blockmap.thing_lists[index] = thing
+          map.blockmap.as(BlockMap).thing_lists[index] = thing
         else
           # Thing is off the map.
           thing.block_next = nil
@@ -111,10 +111,10 @@ module Doocr
     # maintaining lists ot things inside these structures
     # need to be updated.
     def unset_thing_position(thing : Mobj)
-      map = @world.as(World).map
+      map = @world.as(World).map.as(Map)
 
       # Invisible things don't go into the sector links.
-      if (thing.flags & MobjFlags::NoSector) == 0
+      if (thing.flags & MobjFlags::NoSector).to_i32 == 0
         # Unlink from subsector.
         if thing.sector_next != nil
           thing.sector_next.as(Mobj).sector_prev = thing.sector_prev
@@ -128,7 +128,7 @@ module Doocr
       end
 
       # Inert things don't need to be in blockmap.
-      if (thing.flags & MobjFlags::NoBlockMap) == 0
+      if (thing.flags & MobjFlags::NoBlockMap).to_i32 == 0
         # Unlink from block map.
         if thing.block_next != nil
           thing.block_next.as(Mobj).block_prev = thing.block_prev
@@ -137,10 +137,10 @@ module Doocr
         if thing.block_prev != nil
           thing.block_prev.as(Mobj).block_next = thing.block_next
         else
-          index = map.as(Map).blockmap.get_index(thing.x, thing.y)
+          index = map.as(Map).blockmap.as(BlockMap).get_index(thing.x, thing.y)
 
           if index != -1
-            map.as(Map).blockmap.thing_lists[index] = thing.block_next.as(Mobj)
+            map.as(Map).blockmap.as(BlockMap).thing_lists[index] = thing.block_next.as(Mobj)
           end
         end
       end
@@ -148,12 +148,12 @@ module Doocr
 
     # Adjusts currentFloorZ and currentCeilingZ as lines are contacted.
     private def check_line(line : LineDef) : Bool
-      mc = @world.as(World).map_collision
+      mc = @world.as(World).map_collision.as(MapCollision)
 
-      if (@current_box.right <= line.bounding_box.left ||
-         @current_box.left >= line.bounding_box.right ||
-         @current_box.top <= line.bounding_box.bottom ||
-         @current_box.bottom >= line.bounding_box.top)
+      if (@current_box[Box::RIGHT] <= line.bounding_box[Box::LEFT] ||
+         @current_box[Box::LEFT] >= line.bounding_box[Box::RIGHT] ||
+         @current_box[Box::TOP] <= line.bounding_box[Box::BOTTOM] ||
+         @current_box[Box::BOTTOM] >= line.bounding_box[Box::TOP])
         return true
       end
 
@@ -176,13 +176,13 @@ module Doocr
         return false
       end
 
-      if (@current_thing.flags & MobjFlags::Missile) == 0
-        if (line.flags & LineFlags::Blocking) != 0
+      if (@current_thing.as(Mobj).flags & MobjFlags::Missile).to_i32 == 0
+        if (line.flags & LineFlags::Blocking).to_i32 != 0
           # Explicitly blocking everything.
           return false
         end
 
-        if @current_thing.player == nil && (line.flags & LineFlags::BlockMonsters) != 0
+        if @current_thing.as(Mobj).player == nil && (line.flags & LineFlags::BlockMonsters).to_i32 != 0
           # Block monsters only,
           return false
         end
@@ -215,11 +215,11 @@ module Doocr
     end
 
     private def check_thing(thing : Mobj) : Bool
-      if (thing.flags & (MobjFlags::Solid | MobjFlags::Special | MobjFlags::Shootable)) == 0
+      if (thing.flags & (MobjFlags::Solid | MobjFlags::Special | MobjFlags::Shootable)).to_i32 == 0
         return true
       end
 
-      block_dist = thing.radius + @current_thing.radius
+      block_dist = thing.radius + @current_thing.as(Mobj).radius
 
       if ((thing.x - @current_x).abs >= block_dist ||
          (thing.y - @current_y).abs >= block_dist)
@@ -231,41 +231,41 @@ module Doocr
       return true if thing == @current_thing
 
       # Check for skulls slamming into things.
-      if (@current_thing.flags & MobjFlags::SkullFly) != 0
-        damage = ((@world.as(World).random.next % 8) + 1) * @current_thing.info.damage
+      if (@current_thing.as(Mobj).flags & MobjFlags::SkullFly).to_i32 != 0
+        damage = ((@world.as(World).random.next % 8) + 1) * @current_thing.as(Mobj).info.as(MobjInfo).damage
 
-        @world.as(World).thing_interaction.damage_mobj(thing, @current_thing, @current_thing, damage)
+        @world.as(World).thing_interaction.as(ThingInteraction).damage_mobj(thing, @current_thing, @current_thing, damage)
 
-        @current_thing.flags &= ~MobjFlags::SkullFly
-        @current_thing.mom_x = Fixed.zero
-        @current_thing.mom_y = Fixed.zero
-        @current_thing.mom_z = Fixed.zero
+        @current_thing.as(Mobj).flags &= ~MobjFlags::SkullFly
+        @current_thing.as(Mobj).mom_x = Fixed.zero
+        @current_thing.as(Mobj).mom_y = Fixed.zero
+        @current_thing.as(Mobj).mom_z = Fixed.zero
 
-        @current_thing.set_state(@current_thing.info.spawn_state)
+        @current_thing.as(Mobj).set_state(@current_thing.as(Mobj).info.as(MobjInfo).spawn_state)
 
         # Stop moving.
         return false
       end
 
       # Missiles can hit other things.
-      if (@current_thing.flags & MobjFlags::Missile) != 0
+      if (@current_thing.as(Mobj).flags & MobjFlags::Missile).to_i32 != 0
         # See if it went over / under.
-        if @current_thing.z > thing.z + thing.heights
+        if @current_thing.as(Mobj).z > thing.z + thing.height
           # Overhead.
           return true
         end
 
-        if @current_thing.z + @current_thing.height < thing.z
+        if @current_thing.as(Mobj).z + @current_thing.as(Mobj).height < thing.z
           # Underneath.
           return true
         end
 
-        if (@current_thing.target != nil &&
-           (@current_thing.target.type == thing.type ||
-           (@current_thing.target.type == MobjType::Knight && thing.type == MobjType::Bruiser) ||
-           (@current_thing.target.type == MobjType::Bruiser && thing.type == MobjType::Knight)))
+        if (@current_thing.as(Mobj).target != nil &&
+           (@current_thing.as(Mobj).target.as(Mobj).type == thing.type ||
+           (@current_thing.as(Mobj).target.as(Mobj).type == MobjType::Knight && thing.type == MobjType::Bruiser) ||
+           (@current_thing.as(Mobj).target.as(Mobj).type == MobjType::Bruiser && thing.type == MobjType::Knight)))
           # Don't hit same species as originator.
-          if thing == @current_thing.target
+          if thing == @current_thing.as(Mobj).target
             return true
           end
 
@@ -276,30 +276,30 @@ module Doocr
           end
         end
 
-        if (thing.flags & MobjFlags::Shootable) == 0
+        if (thing.flags & MobjFlags::Shootable).to_i32 == 0
           # Didn't do any damage.
-          return (thing.flags & MobjFlags::Solid) == 0
+          return (thing.flags & MobjFlags::Solid).to_i32 == 0
         end
 
         # Damage / explode.
-        damage = ((@world.as(World).damage.next % 8) + 1) * @current_thing.info.damage
-        @world.as(World).thing_interaction.damage_mobj(thing, @current_thing, @current_thing.target, damage)
+        damage = ((@world.as(World).random.next % 8) + 1) * @current_thing.as(Mobj).info.as(MobjInfo).damage
+        @world.as(World).thing_interaction.as(ThingInteraction).damage_mobj(thing, @current_thing.as(Mobj), @current_thing.as(Mobj).target, damage)
 
         # Don't traverse any more.
         return false
       end
 
       # Check for special pickup.
-      if (thing.flags & MobjFlags::Special) != 0
-        solid = (thing.flags & MobjFlags::Solid) != 0
-        if (@current_flags & MobjFlags::PickUp) != 0
+      if (thing.flags & MobjFlags::Special).to_i32 != 0
+        solid = (thing.flags & MobjFlags::Solid).to_i32 != 0
+        if (@current_flags & MobjFlags::PickUp).to_i32 != 0
           # Can remove thing.
-          @world.as(World).item_pickup.touch_special_thing(thing, @current_thing)
+          @world.as(World).item_pickup.as(ItemPickup).touch_special_thing(thing, @current_thing.as(Mobj))
         end
         return !solid
       end
 
-      return (thing.flags & MobjFlags::Solid) == 0
+      return (thing.flags & MobjFlags::Solid).to_i32 == 0
     end
 
     # This is purely informative, nothing is modified
@@ -325,7 +325,7 @@ module Doocr
     #     crossedSpecialCount
     def check_position(thing : Mobj, x : Fixed, y : Fixed) : Bool
       map = @world.as(World).map.as(Map)
-      bm = map.as(Map).blockmap
+      bm = map.as(Map).blockmap.as(BlockMap)
 
       @current_thing = thing
       @current_flags = thing.flags
@@ -352,7 +352,7 @@ module Doocr
 
       @crossed_special_count = 0
 
-      if (@current_flags & MobjFlags::NoClip) != 0
+      if (@current_flags & MobjFlags::NoClip).to_i32 != 0
         return true
       end
 
@@ -369,7 +369,7 @@ module Doocr
       while bx <= block_x2
         by = block_y1
         while by <= block_y2
-          if !map.blockmap.iterate_things(bx, by, @check_thing_func.as(Proc(Mobj, Bool)))
+          if !map.blockmap.as(BlockMap).iterate_things(bx, by, @check_thing_func.as(Proc(Mobj, Bool)))
             return false
           end
           by += 1
@@ -387,7 +387,7 @@ module Doocr
       while bx <= block_x2
         by = block_y1
         while by <= block_y2
-          if !map.blockmap.iterate_lines(bx, by, @check_line_func.as(Proc(LineDef, Bool)), valid_count)
+          if !map.blockmap.as(BlockMap).iterate_lines(bx, by, @check_line_func.as(Proc(LineDef, Bool)), valid_count)
             return false
           end
           by += 1
@@ -408,7 +408,7 @@ module Doocr
         return false
       end
 
-      if (thing.flags & MobjFlags::NoClip) == 0
+      if (thing.flags & MobjFlags::NoClip).to_i32 == 0
         if @current_ceiling_z - @current_floor_z < thing.height
           # Doesn't fit
           return false
@@ -416,19 +416,19 @@ module Doocr
 
         @float_ok = true
 
-        if ((thing.flags & MobjFlags::Teleport) == 0 &&
+        if ((thing.flags & MobjFlags::Teleport).to_i32 == 0 &&
            @current_ceiling_z - thing.z < thing.height)
           # Mobj must lower itself to fit.
           return false
         end
 
-        if ((thing.flags & MobjFlags::Teleport) == 0 &&
+        if ((thing.flags & MobjFlags::Teleport).to_i32 == 0 &&
            @current_floor_z - thing.z < Fixed.from_i(24))
           # Too big a step up.
           return false
         end
 
-        if ((thing.flags & (MobjFlags::DropOff | MobjFlags::Float)) == 0 &&
+        if ((thing.flags & (MobjFlags::DropOff | MobjFlags::Float)).to_i32 == 0 &&
            @current_floor_z - @current_dropoff_z > Fixed.from_i(24))
           # Don't stand over a dropoff.
           return false
@@ -449,7 +449,7 @@ module Doocr
       set_thing_position(thing)
 
       # If any special lines were hit, do the effect.
-      if (thing.flags & (MobjFlags::Teleport | MobjFlags::NoClip)) == 0
+      if (thing.flags & (MobjFlags::Teleport | MobjFlags::NoClip)).to_i32 == 0
         while @crossed_special_count > 0
           @crossed_special_count -= 1
           # See if the line was crossed.
@@ -472,14 +472,14 @@ module Doocr
 
     def x_y_movement(thing : Mobj)
       if thing.mom_x == Fixed.zero && thing.mom_y == Fixed.zero
-        if (thing.flags & MobjFlags::SkullFly) != 0
+        if (thing.flags & MobjFlags::SkullFly).to_i32 != 0
           # The skull slammed into something.
           thing.flags &= ~MobjFlags::SkullFly
           thing.mom_x = Fixed.zero
           thing.mom_y = Fixed.zero
           thing.mom_z = Fixed.zero
 
-          thing.set_state(thing.info.spawn_state)
+          thing.set_state(thing.info.as(MobjInfo).spawn_state)
         end
 
         return
@@ -490,7 +490,7 @@ module Doocr
       if thing.mom_x > @@max_move
         thing.mom_x = @@max_move
       elsif thing.mom_x < -@@max_move
-        thing.mom_x -@@max_move
+        thing.mom_x = -@@max_move
       end
 
       if thing.mom_y > @@max_move
@@ -525,17 +525,17 @@ module Doocr
           if thing.player != nil
             # Try to slide along it.
             slide_move(thing)
-          elsif (thing.flags & MobjFlags::Missile) != 0
+          elsif (thing.flags & MobjFlags::Missile).to_i32 != 0
             # Explode a missile.
             if (@current_ceiling_line != nil &&
-               @current_ceiling_line.back_sector != nil &&
-               @current_ceiling_line.back_sector.ceiling_flat == @world.as(World).map.sky_flat_number)
+               @current_ceiling_line.as(LineDef).back_sector != nil &&
+               @current_ceiling_line.as(LineDef).back_sector.as(Sector).ceiling_flat == @world.as(World).map.as(Map).sky_flat_number)
               # Hack to prevent missiles exploding against the sky.
               # Does not handle sky floors.
-              @world.as(World).thing_allocation.remove_mobj(thing)
+              @world.as(World).thing_allocation.as(ThingAllocation).remove_mobj(thing)
               return
             end
-            @world.as(World).thing_interaction.explode_missile(thing)
+            @world.as(World).thing_interaction.as(ThingInteraction).explode_missile(thing)
           else
             thing.mom_x = Fixed.zero
             thing.mom_y = Fixed.zero
@@ -544,14 +544,14 @@ module Doocr
       end
 
       # Slow down.
-      if player != nil && (player.cheats & CheatFlags::NoMomentum) != 0
+      if player != nil && (player.as(Player).as(Player).cheats & CheatFlags::NoMomentum).to_i32 != 0
         # Debug option for no sliding at all.
         thing.mom_x = Fixed.zero
         thing.mom_y = Fixed.zero
         return
       end
 
-      if (thing.flags & (MobjFlags::Missile | MobjFlags::SkullFly)) != 0
+      if (thing.flags & (MobjFlags::Missile | MobjFlags::SkullFly)).to_i32 != 0
         # No friction for missile ever.
         return
       end
@@ -561,13 +561,13 @@ module Doocr
         return
       end
 
-      if (thing.flags & MobjFlags::Corpse) != 0
+      if (thing.flags & MobjFlags::Corpse).to_i32 != 0
         # Do not stop sliding if halfway off a step with some momentum.
         if (thing.mom_x > Fixed.one / 4 ||
            thing.mom_x < -Fixed.one / 4 ||
            thing.mom_y > Fixed.one / 4 ||
            thing.mom_y < -Fixed.one / 4)
-          return if thing.floor_z != thing.subsector.sector.floor_height
+          return if thing.floor_z != thing.subsector.as(Subsector).sector.as(Sector).floor_height
         end
       end
 
@@ -575,10 +575,10 @@ module Doocr
          thing.mom_x < @@stop_speed &&
          thing.mom_y > -@@stop_speed &&
          thing.mom_y < @@stop_speed &&
-         (player == nil || (player.cmd.forward_move == 0 && player.cmd.side_move == 0)))
+         (player == nil || (player.as(Player).cmd.as(TicCmd).forward_move == 0 && player.as(Player).cmd.as(TicCmd).side_move == 0)))
         # If in a walking frame, stop moving.
-        if player != nil && (player.mobj.state.number - MobjState::PlayRun1.to_i32) < 4
-          player.mobj.set_state(MobjState::Play)
+        if player != nil && (player.as(Player).mobj.as(Mobj).state.as(MobjStateDef).number - MobjState::PlayRun1.to_i32) < 4
+          player.as(Player).mobj.as(Mobj).set_state(MobjState::Play)
         end
 
         thing.mom_x = Fixed.zero
@@ -592,28 +592,28 @@ module Doocr
     def z_movement(thing : Mobj)
       # Check for smooth step up.
       if thing.player != nil && thing.z < thing.floor_z
-        thing.player.view_height -= thing.floor_z - thing.z
+        thing.player.as(Player).view_height -= thing.floor_z - thing.z
 
-        thing.player.delta_view_height = (Player.normal_view_height - thing.player.view_height) >> 3
+        thing.player.as(Player).delta_view_height = (Player.normal_view_height - thing.player.as(Player).view_height) >> 3
       end
 
       # Adjust height.
       thing.z += thing.mom_z
 
-      if (thing.flags & MobjFlags::Float) != 0 && thing.target != nil
+      if (thing.flags & MobjFlags::Float).to_i32 != 0 && thing.target != nil
         # Float down towards target if too close.
-        if ((thing.flags & MobjFlags::SkullFly) == 0 &
-                                                   (thing.flags & MobjFlags::InFloat) == 0)
+        if ((thing.flags & MobjFlags::SkullFly).to_i32 == 0 &&
+           (thing.flags & MobjFlags::InFloat).to_i32 == 0)
           dist = Geometry.aprox_distance(
-            thing.x - thing.target.x,
-            thing.y - thing.target.Y
+            thing.x - thing.target.as(Mobj).x,
+            thing.y - thing.target.as(Mobj).y
           )
 
-          delta = thing.target.z + (thing.height >> 1) - thing.z
+          delta = thing.target.as(Mobj).z + (thing.height >> 1) - thing.z
 
-          if delta < Fixed.zero && diset < -(delta & 3)
+          if delta < Fixed.zero && dist < -(delta * 3)
             thing.z -= @@float_speed
-          elsif delta > Fixed.zero && dist < (delta & 3)
+          elsif delta > Fixed.zero && dist < (delta * 3)
             thing.z += @@float_speed
           end
         end
@@ -629,7 +629,7 @@ module Doocr
 
         correct_lost_soul_bounce = @world.as(World).options.game_version >= GameVersion::Ultimate
 
-        if correct_lost_soul_bounce && (thing.flags & MobjFlags::SkullFly) != 0
+        if correct_lost_soul_bounce && (thing.flags & MobjFlags::SkullFly).to_i32 != 0
           # The skull slammed into something
           thing.mom_z = -thing.mom_z
         end
@@ -639,7 +639,7 @@ module Doocr
             # Squat down.
             # Decrease viewheight for a moment after hitting the ground (hard),
             # and utter appropriate sound.
-            thing.player.delta_view_height = thing.mom_z >> 3
+            thing.player.as(Player).delta_view_height = thing.mom_z >> 3
             @world.as(World).start_sound(thing, Sfx::OOF, SfxType::Voice)
           end
           thing.mom_z = Fixed.zero
@@ -647,16 +647,16 @@ module Doocr
         thing.z = thing.floor_z
 
         if (!correct_lost_soul_bounce &&
-           (thing.flags & MobjFlags::SkullFly) != 0)
+           (thing.flags & MobjFlags::SkullFly).to_i32 != 0)
           thing.mom_z = -thing.mom_z
         end
 
-        if ((thing.flags & MobjFlags::Missile) != 0 &&
-           (thing.flags & MobjFlags::NoClip) == 0)
-          @world.as(World).thing_interaction.explode_missile(thing)
+        if ((thing.flags & MobjFlags::Missile).to_i32 != 0 &&
+           (thing.flags & MobjFlags::NoClip).to_i32 == 0)
+          @world.as(World).thing_interaction.as(ThingInteraction).explode_missile(thing)
           return
         end
-      elsif (thing.flags & MobjFlags::NoGravity) == 0
+      elsif (thing.flags & MobjFlags::NoGravity).to_i32 == 0
         if thing.mom_z == Fixed.zero
           thing.mom_z = -@@gravity * 2
         else
@@ -672,14 +672,14 @@ module Doocr
 
         thing.z = thing.ceiling_z - thing.height
 
-        if (thing.flags & MobjFlags::SkullFly) != 0
+        if (thing.flags & MobjFlags::SkullFly).to_i32 != 0
           # The skull slammed into something.
           thing.mom_z = -thing.mom_z
         end
 
-        if ((thing.flags & MobjFlags::Missile) != 0 &&
-           (thing.flags & MobjFlags::NoClip) == 0)
-          @world.as(World).thing_interaction.explode_missile(thing)
+        if ((thing.flags & MobjFlags::Missile).to_i32 != 0 &&
+           (thing.flags & MobjFlags::NoClip).to_i32 == 0)
+          @world.as(World).thing_interaction.as(ThingInteraction).explode_missile(thing)
           return
         end
       end
@@ -702,7 +702,7 @@ module Doocr
     @slide_traverse_func : Proc(Intercept, Bool) | Nil = nil
 
     private def init_slide_movement
-      @slide_traverse_func = slide_traverse
+      @slide_traverse_func = ->slide_traverse(Intercept)
     end
 
     # Adjusts the x and y movement so that the next move will
@@ -718,7 +718,7 @@ module Doocr
         return
       end
 
-      side = Geometry.point_on_line_side(@slide_thing.x, @slide_thing.y, line)
+      side = Geometry.point_on_line_side(@slide_thing.as(Mobj).x, @slide_thing.as(Mobj).y, line)
 
       line_angle = Geometry.point_to_angle(Fixed.zero, Fixed.zero, line.dx, line.dy)
       if side == 1
@@ -740,18 +740,18 @@ module Doocr
     end
 
     private def slide_traverse(intercept : Intercept) : Bool
-      mc = @world.as(World).map_collision
+      mc = @world.as(World).map_collision.as(MapCollision)
 
       if intercept.line == nil
         raise "thing_movement.slide_traverse: Not a line?"
       end
 
-      line = intercept.line
+      line = intercept.line.as(LineDef)
 
       x = false
 
-      if (line.flags * LineFlags::TwoSided) == 0
-        if Geometry.point_on_line_side(@slide_thing.x, @slide_thing.y, line) != 0
+      if (line.as(LineDef).flags & LineFlags::TwoSided).to_i32 == 0
+        if Geometry.point_on_line_side(@slide_thing.as(Mobj).x, @slide_thing.as(Mobj).y, line.as(LineDef)) != 0
           # Don't hit the back side.
           return true
         end
@@ -763,17 +763,17 @@ module Doocr
         # Set openrange, opentop, openbottom
         mc.line_opening(line)
 
-        if mc.open_range < @slide_thing.height
+        if mc.open_range < @slide_thing.as(Mobj).height
           # Doesn't fit
           x = true
         end
 
-        if mc.open_top - @slide_thing.z < @slide_thing.height
+        if mc.open_top - @slide_thing.as(Mobj).z < @slide_thing.as(Mobj).height
           # Mobj is too high.
           x = true
         end
 
-        if mc.open_bottom - @slide_thing.z > Fixed.from_i(24)
+        if mc.open_bottom - @slide_thing.as(Mobj).z > Fixed.from_i(24)
           # Too big a step up.
           x = true
         end
@@ -800,7 +800,7 @@ module Doocr
     # Find the first line hit, move flush to it, and slide along it.
     # This is a kludgy mess.
     private def slide_move(thing : Mobj)
-      pt = @world.as(World).path_traversal
+      pt = @world.as(World).path_traversal.as(PathTraversal)
 
       @slide_thing = thing
 
@@ -843,17 +843,17 @@ module Doocr
 
         pt.path_traverse(
           lead_x, lead_y, lead_x + thing.mom_x, lead_y + thing.mom_y,
-          PathTraverseFlags::AddLines, @slide_traverse_func
+          PathTraverseFlags::AddLines, @slide_traverse_func.as(Proc(Intercept, Bool))
         )
 
         pt.path_traverse(
           trail_x, lead_y, trail_x + thing.mom_x, lead_y + thing.mom_y,
-          PathTraverseFlags::AddLines, @slide_traverse_func
+          PathTraverseFlags::AddLines, @slide_traverse_func.as(Proc(Intercept, Bool))
         )
 
         pt.path_traverse(
           lead_x, trail_y, lead_x + thing.mom_x, trail_y + thing.mom_y,
-          PathTraverseFlags::AddLines, @slide_traverse_func
+          PathTraverseFlags::AddLines, @slide_traverse_func.as(Proc(Intercept, Bool))
         )
 
         # Move up to the wall.
@@ -892,7 +892,7 @@ module Doocr
         @slide_move_y = thing.mom_y * @best_slide_frac
 
         # Clip the moves.
-        hit_slide_line(@best_slide_line)
+        hit_slide_line(@best_slide_line.as(LineDef))
 
         thing.mom_x = @slide_move_x
         thing.mom_y = @slide_move_y
@@ -912,13 +912,13 @@ module Doocr
     @stomp_thing_func : Proc(Mobj, Bool) | Nil = nil
 
     private def init_teleport_movement
-      @stomp_thing_func = stomp_thing()
+      @stomp_thing_func = ->stomp_thing(Mobj)
     end
 
     private def stomp_thing(thing : Mobj) : Bool
-      return true if (thing.flags & MobjFlags::Shootable) == 0
+      return true if (thing.flags & MobjFlags::Shootable).to_i32 == 0
 
-      block_dist = thing.radius + @current_thing.radius
+      block_dist = thing.radius + @current_thing.as(Mobj).radius
       dx = (thing.x - @current_x).abs
       dy = (thing.y - @current_y).abs
       if dx >= block_dist || dy >= block_dist
@@ -930,9 +930,9 @@ module Doocr
       return true if thing == @current_thing
 
       # Monsters don't stomp things except on boss level.
-      return false if @current_thing.player == nil && @world.as(World).options.map != 30
+      return false if @current_thing.as(Mobj).player == nil && @world.as(World).options.map != 30
 
-      @world.as(World).thing_interaction.damage_mobj(thing, @current_thing, @current_thing, 10000)
+      @world.as(World).thing_interaction.as(ThingInteraction).damage_mobj(thing, @current_thing, @current_thing, 10000)
 
       return true
     end
@@ -964,7 +964,7 @@ module Doocr
       @crossed_special_count = 0
 
       # Stomp on any things contacted.
-      bm = @world.as(World).map.as(Map).blockmap
+      bm = @world.as(World).map.as(Map).blockmap.as(BlockMap)
       block_x1 = bm.get_block_x(@current_box[Box::LEFT] - GameConst.max_thing_radius)
       block_x2 = bm.get_block_x(@current_box[Box::RIGHT] + GameConst.max_thing_radius)
       block_y1 = bm.get_block_y(@current_box[Box::BOTTOM] - GameConst.max_thing_radius)

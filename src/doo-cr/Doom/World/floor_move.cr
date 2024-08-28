@@ -33,10 +33,10 @@ module Doocr
     def run
       result : SectorActionResult
 
-      sa = @world.as(World).sector_action
+      sa = @world.as(World).sector_action.as(SectorAction)
 
-      rsult = sa.move_plane(
-        @sector,
+      result = sa.move_plane(
+        @sector.as(Sector),
         @speed,
         @floor_dest_height,
         @crush,
@@ -44,33 +44,31 @@ module Doocr
         @direction
       )
 
-      if ((@world.as(World).level_time + @sector.number) & 7) == 0
-        @world.as(World).start_sound(@sector.sound_origin, Sfx::STNMOV, SfxType::Misc)
+      if ((@world.as(World).level_time + @sector.as(Sector).number) & 7) == 0
+        @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::STNMOV, SfxType::Misc)
       end
 
       if result == SectorActionResult::PastDestination
-        @sector.special_data = nil
+        @sector.as(Sector).special_data = nil
 
         if @direction == 1
           case type
           when FloorMoveType::DonutRaise
-            @sector.special = @new_special
-            @sector.floor_flat = @texture
-            break
+            @sector.as(Sector).special = @new_special
+            @sector.as(Sector).floor_flat = @texture
           end
         elsif @direction == -1
           case type
           when FloorMoveType::LowerAndChange
-            @sector.special = @new_special
-            @sector.floor_flat = @texture
-            break
+            @sector.as(Sector).special = @new_special
+            @sector.as(Sector).floor_flat = @texture
           end
         end
 
-        @world.as(World).thinkers.remove(self)
-        @sector.disable_frame_interpolation_for_one_frame
+        @world.as(World).thinkers.as(Thinkers).remove(self)
+        @sector.as(Sector).disable_frame_interpolation_for_one_frame
 
-        @world.as(World).start_sound(@sector.sound_origin, Sfx::PSTOP, SfxType::Misc)
+        @world.as(World).start_sound(@sector.as(Sector).sound_origin.as(Mobj), Sfx::PSTOP, SfxType::Misc)
       end
     end
   end
