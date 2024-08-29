@@ -106,7 +106,7 @@ module Doocr
 
     private def group_lines
       sector_lines = [] of LineDef
-      bounding_box = Array(Fixed).new(4)
+      bounding_box = Array.new(4, Fixed.zero)
 
       @lines.each do |line|
         if line.special.to_i32 != 0
@@ -129,14 +129,14 @@ module Doocr
           end
         end
 
-        sector.lines = sector_lines.to_a
+        sector.lines = sector_lines.dup
 
         # Set the degenmobj_t to the middle of the bounding box.
         sector.sound_origin = Mobj.new(@world.as(World))
         sector.sound_origin.as(Mobj).x = (bounding_box[Box::RIGHT] + bounding_box[Box::LEFT]) / 2
         sector.sound_origin.as(Mobj).y = (bounding_box[Box::TOP] + bounding_box[Box::BOTTOM]) / 2
 
-        sector.block_box = Array(Int32).new(4)
+        sector.block_box = Array.new(4, 0)
 
         # Adjust bounding box to map blocks.
         block = (bounding_box[Box::TOP] - @blockmap.as(BlockMap).origin_y + GameConst.max_thing_radius).data >> BlockMap.frac_to_block_shift

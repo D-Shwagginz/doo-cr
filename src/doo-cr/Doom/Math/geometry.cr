@@ -272,8 +272,8 @@ module Doocr
           p2 ^= 1
         end
       when SlopeType::Vertical
-        p1 = box[Box::RIGHT] > line.vertex1.as(Vertex).x ? 1 : 0
-        p2 = box[Box::LEFT] > line.vertex1.as(Vertex).x ? 1 : 0
+        p1 = box[Box::RIGHT] < line.vertex1.as(Vertex).x ? 1 : 0
+        p2 = box[Box::LEFT] < line.vertex1.as(Vertex).x ? 1 : 0
         if line.dy < Fixed.zero
           p1 ^= 1
           p2 ^= 1

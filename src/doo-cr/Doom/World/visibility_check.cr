@@ -58,7 +58,7 @@ module Doocr
       # Check lines.
       count.times do |i|
         seg = map.segs[subsector.first_seg + i]
-        line = seg.line_def
+        line = seg.line_def.as(LineDef)
 
         # Already checked other side?
         next if line.valid_count == valid_count

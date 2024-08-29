@@ -31,7 +31,7 @@ module Doocr
     @table : Array(Int16)
 
     @lines : Array(LineDef)
-    getter thing_lists : Array(Mobj)
+    getter thing_lists : Array(Mobj | Nil)
 
     private def initialize(
       @origin_x : Fixed,
@@ -41,7 +41,7 @@ module Doocr
       @table : Array(Int16),
       @lines : Array(LineDef)
     )
-      @thing_lists = Array(Mobj).new(width * height)
+      @thing_lists = Array(Mobj | Nil).new(width * height, nil)
     end
 
     def self.from_wad(wad : Wad, lump : Int32, lines : Array(LineDef)) : BlockMap
@@ -121,7 +121,7 @@ module Doocr
 
       return true if index == -1
 
-      mobj = @thing_lists[index]?
+      mobj = @thing_lists[index]
       while mobj != nil
         if !proc.call(mobj.as(Mobj))
           return false

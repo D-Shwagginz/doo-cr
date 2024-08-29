@@ -30,7 +30,7 @@ module Doocr
       first_seg_number = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 2, 2])
 
       return Subsector.new(
-        segs[first_seg_number].side_def.sector.as(Sector),
+        segs[first_seg_number].side_def.as(SideDef).sector.as(Sector),
         seg_count,
         first_seg_number
       )

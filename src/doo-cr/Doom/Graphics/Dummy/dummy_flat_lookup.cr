@@ -64,7 +64,8 @@ module Doocr
 
         number = lump - first_flat
         name = wad.lump_infos[lump].name
-        flat = name != "F_SKY1" ? DummyData.get_flat : DummData.get_sky_flat
+        flat = name != "F_SKY1" ? DummyData.get_flat : DummyData.get_sky_flat
+        flat = flat.as(Flat)
 
         @flats << flat
         @name_to_flat[name] = flat

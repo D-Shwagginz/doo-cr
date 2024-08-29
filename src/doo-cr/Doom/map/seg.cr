@@ -22,9 +22,9 @@ module Doocr
     getter vertex2 : Vertex
     getter offset : Fixed
     getter angle : Angle
-    getter side_def : SideDef
-    getter line_def : LineDef
-    getter front_sector : Sector
+    getter side_def : SideDef | Nil
+    getter line_def : LineDef | Nil
+    getter front_sector : Sector | Nil
     getter back_sector : Sector | Nil = nil
 
     def initialize(

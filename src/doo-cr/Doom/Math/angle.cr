@@ -33,12 +33,12 @@ module Doocr
 
     def self.from_radian(radian : Float64) : Angle
       data = (0x100000000 * (radian / (2 * Math::PI))).round_even
-      return Angle.new(data.to_u32)
+      return Angle.new(data.to_u32!)
     end
 
     def self.from_degree(degree : Float64) : Angle
       data = (0x100000000 * (degree / 360)).round_even
-      return Angle.new(data.to_u32)
+      return Angle.new(data.to_u32!)
     end
 
     def to_radian : Float64
@@ -50,8 +50,8 @@ module Doocr
     end
 
     def abs : Angle
-      if @data < 0
-        return Angle.new(@data.to_u32 * -1)
+      if @data.to_i32! < 0
+        return Angle.new((-1 * @data.to_i32!).to_u32!)
       else
         return self
       end
@@ -62,7 +62,7 @@ module Doocr
     end
 
     def - : Angle
-      return Angle.new((-(@data.to_i32)).to_u32)
+      return Angle.new(((@data.to_i32!) * -1).to_u32!)
     end
 
     def +(b : Angle) : Angle

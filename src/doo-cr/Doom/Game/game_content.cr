@@ -49,10 +49,10 @@ module Doocr
     end
 
     def self.create_dummy(*wadpaths : String) : GameContent
-      wad = Wad.new(wadpaths)
+      wad = Wad.new(wadpaths.to_a)
       textures = DummyTextureLookup.new(wad)
       flats = DummyFlatLookup.new(wad)
-      gc = GameContent.new(
+      gc = new(
         wad,
         Palette.new(wad),
         ColorMap.new(wad),

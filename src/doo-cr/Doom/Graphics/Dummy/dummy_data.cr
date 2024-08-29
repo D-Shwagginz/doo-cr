@@ -18,9 +18,9 @@ module Doocr
   module DummyData
     @@dummy_patch : Patch | Nil = nil
 
-    def self.get_patch
+    def self.get_patch : Patch
       if @@dummy_patch != nil
-        @@dummy_patch
+        @@dummy_patch.as(Patch)
       else
         width = 64
         height = 128
@@ -34,12 +34,13 @@ module Doocr
         c1 = [Column.new(0, data, 0, height)]
         c2 = [Column.new(0, data, 32, height)]
         width.times do |x|
-          columns << x / 32 % 2 == 0 ? c1 : c2
+          y = (x / 32).to_i32 % 2 == 0 ? c1 : c2
+          columns << y
         end
 
         @@dummy_patch = Patch.new("DUMMY", width, height, 32, 128, columns)
 
-        return @@dummy_patch
+        return @@dummy_patch.as(Patch)
       end
     end
 
@@ -50,7 +51,7 @@ module Doocr
         return @@dummy_textures[height]
       else
         patch = [TexturePatch.new(0, 0, get_patch())]
-        @@dummy_textures[height, Texture.new("DUMMY", false, 64, height, patch)]
+        @@dummy_textures[height] = Texture.new("DUMMY", false, 64, height, patch)
         return @@dummy_textures[height]
       end
     end
@@ -59,20 +60,20 @@ module Doocr
 
     def self.get_flat : Flat
       if @@dummy_flat != nil
-        return @@dummy_flat
+        return @@dummy_flat.as(Flat)
       else
         data = Bytes.new(64 * 64)
         spot = 0
         64.times do |y|
           64.times do |x|
-            data[spot] = ((x / 32) ^ (y / 32)) == 0 ? 80_u8 : 96_u8
+            data[spot] = ((x / 32).to_i32 ^ (y / 32).to_i32) == 0 ? 80_u8 : 96_u8
             spot += 1
           end
         end
 
         @@dummy_flat = Flat.new("DUMMY", data)
 
-        return @@dummy_flat
+        return @@dummy_flat.as(Flat)
       end
     end
 

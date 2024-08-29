@@ -38,9 +38,9 @@ module Doocr
     def self.from_data(data : Bytes, offset : Int32, textures : ITextureLookup, sectors : Array(Sector)) : SideDef
       texture_offset = IO::ByteFormat::LittleEndian.decode(Int16, data[offset, 2])
       row_offset = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 2, 2])
-      top_texture_name = String.new(data[offset + 4, 8])
-      bottom_texture_name = String.new(data[offset + 12, 8])
-      middle_texture_name = String.new(data[offset + 20, 8])
+      top_texture_name = DoomInterop.to_s(data, offset + 4, 8)
+      bottom_texture_name = DoomInterop.to_s(data, offset + 12, 8)
+      middle_texture_name = DoomInterop.to_s(data, offset + 20, 8)
       sector_num = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 28, 2])
 
       return SideDef.new(

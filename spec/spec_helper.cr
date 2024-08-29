@@ -1,2 +1,5 @@
 require "spec"
-require "../src/doo-cr.cr"
+require "crsfml"
+require "crsfml/audio"
+require "term-reader"
+require "../src/doo-cr/**"

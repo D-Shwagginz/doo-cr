@@ -38,7 +38,7 @@ module Doocr
     end
 
     def self.from_data(data : Bytes, offset : Int32, patch_lookup : Array(Patch)) : Texture
-      name = String.new(data[offset, 8])
+      name = DoomInterop.to_s(data, offset, 8)
       masked = IO::ByteFormat::LittleEndian.decode(Int32, data[offset + 8, 4])
       width = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 12, 2])
       height = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 14, 2])
@@ -59,11 +59,11 @@ module Doocr
     end
 
     def self.get_name(data : Bytes, offset : Int32) : String
-      return String.new(data[offset, 8])
+      return DoomInterop.to_s(data, offset, 8)
     end
 
     def self.get_height(data : Bytes, offset : Int32) : Int32
-      width = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 14, 2])
+      width = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 14, 2]).to_i32
     end
 
     private def generate_composite(name : String, width : Int32, height : Int32, patches : Array(TexturePatch)) : Patch

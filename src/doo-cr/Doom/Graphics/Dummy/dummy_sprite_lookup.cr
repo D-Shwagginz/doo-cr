@@ -24,8 +24,8 @@ module Doocr
 
     def initialize(wad : Wad)
       temp = {} of String => Array(SpriteInfo)
-      Sprite::Count.times do |i|
-        temp[DoomInfo.sprite_names[i]] = [] of SpriteInfo
+      Sprite::Count.to_i32.times do |i|
+        temp[DoomInfo.sprite_names[i].to_s] = [] of SpriteInfo
       end
 
       cache = {} of Int32 => Patch
@@ -39,7 +39,7 @@ module Doocr
         frame = wad.lump_infos[lump].name[4] - 'A'
         rotation = wad.lump_infos[lump].name[5] - '0'
 
-        while list.size < frame.ord + 1
+        while list.size < frame + 1
           list << SpriteInfo.new
         end
 
@@ -56,41 +56,41 @@ module Doocr
             list[frame].flip << false
           end
         end
-      end
 
-      if wad.lump_infos[lump].name.size == 8
-        frame = wad.lump_infos[lump].name[6] - 'A'
-        rotation = wad.lump_infos[lump].name[7] - '0'
+        if wad.lump_infos[lump].name.size == 8
+          frame = wad.lump_infos[lump].name[6] - 'A'
+          rotation = wad.lump_infos[lump].name[7] - '0'
 
-        while list.size < frame + 1
-          list << SpriteInfo.new
-        end
+          while list.size < frame + 1
+            list << SpriteInfo.new
+          end
 
-        if rotation == 0
-          8.times do |i|
-            if list[frames].patches[i]? == nil
+          if rotation == 0
+            8.times do |i|
+              if list[frame].patches[i]? == nil
+                list[frame].patches << DummyData.get_patch
+                list[frame].flip << true
+              end
+            end
+          else
+            if list[frame].patches[rotation - 1]? == nil
               list[frame].patches << DummyData.get_patch
               list[frame].flip << true
             end
-          end
-        else
-          if list[frame].patches[rotation - 1]? == nil
-            list[frame].patches << DummyData.get_patch
-            list[frame].flip << true
           end
         end
       end
 
       @spritedefs = Array(SpriteDef).new(Sprite::Count.to_i32)
       Sprite::Count.to_i32.times do |i|
-        list = temp[DoomInfo.sprite_names[i]]
+        list = temp[DoomInfo.sprite_names[i].to_s]
 
-        frames = SpriteFrame.new(list.size)
-        frames.size.times do |j|
+        frames = Array(SpriteFrame).new(list.size)
+        list.size.times do |j|
           list[j].check_completion
 
-          frame = SpriteFrame.new(list[j].has_rotation)
-          frames[j] = frame
+          frame = SpriteFrame.new(list[j].has_rotation, list[j].patches, list[j].flip)
+          frames << frame
         end
 
         @spritedefs << SpriteDef.new(frames)
@@ -139,7 +139,7 @@ module Doocr
       end
 
       def check_completion
-        8.times do |i|
+        @patches.size.times do |i|
           if @patches[i]? == nil
             raise("Missing sprite!")
           end

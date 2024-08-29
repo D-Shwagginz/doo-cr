@@ -71,8 +71,8 @@ module Doocr
     def self.from_data(data : Bytes, offset : Int32, number : Int32, flats : IFlatLookup) : Sector
       floor_height = IO::ByteFormat::LittleEndian.decode(Int16, data[offset, 2])
       ceiling_height = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 2, 2])
-      floor_flat_name = String.new(data[offset + 4, 8])
-      ceiling_flat_name = String.new(data[offset + 12, 8])
+      floor_flat_name = DoomInterop.to_s(data, offset + 4, 8)
+      ceiling_flat_name = DoomInterop.to_s(data, offset + 12, 8)
       light_level = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 20, 2])
       special = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 22, 2])
       tag = IO::ByteFormat::LittleEndian.decode(Int16, data[offset + 24, 2])

@@ -94,7 +94,7 @@ module Doocr
           thing.block_next = link
 
           if link != nil
-            link.block_prev = thing
+            link.as(Mobj).block_prev = thing
           end
 
           map.blockmap.as(BlockMap).thing_lists[index] = thing

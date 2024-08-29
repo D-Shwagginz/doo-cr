@@ -64,8 +64,7 @@ module Doocr
 
       patches = load_patches(wad)
 
-      n = 1
-      while n <= 2
+      2.times do |n|
         lump_number = wad.get_lump_number("TEXTURE#{n + 1}")
         break if lump_number == -1
 
@@ -78,7 +77,6 @@ module Doocr
           @textures << texture
           @name_to_texture[texture.name] = texture if !@name_to_texture[texture.name]?
         end
-        n += 1
       end
     end
 
@@ -125,7 +123,7 @@ module Doocr
       count = IO::ByteFormat::LittleEndian.decode(Int32, data[0, 4])
       names = Array(String).new(count)
       count.times do |i|
-        names << String.new(data[4 + 8*i, 8])
+        names << DoomInterop.to_s(data, 4 + 8 * i, 8)
       end
 
       return names

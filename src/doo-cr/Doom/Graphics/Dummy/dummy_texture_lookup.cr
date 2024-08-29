@@ -43,7 +43,7 @@ module Doocr
       return @name_to_texture[name]
     end
 
-    def initialize(wad : Wad, use_dummy : Bool = false)
+    def initialize(wad : Wad)
       init_lookup(wad)
       init_switch_list()
     end
@@ -54,7 +54,7 @@ module Doocr
       @name_to_number = {} of String => Int32
 
       2.times do |n|
-        lump_number = wad.get_lump_number("TEXTURE" + (n + 1))
+        lump_number = wad.get_lump_number("TEXTURE#{(n + 1)}")
         break if lump_number == -1
 
         data = wad.read_lump(lump_number)
@@ -64,9 +64,9 @@ module Doocr
           name = Texture.get_name(data, offset)
           height = Texture.get_height(data, offset)
           texture = DummyData.get_texture(height)
-          @name_to_number[texture.name] = texture.count if !@name_to_number[texture.name]?
-          textures << texture
-          @name_to_texture[texture.name] = texture if !@name_to_texture[texture.name]?
+          @name_to_number[name] = @textures.size if !@name_to_number[name]?
+          @textures << texture
+          @name_to_texture[name] = texture if !@name_to_texture[name]?
         end
       end
     end
@@ -74,8 +74,8 @@ module Doocr
     private def init_switch_list
       list = [] of Int32
       DoomInfo.switch_names.each do |tuple|
-        texnum1 = get_number(tuple[0])
-        texnum2 = get_number(tuple[1])
+        texnum1 = get_number(tuple[0].to_s)
+        texnum2 = get_number(tuple[1].to_s)
         if texnum1 != -1 && texnum2 != -1
           list << texnum1
           list << texnum2

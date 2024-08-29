@@ -805,8 +805,8 @@ module Doocr::Video
       # Does not cross a pixel?
       return if x1 == x2
 
-      front_sector = seg.front_sector
-      back_sector = seg.back_sector
+      front_sector = seg.front_sector.as(Sector)
+      back_sector = seg.back_sector.as(Sector)
 
       front_sector_floor_height = front_sector.get_interpolated_floor_height(@frame_frac)
       front_sector_ceiling_height = front_sector.get_interpolated_ceiling_height(@frame_frac)
@@ -840,7 +840,7 @@ module Doocr::Video
       if (back_sector.as(Sector).ceiling_flat == front_sector.ceiling_flat &&
          back_sector.as(Sector).floor_flat == front_sector.floor_flat &&
          back_sector.as(Sector).light_level == front_sector.light_level &&
-         seg.side_def.middle_texture == 0)
+         seg.side_def.as(SideDef).middle_texture == 0)
         return
       end
 
@@ -996,9 +996,9 @@ module Doocr::Video
       end
 
       # Make some aliases to shorten the following code.
-      line = seg.line_def
-      side = seg.side_def
-      front_sector = seg.front_sector
+      line = seg.line_def.as(LineDef)
+      side = seg.side_def.as(SideDef)
+      front_sector = seg.front_sector.as(Sector)
 
       front_sector_floor_height = front_sector.get_interpolated_floor_height(@frame_frac)
       front_sector_ceiling_height = front_sector.get_interpolated_ceiling_height(@frame_frac)
@@ -1204,10 +1204,10 @@ module Doocr::Video
       end
 
       # Make some aliases to shorten the following code.
-      line = seg.line_def
-      side = seg.side_def
-      front_sector = seg.front_sector
-      back_sector = seg.back_sector
+      line = seg.line_def.as(LineDef)
+      side = seg.side_def.as(SideDef)
+      front_sector = seg.front_sector.as(Sector)
+      back_sector = seg.back_sector.as(Sector)
 
       front_sector_floor_height = front_sector.get_interpolated_floor_height(@frame_frac)
       front_sector_ceiling_height = front_sector.get_interpolated_ceiling_height(@frame_frac)
@@ -1626,7 +1626,7 @@ module Doocr::Video
     private def draw_masked_range(draw_seg : VisWallRange, x1 : Int32, x2 : Int32)
       seg = draw_seg.seg
 
-      wall_light_level = (seg.as(Seg).front_sector.light_level >> LIGHT_SEG_SHIFT) + @extra_light
+      wall_light_level = (seg.as(Seg).front_sector.as(Sector).light_level >> LIGHT_SEG_SHIFT) + @extra_light
       if seg.as(Seg).vertex1.as(Vertex).y == seg.as(Seg).vertex2.as(Vertex).y
         wall_light_level -= 1
       elsif seg.as(Seg).vertex1.as(Vertex).x == seg.as(Seg).vertex2.as(Vertex).x
@@ -1635,18 +1635,18 @@ module Doocr::Video
 
       wall_lights = @scale_light[wall_light_level.clamp(0, LIGHT_LEVEL_COUNT - 1)]
 
-      wall_texture = @textures.as(ITextureLookup)[@world.as(World).specials.as(Specials).texture_translation[seg.as(Seg).side_def.middle_texture]]
+      wall_texture = @textures.as(ITextureLookup)[@world.as(World).specials.as(Specials).texture_translation[seg.as(Seg).side_def.as(SideDef).middle_texture]]
       mask = wall_texture.width - 1
 
       mid_texture_alt : Fixed
-      if (seg.as(Seg).line_def.flags & LineFlags::DontPegBottom).to_i32 != 0
+      if (seg.as(Seg).line_def.as(LineDef).flags & LineFlags::DontPegBottom).to_i32 != 0
         mid_texture_alt = draw_seg.front_sector_floor_height > draw_seg.back_sector_floor_height ? draw_seg.front_sector_floor_height : draw_seg.back_sector_floor_height
         mid_texture_alt = mid_texture_alt + Fixed.from_i(wall_texture.height) - @view_z
       else
         mid_texture_alt = draw_seg.front_sector_ceiling_height > draw_seg.back_sector_ceiling_height ? draw_seg.front_sector_ceiling_height : draw_seg.back_sector_ceiling_height
         mid_texture_alt = mid_texture_alt - @view_z
       end
-      mid_texture_alt += seg.as(Seg).side_def.row_offset
+      mid_texture_alt += seg.as(Seg).side_def.as(SideDef).row_offset
 
       scale_step = draw_seg.scale_step
       scale = draw_seg.scale1 + scale_step * (x1 - draw_seg.x1)

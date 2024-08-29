@@ -101,13 +101,12 @@ module Doocr
             next
           end
 
-          number = lump - firstflat
           name = wad.lump_infos[lump].name
           flat = Flat.new(name, wad.read_lump(lump))
 
           @flats << flat
           @name_to_flat[name] = flat
-          @name_to_number[name] = number
+          @name_to_number[name] = @flats.size - 1
           lump += 1
         end
 

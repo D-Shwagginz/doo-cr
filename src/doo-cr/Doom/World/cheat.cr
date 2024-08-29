@@ -283,14 +283,14 @@ module Doocr
         map = 0
         return if !(map = typed[typed.size - 2, 2].to_i32?)
         skill = @world.as(World).options.skill.as(GameSkill)
-        @world.as(World).game.defered_init_new(skill, 1, map)
+        @world.as(World).game.as(DoomGame).defered_init_new(skill, 1, map)
       else
         episode = 0
         return if !(episode = typed[typed.size - 2, 1].to_i32?)
         map = 0
         return if !(map = typed[typed.size - 1, 1].to_i32?)
         skill = @world.as(World).options.skill.as(GameSkill)
-        @world.as(World).game.defered_init_new(skill, episode, map)
+        @world.as(World).game.as(DoomGame).defered_init_new(skill, episode, map)
       end
     end
 

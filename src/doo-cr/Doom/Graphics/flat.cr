@@ -23,7 +23,7 @@ module Doocr
       return @name
     end
 
-    def initialize(@name : String, data : Bytes)
+    def initialize(@name : String, @data : Bytes)
     end
 
     def self.from_data(name : String, data : Bytes)

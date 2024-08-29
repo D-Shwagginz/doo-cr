@@ -17,7 +17,7 @@
 module Doocr
   class World
     getter options : GameOptions
-    getter game : DoomGame
+    getter game : DoomGame | Nil
     getter random : DoomRandom
 
     getter map : Map | Nil = nil
@@ -60,7 +60,7 @@ module Doocr
     @dummy : Mobj | Nil = nil
 
     def game_tic : Int32
-      return @game.game_tic
+      return @game.as(DoomGame).game_tic
     end
 
     def console_player
@@ -75,7 +75,7 @@ module Doocr
       return console_player.view_z == Fixed.epsilon
     end
 
-    def initialize(resources : GameContent, @options : GameOptions, @game : DoomGame)
+    def initialize(resources : GameContent, @options : GameOptions, @game : DoomGame | Nil)
       @random = @options.as(GameOptions).random.as(DoomRandom)
 
       @map = Map.new(resources, self)
