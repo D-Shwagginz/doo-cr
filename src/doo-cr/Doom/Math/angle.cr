@@ -28,7 +28,7 @@ module Doocr
     end
 
     def initialize(data : Int32)
-      @data = data.to_u32
+      @data = data.to_u32!
     end
 
     def self.from_radian(radian : Float64) : Angle

@@ -218,9 +218,9 @@ module Doocr
     end
 
     def set_state(state : MobjState) : Bool
-      x = true
-      while x || @tics == 0
-        x = false
+      y = true
+      while y || @tics == 0
+        y = false
         if state == MobjState::Nil
           @state = DoomInfo.states[MobjState::Nil.to_i32]
           @world.as(World).thing_allocation.as(ThingAllocation).remove_mobj(self)
@@ -235,7 +235,9 @@ module Doocr
 
         # Modified handling.
         # Call action functions when the state is set.
-        st.mobj_action.as(Proc(World, Mobj, Nil)).call(@world.as(World), self) if st.mobj_action != nil
+        if (x = st.mobj_action) && st.mobj_action.responds_to?(:call)
+          x.call(@world.as(World), self)
+        end
 
         state = st.next
       end

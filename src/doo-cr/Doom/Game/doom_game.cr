@@ -86,7 +86,7 @@ module Doocr
 
       # Do things to change the game state.
       while @game_action != GameAction::Nothing
-        case GameAction
+        case @game_action
         when GameAction::LoadLevel
           do_load_level()
         when GameAction::NewGame

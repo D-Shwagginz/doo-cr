@@ -48,14 +48,14 @@ module Doocr
     @current_ceiling_line : LineDef | Nil = nil
 
     property crossed_special_count : Int32 = 0
-    getter crossed_specials : Array(LineDef) = Array(LineDef).new
+    getter crossed_specials : Array(LineDef | Nil) = Array(LineDef | Nil).new
 
     @check_line_func : Proc(LineDef, Bool) | Nil = nil
     @check_thing_func : Proc(Mobj, Bool) | Nil = nil
 
     private def init_thing_movement
-      @current_box = Array(Fixed).new(4)
-      @crossed_specials = Array(LineDef).new(@@max_special_cross_count)
+      @current_box = Array.new(4, Fixed.zero)
+      @crossed_specials = Array(LineDef | Nil).new(@@max_special_cross_count, nil)
       @check_line_func = ->check_line(LineDef)
       @check_thing_func = ->check_thing(Mobj)
     end
@@ -453,7 +453,7 @@ module Doocr
         while @crossed_special_count > 0
           @crossed_special_count -= 1
           # See if the line was crossed.
-          line = @crossed_specials[@crossed_special_count]
+          line = @crossed_specials[@crossed_special_count].as(LineDef)
           new_side = Geometry.point_on_line_side(thing.x, thing.y, line)
           old_side = Geometry.point_on_line_side(oldx, oldy, line)
           if new_side != old_side

@@ -42,6 +42,7 @@ module Doocr
 
         # Done looking.
         return false if count == 2 || actor.last_look == stop
+        count += 1
 
         player = players[actor.last_look]
 
@@ -192,11 +193,12 @@ module Doocr
         while tm.crossed_special_count > 0
           tm.crossed_special_count -= 1
 
-          line = tm.crossed_specials[tm.crossed_special_count]
+          line = tm.crossed_specials[tm.crossed_special_count].as(LineDef)
           # If the special is not a door that can be opened,
           # return false.
           good = true if @world.as(World).map_interaction.as(MapInteraction).use_special_line(actor, line, 0)
         end
+        tm.crossed_special_count -= 1
         return good
       else
         actor.flags &= ~MobjFlags::InFloat
@@ -413,14 +415,14 @@ module Doocr
 
       # Turn towards movement direction if not there yet.
       if actor.move_dir.to_i32 < 8
-        actor.angle = Angle.new(actor.angle.data.to_i32 & (7 << 29))
+        actor.angle = Angle.new(actor.angle.data.to_i32! & (7 << 29))
 
-        delta = (actor.angle - Angle.new(actor.move_dir.to_i32 << 29)).data.to_i32
+        delta = (actor.angle - Angle.new(actor.move_dir.to_i32! << 29)).data.to_i32!
 
         if delta > 0
-          actor.angle -= Angle.new((Angle.ang90.data / 2).to_i32)
+          actor.angle -= Angle.new((Angle.ang90.data / 2).to_i32!)
         elsif delta < 0
-          actor.angle += Angle.new((Angle.ang90.data / 2).to_i32)
+          actor.angle += Angle.new((Angle.ang90.data / 2).to_i32!)
         end
       end
 
@@ -475,6 +477,7 @@ module Doocr
 
           return
         end
+      rescue
       end
 
       # Possibly choose another target.

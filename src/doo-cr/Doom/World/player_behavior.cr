@@ -78,7 +78,7 @@ module Doocr
 
       calc_height(player)
 
-      if player.mobj.as(Mobj).subsector.as(Subsector).sector.as(Sector).special != 0
+      if player.mobj.as(Mobj).subsector.as(Subsector).sector.as(Sector).special.to_i32 != 0
         player_in_special_sector(player)
       end
 
@@ -416,8 +416,8 @@ module Doocr
 
         # Call action routine.
         # Modified handling.
-        if state_def.player_action != nil
-          state_def.player_action.as(Proc(World, Player, PlayerSpriteDef, Nil)).call(@world.as(World), player, psp)
+        if proc = state_def.player_action
+          proc.call(@world.as(World), player, psp)
           break if psp.state == nil
         end
         state = psp.state.as(MobjStateDef).next

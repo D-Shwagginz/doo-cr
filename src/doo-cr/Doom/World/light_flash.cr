@@ -30,7 +30,7 @@ module Doocr
 
     def run
       @count -= 1
-      return @count > 0
+      return if @count > 0
 
       if @sector.as(Sector).light_level == @max_light
         @sector.as(Sector).light_level = @min_light

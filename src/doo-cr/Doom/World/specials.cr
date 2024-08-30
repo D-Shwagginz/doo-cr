@@ -66,47 +66,36 @@ module Doocr
         when 1
           # Flickering lights.
           lc.spawn_light_flash(sector)
-          break
         when 2
           # Strobe fast.
           lc.spawn_strobe_flash(sector, StrobeFlash.fast_dark, false)
-          break
         when 3
           # Strobe slow
           lc.spawn_strobe_flash(sector, StrobeFlash.slow_dark, false)
-          break
         when 4
           # Strobe fast / death slime.
           lc.spawn_strobe_flash(sector, StrobeFlash.fast_dark, false)
           sector.special = SectorSpecial.new(4)
-          break
         when 8
           # Glowing light.
           lc.spawn_glowing_light(sector)
-          break
         when 9
           # Secret sector.
           @world.as(World).total_secrets += 1
-          break
         when 10
           # Door close in 30 seconds.
           sa.spawn_door_close_in_30(sector)
-          break
         when 12
           # Sync strobe slow.
           lc.spawn_strobe_flash(sector, StrobeFlash.slow_dark, true)
-          break
         when 13
           # Sync strobe fast
           lc.spawn_strobe_flash(sector, StrobeFlash.fast_dark, true)
-          break
         when 14
           # Door raise in 5 minutes.
           sa.spawn_door_raise_in_5_mins(sector)
-          break
         when 17
           lc.spawn_fire_flicker(sector)
-          break
         end
       end
 
@@ -116,7 +105,6 @@ module Doocr
         when 48
           # Texture scroll.
           scroll_list << line
-          break
         end
       end
 
@@ -211,9 +199,8 @@ module Doocr
             @texture_translation[i] = pic.to_i32
           else
             @flat_translation[i] = pic.to_i32
-
-            i += 1
           end
+          i += 1
         end
       end
 
@@ -231,13 +218,10 @@ module Doocr
             case @button_list[i].position
             when ButtonPosition::Top
               @button_list[i].line.as(LineDef).front_side.as(SideDef).top_texture = @button_list[i].texture
-              break
             when ButtonPosition::Middle
               @button_list[i].line.as(LineDef).front_side.as(SideDef).middle_texture = @button_list[i].texture
-              break
             when ButtonPosition::Bottom
               @button_list[i].line.as(LineDef).front_side.as(SideDef).bottom_texture = @button_list[i].texture
-              break
             end
 
             @world.as(World).start_sound(@button_list[i].sound_origin.as(Mobj), Sfx::SWTCHN, SfxType::Misc, 50)

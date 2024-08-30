@@ -17,17 +17,19 @@
 module Doocr
   module DoomDebug
     def self.combine_hash(a : Int32, b : Int32) : Int32
-      return (3 * a) ^ b
+      return (3 &* a) ^ b
     end
 
-    def self.get_mobj_hash(mobj : Mobj) : Int32
+    def self.get_mobj_hash(mobj : Mobj, r : Bool = false) : Int32
       hash = 0
 
       hash = combine_hash(hash, mobj.x.data)
       hash = combine_hash(hash, mobj.y.data)
       hash = combine_hash(hash, mobj.z.data)
 
-      hash = combine_hash(hash, mobj.angle.data.to_i32)
+      puts mobj.frame if r
+
+      hash = combine_hash(hash, mobj.angle.data.to_i32!)
       hash = combine_hash(hash, mobj.sprite.to_i32)
       hash = combine_hash(hash, mobj.frame)
 
@@ -56,10 +58,15 @@ module Doocr
 
     def self.get_mobj_hash(world : World) : Int32
       hash = 0
+      i = 0
       enumerator = world.as(World).thinkers.as(Thinkers).get_enumerator
       while true
         thinker = enumerator.current
         if mobj = thinker.as?(Mobj)
+          if i == 3
+            get_mobj_hash(mobj, true)
+          end
+          i += 1
           hash = combine_hash(hash, get_mobj_hash(mobj))
         end
         break if !enumerator.move_next
@@ -73,7 +80,7 @@ module Doocr
         sb << "#{mobj.y.data},"
         sb << "#{mobj.z.data},"
 
-        sb << "#{mobj.angle.data.to_i32},"
+        sb << "#{mobj.angle.data.to_i32!},"
         sb << "#{mobj.sprite.to_i32},"
         sb << "#{mobj.frame},"
 
