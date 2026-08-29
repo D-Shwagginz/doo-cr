@@ -191,6 +191,20 @@ module LibDoom
 
   CDoom.followplayer = 1
 
+  @@suic_strings = [
+    "You have taken your own life!",
+    "You will be missed",
+    "Due to a rocket no doubt",
+    "Good thing you can respawn!"
+  ]
+
+  @@suic_see_strings = [
+    "1 killed themselves",
+    "1 has blown themselves up",
+    "1 couldn't take it anymore",
+    "who killed 1?"
+  ]
+
   @@death_kill_strings = [
     "You killed 2",
     "You got 2",
@@ -5554,7 +5568,7 @@ module LibDoom
     # Another hickup with Special edition.
     CDoom::Menuitem.new(status: 1, name: "M_RDTHIS".to_unsafe, routine: ->CDoom.m_readthis(Int32), alpha_key: 'r'.ord),
     CDoom::Menuitem.new(status: 1, name: "M_QUITG".to_unsafe, routine: ->CDoom.m_quitdoom(Int32), alpha_key: 'q'.ord),
-]
+  ]
 
   @@maindef = CDoom::Menu.new(
     numitems: @@mainmenu.size,
@@ -5563,14 +5577,13 @@ module LibDoom
     routine: ->CDoom.m_draw_mainmenu,
     x: 97, y: 64,
     last_on: 0)
-  
 
   @@episodemenu = [
     CDoom::Menuitem.new(status: 1, name: "M_EPI1".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 'k'.ord),
     CDoom::Menuitem.new(status: 1, name: "M_EPI2".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 't'.ord),
     CDoom::Menuitem.new(status: 1, name: "M_EPI3".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 'i'.ord),
     CDoom::Menuitem.new(status: 1, name: "M_EPI4".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 't'.ord),
-]
+  ]
 
   @@epidef = CDoom::Menu.new(
     numitems: @@episodemenu.size,
@@ -5587,7 +5600,7 @@ module LibDoom
     CDoom::Menuitem.new(status: 1, name: "M_HURT".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'h'.ord),
     CDoom::Menuitem.new(status: 1, name: "M_ULTRA".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'u'.ord),
     CDoom::Menuitem.new(status: 1, name: "M_NMARE".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'n'.ord),
-]
+  ]
 
   @@newdef = CDoom::Menu.new(
     numitems: @@newgame_menu.size,
@@ -5607,7 +5620,7 @@ module LibDoom
     CDoom::Menuitem.new(status: -1, name: "".to_unsafe),
     CDoom::Menuitem.new(status: 1, name: "M_SVOL".to_unsafe, routine: ->CDoom.m_sound(Int32), alpha_key: 's'.ord),
     CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_moreoptions(Int32), alpha_key: 'm'.ord),
-]
+  ]
 
   @@optionsdef = CDoom::Menu.new(
     numitems: @@options_menu.size,
@@ -5620,7 +5633,7 @@ module LibDoom
 
   @@current_options_menu = 0
 
-  @@moreoptions_menus =[ [
+  @@moreoptions_menus = [[
     CDoom::Menuitem.new(status: 2, text: "page ", num: pointerof(@@current_options_menu), routine: ->m_change_options_menu(Int32), alpha_key: 'e'.ord),
     CDoom::Menuitem.new(status: 1, text: "edit controls ->", routine: ->m_edit_controls(Int32), alpha_key: 'e'.ord),
     CDoom::Menuitem.new(status: 1, text: "toggle fullscreen", routine: ->m_toggle_fullscreen(Int32), alpha_key: 't'.ord),
@@ -5630,13 +5643,13 @@ module LibDoom
     CDoom::Menuitem.new(status: 1, text: "random audio pitch: ", bool: pointerof(@@randompitch), routine: ->m_toggle_pitching(Int32), alpha_key: 'r'.ord),
     CDoom::Menuitem.new(status: 1, text: "active automap drawing: ", bool: pointerof(@@amactivedraw), routine: ->m_toggle_amactivedraw(Int32), alpha_key: 'a'.ord),
   ],
-  [
-    CDoom::Menuitem.new(status: 2, text: "page ", num: pointerof(@@current_options_menu), routine: ->m_change_options_menu(Int32), alpha_key: 'e'.ord),
-    CDoom::Menuitem.new(status: 1, text: "Mouse Y movement: ", bool: pointerof(CDoom.mousemove), routine: ->m_mouse_move(Int32), alpha_key: 'm'.ord),
-    CDoom::Menuitem.new(status: 1, text: "Fire weapon centered: ", bool: pointerof(@@weaponfirecentered), routine: ->m_toggle_weaponfirecentered(Int32), alpha_key: 'f'.ord),
-    CDoom::Menuitem.new(status: 1, text: "crosshair: ", bool: pointerof(CDoom.crosshair), routine: ->m_change_crosshair(Int32), alpha_key: 'c'.ord),
+                         [
+                           CDoom::Menuitem.new(status: 2, text: "page ", num: pointerof(@@current_options_menu), routine: ->m_change_options_menu(Int32), alpha_key: 'e'.ord),
+                           CDoom::Menuitem.new(status: 1, text: "Mouse Y movement: ", bool: pointerof(CDoom.mousemove), routine: ->m_mouse_move(Int32), alpha_key: 'm'.ord),
+                           CDoom::Menuitem.new(status: 1, text: "Fire weapon centered: ", bool: pointerof(@@weaponfirecentered), routine: ->m_toggle_weaponfirecentered(Int32), alpha_key: 'f'.ord),
+                           CDoom::Menuitem.new(status: 1, text: "crosshair: ", bool: pointerof(CDoom.crosshair), routine: ->m_change_crosshair(Int32), alpha_key: 'c'.ord),
+                         ],
   ]
- ]
 
   @@moreoptions_def = CDoom::Menu.new(
     numitems: @@moreoptions_menus[0].size,
@@ -5669,8 +5682,8 @@ module LibDoom
   )
 
   @@readmenu1 = [
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_readthis2(Int32))
-]
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_readthis2(Int32)),
+  ]
 
   @@readdef1 = CDoom::Menu.new(
     numitems: @@readmenu1.size,
@@ -5682,8 +5695,8 @@ module LibDoom
   )
 
   @@readmenu2 = [
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_finish_readthis(Int32))
-]
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_finish_readthis(Int32)),
+  ]
 
   @@readdef2 = CDoom::Menu.new(
     numitems: @@readmenu2.size,
@@ -5699,7 +5712,7 @@ module LibDoom
     CDoom::Menuitem.new(status: -1, name: "".to_unsafe),
     CDoom::Menuitem.new(status: 2, name: "M_MUSVOL".to_unsafe, routine: ->CDoom.m_musicvol(Int32), alpha_key: 'm'.ord),
     CDoom::Menuitem.new(status: -1, name: "".to_unsafe),
-]
+  ]
 
   @@sounddef = CDoom::Menu.new(
     numitems: @@soundmenu.size,
@@ -5717,7 +5730,7 @@ module LibDoom
     CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '4'.ord),
     CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '5'.ord),
     CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '6'.ord),
-]
+  ]
 
   @@loaddef = CDoom::Menu.new(
     numitems: @@loadmenu.size,
@@ -5735,7 +5748,7 @@ module LibDoom
     CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '4'.ord),
     CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '5'.ord),
     CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '6'.ord),
-]
+  ]
 
   @@savedef = CDoom::Menu.new(
     numitems: @@savemenu.size,

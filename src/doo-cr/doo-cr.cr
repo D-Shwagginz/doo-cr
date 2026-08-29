@@ -5784,7 +5784,7 @@ module LibDoom
   end
 
   def self.update_audio
-RAudio.init_audio_device
+    RAudio.init_audio_device
     RAudio.set_master_volume(10.0)
     RAudio.set_audio_stream_buffer_size_default(512)
     @@audio_stream = RAudio.load_audio_stream(CDoom::DOOM_SAMPLERATE, 16, 2)
@@ -5794,7 +5794,6 @@ RAudio.init_audio_device
     @@adl_player = ADLMIDI.adl_init(MIDI_SAMPLE_RATE)
     ADLMIDI.adl_setNumChips(@@adl_player.not_nil!, 4)
     ADLMIDI.adl_setBank(@@adl_player.not_nil!, @@midibank)
-
 
     ADLMIDI.adl_setSoftPanEnabled(@@adl_player.not_nil!, @@midismoothpan)
 
@@ -5878,7 +5877,7 @@ RAudio.init_audio_device
 
     @@audio_stream.try { |a| RAudio.unload_audio_stream(a) }
 
-sleep 1.millisecond # Let music stop
+    sleep 1.millisecond # Let music stop
     @@music_stream.try { |m| RAudio.unload_audio_stream(m) }
     @@adl_player.try { |ap| ADLMIDI.adl_close(ap) }
 
@@ -5908,7 +5907,7 @@ sleep 1.millisecond # Let music stop
 
     # Now initialize mixbuffer with zero.
     CDoom::MIXBUFFERSIZE.times { |i| CDoom.mixbuffer[i] = 0 }
-    
+
     # Finished initialization.
     puts "sound module ready"
   end
@@ -5917,11 +5916,9 @@ sleep 1.millisecond # Let music stop
   # MUSIC API.
   #
   def self.i_init_music
-    
   end
 
   def self.i_shutdown_music
-    
   end
 
   def self.i_play_song(handle : Int32, looping : Int32)
@@ -6032,14 +6029,14 @@ sleep 1.millisecond # Let music stop
         midi_event = (0x00000080_u32 | channel | (note << 8))
       when CDoom::EVENT_PLAY_NOTE
         note_bytes = CDoom.mus_data[CDoom.mus_offset].to_i32
-  CDoom.mus_offset += 1
-  note = note_bytes & 0b01111111
-  if note_bytes & 0b10000000 != 0
-    @@mus_channel_volume[channel] = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
-    CDoom.mus_offset += 1
-  end
-  vol = @@mus_channel_volume[channel]
-  midi_event = (0x00000090_u32 | channel | (note << 8) | (vol << 16))
+        CDoom.mus_offset += 1
+        note = note_bytes & 0b01111111
+        if note_bytes & 0b10000000 != 0
+          @@mus_channel_volume[channel] = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
+          CDoom.mus_offset += 1
+        end
+        vol = @@mus_channel_volume[channel]
+        midi_event = (0x00000090_u32 | channel | (note << 8) | (vol << 16))
       when CDoom::EVENT_PITCH_BEND
         bend_amount = CDoom.mus_data[CDoom.mus_offset].to_i32 * 64
         CDoom.mus_offset += 1
@@ -6060,7 +6057,7 @@ sleep 1.millisecond # Let music stop
           midi_event = (0x000000B0_u32 | channel | (127 << 8))
         when CDoom::CONTROLLER_EVENT_RESET_ALL_CONTROLLERS
           midi_event = (0x000000B0_u32 | channel | (121 << 8))
-  @@mus_channel_volume[channel] = 127
+          @@mus_channel_volume[channel] = 127
         when CDoom::CONTROLLER_EVENT_EVENT # Doom never implemented
         end
       when CDoom::EVENT_CONTROLLER
@@ -6881,7 +6878,7 @@ sleep 1.millisecond # Let music stop
       10, CDoom.mouse_sensitivity)
 
     CDoom.m_write_text(@@optionsdef.x, @@optionsdef.y +
-                                           CDoom::LINEHEIGHT * CDoom::OptionsEnum::More.value + CDoom.hu_font[0].value.height // 2,
+                                       CDoom::LINEHEIGHT * CDoom::OptionsEnum::More.value + CDoom.hu_font[0].value.height // 2,
       "more options")
   end
 
@@ -6915,10 +6912,10 @@ sleep 1.millisecond # Let music stop
 
     @@moreoptions_menus[@@current_options_menu].each_with_index do |item, i|
       CDoom.m_write_text(@@moreoptions_def.x, @@moreoptions_def.y +
-                                            CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
-      String.new(item.text) + (
-        (item.bool.null? ? "" : (item.bool.value != 0 ? "on" : "off")) +
-        (item.num.null? ? "" : "#{item.num.value + 1}")
+                                              CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
+        String.new(item.text) + (
+          (item.bool.null? ? "" : (item.bool.value != 0 ? "on" : "off")) +
+          (item.num.null? ? "" : "#{item.num.value + 1}")
         ))
     end
   end
@@ -7029,11 +7026,11 @@ sleep 1.millisecond # Let music stop
                                                                                         -CDoom::LINEHEIGHT + CDoom.hu_font[0].value.height // 2,
       "Controls")
 
-      @@editcontrols_menu.each_with_index do |item, i|
+    @@editcontrols_menu.each_with_index do |item, i|
       CDoom.m_write_text(@@editcontrols_def.x, @@editcontrols_def.y +
-                                            CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
-      String.new(item.text) + (item.num.null? ? "" : m_draw_key(item.num)))
-      end
+                                               CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
+        String.new(item.text) + (item.num.null? ? "" : m_draw_key(item.num)))
+    end
   end
 
   def self.m_edit_forward(choice : Int32)
@@ -7646,7 +7643,7 @@ sleep 1.millisecond # Let music stop
     return if CDoom.menuactive != 0
 
     CDoom.menuactive = 1
-    CDoom.current_menu = pointerof(@@maindef)    # JDC
+    CDoom.current_menu = pointerof(@@maindef)        # JDC
     CDoom.item_on = CDoom.current_menu.value.last_on # JDC
   end
 
@@ -10662,24 +10659,30 @@ sleep 1.millisecond # Let music stop
       source.value.player.value.killcount = source.value.player.value.killcount + 1 if target.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0
 
       if !target.value.player.null?
-        srcplr = source.value.player.- CDoom.players.to_unsafe
-        trgtplr = target.value.player - CDoom.players.to_unsafe
-        source.value.player.value.frags[trgtplr] =
-          source.value.player.value.frags[trgtplr] + 1
+        unless CDoom.netgame == 0
+          srcplr = source.value.player.- CDoom.players.to_unsafe
+          trgtplr = target.value.player - CDoom.players.to_unsafe
+          source.value.player.value.frags[trgtplr] =
+            source.value.player.value.frags[trgtplr] + 1
 
-        strings = CDoom.deathmatch != 0 ? ( # Deathmatch strings
+          if srcplr == trgtplr
+            # Suicide
+            strings = CDoom.consoleplayer == srcplr ? @@suic_strings : @@suic_see_strings
+          else
+            strings = CDoom.deathmatch != 0 ? # Deathmatch strings
+(CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
+              CDoom.consoleplayer == trgtplr ? @@death_dead_strings : @@death_nut_strings
+            ) # Coop strings
+) : CDoom.consoleplayer == srcplr ? @@net_kill_strings : (
+              CDoom.consoleplayer == trgtplr ? @@net_dead_strings : @@net_nut_strings
+            )
+          end
 
-CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
-          CDoom.consoleplayer == trgtplr ? @@death_dead_strings : @@death_nut_strings
-        )
-          ) : CDoom.consoleplayer == srcplr ? @@net_kill_strings : (
-          CDoom.consoleplayer == trgtplr ? @@net_dead_strings : @@net_nut_strings
-        )
-
-        (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message =
-          strings.sample(Random.new(CDoom.m_random)).gsub(
-            '1', String.new(CDoom.player_names[srcplr])[...-2]).gsub(
-            '2', String.new(CDoom.player_names[trgtplr])[...-2])
+          (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message =
+            strings.sample(Random.new(CDoom.m_random)).gsub(
+              '1', String.new(CDoom.player_names[srcplr])[...-2]).gsub(
+              '2', String.new(CDoom.player_names[trgtplr])[...-2])
+        end
       end
     elsif CDoom.netgame == 0 && target.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0
       # count all monster deaths,
