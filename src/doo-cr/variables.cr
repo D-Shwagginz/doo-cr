@@ -6281,6 +6281,8 @@ module LibDoom
     0xb2, 0x26, 0xb6, 0xba, 0x2a, 0xf6, 0xea, 0xff # idmypos
   )
 
+  @@cheat_me_seq = [0x26, 0xA2, 0xEA, 0x32, 0xEE, 0xA2, 0xE6, 0xFF] of UInt8
+
   CDoom.cheat_mus.sequence = CDoom.cheat_mus_seq.to_unsafe
   CDoom.cheat_mus.p = Pointer(UInt8).null
   CDoom.cheat_god.sequence = CDoom.cheat_god_seq.to_unsafe
@@ -6293,6 +6295,7 @@ module LibDoom
   CDoom.cheat_noclip.p = Pointer(UInt8).null
   CDoom.cheat_commercial_noclip.sequence = CDoom.cheat_commercial_noclip_seq.to_unsafe
   CDoom.cheat_commercial_noclip.p = Pointer(UInt8).null
+  @@cheat_me = CDoom::Cheatseq.new(sequence: @@cheat_me_seq.to_unsafe, p: Pointer(UInt8).null)
 
   c_array_cheat(CDoom.cheat_powerup,
     {CDoom.cheat_powerup_seq[0].to_unsafe, Pointer(UInt8).null},

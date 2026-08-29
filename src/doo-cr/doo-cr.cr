@@ -20686,7 +20686,6 @@ module LibDoom
           CDoom.doom_concat(@@buf, ")")
           CDoom.plyr.value.message = @@buf
         end
-      end
 
       # 'clev' change-level cheat
       if CDoom.cht_check_cheat(pointerof(CDoom.cheat_clev), ev.value.data1) != 0
@@ -20724,6 +20723,7 @@ module LibDoom
         CDoom.plyr.value.message = CDoom::STSTR_CLEV
         CDoom.g_defered_init_new(CDoom.gameskill, epsd, map)
       end
+    end
     end
     return 0
   end
