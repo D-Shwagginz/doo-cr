@@ -5970,6 +5970,7 @@ sleep 1.millisecond # Let music stop
 
   def self.i_register_song(data : Void*) : LibC::Int
     @@mus_is_midi = false
+    @@mus_channel_volume.fill(127)
 
     CDoom.doom_memcpy(pointerof(CDoom.mus_header), data, sizeof(CDoom::MusHeader))
     if (CDoom.doom_strncmp(CDoom.mus_header.id, "MUS", 3) != 0 || CDoom.mus_header.id[3] != 0x1A)
@@ -5993,6 +5994,8 @@ sleep 1.millisecond # Let music stop
   def self.i_qry_song_playing(handle : LibC::Int) : LibC::Int
     return CDoom.mus_playing
   end
+
+  @@mus_channel_volume = Array(Int32).new(16, 127)
 
   # Is the song playing?
   def self.i_tick_song : UInt64
@@ -6029,14 +6032,14 @@ sleep 1.millisecond # Let music stop
         midi_event = (0x00000080_u32 | channel | (note << 8))
       when CDoom::EVENT_PLAY_NOTE
         note_bytes = CDoom.mus_data[CDoom.mus_offset].to_i32
-        CDoom.mus_offset += 1
-        note = note_bytes & 0b01111111
-        vol = 127
-        if note_bytes & 0b10000000 != 0
-          vol = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
-          CDoom.mus_offset += 1
-        end
-        midi_event = (0x00000090_u32 | channel | (note << 8) | (vol << 16))
+  CDoom.mus_offset += 1
+  note = note_bytes & 0b01111111
+  if note_bytes & 0b10000000 != 0
+    @@mus_channel_volume[channel] = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
+    CDoom.mus_offset += 1
+  end
+  vol = @@mus_channel_volume[channel]
+  midi_event = (0x00000090_u32 | channel | (note << 8) | (vol << 16))
       when CDoom::EVENT_PITCH_BEND
         bend_amount = CDoom.mus_data[CDoom.mus_offset].to_i32 * 64
         CDoom.mus_offset += 1
@@ -6057,6 +6060,7 @@ sleep 1.millisecond # Let music stop
           midi_event = (0x000000B0_u32 | channel | (127 << 8))
         when CDoom::CONTROLLER_EVENT_RESET_ALL_CONTROLLERS
           midi_event = (0x000000B0_u32 | channel | (121 << 8))
+  @@mus_channel_volume[channel] = 127
         when CDoom::CONTROLLER_EVENT_EVENT # Doom never implemented
         end
       when CDoom::EVENT_CONTROLLER
