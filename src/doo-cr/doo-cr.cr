@@ -19921,6 +19921,20 @@ module LibDoom
     end
   end
 
+  @@regmus = [
+        # Song - Who? - Where?
+
+        CDoom::Musicenum::MUS_e3m4, # American        e4m1
+        CDoom::Musicenum::MUS_e3m2, # Romero        e4m2
+        CDoom::Musicenum::MUS_e3m3, # Shawn        e4m3
+        CDoom::Musicenum::MUS_e1m5, # American        e4m4
+        CDoom::Musicenum::MUS_e2m7, # Tim         e4m5
+        CDoom::Musicenum::MUS_e2m4, # Romero        e4m6
+        CDoom::Musicenum::MUS_e2m6, # J.Anderson        e4m7 CHIRON.WAD
+        CDoom::Musicenum::MUS_e2m5, # Shawn        e4m8
+        CDoom::Musicenum::MUS_e1m9, # Tim                e4m9
+      ]
+
   #
   # Per level startup code.
   # Kills playing sounds at start of level,
@@ -19939,24 +19953,10 @@ module LibDoom
     if CDoom.gamemode == CDoom::GameMode::Commercial
       mnum = CDoom::Musicenum::MUS_runnin.value + CDoom.gamemap - 1
     else
-      spmus = [
-        # Song - Who? - Where?
-
-        CDoom::Musicenum::MUS_e3m4, # American        e4m1
-        CDoom::Musicenum::MUS_e3m2, # Romero        e4m2
-        CDoom::Musicenum::MUS_e3m3, # Shawn        e4m3
-        CDoom::Musicenum::MUS_e1m5, # American        e4m4
-        CDoom::Musicenum::MUS_e2m7, # Tim         e4m5
-        CDoom::Musicenum::MUS_e2m4, # Romero        e4m6
-        CDoom::Musicenum::MUS_e2m6, # J.Anderson        e4m7 CHIRON.WAD
-        CDoom::Musicenum::MUS_e2m5, # Shawn        e4m8
-        CDoom::Musicenum::MUS_e1m9, # Tim                e4m9
-      ]
-
       if CDoom.gameepisode < 4
         mnum = CDoom::Musicenum::MUS_e1m1.value + (CDoom.gameepisode - 1) * 9 + CDoom.gamemap - 1
       else
-        mnum = spmus[CDoom.gamemap - 1].value
+        mnum = @@regmus[CDoom.gamemap - 1].value
       end
     end
 
@@ -20617,20 +20617,26 @@ module LibDoom
           CDoom.cht_get_param(pointerof(CDoom.cheat_mus), buf)
 
           if CDoom.gamemode == CDoom::GameMode::Commercial
-            musnum = CDoom::Musicenum::MUS_runnin.value + (buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord - 1
+            map = ((buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord ) &- 1
+            musnum = CDoom::Musicenum::MUS_runnin.value + map
 
-            if ((buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord) > 35
+            if map > 31
               CDoom.plyr.value.message = CDoom::STSTR_NOMUS
             else
               CDoom.s_change_music(musnum, 1)
             end
           else
-            musnum = CDoom::Musicenum::MUS_e1m1.value + (buf[0] - '1'.ord) * 9 + (buf[1] - '1'.ord)
+            e = (buf[0] &- '1'.ord)
+            m = (buf[1] &- '1'.ord)
 
-            if ((buf[0] - '1'.ord) * 9 + buf[1] - '1'.ord) > 31
+            if m > 8 || (e > 3 && CDoom.gamemode == CDoom::GameMode::Retail) ||
+               (e > 2 && CDoom.gamemode == CDoom::GameMode::Registered) ||
+              (e > 0 && CDoom.gamemode == CDoom::GameMode::Shareware)
               CDoom.plyr.value.message = CDoom::STSTR_NOMUS
             else
-              CDoom.s_change_music(musnum, 1)
+              mus = CDoom.gamemode == CDoom::GameMode::Retail ?
+                @@regmus[m].value : CDoom::Musicenum::MUS_e1m1.value + e * 9 + m
+              CDoom.s_change_music(mus, 1)
             end
           end
 
