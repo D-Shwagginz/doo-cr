@@ -20720,7 +20720,7 @@ module LibDoom
                     (epsd > 1 || map > 9)
 
         return 0 if CDoom.gamemode == CDoom::GameMode::Commercial &&
-                    map > 34
+                    map > 32
 
         # So be it.
         CDoom.plyr.value.message = CDoom::STSTR_CLEV
