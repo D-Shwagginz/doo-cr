@@ -27,10 +27,12 @@ require "raylib-cr/audio.cr"
 require "./adlmidi.cr"
 
 module LibDoom
-  VERSION_STR = "1.3" # Used for displaying
+  VERSION_STR = "1.4" # Used for displaying
   DEMOVERSION = 110
   SAVEVERSION =  10
   NETVERSION  =  13
+
+  BUILD_TIME = {{ "#{`date -u +"%m-%d-%Y %H:%M:%S UTC"`.strip}" }}
 
   # The resolution of the player's viewport for hardware rendering
   # NOTE: the screen wipe is only designed for 320 x 240

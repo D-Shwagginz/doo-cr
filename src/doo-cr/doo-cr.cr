@@ -1808,6 +1808,13 @@ module LibDoom
   #
   def self.d_doom_main
     Raylib.set_trace_log_level(Raylib::TraceLogLevel::Error)
+
+    if ARGV.includes?("-v")
+      puts "DOO-CR v#{VERSION_STR} - DEMO v#{DEMOVERSION} | SAVE v#{SAVEVERSION} | NET v#{NETVERSION}"
+      puts "Built #{BUILD_TIME}"
+      i_quit
+    end
+
     file = uninitialized StaticArray(UInt8, 256)
 
     CDoom.find_response_file
@@ -1830,21 +1837,12 @@ module LibDoom
     print "\e[?25l"
     print "\e[1;1H\e[2K\e\e[38;2;255;215;0;48;5;19m"
     puts "DOO-CR Operating System v#{VERSION_STR} ".center(77)
-    puts " DEMO V#{DEMOVERSION} | SAVE V#{SAVEVERSION} | NET V#{NETVERSION} ".center(77)
+    puts " DEMO v#{DEMOVERSION} | SAVE v#{SAVEVERSION} | NET v#{NETVERSION} ".center(77)
     print "\e[0m\e[3;999r"
     print "\e[3;1H\e[38;5;250m"
 
 
     print CDoom::D_DEVSTR if CDoom.devparm != 0
-
-    {% if false %}
-      # [pd] Ignore cdrom
-      if CDoom.m_check_parm("-cdrom") != 0
-        print CDoom::D_CDROM
-        Dir.mkdir("c:\\doomdata")
-        CDoom.doom_strcpy(CDoom.basedefault, "c:/doomdata/default.cfg")
-      end
-    {% end %}
 
     # turbo option
     if (p = CDoom.m_check_parm("-turbo")) != 0
