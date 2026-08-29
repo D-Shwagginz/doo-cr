@@ -10660,7 +10660,7 @@ module LibDoom
 
       if !target.value.player.null?
         unless CDoom.netgame == 0
-          srcplr = source.value.player.- CDoom.players.to_unsafe
+          srcplr = source.value.player - CDoom.players.to_unsafe
           trgtplr = target.value.player - CDoom.players.to_unsafe
           source.value.player.value.frags[trgtplr] =
             source.value.player.value.frags[trgtplr] + 1
@@ -10691,6 +10691,14 @@ module LibDoom
     end
 
     if !target.value.player.null?
+      if source.null? || source.value.player.null? && # Player was not killed by player
+        target.value.player - CDoom.players.to_unsafe != CDoom.consoleplayer # Isn't self. They know they died
+         (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message =
+            @@died_strings.sample(Random.new(CDoom.m_random)).gsub(
+              '1', String.new(CDoom.player_names[target.value.player - CDoom.players.to_unsafe])[...-2])
+
+      end
+
       # count environment kills against you
       target.value.player.value.frags[target.value.player - CDoom.players.to_unsafe] =
         target.value.player.value.frags[target.value.player - CDoom.players.to_unsafe] + 1 if source.null?

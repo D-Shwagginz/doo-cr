@@ -191,6 +191,13 @@ module LibDoom
 
   CDoom.followplayer = 1
 
+  @@died_strings = [
+    "1 has died",
+    "something got 1",
+    "1 has been slain",
+    "1 will be missed"
+  ]
+
   @@suic_strings = [
     "You have taken your own life!",
     "You will be missed",
