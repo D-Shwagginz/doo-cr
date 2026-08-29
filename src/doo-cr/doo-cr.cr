@@ -1826,40 +1826,14 @@ module LibDoom
       CDoom.deathmatch = 1
     end
 
-    case CDoom.gamemode
-    when CDoom::GameMode::Retail
-      @@title = "The Ultimate DOOM Startup"
-    when CDoom::GameMode::Shareware
-      @@title = "DOOM Shareware Startup"
-    when CDoom::GameMode::Registered
-      @@title = "DOOM Registered Startup"
-    when CDoom::GameMode::Commercial
-      case CDoom.gamemission
-      when CDoom::GameMission::PackPlut
-        @@title = "Final Doom: The Plutonia Experiment"
-      when CDoom::GameMission::PackTnt
-        @@title = "Final Doom: TNT: Evilution"
-      else
-        @@title = "DOOM 2: Hell on Earth"
-      end
-    else
-      @@title = "Public DOOM"
-    end
-
     print "\e[2J\e[H"
     print "\e[?25l"
     print "\e[1;1H\e[2K\e\e[38;2;255;215;0;48;5;19m"
     puts "DOO-CR Operating System v#{VERSION_STR} ".center(77)
-    print "\e[0m\e[2;999r"
-    print "\e[2;1H\e[38;5;250m"
+    puts " DEMO V#{DEMOVERSION} | SAVE V#{SAVEVERSION} | NET V#{NETVERSION} ".center(77)
+    print "\e[0m\e[3;999r"
+    print "\e[3;1H\e[38;5;250m"
 
-    puts " DEMO V#{DEMOVERSION} | SAVE V#{SAVEVERSION} | NET V#{NETVERSION} ".center(77, '=')
-    puts @@title.center(77)
-    puts "".ljust(77, '=')
-    puts "Doo-cr is licensed under the GNU General Public License v3.0 license".center(77)
-    puts "Doo-cr comes with ABSOLUTELY NO WARRANTY".center(77)
-    puts "Doo-cr is free software, and you are welcome to redistribute it".center(77)
-    puts "".ljust(77, '=')
 
     print CDoom::D_DEVSTR if CDoom.devparm != 0
 
@@ -2015,10 +1989,37 @@ module LibDoom
     puts "w_init: Init Wadfiles."
     CDoom.w_init_multiple_files(CDoom.wadfiles)
 
-    puts "        Init Mergefiles" if ARGV.includes?("-merge")
+    puts "        Init Mergefiles." if ARGV.includes?("-merge")
     w_merge_multiple_files(@@merge_files)
 
     confirm_version()
+
+    case CDoom.gamemode
+    when CDoom::GameMode::Retail
+      @@title = "The Ultimate DOOM Startup"
+    when CDoom::GameMode::Shareware
+      @@title = "DOOM Shareware Startup"
+    when CDoom::GameMode::Registered
+      @@title = "DOOM Registered Startup"
+    when CDoom::GameMode::Commercial
+      case CDoom.gamemission
+      when CDoom::GameMission::PackPlut
+        @@title = "Final Doom: The Plutonia Experiment"
+      when CDoom::GameMission::PackTnt
+        @@title = "Final Doom: TNT: Evilution"
+      else
+        @@title = "DOOM 2: Hell on Earth"
+      end
+    else
+      @@title = "Public DOOM"
+    end
+
+    puts @@title.center(77)
+    puts "".ljust(77, '=')
+    puts "Doo-cr is licensed under the GNU General Public License v3.0 license".center(77)
+    puts "Doo-cr comes with ABSOLUTELY NO WARRANTY".center(77)
+    puts "Doo-cr is free software, and you are welcome to redistribute it".center(77)
+    puts "".ljust(77, '=')
 
     # Check for -file in shareware
     if CDoom.modifiedgame != 0
@@ -5927,7 +5928,7 @@ module LibDoom
     CDoom::MIXBUFFERSIZE.times { |i| CDoom.mixbuffer[i] = 0 }
 
     # Finished initialization.
-    puts "sound module ready"
+    puts "sound module ready."
   end
 
   #
