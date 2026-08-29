@@ -5807,7 +5807,7 @@ module LibDoom
                 CDoom::Default.new(name: "crosshair", location: pointerof(CDoom.crosshair), defaultvalue: 0),
                 CDoom::Default.new(name: "always_run", location: pointerof(CDoom.always_run), defaultvalue: 0),
 
-                CDoom::Default.new(name: "snd_channels", location: pointerof(CDoom.num_channels), defaultvalue: 8),
+                CDoom::Default.new(name: "snd_channels", location: pointerof(CDoom.num_channels), defaultvalue: 16),
 
                 CDoom::Default.new(name: "usegamma", location: pointerof(CDoom.usegamma), defaultvalue: 0),
 
