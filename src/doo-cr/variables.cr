@@ -6295,7 +6295,9 @@ module LibDoom
   CDoom.cheat_noclip.p = Pointer(UInt8).null
   CDoom.cheat_commercial_noclip.sequence = CDoom.cheat_commercial_noclip_seq.to_unsafe
   CDoom.cheat_commercial_noclip.p = Pointer(UInt8).null
-  @@cheat_me = CDoom::Cheatseq.new(sequence: @@cheat_me_seq.to_unsafe, p: Pointer(UInt8).null)
+  @@cheat_me = Pointer(CDoom::Cheatseq).malloc
+  @@cheat_me.value.sequence = @@cheat_me_seq.to_unsafe
+  @@cheat_me.value.p = Pointer(UInt8).null
 
   c_array_cheat(CDoom.cheat_powerup,
     {CDoom.cheat_powerup_seq[0].to_unsafe, Pointer(UInt8).null},

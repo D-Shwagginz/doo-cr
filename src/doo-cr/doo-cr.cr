@@ -6489,7 +6489,6 @@ module LibDoom
 
   def self.cht_check_cheat(cht : CDoom::Cheatseq*, key : LibC::Char) : LibC::Int
     rc = 0
-
     if @@firsttime != 0
       @@firsttime = 0
       256.times { |i| @@cheat_xlate_table[i] = (scramble(i)).to_u8 }
@@ -10744,6 +10743,9 @@ module LibDoom
       target.value.momy = 0
       target.value.momz = 0
     end
+
+        player = source.value.player
+    damage <<= 1 if !player.null? && player.value.cheats & CDoom::Cheat::CF_ME.value != 0 # Double damage in me mode!
 
     player = target.value.player
     damage >>= 1 if !player.null? && CDoom.gameskill == CDoom::Skill::Baby # take half damage in trainer mode
@@ -20576,6 +20578,24 @@ module LibDoom
       # if a user keypress...
     elsif ev.value.type == CDoom::Evtype::Keydown
       if CDoom.netgame == 0
+        # my little cheat
+        if cht_check_cheat(@@cheat_me, ev.value.data1.to_u8) != 0
+          CDoom.plyr.value.cheats = CDoom.plyr.value.cheats ^ CDoom::Cheat::CF_ME.value
+          CDoom.plyr.value.message = "#{(CDoom.plyr.value.cheats & CDoom::Cheat::CF_ME.value != 0 ? "yea" : "no")} baby!"
+          if CDoom.plyr.value.cheats & CDoom::Cheat::CF_ME.value != 0
+          if CDoom.plyr.value.backpack == 0
+            CDoom::Ammotype::NUMAMMO.value.times do |i|
+              CDoom.plyr.value.maxammo[i] = CDoom.plyr.value.maxammo[i] * 2
+            end
+            CDoom.plyr.value.backpack = 1
+          end          
+            CDoom::Ammotype::NUMAMMO.value.times do |i|
+              CDoom.plyr.value.ammo[i] = CDoom.plyr.value.maxammo[i]
+            end
+          end
+        end
+          
+
         # 'dqd' cheat of toggleable god mode
         if CDoom.cht_check_cheat(pointerof(CDoom.cheat_god), ev.value.data1) != 0
           CDoom.plyr.value.cheats = CDoom.plyr.value.cheats ^ CDoom::Cheat::CF_GODMODE.value

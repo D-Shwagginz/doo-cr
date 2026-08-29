@@ -121,5 +121,6 @@ end
 MAIN_THREAD = Thread.current
 Fiber::ExecutionContext.default.resize(1)
 
+
 # Make it happen!
 LibDoom.doom_init(ARGC_UNSAFE, ARGV_UNSAFE, 0)

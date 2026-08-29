@@ -3822,13 +3822,16 @@ lib CDoom
   #
   # Player internal flags, for cheats and debug.
   #
+  @[Flags]
   enum Cheat
     # No clipping, walk through barriers.
-    CF_NOCLIP = 1
+    CF_NOCLIP
     # No damage, no health loss.
-    CF_GODMODE = 2
+    CF_GODMODE
     # Not really a cheat, just a debug aid.
-    CF_NOMOMENTUM = 4
+    CF_NOMOMENTUM
+    # Me!
+    CF_ME
   end
 
   #
