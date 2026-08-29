@@ -1807,6 +1807,7 @@ module LibDoom
   # d_doom_main
   #
   def self.d_doom_main
+    Raylib.set_trace_log_level(Raylib::TraceLogLevel::Error)
     file = uninitialized StaticArray(UInt8, 256)
 
     CDoom.find_response_file
@@ -1844,6 +1845,21 @@ module LibDoom
     else
       @@title = "Public DOOM"
     end
+
+    print "\e[2J\e[H"
+    print "\e[?25l"
+    print "\e[1;1H\e[2K\e\e[38;2;255;215;0;48;5;19m"
+    puts "DOO-CR Operating System v#{VERSION_STR} ".center(77)
+    print "\e[0m\e[2;999r"
+    print "\e[2;1H\e[38;5;250m"
+
+    puts " DEMO V#{DEMOVERSION} | SAVE V#{SAVEVERSION} | NET V#{NETVERSION} ".center(77, '=')
+    puts @@title.center(77)
+    puts "".ljust(77, '=')
+    puts "Doo-cr is licensed under the GNU General Public License v3.0 license".center(77)
+    puts "Doo-cr comes with ABSOLUTELY NO WARRANTY".center(77)
+    puts "Doo-cr is free software, and you are welcome to redistribute it".center(77)
+    puts "".ljust(77, '=')
 
     print CDoom::D_DEVSTR if CDoom.devparm != 0
 
@@ -2029,24 +2045,13 @@ module LibDoom
       end
     end
 
-    puts " DOO-CR V#{VERSION_STR} ".center(77, '=')
-    puts " DEMO V#{DEMOVERSION} | SAVE V#{SAVEVERSION} | NET V#{NETVERSION} ".center(77, '=')
-    puts @@title.center(77)
-    puts "".ljust(77, '=')
-    puts "Doo-cr is licensed under the GNU General Public License v3.0 license".center(77)
-    puts "Doo-cr comes with ABSOLUTELY NO WARRANTY".center(77)
-    puts "Doo-cr is free software, and you are welcome to redistribute it".center(77)
-    puts "".ljust(77, '=')
-
-    Raylib.set_trace_log_level(Raylib::TraceLogLevel::Error)
-
     puts "m_init: Init miscellaneous info."
     CDoom.m_init
 
-    print "r_init: Init DOOM refresh daemon."
+    print "r_init: Init DOO-CR refresh daemon - "
     CDoom.r_init
 
-    puts "\np_init: Init Playloop state."
+    puts "p_init: Init Playloop state."
     CDoom.p_init
 
     puts "i_init: Setting up machine state."
@@ -2685,7 +2690,7 @@ module LibDoom
     CDoom.d_arbitrate_net_start if CDoom.netgame != 0
     puts "startskill: #{CDoom.startskill} | deathmatch: #{CDoom.deathmatch}" +
          " | startmap: #{CDoom.startmap} | startepisode: #{CDoom.startepisode}"
-    puts "ticdup: #{CDoom.doomcom.value.ticdup} | extratic: #{CDoom.doomcom.value.extratics}"
+    print "ticdup: #{CDoom.doomcom.value.ticdup} | extratic: #{CDoom.doomcom.value.extratics} | "
 
     # read values out of doomcom
     CDoom.ticdup = CDoom.doomcom.value.ticdup
@@ -5916,7 +5921,7 @@ module LibDoom
       i += 1
     end
 
-    print "pre-cached all sound data - "
+    print "Pre-cached all sound data - "
 
     # Now initialize mixbuffer with zero.
     CDoom::MIXBUFFERSIZE.times { |i| CDoom.mixbuffer[i] = 0 }
@@ -17270,12 +17275,6 @@ module LibDoom
 
     totalwidth = 0
 
-    # Really complex printing shit...
-    print "["
-    ((CDoom.numtextures + 63) // 64).times { |i| print " " }
-    print "]"
-    (((CDoom.numtextures + 63) // 64) + 1).times { |i| print "\b" }
-
     CDoom.numtextures.times do |i|
       print "." if i & 63 == 0
 
@@ -17346,17 +17345,8 @@ module LibDoom
   end
 
   def self.r_init_flats
-    CDoom.firstflat = CDoom.w_get_num_for_name("F_START") + 1
-    CDoom.lastflat = CDoom.w_get_num_for_name("F_END") - 1
-    CDoom.numflats = CDoom.lastflat - CDoom.firstflat + 1
-
     # Create translation table for global animation.
     CDoom.flattranslation = CDoom.z_malloc((CDoom.numflats + 1) * sizeof(Int32), CDoom::PU_STATIC, Pointer(Void).null).as(Int32*)
-
-    print "["
-    ((CDoom.numflats + 63) // 64).times { |i| print " " }
-    print "]"
-    (((CDoom.numflats + 63) // 64) + 1).times { |i| print "\b" }
 
     CDoom.numflats.times do |i|
       print "." if i & 63 == 0
@@ -17370,18 +17360,9 @@ module LibDoom
   #  just for having the header info ready during rendering.
   #
   def self.r_init_sprite_lumps
-    CDoom.firstspritelump = CDoom.w_get_num_for_name("S_START") + 1
-    CDoom.lastspritelump = CDoom.w_get_num_for_name("S_END") - 1
-
-    CDoom.numspritelumps = CDoom.lastspritelump - CDoom.firstspritelump + 1
     CDoom.spritewidth = CDoom.z_malloc(CDoom.numspritelumps * sizeof(CDoom::Fixed), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Fixed*)
     CDoom.spriteoffset = CDoom.z_malloc(CDoom.numspritelumps * sizeof(CDoom::Fixed), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Fixed*)
     CDoom.spritetopoffset = CDoom.z_malloc(CDoom.numspritelumps * sizeof(CDoom::Fixed), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Fixed*)
-
-    print "["
-    ((CDoom.numspritelumps + 63) // 64).times { |i| print " " }
-    print "]"
-    (((CDoom.numspritelumps + 63) // 64) + 1).times { |i| print "\b" }
 
     CDoom.numspritelumps.times do |i|
       print "." if i & 63 == 0
@@ -17401,7 +17382,6 @@ module LibDoom
     CDoom.colormaps = CDoom.z_malloc(length, CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Lighttable*)
     CDoom.colormaps = Pointer(CDoom::Lighttable).new(((CDoom.colormaps.address + 255) & ~0xff))
     CDoom.w_read_lump(lump, CDoom.colormaps)
-    print "x"
   end
 
   #
@@ -17410,14 +17390,30 @@ module LibDoom
   # Must be called after W_Init.
   #
   def self.r_init_data
-    print "\n  init_textures           - "
+    CDoom.firstflat = CDoom.w_get_num_for_name("F_START") + 1
+    CDoom.lastflat = CDoom.w_get_num_for_name("F_END") - 1
+    CDoom.numflats = CDoom.lastflat - CDoom.firstflat + 1
+    
+    CDoom.firstspritelump = CDoom.w_get_num_for_name("S_START") + 1
+    CDoom.lastspritelump = CDoom.w_get_num_for_name("S_END") - 1
+    CDoom.numspritelumps = CDoom.lastspritelump - CDoom.firstspritelump + 1
+
+    nums = (CDoom.numtextures + 63) // 64 +
+    (CDoom.numflats + 63) // 64 +
+    (CDoom.numspritelumps + 63) // 64
+
+
+    # Really complex printing shit...
+    print "["
+    nums.times { |i| print " " }
+    print "]"
+    (nums + 1).times { |i| print "\b" }
+
     CDoom.r_init_textures
-    print "\n  init_flats              - "
     CDoom.r_init_flats
-    print "\n  init_sprites            - "
     CDoom.r_init_sprite_lumps
-    print "\n  init_colormaps          - "
     CDoom.r_init_colormaps
+    puts "]"
   end
 
   #
@@ -17718,14 +17714,8 @@ module LibDoom
     CDoom.translationtables = CDoom.z_malloc(256 * 3 + 255, CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Byte*)
     CDoom.translationtables = Pointer(CDoom::Byte).new((CDoom.translationtables.address + 255) & ~255)
 
-    print "["
-    ((256 + 15) // 16).times { |i| print " " }
-    print "]"
-    (((256 + 15) // 16) + 1).times { |i| print "\b" }
-
     # translate just the 16 green colors
     256.times do |i|
-      print "." if i & 15 == 0
       if i >= 0x70 && i <= 0x7f
         # map green ramp to gray, brown, red
         CDoom.translationtables[i] = 0x60_u8 + (i & 0xf)
@@ -17738,7 +17728,6 @@ module LibDoom
         CDoom.translationtables[i + 512] = i.to_u8!
       end
     end
-    print "]"
   end
 
   #
@@ -18163,8 +18152,8 @@ module LibDoom
   def self.r_init_tables
     {% unless flag?("PRECOMPUTED") %}
       # FINE TANGENT COMPUTE
-
-      print "\n  finetangent             - ["
+      puts " - COMPUTE"
+      print "         finetangent - ["
       ((FINETANGENT_SIZE + 255) // 256).times { |i| print " " }
       print "]"
       (((FINETANGENT_SIZE + 255) // 256) + 1).times { |i| print "\b" }
@@ -18187,7 +18176,7 @@ module LibDoom
       puts "]"
 
       # FINE SINE COMPUTE
-      print "  finesine                - ["
+      print "         finesine    - ["
       ((FINESINE_SIZE + 255) // 256).times { |i| print " " }
       print "]"
       (((FINESINE_SIZE + 255) // 256) + 1).times { |i| print "\b" }
@@ -18201,7 +18190,7 @@ module LibDoom
       puts "]"
 
       # TANTOANGLE COMPUTE
-      print "  tantoangle              - ["
+      print "         tantoangle  - ["
       ((TANTOANGLE_SIZE + 255) // 256).times { |i| print " " }
       print "]"
       (((TANTOANGLE_SIZE + 255) // 256) + 1).times { |i| print "\b" }
@@ -18215,7 +18204,7 @@ module LibDoom
       end
       puts "]"
     {% else %}
-      puts "             - PRECOMPUTED"
+      puts " - PRECOMPUTED"
     {% end %}
 
     @@finecosine = @@finesine.dup.rotate(FINEANGLES // 4)
@@ -18283,16 +18272,9 @@ module LibDoom
   # because the scalelight table changes with view size.
   #
   def self.r_init_light_tables
-    print "["
-    CDoom::LIGHTLEVELS.times { |i| print " " }
-    print "]"
-    (CDoom::LIGHTLEVELS + 1).times { |i| print "\b" }
-
     # Calculate the light levels to use
     #  for each level / distance combination.
     CDoom::LIGHTLEVELS.times do |i|
-      print "."
-
       startmap = ((CDoom::LIGHTLEVELS - 1 - i) * 2) * CDoom::NUMCOLORMAPS // CDoom::LIGHTLEVELS
       CDoom::MAXLIGHTZ.times do |j|
         scale = CDoom.fixed_div((CDoom::SCREENWIDTH // 2 * FRACUNIT), (j + 1) << CDoom::LIGHTZSHIFT)
@@ -18306,7 +18288,6 @@ module LibDoom
         ((CDoom.zlight.to_unsafe + i).value.to_unsafe + j).value = CDoom.colormaps + level * 256
       end
     end
-    puts "]"
   end
 
   #
@@ -18386,16 +18367,13 @@ module LibDoom
     CDoom.r_init_data
 
     # viewwidth / viewheight / detailLevel are set by the defaults
-    print "\nr_init_tables"
+    print "        Tables"
     CDoom.r_init_tables
 
     CDoom.r_set_view_size(CDoom.screenblocks, CDoom.detail_level)
 
-    print "r_init_light_tables       - "
     CDoom.r_init_light_tables
-    print "r_init_sky_map            - "
     CDoom.r_init_sky_map
-    print "r_init_translation_tables - "
     CDoom.r_init_translation_tables
 
     CDoom.framecount = 0
@@ -19254,7 +19232,6 @@ module LibDoom
   #
   def self.r_init_sky_map
     CDoom.skytexturemid = 100 * FRACUNIT
-    puts "x"
   end
 
   #

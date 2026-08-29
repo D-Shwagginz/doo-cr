@@ -121,6 +121,12 @@ end
 MAIN_THREAD = Thread.current
 Fiber::ExecutionContext.default.resize(1)
 
+at_exit do
+  print "\e7"       # save cursor position
+print "\e[r"      # reset scrolling region
+print "\e8"       # restore cursor position
+print "\e[?25h"   # show cursor
+end
 
 # Make it happen!
 LibDoom.doom_init(ARGC_UNSAFE, ARGV_UNSAFE, 0)
