@@ -3863,7 +3863,10 @@ module LibDoom
               CDoom.s_resume_sound
             end
           when CDoom::Buttoncode::BTS_SAVEGAME
-            CDoom.doom_strcpy(CDoom.savedescription, "NET GAME") if CDoom.savedescription[0] == '\0'.ord
+            if CDoom.savedescription[0] == '\0'.ord && CDoom.netgame != 0
+              # Let single player game save empty descriptions
+              CDoom.doom_strcpy(CDoom.savedescription, "NET GAME") 
+            end
             CDoom.savegameslot =
               (CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BTS_SAVEMASK.value) >> CDoom::Buttoncode::BTS_SAVESHIFT.value
             CDoom.gameaction = CDoom::Gameaction::Savegame
@@ -6952,24 +6955,7 @@ module LibDoom
   def self.m_draw_key(key : Pointer(Int32)) : String
     str = "NIL"
 
-    dch = key.value
-    dch += 0x80 if dch == 0x1d ||
-                   dch == 0x36 ||
-                   dch == 0x38 ||
-                   dch == 0x3b ||
-                   dch == 0x3c ||
-                   dch == 0x3d ||
-                   dch == 0x3e ||
-                   dch == 0x3f ||
-                   dch == 0x40 ||
-                   dch == 0x41 ||
-                   dch == 0x42 ||
-                   dch == 0x43 ||
-                   dch == 0x44 ||
-                   dch == 0x57 ||
-                   dch == 0x58
-
-    CDoom::DoomKey.from_value?(dch).try do |dkey|
+    CDoom::DoomKey.from_value?(key.value).try do |dkey|
       case dkey
       when CDoom::DoomKey::UNKNOWN
       when CDoom::DoomKey::TAB
@@ -7415,25 +7401,8 @@ module LibDoom
 
     # Edit selected control
     if !@@selected_edit.null?
-      dch = ch
-      dch += 0x80 if dch == 0x1d ||
-                     dch == 0x36 ||
-                     dch == 0x38 ||
-                     dch == 0x3b ||
-                     dch == 0x3c ||
-                     dch == 0x3d ||
-                     dch == 0x3e ||
-                     dch == 0x3f ||
-                     dch == 0x40 ||
-                     dch == 0x41 ||
-                     dch == 0x42 ||
-                     dch == 0x43 ||
-                     dch == 0x44 ||
-                     dch == 0x57 ||
-                     dch == 0x58
-
-      unless CDoom::DoomKey.from_value(dch).nil?
-        @@selected_edit.value = dch
+      unless CDoom::DoomKey.from_value?(ch).nil?
+        @@selected_edit.value = ch
         @@selected_edit = Pointer(Int32).null
         return 1
       end
@@ -7452,7 +7421,7 @@ module LibDoom
         CDoom.doom_strcpy(CDoom.savegamestrings[CDoom.save_slot].to_unsafe, CDoom.save_old_string)
       when CDoom::KEY_ENTER
         CDoom.save_string_enter = 0
-        CDoom.m_do_save(CDoom.save_slot) if CDoom.savegamestrings[CDoom.save_slot][0] != 0
+        CDoom.m_do_save(CDoom.save_slot) # if CDoom.savegamestrings[CDoom.save_slot][0] != 0 allows empty saves
       else
         ch = CDoom.doom_toupper(ch)
         unless ch != 32 && (ch - CDoom::HU_FONTSTART < 0 || ch - CDoom::HU_FONTSTART >= CDoom::HU_FONTSIZE)
