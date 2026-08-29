@@ -10108,7 +10108,7 @@ module LibDoom
         floor.value.floordestheight =
           floor.value.sector.value.floorheight + minsize
       when CDoom::Floorenum::LowerAndChange
-        floor.value.direction = 1
+        floor.value.direction = -1
         floor.value.sector = sec
         floor.value.speed = CDoom::FLOORSPEED
         floor.value.floordestheight =
@@ -10744,8 +10744,9 @@ module LibDoom
       target.value.momz = 0
     end
 
-        player = source.value.player
-    damage <<= 1 if !player.null? && player.value.cheats & CDoom::Cheat::CF_ME.value != 0 # Double damage in me mode!
+    damage <<= 1 if !source.null? && 
+    !source.value.player.null? && 
+    source.value.player.value.cheats & CDoom::Cheat::CF_ME.value != 0 # Double damage in me mode!
 
     player = target.value.player
     damage >>= 1 if !player.null? && CDoom.gameskill == CDoom::Skill::Baby # take half damage in trainer mode
