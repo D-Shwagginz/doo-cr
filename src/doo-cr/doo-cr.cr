@@ -109,8 +109,13 @@ module LibDoom
   end
 
   def self.doom_strncmp(str1 : UInt8*, str2 : UInt8*, n : Int32) : Int32
-    len = doom_strlen(str1) + 1 < n ? doom_strlen(str1) + 1 : n
-    return str1.memcmp(str2, len).clamp(-1, 1)
+  n.times do |i|
+    c1 = str1[i]
+    c2 = str2[i]
+    return (c1.to_i32 - c2.to_i32).clamp(-1, 1) if c1 != c2
+    return 0 if c1 == 0
+  end
+  return 0
   end
 
   def self.doom_toupper(c : Int32) : Int32
@@ -123,8 +128,13 @@ module LibDoom
   end
 
   def self.doom_strncasecmp(str1 : UInt8*, str2 : UInt8*, n : Int32) : Int32
-    len = doom_strlen(str1) < n ? doom_strlen(str1) : n
-    return String.new(str1)[...len].compare(String.new(str2)[...len], case_insensitive: true)
+  n.times do |i|
+    c1 = doom_toupper(str1[i].to_i32)
+    c2 = doom_toupper(str2[i].to_i32)
+    return (c1 - c2).clamp(-1, 1) if c1 != c2
+    return 0 if c1 == 0
+  end
+  return 0
   end
 
   def self.doom_atoi(str : UInt8*) : Int32
