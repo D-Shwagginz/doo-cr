@@ -195,21 +195,21 @@ module LibDoom
     "1 has died",
     "something got 1",
     "1 has been slain",
-    "1 will be missed"
+    "1 will be missed",
   ]
 
   @@suic_strings = [
     "You have taken your own life!",
     "You will be missed",
     "Due to a rocket no doubt",
-    "Good thing you can respawn!"
+    "Good thing you can respawn!",
   ]
 
   @@suic_see_strings = [
     "1 killed themselves",
     "1 has blown themselves up",
     "1 couldn't take it anymore",
-    "who killed 1?"
+    "who killed 1?",
   ]
 
   @@death_kill_strings = [

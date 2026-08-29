@@ -10691,12 +10691,11 @@ module LibDoom
     end
 
     if !target.value.player.null?
-      if source.null? || source.value.player.null? && # Player was not killed by player
-        target.value.player - CDoom.players.to_unsafe != CDoom.consoleplayer # Isn't self. They know they died
-         (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message =
-            @@died_strings.sample(Random.new(CDoom.m_random)).gsub(
-              '1', String.new(CDoom.player_names[target.value.player - CDoom.players.to_unsafe])[...-2])
-
+      if source.null? || source.value.player.null? &&                         # Player was not killed by player
+         target.value.player - CDoom.players.to_unsafe != CDoom.consoleplayer # Isn't self. They know they died
+        (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message =
+          @@died_strings.sample(Random.new(CDoom.m_random)).gsub(
+            '1', String.new(CDoom.player_names[target.value.player - CDoom.players.to_unsafe])[...-2])
       end
 
       # count environment kills against you
