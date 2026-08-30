@@ -4170,7 +4170,7 @@ end
     if CDoom.gamemode == CDoom::GameMode::Commercial
       CDoom.wminfo.partime = 35 * CDoom.cpars[CDoom.gamemap - 1]
     else
-      CDoom.wminfo.partime = 35 * CDoom.pars[CDoom.gameepisode][CDoom.gamemap]
+      CDoom.wminfo.partime = CDoom.gameepisode > 3 ? 0 : 35 * CDoom.pars[CDoom.gameepisode][CDoom.gamemap]
     end
     CDoom.wminfo.pnum = CDoom.consoleplayer
 
