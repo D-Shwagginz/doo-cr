@@ -4170,7 +4170,7 @@ end
     if CDoom.gamemode == CDoom::GameMode::Commercial
       CDoom.wminfo.partime = 35 * CDoom.cpars[CDoom.gamemap - 1]
     else
-      CDoom.wminfo.partime = CDoom.gameepisode > 3 ? 0 : 35 * CDoom.pars[CDoom.gameepisode][CDoom.gamemap]
+      CDoom.wminfo.partime = 35 * CDoom.pars[CDoom.gameepisode-1][CDoom.gamemap-1]
     end
     CDoom.wminfo.pnum = CDoom.consoleplayer
 
@@ -22886,10 +22886,8 @@ end
     CDoom.v_draw_patch(CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom::FB, CDoom.time_patch)
     CDoom.wi_draw_time(CDoom::SCREENWIDTH // 2 - CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom.cnt_time)
 
-    if CDoom.wbs.value.epsd < 3
       CDoom.v_draw_patch(CDoom::SCREENWIDTH // 2 + CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom::FB, CDoom.par)
       CDoom.wi_draw_time(CDoom::SCREENWIDTH - CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom.cnt_par)
-    end
   end
 
   def self.wi_check_for_accelerate
