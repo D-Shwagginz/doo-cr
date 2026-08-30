@@ -12138,7 +12138,7 @@ module Doocr
     return 0 if den == 0
 
     num =
-      CDoom.fixed_mul((v1.value.x &- v2.value.x) >> 8, v1.value.dy) +
+      CDoom.fixed_mul((v1.value.x &- v2.value.x) >> 8, v1.value.dy) &+
         CDoom.fixed_mul((v2.value.y &- v1.value.y) >> 8, v1.value.dx)
     frac = CDoom.fixed_div(num, den)
 
@@ -16649,7 +16649,7 @@ module Doocr
     # Strength counts up to diminish fade
     if player.value.powers[CDoom::Powertype::Strength.value] != 0
       player.value.powers[CDoom::Powertype::Strength.value] =
-        player.value.powers[CDoom::Powertype::Strength.value] + 1
+        player.value.powers[CDoom::Powertype::Strength.value] &+ 1
     end
 
     if player.value.powers[CDoom::Powertype::Invulnerability.value] != 0
