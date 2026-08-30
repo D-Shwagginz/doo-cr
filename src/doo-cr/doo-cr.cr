@@ -10535,7 +10535,7 @@ end
     when CDoom::Spritenum::SPR_MEDI
       return if CDoom.p_give_body(player, 25) == 0
 
-      if player.value.health < 25
+      if (player.value.health - 25) < 25
         player.value.message = CDoom::GOTMEDINEED
       else
         player.value.message = CDoom::GOTMEDIKIT

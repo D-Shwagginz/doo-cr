@@ -46,10 +46,10 @@ SHELLCOLORS = [
 ]
 
 module Doocr
-  VERSION_STR = "1.4" # Used for displaying
+  VERSION_STR = "1.5" # Used for displaying
   DEMOVERSION = 110
   SAVEVERSION =  11
-  NETVERSION  =  14
+  NETVERSION  =  15
 
   BUILD_TIME = {{ "#{`date -u +"%m-%d-%Y %H:%M:%S UTC"`.strip}" }}
 
