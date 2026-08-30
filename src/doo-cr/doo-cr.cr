@@ -3347,37 +3347,30 @@ module Doocr
   end
 
   def self.wipe_do_color_x_form(width : Int32, height : Int32, ticks : Int32) : Int32
-    changes = 0
-    w = CDoom.wipe_scr
-    e = CDoom.wipe_scr_end
-    newval = 0
+  changed = 0
+  w = CDoom.wipe_scr
+  e = CDoom.wipe_scr_end
+  stop = w + width * height
 
-    while w != CDoom.wipe_scr + width * height
-      if w.value != e.value
-        if w.value > e.value
-          newval = w.value - ticks
-          if newval < e.value
-            w.value = e.value
-          else
-            w.value = newval
-          end
-          changed = 1
-        elsif w.value < e.value
-          newval = w.value + ticks
-          if newval > e.value
-            w.value = e.value
-          else
-            w.value = newval
-          end
-          changed = 1
-        end
+  while w != stop
+    wv = w.value.to_i32
+    ev = e.value.to_i32
+    if wv != ev
+      if wv > ev
+        newval = wv - ticks
+        w.value = (newval < ev ? ev : newval).to_u8
+      elsif wv < ev
+        newval = wv + ticks
+        w.value = (newval > ev ? ev : newval).to_u8
       end
-      w += 1
-      e += 1
+      changed = 1
     end
-
-    return (changed == 0).to_unsafe
+    w += 1
+    e += 1
   end
+
+  return (changed == 0).to_unsafe
+end
 
   def self.wipe_exit_color_x_form(width : Int32, height : Int32, ticks : Int32) : Int32
     return 0
