@@ -26,11 +26,11 @@ require "raylib-cr"
 require "raylib-cr/audio.cr"
 require "./adlmidi.cr"
 
-module LibDoom
+module Doocr
   VERSION_STR = "1.4" # Used for displaying
   DEMOVERSION = 110
-  SAVEVERSION =  10
-  NETVERSION  =  13
+  SAVEVERSION =  11
+  NETVERSION  =  14
 
   BUILD_TIME = {{ "#{`date -u +"%m-%d-%Y %H:%M:%S UTC"`.strip}" }}
 
@@ -47,26 +47,26 @@ module LibDoom
 
   # -- Macros for quick key polling --
   macro poll_key(doomkey, raylibkey)
-  was_down = LibDoom.keystates[CDoom::DoomKey::{{doomkey}}.value]
+  was_down = Doocr.keystates[CDoom::DoomKey::{{doomkey}}.value]
   is_down = Raylib::KeyboardKey::{{raylibkey}}.down?
 
-  LibDoom.doom_key_down(CDoom::DoomKey::{{doomkey}}) if is_down && !was_down
-  LibDoom.doom_key_up(CDoom::DoomKey::{{doomkey}}) if !is_down && was_down
+  Doocr.doom_key_down(CDoom::DoomKey::{{doomkey}}) if is_down && !was_down
+  Doocr.doom_key_up(CDoom::DoomKey::{{doomkey}}) if !is_down && was_down
 end
 
   macro poll_two_key(doomkey, raylibkey1, raylibkey2)
-  was_down = LibDoom.keystates[CDoom::DoomKey::{{doomkey}}.value]
+  was_down = Doocr.keystates[CDoom::DoomKey::{{doomkey}}.value]
   is_down = Raylib::KeyboardKey::{{raylibkey1}}.down? || Raylib::KeyboardKey::{{raylibkey2}}.down?
   
-  LibDoom.doom_key_down(CDoom::DoomKey::{{doomkey}}) if is_down && !was_down
-  LibDoom.doom_key_up(CDoom::DoomKey::{{doomkey}}) if !is_down && was_down
+  Doocr.doom_key_down(CDoom::DoomKey::{{doomkey}}) if is_down && !was_down
+  Doocr.doom_key_up(CDoom::DoomKey::{{doomkey}}) if !is_down && was_down
 end
 
   macro poll_button(doombutton, raylibbutton)
   was_down = CDoom.button_states[CDoom::DoomButton::{{doombutton}}.value] != 0
   is_down = Raylib::MouseButton::{{raylibbutton}}.down?
-  LibDoom.doom_button_down(CDoom::DoomButton::{{doombutton}}) if is_down && !was_down
-  LibDoom.doom_button_up(CDoom::DoomButton::{{doombutton}}) if !is_down && was_down
+  Doocr.doom_button_down(CDoom::DoomButton::{{doombutton}}) if is_down && !was_down
+  Doocr.doom_button_up(CDoom::DoomButton::{{doombutton}}) if !is_down && was_down
 end
 
   # -- Macros for quick key polling --
@@ -74,12 +74,12 @@ end
   unless ARGV.includes?("-nosound")
     # Create seperate thread so audio updates seperately from game code
     audio_context = Fiber::ExecutionContext::Isolated.new("doom-audio") do
-      LibDoom.update_audio
+      Doocr.update_audio
     end
   end
 
   @@pause_socket = false
-  if ARGV.includes?("-net") || ARGV.includes?("-altnet")
+  if ARGV.includes?("-net")
     # Create a seperate thread for the packets-in buffer during a netgame
     net_context = Fiber::ExecutionContext::Isolated.new("doom-net") do
       until @@insocket
@@ -97,6 +97,30 @@ end
       end
     end
   end
+
+
+   alias IOJob = {String, String, Bytes?, Channel({Bytes, Bool})} # path, mode, write_data (nil=read), response
+@@io_jobs = Channel(IOJob).new
+
+io_context = Fiber::ExecutionContext::Isolated.new("doom-io") do
+  loop do
+    path, mode, write_data, response = @@io_jobs.receive
+    if data = write_data
+      begin
+        File.write(path, data)
+        response.send({Bytes.empty, true})
+      rescue
+        response.send({Bytes.empty, false})
+      end
+    else
+      begin
+        response.send({File.read(path).to_slice, true})
+      rescue
+        response.send({Bytes.empty, false})
+      end
+    end
+  end
+end
 end
 
 struct SpinLock
@@ -120,8 +144,8 @@ lib LibC
   fun sched_yield : Int32
 end
 
-MAIN_THREAD = Thread.current
 Fiber::ExecutionContext.default.resize(1)
+MAIN_THREAD = Thread.current
 
 at_exit do
   print "\e7"       # save cursor position
@@ -131,4 +155,4 @@ print "\e[?25h"   # show cursor
 end
 
 # Make it happen!
-LibDoom.doom_init(ARGC_UNSAFE, ARGV_UNSAFE, 0)
+Doocr.doom_init(ARGC_UNSAFE, ARGV_UNSAFE, 0)

@@ -23,37 +23,58 @@
 # I reworked a lot of stuff already but even then the first line
 #  in this module is still a null pointer... so... it needs more work :)
 
-module LibDoom
+module Doocr
   NULL_PROC   = Proc(Nil).new(Pointer(Void).null, Pointer(Void).null)
   NULL_PROCP1 = Proc(Int32, Nil).new(Pointer(Void).null, Pointer(Void).null)
 
+  alias DoomHandle = {String, IO::Memory, Bool} # path, buffer, write_mode
+
   def self.doom_open(filename : UInt8*, mode : UInt8*) : Void*
+    path = String.new(filename)
+    m = String.new(mode)
+    write_mode = m.includes?('w') || m.includes?('a')
+
     begin
-      file = File.new(String.new(filename), String.new(mode))
-      return Box.box(file)
+      if write_mode
+        return Box.box({path, IO::Memory.new, true})
+      else
+        response = Channel({Bytes, Bool}).new
+        @@io_jobs.send({path, "rb", nil, response})
+        data, ok = response.receive
+        return Pointer(Void).null unless ok
+        return Box.box({path, IO::Memory.new(data), false})
+      end
     rescue
     end
     return Pointer(Void).null
   end
 
   def self.doom_close(handle : Void*)
-    Box(File).unbox(handle).close
+    path, io, write_mode = Box(DoomHandle).unbox(handle)
+    return unless write_mode
+
+    response = Channel({Bytes, Bool}).new
+    @@io_jobs.send({path, "wb", io.to_slice, response})
+    response.receive
   end
 
   def self.doom_read(handle : Void*, buf : Void*, count : Int32) : Int32
     slice = Slice.new(buf.as(UInt8*), count)
-    return Box(File).unbox(handle).read(slice)
+    _, io, _ = Box(DoomHandle).unbox(handle)
+    return io.read(slice)
   end
 
   def self.doom_write(handle : Void*, buf : Void*, count : Int32) : Int32
     slice = Slice.new(buf.as(UInt8*), count)
-    Box(File).unbox(handle).write(slice)
+    _, io, _ = Box(DoomHandle).unbox(handle)
+    io.write(slice)
     return count
   end
 
   def self.doom_seek(handle : Void*, offset : Int32, origin : CDoom::DoomSeek) : Int32
+    _, io, _ = Box(DoomHandle).unbox(handle)
     begin
-      Box(File).unbox(handle).seek(offset, IO::Seek.from_value(origin.value))
+      io.seek(offset, IO::Seek.from_value(origin.value))
     rescue
       return 1
     end
@@ -61,12 +82,13 @@ module LibDoom
   end
 
   def self.doom_tell(handle : Void*) : Int32
-    return Box(File).unbox(handle).pos.to_i32
+    _, io, _ = Box(DoomHandle).unbox(handle)
+    return io.pos.to_i32
   end
 
   def self.doom_eof(handle : Void*) : Int32
-    file = Box(File).unbox(handle)
-    return file.pos >= file.size ? 1 : 0
+    _, io, _ = Box(DoomHandle).unbox(handle)
+    return io.pos >= io.size ? 1 : 0
   end
 
   def self.doom_memset(ptr : Void*, value : Int32, num : Int32)
@@ -4229,7 +4251,12 @@ module LibDoom
   def self.g_do_load_game
     CDoom.gameaction = CDoom::Gameaction::Nothing
 
-    File.open(String.new(CDoom.savename.to_unsafe), "rb") do |file|
+    response = Channel({Bytes, Bool}).new
+  @@io_jobs.send({String.new(CDoom.savename.to_unsafe), "rb", nil, response})
+  data, ok = response.receive
+  return unless ok
+
+  IO::Memory.new(data).tap do |file|
       file.pos += CDoom::SAVESTRINGSIZE
       # skip the description field
       vcheck = "version #{SAVEVERSION}".ljust(CDoom::VERSIONSIZE, '\0')
@@ -4280,30 +4307,34 @@ module LibDoom
   def self.g_do_save_game
     name = "#{CDoom::SAVEGAMENAME}#{CDoom.savegameslot}.dsg"
     description = CDoom.savedescription.to_slice
-    File.open(name, "wb") do |file|
-      file.write_string(description[0...CDoom::SAVESTRINGSIZE])
+     buf = IO::Memory.new
+  buf.write_string(description[0...CDoom::SAVESTRINGSIZE])
 
-      name2 = "version #{SAVEVERSION}".ljust(CDoom::VERSIONSIZE, '\0')
-      file.write_string(name2.to_slice)
+  name2 = "version #{SAVEVERSION}".ljust(CDoom::VERSIONSIZE, '\0')
+  buf.write_string(name2.to_slice)
 
-      file.write_byte(CDoom.gameskill.value.to_u8!)
-      file.write_byte(CDoom.gameepisode.to_u8!)
-      file.write_byte(CDoom.gamemap.to_u8!)
+  buf.write_byte(CDoom.gameskill.value.to_u8!)
+  buf.write_byte(CDoom.gameepisode.to_u8!)
+  buf.write_byte(CDoom.gamemap.to_u8!)
 
-      CDoom::MAXPLAYERS.times do |i|
-        file.write_byte(CDoom.playeringame[i].to_u8!)
-      end
-      file.write_byte((CDoom.leveltime >> 16).to_u8!)
-      file.write_byte((CDoom.leveltime >> 8).to_u8!)
-      file.write_byte((CDoom.leveltime).to_u8!)
+  CDoom::MAXPLAYERS.times do |i|
+    buf.write_byte(CDoom.playeringame[i].to_u8!)
+  end
+  buf.write_byte((CDoom.leveltime >> 16).to_u8!)
+  buf.write_byte((CDoom.leveltime >> 8).to_u8!)
+  buf.write_byte((CDoom.leveltime).to_u8!)
 
-      p_archive_players(file)
-      p_archive_world(file)
-      p_archive_thinkers(file)
-      p_archive_specials(file)
+  p_archive_players(buf)
+  p_archive_world(buf)
+  p_archive_thinkers(buf)
+  p_archive_specials(buf)
 
-      file.write_byte(0x1d) # consistancy marker
-    end
+  buf.write_byte(0x1d)
+
+  response = Channel({Bytes, Bool}).new
+  @@io_jobs.send({name, "wb", buf.to_slice, response})
+  response.receive
+
     CDoom.gameaction = CDoom::Gameaction::Nothing
     CDoom.savedescription[0] = 0
 
@@ -6252,7 +6283,7 @@ module LibDoom
 
   def self.i_start_tic(in_delta : Raylib::Vector2? = nil)
     mousedelta = in_delta || @@mouse_queued
-    LibDoom.doom_mouse_move(mousedelta.x.to_i32!, mousedelta.y.to_i32)
+    Doocr.doom_mouse_move(mousedelta.x.to_i32!, mousedelta.y.to_i32)
     if in_delta.nil?
       @@mouse_queued = Raylib::Vector2.new
     end
@@ -6433,7 +6464,7 @@ module LibDoom
     CDoom.screens[0].clear(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
 
     Raylib.set_config_flags(Raylib::ConfigFlags::WindowResizable)
-    Raylib.init_window(1024, 768, "LibDoom")
+    Raylib.init_window(1024, 768, "DOO-CR")
     Raylib.set_exit_key(Raylib::KeyboardKey::Null)
     @@was_focused = false
     Raylib.toggle_borderless_windowed if @@rlfullscreen != 0
@@ -8164,7 +8195,7 @@ module LibDoom
     CDoom::MAXCEILINGS.times do |i|
       if CDoom.activeceilings[i] == c
         CDoom.activeceilings[i].value.sector.value.specialdata = Pointer(Void).null
-        CDoom.p_remove_thinker(((CDoom.activeceilings.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Ceiling, @thinker)).as(CDoom::Thinker*))
+       CDoom.p_remove_thinker((CDoom.activeceilings[i].as(UInt8*) + offsetof(CDoom::Ceiling, @thinker)).as(CDoom::Thinker*))
         CDoom.activeceilings[i] = Pointer(CDoom::Ceiling).null
         break
       end
@@ -11843,7 +11874,7 @@ module LibDoom
     end
 
     side = 0
-    side = 1 if CDoom.p_point_on_line_side(CDoom.usething.value.x, CDoom.usething.value.y, int.value.d.line) != 0
+    side = 1 if CDoom.p_point_on_line_side(CDoom.usething.value.x, CDoom.usething.value.y, int.value.d.line) == 1
 
     CDoom.p_use_special_line(CDoom.usething, int.value.d.line, side)
 
@@ -12806,15 +12837,13 @@ module LibDoom
        (mobj.value.flags & CDoom::Mobjflag::MF_SKULLFLY.value != 0)
       CDoom.p_xymovement(mobj)
 
-      # FIXME: decent NOP/0/Nil function pointer please.
-      return if mobj.value.thinker.function.acv.pointer == Pointer(Void).new(UInt64::MAX) # mobj was removed
+      return if mobj.value.thinker.remove != 0 # mobj was removed
     end
     if mobj.value.z != mobj.value.floorz ||
        mobj.value.momz != 0
       CDoom.p_zmovement(mobj)
 
-      # FIXME: decent NOP/0/Nil function pointer please.
-      return if mobj.value.thinker.function.acv.pointer == Pointer(Void).new(UInt64::MAX) # mobj was removed
+      return if mobj.value.thinker.remove != 0 # mobj was removed
     end
 
     # cycle through states,
@@ -13951,7 +13980,7 @@ module LibDoom
     (player.value.psprites.to_unsafe + CDoom::Psprnum::Flash.value).value.sy = player.value.psprites[CDoom::Psprnum::Weapon.value].sy
   end
 
-  def self.p_archive_players(file : File)
+  def self.p_archive_players(file : IO)
     CDoom::MAXPLAYERS.times do |i|
       next if CDoom.playeringame[i] == 0
 
@@ -13966,7 +13995,7 @@ module LibDoom
     end
   end
 
-  def self.p_unarchive_players(file : File)
+  def self.p_unarchive_players(file : IO)
     CDoom::MAXPLAYERS.times do |i|
       next if CDoom.playeringame[i] == 0
 
@@ -13987,7 +14016,7 @@ module LibDoom
     end
   end
 
-  def self.p_archive_world(file : File)
+  def self.p_archive_world(file : IO)
     sec = CDoom.sectors
     # do sectors
     CDoom.numsectors.times do |i|
@@ -14023,7 +14052,7 @@ module LibDoom
     end
   end
 
-  def self.p_unarchive_world(file : File)
+  def self.p_unarchive_world(file : IO)
     sec = CDoom.sectors
     # do sectors
     CDoom.numsectors.times do |i|
@@ -14060,7 +14089,7 @@ module LibDoom
     end
   end
 
-  def self.p_archive_thinkers(file : File)
+  def self.p_archive_thinkers(file : IO)
     # save off the current thinkers
     th = CDoom.thinkercap.next
     while th != pointerof(CDoom.thinkercap)
@@ -14081,7 +14110,7 @@ module LibDoom
     file.write_byte(CDoom::Thinkerclass::End.value)
   end
 
-  def self.p_unarchive_thinkers(file : File)
+  def self.p_unarchive_thinkers(file : IO)
     # remove all the current thinkers
     currentthinker = CDoom.thinkercap.next
     while currentthinker != pointerof(CDoom.thinkercap)
@@ -14135,7 +14164,7 @@ module LibDoom
   # T_Glow, (glow_t: sector_t *),
   # T_PlatRaise, (plat_t: sector_t *), - active list
   #
-  def self.p_archive_specials(file : File)
+  def self.p_archive_specials(file : IO)
     # save off the current thinkers
     th = CDoom.thinkercap.next
     while th != pointerof(CDoom.thinkercap)
@@ -14228,7 +14257,7 @@ module LibDoom
     file.write_byte(CDoom::Specials::End.value)
   end
 
-  def self.p_unarchive_specials(file : File)
+  def self.p_unarchive_specials(file : IO)
     # read in saved thinkers
     loop do
       tclass = CDoom::Specials.new(file.read_bytes(UInt8))
@@ -16349,6 +16378,7 @@ module LibDoom
     thinker.value.next = pointerof(CDoom.thinkercap)
     thinker.value.prev = CDoom.thinkercap.prev
     CDoom.thinkercap.prev = thinker
+    thinker.value.remove = 0
   end
 
   #
@@ -16356,14 +16386,13 @@ module LibDoom
   # until its thinking turn comes up.
   #
   def self.p_remove_thinker(thinker : CDoom::Thinker*)
-    # FIXME: NOP>
-    (thinker.as(UInt8*) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfV*).value = CDoom::ActionfV.new(Pointer(Void).new(UInt64::MAX), Pointer(Void).null)
+    thinker.value.remove = 1
   end
 
   def self.p_run_thinkers
     currentthinker = CDoom.thinkercap.next
     while currentthinker != pointerof(CDoom.thinkercap)
-      if currentthinker.value.function.acv.pointer == Pointer(Void).new(UInt64::MAX)
+      if currentthinker.value.remove != 0
         # time to remove it
         currentthinker.value.next.value.prev = currentthinker.value.prev
         currentthinker.value.prev.value.next = currentthinker.value.next
@@ -20062,7 +20091,7 @@ module LibDoom
   end
 
   def self.s_start_sound(origin : Void*, sfx_id : LibC::Int)
-    LibDoom.s_start_sound_at_volume(origin, sfx_id, CDoom.snd_sfx_volume)
+    Doocr.s_start_sound_at_volume(origin, sfx_id, CDoom.snd_sfx_volume)
   end
 
   def self.s_stop_sound(origin : Void*)
@@ -21783,7 +21812,10 @@ module LibDoom
       CDoom.reloadlump = CDoom.numlumps
     end
 
-    unless File.exists?(filename)
+    response = Channel({Bytes, Bool}).new
+    @@io_jobs.send({filename, "rb", nil, response})
+    data, ok = response.receive
+    unless ok
       puts " couldn't open #{filename}"
       return
     end
@@ -21794,7 +21826,7 @@ module LibDoom
 
     header = CDoom::Wadinfo.new
     singleinfo = CDoom::Filelump.new
-    file = File.new(filename, "rb")
+    file = IO::Memory.new(data)
     if filename[-3..-1].downcase.compare("wad") != 0
       # single lump file
       fileinfo = pointerof(singleinfo)
@@ -21859,7 +21891,7 @@ module LibDoom
       # Set the lump
       if ismap
         (CDoom::ML_BLOCKMAP + 1).times do |m|
-          lump_p.value.handle = !CDoom.reloadname.null? ? Pointer(Void).null : Box.box(file)
+          lump_p.value.handle = !CDoom.reloadname.null? ? Pointer(Void).null : Box.box({filename, file, false})
           lump_p.value.position = fileinfo[mlump].filepos
           lump_p.value.size = fileinfo[mlump].size
           CDoom.doom_strncpy(lump_p.value.name, fileinfo[mlump].name, 8)
@@ -21867,7 +21899,7 @@ module LibDoom
           lump_p += 1
         end
       else
-        lump_p.value.handle = !CDoom.reloadname.null? ? Pointer(Void).null : Box.box(file)
+        lump_p.value.handle = !CDoom.reloadname.null? ? Pointer(Void).null : Box.box({filename, file, false})
         lump_p.value.position = fileinfo[mlump].filepos
         lump_p.value.size = fileinfo[mlump].size
         CDoom.doom_strncpy(lump_p.value.name, fileinfo[mlump].name, 8)

@@ -17,7 +17,7 @@
 #
 # Essentially the "Header" file for doo-cr
 
-module LibDoom
+module Doocr
   PI = 3.141592657
 
   FRACBITS = 16

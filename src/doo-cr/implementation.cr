@@ -17,122 +17,122 @@
 #      and working with PureDoom. Hope to get rid of this someday.
 
 fun doom_memset(ptr : Void*, value : Int32, num : Int32)
-  LibDoom.doom_memset(ptr, value, num)
+  Doocr.doom_memset(ptr, value, num)
 end
 
 fun doom_memcpy(destination : Void*, source : Void*, num : Int32) : Void*
-  LibDoom.doom_memcpy(destination, source, num)
+  Doocr.doom_memcpy(destination, source, num)
 end
 
 fun doom_strlen(str : UInt8*) : Int32
-  LibDoom.doom_strlen(str)
+  Doocr.doom_strlen(str)
 end
 
 fun doom_concat(dst : UInt8*, src : UInt8*) : UInt8*
-  LibDoom.doom_concat(dst, src)
+  Doocr.doom_concat(dst, src)
 end
 
 fun doom_strcpy(dst : UInt8*, src : UInt8*) : UInt8*
-  LibDoom.doom_strcpy(dst, src)
+  Doocr.doom_strcpy(dst, src)
 end
 
 fun doom_strncpy(dst : UInt8*, src : UInt8*, num : Int32) : UInt8*
-  LibDoom.doom_strncpy(dst, src, num)
+  Doocr.doom_strncpy(dst, src, num)
 end
 
 fun doom_strcmp(str1 : UInt8*, str2 : UInt8*) : Int32
-  LibDoom.doom_strcmp(str1, str2)
+  Doocr.doom_strcmp(str1, str2)
 end
 
 fun doom_strncmp(str1 : UInt8*, str2 : UInt8*, n : Int32) : Int32
-  LibDoom.doom_strncmp(str1, str2, n)
+  Doocr.doom_strncmp(str1, str2, n)
 end
 
 fun doom_toupper(c : Int32) : Int32
-  LibDoom.doom_toupper(c)
+  Doocr.doom_toupper(c)
 end
 
 fun doom_strcasecmp(str1 : UInt8*, str2 : UInt8*) : Int32
-  LibDoom.doom_strcasecmp(str1, str2)
+  Doocr.doom_strcasecmp(str1, str2)
 end
 
 fun doom_strncasecmp(str1 : UInt8*, str2 : UInt8*, n : Int32) : Int32
-  LibDoom.doom_strncasecmp(str1, str2, n)
+  Doocr.doom_strncasecmp(str1, str2, n)
 end
 
 fun doom_atoi(str : UInt8*) : Int32
-  LibDoom.doom_atoi(str)
+  Doocr.doom_atoi(str)
 end
 
 fun doom_atox(str : UInt8*) : Int32
-  LibDoom.doom_atox(str)
+  Doocr.doom_atox(str)
 end
 
 fun doom_itoa(k : Int32, radix : Int32) : UInt8*
-  LibDoom.doom_itoa(k, radix)
+  Doocr.doom_itoa(k, radix)
 end
 
 fun doom_ctoa(c : UInt8) : UInt8*
-  LibDoom.doom_ctoa(c)
+  Doocr.doom_ctoa(c)
 end
 
 fun doom_ptoa(p : Void*) : UInt8*
-  LibDoom.doom_ptoa(p)
+  Doocr.doom_ptoa(p)
 end
 
 fun doom_fprint(handle : Void*, str : UInt8*) : Int32
-  LibDoom.doom_fprint(handle, str)
+  Doocr.doom_fprint(handle, str)
 end
 
 fun doom_init(argc : Int32, argv : UInt8**, flags : Int32)
-  LibDoom.doom_init(argc, argv, flags)
+  Doocr.doom_init(argc, argv, flags)
 end
 
 fun doom_tick_midi : LibC::ULongLong
-  LibDoom.doom_tick_midi
+  Doocr.doom_tick_midi
 end
 
 fun doom_get_sound_buffer : Int16*
-  LibDoom.doom_get_sound_buffer
+  Doocr.doom_get_sound_buffer
 end
 
 fun doom_key_down(key : CDoom::DoomKey)
-  LibDoom.doom_key_down(key)
+  Doocr.doom_key_down(key)
 end
 
 fun doom_key_up(key : CDoom::DoomKey)
-  LibDoom.doom_key_up(key)
+  Doocr.doom_key_up(key)
 end
 
 fun doom_button_down(button : CDoom::DoomButton)
-  LibDoom.doom_button_down(button)
+  Doocr.doom_button_down(button)
 end
 
 fun doom_button_up(button : CDoom::DoomButton)
-  LibDoom.doom_button_up(button)
+  Doocr.doom_button_up(button)
 end
 
 fun doom_mouse_move(delta_x : Int32, delta_y : Int32)
-  LibDoom.doom_mouse_move(delta_x, delta_y)
+  Doocr.doom_mouse_move(delta_x, delta_y)
 end
 
 fun am_activate_new_scale = AM_activateNewScale
-  LibDoom.am_activate_new_scale
+  Doocr.am_activate_new_scale
 end
 
 fun am_save_scale_and_loc = AM_saveScaleAndLoc
-  LibDoom.am_save_scale_and_loc
+  Doocr.am_save_scale_and_loc
 end
 
 fun am_restore_scale_and_loc = AM_restoreScaleAndLoc
-  LibDoom.am_restore_scale_and_loc
+  Doocr.am_restore_scale_and_loc
 end
 
 #
 # adds a marker at the current location
 #
 fun am_add_mark = AM_addMark
-  LibDoom.am_add_mark
+  Doocr.am_add_mark
 end
 
 #
@@ -140,27 +140,27 @@ end
 # sets global variables controlling zoom range.
 #
 fun am_find_min_max_boundaries = AM_findMinMaxBoundaries
-  LibDoom.am_find_min_max_boundaries
+  Doocr.am_find_min_max_boundaries
 end
 
 fun am_change_window_loc = AM_changeWindowLoc
-  LibDoom.am_change_window_loc
+  Doocr.am_change_window_loc
 end
 
 fun am_init_variables = AM_initVariables
-  LibDoom.am_init_variables
+  Doocr.am_init_variables
 end
 
 fun am_load_pics = AM_loadPics
-  LibDoom.am_load_pics
+  Doocr.am_load_pics
 end
 
 fun am_unload_pics = AM_unloadPics
-  LibDoom.am_unload_pics
+  Doocr.am_unload_pics
 end
 
 fun am_clear_marks = AM_clearMarks
-  LibDoom.am_clear_marks
+  Doocr.am_clear_marks
 end
 
 #
@@ -168,74 +168,74 @@ end
 # right now, i figure it out myself
 #
 fun am_level_init = AM_LevelInit
-  LibDoom.am_level_init
+  Doocr.am_level_init
 end
 
 fun am_stop = AM_Stop
-  LibDoom.am_stop
+  Doocr.am_stop
 end
 
 fun am_start = AM_Start
-  LibDoom.am_start
+  Doocr.am_start
 end
 
 #
 # set the window scale to the maximum size
 #
 fun am_min_out_window_scale = AM_minOutWindowScale
-  LibDoom.am_min_out_window_scale
+  Doocr.am_min_out_window_scale
 end
 
 fun am_max_out_window_scale = AM_maxOutWindowScale
-  LibDoom.am_max_out_window_scale
+  Doocr.am_max_out_window_scale
 end
 
 fun am_responder = AM_Responder(ev : CDoom::Event*) : CDoom::DoomBool
-  LibDoom.am_responder(ev)
+  Doocr.am_responder(ev)
 end
 
 fun am_change_window_scale = AM_changeWindowScale
-  LibDoom.am_change_window_scale
+  Doocr.am_change_window_scale
 end
 
 fun am_do_follow_player = AM_doFollowPlayer
-  LibDoom.am_do_follow_player
+  Doocr.am_do_follow_player
 end
 
 fun am_update_light_lev = AM_updateLightLev
-  LibDoom.am_update_light_lev
+  Doocr.am_update_light_lev
 end
 
 fun am_ticker = AM_Ticker
-  LibDoom.am_ticker
+  Doocr.am_ticker
 end
 
 fun am_clear_fb = AM_clearFB(color : LibC::Int)
-  LibDoom.am_clear_fb(color)
+  Doocr.am_clear_fb(color)
 end
 
 fun am_clip_mline = AM_clipMline(ml : CDoom::Mline*, fl : CDoom::Fline*) : CDoom::DoomBool
-  LibDoom.am_clip_mline(ml, fl)
+  Doocr.am_clip_mline(ml, fl)
 end
 
 fun am_draw_fline = AM_drawFline(fl : CDoom::Fline*, color : LibC::Int)
-  LibDoom.am_draw_fline(fl, color)
+  Doocr.am_draw_fline(fl, color)
 end
 
 fun am_draw_mline = AM_drawMline(ml : CDoom::Mline*, color : LibC::Int)
-  LibDoom.am_draw_mline(ml, color)
+  Doocr.am_draw_mline(ml, color)
 end
 
 fun am_draw_grid = AM_drawGrid(color : Int32)
-  LibDoom.am_draw_grid(color)
+  Doocr.am_draw_grid(color)
 end
 
 fun am_draw_walls = AM_drawWalls
-  LibDoom.am_draw_walls
+  Doocr.am_draw_walls
 end
 
 fun am_rotate = AM_rotate(x : CDoom::Fixed*, y : CDoom::Fixed*, a : CDoom::Angle)
-  LibDoom.am_rotate(x, y, a)
+  Doocr.am_rotate(x, y, a)
 end
 
 fun am_draw_line_character = AM_drawLineCharacter(lineguy : CDoom::Mline*,
@@ -245,7 +245,7 @@ fun am_draw_line_character = AM_drawLineCharacter(lineguy : CDoom::Mline*,
                                                   color : LibC::Int,
                                                   x : CDoom::Fixed,
                                                   y : CDoom::Fixed)
-  LibDoom.am_draw_line_character(lineguy,
+  Doocr.am_draw_line_character(lineguy,
     lineguylines,
     scale,
     angle,
@@ -255,359 +255,359 @@ fun am_draw_line_character = AM_drawLineCharacter(lineguy : CDoom::Mline*,
 end
 
 fun am_draw_players = AM_drawPlayers
-  LibDoom.am_draw_players
+  Doocr.am_draw_players
 end
 
 fun am_draw_things = AM_drawThings(colors : LibC::Int, colorrange : LibC::Int)
-  LibDoom.am_draw_things(colors, colorrange)
+  Doocr.am_draw_things(colors, colorrange)
 end
 
 fun am_draw_marks = AM_drawMarks
-  LibDoom.am_draw_marks
+  Doocr.am_draw_marks
 end
 
 fun am_draw_crosshair = AM_drawCrosshair(color : LibC::Int)
-  LibDoom.am_draw_crosshair(color)
+  Doocr.am_draw_crosshair(color)
 end
 
 fun am_drawer = AM_Drawer
-  LibDoom.am_drawer
+  Doocr.am_drawer
 end
 
 fun d_post_event = D_PostEvent(ev : CDoom::Event*)
-  LibDoom.d_post_event(ev)
+  Doocr.d_post_event(ev)
 end
 
 fun d_process_events = D_ProcessEvents
-  LibDoom.d_process_events
+  Doocr.d_process_events
 end
 
 fun d_display = D_Display
-  LibDoom.d_display
+  Doocr.d_display
 end
 
 fun d_doom_loop = D_DoomLoop
-  LibDoom.d_doom_loop
+  Doocr.d_doom_loop
 end
 
 fun d_page_ticker = D_PageTicker
-  LibDoom.d_page_ticker
+  Doocr.d_page_ticker
 end
 
 fun d_page_drawer = D_PageDrawer
-  LibDoom.d_page_drawer
+  Doocr.d_page_drawer
 end
 
 fun d_advance_demo = D_AdvanceDemo
-  LibDoom.d_advance_demo
+  Doocr.d_advance_demo
 end
 
 fun d_do_advance_demo = D_DoAdvanceDemo
-  LibDoom.d_do_advance_demo
+  Doocr.d_do_advance_demo
 end
 
 fun d_start_title = D_StartTitle
-  LibDoom.d_start_title
+  Doocr.d_start_title
 end
 
 fun d_add_file = D_AddFile(file : LibC::Char*)
-  LibDoom.d_add_file(file)
+  Doocr.d_add_file(file)
 end
 
 fun identify_version = IdentifyVersion
-  LibDoom.identify_version
+  Doocr.identify_version
 end
 
 fun find_response_file = FindResponseFile
-  LibDoom.find_response_file
+  Doocr.find_response_file
 end
 
 fun d_doom_main = D_DoomMain
-  LibDoom.d_doom_main
+  Doocr.d_doom_main
 end
 
 fun net_buffer_size = NetBufferSize : LibC::Int
-  LibDoom.net_buffer_size
+  Doocr.net_buffer_size
 end
 
 fun net_buffer_checksum = NetbufferChecksum : LibC::UInt
-  LibDoom.net_buffer_checksum
+  Doocr.net_buffer_checksum
 end
 
 fun expand_tics = ExpandTics(low : LibC::Int) : LibC::Int
-  LibDoom.expand_tics(low)
+  Doocr.expand_tics(low)
 end
 
 fun h_send_packet = HSendPacket(node : LibC::Int, flags : LibC::Int)
-  LibDoom.h_send_packet(node, flags)
+  Doocr.h_send_packet(node, flags)
 end
 
 fun h_get_packet = HGetPacket : CDoom::DoomBool
-  LibDoom.h_get_packet
+  Doocr.h_get_packet
 end
 
 fun get_packets = GetPackets
-  LibDoom.get_packets
+  Doocr.get_packets
 end
 
 fun net_update = NetUpdate
-  LibDoom.net_update
+  Doocr.net_update
 end
 
 fun check_abort = CheckAbort
-  LibDoom.check_abort
+  Doocr.check_abort
 end
 
 fun d_arbitrate_net_start = D_ArbitrateNetStart
-  LibDoom.d_arbitrate_net_start
+  Doocr.d_arbitrate_net_start
 end
 
 fun d_check_net_game = D_CheckNetGame
-  LibDoom.d_check_net_game
+  Doocr.d_check_net_game
 end
 
 fun d_quit_net_game = D_QuitNetGame
-  LibDoom.d_quit_net_game
+  Doocr.d_quit_net_game
 end
 
 fun try_run_tics = TryRunTics
-  LibDoom.try_run_tics
+  Doocr.try_run_tics
 end
 
 fun f_start_finale = F_StartFinale
-  LibDoom.f_start_finale
+  Doocr.f_start_finale
 end
 
 fun f_responder = F_Responder(event : CDoom::Event*) : CDoom::DoomBool
-  LibDoom.f_responder(event)
+  Doocr.f_responder(event)
 end
 
 fun f_ticker = F_Ticker
-  LibDoom.f_ticker
+  Doocr.f_ticker
 end
 
 fun f_text_write = F_TextWrite
-  LibDoom.f_text_write
+  Doocr.f_text_write
 end
 
 fun f_start_cast = F_StartCast
-  LibDoom.f_start_cast
+  Doocr.f_start_cast
 end
 
 fun f_cast_ticker = F_CastTicker
-  LibDoom.f_cast_ticker
+  Doocr.f_cast_ticker
 end
 
 fun f_cast_responder = F_CastResponder(ev : CDoom::Event*) : CDoom::DoomBool
-  LibDoom.f_cast_responder(ev)
+  Doocr.f_cast_responder(ev)
 end
 
 fun f_cast_print = F_CastPrint(text : LibC::Char*)
-  LibDoom.f_cast_print(text)
+  Doocr.f_cast_print(text)
 end
 
 fun f_cast_drawer = F_CastDrawer
-  LibDoom.f_cast_drawer
+  Doocr.f_cast_drawer
 end
 
 fun f_draw_patch_col = F_DrawPatchCol(x : LibC::Int, patch : CDoom::Patch*, col : LibC::Int)
-  LibDoom.f_draw_patch_col(x, patch, col)
+  Doocr.f_draw_patch_col(x, patch, col)
 end
 
 fun f_bunny_scroll = F_BunnyScroll
-  LibDoom.f_bunny_scroll
+  Doocr.f_bunny_scroll
 end
 
 fun f_drawer = F_Drawer
-  LibDoom.f_drawer
+  Doocr.f_drawer
 end
 
 fun wipe_shitty_col_major_x_form = wipe_shittyColMajorXform(array : LibC::Short*, width : LibC::Int, height : LibC::Int)
-  LibDoom.wipe_shitty_col_major_x_form(array, width, height)
+  Doocr.wipe_shitty_col_major_x_form(array, width, height)
 end
 
 fun wipe_init_color_x_form = wipe_initColorXForm(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
-  LibDoom.wipe_init_color_x_form(width, height, ticks)
+  Doocr.wipe_init_color_x_form(width, height, ticks)
 end
 
 fun wipe_do_color_x_form = wipe_doColorXForm(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
-  LibDoom.wipe_do_color_x_form(width, height, ticks)
+  Doocr.wipe_do_color_x_form(width, height, ticks)
 end
 
 fun wipe_exit_color_x_form = wipe_exitColorXForm(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
-  LibDoom.wipe_exit_color_x_form(width, height, ticks)
+  Doocr.wipe_exit_color_x_form(width, height, ticks)
 end
 
 fun wipe_init_melt = wipe_initMelt(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
-  LibDoom.wipe_init_melt(width, height, ticks)
+  Doocr.wipe_init_melt(width, height, ticks)
 end
 
 fun wipe_do_melt = wipe_doMelt(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
-  LibDoom.wipe_do_melt(width, height, ticks)
+  Doocr.wipe_do_melt(width, height, ticks)
 end
 
 fun wipe_exit_melt = wipe_exitMelt(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
-  LibDoom.wipe_exit_melt(width, height, ticks)
+  Doocr.wipe_exit_melt(width, height, ticks)
 end
 
 fun wipe_start_screen = wipe_StartScreen(x : LibC::Int, y : LibC::Int, width : LibC::Int, height : LibC::Int) : LibC::Int
-  LibDoom.wipe_start_screen(x, y, width, height)
+  Doocr.wipe_start_screen(x, y, width, height)
 end
 
 fun wipe_end_screen = wipe_EndScreen(x : LibC::Int, y : LibC::Int, width : LibC::Int, height : LibC::Int) : LibC::Int
-  LibDoom.wipe_end_screen(x, y, width, height)
+  Doocr.wipe_end_screen(x, y, width, height)
 end
 
 fun wipe_screen_wipe = wipe_ScreenWipe(wipeno : LibC::Int, x : LibC::Int, y : LibC::Int, width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
-  LibDoom.wipe_screen_wipe(wipeno, x, y, width, height, ticks)
+  Doocr.wipe_screen_wipe(wipeno, x, y, width, height, ticks)
 end
 
 fun g_build_ticcmd = G_BuildTiccmd(cmd : CDoom::Ticcmd*)
-  LibDoom.g_build_ticcmd(cmd)
+  Doocr.g_build_ticcmd(cmd)
 end
 
 fun g_do_load_level = G_DoLoadLevel
-  LibDoom.g_do_load_level
+  Doocr.g_do_load_level
 end
 
 fun g_responder = G_Responder(ev : CDoom::Event*) : CDoom::DoomBool
-  LibDoom.g_responder(ev)
+  Doocr.g_responder(ev)
 end
 
 fun g_ticker = G_Ticker
-  LibDoom.g_ticker
+  Doocr.g_ticker
 end
 
 fun g_init_player = G_InitPlayer(player : LibC::Int)
-  LibDoom.g_init_player(player)
+  Doocr.g_init_player(player)
 end
 
 fun g_player_finish_level = G_PlayerFinishLevel(player : LibC::Int)
-  LibDoom.g_player_finish_level(player)
+  Doocr.g_player_finish_level(player)
 end
 
 fun g_player_reborn = G_PlayerReborn(player : LibC::Int)
-  LibDoom.g_player_reborn(player)
+  Doocr.g_player_reborn(player)
 end
 
 fun g_check_spot = G_CheckSpot(playernum : LibC::Int, mthing : CDoom::Mapthing*) : CDoom::DoomBool
-  LibDoom.g_check_spot(playernum, mthing)
+  Doocr.g_check_spot(playernum, mthing)
 end
 
 fun g_deathmatch_spawn_player = G_DeathMatchSpawnPlayer(playernum : LibC::Int)
-  LibDoom.g_deathmatch_spawn_player(playernum)
+  Doocr.g_deathmatch_spawn_player(playernum)
 end
 
 fun g_do_reborn = G_DoReborn(playernum : LibC::Int)
-  LibDoom.g_do_reborn(playernum)
+  Doocr.g_do_reborn(playernum)
 end
 
 fun g_screenshot = G_ScreenShot
-  LibDoom.g_screenshot
+  Doocr.g_screenshot
 end
 
 fun g_exit_level = G_ExitLevel
-  LibDoom.g_exit_level
+  Doocr.g_exit_level
 end
 
 fun g_secret_exit_level = G_SecretExitLevel
-  LibDoom.g_secret_exit_level
+  Doocr.g_secret_exit_level
 end
 
 fun g_do_completed = G_DoCompleted
-  LibDoom.g_do_completed
+  Doocr.g_do_completed
 end
 
 fun g_world_done = G_WorldDone
-  LibDoom.g_world_done
+  Doocr.g_world_done
 end
 
 fun g_do_world_done = G_DoWorldDone
-  LibDoom.g_do_world_done
+  Doocr.g_do_world_done
 end
 
 fun g_load_game = G_LoadGame(name : LibC::Char*)
-  LibDoom.g_load_game(name)
+  Doocr.g_load_game(name)
 end
 
 fun g_do_load_game = G_DoLoadGame
-  LibDoom.g_do_load_game
+  Doocr.g_do_load_game
 end
 
 fun g_save_game = G_SaveGame(slot : LibC::Int, description : LibC::Char*)
-  LibDoom.g_save_game(slot, description)
+  Doocr.g_save_game(slot, description)
 end
 
 fun g_do_save_game = G_DoSaveGame
-  LibDoom.g_do_save_game
+  Doocr.g_do_save_game
 end
 
 fun g_defered_init_new = G_DeferedInitNew(skill : CDoom::Skill, episode : LibC::Int, map : LibC::Int)
-  LibDoom.g_defered_init_new(skill, episode, map)
+  Doocr.g_defered_init_new(skill, episode, map)
 end
 
 fun g_do_new_game = G_DoNewGame
-  LibDoom.g_do_new_game
+  Doocr.g_do_new_game
 end
 
 fun g_init_new = G_InitNew(skill : CDoom::Skill, episode : LibC::Int, map : LibC::Int)
-  LibDoom.g_init_new(skill, episode, map)
+  Doocr.g_init_new(skill, episode, map)
 end
 
 fun g_read_demo_ticcmd = G_ReadDemoTiccmd(cmd : CDoom::Ticcmd*)
-  LibDoom.g_read_demo_ticcmd(cmd)
+  Doocr.g_read_demo_ticcmd(cmd)
 end
 
 fun g_write_demo_ticcmd = G_WriteDemoTiccmd(cmd : CDoom::Ticcmd*)
-  LibDoom.g_write_demo_ticcmd(cmd)
+  Doocr.g_write_demo_ticcmd(cmd)
 end
 
 fun g_record_demo = G_RecordDemo(name : LibC::Char*)
-  LibDoom.g_record_demo(name)
+  Doocr.g_record_demo(name)
 end
 
 fun g_begin_recording = G_BeginRecording
-  LibDoom.g_begin_recording
+  Doocr.g_begin_recording
 end
 
 fun g_defered_play_demo = G_DeferedPlayDemo(demo : LibC::Char*)
-  LibDoom.g_defered_play_demo(demo)
+  Doocr.g_defered_play_demo(demo)
 end
 
 fun g_do_play_demo = G_DoPlayDemo
-  LibDoom.g_do_play_demo
+  Doocr.g_do_play_demo
 end
 
 fun g_time_demo = G_TimeDemo(name : LibC::Char*)
-  LibDoom.g_time_demo(name)
+  Doocr.g_time_demo(name)
 end
 
 fun g_check_demo_status = G_CheckDemoStatus : CDoom::DoomBool
-  LibDoom.g_check_demo_status
+  Doocr.g_check_demo_status
 end
 
 fun hulib_clear_text_line = HUlib_clearTextLine(t : CDoom::HU_Textline*)
-  LibDoom.hulib_clear_text_line(t)
+  Doocr.hulib_clear_text_line(t)
 end
 
 fun hulib_init_text_line = HUlib_initTextLine(t : CDoom::HU_Textline*, x : LibC::Int, y : LibC::Int, f : CDoom::Patch**, sc : LibC::Int)
-  LibDoom.hulib_init_text_line(t, x, y, f, sc)
+  Doocr.hulib_init_text_line(t, x, y, f, sc)
 end
 
 fun hulib_add_char_to_text_line = HUlib_addCharToTextLine(t : CDoom::HU_Textline*, ch : LibC::Char) : CDoom::DoomBool
-  LibDoom.hulib_add_char_to_text_line(t, ch)
+  Doocr.hulib_add_char_to_text_line(t, ch)
 end
 
 fun hulib_del_char_from_text_line = HUlib_delCharFromTextLine(t : CDoom::HU_Textline*) : CDoom::DoomBool
-  LibDoom.hulib_del_char_from_text_line(t)
+  Doocr.hulib_del_char_from_text_line(t)
 end
 
 fun hulib_draw_text_line = HUlib_drawTextLine(l : CDoom::HU_Textline*, drawcursor : CDoom::DoomBool)
-  LibDoom.hulib_draw_text_line(l, drawcursor)
+  Doocr.hulib_draw_text_line(l, drawcursor)
 end
 
 fun hulib_erase_text_line = HUlib_eraseTextLine(l : CDoom::HU_Textline*)
-  LibDoom.hulib_erase_text_line(l)
+  Doocr.hulib_erase_text_line(l)
 end
 
 fun hulib_init_s_text = HUlib_initSText(s : CDoom::HU_Stext*,
@@ -617,23 +617,23 @@ fun hulib_init_s_text = HUlib_initSText(s : CDoom::HU_Stext*,
                                         font : CDoom::Patch**,
                                         startchar : LibC::Int,
                                         on : CDoom::DoomBool*)
-  LibDoom.hulib_init_s_text(s, x, y, h, font, startchar, on)
+  Doocr.hulib_init_s_text(s, x, y, h, font, startchar, on)
 end
 
 fun hulib_add_line_to_s_text = HUlib_addLineToSText(s : CDoom::HU_Stext*)
-  LibDoom.hulib_add_line_to_s_text(s)
+  Doocr.hulib_add_line_to_s_text(s)
 end
 
 fun hulib_add_message_to_s_text = HUlib_addMessageToSText(s : CDoom::HU_Stext*, prefix : LibC::Char*, msg : LibC::Char*)
-  LibDoom.hulib_add_message_to_s_text(s, prefix, msg)
+  Doocr.hulib_add_message_to_s_text(s, prefix, msg)
 end
 
 fun hulib_draw_s_text = HUlib_drawSText(s : CDoom::HU_Stext*)
-  LibDoom.hulib_draw_s_text(s)
+  Doocr.hulib_draw_s_text(s)
 end
 
 fun hulib_erase_s_text = HUlib_eraseSText(s : CDoom::HU_Stext*)
-  LibDoom.hulib_erase_s_text(s)
+  Doocr.hulib_erase_s_text(s)
 end
 
 fun hulib_init_i_text = HUlib_initIText(it : CDoom::HU_Itext*,
@@ -642,1843 +642,1843 @@ fun hulib_init_i_text = HUlib_initIText(it : CDoom::HU_Itext*,
                                         font : CDoom::Patch**,
                                         startchar : LibC::Int,
                                         on : CDoom::DoomBool*)
-  LibDoom.hulib_init_i_text(it, x, y, font, startchar, on)
+  Doocr.hulib_init_i_text(it, x, y, font, startchar, on)
 end
 
 fun hulib_del_char_from_i_text = HUlib_delCharFromIText(it : CDoom::HU_Itext*)
-  LibDoom.hulib_del_char_from_i_text(it)
+  Doocr.hulib_del_char_from_i_text(it)
 end
 
 fun hulib_erase_line_from_i_text = HUlib_eraseLineFromIText(it : CDoom::HU_Itext*)
-  LibDoom.hulib_erase_line_from_i_text(it)
+  Doocr.hulib_erase_line_from_i_text(it)
 end
 
 fun hulib_reset_i_text = HUlib_resetIText(it : CDoom::HU_Itext*)
-  LibDoom.hulib_reset_i_text(it)
+  Doocr.hulib_reset_i_text(it)
 end
 
 fun hulib_add_prefix_to_i_text = HUlib_addPrefixToIText(it : CDoom::HU_Itext*, str : LibC::Char*)
-  LibDoom.hulib_add_prefix_to_i_text(it, str)
+  Doocr.hulib_add_prefix_to_i_text(it, str)
 end
 
 fun hulib_key_in_i_text = HUlib_keyInIText(it : CDoom::HU_Itext*, ch : LibC::UChar) : CDoom::DoomBool
-  LibDoom.hulib_key_in_i_text(it, ch)
+  Doocr.hulib_key_in_i_text(it, ch)
 end
 
 fun hulib_draw_i_text = HUlib_drawIText(it : CDoom::HU_Itext*)
-  LibDoom.hulib_draw_i_text(it)
+  Doocr.hulib_draw_i_text(it)
 end
 
 fun hulib_erase_i_text = HUlib_eraseIText(it : CDoom::HU_Itext*)
-  LibDoom.hulib_erase_i_text(it)
+  Doocr.hulib_erase_i_text(it)
 end
 
 fun foreign_translation = ForeignTranslation(ch : LibC::Char) : LibC::Char
-  LibDoom.foreign_translation(ch)
+  Doocr.foreign_translation(ch)
 end
 
 fun hu_init = HU_Init
-  LibDoom.hu_init
+  Doocr.hu_init
 end
 
 fun hu_stop = HU_Stop
-  LibDoom.hu_stop
+  Doocr.hu_stop
 end
 
 fun hu_start = HU_Start
-  LibDoom.hu_start
+  Doocr.hu_start
 end
 
 fun hu_drawer = HU_Drawer
-  LibDoom.hu_drawer
+  Doocr.hu_drawer
 end
 
 fun hu_erase = HU_Erase
-  LibDoom.hu_erase
+  Doocr.hu_erase
 end
 
 fun hu_ticker = HU_Ticker
-  LibDoom.hu_ticker
+  Doocr.hu_ticker
 end
 
 fun hu_queue_chat_char = HU_queueChatChar(c : LibC::Char)
-  LibDoom.hu_queue_chat_char(c)
+  Doocr.hu_queue_chat_char(c)
 end
 
 fun hu_dequeue_chat_char = HU_dequeueChatChar : LibC::Char
-  LibDoom.hu_dequeue_chat_char
+  Doocr.hu_dequeue_chat_char
 end
 
 fun hu_responder = HU_Responder(ev : CDoom::Event*) : CDoom::DoomBool
-  LibDoom.hu_responder(ev)
+  Doocr.hu_responder(ev)
 end
 
 fun i_init_network = I_InitNetwork
-  LibDoom.i_init_network
+  Doocr.i_init_network
 end
 
 fun i_net_cmd = I_NetCmd
-  LibDoom.i_net_cmd
+  Doocr.i_net_cmd
 end
 
 fun getsfx(sfxname : LibC::Char*, len : LibC::Int*) : Void*
-  LibDoom.getsfx(sfxname, len)
+  Doocr.getsfx(sfxname, len)
 end
 
 fun addsfx(sfxid : LibC::Int, volume : LibC::Int, step : LibC::Int, seperation : LibC::Int) : LibC::Int
-  LibDoom.addsfx(sfxid, volume, step, seperation)
+  Doocr.addsfx(sfxid, volume, step, seperation)
 end
 
 fun i_set_channels = I_SetChannels
-  LibDoom.i_set_channels
+  Doocr.i_set_channels
 end
 
 fun i_set_sfx_volume = I_SetSfxVolume(volume : LibC::Int)
-  LibDoom.i_set_sfx_volume(volume)
+  Doocr.i_set_sfx_volume(volume)
 end
 
 fun i_set_music_volume = I_SetMusicVolume(volume : LibC::Int)
-  LibDoom.i_set_music_volume(volume)
+  Doocr.i_set_music_volume(volume)
 end
 
 fun i_get_sfx_lump_num = I_GetSfxLumpNum(sfx : CDoom::Sfxinfo*) : LibC::Int
-  LibDoom.i_get_sfx_lump_num(sfx)
+  Doocr.i_get_sfx_lump_num(sfx)
 end
 
 fun i_start_sound = I_StartSound(id : LibC::Int, vol : LibC::Int, sep : LibC::Int, pitch : LibC::Int, priority : LibC::Int) : LibC::Int
-  LibDoom.i_start_sound(id, vol, sep, pitch, priority)
+  Doocr.i_start_sound(id, vol, sep, pitch, priority)
 end
 
 fun i_stop_sound = I_StopSound(handle : LibC::Int)
-  LibDoom.i_stop_sound(handle)
+  Doocr.i_stop_sound(handle)
 end
 
 fun i_sound_is_playing = I_SoundIsPlaying(handle : LibC::Int) : LibC::Int
-  LibDoom.i_sound_is_playing(handle)
+  Doocr.i_sound_is_playing(handle)
 end
 
 fun i_update_sound = I_UpdateSound
-  LibDoom.i_update_sound
+  Doocr.i_update_sound
 end
 
 fun i_update_sound_params = I_UpdateSoundParams(handle : LibC::Int, vol : LibC::Int, sep : LibC::Int, pitch : LibC::Int)
-  LibDoom.i_update_sound_params(handle, vol, sep, pitch)
+  Doocr.i_update_sound_params(handle, vol, sep, pitch)
 end
 
 fun i_shutdown_sound = I_ShutdownSound
-  LibDoom.i_shutdown_sound
+  Doocr.i_shutdown_sound
 end
 
 fun i_init_sound = I_InitSound
-  LibDoom.i_init_sound
+  Doocr.i_init_sound
 end
 
 fun i_init_music = I_InitMusic
-  LibDoom.i_init_music
+  Doocr.i_init_music
 end
 
 fun i_shutdown_music = I_ShutdownMusic
-  LibDoom.i_shutdown_music
+  Doocr.i_shutdown_music
 end
 
 fun i_play_song = I_PlaySong(handle : LibC::Int, looping : LibC::Int)
-  LibDoom.i_play_song(handle, looping)
+  Doocr.i_play_song(handle, looping)
 end
 
 fun i_pause_song = I_PauseSong(handle : LibC::Int)
-  LibDoom.i_pause_song(handle)
+  Doocr.i_pause_song(handle)
 end
 
 fun i_resume_song = I_ResumeSong(handle : LibC::Int)
-  LibDoom.i_resume_song(handle)
+  Doocr.i_resume_song(handle)
 end
 
 fun reset_all_channels
-  LibDoom.reset_all_channels
+  Doocr.reset_all_channels
 end
 
 fun i_stop_song = I_StopSong(handle : LibC::Int)
-  LibDoom.i_stop_song(handle)
+  Doocr.i_stop_song(handle)
 end
 
 fun i_unregister_song = I_UnRegisterSong(handle : LibC::Int)
-  LibDoom.i_unregister_song(handle)
+  Doocr.i_unregister_song(handle)
 end
 
 fun i_register_song = I_RegisterSong(data : Void*) : LibC::Int
-  LibDoom.i_register_song(data)
+  Doocr.i_register_song(data)
 end
 
 fun i_qry_song_playing = I_QrySongPlaying(handle : LibC::Int) : LibC::Int
-  LibDoom.i_qry_song_playing(handle)
+  Doocr.i_qry_song_playing(handle)
 end
 
 fun i_tick_song = I_TickSong : LibC::ULongLong
-  LibDoom.i_tick_song
+  Doocr.i_tick_song
 end
 
 fun i_tactile = I_Tactile(on : LibC::Int, off : LibC::Int, total : LibC::Int)
-  LibDoom.i_tactile(on, off, total)
+  Doocr.i_tactile(on, off, total)
 end
 
 fun i_base_ticcmd = I_BaseTiccmd : CDoom::Ticcmd*
-  LibDoom.i_base_ticcmd
+  Doocr.i_base_ticcmd
 end
 
 fun i_get_heap_size = I_GetHeapSize : LibC::Int
-  LibDoom.i_get_heap_size
+  Doocr.i_get_heap_size
 end
 
 fun i_zone_base = I_ZoneBase(size : LibC::Int*) : CDoom::Byte*
-  LibDoom.i_zone_base(size)
+  Doocr.i_zone_base(size)
 end
 
 fun i_get_time = I_GetTime : LibC::Int
-  LibDoom.i_get_time
+  Doocr.i_get_time
 end
 
 fun i_init = I_Init
-  LibDoom.i_init
+  Doocr.i_init
 end
 
 fun i_quit = I_Quit
-  LibDoom.i_quit
+  Doocr.i_quit
 end
 
 fun i_wait_vbl = I_WaitVBL(count : LibC::Int)
-  LibDoom.i_wait_vbl(count)
+  Doocr.i_wait_vbl(count)
 end
 
 fun i_shutdown_graphics = I_ShutdownGraphics
-  LibDoom.i_shutdown_graphics
+  Doocr.i_shutdown_graphics
 end
 
 fun i_init_graphics = I_InitGraphics
-  LibDoom.i_init_graphics
+  Doocr.i_init_graphics
 end
 
 fun i_alloc_low = I_AllocLow(length : LibC::Int) : CDoom::Byte*
-  LibDoom.i_alloc_low(length)
+  Doocr.i_alloc_low(length)
 end
 
 fun i_error = I_Error(error : LibC::Char*)
-  LibDoom.i_error(String.new(error))
+  Doocr.i_error(String.new(error))
 end
 
 fun i_shutdown_graphics = I_ShutdownGraphics
-  LibDoom.i_shutdown_graphics
+  Doocr.i_shutdown_graphics
 end
 
 fun i_start_frame = I_StartFrame
-  LibDoom.i_start_frame
+  Doocr.i_start_frame
 end
 
 fun i_start_tic = I_StartTic
-  LibDoom.i_start_tic
+  Doocr.i_start_tic
 end
 
 fun i_update_no_blit = I_UpdateNoBlit
-  LibDoom.i_update_no_blit
+  Doocr.i_update_no_blit
 end
 
 fun i_finish_update = I_FinishUpdate
-  LibDoom.i_finish_update
+  Doocr.i_finish_update
 end
 
 fun i_read_screen = I_ReadScreen(scr : CDoom::Byte*)
-  LibDoom.i_read_screen(scr)
+  Doocr.i_read_screen(scr)
 end
 
 fun i_set_palette = I_SetPalette(palette : CDoom::Byte*)
-  LibDoom.i_set_palette(palette)
+  Doocr.i_set_palette(palette)
 end
 
 fun i_init_graphics = I_InitGraphics
-  LibDoom.i_init_graphics
+  Doocr.i_init_graphics
 end
 
 fun m_check_parm = M_CheckParm(check : LibC::Char*) : LibC::Int
-  LibDoom.m_check_parm(check)
+  Doocr.m_check_parm(check)
 end
 
 fun m_clear_box = M_ClearBox(box : CDoom::Fixed*)
-  LibDoom.m_clear_box(box)
+  Doocr.m_clear_box(box)
 end
 
 fun m_add_to_box = M_AddToBox(box : CDoom::Fixed*, x : CDoom::Fixed, y : CDoom::Fixed)
-  LibDoom.m_add_to_box(box, x, y)
+  Doocr.m_add_to_box(box, x, y)
 end
 
 fun cht_check_cheat = cht_CheckCheat(cht : CDoom::Cheatseq*, key : LibC::Char) : LibC::Int
-  LibDoom.cht_check_cheat(cht, key)
+  Doocr.cht_check_cheat(cht, key)
 end
 
 fun cht_get_param = cht_GetParam(cht : CDoom::Cheatseq*, buffer : LibC::Char*)
-  LibDoom.cht_get_param(cht, buffer)
+  Doocr.cht_get_param(cht, buffer)
 end
 
 fun fixed_mul = FixedMul(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
-  LibDoom.fixed_mul(a, b)
+  Doocr.fixed_mul(a, b)
 end
 
 fun fixed_div = FixedDiv(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
-  LibDoom.fixed_div(a, b)
+  Doocr.fixed_div(a, b)
 end
 
 fun fixed_div2 = FixedDiv2(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
-  LibDoom.fixed_div2(a, b)
+  Doocr.fixed_div2(a, b)
 end
 
 fun m_read_save_strings = M_ReadSaveStrings
-  LibDoom.m_read_save_strings
+  Doocr.m_read_save_strings
 end
 
 fun m_draw_load = M_DrawLoad
-  LibDoom.m_draw_load
+  Doocr.m_draw_load
 end
 
 fun m_draw_save_load_border = M_DrawSaveLoadBorder(x : LibC::Int, y : LibC::Int)
-  LibDoom.m_draw_save_load_border(x, y)
+  Doocr.m_draw_save_load_border(x, y)
 end
 
 fun m_load_select = M_LoadSelect(choice : LibC::Int)
-  LibDoom.m_load_select(choice)
+  Doocr.m_load_select(choice)
 end
 
 fun m_load_game = M_LoadGame(choice : LibC::Int)
-  LibDoom.m_load_game(choice)
+  Doocr.m_load_game(choice)
 end
 
 fun m_draw_save = M_DrawSave
-  LibDoom.m_draw_save
+  Doocr.m_draw_save
 end
 
 fun m_do_save = M_DoSave(slot : LibC::Int)
-  LibDoom.m_do_save(slot)
+  Doocr.m_do_save(slot)
 end
 
 fun m_save_select = M_SaveSelect(choice : LibC::Int)
-  LibDoom.m_save_select(choice)
+  Doocr.m_save_select(choice)
 end
 
 fun m_save_game = M_SaveGame(choice : LibC::Int)
-  LibDoom.m_save_game(choice)
+  Doocr.m_save_game(choice)
 end
 
 fun m_quicksave_response = M_QuickSaveResponse(ch : LibC::Int)
-  LibDoom.m_quicksave_response(ch)
+  Doocr.m_quicksave_response(ch)
 end
 
 fun m_quicksave = M_QuickSave
-  LibDoom.m_quicksave
+  Doocr.m_quicksave
 end
 
 fun m_quickload_response = M_QuickLoadResponse(ch : LibC::Int)
-  LibDoom.m_quickload_response(ch)
+  Doocr.m_quickload_response(ch)
 end
 
 fun m_quickload = M_QuickLoad
-  LibDoom.m_quickload
+  Doocr.m_quickload
 end
 
 fun m_draw_readthis1 = M_DrawReadThis1
-  LibDoom.m_draw_readthis1
+  Doocr.m_draw_readthis1
 end
 
 fun m_draw_readthis2 = M_DrawReadThis2
-  LibDoom.m_draw_readthis2
+  Doocr.m_draw_readthis2
 end
 
 fun m_draw_sound = M_DrawSound
-  LibDoom.m_draw_sound
+  Doocr.m_draw_sound
 end
 
 fun m_sound = M_Sound(choice : LibC::Int)
-  LibDoom.m_sound(choice)
+  Doocr.m_sound(choice)
 end
 
 fun m_sfxvol = M_SfxVol(choice : LibC::Int)
-  LibDoom.m_sfxvol(choice)
+  Doocr.m_sfxvol(choice)
 end
 
 fun m_musicvol = M_MusicVol(choice : LibC::Int)
-  LibDoom.m_musicvol(choice)
+  Doocr.m_musicvol(choice)
 end
 
 fun m_draw_mainmenu = M_DrawMainMenu
-  LibDoom.m_draw_mainmenu
+  Doocr.m_draw_mainmenu
 end
 
 fun m_draw_newgame = M_DrawNewGame
-  LibDoom.m_draw_newgame
+  Doocr.m_draw_newgame
 end
 
 fun m_new_game = M_NewGame(choice : LibC::Int)
-  LibDoom.m_new_game(choice)
+  Doocr.m_new_game(choice)
 end
 
 fun m_draw_episode = M_DrawEpisode
-  LibDoom.m_draw_episode
+  Doocr.m_draw_episode
 end
 
 fun m_verify_nightmare = M_VerifyNightmare(ch : LibC::Int)
-  LibDoom.m_verify_nightmare(ch)
+  Doocr.m_verify_nightmare(ch)
 end
 
 fun m_choose_skill = M_ChooseSkill(choice : LibC::Int)
-  LibDoom.m_choose_skill(choice)
+  Doocr.m_choose_skill(choice)
 end
 
 fun m_episode = M_Episode(choice : LibC::Int)
-  LibDoom.m_episode(choice)
+  Doocr.m_episode(choice)
 end
 
 fun m_draw_options = M_DrawOptions
-  LibDoom.m_draw_options
+  Doocr.m_draw_options
 end
 
 fun m_options = M_Options(choice : LibC::Int)
-  LibDoom.m_options(choice)
+  Doocr.m_options(choice)
 end
 
 fun m_change_messages = M_ChangeMessages(choice : LibC::Int)
-  LibDoom.m_change_messages(choice)
+  Doocr.m_change_messages(choice)
 end
 
 fun m_change_crosshair = M_ChangeCrosshair(choice : LibC::Int)
-  LibDoom.m_change_crosshair(choice)
+  Doocr.m_change_crosshair(choice)
 end
 
 fun m_change_alwaysrun = M_ChangeAlwaysRun(choice : LibC::Int)
-  LibDoom.m_change_alwaysrun(choice)
+  Doocr.m_change_alwaysrun(choice)
 end
 
 fun m_endgame_response = M_EndGameResponse(ch : Int32)
-  LibDoom.m_endgame_response(ch)
+  Doocr.m_endgame_response(ch)
 end
 
 fun m_endgame = M_EndGame(choice : LibC::Int)
-  LibDoom.m_endgame(choice)
+  Doocr.m_endgame(choice)
 end
 
 fun m_readthis = M_ReadThis(choice : LibC::Int)
-  LibDoom.m_readthis(choice)
+  Doocr.m_readthis(choice)
 end
 
 fun m_readthis2 = M_ReadThis2(choice : LibC::Int)
-  LibDoom.m_readthis2(choice)
+  Doocr.m_readthis2(choice)
 end
 
 fun m_finish_readthis = M_FinishReadThis(choice : LibC::Int)
-  LibDoom.m_finish_readthis(choice)
+  Doocr.m_finish_readthis(choice)
 end
 
 fun m_quit_response = M_QuitResponse(ch : LibC::Int)
-  LibDoom.m_quit_response(ch)
+  Doocr.m_quit_response(ch)
 end
 
 fun m_quitdoom = M_QuitDOOM(choice : LibC::Int)
-  LibDoom.m_quitdoom(choice)
+  Doocr.m_quitdoom(choice)
 end
 
 fun m_change_sensitivity = M_ChangeSensitivity(choice : LibC::Int)
-  LibDoom.m_change_sensitivity(choice)
+  Doocr.m_change_sensitivity(choice)
 end
 
 fun m_mouse_move = M_MouseMove(choice : LibC::Int)
-  LibDoom.m_mouse_move(choice)
+  Doocr.m_mouse_move(choice)
 end
 
 fun m_size_display = M_SizeDisplay(choice : LibC::Int)
-  LibDoom.m_size_display(choice)
+  Doocr.m_size_display(choice)
 end
 
 fun m_draw_thermo = M_DrawThermo(x : LibC::Int, y : LibC::Int, therm_width : LibC::Int, therm_dot : LibC::Int)
-  LibDoom.m_draw_thermo(x, y, therm_width, therm_dot)
+  Doocr.m_draw_thermo(x, y, therm_width, therm_dot)
 end
 
 fun m_draw_empty_cell = M_DrawEmptyCell(menu : CDoom::Menu*, item : LibC::Int)
-  LibDoom.m_draw_empty_cell(menu, item)
+  Doocr.m_draw_empty_cell(menu, item)
 end
 
 fun m_draw_selcell = M_DrawSelCell(menu : CDoom::Menu*, item : LibC::Int)
-  LibDoom.m_draw_selcell(menu, item)
+  Doocr.m_draw_selcell(menu, item)
 end
 
 fun m_start_message = M_StartMessage(string : LibC::Char*, routine : Proc(Int32, Nil), input : CDoom::DoomBool)
-  LibDoom.m_start_message(string, routine, input)
+  Doocr.m_start_message(string, routine, input)
 end
 
 fun m_stop_message = M_StopMessage
-  LibDoom.m_stop_message
+  Doocr.m_stop_message
 end
 
 fun m_string_width = M_StringWidth(string : LibC::Char*) : LibC::Int
-  LibDoom.m_string_width(string)
+  Doocr.m_string_width(string)
 end
 
 fun m_string_height = M_StringHeight(string : LibC::Char*) : LibC::Int
-  LibDoom.m_string_height(string)
+  Doocr.m_string_height(string)
 end
 
 fun m_write_text = M_WriteText(x : LibC::Int, y : LibC::Int, string : LibC::Char*)
-  LibDoom.m_write_text(x, y, string)
+  Doocr.m_write_text(x, y, string)
 end
 
 fun m_responder = M_Responder(ev : CDoom::Event*) : CDoom::DoomBool
-  LibDoom.m_responder(ev)
+  Doocr.m_responder(ev)
 end
 
 fun m_start_control_panel = M_StartControlPanel
-  LibDoom.m_start_control_panel
+  Doocr.m_start_control_panel
 end
 
 fun m_drawer = M_Drawer
-  LibDoom.m_drawer
+  Doocr.m_drawer
 end
 
 fun m_clear_menus = M_ClearMenus
-  LibDoom.m_clear_menus
+  Doocr.m_clear_menus
 end
 
 fun m_setup_next_menu = M_SetupNextMenu(menudef : CDoom::Menu*)
-  LibDoom.m_setup_next_menu(menudef)
+  Doocr.m_setup_next_menu(menudef)
 end
 
 fun m_ticker = M_Ticker
-  LibDoom.m_ticker
+  Doocr.m_ticker
 end
 
 fun m_init = M_Init
-  LibDoom.m_init
+  Doocr.m_init
 end
 
 fun m_draw_text(x : LibC::Int, y : LibC::Int, direct : CDoom::DoomBool, string : LibC::Char*) : LibC::Int
-  LibDoom.m_draw_text(x, y, direct, string)
+  Doocr.m_draw_text(x, y, direct, string)
 end
 
 fun m_write_file = M_WriteFile(name : LibC::Char*, source : Void*, length : LibC::Int) : CDoom::DoomBool
-  LibDoom.m_write_file(name, source, length)
+  Doocr.m_write_file(name, source, length)
 end
 
 fun m_read_file = M_ReadFile(name : LibC::Char*, buffer : CDoom::Byte**) : LibC::Int
-  LibDoom.m_read_file(name, buffer)
+  Doocr.m_read_file(name, buffer)
 end
 
 fun m_save_defaults = M_SaveDefaults
-  LibDoom.m_save_defaults
+  Doocr.m_save_defaults
 end
 
 fun m_load_defaults = M_LoadDefaults
-  LibDoom.m_load_defaults
+  Doocr.m_load_defaults
 end
 
 fun write_pcx_file = WritePCXfile(filename : LibC::Char*, data : CDoom::Byte*, width : LibC::Int, height : LibC::Int, palette : CDoom::Byte*)
-  LibDoom.write_pcx_file(filename, data, width, height, palette)
+  Doocr.write_pcx_file(filename, data, width, height, palette)
 end
 
 fun m_screenshot = M_ScreenShot
-  LibDoom.m_screenshot
+  Doocr.m_screenshot
 end
 
 fun p_random = P_Random : LibC::Int
-  LibDoom.p_random
+  Doocr.p_random
 end
 
 fun m_random = M_Random : LibC::Int
-  LibDoom.m_random
+  Doocr.m_random
 end
 
 fun m_clear_random = M_ClearRandom
-  LibDoom.m_clear_random
+  Doocr.m_clear_random
 end
 
 fun t_move_ceiling = T_MoveCeiling(ceiling : CDoom::Ceiling*)
-  LibDoom.t_move_ceiling(ceiling)
+  Doocr.t_move_ceiling(ceiling)
 end
 
 fun ev_do_ceiling = EV_DoCeiling(line : CDoom::Line*, type : CDoom::Ceilingenum) : LibC::Int
-  LibDoom.ev_do_ceiling(line, type)
+  Doocr.ev_do_ceiling(line, type)
 end
 
 fun p_add_active_ceiling = P_AddActiveCeiling(c : CDoom::Ceiling*)
-  LibDoom.p_add_active_ceiling(c)
+  Doocr.p_add_active_ceiling(c)
 end
 
 fun p_remove_active_ceiling = P_RemoveActiveCeiling(c : CDoom::Ceiling*)
-  LibDoom.p_remove_active_ceiling(c)
+  Doocr.p_remove_active_ceiling(c)
 end
 
 fun p_activate_in_stasis_ceiling = P_ActivateInStasisCeiling(line : CDoom::Line*)
-  LibDoom.p_activate_in_stasis_ceiling(line)
+  Doocr.p_activate_in_stasis_ceiling(line)
 end
 
 fun ev_ceiling_crush_stop = EV_CeilingCrushStop(line : CDoom::Line*) : LibC::Int
-  LibDoom.ev_ceiling_crush_stop(line)
+  Doocr.ev_ceiling_crush_stop(line)
 end
 
 fun t_vertical_door = T_VerticalDoor(door : CDoom::Vldoor*)
-  LibDoom.t_vertical_door(door)
+  Doocr.t_vertical_door(door)
 end
 
 fun ev_do_locked_door = EV_DoLockedDoor(line : CDoom::Line*, type : CDoom::Vldoorenum, thing : CDoom::Mobj*) : LibC::Int
-  LibDoom.ev_do_locked_door(line, type, thing)
+  Doocr.ev_do_locked_door(line, type, thing)
 end
 
 fun ev_do_door = EV_DoDoor(line : CDoom::Line*, type : CDoom::Vldoorenum) : LibC::Int
-  LibDoom.ev_do_door(line, type)
+  Doocr.ev_do_door(line, type)
 end
 
 fun ev_vertical_door = EV_VerticalDoor(line : CDoom::Line*, thing : CDoom::Mobj*)
-  LibDoom.ev_vertical_door(line, thing)
+  Doocr.ev_vertical_door(line, thing)
 end
 
 fun p_spawn_door_close_in_30 = P_SpawnDoorCloseIn30(sec : CDoom::Sector*)
-  LibDoom.p_spawn_door_close_in_30(sec)
+  Doocr.p_spawn_door_close_in_30(sec)
 end
 
 fun p_spawn_door_raise_in_5_mins = P_SpawnDoorRaiseIn5Mins(sec : CDoom::Sector*, secnum : LibC::Int)
-  LibDoom.p_spawn_door_raise_in_5_mins(sec, secnum)
+  Doocr.p_spawn_door_raise_in_5_mins(sec, secnum)
 end
 
 fun p_recursive_sound = P_RecursiveSound(sec : CDoom::Sector*, soundblocks : LibC::Int)
-  LibDoom.p_recursive_sound(sec, soundblocks)
+  Doocr.p_recursive_sound(sec, soundblocks)
 end
 
 fun p_noise_alert = P_NoiseAlert(target : CDoom::Mobj*, emmiter : CDoom::Mobj*)
-  LibDoom.p_noise_alert(target, emmiter)
+  Doocr.p_noise_alert(target, emmiter)
 end
 
 fun p_check_melee_range = P_CheckMeleeRange(actor : CDoom::Mobj*) : CDoom::DoomBool
-  LibDoom.p_check_melee_range(actor)
+  Doocr.p_check_melee_range(actor)
 end
 
 fun p_check_missile_range = P_CheckMissileRange(actor : CDoom::Mobj*) : CDoom::DoomBool
-  LibDoom.p_check_missile_range(actor)
+  Doocr.p_check_missile_range(actor)
 end
 
 fun p_move = P_Move(actor : CDoom::Mobj*) : CDoom::DoomBool
-  LibDoom.p_move(actor)
+  Doocr.p_move(actor)
 end
 
 fun p_try_walk = P_TryWalk(actor : CDoom::Mobj*) : CDoom::DoomBool
-  LibDoom.p_try_walk(actor)
+  Doocr.p_try_walk(actor)
 end
 
 fun p_new_chase_dir = P_NewChaseDir(actor : CDoom::Mobj*)
-  LibDoom.p_new_chase_dir(actor)
+  Doocr.p_new_chase_dir(actor)
 end
 
 fun p_look_for_players = P_LookForPlayers(actor : CDoom::Mobj*, allaround : CDoom::DoomBool) : CDoom::DoomBool
-  LibDoom.p_look_for_players(actor, allaround)
+  Doocr.p_look_for_players(actor, allaround)
 end
 
 fun a_keen_die = A_KeenDie(mo : CDoom::Mobj*)
-  LibDoom.a_keen_die(mo)
+  Doocr.a_keen_die(mo)
 end
 
 fun a_look = A_Look(actor : CDoom::Mobj*)
-  LibDoom.a_look(actor)
+  Doocr.a_look(actor)
 end
 
 fun a_chase = A_Chase(actor : CDoom::Mobj*)
-  LibDoom.a_chase(actor)
+  Doocr.a_chase(actor)
 end
 
 fun a_face_target = A_FaceTarget(actor : CDoom::Mobj*)
-  LibDoom.a_face_target(actor)
+  Doocr.a_face_target(actor)
 end
 
 fun a_pos_attack = A_PosAttack(actor : CDoom::Mobj*)
-  LibDoom.a_pos_attack(actor)
+  Doocr.a_pos_attack(actor)
 end
 
 fun a_spos_attack = A_SPosAttack(actor : CDoom::Mobj*)
-  LibDoom.a_spos_attack(actor)
+  Doocr.a_spos_attack(actor)
 end
 
 fun a_cpos_attack = A_CPosAttack(actor : CDoom::Mobj*)
-  LibDoom.a_cpos_attack(actor)
+  Doocr.a_cpos_attack(actor)
 end
 
 fun a_cpos_refire = A_CPosRefire(actor : CDoom::Mobj*)
-  LibDoom.a_cpos_refire(actor)
+  Doocr.a_cpos_refire(actor)
 end
 
 fun a_spid_refire = A_SpidRefire(actor : CDoom::Mobj*)
-  LibDoom.a_spid_refire(actor)
+  Doocr.a_spid_refire(actor)
 end
 
 fun a_bspi_attack = A_BspiAttack(actor : CDoom::Mobj*)
-  LibDoom.a_bspi_attack(actor)
+  Doocr.a_bspi_attack(actor)
 end
 
 fun a_troop_attack = A_TroopAttack(actor : CDoom::Mobj*)
-  LibDoom.a_troop_attack(actor)
+  Doocr.a_troop_attack(actor)
 end
 
 fun a_sarg_attack = A_SargAttack(actor : CDoom::Mobj*)
-  LibDoom.a_sarg_attack(actor)
+  Doocr.a_sarg_attack(actor)
 end
 
 fun a_head_attack = A_HeadAttack(actor : CDoom::Mobj*)
-  LibDoom.a_head_attack(actor)
+  Doocr.a_head_attack(actor)
 end
 
 fun a_cyber_attack = A_CyberAttack(actor : CDoom::Mobj*)
-  LibDoom.a_cyber_attack(actor)
+  Doocr.a_cyber_attack(actor)
 end
 
 fun a_bruis_attack = A_BruisAttack(actor : CDoom::Mobj*)
-  LibDoom.a_bruis_attack(actor)
+  Doocr.a_bruis_attack(actor)
 end
 
 fun a_skel_missile = A_SkelMissile(actor : CDoom::Mobj*)
-  LibDoom.a_skel_missile(actor)
+  Doocr.a_skel_missile(actor)
 end
 
 fun a_tracer = A_Tracer(actor : CDoom::Mobj*)
-  LibDoom.a_tracer(actor)
+  Doocr.a_tracer(actor)
 end
 
 fun a_skel_whoosh = A_SkelWhoosh(actor : CDoom::Mobj*)
-  LibDoom.a_skel_whoosh(actor)
+  Doocr.a_skel_whoosh(actor)
 end
 
 fun a_skel_fist = A_SkelFist(actor : CDoom::Mobj*)
-  LibDoom.a_skel_fist(actor)
+  Doocr.a_skel_fist(actor)
 end
 
 fun pit_vile_check = PIT_VileCheck(thing : CDoom::Mobj*) : CDoom::DoomBool
-  LibDoom.pit_vile_check(thing)
+  Doocr.pit_vile_check(thing)
 end
 
 fun a_vile_chase = A_VileChase(actor : CDoom::Mobj*)
-  LibDoom.a_vile_chase(actor)
+  Doocr.a_vile_chase(actor)
 end
 
 fun a_vile_start = A_VileStart(actor : CDoom::Mobj*)
-  LibDoom.a_vile_start(actor)
+  Doocr.a_vile_start(actor)
 end
 
 fun a_start_fire = A_StartFire(actor : CDoom::Mobj*)
-  LibDoom.a_start_fire(actor)
+  Doocr.a_start_fire(actor)
 end
 
 fun a_fire_crackle = A_FireCrackle(actor : CDoom::Mobj*)
-  LibDoom.a_fire_crackle(actor)
+  Doocr.a_fire_crackle(actor)
 end
 
 fun a_fire = A_Fire(actor : CDoom::Mobj*)
-  LibDoom.a_fire(actor)
+  Doocr.a_fire(actor)
 end
 
 fun a_vile_target = A_VileTarget(actor : CDoom::Mobj*)
-  LibDoom.a_vile_target(actor)
+  Doocr.a_vile_target(actor)
 end
 
 fun a_vile_attack = A_VileAttack(actor : CDoom::Mobj*)
-  LibDoom.a_vile_attack(actor)
+  Doocr.a_vile_attack(actor)
 end
 
 fun a_fat_raise = A_FatRaise(actor : CDoom::Mobj*)
-  LibDoom.a_fat_raise(actor)
+  Doocr.a_fat_raise(actor)
 end
 
 fun a_fat_attack1 = A_FatAttack1(actor : CDoom::Mobj*)
-  LibDoom.a_fat_attack1(actor)
+  Doocr.a_fat_attack1(actor)
 end
 
 fun a_fat_attack2 = A_FatAttack2(actor : CDoom::Mobj*)
-  LibDoom.a_fat_attack2(actor)
+  Doocr.a_fat_attack2(actor)
 end
 
 fun a_fat_attack3 = A_FatAttack3(actor : CDoom::Mobj*)
-  LibDoom.a_fat_attack3(actor)
+  Doocr.a_fat_attack3(actor)
 end
 
 fun a_skull_attack = A_SkullAttack(actor : CDoom::Mobj*)
-  LibDoom.a_skull_attack(actor)
+  Doocr.a_skull_attack(actor)
 end
 
 fun a_pain_shoot_skull = A_PainShootSkull(actor : CDoom::Mobj*, angle : CDoom::Angle)
-  LibDoom.a_pain_shoot_skull(actor, angle)
+  Doocr.a_pain_shoot_skull(actor, angle)
 end
 
 fun a_pain_attack = A_PainAttack(actor : CDoom::Mobj*)
-  LibDoom.a_pain_attack(actor)
+  Doocr.a_pain_attack(actor)
 end
 
 fun a_pain_die = A_PainDie(actor : CDoom::Mobj*)
-  LibDoom.a_pain_die(actor)
+  Doocr.a_pain_die(actor)
 end
 
 fun a_scream = A_Scream(actor : CDoom::Mobj*)
-  LibDoom.a_scream(actor)
+  Doocr.a_scream(actor)
 end
 
 fun a_xscream = A_XScream(actor : CDoom::Mobj*)
-  LibDoom.a_xscream(actor)
+  Doocr.a_xscream(actor)
 end
 
 fun a_pain = A_Pain(actor : CDoom::Mobj*)
-  LibDoom.a_pain(actor)
+  Doocr.a_pain(actor)
 end
 
 fun a_fall = A_Fall(actor : CDoom::Mobj*)
-  LibDoom.a_fall(actor)
+  Doocr.a_fall(actor)
 end
 
 fun a_explode = A_Explode(thingy : CDoom::Mobj*)
-  LibDoom.a_explode(thingy)
+  Doocr.a_explode(thingy)
 end
 
 fun a_boss_death = A_BossDeath(mo : CDoom::Mobj*)
-  LibDoom.a_boss_death(mo)
+  Doocr.a_boss_death(mo)
 end
 
 fun a_hoof = A_Hoof(mo : CDoom::Mobj*)
-  LibDoom.a_hoof(mo)
+  Doocr.a_hoof(mo)
 end
 
 fun a_metal = A_Metal(mo : CDoom::Mobj*)
-  LibDoom.a_metal(mo)
+  Doocr.a_metal(mo)
 end
 
 fun a_baby_metal = A_BabyMetal(mo : CDoom::Mobj*)
-  LibDoom.a_baby_metal(mo)
+  Doocr.a_baby_metal(mo)
 end
 
 fun a_open_shotgun2 = A_OpenShotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_open_shotgun2(player, psp)
+  Doocr.a_open_shotgun2(player, psp)
 end
 
 fun a_load_shotgun2 = A_LoadShotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_load_shotgun2(player, psp)
+  Doocr.a_load_shotgun2(player, psp)
 end
 
 fun a_close_shotgun2 = A_CloseShotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_close_shotgun2(player, psp)
+  Doocr.a_close_shotgun2(player, psp)
 end
 
 fun a_brain_awake = A_BrainAwake(mo : CDoom::Mobj*)
-  LibDoom.a_brain_awake(mo)
+  Doocr.a_brain_awake(mo)
 end
 
 fun a_brain_pain = A_BrainPain(mo : CDoom::Mobj*)
-  LibDoom.a_brain_pain(mo)
+  Doocr.a_brain_pain(mo)
 end
 
 fun a_brain_scream = A_BrainScream(mo : CDoom::Mobj*)
-  LibDoom.a_brain_scream(mo)
+  Doocr.a_brain_scream(mo)
 end
 
 fun a_brain_explode = A_BrainExplode(mo : CDoom::Mobj*)
-  LibDoom.a_brain_explode(mo)
+  Doocr.a_brain_explode(mo)
 end
 
 fun a_brain_die = A_BrainDie(mo : CDoom::Mobj*)
-  LibDoom.a_brain_die(mo)
+  Doocr.a_brain_die(mo)
 end
 
 fun a_brain_spit = A_BrainSpit(mo : CDoom::Mobj*)
-  LibDoom.a_brain_spit(mo)
+  Doocr.a_brain_spit(mo)
 end
 
 fun a_spawn_sound = A_SpawnSound(mo : CDoom::Mobj*)
-  LibDoom.a_spawn_sound(mo)
+  Doocr.a_spawn_sound(mo)
 end
 
 fun a_spawn_fly = A_SpawnFly(mo : CDoom::Mobj*)
-  LibDoom.a_spawn_fly(mo)
+  Doocr.a_spawn_fly(mo)
 end
 
 fun a_player_scream = A_PlayerScream(mo : CDoom::Mobj*)
-  LibDoom.a_player_scream(mo)
+  Doocr.a_player_scream(mo)
 end
 
 fun t_move_plane = T_MovePlane(sector : CDoom::Sector*, speed : CDoom::Fixed, dest : CDoom::Fixed, crush : CDoom::DoomBool, floor_or_ceiling : LibC::Int, direction : LibC::Int) : CDoom::Result
-  LibDoom.t_move_plane(sector, speed, dest, crush, floor_or_ceiling, direction)
+  Doocr.t_move_plane(sector, speed, dest, crush, floor_or_ceiling, direction)
 end
 
 fun t_move_floor = T_MoveFloor(floor : CDoom::Floormove*)
-  LibDoom.t_move_floor(floor)
+  Doocr.t_move_floor(floor)
 end
 
 fun ev_do_floor = EV_DoFloor(line : CDoom::Line*, floortype : CDoom::Floorenum) : LibC::Int
-  LibDoom.ev_do_floor(line, floortype)
+  Doocr.ev_do_floor(line, floortype)
 end
 
 fun ev_build_stairs = EV_BuildStairs(line : CDoom::Line*, type : CDoom::Stairenum) : LibC::Int
-  LibDoom.ev_build_stairs(line, type)
+  Doocr.ev_build_stairs(line, type)
 end
 
 fun p_give_ammo = P_GiveAmmo(player : CDoom::Player*, ammo : CDoom::Ammotype, num : LibC::Int) : CDoom::DoomBool
-  LibDoom.p_give_ammo(player, ammo, num)
+  Doocr.p_give_ammo(player, ammo, num)
 end
 
 fun p_give_weapon = P_GiveWeapon(player : CDoom::Player*, weapon : CDoom::Weapontype, dropped : CDoom::DoomBool) : CDoom::DoomBool
-  LibDoom.p_give_weapon(player, weapon, dropped)
+  Doocr.p_give_weapon(player, weapon, dropped)
 end
 
 fun p_give_body = P_GiveBody(player : CDoom::Player*, num : LibC::Int) : CDoom::DoomBool
-  LibDoom.p_give_body(player, num)
+  Doocr.p_give_body(player, num)
 end
 
 fun p_give_armor = P_GiveArmor(player : CDoom::Player*, armortype : LibC::Int) : CDoom::DoomBool
-  LibDoom.p_give_armor(player, armortype)
+  Doocr.p_give_armor(player, armortype)
 end
 
 fun p_give_card = P_GiveCard(player : CDoom::Player*, card : CDoom::Card)
-  LibDoom.p_give_card(player, card)
+  Doocr.p_give_card(player, card)
 end
 
 fun p_give_power = P_GivePower(player : CDoom::Player*, power : LibC::Int) : CDoom::DoomBool
-  LibDoom.p_give_power(player, power)
+  Doocr.p_give_power(player, power)
 end
 
 fun p_touch_special_thing = P_TouchSpecialThing(special : CDoom::Mobj*, toucher : CDoom::Mobj*)
-  LibDoom.p_touch_special_thing(special, toucher)
+  Doocr.p_touch_special_thing(special, toucher)
 end
 
 fun p_kill_mobj = P_KillMobj(source : CDoom::Mobj*, target : CDoom::Mobj*)
-  LibDoom.p_kill_mobj(source, target)
+  Doocr.p_kill_mobj(source, target)
 end
 
 fun p_damage_mobj = P_DamageMobj(target : CDoom::Mobj*, inflictor : CDoom::Mobj*, source : CDoom::Mobj*, damage : LibC::Int)
-  LibDoom.p_damage_mobj(target, inflictor, source, damage)
+  Doocr.p_damage_mobj(target, inflictor, source, damage)
 end
 
 fun t_fire_flicker = T_FireFlicker(flick : CDoom::Fireflicker*)
-  LibDoom.t_fire_flicker(flick)
+  Doocr.t_fire_flicker(flick)
 end
 
 fun p_spawn_fire_flicker = P_SpawnFireFlicker(sector : CDoom::Sector*)
-  LibDoom.p_spawn_fire_flicker(sector)
+  Doocr.p_spawn_fire_flicker(sector)
 end
 
 fun t_light_flash = T_LightFlash(flash : CDoom::Lightflash*)
-  LibDoom.t_light_flash(flash)
+  Doocr.t_light_flash(flash)
 end
 
 fun p_spawn_light_flash = P_SpawnLightFlash(sector : CDoom::Sector*)
-  LibDoom.p_spawn_light_flash(sector)
+  Doocr.p_spawn_light_flash(sector)
 end
 
 fun t_strobe_flash = T_StrobeFlash(flash : CDoom::Strobe*)
-  LibDoom.t_strobe_flash(flash)
+  Doocr.t_strobe_flash(flash)
 end
 
 fun p_spawn_strobe_flash = P_SpawnStrobeFlash(sector : CDoom::Sector*, fast_or_slow : LibC::Int, in_sync : LibC::Int)
-  LibDoom.p_spawn_strobe_flash(sector, fast_or_slow, in_sync)
+  Doocr.p_spawn_strobe_flash(sector, fast_or_slow, in_sync)
 end
 
 fun ev_start_light_strobing = EV_StartLightStrobing(line : CDoom::Line*)
-  LibDoom.ev_start_light_strobing(line)
+  Doocr.ev_start_light_strobing(line)
 end
 
 fun ev_turn_tag_lights_off = EV_TurnTagLightsOff(line : CDoom::Line*)
-  LibDoom.ev_turn_tag_lights_off(line)
+  Doocr.ev_turn_tag_lights_off(line)
 end
 
 fun ev_light_turn_on = EV_LightTurnOn(line : CDoom::Line*, bright : LibC::Int)
-  LibDoom.ev_light_turn_on(line, bright)
+  Doocr.ev_light_turn_on(line, bright)
 end
 
 fun t_glow = T_Glow(g : CDoom::Glow*)
-  LibDoom.t_glow(g)
+  Doocr.t_glow(g)
 end
 
 fun p_spawn_glowing_light = P_SpawnGlowingLight(sector : CDoom::Sector*)
-  LibDoom.p_spawn_glowing_light(sector)
+  Doocr.p_spawn_glowing_light(sector)
 end
 
 fun pit_stomp_thing = PIT_StompThing(thing : CDoom::Mobj*) : CDoom::DoomBool
-  LibDoom.pit_stomp_thing(thing)
+  Doocr.pit_stomp_thing(thing)
 end
 
 fun p_teleport_move = P_TeleportMove(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
-  LibDoom.p_teleport_move(thing, x, y)
+  Doocr.p_teleport_move(thing, x, y)
 end
 
 fun pit_check_line = PIT_CheckLine(ld : CDoom::Line*) : CDoom::DoomBool
-  LibDoom.pit_check_line(ld)
+  Doocr.pit_check_line(ld)
 end
 
 fun pit_check_thing = PIT_CheckThing(thing : CDoom::Mobj*) : CDoom::DoomBool
-  LibDoom.pit_check_thing(thing)
+  Doocr.pit_check_thing(thing)
 end
 
 fun p_check_position = P_CheckPosition(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
-  LibDoom.p_check_position(thing, x, y)
+  Doocr.p_check_position(thing, x, y)
 end
 
 fun p_try_move = P_TryMove(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
-  LibDoom.p_try_move(thing, x, y)
+  Doocr.p_try_move(thing, x, y)
 end
 
 fun p_thing_height_clip = P_ThingHeightClip(thing : CDoom::Mobj*) : CDoom::DoomBool
-  LibDoom.p_thing_height_clip(thing)
+  Doocr.p_thing_height_clip(thing)
 end
 
 fun p_hit_slide_line = P_HitSlideLine(ld : CDoom::Line*)
-  LibDoom.p_hit_slide_line(ld)
+  Doocr.p_hit_slide_line(ld)
 end
 
 fun ptr_slide_traverse = PTR_SlideTraverse(int : CDoom::Intercept*) : CDoom::DoomBool
-  LibDoom.ptr_slide_traverse(int)
+  Doocr.ptr_slide_traverse(int)
 end
 
 fun p_slide_move = P_SlideMove(mo : CDoom::Mobj*)
-  LibDoom.p_slide_move(mo)
+  Doocr.p_slide_move(mo)
 end
 
 fun ptr_aim_traverse = PTR_AimTraverse(int : CDoom::Intercept*) : CDoom::DoomBool
-  LibDoom.ptr_aim_traverse(int)
+  Doocr.ptr_aim_traverse(int)
 end
 
 fun ptr_shoot_traverse = PTR_ShootTraverse(int : CDoom::Intercept*) : CDoom::DoomBool
-  LibDoom.ptr_shoot_traverse(int)
+  Doocr.ptr_shoot_traverse(int)
 end
 
 fun p_aim_line_attack = P_AimLineAttack(t1 : CDoom::Mobj*, angle : CDoom::Angle, distance : CDoom::Fixed) : CDoom::Fixed
-  LibDoom.p_aim_line_attack(t1, angle, distance)
+  Doocr.p_aim_line_attack(t1, angle, distance)
 end
 
 fun p_line_attack = P_LineAttack(t1 : CDoom::Mobj*, angle : CDoom::Angle, distance : CDoom::Fixed, slope : CDoom::Fixed, damage : LibC::Int)
-  LibDoom.p_line_attack(t1, angle, distance, slope, damage)
+  Doocr.p_line_attack(t1, angle, distance, slope, damage)
 end
 
 fun ptr_use_traverse = PTR_UseTraverse(int : CDoom::Intercept*) : CDoom::DoomBool
-  LibDoom.ptr_use_traverse(int)
+  Doocr.ptr_use_traverse(int)
 end
 
 fun p_use_lines = P_UseLines(player : CDoom::Player*)
-  LibDoom.p_use_lines(player)
+  Doocr.p_use_lines(player)
 end
 
 fun pit_radius_attack = PIT_RadiusAttack(thing : CDoom::Mobj*) : CDoom::DoomBool
-  LibDoom.pit_radius_attack(thing)
+  Doocr.pit_radius_attack(thing)
 end
 
 fun p_radius_attack = P_RadiusAttack(spot : CDoom::Mobj*, source : CDoom::Mobj*, damage : LibC::Int)
-  LibDoom.p_radius_attack(spot, source, damage)
+  Doocr.p_radius_attack(spot, source, damage)
 end
 
 fun pit_change_sector = PIT_ChangeSector(thing : CDoom::Mobj*) : CDoom::DoomBool
-  LibDoom.pit_change_sector(thing)
+  Doocr.pit_change_sector(thing)
 end
 
 fun p_change_sector = P_ChangeSector(sector : CDoom::Sector*, crunch : CDoom::DoomBool) : CDoom::DoomBool
-  LibDoom.p_change_sector(sector, crunch)
+  Doocr.p_change_sector(sector, crunch)
 end
 
 fun p_aprox_distance = P_AproxDistance(dx : CDoom::Fixed, dy : CDoom::Fixed) : CDoom::Fixed
-  LibDoom.p_aprox_distance(dx, dy)
+  Doocr.p_aprox_distance(dx, dy)
 end
 
 fun p_point_on_line_side = P_PointOnLineSide(x : CDoom::Fixed, y : CDoom::Fixed, line : CDoom::Line*) : LibC::Int
-  LibDoom.p_point_on_line_side(x, y, line)
+  Doocr.p_point_on_line_side(x, y, line)
 end
 
 fun p_box_on_line_side = P_BoxOnLineSide(tmbox : CDoom::Fixed*, ld : CDoom::Line*) : LibC::Int
-  LibDoom.p_box_on_line_side(tmbox, ld)
+  Doocr.p_box_on_line_side(tmbox, ld)
 end
 
 fun p_point_on_divline_side = P_PointOnDivlineSide(x : CDoom::Fixed, y : CDoom::Fixed, line : CDoom::Divline*) : LibC::Int
-  LibDoom.p_point_on_divline_side(x, y, line)
+  Doocr.p_point_on_divline_side(x, y, line)
 end
 
 fun p_make_divline = P_MakeDivline(li : CDoom::Line*, dl : CDoom::Divline*)
-  LibDoom.p_make_divline(li, dl)
+  Doocr.p_make_divline(li, dl)
 end
 
 fun p_intercept_vector = P_InterceptVector(v2 : CDoom::Divline*, v1 : CDoom::Divline*) : CDoom::Fixed
-  LibDoom.p_intercept_vector(v2, v1)
+  Doocr.p_intercept_vector(v2, v1)
 end
 
 fun p_line_opening = P_LineOpening(linedef : CDoom::Line*)
-  LibDoom.p_line_opening(linedef)
+  Doocr.p_line_opening(linedef)
 end
 
 fun p_unset_thing_position = P_UnsetThingPosition(thing : CDoom::Mobj*)
-  LibDoom.p_unset_thing_position(thing)
+  Doocr.p_unset_thing_position(thing)
 end
 
 fun p_set_thing_position = P_SetThingPosition(thing : CDoom::Mobj*)
-  LibDoom.p_set_thing_position(thing)
+  Doocr.p_set_thing_position(thing)
 end
 
 fun p_block_lines_iterator = P_BlockLinesIterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Line*, CDoom::DoomBool)) : CDoom::DoomBool
-  LibDoom.p_block_lines_iterator(x, y, func)
+  Doocr.p_block_lines_iterator(x, y, func)
 end
 
 fun p_block_things_iterator = P_BlockThingsIterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Mobj*, CDoom::DoomBool)) : CDoom::DoomBool
-  LibDoom.p_block_things_iterator(x, y, func)
+  Doocr.p_block_things_iterator(x, y, func)
 end
 
 fun pit_add_line_intercepts = PIT_AddLineIntercepts(ld : CDoom::Line*) : CDoom::DoomBool
-  LibDoom.pit_add_line_intercepts(ld)
+  Doocr.pit_add_line_intercepts(ld)
 end
 
 fun pit_add_thing_intercepts = PIT_AddThingIntercepts(thing : CDoom::Mobj*) : CDoom::DoomBool
-  LibDoom.pit_add_thing_intercepts(thing)
+  Doocr.pit_add_thing_intercepts(thing)
 end
 
 fun p_traverse_intercepts = P_TraverseIntercepts(func : CDoom::Traverser, maxfrac : CDoom::Fixed) : CDoom::DoomBool
-  LibDoom.p_traverse_intercepts(func, maxfrac)
+  Doocr.p_traverse_intercepts(func, maxfrac)
 end
 
 fun p_path_traverse = P_PathTraverse(x1 : CDoom::Fixed, y1 : CDoom::Fixed, x2 : CDoom::Fixed, y2 : CDoom::Fixed, flags : LibC::Int, trav : Proc(CDoom::Intercept*, CDoom::DoomBool)) : CDoom::DoomBool
-  LibDoom.p_path_traverse(x1, y1, x2, y2, flags, trav)
+  Doocr.p_path_traverse(x1, y1, x2, y2, flags, trav)
 end
 
 fun p_set_mobj_state = P_SetMobjState(mobj : CDoom::Mobj*, state : CDoom::Statenum) : CDoom::DoomBool
-  LibDoom.p_set_mobj_state(mobj, state)
+  Doocr.p_set_mobj_state(mobj, state)
 end
 
 fun p_explode_missile = P_ExplodeMissile(mo : CDoom::Mobj*)
-  LibDoom.p_explode_missile(mo)
+  Doocr.p_explode_missile(mo)
 end
 
 fun p_xymovement = P_XYMovement(mo : CDoom::Mobj*)
-  LibDoom.p_xymovement(mo)
+  Doocr.p_xymovement(mo)
 end
 
 fun p_zmovement = P_ZMovement(mo : CDoom::Mobj*)
-  LibDoom.p_zmovement(mo)
+  Doocr.p_zmovement(mo)
 end
 
 fun p_nightmare_respawn = P_NightmareRespawn(mobj : CDoom::Mobj*)
-  LibDoom.p_nightmare_respawn(mobj)
+  Doocr.p_nightmare_respawn(mobj)
 end
 
 fun p_mobj_thinker = P_MobjThinker(mobj : CDoom::Mobj*)
-  LibDoom.p_mobj_thinker(mobj)
+  Doocr.p_mobj_thinker(mobj)
 end
 
 fun p_spawn_mobj = P_SpawnMobj(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, type : CDoom::Mobjtype) : CDoom::Mobj*
-  LibDoom.p_spawn_mobj(x, y, z, type)
+  Doocr.p_spawn_mobj(x, y, z, type)
 end
 
 fun p_remove_mobj = P_RemoveMobj(mobj : CDoom::Mobj*)
-  LibDoom.p_remove_mobj(mobj)
+  Doocr.p_remove_mobj(mobj)
 end
 
 fun p_respawn_specials = P_RespawnSpecials
-  LibDoom.p_respawn_specials
+  Doocr.p_respawn_specials
 end
 
 fun p_spawn_player = P_SpawnPlayer(mthing : CDoom::Mapthing*)
-  LibDoom.p_spawn_player(mthing)
+  Doocr.p_spawn_player(mthing)
 end
 
 fun p_spawn_map_thing = P_SpawnMapThing(mthing : CDoom::Mapthing*)
-  LibDoom.p_spawn_map_thing(mthing)
+  Doocr.p_spawn_map_thing(mthing)
 end
 
 fun p_spawn_puff = P_SpawnPuff(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed)
-  LibDoom.p_spawn_puff(x, y, z)
+  Doocr.p_spawn_puff(x, y, z)
 end
 
 fun p_spawn_blood = P_SpawnBlood(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, damage : LibC::Int)
-  LibDoom.p_spawn_blood(x, y, z, damage)
+  Doocr.p_spawn_blood(x, y, z, damage)
 end
 
 fun p_check_missile_spawn = P_CheckMissileSpawn(th : CDoom::Mobj*)
-  LibDoom.p_check_missile_spawn(th)
+  Doocr.p_check_missile_spawn(th)
 end
 
 fun p_spawn_missile = P_SpawnMissile(source : CDoom::Mobj*, dest : CDoom::Mobj*, type : CDoom::Mobjtype) : CDoom::Mobj*
-  LibDoom.p_spawn_missile(source, dest, type)
+  Doocr.p_spawn_missile(source, dest, type)
 end
 
 fun p_spawn_player_missile = P_SpawnPlayerMissile(source : CDoom::Mobj*, type : CDoom::Mobjtype)
-  LibDoom.p_spawn_player_missile(source, type)
+  Doocr.p_spawn_player_missile(source, type)
 end
 
 fun t_plat_raise = T_PlatRaise(plat : CDoom::Plat*)
-  LibDoom.t_plat_raise(plat)
+  Doocr.t_plat_raise(plat)
 end
 
 fun ev_do_plat = EV_DoPlat(line : CDoom::Line*, type : CDoom::Plattype, amount : LibC::Int) : LibC::Int
-  LibDoom.ev_do_plat(line, type, amount)
+  Doocr.ev_do_plat(line, type, amount)
 end
 
 fun p_activate_in_stasis = P_ActivateInStasis(tag : LibC::Int)
-  LibDoom.p_activate_in_stasis(tag)
+  Doocr.p_activate_in_stasis(tag)
 end
 
 fun ev_stop_plat = EV_StopPlat(line : CDoom::Line*)
-  LibDoom.ev_stop_plat(line)
+  Doocr.ev_stop_plat(line)
 end
 
 fun p_add_active_plat = P_AddActivePlat(plat : CDoom::Plat*)
-  LibDoom.p_add_active_plat(plat)
+  Doocr.p_add_active_plat(plat)
 end
 
 fun p_remove_active_plat = P_RemoveActivePlat(plat : CDoom::Plat*)
-  LibDoom.p_remove_active_plat(plat)
+  Doocr.p_remove_active_plat(plat)
 end
 
 fun p_set_psprite = P_SetPsprite(player : CDoom::Player*, position : LibC::Int, stnum : CDoom::Statenum)
-  LibDoom.p_set_psprite(player, position, stnum)
+  Doocr.p_set_psprite(player, position, stnum)
 end
 
 fun p_bring_up_weapon = P_BringUpWeapon(player : CDoom::Player*)
-  LibDoom.p_bring_up_weapon(player)
+  Doocr.p_bring_up_weapon(player)
 end
 
 fun p_check_ammo = P_CheckAmmo(player : CDoom::Player*) : CDoom::DoomBool
-  LibDoom.p_check_ammo(player)
+  Doocr.p_check_ammo(player)
 end
 
 fun p_fire_weapon = P_FireWeapon(player : CDoom::Player*)
-  LibDoom.p_fire_weapon(player)
+  Doocr.p_fire_weapon(player)
 end
 
 fun p_drop_weapon = P_DropWeapon(player : CDoom::Player*)
-  LibDoom.p_drop_weapon(player)
+  Doocr.p_drop_weapon(player)
 end
 
 fun a_weapon_ready = A_WeaponReady(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_weapon_ready(player, psp)
+  Doocr.a_weapon_ready(player, psp)
 end
 
 fun a_refire = A_ReFire(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_refire(player, psp)
+  Doocr.a_refire(player, psp)
 end
 
 fun a_check_reload = A_CheckReload(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_check_reload(player, psp)
+  Doocr.a_check_reload(player, psp)
 end
 
 fun a_lower = A_Lower(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_lower(player, psp)
+  Doocr.a_lower(player, psp)
 end
 
 fun a_raise = A_Raise(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_raise(player, psp)
+  Doocr.a_raise(player, psp)
 end
 
 fun a_gun_flash = A_GunFlash(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_gun_flash(player, psp)
+  Doocr.a_gun_flash(player, psp)
 end
 
 fun a_punch = A_Punch(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_punch(player, psp)
+  Doocr.a_punch(player, psp)
 end
 
 fun a_saw = A_Saw(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_saw(player, psp)
+  Doocr.a_saw(player, psp)
 end
 
 fun a_fire_missile = A_FireMissile(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_fire_missile(player, psp)
+  Doocr.a_fire_missile(player, psp)
 end
 
 fun a_fire_bfg = A_FireBFG(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_fire_bfg(player, psp)
+  Doocr.a_fire_bfg(player, psp)
 end
 
 fun a_fire_plasma = A_FirePlasma(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_fire_plasma(player, psp)
+  Doocr.a_fire_plasma(player, psp)
 end
 
 fun p_bullet_slope = P_BulletSlope(mo : CDoom::Mobj*)
-  LibDoom.p_bullet_slope(mo)
+  Doocr.p_bullet_slope(mo)
 end
 
 fun p_gunshot = P_GunShot(mo : CDoom::Mobj*, accurate : CDoom::DoomBool)
-  LibDoom.p_gunshot(mo, accurate)
+  Doocr.p_gunshot(mo, accurate)
 end
 
 fun a_fire_pistol = A_FirePistol(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_fire_pistol(player, psp)
+  Doocr.a_fire_pistol(player, psp)
 end
 
 fun a_fire_shotgun = A_FireShotgun(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_fire_shotgun(player, psp)
+  Doocr.a_fire_shotgun(player, psp)
 end
 
 fun a_fire_shotgun2 = A_FireShotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_fire_shotgun2(player, psp)
+  Doocr.a_fire_shotgun2(player, psp)
 end
 
 fun a_fire_cgun = A_FireCGun(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_fire_cgun(player, psp)
+  Doocr.a_fire_cgun(player, psp)
 end
 
 fun a_light0 = A_Light0(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_light0(player, psp)
+  Doocr.a_light0(player, psp)
 end
 
 fun a_light1 = A_Light1(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_light1(player, psp)
+  Doocr.a_light1(player, psp)
 end
 
 fun a_light2 = A_Light2(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_light2(player, psp)
+  Doocr.a_light2(player, psp)
 end
 
 fun a_bfg_spray = A_BFGSpray(mo : CDoom::Mobj*)
-  LibDoom.a_bfg_spray(mo)
+  Doocr.a_bfg_spray(mo)
 end
 
 fun a_bfg_sound = A_BFGsound(player : CDoom::Player*, psp : CDoom::Pspdef*)
-  LibDoom.a_bfg_sound(player, psp)
+  Doocr.a_bfg_sound(player, psp)
 end
 
 fun p_setup_psprites = P_SetupPsprites(curplayer : CDoom::Player*)
-  LibDoom.p_setup_psprites(curplayer)
+  Doocr.p_setup_psprites(curplayer)
 end
 
 fun p_move_psprites = P_MovePsprites(curplayer : CDoom::Player*)
-  LibDoom.p_move_psprites(curplayer)
+  Doocr.p_move_psprites(curplayer)
 end
 
 fun p_load_vertexes = P_LoadVertexes(lump : LibC::Int)
-  LibDoom.p_load_vertexes(lump)
+  Doocr.p_load_vertexes(lump)
 end
 
 fun p_load_segs = P_LoadSegs(lump : LibC::Int)
-  LibDoom.p_load_segs(lump)
+  Doocr.p_load_segs(lump)
 end
 
 fun p_load_subsectors = P_LoadSubsectors(lump : LibC::Int)
-  LibDoom.p_load_subsectors(lump)
+  Doocr.p_load_subsectors(lump)
 end
 
 fun p_load_sectors = P_LoadSectors(lump : LibC::Int)
-  LibDoom.p_load_sectors(lump)
+  Doocr.p_load_sectors(lump)
 end
 
 fun p_load_nodes = P_LoadNodes(lump : LibC::Int)
-  LibDoom.p_load_nodes(lump)
+  Doocr.p_load_nodes(lump)
 end
 
 fun p_load_things = P_LoadThings(lump : LibC::Int)
-  LibDoom.p_load_things(lump)
+  Doocr.p_load_things(lump)
 end
 
 fun p_load_linedefs = P_LoadLineDefs(lump : LibC::Int)
-  LibDoom.p_load_linedefs(lump)
+  Doocr.p_load_linedefs(lump)
 end
 
 fun p_load_sidedefs = P_LoadSideDefs(lump : LibC::Int)
-  LibDoom.p_load_sidedefs(lump)
+  Doocr.p_load_sidedefs(lump)
 end
 
 fun p_load_blockmap = P_LoadBlockMap(lump : LibC::Int)
-  LibDoom.p_load_blockmap(lump)
+  Doocr.p_load_blockmap(lump)
 end
 
 fun p_group_lines = P_GroupLines
-  LibDoom.p_group_lines
+  Doocr.p_group_lines
 end
 
 fun p_setup_level = P_SetupLevel(episode : LibC::Int, map : LibC::Int, playermask : LibC::Int, skill : CDoom::Skill)
-  LibDoom.p_setup_level(episode, map, playermask, skill)
+  Doocr.p_setup_level(episode, map, playermask, skill)
 end
 
 fun p_init = P_Init
-  LibDoom.p_init
+  Doocr.p_init
 end
 
 fun p_divline_side = P_DivlineSide(x : CDoom::Fixed, y : CDoom::Fixed, node : CDoom::Divline*) : LibC::Int
-  LibDoom.p_divline_side(x, y, node)
+  Doocr.p_divline_side(x, y, node)
 end
 
 fun p_intercept_vector2 = P_InterceptVector2(v2 : CDoom::Divline*, v1 : CDoom::Divline*) : CDoom::Fixed
-  LibDoom.p_intercept_vector2(v2, v1)
+  Doocr.p_intercept_vector2(v2, v1)
 end
 
 fun p_cross_subsector = P_CrossSubsector(num : LibC::Int) : CDoom::DoomBool
-  LibDoom.p_cross_subsector(num)
+  Doocr.p_cross_subsector(num)
 end
 
 fun p_cross_bsp_node = P_CrossBSPNode(bspnum : LibC::Int) : CDoom::DoomBool
-  LibDoom.p_cross_bsp_node(bspnum)
+  Doocr.p_cross_bsp_node(bspnum)
 end
 
 fun p_check_sight = P_CheckSight(t1 : CDoom::Mobj*, t2 : CDoom::Mobj*) : CDoom::DoomBool
-  LibDoom.p_check_sight(t1, t2)
+  Doocr.p_check_sight(t1, t2)
 end
 
 fun p_init_pic_anims = P_InitPicAnims
-  LibDoom.p_init_pic_anims
+  Doocr.p_init_pic_anims
 end
 
 fun get_side = getSide(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : CDoom::Side*
-  LibDoom.get_side(current_sector, line, side)
+  Doocr.get_side(current_sector, line, side)
 end
 
 fun get_sector = getSector(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : CDoom::Sector*
-  LibDoom.get_sector(current_sector, line, side)
+  Doocr.get_sector(current_sector, line, side)
 end
 
 fun two_sided = twoSided(sector : LibC::Int, line : LibC::Int) : LibC::Int
-  LibDoom.two_sided(sector, line)
+  Doocr.two_sided(sector, line)
 end
 
 fun get_next_sector = getNextSector(line : CDoom::Line*, sec : CDoom::Sector*) : CDoom::Sector*
-  LibDoom.get_next_sector(line, sec)
+  Doocr.get_next_sector(line, sec)
 end
 
 fun p_find_lowest_floor_surrounding = P_FindLowestFloorSurrounding(sec : CDoom::Sector*) : CDoom::Fixed
-  LibDoom.p_find_lowest_floor_surrounding(sec)
+  Doocr.p_find_lowest_floor_surrounding(sec)
 end
 
 fun p_find_highest_floor_surrounding = P_FindHighestFloorSurrounding(sec : CDoom::Sector*) : CDoom::Fixed
-  LibDoom.p_find_highest_floor_surrounding(sec)
+  Doocr.p_find_highest_floor_surrounding(sec)
 end
 
 fun p_find_next_highest_floor = P_FindNextHighestFloor(sec : CDoom::Sector*, currentheight : LibC::Int) : CDoom::Fixed
-  LibDoom.p_find_next_highest_floor(sec, currentheight)
+  Doocr.p_find_next_highest_floor(sec, currentheight)
 end
 
 fun p_find_lowest_ceiling_surrounding = P_FindLowestCeilingSurrounding(sec : CDoom::Sector*) : CDoom::Fixed
-  LibDoom.p_find_lowest_ceiling_surrounding(sec)
+  Doocr.p_find_lowest_ceiling_surrounding(sec)
 end
 
 fun p_find_highest_ceiling_surrounding = P_FindHighestCeilingSurrounding(sec : CDoom::Sector*) : CDoom::Fixed
-  LibDoom.p_find_highest_ceiling_surrounding(sec)
+  Doocr.p_find_highest_ceiling_surrounding(sec)
 end
 
 fun p_find_sector_from_line_tag = P_FindSectorFromLineTag(line : CDoom::Line*, start : LibC::Int) : LibC::Int
-  LibDoom.p_find_sector_from_line_tag(line, start)
+  Doocr.p_find_sector_from_line_tag(line, start)
 end
 
 fun p_find_min_surrounding_light = P_FindMinSurroundingLight(sector : CDoom::Sector*, max : LibC::Int) : LibC::Int
-  LibDoom.p_find_min_surrounding_light(sector, max)
+  Doocr.p_find_min_surrounding_light(sector, max)
 end
 
 fun p_cross_special_line = P_CrossSpecialLine(linenum : LibC::Int, side : LibC::Int, thing : CDoom::Mobj*)
-  LibDoom.p_cross_special_line(linenum, side, thing)
+  Doocr.p_cross_special_line(linenum, side, thing)
 end
 
 fun p_shoot_special_line = P_ShootSpecialLine(thing : CDoom::Mobj*, line : CDoom::Line*)
-  LibDoom.p_shoot_special_line(thing, line)
+  Doocr.p_shoot_special_line(thing, line)
 end
 
 fun p_player_in_special_sector = P_PlayerInSpecialSector(player : CDoom::Player*)
-  LibDoom.p_player_in_special_sector(player)
+  Doocr.p_player_in_special_sector(player)
 end
 
 fun p_update_specials = P_UpdateSpecials
-  LibDoom.p_update_specials
+  Doocr.p_update_specials
 end
 
 fun ev_do_donut = EV_DoDonut(line : CDoom::Line*) : LibC::Int
-  LibDoom.ev_do_donut(line)
+  Doocr.ev_do_donut(line)
 end
 
 fun p_spawn_specials = P_SpawnSpecials
-  LibDoom.p_spawn_specials
+  Doocr.p_spawn_specials
 end
 
 fun p_init_switch_list = P_InitSwitchList
-  LibDoom.p_init_switch_list
+  Doocr.p_init_switch_list
 end
 
 fun p_change_switch_texture = P_ChangeSwitchTexture(line : CDoom::Line*, use_again : LibC::Int)
-  LibDoom.p_change_switch_texture(line, use_again)
+  Doocr.p_change_switch_texture(line, use_again)
 end
 
 fun p_use_special_line = P_UseSpecialLine(thing : CDoom::Mobj*, line : CDoom::Line*, side : LibC::Int) : CDoom::DoomBool
-  LibDoom.p_use_special_line(thing, line, side)
+  Doocr.p_use_special_line(thing, line, side)
 end
 
 fun ev_teleport = EV_Teleport(line : CDoom::Line*, side : LibC::Int, thing : CDoom::Mobj*) : LibC::Int
-  LibDoom.ev_teleport(line, side, thing)
+  Doocr.ev_teleport(line, side, thing)
 end
 
 fun p_init_thinkers = P_InitThinkers
-  LibDoom.p_init_thinkers
+  Doocr.p_init_thinkers
 end
 
 fun p_add_thinker = P_AddThinker(thinker : CDoom::Thinker*)
-  LibDoom.p_add_thinker(thinker)
+  Doocr.p_add_thinker(thinker)
 end
 
 fun p_remove_thinker = P_RemoveThinker(thinker : CDoom::Thinker*)
-  LibDoom.p_remove_thinker(thinker)
+  Doocr.p_remove_thinker(thinker)
 end
 
 fun p_run_thinkers = P_RunThinkers
-  LibDoom.p_run_thinkers
+  Doocr.p_run_thinkers
 end
 
 fun p_ticker = P_Ticker
-  LibDoom.p_ticker
+  Doocr.p_ticker
 end
 
 fun p_thrust = P_Thrust(player : CDoom::Player*, angle : CDoom::Angle, move : CDoom::Fixed)
-  LibDoom.p_thrust(player, angle, move)
+  Doocr.p_thrust(player, angle, move)
 end
 
 fun p_calc_height = P_CalcHeight(player : CDoom::Player*)
-  LibDoom.p_calc_height(player)
+  Doocr.p_calc_height(player)
 end
 
 fun p_move_player = P_MovePlayer(player : CDoom::Player*)
-  LibDoom.p_move_player(player)
+  Doocr.p_move_player(player)
 end
 
 fun p_death_think = P_DeathThink(player : CDoom::Player*)
-  LibDoom.p_death_think(player)
+  Doocr.p_death_think(player)
 end
 
 fun p_player_think = P_PlayerThink(player : CDoom::Player*)
-  LibDoom.p_player_think(player)
+  Doocr.p_player_think(player)
 end
 
 fun r_clear_draw_segs = R_ClearDrawSegs
-  LibDoom.r_clear_draw_segs
+  Doocr.r_clear_draw_segs
 end
 
 fun r_clip_solid_wall_segment = R_ClipSolidWallSegment(first : LibC::Int, last : LibC::Int)
-  LibDoom.r_clip_solid_wall_segment(first, last)
+  Doocr.r_clip_solid_wall_segment(first, last)
 end
 
 fun r_clip_pass_wall_segment = R_ClipPassWallSegment(first : LibC::Int, last : LibC::Int)
-  LibDoom.r_clip_pass_wall_segment(first, last)
+  Doocr.r_clip_pass_wall_segment(first, last)
 end
 
 fun r_clear_clip_segs = R_ClearClipSegs
-  LibDoom.r_clear_clip_segs
+  Doocr.r_clear_clip_segs
 end
 
 fun r_addline = R_AddLine(line : CDoom::Seg*)
-  LibDoom.r_addline(line)
+  Doocr.r_addline(line)
 end
 
 fun r_check_bbox = R_CheckBBox(bspcoord : CDoom::Fixed*) : CDoom::DoomBool
-  LibDoom.r_check_bbox(bspcoord)
+  Doocr.r_check_bbox(bspcoord)
 end
 
 fun r_subsector = R_Subsector(num : LibC::Int)
-  LibDoom.r_subsector(num)
+  Doocr.r_subsector(num)
 end
 
 fun r_render_bsp_node = R_RenderBSPNode(bspnum : LibC::Int)
-  LibDoom.r_render_bsp_node(bspnum)
+  Doocr.r_render_bsp_node(bspnum)
 end
 
 fun r_draw_column_in_cache = R_DrawColumnInCache(patch : CDoom::Column*, cache : CDoom::Byte*, originy : LibC::Int, cacheheight : LibC::Int)
-  LibDoom.r_draw_column_in_cache(patch, cache, originy, cacheheight)
+  Doocr.r_draw_column_in_cache(patch, cache, originy, cacheheight)
 end
 
 fun r_generate_composite = R_GenerateComposite(texnum : LibC::Int)
-  LibDoom.r_generate_composite(texnum)
+  Doocr.r_generate_composite(texnum)
 end
 
 fun r_generate_lookup = R_GenerateLookup(texnum : LibC::Int)
-  LibDoom.r_generate_lookup(texnum)
+  Doocr.r_generate_lookup(texnum)
 end
 
 fun r_get_column = R_GetColumn(tex : LibC::Int, col : LibC::Int) : CDoom::Byte*
-  LibDoom.r_get_column(tex, col)
+  Doocr.r_get_column(tex, col)
 end
 
 fun r_init_textures = R_InitTextures
-  LibDoom.r_init_textures
+  Doocr.r_init_textures
 end
 
 fun r_init_flats = R_InitFlats
-  LibDoom.r_init_flats
+  Doocr.r_init_flats
 end
 
 fun r_init_sprite_lumps = R_InitSpriteLumps
-  LibDoom.r_init_sprite_lumps
+  Doocr.r_init_sprite_lumps
 end
 
 fun r_init_colormaps = R_InitColormaps
-  LibDoom.r_init_colormaps
+  Doocr.r_init_colormaps
 end
 
 fun r_init_data = R_InitData
-  LibDoom.r_init_data
+  Doocr.r_init_data
 end
 
 fun r_flat_num_for_name = R_FlatNumForName(name : LibC::Char*) : LibC::Int
-  LibDoom.r_flat_num_for_name(name)
+  Doocr.r_flat_num_for_name(name)
 end
 
 fun r_check_texture_num_for_name = R_CheckTextureNumForName(name : LibC::Char*) : LibC::Int
-  LibDoom.r_check_texture_num_for_name(name)
+  Doocr.r_check_texture_num_for_name(name)
 end
 
 fun r_texture_num_for_name = R_TextureNumForName(name : LibC::Char*) : LibC::Int
-  LibDoom.r_texture_num_for_name(name)
+  Doocr.r_texture_num_for_name(name)
 end
 
 fun r_precache_level = R_PrecacheLevel
-  LibDoom.r_precache_level
+  Doocr.r_precache_level
 end
 
 fun r_draw_column = R_DrawColumn
-  LibDoom.r_draw_column
+  Doocr.r_draw_column
 end
 
 fun r_draw_fuzz_column = R_DrawFuzzColumn
-  LibDoom.r_draw_fuzz_column
+  Doocr.r_draw_fuzz_column
 end
 
 fun r_draw_translated_column = R_DrawTranslatedColumn
-  LibDoom.r_draw_translated_column
+  Doocr.r_draw_translated_column
 end
 
 fun r_init_translation_tables = R_InitTranslationTables
-  LibDoom.r_init_translation_tables
+  Doocr.r_init_translation_tables
 end
 
 fun r_draw_span = R_DrawSpan
-  LibDoom.r_draw_span
+  Doocr.r_draw_span
 end
 
 fun r_init_buffer = R_InitBuffer(width : LibC::Int, height : LibC::Int)
-  LibDoom.r_init_buffer(width, height)
+  Doocr.r_init_buffer(width, height)
 end
 
 fun r_fill_back_screen = R_FillBackScreen
-  LibDoom.r_fill_back_screen
+  Doocr.r_fill_back_screen
 end
 
 fun r_video_erase = R_VideoErase(ofs : LibC::UInt, count : LibC::Int)
-  LibDoom.r_video_erase(ofs, count)
+  Doocr.r_video_erase(ofs, count)
 end
 
 fun r_draw_view_border = R_DrawViewBorder
-  LibDoom.r_draw_view_border
+  Doocr.r_draw_view_border
 end
 
 fun r_add_point_to_box = R_AddPointToBox(x : LibC::Int, y : LibC::Int, box : CDoom::Fixed*)
-  LibDoom.r_add_point_to_box(x, y, box)
+  Doocr.r_add_point_to_box(x, y, box)
 end
 
 fun r_point_on_side = R_PointOnSide(x : CDoom::Fixed, y : CDoom::Fixed, node : CDoom::Node*) : LibC::Int
-  LibDoom.r_point_on_side(x, y, node)
+  Doocr.r_point_on_side(x, y, node)
 end
 
 fun r_point_on_seg_side = R_PointOnSegSide(x : CDoom::Fixed, y : CDoom::Fixed, line : CDoom::Seg*) : LibC::Int
-  LibDoom.r_point_on_seg_side(x, y, line)
+  Doocr.r_point_on_seg_side(x, y, line)
 end
 
 fun r_point_to_angle = R_PointToAngle(x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::Angle
-  LibDoom.r_point_to_angle(x, y)
+  Doocr.r_point_to_angle(x, y)
 end
 
 fun r_point_to_angle2 = R_PointToAngle2(x1 : CDoom::Fixed, y1 : CDoom::Fixed, x2 : CDoom::Fixed, y2 : CDoom::Fixed) : CDoom::Angle
-  LibDoom.r_point_to_angle2(x1, y1, x2, y2)
+  Doocr.r_point_to_angle2(x1, y1, x2, y2)
 end
 
 fun r_point_to_dist = R_PointToDist(x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::Fixed
-  LibDoom.r_point_to_dist(x, y)
+  Doocr.r_point_to_dist(x, y)
 end
 
 fun r_scale_from_global_angle = R_ScaleFromGlobalAngle(visangle : CDoom::Angle) : CDoom::Fixed
-  LibDoom.r_scale_from_global_angle(visangle)
+  Doocr.r_scale_from_global_angle(visangle)
 end
 
 fun r_init_tables = R_InitTables
-  LibDoom.r_init_tables
+  Doocr.r_init_tables
 end
 
 fun r_init_texture_mapping = R_InitTextureMapping
-  LibDoom.r_init_texture_mapping
+  Doocr.r_init_texture_mapping
 end
 
 fun r_init_light_tables = R_InitLightTables
-  LibDoom.r_init_light_tables
+  Doocr.r_init_light_tables
 end
 
 fun r_set_view_size = R_SetViewSize(blocks : LibC::Int, detail : LibC::Int)
-  LibDoom.r_set_view_size(blocks, detail)
+  Doocr.r_set_view_size(blocks, detail)
 end
 
 fun r_execute_set_view_size = R_ExecuteSetViewSize
-  LibDoom.r_execute_set_view_size
+  Doocr.r_execute_set_view_size
 end
 
 fun r_init = R_Init
-  LibDoom.r_init
+  Doocr.r_init
 end
 
 fun r_point_in_subsector = R_PointInSubsector(x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::Subsector*
-  LibDoom.r_point_in_subsector(x, y)
+  Doocr.r_point_in_subsector(x, y)
 end
 
 fun r_setup_frame = R_SetupFrame(player : CDoom::Player*)
-  LibDoom.r_setup_frame(player)
+  Doocr.r_setup_frame(player)
 end
 
 fun r_render_player_view = R_RenderPlayerView(player : CDoom::Player*)
-  LibDoom.r_render_player_view(player)
+  Doocr.r_render_player_view(player)
 end
 
 fun r_map_plane = R_MapPlane(y : LibC::Int, x1 : LibC::Int, x2 : LibC::Int)
-  LibDoom.r_map_plane(y, x1, x2)
+  Doocr.r_map_plane(y, x1, x2)
 end
 
 fun r_clear_planes = R_ClearPlanes
-  LibDoom.r_clear_planes
+  Doocr.r_clear_planes
 end
 
 fun r_find_plane = R_FindPlane(height : CDoom::Fixed, picnum : LibC::Int, lightlevel : LibC::Int) : CDoom::Visplane*
-  LibDoom.r_find_plane(height, picnum, lightlevel)
+  Doocr.r_find_plane(height, picnum, lightlevel)
 end
 
 fun r_check_plane = R_CheckPlane(pl : CDoom::Visplane*, start : LibC::Int, stop : LibC::Int) : CDoom::Visplane*
-  LibDoom.r_check_plane(pl, start, stop)
+  Doocr.r_check_plane(pl, start, stop)
 end
 
 fun r_make_spans = R_MakeSpans(x : LibC::Int, t1 : LibC::Int, b1 : LibC::Int, t2 : LibC::Int, b2 : LibC::Int)
-  LibDoom.r_make_spans(x, t1, b1, t2, b2)
+  Doocr.r_make_spans(x, t1, b1, t2, b2)
 end
 
 fun r_draw_planes = R_DrawPlanes
-  LibDoom.r_draw_planes
+  Doocr.r_draw_planes
 end
 
 fun r_render_masked_seg_range = R_RenderMaskedSegRange(ds : CDoom::Drawseg*, x1 : LibC::Int, x2 : LibC::Int)
-  LibDoom.r_render_masked_seg_range(ds, x1, x2)
+  Doocr.r_render_masked_seg_range(ds, x1, x2)
 end
 
 fun r_render_seg_loop = R_RenderSegLoop
-  LibDoom.r_render_seg_loop
+  Doocr.r_render_seg_loop
 end
 
 fun r_store_wall_range = R_StoreWallRange(start : LibC::Int, stop : LibC::Int)
-  LibDoom.r_store_wall_range(start, stop)
+  Doocr.r_store_wall_range(start, stop)
 end
 
 fun r_init_sky_map = R_InitSkyMap
-  LibDoom.r_init_sky_map
+  Doocr.r_init_sky_map
 end
 
 fun r_install_sprite_lump = R_InstallSpriteLump(lump : LibC::Int, frame : LibC::UInt, rotation : LibC::UInt, flipped : CDoom::DoomBool)
-  LibDoom.r_install_sprite_lump(lump, frame, rotation, flipped)
+  Doocr.r_install_sprite_lump(lump, frame, rotation, flipped)
 end
 
 fun r_init_sprite_defs = R_InitSpriteDefs(namelist : LibC::Char**)
-  LibDoom.r_init_sprite_defs(namelist)
+  Doocr.r_init_sprite_defs(namelist)
 end
 
 fun r_init_sprites = R_InitSprites(namelist : LibC::Char**)
-  LibDoom.r_init_sprites(namelist)
+  Doocr.r_init_sprites(namelist)
 end
 
 fun r_clear_sprites = R_ClearSprites
-  LibDoom.r_clear_sprites
+  Doocr.r_clear_sprites
 end
 
 fun r_new_vis_sprite = R_NewVisSprite : CDoom::Vissprite*
-  LibDoom.r_new_vis_sprite
+  Doocr.r_new_vis_sprite
 end
 
 fun r_draw_masked_column = R_DrawMaskedColumn(column : CDoom::Column*)
-  LibDoom.r_draw_masked_column(column)
+  Doocr.r_draw_masked_column(column)
 end
 
 fun r_draw_vis_sprite = R_DrawVisSprite(vis : CDoom::Vissprite*, x1 : LibC::Int, x2 : LibC::Int)
-  LibDoom.r_draw_vis_sprite(vis, x1, x2)
+  Doocr.r_draw_vis_sprite(vis, x1, x2)
 end
 
 fun r_project_sprite = R_ProjectSprite(thing : CDoom::Mobj*)
-  LibDoom.r_project_sprite(thing)
+  Doocr.r_project_sprite(thing)
 end
 
 fun r_add_sprites = R_AddSprites(sec : CDoom::Sector*)
-  LibDoom.r_add_sprites(sec)
+  Doocr.r_add_sprites(sec)
 end
 
 fun r_draw_psprite = R_DrawPSprite(psp : CDoom::Pspdef*)
-  LibDoom.r_draw_psprite(psp)
+  Doocr.r_draw_psprite(psp)
 end
 
 fun r_draw_player_sprites = R_DrawPlayerSprites
-  LibDoom.r_draw_player_sprites
+  Doocr.r_draw_player_sprites
 end
 
 fun r_sort_vis_sprites = R_SortVisSprites
-  LibDoom.r_sort_vis_sprites
+  Doocr.r_sort_vis_sprites
 end
 
 fun r_draw_sprite = R_DrawSprite(spr : CDoom::Vissprite*)
-  LibDoom.r_draw_sprite(spr)
+  Doocr.r_draw_sprite(spr)
 end
 
 fun r_draw_masked = R_DrawMasked
-  LibDoom.r_draw_masked
+  Doocr.r_draw_masked
 end
 
 fun s_init = S_Init(sfx_volume : LibC::Int, music_volume : LibC::Int)
-  LibDoom.s_init(sfx_volume, music_volume)
+  Doocr.s_init(sfx_volume, music_volume)
 end
 
 fun s_start = S_Start
-  LibDoom.s_start
+  Doocr.s_start
 end
 
 fun s_start_sound_at_volume = S_StartSoundAtVolume(origin_p : Void*, sfx_id : LibC::Int, volume : LibC::Int)
-  LibDoom.s_start_sound_at_volume(origin_p, sfx_id, volume)
+  Doocr.s_start_sound_at_volume(origin_p, sfx_id, volume)
 end
 
 fun s_start_sound = S_StartSound(origin : Void*, sfx_id : LibC::Int)
-  LibDoom.s_start_sound(origin, sfx_id)
+  Doocr.s_start_sound(origin, sfx_id)
 end
 
 fun s_stop_sound = S_StopSound(origin : Void*)
-  LibDoom.s_stop_sound(origin)
+  Doocr.s_stop_sound(origin)
 end
 
 fun s_pause_sound = S_PauseSound
-  LibDoom.s_pause_sound
+  Doocr.s_pause_sound
 end
 
 fun s_resume_sound = S_ResumeSound
-  LibDoom.s_resume_sound
+  Doocr.s_resume_sound
 end
 
 fun s_update_sounds = S_UpdateSounds(listener_p : Void*)
-  LibDoom.s_update_sounds(listener_p)
+  Doocr.s_update_sounds(listener_p)
 end
 
 fun s_set_music_volume = S_SetMusicVolume(volume : LibC::Int)
-  LibDoom.s_set_music_volume(volume)
+  Doocr.s_set_music_volume(volume)
 end
 
 fun s_set_sfx_volume = S_SetSfxVolume(volume : LibC::Int)
-  LibDoom.s_set_sfx_volume(volume)
+  Doocr.s_set_sfx_volume(volume)
 end
 
 fun s_start_music = S_StartMusic(music_id : LibC::Int)
-  LibDoom.s_start_music(music_id)
+  Doocr.s_start_music(music_id)
 end
 
 fun s_change_music = S_ChangeMusic(music_id : LibC::Int, looping : LibC::Int)
-  LibDoom.s_change_music(music_id, looping)
+  Doocr.s_change_music(music_id, looping)
 end
 
 fun s_stop_music = S_StopMusic
-  LibDoom.s_stop_music
+  Doocr.s_stop_music
 end
 
 fun s_stop_channel = S_StopChannel(cnum : LibC::Int)
-  LibDoom.s_stop_channel(cnum)
+  Doocr.s_stop_channel(cnum)
 end
 
 fun s_adjust_sound_params = S_AdjustSoundParams(listener : CDoom::Mobj*, source : CDoom::Mobj*, vol : LibC::Int*, sep : LibC::Int*, pitch : LibC::Int*) : LibC::Int
-  LibDoom.s_adjust_sound_params(listener, source, vol, sep, pitch)
+  Doocr.s_adjust_sound_params(listener, source, vol, sep, pitch)
 end
 
 fun s_get_channel = S_getChannel(origin : Void*, sfxinfo : CDoom::Sfxinfo*) : LibC::Int
-  LibDoom.s_get_channel(origin, sfxinfo)
+  Doocr.s_get_channel(origin, sfxinfo)
 end
 
 fun stlib_init = STlib_init
-  LibDoom.stlib_init
+  Doocr.stlib_init
 end
 
 fun stlib_init_num = STlib_initNum(n : CDoom::ST_Number*,
@@ -2488,7 +2488,7 @@ fun stlib_init_num = STlib_initNum(n : CDoom::ST_Number*,
                                    num : LibC::Int*,
                                    on : CDoom::DoomBool*,
                                    width : LibC::Int)
-  LibDoom.stlib_init_num(n,
+  Doocr.stlib_init_num(n,
     x,
     y,
     pl,
@@ -2498,11 +2498,11 @@ fun stlib_init_num = STlib_initNum(n : CDoom::ST_Number*,
 end
 
 fun stlib_draw_num = STlib_drawNum(n : CDoom::ST_Number*, refresh : CDoom::DoomBool)
-  LibDoom.stlib_draw_num(n, refresh)
+  Doocr.stlib_draw_num(n, refresh)
 end
 
 fun stlib_update_num = STlib_updateNum(n : CDoom::ST_Number*, refresh : CDoom::DoomBool)
-  LibDoom.stlib_update_num(n, refresh)
+  Doocr.stlib_update_num(n, refresh)
 end
 
 fun stlib_init_percent = STlib_initPercent(p : CDoom::ST_Percent*,
@@ -2512,11 +2512,11 @@ fun stlib_init_percent = STlib_initPercent(p : CDoom::ST_Percent*,
                                            num : LibC::Int*,
                                            on : CDoom::DoomBool*,
                                            percent : CDoom::Patch*)
-  LibDoom.stlib_init_percent(p, x, y, pl, num, on, percent)
+  Doocr.stlib_init_percent(p, x, y, pl, num, on, percent)
 end
 
 fun stlib_update_percent = STlib_updatePercent(per : CDoom::ST_Percent*, refresh : LibC::Int)
-  LibDoom.stlib_update_percent(per, refresh)
+  Doocr.stlib_update_percent(per, refresh)
 end
 
 fun stlib_init_mult_icon = STlib_initMultIcon(mi : CDoom::ST_Multicon*,
@@ -2525,11 +2525,11 @@ fun stlib_init_mult_icon = STlib_initMultIcon(mi : CDoom::ST_Multicon*,
                                               il : CDoom::Patch**,
                                               inum : LibC::Int*,
                                               on : CDoom::DoomBool*)
-  LibDoom.stlib_init_mult_icon(mi, x, y, il, inum, on)
+  Doocr.stlib_init_mult_icon(mi, x, y, il, inum, on)
 end
 
 fun stlib_update_mult_icon = STlib_updateMultIcon(mi : CDoom::ST_Multicon*, refresh : CDoom::DoomBool)
-  LibDoom.stlib_update_mult_icon(mi, refresh)
+  Doocr.stlib_update_mult_icon(mi, refresh)
 end
 
 fun stlib_init_bin_icon = STlib_initBinIcon(b : CDoom::ST_Binicon*,
@@ -2538,102 +2538,102 @@ fun stlib_init_bin_icon = STlib_initBinIcon(b : CDoom::ST_Binicon*,
                                             i : CDoom::Patch*,
                                             val : CDoom::DoomBool*,
                                             on : CDoom::DoomBool*)
-  LibDoom.stlib_init_bin_icon(b, x, y, i, val, on)
+  Doocr.stlib_init_bin_icon(b, x, y, i, val, on)
 end
 
 fun stlib_update_bin_icon = STlib_updateBinIcon(bi : CDoom::ST_Binicon*, refresh : CDoom::DoomBool)
-  LibDoom.stlib_update_bin_icon(bi, refresh)
+  Doocr.stlib_update_bin_icon(bi, refresh)
 end
 
 fun st_refresh_background = ST_refreshBackground
-  LibDoom.st_refresh_background
+  Doocr.st_refresh_background
 end
 
 fun st_responder = ST_Responder(ev : CDoom::Event*) : CDoom::DoomBool
-  LibDoom.st_responder(ev)
+  Doocr.st_responder(ev)
 end
 
 fun st_calc_pain_offset = ST_calcPainOffset : LibC::Int
-  LibDoom.st_calc_pain_offset
+  Doocr.st_calc_pain_offset
 end
 
 fun st_update_face_widget = ST_updateFaceWidget
-  LibDoom.st_update_face_widget
+  Doocr.st_update_face_widget
 end
 
 fun st_update_widgets = ST_updateWidgets
-  LibDoom.st_update_widgets
+  Doocr.st_update_widgets
 end
 
 fun st_ticker = ST_Ticker
-  LibDoom.st_ticker
+  Doocr.st_ticker
 end
 
 fun st_do_palette_stuff = ST_doPaletteStuff
-  LibDoom.st_do_palette_stuff
+  Doocr.st_do_palette_stuff
 end
 
 fun st_draw_widgets = ST_drawWidgets(refresh : CDoom::DoomBool)
-  LibDoom.st_draw_widgets(refresh)
+  Doocr.st_draw_widgets(refresh)
 end
 
 fun st_do_refresh = ST_doRefresh
-  LibDoom.st_do_refresh
+  Doocr.st_do_refresh
 end
 
 fun st_diff_draw = ST_diffDraw
-  LibDoom.st_diff_draw
+  Doocr.st_diff_draw
 end
 
 fun st_drawer = ST_Drawer(fullscreen : CDoom::DoomBool, refresh : CDoom::DoomBool)
-  LibDoom.st_drawer(fullscreen, refresh)
+  Doocr.st_drawer(fullscreen, refresh)
 end
 
 fun st_load_graphics = ST_loadGraphics
-  LibDoom.st_load_graphics
+  Doocr.st_load_graphics
 end
 
 fun st_load_data = ST_loadData
-  LibDoom.st_load_data
+  Doocr.st_load_data
 end
 
 fun st_unload_graphics = ST_unloadGraphics
-  LibDoom.st_unload_graphics
+  Doocr.st_unload_graphics
 end
 
 fun st_unload_data = ST_unloadData
-  LibDoom.st_unload_data
+  Doocr.st_unload_data
 end
 
 fun st_init_data = ST_initData
-  LibDoom.st_init_data
+  Doocr.st_init_data
 end
 
 fun st_create_widgets = ST_createWidgets
-  LibDoom.st_create_widgets
+  Doocr.st_create_widgets
 end
 
 fun st_start = ST_Start
-  LibDoom.st_start
+  Doocr.st_start
 end
 
 fun st_stop = ST_Stop
-  LibDoom.st_stop
+  Doocr.st_stop
 end
 
 fun st_init = ST_Init
-  LibDoom.st_init
+  Doocr.st_init
 end
 
 fun slope_div = SlopeDiv(num : LibC::UInt, den : LibC::UInt) : LibC::Int
-  LibDoom.slope_div(num, den)
+  Doocr.slope_div(num, den)
 end
 
 fun v_mark_rect = V_MarkRect(x : LibC::Int,
                              y : LibC::Int,
                              width : LibC::Int,
                              height : LibC::Int)
-  LibDoom.v_mark_rect(x, y, width, height)
+  Doocr.v_mark_rect(x, y, width, height)
 end
 
 fun v_copy_rect = V_CopyRect(srcx : LibC::Int,
@@ -2644,29 +2644,29 @@ fun v_copy_rect = V_CopyRect(srcx : LibC::Int,
                              destx : LibC::Int,
                              desty : LibC::Int,
                              destscrn : LibC::Int)
-  LibDoom.v_copy_rect(srcx, srcy, srcscrn, width, height, destx, desty, destscrn)
+  Doocr.v_copy_rect(srcx, srcy, srcscrn, width, height, destx, desty, destscrn)
 end
 
 fun v_draw_patch = V_DrawPatch(x : LibC::Int,
                                y : LibC::Int,
                                scrn : LibC::Int,
                                patch : CDoom::Patch*)
-  LibDoom.v_draw_patch(x, y, scrn, patch)
+  Doocr.v_draw_patch(x, y, scrn, patch)
 end
 
 fun v_draw_patch_flipped = V_DrawPatchFlipped(x : LibC::Int, y : LibC::Int, scrn : LibC::Int, patch : CDoom::Patch*)
-  LibDoom.v_draw_patch_flipped(x, y, scrn, patch)
+  Doocr.v_draw_patch_flipped(x, y, scrn, patch)
 end
 
 fun v_draw_patch_rect_direct = V_DrawPatchRectDirect(x : LibC::Int, y : LibC::Int, scrn : LibC::Int, patch : CDoom::Patch*, src_x : LibC::Int, src_w : LibC::Int)
-  LibDoom.v_draw_patch_rect_direct(x, y, scrn, patch, src_x, src_w)
+  Doocr.v_draw_patch_rect_direct(x, y, scrn, patch, src_x, src_w)
 end
 
 fun v_draw_patch_direct = V_DrawPatchDirect(x : LibC::Int,
                                             y : LibC::Int,
                                             scrn : LibC::Int,
                                             patch : CDoom::Patch*)
-  LibDoom.v_draw_patch_direct(x, y, scrn, patch)
+  Doocr.v_draw_patch_direct(x, y, scrn, patch)
 end
 
 fun v_draw_block = V_DrawBlock(x : LibC::Int,
@@ -2675,7 +2675,7 @@ fun v_draw_block = V_DrawBlock(x : LibC::Int,
                                width : LibC::Int,
                                height : LibC::Int,
                                src : CDoom::Byte*)
-  LibDoom.v_draw_block(x, y, scrn, width, height, src)
+  Doocr.v_draw_block(x, y, scrn, width, height, src)
 end
 
 fun v_get_block = V_GetBlock(x : LibC::Int,
@@ -2684,217 +2684,217 @@ fun v_get_block = V_GetBlock(x : LibC::Int,
                              width : LibC::Int,
                              height : LibC::Int,
                              dest : CDoom::Byte*)
-  LibDoom.v_get_block(x, y, scrn, width, height, dest)
+  Doocr.v_get_block(x, y, scrn, width, height, dest)
 end
 
 fun v_init = V_Init
-  LibDoom.v_init
+  Doocr.v_init
 end
 
 fun doom_strupr(s : LibC::Char*)
-  LibDoom.doom_strupr(s)
+  Doocr.doom_strupr(s)
 end
 
 fun extract_file_base = ExtractFileBase(path : LibC::Char*, dest : LibC::Char*)
-  LibDoom.extract_file_base(path, dest)
+  Doocr.extract_file_base(path, dest)
 end
 
 fun w_add_file = W_AddFile(filename : LibC::Char*)
-  LibDoom.w_add_file(filename)
+  Doocr.w_add_file(filename)
 end
 
 fun w_reload = W_Reload
-  LibDoom.w_reload
+  Doocr.w_reload
 end
 
 fun w_init_multiple_files = W_InitMultipleFiles(filenames : LibC::Char**)
-  LibDoom.w_init_multiple_files(filenames)
+  Doocr.w_init_multiple_files(filenames)
 end
 
 fun w_init_file = W_InitFile(filename : LibC::Char*)
-  LibDoom.w_init_file(filename)
+  Doocr.w_init_file(filename)
 end
 
 fun w_check_num_for_name = W_CheckNumForName(name : LibC::Char*) : LibC::Int
-  LibDoom.w_check_num_for_name(name)
+  Doocr.w_check_num_for_name(name)
 end
 
 fun w_get_num_for_name = W_GetNumForName(name : LibC::Char*) : LibC::Int
-  LibDoom.w_get_num_for_name(name)
+  Doocr.w_get_num_for_name(name)
 end
 
 fun w_lump_length = W_LumpLength(lump : LibC::Int) : LibC::Int
-  LibDoom.w_lump_length(lump)
+  Doocr.w_lump_length(lump)
 end
 
 fun w_read_lump = W_ReadLump(lump : LibC::Int, dest : Void*)
-  LibDoom.w_read_lump(lump, dest)
+  Doocr.w_read_lump(lump, dest)
 end
 
 fun w_cache_lump_num = W_CacheLumpNum(lump : LibC::Int, tag : LibC::Int) : Void*
-  LibDoom.w_cache_lump_num(lump, tag)
+  Doocr.w_cache_lump_num(lump, tag)
 end
 
 fun w_cache_lump_name = W_CacheLumpName(name : LibC::Char*, tag : LibC::Int) : Void*
-  LibDoom.w_cache_lump_name(name, tag)
+  Doocr.w_cache_lump_name(name, tag)
 end
 
 fun wi_slam_background = WI_slamBackground
-  LibDoom.wi_slam_background
+  Doocr.wi_slam_background
 end
 
 fun wi_draw_lf = WI_drawLF
-  LibDoom.wi_draw_lf
+  Doocr.wi_draw_lf
 end
 
 fun wi_draw_el = WI_drawEL
-  LibDoom.wi_draw_el
+  Doocr.wi_draw_el
 end
 
 fun wi_draw_on_lnode = WI_drawOnLnode(n : LibC::Int, c : CDoom::Patch**)
-  LibDoom.wi_draw_on_lnode(n, c)
+  Doocr.wi_draw_on_lnode(n, c)
 end
 
 fun wi_init_animated_back = WI_initAnimatedBack
-  LibDoom.wi_init_animated_back
+  Doocr.wi_init_animated_back
 end
 
 fun wi_update_animated_back = WI_updateAnimatedBack
-  LibDoom.wi_update_animated_back
+  Doocr.wi_update_animated_back
 end
 
 fun wi_draw_animated_back = WI_drawAnimatedBack
-  LibDoom.wi_draw_animated_back
+  Doocr.wi_draw_animated_back
 end
 
 fun wi_draw_num = WI_drawNum(x : LibC::Int, y : LibC::Int, n : LibC::Int, digits : LibC::Int) : LibC::Int
-  LibDoom.wi_draw_num(x, y, n, digits)
+  Doocr.wi_draw_num(x, y, n, digits)
 end
 
 fun wi_draw_percent = WI_drawPercent(x : LibC::Int, y : LibC::Int, p : LibC::Int)
-  LibDoom.wi_draw_percent(x, y, p)
+  Doocr.wi_draw_percent(x, y, p)
 end
 
 fun wi_draw_time = WI_drawTime(x : LibC::Int, y : LibC::Int, t : LibC::Int)
-  LibDoom.wi_draw_time(x, y, t)
+  Doocr.wi_draw_time(x, y, t)
 end
 
 fun wi_end = WI_End
-  LibDoom.wi_end
+  Doocr.wi_end
 end
 
 fun wi_init_no_state = WI_initNoState
-  LibDoom.wi_init_no_state
+  Doocr.wi_init_no_state
 end
 
 fun wi_update_no_state = WI_updateNoState
-  LibDoom.wi_update_no_state
+  Doocr.wi_update_no_state
 end
 
 fun wi_init_show_next_loc = WI_initShowNextLoc
-  LibDoom.wi_init_show_next_loc
+  Doocr.wi_init_show_next_loc
 end
 
 fun wi_update_show_next_loc = WI_updateShowNextLoc
-  LibDoom.wi_update_show_next_loc
+  Doocr.wi_update_show_next_loc
 end
 
 fun wi_draw_show_next_loc = WI_drawShowNextLoc
-  LibDoom.wi_draw_show_next_loc
+  Doocr.wi_draw_show_next_loc
 end
 
 fun wi_draw_no_state = WI_drawNoState
-  LibDoom.wi_draw_no_state
+  Doocr.wi_draw_no_state
 end
 
 fun wi_frag_sum = WI_fragSum(playernum : LibC::Int) : LibC::Int
-  LibDoom.wi_frag_sum(playernum)
+  Doocr.wi_frag_sum(playernum)
 end
 
 fun wi_init_deathmatch_stats = WI_initDeathmatchStats
-  LibDoom.wi_init_deathmatch_stats
+  Doocr.wi_init_deathmatch_stats
 end
 
 fun wi_update_deathmatch_stats = WI_updateDeathmatchStats
-  LibDoom.wi_update_deathmatch_stats
+  Doocr.wi_update_deathmatch_stats
 end
 
 fun wi_draw_deathmatch_stats = WI_drawDeathmatchStats
-  LibDoom.wi_draw_deathmatch_stats
+  Doocr.wi_draw_deathmatch_stats
 end
 
 fun wi_init_netgame_stats = WI_initNetgameStats
-  LibDoom.wi_init_netgame_stats
+  Doocr.wi_init_netgame_stats
 end
 
 fun wi_update_netgame_stats = WI_updateNetgameStats
-  LibDoom.wi_update_netgame_stats
+  Doocr.wi_update_netgame_stats
 end
 
 fun wi_draw_netgame_stats = WI_drawNetgameStats
-  LibDoom.wi_draw_netgame_stats
+  Doocr.wi_draw_netgame_stats
 end
 
 fun wi_init_stats = WI_initStats
-  LibDoom.wi_init_stats
+  Doocr.wi_init_stats
 end
 
 fun wi_update_stats = WI_updateStats
-  LibDoom.wi_update_stats
+  Doocr.wi_update_stats
 end
 
 fun wi_draw_stats = WI_drawStats
-  LibDoom.wi_draw_stats
+  Doocr.wi_draw_stats
 end
 
 fun wi_check_for_accelerate = WI_checkForAccelerate
-  LibDoom.wi_check_for_accelerate
+  Doocr.wi_check_for_accelerate
 end
 
 fun wi_ticker = WI_Ticker
-  LibDoom.wi_ticker
+  Doocr.wi_ticker
 end
 
 fun wi_load_data = WI_loadData
-  LibDoom.wi_load_data
+  Doocr.wi_load_data
 end
 
 fun wi_unload_data = WI_unloadData
-  LibDoom.wi_unload_data
+  Doocr.wi_unload_data
 end
 
 fun wi_drawer = WI_Drawer
-  LibDoom.wi_drawer
+  Doocr.wi_drawer
 end
 
 fun wi_init_variables = WI_initVariables(wbstartstruct : CDoom::Wbstartstruct*)
-  LibDoom.wi_init_variables(wbstartstruct)
+  Doocr.wi_init_variables(wbstartstruct)
 end
 
 fun wi_start = WI_Start(wbstartstruct : CDoom::Wbstartstruct*)
-  LibDoom.wi_start(wbstartstruct)
+  Doocr.wi_start(wbstartstruct)
 end
 
 fun z_init = Z_Init
-  LibDoom.z_init
+  Doocr.z_init
 end
 
 fun z_free = Z_Free(ptr : Void*)
-  LibDoom.z_free(ptr)
+  Doocr.z_free(ptr)
 end
 
 fun z_malloc = Z_Malloc(size : LibC::Int, tag : LibC::Int, ptr : Void*) : Void*
-  LibDoom.z_malloc(size, tag, ptr)
+  Doocr.z_malloc(size, tag, ptr)
 end
 
 fun z_free_tags = Z_FreeTags(lowtag : LibC::Int, hightag : LibC::Int)
-  LibDoom.z_free_tags(lowtag, hightag)
+  Doocr.z_free_tags(lowtag, hightag)
 end
 
 fun z_check_heap = Z_CheckHeap
-  LibDoom.z_check_heap
+  Doocr.z_check_heap
 end
 
 fun z_change_tag2 = Z_ChangeTag2(ptr : Void*, tag : LibC::Int)
-  LibDoom.z_change_tag2(ptr, tag)
+  Doocr.z_change_tag2(ptr, tag)
 end

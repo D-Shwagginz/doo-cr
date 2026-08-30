@@ -937,6 +937,7 @@ lib CDoom
     # the 8 bytes after the function pointer (think)
     # This is bullshit
     pad : LibC::LongLong
+    remove : UInt8
   end
 
   # __DOOM_CONFIG_H__
@@ -4150,7 +4151,7 @@ lib CDoom
   $scaledviewwidth : LibC::Int
 
   # This one is related to the 3-screen display mode.
-  # LibDoom::ANG90 = left side, ANG270 = right
+  # Doocr::ANG90 = left side, ANG270 = right
   $viewangleoffset : LibC::Int
 
   # Player taking events, and displaying.
@@ -4998,7 +4999,7 @@ lib CDoom
   end
 
   PLATWAIT  = 3
-  PLATSPEED = LibDoom::FRACUNIT
+  PLATSPEED = Doocr::FRACUNIT
   MAXPLATS  = 30
 
   $activeplats : Plat*[MAXPLATS]
@@ -5042,7 +5043,7 @@ lib CDoom
     topcountdown : LibC::Int
   end
 
-  VDOORSPEED = LibDoom::FRACUNIT*2
+  VDOORSPEED = Doocr::FRACUNIT*2
   VDOORWAIT  = 150
 
   fun ev_vertical_door = EV_VerticalDoor(line : Line*, thing : Mobj*)
@@ -5081,7 +5082,7 @@ lib CDoom
     olddirection : LibC::Int
   end
 
-  CEILSPEED   = LibDoom::FRACUNIT
+  CEILSPEED   = Doocr::FRACUNIT
   CEILWAIT    = 150
   MAXCEILINGS =  30
 
@@ -5147,7 +5148,7 @@ lib CDoom
     speed : Fixed
   end
 
-  FLOORSPEED = LibDoom::FRACUNIT
+  FLOORSPEED = Doocr::FRACUNIT
 
   enum Result
     Ok
@@ -5514,33 +5515,33 @@ lib CDoom
 
   # __R_LOCAL__
 
-  FLOATSPEED = (LibDoom::FRACUNIT*4)
+  FLOATSPEED = (Doocr::FRACUNIT*4)
 
   MAXHEALTH  = 100
-  VIEWHEIGHT = (41*LibDoom::FRACUNIT)
+  VIEWHEIGHT = (41*Doocr::FRACUNIT)
 
   # mapblocks are used to check movement
   # against lines and things
   MAPBLOCKUNITS = 128
-  MAPBLOCKSIZE  = (MAPBLOCKUNITS*LibDoom::FRACUNIT)
-  MAPBLOCKSHIFT = (LibDoom::FRACBITS + 7)
+  MAPBLOCKSIZE  = (MAPBLOCKUNITS*Doocr::FRACUNIT)
+  MAPBLOCKSHIFT = (Doocr::FRACBITS + 7)
   MAPBMASK      = (MAPBLOCKSIZE - 1)
-  MAPBTOFRAC    = (MAPBLOCKSHIFT - LibDoom::FRACBITS)
+  MAPBTOFRAC    = (MAPBLOCKSHIFT - Doocr::FRACBITS)
 
   # player radius for movement checking
-  PLAYERRADIUS = 16*LibDoom::FRACUNIT
+  PLAYERRADIUS = 16*Doocr::FRACUNIT
 
   # MAXRADIUS is for precalculated sector block boxes
   # the spider demon is larger,
   # but we do not have any moving sectors nearby
-  MAXRADIUS = 32*LibDoom::FRACUNIT
+  MAXRADIUS = 32*Doocr::FRACUNIT
 
-  GRAVITY = LibDoom::FRACUNIT
-  MAXMOVE = (30*LibDoom::FRACUNIT)
+  GRAVITY = Doocr::FRACUNIT
+  MAXMOVE = (30*Doocr::FRACUNIT)
 
-  USERANGE     = (64*LibDoom::FRACUNIT)
-  MELEERANGE   = (64*LibDoom::FRACUNIT)
-  MISSILERANGE = (32*64*LibDoom::FRACUNIT)
+  USERANGE     = (64*Doocr::FRACUNIT)
+  MELEERANGE   = (64*Doocr::FRACUNIT)
+  MISSILERANGE = (32*64*Doocr::FRACUNIT)
 
   # follow a player exlusively for 3 seconds
   BASETHRESHOLD = 100
@@ -6094,16 +6095,16 @@ lib CDoom
   AM_NUMMARKPOINTS = 10
 
   # scale on entry
-  INITSCALEMTOF = (0.2*LibDoom::FRACUNIT)
+  INITSCALEMTOF = (0.2*Doocr::FRACUNIT)
   # how much the automap moves window per tic in frame-buffer coordinates
   # moves 140 pixels in 1 second
   F_PANINC = 4
   # how much zoom-in per tic
   # goes to 2x in 1 second
-  M_ZOOMIN = (1.02*LibDoom::FRACUNIT).to_i32
+  M_ZOOMIN = (1.02*Doocr::FRACUNIT).to_i32
   # how much zoom-out per tic
   # pulls out to 0.5x in 1 second
-  M_ZOOMOUT = (LibDoom::FRACUNIT/1.02).to_i32
+  M_ZOOMOUT = (Doocr::FRACUNIT/1.02).to_i32
 
   # the following is crap
   LINE_NEVERSEE = ML_DONTDRAW
@@ -7360,8 +7361,8 @@ lib CDoom
   fun p_random = P_Random : LibC::Int
 
   MAXSPECIALCROSS = 8
-  FATSPREAD       = LibDoom::ANG90 // 8
-  SKULLSPEED      = 20*LibDoom::FRACUNIT
+  FATSPREAD       = Doocr::ANG90 // 8
+  SKULLSPEED      = 20*Doocr::FRACUNIT
 
   enum Dirtype
     East
@@ -7499,11 +7500,11 @@ lib CDoom
 
   fun p_check_missile_spawn = P_CheckMissileSpawn(th : Mobj*)
 
-  LOWERSPEED = LibDoom::FRACUNIT*6
-  RAISESPEED = LibDoom::FRACUNIT*6
+  LOWERSPEED = Doocr::FRACUNIT*6
+  RAISESPEED = Doocr::FRACUNIT*6
 
-  WEAPONBOTTOM = 128*LibDoom::FRACUNIT
-  WEAPONTOP    = 32*LibDoom::FRACUNIT
+  WEAPONBOTTOM = 128*Doocr::FRACUNIT
+  WEAPONTOP    = 32*Doocr::FRACUNIT
 
   # plasma cells for a bfg attack
   BFGCELLS = 40
@@ -7612,7 +7613,7 @@ lib CDoom
   # 16 pixels of bob
   MAXBOB = 0x100000
 
-  ANG5 = LibDoom::ANG90//18
+  ANG5 = Doocr::ANG90//18
 
   $onground : DoomBool
 
@@ -7838,7 +7839,7 @@ lib CDoom
 
   fun r_render_seg_loop = R_RenderSegLoop
 
-  MINZ        = LibDoom::FRACUNIT * 4
+  MINZ        = Doocr::FRACUNIT * 4
   BASEYCENTER = 100
 
   struct Maskdraw
@@ -7889,7 +7890,7 @@ lib CDoom
   # Originally: (200*0x10000).
   S_CLOSE_DIST = (160*0x10000)
 
-  S_ATTENUATOR = ((S_CLIPPING_DIST - S_CLOSE_DIST) >> LibDoom::FRACBITS)
+  S_ATTENUATOR = ((S_CLIPPING_DIST - S_CLOSE_DIST) >> Doocr::FRACBITS)
 
   NORM_PITCH    = 128
   NORM_PRIORITY =  64

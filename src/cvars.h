@@ -130,6 +130,7 @@ typedef struct thinker_s
     struct thinker_s* next;
     think_t function;
     long long pad;
+    char remove;
 } thinker_t;
 
 typedef enum
