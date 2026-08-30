@@ -131,13 +131,13 @@ module Doocr
   end
 
   def self.doom_strncmp(str1 : UInt8*, str2 : UInt8*, n : Int32) : Int32
-  n.times do |i|
-    c1 = str1[i]
-    c2 = str2[i]
-    return (c1.to_i32 - c2.to_i32).clamp(-1, 1) if c1 != c2
-    return 0 if c1 == 0
-  end
-  return 0
+    n.times do |i|
+      c1 = str1[i]
+      c2 = str2[i]
+      return (c1.to_i32 - c2.to_i32).clamp(-1, 1) if c1 != c2
+      return 0 if c1 == 0
+    end
+    return 0
   end
 
   def self.doom_toupper(c : Int32) : Int32
@@ -150,13 +150,13 @@ module Doocr
   end
 
   def self.doom_strncasecmp(str1 : UInt8*, str2 : UInt8*, n : Int32) : Int32
-  n.times do |i|
-    c1 = doom_toupper(str1[i].to_i32)
-    c2 = doom_toupper(str2[i].to_i32)
-    return (c1 - c2).clamp(-1, 1) if c1 != c2
-    return 0 if c1 == 0
-  end
-  return 0
+    n.times do |i|
+      c1 = doom_toupper(str1[i].to_i32)
+      c2 = doom_toupper(str2[i].to_i32)
+      return (c1 - c2).clamp(-1, 1) if c1 != c2
+      return 0 if c1 == 0
+    end
+    return 0
   end
 
   def self.doom_atoi(str : UInt8*) : Int32
@@ -1856,14 +1856,18 @@ module Doocr
       CDoom.deathmatch = 1
     end
 
+    fr, fgc, fb = SHELLCOLORS[14]
+    br, bgc, bb = SHELLCOLORS[1]
+
     print "\e[2J\e[H"
     print "\e[?25l"
-    print "\e[1;1H\e[2K\e\e[38;2;255;215;0;48;5;19m"
+    print "\e[1;1H\e[2K\e"
+    print "\e[38;2;#{fr};#{fgc};#{fb}m"
+    print "\e[48;2;#{br};#{bgc};#{bb}m"
     puts "DOO-CR Operating System v#{VERSION_STR} ".center(77)
     puts " DEMO v#{DEMOVERSION} | SAVE v#{SAVEVERSION} | NET v#{NETVERSION} ".center(77)
     print "\e[0m\e[3;999r"
-    print "\e[3;1H\e[38;5;250m"
-
+    print "\e[3;1H\e[38;5;250m\e[49m"
 
     print CDoom::D_DEVSTR if CDoom.devparm != 0
 
@@ -3881,7 +3885,7 @@ module Doocr
           when CDoom::Buttoncode::BTS_SAVEGAME
             if CDoom.savedescription[0] == '\0'.ord && CDoom.netgame != 0
               # Let single player game save empty descriptions
-              CDoom.doom_strcpy(CDoom.savedescription, "NET GAME") 
+              CDoom.doom_strcpy(CDoom.savedescription, "NET GAME")
             end
             CDoom.savegameslot =
               (CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BTS_SAVEMASK.value) >> CDoom::Buttoncode::BTS_SAVESHIFT.value
@@ -4242,11 +4246,11 @@ module Doocr
     CDoom.gameaction = CDoom::Gameaction::Nothing
 
     response = Channel({Bytes, Bool}).new
-  @@io_jobs.send({String.new(CDoom.savename.to_unsafe), "rb", nil, response})
-  data, ok = response.receive
-  return unless ok
+    @@io_jobs.send({String.new(CDoom.savename.to_unsafe), "rb", nil, response})
+    data, ok = response.receive
+    return unless ok
 
-  IO::Memory.new(data).tap do |file|
+    IO::Memory.new(data).tap do |file|
       file.pos += CDoom::SAVESTRINGSIZE
       # skip the description field
       vcheck = "version #{SAVEVERSION}".ljust(CDoom::VERSIONSIZE, '\0')
@@ -4297,33 +4301,33 @@ module Doocr
   def self.g_do_save_game
     name = "#{CDoom::SAVEGAMENAME}#{CDoom.savegameslot}.dsg"
     description = CDoom.savedescription.to_slice
-     buf = IO::Memory.new
-  buf.write_string(description[0...CDoom::SAVESTRINGSIZE])
+    buf = IO::Memory.new
+    buf.write_string(description[0...CDoom::SAVESTRINGSIZE])
 
-  name2 = "version #{SAVEVERSION}".ljust(CDoom::VERSIONSIZE, '\0')
-  buf.write_string(name2.to_slice)
+    name2 = "version #{SAVEVERSION}".ljust(CDoom::VERSIONSIZE, '\0')
+    buf.write_string(name2.to_slice)
 
-  buf.write_byte(CDoom.gameskill.value.to_u8!)
-  buf.write_byte(CDoom.gameepisode.to_u8!)
-  buf.write_byte(CDoom.gamemap.to_u8!)
+    buf.write_byte(CDoom.gameskill.value.to_u8!)
+    buf.write_byte(CDoom.gameepisode.to_u8!)
+    buf.write_byte(CDoom.gamemap.to_u8!)
 
-  CDoom::MAXPLAYERS.times do |i|
-    buf.write_byte(CDoom.playeringame[i].to_u8!)
-  end
-  buf.write_byte((CDoom.leveltime >> 16).to_u8!)
-  buf.write_byte((CDoom.leveltime >> 8).to_u8!)
-  buf.write_byte((CDoom.leveltime).to_u8!)
+    CDoom::MAXPLAYERS.times do |i|
+      buf.write_byte(CDoom.playeringame[i].to_u8!)
+    end
+    buf.write_byte((CDoom.leveltime >> 16).to_u8!)
+    buf.write_byte((CDoom.leveltime >> 8).to_u8!)
+    buf.write_byte((CDoom.leveltime).to_u8!)
 
-  p_archive_players(buf)
-  p_archive_world(buf)
-  p_archive_thinkers(buf)
-  p_archive_specials(buf)
+    p_archive_players(buf)
+    p_archive_world(buf)
+    p_archive_thinkers(buf)
+    p_archive_specials(buf)
 
-  buf.write_byte(0x1d)
+    buf.write_byte(0x1d)
 
-  response = Channel({Bytes, Bool}).new
-  @@io_jobs.send({name, "wb", buf.to_slice, response})
-  response.receive
+    response = Channel({Bytes, Bool}).new
+    @@io_jobs.send({name, "wb", buf.to_slice, response})
+    response.receive
 
     CDoom.gameaction = CDoom::Gameaction::Nothing
     CDoom.savedescription[0] = 0
@@ -4830,7 +4834,7 @@ module Doocr
 
   # The following deletion routines adhere to the left margin restriction
   def self.hulib_del_char_from_i_text(it : CDoom::HU_Itext*)
-    CDoom.hulib_del_char_from_text_line(pointerof(it .value.@l)) if it.value.l.len != it.value.lm
+    CDoom.hulib_del_char_from_text_line(pointerof(it.value.@l)) if it.value.l.len != it.value.lm
   end
 
   def self.hulib_erase_line_from_i_text(it : CDoom::HU_Itext*)
@@ -8185,7 +8189,7 @@ module Doocr
     CDoom::MAXCEILINGS.times do |i|
       if CDoom.activeceilings[i] == c
         CDoom.activeceilings[i].value.sector.value.specialdata = Pointer(Void).null
-       CDoom.p_remove_thinker(pointerof(CDoom.activeceilings[i].value.@thinker))
+        CDoom.p_remove_thinker(pointerof(CDoom.activeceilings[i].value.@thinker))
         CDoom.activeceilings[i] = Pointer(CDoom::Ceiling).null
         break
       end
@@ -10769,9 +10773,9 @@ module Doocr
       target.value.momz = 0
     end
 
-    damage <<= 1 if !source.null? && 
-    !source.value.player.null? && 
-    source.value.player.value.cheats & CDoom::Cheat::CF_ME.value != 0 # Double damage in me mode!
+    damage <<= 1 if !source.null? &&
+                    !source.value.player.null? &&
+                    source.value.player.value.cheats & CDoom::Cheat::CF_ME.value != 0 # Double damage in me mode!
 
     player = target.value.player
     damage >>= 1 if !player.null? && CDoom.gameskill == CDoom::Skill::Baby # take half damage in trainer mode
@@ -17411,15 +17415,14 @@ module Doocr
     CDoom.firstflat = CDoom.w_get_num_for_name("F_START") + 1
     CDoom.lastflat = CDoom.w_get_num_for_name("F_END") - 1
     CDoom.numflats = CDoom.lastflat - CDoom.firstflat + 1
-    
+
     CDoom.firstspritelump = CDoom.w_get_num_for_name("S_START") + 1
     CDoom.lastspritelump = CDoom.w_get_num_for_name("S_END") - 1
     CDoom.numspritelumps = CDoom.lastspritelump - CDoom.firstspritelump + 1
 
     nums = (CDoom.numtextures + 63) // 64 +
-    (CDoom.numflats + 63) // 64 +
-    (CDoom.numspritelumps + 63) // 64
-
+           (CDoom.numflats + 63) // 64 +
+           (CDoom.numspritelumps + 63) // 64
 
     # Really complex printing shit...
     print "["
@@ -19941,18 +19944,18 @@ module Doocr
   end
 
   @@regmus = [
-        # Song - Who? - Where?
+    # Song - Who? - Where?
 
-        CDoom::Musicenum::MUS_e3m4, # American        e4m1
-        CDoom::Musicenum::MUS_e3m2, # Romero        e4m2
-        CDoom::Musicenum::MUS_e3m3, # Shawn        e4m3
-        CDoom::Musicenum::MUS_e1m5, # American        e4m4
-        CDoom::Musicenum::MUS_e2m7, # Tim         e4m5
-        CDoom::Musicenum::MUS_e2m4, # Romero        e4m6
-        CDoom::Musicenum::MUS_e2m6, # J.Anderson        e4m7 CHIRON.WAD
-        CDoom::Musicenum::MUS_e2m5, # Shawn        e4m8
-        CDoom::Musicenum::MUS_e1m9, # Tim                e4m9
-      ]
+    CDoom::Musicenum::MUS_e3m4, # American        e4m1
+    CDoom::Musicenum::MUS_e3m2, # Romero        e4m2
+    CDoom::Musicenum::MUS_e3m3, # Shawn        e4m3
+    CDoom::Musicenum::MUS_e1m5, # American        e4m4
+    CDoom::Musicenum::MUS_e2m7, # Tim         e4m5
+    CDoom::Musicenum::MUS_e2m4, # Romero        e4m6
+    CDoom::Musicenum::MUS_e2m6, # J.Anderson        e4m7 CHIRON.WAD
+    CDoom::Musicenum::MUS_e2m5, # Shawn        e4m8
+    CDoom::Musicenum::MUS_e1m9, # Tim                e4m9
+  ]
 
   #
   # Per level startup code.
@@ -20447,7 +20450,7 @@ module Doocr
                               on : CDoom::DoomBool*,
                               percent : CDoom::Patch*)
     CDoom.stlib_init_num(
-     pointerof(p.value.@n),
+      pointerof(p.value.@n),
       x, y, pl, num, on, 3)
     p.value.p = percent
   end
@@ -20458,7 +20461,7 @@ module Doocr
     end
 
     CDoom.stlib_update_num(
-     pointerof(per.value.@n),
+      pointerof(per.value.@n),
       refresh
     )
   end
@@ -20579,18 +20582,17 @@ module Doocr
           CDoom.plyr.value.cheats = CDoom.plyr.value.cheats ^ CDoom::Cheat::CF_ME.value
           CDoom.plyr.value.message = "#{(CDoom.plyr.value.cheats & CDoom::Cheat::CF_ME.value != 0 ? "yea" : "no")} baby!"
           if CDoom.plyr.value.cheats & CDoom::Cheat::CF_ME.value != 0
-          if CDoom.plyr.value.backpack == 0
-            CDoom::Ammotype::NUMAMMO.value.times do |i|
-              CDoom.plyr.value.maxammo[i] = CDoom.plyr.value.maxammo[i] * 2
+            if CDoom.plyr.value.backpack == 0
+              CDoom::Ammotype::NUMAMMO.value.times do |i|
+                CDoom.plyr.value.maxammo[i] = CDoom.plyr.value.maxammo[i] * 2
+              end
+              CDoom.plyr.value.backpack = 1
             end
-            CDoom.plyr.value.backpack = 1
-          end          
             CDoom::Ammotype::NUMAMMO.value.times do |i|
               CDoom.plyr.value.ammo[i] = CDoom.plyr.value.maxammo[i]
             end
           end
         end
-          
 
         # 'dqd' cheat of toggleable god mode
         if CDoom.cht_check_cheat(pointerof(CDoom.cheat_god), ev.value.data1) != 0
@@ -20636,7 +20638,7 @@ module Doocr
           CDoom.cht_get_param(pointerof(CDoom.cheat_mus), buf)
 
           if CDoom.gamemode == CDoom::GameMode::Commercial
-            map = ((buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord ) &- 1
+            map = ((buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord) &- 1
             musnum = CDoom::Musicenum::MUS_runnin.value + map
 
             if map > 31
@@ -20650,11 +20652,10 @@ module Doocr
 
             if m > 8 || (e > 3 && CDoom.gamemode == CDoom::GameMode::Retail) ||
                (e > 2 && CDoom.gamemode == CDoom::GameMode::Registered) ||
-              (e > 0 && CDoom.gamemode == CDoom::GameMode::Shareware)
+               (e > 0 && CDoom.gamemode == CDoom::GameMode::Shareware)
               CDoom.plyr.value.message = CDoom::STSTR_NOMUS
             else
-              mus = CDoom.gamemode == CDoom::GameMode::Retail ?
-                @@regmus[m].value : CDoom::Musicenum::MUS_e1m1.value + e * 9 + m
+              mus = CDoom.gamemode == CDoom::GameMode::Retail ? @@regmus[m].value : CDoom::Musicenum::MUS_e1m1.value + e * 9 + m
               CDoom.s_change_music(mus, 1)
             end
           end
@@ -20709,43 +20710,43 @@ module Doocr
           CDoom.plyr.value.message = @@buf
         end
 
-      # 'clev' change-level cheat
-      if CDoom.cht_check_cheat(pointerof(CDoom.cheat_clev), ev.value.data1) != 0
-        buf = Pointer(UInt8).malloc(3)
+        # 'clev' change-level cheat
+        if CDoom.cht_check_cheat(pointerof(CDoom.cheat_clev), ev.value.data1) != 0
+          buf = Pointer(UInt8).malloc(3)
 
-        CDoom.cht_get_param(pointerof(CDoom.cheat_clev), buf)
+          CDoom.cht_get_param(pointerof(CDoom.cheat_clev), buf)
 
-        if CDoom.gamemode == CDoom::GameMode::Commercial
-          epsd = 0
-          map = (buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord
-        else
-          epsd = buf[0] - '0'.ord
-          map = buf[1] - '0'.ord
+          if CDoom.gamemode == CDoom::GameMode::Commercial
+            epsd = 0
+            map = (buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord
+          else
+            epsd = buf[0] - '0'.ord
+            map = buf[1] - '0'.ord
+          end
+
+          # Catch invalid maps
+          return 0 if CDoom.gamemode != CDoom::GameMode::Commercial && epsd < 1
+
+          return 0 if map < 1
+
+          # Ohmygod - this is not going to work.
+          return 0 if CDoom.gamemode == CDoom::GameMode::Retail &&
+                      (epsd > 4 || map > 9)
+
+          return 0 if CDoom.gamemode == CDoom::GameMode::Registered &&
+                      (epsd > 3 || map > 9)
+
+          return 0 if CDoom.gamemode == CDoom::GameMode::Shareware &&
+                      (epsd > 1 || map > 9)
+
+          return 0 if CDoom.gamemode == CDoom::GameMode::Commercial &&
+                      map > 32
+
+          # So be it.
+          CDoom.plyr.value.message = CDoom::STSTR_CLEV
+          CDoom.g_defered_init_new(CDoom.gameskill, epsd, map)
         end
-
-        # Catch invalid maps
-        return 0 if CDoom.gamemode != CDoom::GameMode::Commercial && epsd < 1
-
-        return 0 if map < 1
-
-        # Ohmygod - this is not going to work.
-        return 0 if CDoom.gamemode == CDoom::GameMode::Retail &&
-                    (epsd > 4 || map > 9)
-
-        return 0 if CDoom.gamemode == CDoom::GameMode::Registered &&
-                    (epsd > 3 || map > 9)
-
-        return 0 if CDoom.gamemode == CDoom::GameMode::Shareware &&
-                    (epsd > 1 || map > 9)
-
-        return 0 if CDoom.gamemode == CDoom::GameMode::Commercial &&
-                    map > 32
-
-        # So be it.
-        CDoom.plyr.value.message = CDoom::STSTR_CLEV
-        CDoom.g_defered_init_new(CDoom.gameskill, epsd, map)
       end
-    end
     end
     return 0
   end

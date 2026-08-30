@@ -5585,7 +5585,7 @@ module Doocr
     routine: ->CDoom.m_draw_mainmenu,
     x: 97, y: 64,
     last_on: 0)
-    @@maindef
+  @@maindef
 
   @@episodemenu = [
     CDoom::Menuitem.new(status: 1, name: "M_EPI1".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 'k'.ord),

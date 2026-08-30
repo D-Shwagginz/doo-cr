@@ -6779,7 +6779,7 @@ lib CDoom
   IPPORT_USERRESERVED = 5000
 
   SAMPLECOUNT  = 512
-  NUM_CHANNELS =   16
+  NUM_CHANNELS =  16
   # It is 2 for 16bit, and 2 for two channels.
   BUFMUL        = 4
   MIXBUFFERSIZE = SAMPLECOUNT * BUFMUL
