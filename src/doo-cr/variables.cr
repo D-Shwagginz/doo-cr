@@ -49,6 +49,7 @@ module Doocr
   class_getter keystates = Array(Bool).new(CDoom::NUMKEYS, false)
 
   @@st_notify : CDoom::Event = CDoom::Event.new
+  @@st_notify
   @@lastlevel = -1
   @@lastepisode = -1
   @@cheatstate = 0
@@ -5584,6 +5585,7 @@ module Doocr
     routine: ->CDoom.m_draw_mainmenu,
     x: 97, y: 64,
     last_on: 0)
+    @@maindef
 
   @@episodemenu = [
     CDoom::Menuitem.new(status: 1, name: "M_EPI1".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 'k'.ord),
@@ -5600,6 +5602,7 @@ module Doocr
     x: 48, y: 63,
     last_on: CDoom::Episodesenum::Ep1.value
   )
+  @@epidef
 
   @@newgame_menu = [
     CDoom::Menuitem.new(status: 1, name: "M_JKILL".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'i'.ord),
@@ -5617,6 +5620,7 @@ module Doocr
     x: 48, y: 63,
     last_on: CDoom::NewgameEnum::Hurtme.value
   )
+  @@newdef
 
   @@options_menu = [
     CDoom::Menuitem.new(status: 1, name: "M_ENDGAM".to_unsafe, routine: ->CDoom.m_endgame(Int32), alpha_key: 'e'.ord),
@@ -5637,6 +5641,7 @@ module Doocr
     x: 60, y: 37,
     last_on: 0
   )
+  @@optionsdef
 
   @@current_options_menu = 0
 
@@ -5666,6 +5671,7 @@ module Doocr
     x: 70, y: 30,
     last_on: 0
   )
+  @@moreoptions_def
 
   @@editcontrols_menu = [
     CDoom::Menuitem.new(status: 1, text: "Forward =", num: pointerof(CDoom.key_up), routine: ->m_edit_forward(Int32), alpha_key: 'f'.ord),
@@ -5687,6 +5693,7 @@ module Doocr
     x: 70, y: 25,
     last_on: 0
   )
+  @@editcontrols_def
 
   @@readmenu1 = [
     CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_readthis2(Int32)),
@@ -5700,6 +5707,7 @@ module Doocr
     x: 280, y: 185,
     last_on: 0
   )
+  @@readdef1
 
   @@readmenu2 = [
     CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_finish_readthis(Int32)),
@@ -5713,6 +5721,7 @@ module Doocr
     x: 330, y: 175,
     last_on: 0
   )
+  @@readdef2
 
   @@soundmenu = [
     CDoom::Menuitem.new(status: 2, name: "M_SFXVOL".to_unsafe, routine: ->CDoom.m_sfxvol(Int32), alpha_key: 's'.ord),
@@ -5729,6 +5738,7 @@ module Doocr
     x: 80, y: 64,
     last_on: 0
   )
+  @@sounddef
 
   @@loadmenu = [
     CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '1'.ord),
@@ -5747,6 +5757,7 @@ module Doocr
     x: 80, y: 54,
     last_on: 0
   )
+  @@loaddef
 
   @@savemenu = [
     CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '1'.ord),
@@ -5765,6 +5776,7 @@ module Doocr
     x: 80, y: 54,
     last_on: 0
   )
+  @@savedef
 
   @@rlfullscreen = 0
   @@midismoothpan = 1
@@ -6295,9 +6307,8 @@ module Doocr
   CDoom.cheat_noclip.p = Pointer(UInt8).null
   CDoom.cheat_commercial_noclip.sequence = CDoom.cheat_commercial_noclip_seq.to_unsafe
   CDoom.cheat_commercial_noclip.p = Pointer(UInt8).null
-  @@cheat_me = Pointer(CDoom::Cheatseq).malloc
-  @@cheat_me.value.sequence = @@cheat_me_seq.to_unsafe
-  @@cheat_me.value.p = Pointer(UInt8).null
+  @@cheat_me = CDoom::Cheatseq.new(sequence: @@cheat_me_seq.to_unsafe, p: Pointer(UInt8).null)
+  @@cheat_me
 
   c_array_cheat(CDoom.cheat_powerup,
     {CDoom.cheat_powerup_seq[0].to_unsafe, Pointer(UInt8).null},

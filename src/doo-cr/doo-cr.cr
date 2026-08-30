@@ -1030,6 +1030,7 @@ module Doocr
   end
 
   @@l : CDoom::Mline = CDoom::Mline.new
+  @@l
 
   #
   # Determines visible lines, draws them.
@@ -20585,7 +20586,7 @@ module Doocr
     elsif ev.value.type == CDoom::Evtype::Keydown
       if CDoom.netgame == 0
         # my little cheat
-        if cht_check_cheat(@@cheat_me, ev.value.data1.to_u8) != 0
+        if cht_check_cheat(pointerof(@@cheat_me), ev.value.data1.to_u8) != 0
           CDoom.plyr.value.cheats = CDoom.plyr.value.cheats ^ CDoom::Cheat::CF_ME.value
           CDoom.plyr.value.message = "#{(CDoom.plyr.value.cheats & CDoom::Cheat::CF_ME.value != 0 ? "yea" : "no")} baby!"
           if CDoom.plyr.value.cheats & CDoom::Cheat::CF_ME.value != 0
