@@ -1835,7 +1835,7 @@ module Doocr
     if ARGV.includes?("-v")
       puts "DOO-CR v#{VERSION_STR} - DEMO v#{DEMOVERSION} | SAVE v#{SAVEVERSION} | NET v#{NETVERSION}"
       puts "Built #{BUILD_TIME}"
-      i_quit
+      exit(0)
     end
 
     file = uninitialized StaticArray(UInt8, 256)
