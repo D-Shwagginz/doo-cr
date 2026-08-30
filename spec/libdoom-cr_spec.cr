@@ -1,6 +1,6 @@
 require "./spec_helper"
 
-describe Libdoom::Cr do
+describe Doocr::Cr do
   # TODO: Write tests
 
   it "works" do

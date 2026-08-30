@@ -23,37 +23,58 @@
 # I reworked a lot of stuff already but even then the first line
 #  in this module is still a null pointer... so... it needs more work :)
 
-module LibDoom
+module Doocr
   NULL_PROC   = Proc(Nil).new(Pointer(Void).null, Pointer(Void).null)
   NULL_PROCP1 = Proc(Int32, Nil).new(Pointer(Void).null, Pointer(Void).null)
 
+  alias DoomHandle = {String, IO::Memory, Bool} # path, buffer, write_mode
+
   def self.doom_open(filename : UInt8*, mode : UInt8*) : Void*
+    path = String.new(filename)
+    m = String.new(mode)
+    write_mode = m.includes?('w') || m.includes?('a')
+
     begin
-      file = File.new(String.new(filename), String.new(mode))
-      return Box.box(file)
+      if write_mode
+        return Box.box({path, IO::Memory.new, true})
+      else
+        response = Channel({Bytes, Bool}).new
+        @@io_jobs.send({path, "rb", nil, response})
+        data, ok = response.receive
+        return Pointer(Void).null unless ok
+        return Box.box({path, IO::Memory.new(data), false})
+      end
     rescue
     end
     return Pointer(Void).null
   end
 
   def self.doom_close(handle : Void*)
-    Box(File).unbox(handle).close
+    path, io, write_mode = Box(DoomHandle).unbox(handle)
+    return unless write_mode
+
+    response = Channel({Bytes, Bool}).new
+    @@io_jobs.send({path, "wb", io.to_slice, response})
+    response.receive
   end
 
   def self.doom_read(handle : Void*, buf : Void*, count : Int32) : Int32
     slice = Slice.new(buf.as(UInt8*), count)
-    return Box(File).unbox(handle).read(slice)
+    _, io, _ = Box(DoomHandle).unbox(handle)
+    return io.read(slice)
   end
 
   def self.doom_write(handle : Void*, buf : Void*, count : Int32) : Int32
     slice = Slice.new(buf.as(UInt8*), count)
-    Box(File).unbox(handle).write(slice)
+    _, io, _ = Box(DoomHandle).unbox(handle)
+    io.write(slice)
     return count
   end
 
   def self.doom_seek(handle : Void*, offset : Int32, origin : CDoom::DoomSeek) : Int32
+    _, io, _ = Box(DoomHandle).unbox(handle)
     begin
-      Box(File).unbox(handle).seek(offset, IO::Seek.from_value(origin.value))
+      io.seek(offset, IO::Seek.from_value(origin.value))
     rescue
       return 1
     end
@@ -61,12 +82,13 @@ module LibDoom
   end
 
   def self.doom_tell(handle : Void*) : Int32
-    return Box(File).unbox(handle).pos.to_i32
+    _, io, _ = Box(DoomHandle).unbox(handle)
+    return io.pos.to_i32
   end
 
   def self.doom_eof(handle : Void*) : Int32
-    file = Box(File).unbox(handle)
-    return file.pos >= file.size ? 1 : 0
+    _, io, _ = Box(DoomHandle).unbox(handle)
+    return io.pos >= io.size ? 1 : 0
   end
 
   def self.doom_memset(ptr : Void*, value : Int32, num : Int32)
@@ -109,8 +131,13 @@ module LibDoom
   end
 
   def self.doom_strncmp(str1 : UInt8*, str2 : UInt8*, n : Int32) : Int32
-    len = doom_strlen(str1) + 1 < n ? doom_strlen(str1) + 1 : n
-    return str1.memcmp(str2, len).clamp(-1, 1)
+    n.times do |i|
+      c1 = str1[i]
+      c2 = str2[i]
+      return (c1.to_i32 - c2.to_i32).clamp(-1, 1) if c1 != c2
+      return 0 if c1 == 0
+    end
+    return 0
   end
 
   def self.doom_toupper(c : Int32) : Int32
@@ -123,8 +150,13 @@ module LibDoom
   end
 
   def self.doom_strncasecmp(str1 : UInt8*, str2 : UInt8*, n : Int32) : Int32
-    len = doom_strlen(str1) < n ? doom_strlen(str1) : n
-    return String.new(str1)[...len].compare(String.new(str2)[...len], case_insensitive: true)
+    n.times do |i|
+      c1 = doom_toupper(str1[i].to_i32)
+      c2 = doom_toupper(str2[i].to_i32)
+      return (c1 - c2).clamp(-1, 1) if c1 != c2
+      return 0 if c1 == 0
+    end
+    return 0
   end
 
   def self.doom_atoi(str : UInt8*) : Int32
@@ -998,6 +1030,7 @@ module LibDoom
   end
 
   @@l : CDoom::Mline = CDoom::Mline.new
+  @@l
 
   #
   # Determines visible lines, draws them.
@@ -1071,8 +1104,8 @@ module LibDoom
       l.a = CDoom::Mpoint.new(x: ax, y: ay)
 
       CDoom.am_rotate(
-        (pointerof(l).as(UInt8*) + offsetof(CDoom::Mline, @a) + offsetof(CDoom::Mpoint, @x)).as(CDoom::Fixed*),
-        (pointerof(l).as(UInt8*) + offsetof(CDoom::Mline, @a) + offsetof(CDoom::Mpoint, @y)).as(CDoom::Fixed*),
+        pointerof(l.@a.@x),
+        pointerof(l.@a.@y),
         angle) if angle != 0
 
       l.a = CDoom::Mpoint.new(x: l.a.x + x, y: l.a.y + y)
@@ -1088,8 +1121,8 @@ module LibDoom
       l.b = CDoom::Mpoint.new(x: bx, y: by)
 
       CDoom.am_rotate(
-        (pointerof(l).as(UInt8*) + offsetof(CDoom::Mline, @b) + offsetof(CDoom::Mpoint, @x)).as(CDoom::Fixed*),
-        (pointerof(l).as(UInt8*) + offsetof(CDoom::Mline, @b) + offsetof(CDoom::Mpoint, @y)).as(CDoom::Fixed*),
+        pointerof(l.@b.@x),
+        pointerof(l.@b.@y),
         angle) if angle != 0
 
       l.b = CDoom::Mpoint.new(x: l.b.x + x, y: l.b.y + y)
@@ -1797,6 +1830,14 @@ module LibDoom
   # d_doom_main
   #
   def self.d_doom_main
+    Raylib.set_trace_log_level(Raylib::TraceLogLevel::Error)
+
+    if ARGV.includes?("-v")
+      puts "DOO-CR v#{VERSION_STR} - DEMO v#{DEMOVERSION} | SAVE v#{SAVEVERSION} | NET v#{NETVERSION}"
+      puts "Built #{BUILD_TIME}"
+      i_quit
+    end
+
     file = uninitialized StaticArray(UInt8, 256)
 
     CDoom.find_response_file
@@ -1815,36 +1856,20 @@ module LibDoom
       CDoom.deathmatch = 1
     end
 
-    case CDoom.gamemode
-    when CDoom::GameMode::Retail
-      @@title = "The Ultimate DOOM Startup"
-    when CDoom::GameMode::Shareware
-      @@title = "DOOM Shareware Startup"
-    when CDoom::GameMode::Registered
-      @@title = "DOOM Registered Startup"
-    when CDoom::GameMode::Commercial
-      case CDoom.gamemission
-      when CDoom::GameMission::PackPlut
-        @@title = "Final Doom: The Plutonia Experiment"
-      when CDoom::GameMission::PackTnt
-        @@title = "Final Doom: TNT: Evilution"
-      else
-        @@title = "DOOM 2: Hell on Earth"
-      end
-    else
-      @@title = "Public DOOM"
-    end
+    fr, fgc, fb = SHELLCOLORS[14]
+    br, bgc, bb = SHELLCOLORS[1]
+
+    print "\e[2J\e[H"
+    print "\e[?25l"
+    print "\e[1;1H\e[2K\e"
+    print "\e[38;2;#{fr};#{fgc};#{fb}m"
+    print "\e[48;2;#{br};#{bgc};#{bb}m"
+    puts "DOO-CR Operating System v#{VERSION_STR} ".center(77)
+    puts " DEMO v#{DEMOVERSION} | SAVE v#{SAVEVERSION} | NET v#{NETVERSION} ".center(77)
+    print "\e[0m\e[3;999r"
+    print "\e[3;1H\e[38;5;250m\e[49m"
 
     print CDoom::D_DEVSTR if CDoom.devparm != 0
-
-    {% if false %}
-      # [pd] Ignore cdrom
-      if CDoom.m_check_parm("-cdrom") != 0
-        print CDoom::D_CDROM
-        Dir.mkdir("c:\\doomdata")
-        CDoom.doom_strcpy(CDoom.basedefault, "c:/doomdata/default.cfg")
-      end
-    {% end %}
 
     # turbo option
     if (p = CDoom.m_check_parm("-turbo")) != 0
@@ -1989,10 +2014,37 @@ module LibDoom
     puts "w_init: Init Wadfiles."
     CDoom.w_init_multiple_files(CDoom.wadfiles)
 
-    puts "        Init Mergefiles" if ARGV.includes?("-merge")
+    puts "        Init Mergefiles." if ARGV.includes?("-merge")
     w_merge_multiple_files(@@merge_files)
 
     confirm_version()
+
+    case CDoom.gamemode
+    when CDoom::GameMode::Retail
+      @@title = "The Ultimate DOOM Startup"
+    when CDoom::GameMode::Shareware
+      @@title = "DOOM Shareware Startup"
+    when CDoom::GameMode::Registered
+      @@title = "DOOM Registered Startup"
+    when CDoom::GameMode::Commercial
+      case CDoom.gamemission
+      when CDoom::GameMission::PackPlut
+        @@title = "Final Doom: The Plutonia Experiment"
+      when CDoom::GameMission::PackTnt
+        @@title = "Final Doom: TNT: Evilution"
+      else
+        @@title = "DOOM 2: Hell on Earth"
+      end
+    else
+      @@title = "Public DOOM"
+    end
+
+    puts @@title.center(77)
+    puts "".ljust(77, '=')
+    puts "Doo-cr is licensed under the GNU General Public License v3.0 license".center(77)
+    puts "Doo-cr comes with ABSOLUTELY NO WARRANTY".center(77)
+    puts "Doo-cr is free software, and you are welcome to redistribute it".center(77)
+    puts "".ljust(77, '=')
 
     # Check for -file in shareware
     if CDoom.modifiedgame != 0
@@ -2019,24 +2071,13 @@ module LibDoom
       end
     end
 
-    puts " DOO-CR V#{VERSION_STR} ".center(77, '=')
-    puts " DEMO V#{DEMOVERSION} | SAVE V#{SAVEVERSION} | NET V#{NETVERSION} ".center(77, '=')
-    puts @@title.center(77)
-    puts "".ljust(77, '=')
-    puts "Doo-cr is licensed under the GNU General Public License v3.0 license".center(77)
-    puts "Doo-cr comes with ABSOLUTELY NO WARRANTY".center(77)
-    puts "Doo-cr is free software, and you are welcome to redistribute it".center(77)
-    puts "".ljust(77, '=')
-
-    Raylib.set_trace_log_level(Raylib::TraceLogLevel::Error)
-
     puts "m_init: Init miscellaneous info."
     CDoom.m_init
 
-    print "r_init: Init DOOM refresh daemon."
+    print "r_init: Init DOO-CR refresh daemon - "
     CDoom.r_init
 
-    puts "\np_init: Init Playloop state."
+    puts "p_init: Init Playloop state."
     CDoom.p_init
 
     puts "i_init: Setting up machine state."
@@ -2135,17 +2176,6 @@ module LibDoom
   # Checksum
   #
   def self.net_buffer_checksum : UInt32
-    # c = 0x1234567_u32
-
-    # l = (CDoom.net_buffer_size - offsetof(CDoom::Doomdata, @retransmitfrom)) // 4
-    # l.times do |i|
-    #   value = (pointerof(CDoom.netbuffer.value.@retransmitfrom)
-    #     .as(UInt32*))[i]
-
-    #   c = c &+ (value &* (i + 1).to_u32)
-    # end
-
-    # return c & NCMD_CHECKSUM
     return 0_u32
   end
 
@@ -2669,13 +2699,13 @@ module LibDoom
     CDoom.i_init_network
     CDoom.i_error("Error: Doomcom buffer invalid!") if CDoom.doomcom.value.id != CDoom::DOOMCOM_ID
 
-    CDoom.netbuffer = (CDoom.doomcom.as(UInt8*) + offsetof(CDoom::Doomcom, @data)).as(CDoom::Doomdata*)
+    CDoom.netbuffer = pointerof(CDoom.doomcom.value.@data)
     CDoom.consoleplayer = CDoom.doomcom.value.consoleplayer
     CDoom.displayplayer = CDoom.consoleplayer
     CDoom.d_arbitrate_net_start if CDoom.netgame != 0
     puts "startskill: #{CDoom.startskill} | deathmatch: #{CDoom.deathmatch}" +
          " | startmap: #{CDoom.startmap} | startepisode: #{CDoom.startepisode}"
-    puts "ticdup: #{CDoom.doomcom.value.ticdup} | extratic: #{CDoom.doomcom.value.extratics}"
+    print "ticdup: #{CDoom.doomcom.value.ticdup} | extratic: #{CDoom.doomcom.value.extratics} | "
 
     # read values out of doomcom
     CDoom.ticdup = CDoom.doomcom.value.ticdup
@@ -3811,7 +3841,7 @@ module LibDoom
 
     CDoom::MAXPLAYERS.times do |i|
       if CDoom.playeringame[i] != 0
-        cmd = ((CDoom.players.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Player, @cmd)).as(CDoom::Ticcmd*) # Gotta be a better way to do this
+        cmd = (pointerof((CDoom.players.to_unsafe + i).value.@cmd)) # THERE WAS A BETTER WAY TO DO THIS
 
         CDoom.doom_memcpy(cmd, (CDoom.netcmds.to_unsafe + i).value.to_unsafe + buf, sizeof(CDoom::Ticcmd))
 
@@ -3853,7 +3883,10 @@ module LibDoom
               CDoom.s_resume_sound
             end
           when CDoom::Buttoncode::BTS_SAVEGAME
-            CDoom.doom_strcpy(CDoom.savedescription, "NET GAME") if CDoom.savedescription[0] == '\0'.ord
+            if CDoom.savedescription[0] == '\0'.ord && CDoom.netgame != 0
+              # Let single player game save empty descriptions
+              CDoom.doom_strcpy(CDoom.savedescription, "NET GAME")
+            end
             CDoom.savegameslot =
               (CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BTS_SAVEMASK.value) >> CDoom::Buttoncode::BTS_SAVESHIFT.value
             CDoom.gameaction = CDoom::Gameaction::Savegame
@@ -4212,7 +4245,12 @@ module LibDoom
   def self.g_do_load_game
     CDoom.gameaction = CDoom::Gameaction::Nothing
 
-    File.open(String.new(CDoom.savename.to_unsafe), "rb") do |file|
+    response = Channel({Bytes, Bool}).new
+    @@io_jobs.send({String.new(CDoom.savename.to_unsafe), "rb", nil, response})
+    data, ok = response.receive
+    return unless ok
+
+    IO::Memory.new(data).tap do |file|
       file.pos += CDoom::SAVESTRINGSIZE
       # skip the description field
       vcheck = "version #{SAVEVERSION}".ljust(CDoom::VERSIONSIZE, '\0')
@@ -4263,30 +4301,34 @@ module LibDoom
   def self.g_do_save_game
     name = "#{CDoom::SAVEGAMENAME}#{CDoom.savegameslot}.dsg"
     description = CDoom.savedescription.to_slice
-    File.open(name, "wb") do |file|
-      file.write_string(description[0...CDoom::SAVESTRINGSIZE])
+    buf = IO::Memory.new
+    buf.write_string(description[0...CDoom::SAVESTRINGSIZE])
 
-      name2 = "version #{SAVEVERSION}".ljust(CDoom::VERSIONSIZE, '\0')
-      file.write_string(name2.to_slice)
+    name2 = "version #{SAVEVERSION}".ljust(CDoom::VERSIONSIZE, '\0')
+    buf.write_string(name2.to_slice)
 
-      file.write_byte(CDoom.gameskill.value.to_u8!)
-      file.write_byte(CDoom.gameepisode.to_u8!)
-      file.write_byte(CDoom.gamemap.to_u8!)
+    buf.write_byte(CDoom.gameskill.value.to_u8!)
+    buf.write_byte(CDoom.gameepisode.to_u8!)
+    buf.write_byte(CDoom.gamemap.to_u8!)
 
-      CDoom::MAXPLAYERS.times do |i|
-        file.write_byte(CDoom.playeringame[i].to_u8!)
-      end
-      file.write_byte((CDoom.leveltime >> 16).to_u8!)
-      file.write_byte((CDoom.leveltime >> 8).to_u8!)
-      file.write_byte((CDoom.leveltime).to_u8!)
-
-      p_archive_players(file)
-      p_archive_world(file)
-      p_archive_thinkers(file)
-      p_archive_specials(file)
-
-      file.write_byte(0x1d) # consistancy marker
+    CDoom::MAXPLAYERS.times do |i|
+      buf.write_byte(CDoom.playeringame[i].to_u8!)
     end
+    buf.write_byte((CDoom.leveltime >> 16).to_u8!)
+    buf.write_byte((CDoom.leveltime >> 8).to_u8!)
+    buf.write_byte((CDoom.leveltime).to_u8!)
+
+    p_archive_players(buf)
+    p_archive_world(buf)
+    p_archive_thinkers(buf)
+    p_archive_specials(buf)
+
+    buf.write_byte(0x1d)
+
+    response = Channel({Bytes, Bool}).new
+    @@io_jobs.send({name, "wb", buf.to_slice, response})
+    response.receive
+
     CDoom.gameaction = CDoom::Gameaction::Nothing
     CDoom.savedescription[0] = 0
 
@@ -4787,29 +4829,29 @@ module LibDoom
     it.value.lm = 0 # default left margin is start of text
     it.value.on = on
     it.value.laston = 1
-    CDoom.hulib_init_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*), x, y, font, startchar)
+    CDoom.hulib_init_text_line(pointerof(it.value.@l), x, y, font, startchar)
   end
 
   # The following deletion routines adhere to the left margin restriction
   def self.hulib_del_char_from_i_text(it : CDoom::HU_Itext*)
-    CDoom.hulib_del_char_from_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*)) if it.value.l.len != it.value.lm
+    CDoom.hulib_del_char_from_text_line(pointerof(it.value.@l)) if it.value.l.len != it.value.lm
   end
 
   def self.hulib_erase_line_from_i_text(it : CDoom::HU_Itext*)
     while it.value.lm != it.value.l.len
-      CDoom.hulib_del_char_from_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*))
+      CDoom.hulib_del_char_from_text_line(pointerof(it.value.@l))
     end
   end
 
   # Resets left margin as well
   def self.hulib_reset_i_text(it : CDoom::HU_Itext*)
     it.value.lm = 0
-    CDoom.hulib_clear_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*))
+    CDoom.hulib_clear_text_line(pointerof(it.value.@l))
   end
 
   def self.hulib_add_prefix_to_i_text(it : CDoom::HU_Itext*, str : UInt8*)
     while str.value != 0
-      CDoom.hulib_add_char_to_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*), str.value)
+      CDoom.hulib_add_char_to_text_line(pointerof(it.value.@l), str.value)
       str += 1
     end
     it.value.lm = it.value.l.len
@@ -4819,7 +4861,7 @@ module LibDoom
   # returns true if it ate the key
   def self.hulib_key_in_i_text(it : CDoom::HU_Itext*, ch : UInt8) : CDoom::DoomBool
     if ch >= ' '.ord && ch <= '_'.ord
-      CDoom.hulib_add_char_to_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*), ch.to_i8!)
+      CDoom.hulib_add_char_to_text_line(pointerof(it.value.@l), ch.to_i8!)
     else
       if ch == CDoom::KEY_BACKSPACE
         CDoom.hulib_del_char_from_i_text(it)
@@ -4832,7 +4874,7 @@ module LibDoom
   end
 
   def self.hulib_draw_i_text(it : CDoom::HU_Itext*)
-    l = (it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*)
+    l = pointerof(it.value.@l)
 
     return if it.value.on.value == 0
     CDoom.hulib_draw_text_line(l, 1) # draw the line w/ cursor
@@ -4843,7 +4885,7 @@ module LibDoom
       it.value.l.needsupdate = 4
     end
 
-    CDoom.hulib_erase_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*))
+    CDoom.hulib_erase_text_line(pointerof(it.value.@l))
     it.value.laston = it.value.on.value
   end
 
@@ -4991,7 +5033,7 @@ module LibDoom
               CDoom.hulib_reset_i_text(CDoom.w_inputbuffer.to_unsafe + i)
             end
           end
-          ((CDoom.players.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Player, @cmd)).as(CDoom::Ticcmd*).value.chatchar = 0
+          pointerof((CDoom.players.to_unsafe + i).value.@cmd).value.chatchar = 0
         end
       end
     end
@@ -5784,7 +5826,7 @@ module LibDoom
   end
 
   def self.update_audio
-RAudio.init_audio_device
+    RAudio.init_audio_device
     RAudio.set_master_volume(10.0)
     RAudio.set_audio_stream_buffer_size_default(512)
     @@audio_stream = RAudio.load_audio_stream(CDoom::DOOM_SAMPLERATE, 16, 2)
@@ -5794,7 +5836,6 @@ RAudio.init_audio_device
     @@adl_player = ADLMIDI.adl_init(MIDI_SAMPLE_RATE)
     ADLMIDI.adl_setNumChips(@@adl_player.not_nil!, 4)
     ADLMIDI.adl_setBank(@@adl_player.not_nil!, @@midibank)
-
 
     ADLMIDI.adl_setSoftPanEnabled(@@adl_player.not_nil!, @@midismoothpan)
 
@@ -5878,7 +5919,7 @@ RAudio.init_audio_device
 
     @@audio_stream.try { |a| RAudio.unload_audio_stream(a) }
 
-sleep 1.millisecond # Let music stop
+    sleep 1.millisecond # Let music stop
     @@music_stream.try { |m| RAudio.unload_audio_stream(m) }
     @@adl_player.try { |ap| ADLMIDI.adl_close(ap) }
 
@@ -5904,24 +5945,22 @@ sleep 1.millisecond # Let music stop
       i += 1
     end
 
-    print "pre-cached all sound data - "
+    print "Pre-cached all sound data - "
 
     # Now initialize mixbuffer with zero.
     CDoom::MIXBUFFERSIZE.times { |i| CDoom.mixbuffer[i] = 0 }
-    
+
     # Finished initialization.
-    puts "sound module ready"
+    puts "sound module ready."
   end
 
   #
   # MUSIC API.
   #
   def self.i_init_music
-    
   end
 
   def self.i_shutdown_music
-    
   end
 
   def self.i_play_song(handle : Int32, looping : Int32)
@@ -5970,6 +6009,7 @@ sleep 1.millisecond # Let music stop
 
   def self.i_register_song(data : Void*) : LibC::Int
     @@mus_is_midi = false
+    @@mus_channel_volume.fill(127)
 
     CDoom.doom_memcpy(pointerof(CDoom.mus_header), data, sizeof(CDoom::MusHeader))
     if (CDoom.doom_strncmp(CDoom.mus_header.id, "MUS", 3) != 0 || CDoom.mus_header.id[3] != 0x1A)
@@ -5993,6 +6033,8 @@ sleep 1.millisecond # Let music stop
   def self.i_qry_song_playing(handle : LibC::Int) : LibC::Int
     return CDoom.mus_playing
   end
+
+  @@mus_channel_volume = Array(Int32).new(16, 127)
 
   # Is the song playing?
   def self.i_tick_song : UInt64
@@ -6031,11 +6073,11 @@ sleep 1.millisecond # Let music stop
         note_bytes = CDoom.mus_data[CDoom.mus_offset].to_i32
         CDoom.mus_offset += 1
         note = note_bytes & 0b01111111
-        vol = 127
         if note_bytes & 0b10000000 != 0
-          vol = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
+          @@mus_channel_volume[channel] = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
           CDoom.mus_offset += 1
         end
+        vol = @@mus_channel_volume[channel]
         midi_event = (0x00000090_u32 | channel | (note << 8) | (vol << 16))
       when CDoom::EVENT_PITCH_BEND
         bend_amount = CDoom.mus_data[CDoom.mus_offset].to_i32 * 64
@@ -6057,6 +6099,7 @@ sleep 1.millisecond # Let music stop
           midi_event = (0x000000B0_u32 | channel | (127 << 8))
         when CDoom::CONTROLLER_EVENT_RESET_ALL_CONTROLLERS
           midi_event = (0x000000B0_u32 | channel | (121 << 8))
+          @@mus_channel_volume[channel] = 127
         when CDoom::CONTROLLER_EVENT_EVENT # Doom never implemented
         end
       when CDoom::EVENT_CONTROLLER
@@ -6234,7 +6277,7 @@ sleep 1.millisecond # Let music stop
 
   def self.i_start_tic(in_delta : Raylib::Vector2? = nil)
     mousedelta = in_delta || @@mouse_queued
-    LibDoom.doom_mouse_move(mousedelta.x.to_i32!, mousedelta.y.to_i32)
+    Doocr.doom_mouse_move(mousedelta.x.to_i32!, mousedelta.y.to_i32)
     if in_delta.nil?
       @@mouse_queued = Raylib::Vector2.new
     end
@@ -6415,7 +6458,7 @@ sleep 1.millisecond # Let music stop
     CDoom.screens[0].clear(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
 
     Raylib.set_config_flags(Raylib::ConfigFlags::WindowResizable)
-    Raylib.init_window(1024, 768, "LibDoom")
+    Raylib.init_window(1024, 768, "DOO-CR")
     Raylib.set_exit_key(Raylib::KeyboardKey::Null)
     @@was_focused = false
     Raylib.toggle_borderless_windowed if @@rlfullscreen != 0
@@ -6475,7 +6518,6 @@ sleep 1.millisecond # Let music stop
 
   def self.cht_check_cheat(cht : CDoom::Cheatseq*, key : LibC::Char) : LibC::Int
     rc = 0
-
     if @@firsttime != 0
       @@firsttime = 0
       256.times { |i| @@cheat_xlate_table[i] = (scramble(i)).to_u8 }
@@ -6877,7 +6919,7 @@ sleep 1.millisecond # Let music stop
       10, CDoom.mouse_sensitivity)
 
     CDoom.m_write_text(@@optionsdef.x, @@optionsdef.y +
-                                           CDoom::LINEHEIGHT * CDoom::OptionsEnum::More.value + CDoom.hu_font[0].value.height // 2,
+                                       CDoom::LINEHEIGHT * CDoom::OptionsEnum::More.value + CDoom.hu_font[0].value.height // 2,
       "more options")
   end
 
@@ -6911,10 +6953,10 @@ sleep 1.millisecond # Let music stop
 
     @@moreoptions_menus[@@current_options_menu].each_with_index do |item, i|
       CDoom.m_write_text(@@moreoptions_def.x, @@moreoptions_def.y +
-                                            CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
-      String.new(item.text) + (
-        (item.bool.null? ? "" : (item.bool.value != 0 ? "on" : "off")) +
-        (item.num.null? ? "" : "#{item.num.value + 1}")
+                                              CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
+        String.new(item.text) + (
+          (item.bool.null? ? "" : (item.bool.value != 0 ? "on" : "off")) +
+          (item.num.null? ? "" : "#{item.num.value + 1}")
         ))
     end
   end
@@ -6941,24 +6983,7 @@ sleep 1.millisecond # Let music stop
   def self.m_draw_key(key : Pointer(Int32)) : String
     str = "NIL"
 
-    dch = key.value
-    dch += 0x80 if dch == 0x1d ||
-                   dch == 0x36 ||
-                   dch == 0x38 ||
-                   dch == 0x3b ||
-                   dch == 0x3c ||
-                   dch == 0x3d ||
-                   dch == 0x3e ||
-                   dch == 0x3f ||
-                   dch == 0x40 ||
-                   dch == 0x41 ||
-                   dch == 0x42 ||
-                   dch == 0x43 ||
-                   dch == 0x44 ||
-                   dch == 0x57 ||
-                   dch == 0x58
-
-    CDoom::DoomKey.from_value?(dch).try do |dkey|
+    CDoom::DoomKey.from_value?(key.value).try do |dkey|
       case dkey
       when CDoom::DoomKey::UNKNOWN
       when CDoom::DoomKey::TAB
@@ -7025,11 +7050,11 @@ sleep 1.millisecond # Let music stop
                                                                                         -CDoom::LINEHEIGHT + CDoom.hu_font[0].value.height // 2,
       "Controls")
 
-      @@editcontrols_menu.each_with_index do |item, i|
+    @@editcontrols_menu.each_with_index do |item, i|
       CDoom.m_write_text(@@editcontrols_def.x, @@editcontrols_def.y +
-                                            CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
-      String.new(item.text) + (item.num.null? ? "" : m_draw_key(item.num)))
-      end
+                                               CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
+        String.new(item.text) + (item.num.null? ? "" : m_draw_key(item.num)))
+    end
   end
 
   def self.m_edit_forward(choice : Int32)
@@ -7404,25 +7429,8 @@ sleep 1.millisecond # Let music stop
 
     # Edit selected control
     if !@@selected_edit.null?
-      dch = ch
-      dch += 0x80 if dch == 0x1d ||
-                     dch == 0x36 ||
-                     dch == 0x38 ||
-                     dch == 0x3b ||
-                     dch == 0x3c ||
-                     dch == 0x3d ||
-                     dch == 0x3e ||
-                     dch == 0x3f ||
-                     dch == 0x40 ||
-                     dch == 0x41 ||
-                     dch == 0x42 ||
-                     dch == 0x43 ||
-                     dch == 0x44 ||
-                     dch == 0x57 ||
-                     dch == 0x58
-
-      unless CDoom::DoomKey.from_value(dch).nil?
-        @@selected_edit.value = dch
+      unless CDoom::DoomKey.from_value?(ch).nil?
+        @@selected_edit.value = ch
         @@selected_edit = Pointer(Int32).null
         return 1
       end
@@ -7441,7 +7449,7 @@ sleep 1.millisecond # Let music stop
         CDoom.doom_strcpy(CDoom.savegamestrings[CDoom.save_slot].to_unsafe, CDoom.save_old_string)
       when CDoom::KEY_ENTER
         CDoom.save_string_enter = 0
-        CDoom.m_do_save(CDoom.save_slot) if CDoom.savegamestrings[CDoom.save_slot][0] != 0
+        CDoom.m_do_save(CDoom.save_slot) # if CDoom.savegamestrings[CDoom.save_slot][0] != 0 allows empty saves
       else
         ch = CDoom.doom_toupper(ch)
         unless ch != 32 && (ch - CDoom::HU_FONTSTART < 0 || ch - CDoom::HU_FONTSTART >= CDoom::HU_FONTSIZE)
@@ -7642,7 +7650,7 @@ sleep 1.millisecond # Let music stop
     return if CDoom.menuactive != 0
 
     CDoom.menuactive = 1
-    CDoom.current_menu = pointerof(@@maindef)    # JDC
+    CDoom.current_menu = pointerof(@@maindef)        # JDC
     CDoom.item_on = CDoom.current_menu.value.last_on # JDC
   end
 
@@ -7958,7 +7966,7 @@ sleep 1.millisecond # Let music stop
     CDoom.doom_memset(pcx.value.filler.to_unsafe, 0, sizeof(typeof(pcx.value.filler)))
 
     # pack the image
-    pack = pcx.as(UInt8*) + offsetof(CDoom::PCX, @data)
+    pack = pointerof(pcx.value.@data)
 
     (width * height).times do |i|
       if (data.value & 0xc0) != 0xc0
@@ -8050,7 +8058,7 @@ sleep 1.millisecond # Let music stop
         case ceiling.value.type
         when CDoom::Ceilingenum::SilentCrushAndRaise
         else
-          CDoom.s_start_sound((ceiling.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_stnmov)
         end
       end
@@ -8060,7 +8068,7 @@ sleep 1.millisecond # Let music stop
         when CDoom::Ceilingenum::RaiseToHighest
           CDoom.p_remove_active_ceiling(ceiling)
         when CDoom::Ceilingenum::SilentCrushAndRaise
-          CDoom.s_start_sound((ceiling.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_pstop)
         when CDoom::Ceilingenum::FastCrushAndRaise, CDoom::Ceilingenum::CrushAndRaise
           ceiling.value.direction = -1
@@ -8077,7 +8085,7 @@ sleep 1.millisecond # Let music stop
         case ceiling.value.type
         when CDoom::Ceilingenum::SilentCrushAndRaise
         else
-          CDoom.s_start_sound((ceiling.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_stnmov)
         end
       end
@@ -8085,7 +8093,7 @@ sleep 1.millisecond # Let music stop
       if res == CDoom::Result::Pastdest
         case ceiling.value.type
         when CDoom::Ceilingenum::SilentCrushAndRaise
-          CDoom.s_start_sound((ceiling.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_pstop)
         when CDoom::Ceilingenum::CrushAndRaise
           ceiling.value.speed = CDoom::CEILSPEED
@@ -8125,9 +8133,9 @@ sleep 1.millisecond # Let music stop
       # new door thinker
       rtn = 1
       ceiling = CDoom.z_malloc(sizeof(CDoom::Ceiling), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Ceiling*)
-      CDoom.p_add_thinker((ceiling.as(UInt8*) + offsetof(CDoom::Ceiling, @thinker)).as(CDoom::Thinker*))
+      CDoom.p_add_thinker(pointerof(ceiling.value.@thinker))
       sec.value.specialdata = ceiling
-      (ceiling.as(UInt8*) + offsetof(CDoom::Ceiling, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
+      pointerof(ceiling.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
       ceiling.value.sector = sec
       ceiling.value.crush = 0
 
@@ -8181,7 +8189,7 @@ sleep 1.millisecond # Let music stop
     CDoom::MAXCEILINGS.times do |i|
       if CDoom.activeceilings[i] == c
         CDoom.activeceilings[i].value.sector.value.specialdata = Pointer(Void).null
-        CDoom.p_remove_thinker(((CDoom.activeceilings.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Ceiling, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_remove_thinker(pointerof(CDoom.activeceilings[i].value.@thinker))
         CDoom.activeceilings[i] = Pointer(CDoom::Ceiling).null
         break
       end
@@ -8197,7 +8205,7 @@ sleep 1.millisecond # Let music stop
          (CDoom.activeceilings[i].value.tag == line.value.tag) &&
          (CDoom.activeceilings[i].value.direction == 0)
         CDoom.activeceilings[i].value.direction = CDoom.activeceilings[i].value.olddirection
-        (CDoom.activeceilings[i].as(UInt8*) + offsetof(CDoom::Ceiling, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
+        pointerof(CDoom.activeceilings[i].value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
       end
     end
   end
@@ -8212,7 +8220,7 @@ sleep 1.millisecond # Let music stop
          CDoom.activeceilings[i].value.tag == line.value.tag &&
          CDoom.activeceilings[i].value.direction != 0
         CDoom.activeceilings[i].value.olddirection = CDoom.activeceilings[i].value.direction
-        (CDoom.activeceilings[i].as(UInt8*) + offsetof(CDoom::Ceiling, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfV*).value = NULL_PROC
+        pointerof(CDoom.activeceilings[i].value.@thinker.@function).as(CDoom::ActionfV*).value = NULL_PROC
         CDoom.activeceilings[i].value.direction = 0 # in-stasis
         rtn = 1
       end
@@ -8233,15 +8241,15 @@ sleep 1.millisecond # Let music stop
         case door.value.type
         when CDoom::Vldoorenum::BlazeRaise
           door.value.direction = -1 # time to go back down
-          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_bdcls)
         when CDoom::Vldoorenum::DoorNormal
           door.value.direction = -1 # time to go back down
-          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_dorcls)
         when CDoom::Vldoorenum::Close30ThenOpen
           door.value.direction = 1
-          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_doropn)
         end
       end
@@ -8253,7 +8261,7 @@ sleep 1.millisecond # Let music stop
         when CDoom::Vldoorenum::RaiseIn5Mins
           door.value.direction = 1
           door.value.type = CDoom::Vldoorenum::DoorNormal
-          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_doropn)
         end
       end
@@ -8267,12 +8275,12 @@ sleep 1.millisecond # Let music stop
         case door.value.type
         when CDoom::Vldoorenum::BlazeRaise, CDoom::Vldoorenum::BlazeClose
           door.value.sector.value.specialdata = Pointer(Void).null
-          CDoom.p_remove_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*)) # unlink and free
-          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.p_remove_thinker(pointerof(door.value.@thinker)) # unlink and free
+          CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_bdcls)
         when CDoom::Vldoorenum::DoorNormal, CDoom::Vldoorenum::DoorClose
           door.value.sector.value.specialdata = Pointer(Void).null
-          CDoom.p_remove_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*)) # unlink and free
+          CDoom.p_remove_thinker(pointerof(door.value.@thinker)) # unlink and free
         when CDoom::Vldoorenum::Close30ThenOpen
           door.value.direction = 0
           door.value.topcountdown = 35 * 30
@@ -8283,7 +8291,7 @@ sleep 1.millisecond # Let music stop
           # DO NOT GO BACK UP!
         else
           door.value.direction = 1
-          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_doropn)
         end
       end
@@ -8301,7 +8309,7 @@ sleep 1.millisecond # Let music stop
           door.value.topcountdown = door.value.topwait
         when CDoom::Vldoorenum::Close30ThenOpen, CDoom::Vldoorenum::BlazeOpen, CDoom::Vldoorenum::DoorOpen
           door.value.sector.value.specialdata = Pointer(Void).null
-          CDoom.p_remove_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*)) # unlink and free
+          CDoom.p_remove_thinker(pointerof(door.value.@thinker)) # unlink and free
         end
       end
     end
@@ -8350,10 +8358,10 @@ sleep 1.millisecond # Let music stop
       # new door thinker
       rtn = 1
       door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
-      CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+      CDoom.p_add_thinker(pointerof(door.value.@thinker))
       sec.value.specialdata = door
 
-      (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
+      pointerof(door.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
       door.value.sector = sec
       door.value.type = type
       door.value.topwait = CDoom::VDOORWAIT
@@ -8365,31 +8373,31 @@ sleep 1.millisecond # Let music stop
         door.value.topheight = door.value.topheight - 4 * FRACUNIT
         door.value.direction = -1
         door.value.speed = CDoom::VDOORSPEED * 4
-        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_bdcls)
       when CDoom::Vldoorenum::DoorClose
         door.value.topheight = CDoom.p_find_lowest_ceiling_surrounding(sec)
         door.value.topheight = door.value.topheight - 4 * FRACUNIT
         door.value.direction = -1
-        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_dorcls)
       when CDoom::Vldoorenum::Close30ThenOpen
         door.value.topheight = sec.value.ceilingheight
         door.value.direction = -1
-        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_dorcls)
       when CDoom::Vldoorenum::BlazeRaise, CDoom::Vldoorenum::BlazeOpen
         door.value.direction = 1
         door.value.topheight = CDoom.p_find_lowest_ceiling_surrounding(sec)
         door.value.topheight = door.value.topheight - 4 * FRACUNIT
         door.value.speed = CDoom::VDOORSPEED * 4
-        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_bdopn) if door.value.topheight != sec.value.ceilingheight
       when CDoom::Vldoorenum::DoorNormal, CDoom::Vldoorenum::DoorOpen
         door.value.direction = 1
         door.value.topheight = CDoom.p_find_lowest_ceiling_surrounding(sec)
         door.value.topheight = door.value.topheight - 4 * FRACUNIT
-        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_doropn) if door.value.topheight != sec.value.ceilingheight
       end
     end
@@ -8452,21 +8460,21 @@ sleep 1.millisecond # Let music stop
     # for proper sound
     case line.value.special
     when 117, 118 # BLAZING DOOR RAISE, OPEN
-      CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+      CDoom.s_start_sound(pointerof(sec.value.@soundorg),
         CDoom::Sfxenum::SFX_bdopn)
     when 1, 31 # NORMAL DOOR SOUND
-      CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+      CDoom.s_start_sound(pointerof(sec.value.@soundorg),
         CDoom::Sfxenum::SFX_doropn)
     else # LOCKED DOOR SOUND
-      CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+      CDoom.s_start_sound(pointerof(sec.value.@soundorg),
         CDoom::Sfxenum::SFX_doropn)
     end
 
     # new door thinker
     door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
-    CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(door.value.@thinker))
     sec.value.specialdata = door
-    (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
+    pointerof(door.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
     door.value.sector = sec
     door.value.direction = 1
     door.value.speed = CDoom::VDOORSPEED
@@ -8498,12 +8506,12 @@ sleep 1.millisecond # Let music stop
   def self.p_spawn_door_close_in_30(sec : CDoom::Sector*)
     door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
 
-    CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(door.value.@thinker))
 
     sec.value.specialdata = door
     sec.value.special = 0
 
-    (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
+    pointerof(door.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
     door.value.sector = sec
     door.value.direction = 0
     door.value.type = CDoom::Vldoorenum::DoorNormal
@@ -8517,12 +8525,12 @@ sleep 1.millisecond # Let music stop
   def self.p_spawn_door_raise_in_5_mins(sec : CDoom::Sector*, secnum : LibC::Int)
     door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
 
-    CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(door.value.@thinker))
 
     sec.value.specialdata = door
     sec.value.special = 0
 
-    (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
+    pointerof(door.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
     door.value.sector = sec
     door.value.direction = 2
     door.value.type = CDoom::Vldoorenum::RaiseIn5Mins
@@ -9995,7 +10003,7 @@ sleep 1.millisecond # Let music stop
       floor.value.floordestheight,
       floor.value.crush, 0, floor.value.direction)
 
-    CDoom.s_start_sound((floor.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+    CDoom.s_start_sound(pointerof(floor.value.sector.value.@soundorg),
       CDoom::Sfxenum::SFX_stnmov) if CDoom.leveltime & 7 == 0
 
     if res == CDoom::Result::Pastdest
@@ -10014,9 +10022,9 @@ sleep 1.millisecond # Let music stop
           floor.value.sector.value.floorpic = floor.value.texture
         end
       end
-      CDoom.p_remove_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+      CDoom.p_remove_thinker(pointerof(floor.value.@thinker))
 
-      CDoom.s_start_sound((floor.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+      CDoom.s_start_sound(pointerof(floor.value.sector.value.@soundorg),
         CDoom::Sfxenum::SFX_pstop)
     end
   end
@@ -10033,9 +10041,9 @@ sleep 1.millisecond # Let music stop
       # new floor thinker
       rtn = 1
       floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
-      CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+      CDoom.p_add_thinker(pointerof(floor.value.@thinker))
       sec.value.specialdata = floor
-      (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+      pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
       floor.value.type = floortype
       floor.value.crush = 0
 
@@ -10129,7 +10137,7 @@ sleep 1.millisecond # Let music stop
         floor.value.floordestheight =
           floor.value.sector.value.floorheight + minsize
       when CDoom::Floorenum::LowerAndChange
-        floor.value.direction = 1
+        floor.value.direction = -1
         floor.value.sector = sec
         floor.value.speed = CDoom::FLOORSPEED
         floor.value.floordestheight =
@@ -10178,9 +10186,9 @@ sleep 1.millisecond # Let music stop
       # new floor thinker
       rtn = 1
       floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
-      CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+      CDoom.p_add_thinker(pointerof(floor.value.@thinker))
       sec.value.specialdata = floor
-      (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+      pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
       floor.value.direction = 1
       floor.value.sector = sec
       speed = 0
@@ -10224,10 +10232,10 @@ sleep 1.millisecond # Let music stop
           secnum = newsecnum
           floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
 
-          CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+          CDoom.p_add_thinker(pointerof(floor.value.@thinker))
 
           sec.value.specialdata = floor
-          (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+          pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
           floor.value.direction = 1
           floor.value.sector = sec
           floor.value.speed = speed
@@ -10658,24 +10666,30 @@ sleep 1.millisecond # Let music stop
       source.value.player.value.killcount = source.value.player.value.killcount + 1 if target.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0
 
       if !target.value.player.null?
-        srcplr = source.value.player.- CDoom.players.to_unsafe
-        trgtplr = target.value.player - CDoom.players.to_unsafe
-        source.value.player.value.frags[trgtplr] =
-          source.value.player.value.frags[trgtplr] + 1
+        unless CDoom.netgame == 0
+          srcplr = source.value.player - CDoom.players.to_unsafe
+          trgtplr = target.value.player - CDoom.players.to_unsafe
+          source.value.player.value.frags[trgtplr] =
+            source.value.player.value.frags[trgtplr] + 1
 
-        strings = CDoom.deathmatch != 0 ? ( # Deathmatch strings
+          if srcplr == trgtplr
+            # Suicide
+            strings = CDoom.consoleplayer == srcplr ? @@suic_strings : @@suic_see_strings
+          else
+            strings = CDoom.deathmatch != 0 ? # Deathmatch strings
+(CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
+              CDoom.consoleplayer == trgtplr ? @@death_dead_strings : @@death_nut_strings
+            ) # Coop strings
+) : CDoom.consoleplayer == srcplr ? @@net_kill_strings : (
+              CDoom.consoleplayer == trgtplr ? @@net_dead_strings : @@net_nut_strings
+            )
+          end
 
-CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
-          CDoom.consoleplayer == trgtplr ? @@death_dead_strings : @@death_nut_strings
-        )
-          ) : CDoom.consoleplayer == srcplr ? @@net_kill_strings : (
-          CDoom.consoleplayer == trgtplr ? @@net_dead_strings : @@net_nut_strings
-        )
-
-        (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message =
-          strings.sample(Random.new(CDoom.m_random)).gsub(
-            '1', String.new(CDoom.player_names[srcplr])[...-2]).gsub(
-            '2', String.new(CDoom.player_names[trgtplr])[...-2])
+          (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message =
+            strings.sample(Random.new(CDoom.m_random)).gsub(
+              '1', String.new(CDoom.player_names[srcplr])[...-2]).gsub(
+              '2', String.new(CDoom.player_names[trgtplr])[...-2])
+        end
       end
     elsif CDoom.netgame == 0 && target.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0
       # count all monster deaths,
@@ -10684,6 +10698,13 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     end
 
     if !target.value.player.null?
+      if source.null? || source.value.player.null? &&                         # Player was not killed by player
+         target.value.player - CDoom.players.to_unsafe != CDoom.consoleplayer # Isn't self. They know they died
+        (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message =
+          @@died_strings.sample(Random.new(CDoom.m_random)).gsub(
+            '1', String.new(CDoom.player_names[target.value.player - CDoom.players.to_unsafe])[...-2])
+      end
+
       # count environment kills against you
       target.value.player.value.frags[target.value.player - CDoom.players.to_unsafe] =
         target.value.player.value.frags[target.value.player - CDoom.players.to_unsafe] + 1 if source.null?
@@ -10751,6 +10772,10 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
       target.value.momy = 0
       target.value.momz = 0
     end
+
+    damage <<= 1 if !source.null? &&
+                    !source.value.player.null? &&
+                    source.value.player.value.cheats & CDoom::Cheat::CF_ME.value != 0 # Double damage in me mode!
 
     player = target.value.player
     damage >>= 1 if !player.null? && CDoom.gameskill == CDoom::Skill::Baby # take half damage in trainer mode
@@ -10879,9 +10904,9 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
 
     flick = CDoom.z_malloc(sizeof(CDoom::Fireflicker), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Fireflicker*)
 
-    CDoom.p_add_thinker((flick.as(UInt8*) + offsetof(CDoom::Fireflicker, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(flick.value.@thinker))
 
-    (flick.as(UInt8*) + offsetof(CDoom::Fireflicker, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_fire_flicker).pointer, Pointer(Void).null)
+    pointerof(flick.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_fire_flicker).pointer, Pointer(Void).null)
     flick.value.sector = sector
     flick.value.maxlight = sector.value.lightlevel
     flick.value.minlight = CDoom.p_find_min_surrounding_light(sector, sector.value.lightlevel) + 16
@@ -10918,9 +10943,9 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
 
     flash = CDoom.z_malloc(sizeof(CDoom::Lightflash), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Lightflash*)
 
-    CDoom.p_add_thinker((flash.as(UInt8*) + offsetof(CDoom::Lightflash, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(flash.value.@thinker))
 
-    (flash.as(UInt8*) + offsetof(CDoom::Lightflash, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_light_flash).pointer, Pointer(Void).null)
+    pointerof(flash.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_light_flash).pointer, Pointer(Void).null)
     flash.value.sector = sector
     flash.value.maxlight = sector.value.lightlevel
 
@@ -10954,12 +10979,12 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
   def self.p_spawn_strobe_flash(sector : CDoom::Sector*, fast_or_slow : LibC::Int, in_sync : LibC::Int)
     flash = CDoom.z_malloc(sizeof(CDoom::Strobe), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Strobe*)
 
-    CDoom.p_add_thinker((flash.as(UInt8*) + offsetof(CDoom::Strobe, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(flash.value.@thinker))
 
     flash.value.sector = sector
     flash.value.darktime = fast_or_slow
     flash.value.brighttime = CDoom::STROBEBRIGHT
-    (flash.as(UInt8*) + offsetof(CDoom::Strobe, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_strobe_flash).pointer, Pointer(Void).null)
+    pointerof(flash.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_strobe_flash).pointer, Pointer(Void).null)
     flash.value.maxlight = sector.value.lightlevel
     flash.value.minlight = CDoom.p_find_min_surrounding_light(sector, sector.value.lightlevel)
 
@@ -11059,12 +11084,12 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
   def self.p_spawn_glowing_light(sector : CDoom::Sector*)
     g = CDoom.z_malloc(sizeof(CDoom::Glow), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Glow*)
 
-    CDoom.p_add_thinker((g.as(UInt8*) + offsetof(CDoom::Glow, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(g.value.@thinker))
 
     g.value.sector = sector
     g.value.minlight = CDoom.p_find_min_surrounding_light(sector, sector.value.lightlevel)
     g.value.maxlight = sector.value.lightlevel
-    (g.as(UInt8*) + offsetof(CDoom::Glow, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_glow).pointer, Pointer(Void).null)
+    pointerof(g.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_glow).pointer, Pointer(Void).null)
     g.value.direction = -1
 
     sector.value.special = 0
@@ -11843,7 +11868,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     end
 
     side = 0
-    side = 1 if CDoom.p_point_on_line_side(CDoom.usething.value.x, CDoom.usething.value.y, int.value.d.line) != 0
+    side = 1 if CDoom.p_point_on_line_side(CDoom.usething.value.x, CDoom.usething.value.y, int.value.d.line) == 1
 
     CDoom.p_use_special_line(CDoom.usething, int.value.d.line, side)
 
@@ -12107,7 +12132,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     return 0 if den == 0
 
     num =
-      CDoom.fixed_mul((v1.value.x &- v2.value.x) >> 8, v1.value.dy) +
+      CDoom.fixed_mul((v1.value.x &- v2.value.x) >> 8, v1.value.dy) &+
         CDoom.fixed_mul((v2.value.y &- v1.value.y) >> 8, v1.value.dx)
     frac = CDoom.fixed_div(num, den)
 
@@ -12774,7 +12799,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept.value)
 
     # spawn the new monster
-    mthing = (mobj.as(UInt8*) + offsetof(CDoom::Mobj, @spawnpoint)).as(CDoom::Mapthing*)
+    mthing = pointerof(mobj.value.@spawnpoint)
 
     # spawn it
     if mobj.value.info.value.flags & CDoom::Mobjflag::MF_SPAWNCEILING.value != 0
@@ -12806,15 +12831,13 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
        (mobj.value.flags & CDoom::Mobjflag::MF_SKULLFLY.value != 0)
       CDoom.p_xymovement(mobj)
 
-      # FIXME: decent NOP/0/Nil function pointer please.
-      return if mobj.value.thinker.function.acv.pointer == Pointer(Void).new(UInt64::MAX) # mobj was removed
+      return if mobj.value.thinker.remove != 0 # mobj was removed
     end
     if mobj.value.z != mobj.value.floorz ||
        mobj.value.momz != 0
       CDoom.p_zmovement(mobj)
 
-      # FIXME: decent NOP/0/Nil function pointer please.
-      return if mobj.value.thinker.function.acv.pointer == Pointer(Void).new(UInt64::MAX) # mobj was removed
+      return if mobj.value.thinker.remove != 0 # mobj was removed
     end
 
     # cycle through states,
@@ -12885,9 +12908,9 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
       mobj.value.z = z
     end
 
-    (mobj.as(UInt8*) + offsetof(CDoom::Mobj, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.p_mobj_thinker).pointer, Pointer(Void).null)
+    pointerof(mobj.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.p_mobj_thinker).pointer, Pointer(Void).null)
 
-    CDoom.p_add_thinker((mobj.as(UInt8*) + offsetof(CDoom::Mobj, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(mobj.value.@thinker))
 
     return mobj
   end
@@ -13234,20 +13257,20 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
 
       if plat.value.type == CDoom::Plattype::RaiseAndChange ||
          plat.value.type == CDoom::Plattype::RaiseToNearestAndChange
-        CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(plat.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_stnmov) if CDoom.leveltime & 7 == 0
       end
 
       if res == CDoom::Result::Crushed && plat.value.crush == 0
         plat.value.count = plat.value.wait
         plat.value.status = CDoom::Platenum::Down
-        CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(plat.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_pstart)
       else
         if res == CDoom::Result::Pastdest
           plat.value.count = plat.value.wait
           plat.value.status = CDoom::Platenum::Waiting
-          CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(plat.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_pstop)
 
           case plat.value.type
@@ -13264,7 +13287,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
       if res == CDoom::Result::Pastdest
         plat.value.count = plat.value.wait
         plat.value.status = CDoom::Platenum::Waiting
-        CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(plat.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_pstop)
       end
     when CDoom::Platenum::Waiting
@@ -13275,7 +13298,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
         else
           plat.value.status = CDoom::Platenum::Down
         end
-        CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(plat.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_pstart)
       end
     when CDoom::Platenum::InStasis
@@ -13304,12 +13327,12 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
       # Find lowest & highest floors around sector
       rtn = 1
       plat = CDoom.z_malloc(sizeof(CDoom::Plat), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Plat*)
-      CDoom.p_add_thinker((plat.as(UInt8*) + offsetof(CDoom::Plat, @thinker)).as(CDoom::Thinker*))
+      CDoom.p_add_thinker(pointerof(plat.value.@thinker))
 
       plat.value.type = type
       plat.value.sector = sec
       plat.value.sector.value.specialdata = plat
-      (plat.as(UInt8*) + offsetof(CDoom::Plat, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
+      pointerof(plat.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
       plat.value.crush = 0
       plat.value.tag = line.value.tag
 
@@ -13322,7 +13345,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
         plat.value.status = CDoom::Platenum::Up
         # NO MORE DAMAGE, IF APPLICABLE
         sec.value.special = 0
-        CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(sec.value.@soundorg),
           CDoom::Sfxenum::SFX_stnmov)
       when CDoom::Plattype::RaiseAndChange
         plat.value.speed = CDoom::PLATSPEED // 2
@@ -13331,7 +13354,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
         plat.value.wait = 0
         plat.value.status = CDoom::Platenum::Up
 
-        CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(sec.value.@soundorg),
           CDoom::Sfxenum::SFX_stnmov)
       when CDoom::Plattype::DownWaitUpStay
         plat.value.speed = CDoom::PLATSPEED * 4
@@ -13342,7 +13365,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
         plat.value.high = sec.value.floorheight
         plat.value.wait = 35 * CDoom::PLATWAIT
         plat.value.status = CDoom::Platenum::Down
-        CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(sec.value.@soundorg),
           CDoom::Sfxenum::SFX_pstart)
       when CDoom::Plattype::BlazeDWUS
         plat.value.speed = CDoom::PLATSPEED * 8
@@ -13353,7 +13376,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
         plat.value.high = sec.value.floorheight
         plat.value.wait = 35 * CDoom::PLATWAIT
         plat.value.status = CDoom::Platenum::Down
-        CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(sec.value.@soundorg),
           CDoom::Sfxenum::SFX_pstart)
       when CDoom::Plattype::PerpetualRaise
         plat.value.speed = CDoom::PLATSPEED
@@ -13367,7 +13390,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
 
         plat.value.wait = 35 * CDoom::PLATWAIT
         plat.value.status = CDoom::Platenum.new(CDoom.p_random & 1)
-        CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(sec.value.@soundorg),
           CDoom::Sfxenum::SFX_pstart)
       end
       CDoom.p_add_active_plat(plat)
@@ -13382,7 +13405,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
          CDoom.activeplats[i].value.tag == tag &&
          CDoom.activeplats[i].value.status == CDoom::Platenum::InStasis
         CDoom.activeplats[i].value.status = CDoom.activeplats[i].value.oldstatus
-        (CDoom.activeplats[i].as(UInt8*) + offsetof(CDoom::Plat, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
+        pointerof(CDoom.activeplats[i].value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
       end
     end
   end
@@ -13394,7 +13417,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
          CDoom.activeplats[i].value.tag == line.value.tag
         CDoom.activeplats[i].value.oldstatus = CDoom.activeplats[i].value.status
         CDoom.activeplats[i].value.status = CDoom::Platenum::InStasis
-        (CDoom.activeplats[i].as(UInt8*) + offsetof(CDoom::Plat, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfV*).value = NULL_PROC
+        pointerof(CDoom.activeplats[i].value.@thinker.@function).as(CDoom::ActionfV*).value = NULL_PROC
       end
     end
   end
@@ -13413,7 +13436,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     CDoom::MAXPLATS.times do |i|
       if plat == CDoom.activeplats[i]
         CDoom.activeplats[i].value.sector.value.specialdata = Pointer(Void).null
-        CDoom.p_remove_thinker((CDoom.activeplats[i].as(UInt8*) + offsetof(CDoom::Plat, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_remove_thinker(pointerof(CDoom.activeplats[i].value.@thinker))
         CDoom.activeplats[i] = Pointer(CDoom::Plat).null
 
         return
@@ -13951,7 +13974,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     (player.value.psprites.to_unsafe + CDoom::Psprnum::Flash.value).value.sy = player.value.psprites[CDoom::Psprnum::Weapon.value].sy
   end
 
-  def self.p_archive_players(file : File)
+  def self.p_archive_players(file : IO)
     CDoom::MAXPLAYERS.times do |i|
       next if CDoom.playeringame[i] == 0
 
@@ -13966,7 +13989,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     end
   end
 
-  def self.p_unarchive_players(file : File)
+  def self.p_unarchive_players(file : IO)
     CDoom::MAXPLAYERS.times do |i|
       next if CDoom.playeringame[i] == 0
 
@@ -13987,7 +14010,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     end
   end
 
-  def self.p_archive_world(file : File)
+  def self.p_archive_world(file : IO)
     sec = CDoom.sectors
     # do sectors
     CDoom.numsectors.times do |i|
@@ -14023,7 +14046,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     end
   end
 
-  def self.p_unarchive_world(file : File)
+  def self.p_unarchive_world(file : IO)
     sec = CDoom.sectors
     # do sectors
     CDoom.numsectors.times do |i|
@@ -14060,7 +14083,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     end
   end
 
-  def self.p_archive_thinkers(file : File)
+  def self.p_archive_thinkers(file : IO)
     # save off the current thinkers
     th = CDoom.thinkercap.next
     while th != pointerof(CDoom.thinkercap)
@@ -14081,7 +14104,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     file.write_byte(CDoom::Thinkerclass::End.value)
   end
 
-  def self.p_unarchive_thinkers(file : File)
+  def self.p_unarchive_thinkers(file : IO)
     # remove all the current thinkers
     currentthinker = CDoom.thinkercap.next
     while currentthinker != pointerof(CDoom.thinkercap)
@@ -14116,8 +14139,8 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
         mobj.value.info = CDoom.mobjinfo + mobj.value.type.value
         mobj.value.floorz = mobj.value.subsector.value.sector.value.floorheight
         mobj.value.ceilingz = mobj.value.subsector.value.sector.value.ceilingheight
-        (mobj.as(UInt8*) + offsetof(CDoom::Mobj, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.p_mobj_thinker).pointer, Pointer(Void).null)
-        CDoom.p_add_thinker((mobj.as(UInt8*) + offsetof(CDoom::Mobj, @thinker)).as(CDoom::Thinker*))
+        pointerof(mobj.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.p_mobj_thinker).pointer, Pointer(Void).null)
+        CDoom.p_add_thinker(pointerof(mobj.value.@thinker))
       else
         CDoom.i_error("Error: Unknown tclass #{tclass} in savegame")
       end
@@ -14135,7 +14158,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
   # T_Glow, (glow_t: sector_t *),
   # T_PlatRaise, (plat_t: sector_t *), - active list
   #
-  def self.p_archive_specials(file : File)
+  def self.p_archive_specials(file : IO)
     # save off the current thinkers
     th = CDoom.thinkercap.next
     while th != pointerof(CDoom.thinkercap)
@@ -14228,7 +14251,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     file.write_byte(CDoom::Specials::End.value)
   end
 
-  def self.p_unarchive_specials(file : File)
+  def self.p_unarchive_specials(file : IO)
     # read in saved thinkers
     loop do
       tclass = CDoom::Specials.new(file.read_bytes(UInt8))
@@ -14246,10 +14269,10 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
         ceiling.value.sector.value.specialdata = ceiling
 
         if !ceiling.value.thinker.function.acp1.pointer.null?
-          (ceiling.as(UInt8*) + offsetof(CDoom::Ceiling, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
+          pointerof(ceiling.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
         end
 
-        CDoom.p_add_thinker((ceiling.as(UInt8*) + offsetof(CDoom::Ceiling, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(ceiling.value.@thinker))
         CDoom.p_add_active_ceiling(ceiling)
       when CDoom::Specials::Door
         padsavep
@@ -14258,9 +14281,9 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
         file.read_fully(slice)
         door.value.sector = CDoom.sectors + door.value.sector.address
         door.value.sector.value.specialdata = door
-        (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
+        pointerof(door.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
 
-        CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(door.value.@thinker))
       when CDoom::Specials::Floor
         padsavep
         floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Floormove*)
@@ -14268,9 +14291,9 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
         file.read_fully(slice)
         floor.value.sector = CDoom.sectors + floor.value.sector.address
         floor.value.sector.value.specialdata = floor
-        (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+        pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
 
-        CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(floor.value.@thinker))
       when CDoom::Specials::Plat
         padsavep
         plat = CDoom.z_malloc(sizeof(CDoom::Plat), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Plat*)
@@ -14279,10 +14302,10 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
         plat.value.sector = CDoom.sectors + plat.value.sector.address
         plat.value.sector.value.specialdata = plat
         if !plat.value.thinker.function.acp1.pointer.null?
-          (plat.as(UInt8*) + offsetof(CDoom::Plat, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
+          pointerof(plat.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
         end
 
-        CDoom.p_add_thinker((plat.as(UInt8*) + offsetof(CDoom::Plat, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(plat.value.@thinker))
         CDoom.p_add_active_plat(plat)
       when CDoom::Specials::Flash
         padsavep
@@ -14290,27 +14313,27 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
         slice = Slice.new(flash.as(UInt8*), sizeof(CDoom::Lightflash))
         file.read_fully(slice)
         flash.value.sector = CDoom.sectors + flash.value.sector.address
-        (flash.as(UInt8*) + offsetof(CDoom::Lightflash, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_light_flash).pointer, Pointer(Void).null)
+        pointerof(flash.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_light_flash).pointer, Pointer(Void).null)
 
-        CDoom.p_add_thinker((flash.as(UInt8*) + offsetof(CDoom::Lightflash, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(flash.value.@thinker))
       when CDoom::Specials::Strobe
         padsavep
         strobe = CDoom.z_malloc(sizeof(CDoom::Strobe), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Strobe*)
         slice = Slice.new(strobe.as(UInt8*), sizeof(CDoom::Strobe))
         file.read_fully(slice)
         strobe.value.sector = CDoom.sectors + strobe.value.sector.address
-        (strobe.as(UInt8*) + offsetof(CDoom::Strobe, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_strobe_flash).pointer, Pointer(Void).null)
+        pointerof(strobe.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_strobe_flash).pointer, Pointer(Void).null)
 
-        CDoom.p_add_thinker((strobe.as(UInt8*) + offsetof(CDoom::Strobe, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(strobe.value.@thinker))
       when CDoom::Specials::Glow
         padsavep
         glow = CDoom.z_malloc(sizeof(CDoom::Glow), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Glow*)
         slice = Slice.new(glow.as(UInt8*), sizeof(CDoom::Glow))
         file.read_fully(slice)
         glow.value.sector = CDoom.sectors + glow.value.sector.address
-        (glow.as(UInt8*) + offsetof(CDoom::Glow, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_glow).pointer, Pointer(Void).null)
+        pointerof(glow.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_glow).pointer, Pointer(Void).null)
 
-        CDoom.p_add_thinker((glow.as(UInt8*) + offsetof(CDoom::Glow, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(glow.value.@thinker))
       else
         CDoom.i_error("Error: p_unarchive_specials: Unknown tclass #{tclass} in savegame")
       end
@@ -14667,7 +14690,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
       end
 
       # set the degenmobj_t to the middle of the bounding box
-      soundorg = (sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Degenmobj*)
+      soundorg = pointerof(sector.value.@soundorg)
       soundorg.value.x = (bbox[CDoom::BOXRIGHT] &+ bbox[CDoom::BOXLEFT]) // 2
       soundorg.value.y = (bbox[CDoom::BOXTOP] &+ bbox[CDoom::BOXBOTTOM]) // 2
 
@@ -15690,7 +15713,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
             (CDoom.sides + CDoom.buttonlist[i].line.value.sidenum[0]).value.bottomtexture =
               CDoom.buttonlist[i].btexture
           end
-          CDoom.s_start_sound(((CDoom.buttonlist.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Button, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof((CDoom.buttonlist.to_unsafe + i).value.@soundorg),
             CDoom::Sfxenum::SFX_swtchn.value)
           CDoom.doom_memset(CDoom.buttonlist.to_unsafe + i, 0, sizeof(CDoom::Button))
         end
@@ -15721,9 +15744,9 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
 
         #        Spawn rising slime
         floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
-        CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(floor.value.@thinker))
         s2.value.specialdata = floor
-        (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+        pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
         floor.value.type = CDoom::Floorenum::DonutRaise
         floor.value.crush = 0
         floor.value.direction = 1
@@ -15735,9 +15758,9 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
 
         #        Spawn lowering donut-hole
         floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
-        CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(floor.value.@thinker))
         s1.value.specialdata = floor
-        (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+        pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
         floor.value.type = CDoom::Floorenum::LowerFloor
         floor.value.crush = 0
         floor.value.direction = -1
@@ -16349,6 +16372,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     thinker.value.next = pointerof(CDoom.thinkercap)
     thinker.value.prev = CDoom.thinkercap.prev
     CDoom.thinkercap.prev = thinker
+    thinker.value.remove = 0
   end
 
   #
@@ -16356,14 +16380,13 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
   # until its thinking turn comes up.
   #
   def self.p_remove_thinker(thinker : CDoom::Thinker*)
-    # FIXME: NOP>
-    (thinker.as(UInt8*) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfV*).value = CDoom::ActionfV.new(Pointer(Void).new(UInt64::MAX), Pointer(Void).null)
+    thinker.value.remove = 1
   end
 
   def self.p_run_thinkers
     currentthinker = CDoom.thinkercap.next
     while currentthinker != pointerof(CDoom.thinkercap)
-      if currentthinker.value.function.acv.pointer == Pointer(Void).new(UInt64::MAX)
+      if currentthinker.value.remove != 0
         # time to remove it
         currentthinker.value.next.value.prev = currentthinker.value.prev
         currentthinker.value.prev.value.next = currentthinker.value.next
@@ -16470,7 +16493,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
   end
 
   def self.p_move_player(player : CDoom::Player*)
-    cmd = (player.as(UInt8*) + offsetof(CDoom::Player, @cmd)).as(CDoom::Ticcmd*)
+    cmd = pointerof(player.value.@cmd)
 
     player.value.mo.value.angle = player.value.mo.value.angle &+ (cmd.value.angleturn.to_i32 << 16)
 
@@ -16539,7 +16562,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     end
 
     # chain saw run forward
-    cmd = (player.as(UInt8*) + offsetof(CDoom::Player, @cmd)).as(CDoom::Ticcmd*)
+    cmd = pointerof(player.value.@cmd)
     if player.value.mo.value.flags & CDoom::Mobjflag::MF_JUSTATTACKED.value != 0
       cmd.value.angleturn = 0
       cmd.value.forwardmove = 0xc800 // 512
@@ -16620,7 +16643,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     # Strength counts up to diminish fade
     if player.value.powers[CDoom::Powertype::Strength.value] != 0
       player.value.powers[CDoom::Powertype::Strength.value] =
-        player.value.powers[CDoom::Powertype::Strength.value] + 1
+        player.value.powers[CDoom::Powertype::Strength.value] &+ 1
     end
 
     if player.value.powers[CDoom::Powertype::Invulnerability.value] != 0
@@ -17274,12 +17297,6 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
 
     totalwidth = 0
 
-    # Really complex printing shit...
-    print "["
-    ((CDoom.numtextures + 63) // 64).times { |i| print " " }
-    print "]"
-    (((CDoom.numtextures + 63) // 64) + 1).times { |i| print "\b" }
-
     CDoom.numtextures.times do |i|
       print "." if i & 63 == 0
 
@@ -17350,17 +17367,8 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
   end
 
   def self.r_init_flats
-    CDoom.firstflat = CDoom.w_get_num_for_name("F_START") + 1
-    CDoom.lastflat = CDoom.w_get_num_for_name("F_END") - 1
-    CDoom.numflats = CDoom.lastflat - CDoom.firstflat + 1
-
     # Create translation table for global animation.
     CDoom.flattranslation = CDoom.z_malloc((CDoom.numflats + 1) * sizeof(Int32), CDoom::PU_STATIC, Pointer(Void).null).as(Int32*)
-
-    print "["
-    ((CDoom.numflats + 63) // 64).times { |i| print " " }
-    print "]"
-    (((CDoom.numflats + 63) // 64) + 1).times { |i| print "\b" }
 
     CDoom.numflats.times do |i|
       print "." if i & 63 == 0
@@ -17374,18 +17382,9 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
   #  just for having the header info ready during rendering.
   #
   def self.r_init_sprite_lumps
-    CDoom.firstspritelump = CDoom.w_get_num_for_name("S_START") + 1
-    CDoom.lastspritelump = CDoom.w_get_num_for_name("S_END") - 1
-
-    CDoom.numspritelumps = CDoom.lastspritelump - CDoom.firstspritelump + 1
     CDoom.spritewidth = CDoom.z_malloc(CDoom.numspritelumps * sizeof(CDoom::Fixed), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Fixed*)
     CDoom.spriteoffset = CDoom.z_malloc(CDoom.numspritelumps * sizeof(CDoom::Fixed), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Fixed*)
     CDoom.spritetopoffset = CDoom.z_malloc(CDoom.numspritelumps * sizeof(CDoom::Fixed), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Fixed*)
-
-    print "["
-    ((CDoom.numspritelumps + 63) // 64).times { |i| print " " }
-    print "]"
-    (((CDoom.numspritelumps + 63) // 64) + 1).times { |i| print "\b" }
 
     CDoom.numspritelumps.times do |i|
       print "." if i & 63 == 0
@@ -17405,7 +17404,6 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     CDoom.colormaps = CDoom.z_malloc(length, CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Lighttable*)
     CDoom.colormaps = Pointer(CDoom::Lighttable).new(((CDoom.colormaps.address + 255) & ~0xff))
     CDoom.w_read_lump(lump, CDoom.colormaps)
-    print "x"
   end
 
   #
@@ -17414,14 +17412,29 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
   # Must be called after W_Init.
   #
   def self.r_init_data
-    print "\n  init_textures           - "
+    CDoom.firstflat = CDoom.w_get_num_for_name("F_START") + 1
+    CDoom.lastflat = CDoom.w_get_num_for_name("F_END") - 1
+    CDoom.numflats = CDoom.lastflat - CDoom.firstflat + 1
+
+    CDoom.firstspritelump = CDoom.w_get_num_for_name("S_START") + 1
+    CDoom.lastspritelump = CDoom.w_get_num_for_name("S_END") - 1
+    CDoom.numspritelumps = CDoom.lastspritelump - CDoom.firstspritelump + 1
+
+    nums = (CDoom.numtextures + 63) // 64 +
+           (CDoom.numflats + 63) // 64 +
+           (CDoom.numspritelumps + 63) // 64
+
+    # Really complex printing shit...
+    print "["
+    nums.times { |i| print " " }
+    print "]"
+    (nums + 1).times { |i| print "\b" }
+
     CDoom.r_init_textures
-    print "\n  init_flats              - "
     CDoom.r_init_flats
-    print "\n  init_sprites            - "
     CDoom.r_init_sprite_lumps
-    print "\n  init_colormaps          - "
     CDoom.r_init_colormaps
+    puts "]"
   end
 
   #
@@ -17722,14 +17735,8 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     CDoom.translationtables = CDoom.z_malloc(256 * 3 + 255, CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Byte*)
     CDoom.translationtables = Pointer(CDoom::Byte).new((CDoom.translationtables.address + 255) & ~255)
 
-    print "["
-    ((256 + 15) // 16).times { |i| print " " }
-    print "]"
-    (((256 + 15) // 16) + 1).times { |i| print "\b" }
-
     # translate just the 16 green colors
     256.times do |i|
-      print "." if i & 15 == 0
       if i >= 0x70 && i <= 0x7f
         # map green ramp to gray, brown, red
         CDoom.translationtables[i] = 0x60_u8 + (i & 0xf)
@@ -17742,7 +17749,6 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
         CDoom.translationtables[i + 512] = i.to_u8!
       end
     end
-    print "]"
   end
 
   #
@@ -18167,8 +18173,8 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
   def self.r_init_tables
     {% unless flag?("PRECOMPUTED") %}
       # FINE TANGENT COMPUTE
-
-      print "\n  finetangent             - ["
+      puts " - COMPUTE"
+      print "         finetangent - ["
       ((FINETANGENT_SIZE + 255) // 256).times { |i| print " " }
       print "]"
       (((FINETANGENT_SIZE + 255) // 256) + 1).times { |i| print "\b" }
@@ -18191,7 +18197,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
       puts "]"
 
       # FINE SINE COMPUTE
-      print "  finesine                - ["
+      print "         finesine    - ["
       ((FINESINE_SIZE + 255) // 256).times { |i| print " " }
       print "]"
       (((FINESINE_SIZE + 255) // 256) + 1).times { |i| print "\b" }
@@ -18205,7 +18211,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
       puts "]"
 
       # TANTOANGLE COMPUTE
-      print "  tantoangle              - ["
+      print "         tantoangle  - ["
       ((TANTOANGLE_SIZE + 255) // 256).times { |i| print " " }
       print "]"
       (((TANTOANGLE_SIZE + 255) // 256) + 1).times { |i| print "\b" }
@@ -18219,7 +18225,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
       end
       puts "]"
     {% else %}
-      puts "             - PRECOMPUTED"
+      puts " - PRECOMPUTED"
     {% end %}
 
     @@finecosine = @@finesine.dup.rotate(FINEANGLES // 4)
@@ -18287,16 +18293,9 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
   # because the scalelight table changes with view size.
   #
   def self.r_init_light_tables
-    print "["
-    CDoom::LIGHTLEVELS.times { |i| print " " }
-    print "]"
-    (CDoom::LIGHTLEVELS + 1).times { |i| print "\b" }
-
     # Calculate the light levels to use
     #  for each level / distance combination.
     CDoom::LIGHTLEVELS.times do |i|
-      print "."
-
       startmap = ((CDoom::LIGHTLEVELS - 1 - i) * 2) * CDoom::NUMCOLORMAPS // CDoom::LIGHTLEVELS
       CDoom::MAXLIGHTZ.times do |j|
         scale = CDoom.fixed_div((CDoom::SCREENWIDTH // 2 * FRACUNIT), (j + 1) << CDoom::LIGHTZSHIFT)
@@ -18310,7 +18309,6 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
         ((CDoom.zlight.to_unsafe + i).value.to_unsafe + j).value = CDoom.colormaps + level * 256
       end
     end
-    puts "]"
   end
 
   #
@@ -18390,16 +18388,13 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     CDoom.r_init_data
 
     # viewwidth / viewheight / detailLevel are set by the defaults
-    print "\nr_init_tables"
+    print "        Tables"
     CDoom.r_init_tables
 
     CDoom.r_set_view_size(CDoom.screenblocks, CDoom.detail_level)
 
-    print "r_init_light_tables       - "
     CDoom.r_init_light_tables
-    print "r_init_sky_map            - "
     CDoom.r_init_sky_map
-    print "r_init_translation_tables - "
     CDoom.r_init_translation_tables
 
     CDoom.framecount = 0
@@ -19258,7 +19253,6 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
   #
   def self.r_init_sky_map
     CDoom.skytexturemid = 100 * FRACUNIT
-    puts "x"
   end
 
   #
@@ -19949,6 +19943,20 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     end
   end
 
+  @@regmus = [
+    # Song - Who? - Where?
+
+    CDoom::Musicenum::MUS_e3m4, # American        e4m1
+    CDoom::Musicenum::MUS_e3m2, # Romero        e4m2
+    CDoom::Musicenum::MUS_e3m3, # Shawn        e4m3
+    CDoom::Musicenum::MUS_e1m5, # American        e4m4
+    CDoom::Musicenum::MUS_e2m7, # Tim         e4m5
+    CDoom::Musicenum::MUS_e2m4, # Romero        e4m6
+    CDoom::Musicenum::MUS_e2m6, # J.Anderson        e4m7 CHIRON.WAD
+    CDoom::Musicenum::MUS_e2m5, # Shawn        e4m8
+    CDoom::Musicenum::MUS_e1m9, # Tim                e4m9
+  ]
+
   #
   # Per level startup code.
   # Kills playing sounds at start of level,
@@ -19967,24 +19975,10 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     if CDoom.gamemode == CDoom::GameMode::Commercial
       mnum = CDoom::Musicenum::MUS_runnin.value + CDoom.gamemap - 1
     else
-      spmus = [
-        # Song - Who? - Where?
-
-        CDoom::Musicenum::MUS_e3m4, # American        e4m1
-        CDoom::Musicenum::MUS_e3m2, # Romero        e4m2
-        CDoom::Musicenum::MUS_e3m3, # Shawn        e4m3
-        CDoom::Musicenum::MUS_e1m5, # American        e4m4
-        CDoom::Musicenum::MUS_e2m7, # Tim         e4m5
-        CDoom::Musicenum::MUS_e2m4, # Romero        e4m6
-        CDoom::Musicenum::MUS_e2m6, # J.Anderson        e4m7 CHIRON.WAD
-        CDoom::Musicenum::MUS_e2m5, # Shawn        e4m8
-        CDoom::Musicenum::MUS_e1m9, # Tim                e4m9
-      ]
-
       if CDoom.gameepisode < 4
         mnum = CDoom::Musicenum::MUS_e1m1.value + (CDoom.gameepisode - 1) * 9 + CDoom.gamemap - 1
       else
-        mnum = spmus[CDoom.gamemap - 1].value
+        mnum = @@regmus[CDoom.gamemap - 1].value
       end
     end
 
@@ -20090,7 +20084,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
   end
 
   def self.s_start_sound(origin : Void*, sfx_id : LibC::Int)
-    LibDoom.s_start_sound_at_volume(origin, sfx_id, CDoom.snd_sfx_volume)
+    Doocr.s_start_sound_at_volume(origin, sfx_id, CDoom.snd_sfx_volume)
   end
 
   def self.s_stop_sound(origin : Void*)
@@ -20456,7 +20450,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
                               on : CDoom::DoomBool*,
                               percent : CDoom::Patch*)
     CDoom.stlib_init_num(
-      (p.as(UInt8*) + offsetof(CDoom::ST_Percent, @n)).as(CDoom::ST_Number*),
+      pointerof(p.value.@n),
       x, y, pl, num, on, 3)
     p.value.p = percent
   end
@@ -20467,7 +20461,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     end
 
     CDoom.stlib_update_num(
-      (per.as(UInt8*) + offsetof(CDoom::ST_Percent, @n)).as(CDoom::ST_Number*),
+      pointerof(per.value.@n),
       refresh
     )
   end
@@ -20583,6 +20577,23 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
       # if a user keypress...
     elsif ev.value.type == CDoom::Evtype::Keydown
       if CDoom.netgame == 0
+        # my little cheat
+        if cht_check_cheat(pointerof(@@cheat_me), ev.value.data1.to_u8) != 0
+          CDoom.plyr.value.cheats = CDoom.plyr.value.cheats ^ CDoom::Cheat::CF_ME.value
+          CDoom.plyr.value.message = "#{(CDoom.plyr.value.cheats & CDoom::Cheat::CF_ME.value != 0 ? "yea" : "no")} baby!"
+          if CDoom.plyr.value.cheats & CDoom::Cheat::CF_ME.value != 0
+            if CDoom.plyr.value.backpack == 0
+              CDoom::Ammotype::NUMAMMO.value.times do |i|
+                CDoom.plyr.value.maxammo[i] = CDoom.plyr.value.maxammo[i] * 2
+              end
+              CDoom.plyr.value.backpack = 1
+            end
+            CDoom::Ammotype::NUMAMMO.value.times do |i|
+              CDoom.plyr.value.ammo[i] = CDoom.plyr.value.maxammo[i]
+            end
+          end
+        end
+
         # 'dqd' cheat of toggleable god mode
         if CDoom.cht_check_cheat(pointerof(CDoom.cheat_god), ev.value.data1) != 0
           CDoom.plyr.value.cheats = CDoom.plyr.value.cheats ^ CDoom::Cheat::CF_GODMODE.value
@@ -20627,20 +20638,25 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
           CDoom.cht_get_param(pointerof(CDoom.cheat_mus), buf)
 
           if CDoom.gamemode == CDoom::GameMode::Commercial
-            musnum = CDoom::Musicenum::MUS_runnin.value + (buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord - 1
+            map = ((buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord) &- 1
+            musnum = CDoom::Musicenum::MUS_runnin.value + map
 
-            if ((buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord) > 35
+            if map > 31
               CDoom.plyr.value.message = CDoom::STSTR_NOMUS
             else
               CDoom.s_change_music(musnum, 1)
             end
           else
-            musnum = CDoom::Musicenum::MUS_e1m1.value + (buf[0] - '1'.ord) * 9 + (buf[1] - '1'.ord)
+            e = (buf[0] &- '1'.ord)
+            m = (buf[1] &- '1'.ord)
 
-            if ((buf[0] - '1'.ord) * 9 + buf[1] - '1'.ord) > 31
+            if m > 8 || (e > 3 && CDoom.gamemode == CDoom::GameMode::Retail) ||
+               (e > 2 && CDoom.gamemode == CDoom::GameMode::Registered) ||
+               (e > 0 && CDoom.gamemode == CDoom::GameMode::Shareware)
               CDoom.plyr.value.message = CDoom::STSTR_NOMUS
             else
-              CDoom.s_change_music(musnum, 1)
+              mus = CDoom.gamemode == CDoom::GameMode::Retail ? @@regmus[m].value : CDoom::Musicenum::MUS_e1m1.value + e * 9 + m
+              CDoom.s_change_music(mus, 1)
             end
           end
 
@@ -20693,43 +20709,43 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
           CDoom.doom_concat(@@buf, ")")
           CDoom.plyr.value.message = @@buf
         end
-      end
 
-      # 'clev' change-level cheat
-      if CDoom.cht_check_cheat(pointerof(CDoom.cheat_clev), ev.value.data1) != 0
-        buf = Pointer(UInt8).malloc(3)
+        # 'clev' change-level cheat
+        if CDoom.cht_check_cheat(pointerof(CDoom.cheat_clev), ev.value.data1) != 0
+          buf = Pointer(UInt8).malloc(3)
 
-        CDoom.cht_get_param(pointerof(CDoom.cheat_clev), buf)
+          CDoom.cht_get_param(pointerof(CDoom.cheat_clev), buf)
 
-        if CDoom.gamemode == CDoom::GameMode::Commercial
-          epsd = 0
-          map = (buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord
-        else
-          epsd = buf[0] - '0'.ord
-          map = buf[1] - '0'.ord
+          if CDoom.gamemode == CDoom::GameMode::Commercial
+            epsd = 0
+            map = (buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord
+          else
+            epsd = buf[0] - '0'.ord
+            map = buf[1] - '0'.ord
+          end
+
+          # Catch invalid maps
+          return 0 if CDoom.gamemode != CDoom::GameMode::Commercial && epsd < 1
+
+          return 0 if map < 1
+
+          # Ohmygod - this is not going to work.
+          return 0 if CDoom.gamemode == CDoom::GameMode::Retail &&
+                      (epsd > 4 || map > 9)
+
+          return 0 if CDoom.gamemode == CDoom::GameMode::Registered &&
+                      (epsd > 3 || map > 9)
+
+          return 0 if CDoom.gamemode == CDoom::GameMode::Shareware &&
+                      (epsd > 1 || map > 9)
+
+          return 0 if CDoom.gamemode == CDoom::GameMode::Commercial &&
+                      map > 32
+
+          # So be it.
+          CDoom.plyr.value.message = CDoom::STSTR_CLEV
+          CDoom.g_defered_init_new(CDoom.gameskill, epsd, map)
         end
-
-        # Catch invalid maps
-        return 0 if CDoom.gamemode != CDoom::GameMode::Commercial && epsd < 1
-
-        return 0 if map < 1
-
-        # Ohmygod - this is not going to work.
-        return 0 if CDoom.gamemode == CDoom::GameMode::Retail &&
-                    (epsd > 4 || map > 9)
-
-        return 0 if CDoom.gamemode == CDoom::GameMode::Registered &&
-                    (epsd > 3 || map > 9)
-
-        return 0 if CDoom.gamemode == CDoom::GameMode::Shareware &&
-                    (epsd > 1 || map > 9)
-
-        return 0 if CDoom.gamemode == CDoom::GameMode::Commercial &&
-                    map > 34
-
-        # So be it.
-        CDoom.plyr.value.message = CDoom::STSTR_CLEV
-        CDoom.g_defered_init_new(CDoom.gameskill, epsd, map)
       end
     end
     return 0
@@ -21199,7 +21215,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
       CDoom::ST_HEALTHX,
       CDoom::ST_HEALTHY,
       CDoom.tallnum,
-      (CDoom.plyr.as(UInt8*) + offsetof(CDoom::Player, @health)).as(Int32*),
+      pointerof(CDoom.plyr.value.@health),
       pointerof(CDoom.st_statusbaron),
       CDoom.tallpercent)
 
@@ -21243,7 +21259,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
       CDoom::ST_ARMORX,
       CDoom::ST_ARMORY,
       CDoom.tallnum,
-      (CDoom.plyr.as(UInt8*) + offsetof(CDoom::Player, @armorpoints)).as(Int32*),
+      pointerof(CDoom.plyr.value.@armorpoints),
       pointerof(CDoom.st_statusbaron),
       CDoom.tallpercent)
 
@@ -21787,7 +21803,10 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
       CDoom.reloadlump = CDoom.numlumps
     end
 
-    unless File.exists?(filename)
+    response = Channel({Bytes, Bool}).new
+    @@io_jobs.send({filename, "rb", nil, response})
+    data, ok = response.receive
+    unless ok
       puts " couldn't open #{filename}"
       return
     end
@@ -21798,7 +21817,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
 
     header = CDoom::Wadinfo.new
     singleinfo = CDoom::Filelump.new
-    file = File.new(filename, "rb")
+    file = IO::Memory.new(data)
     if filename[-3..-1].downcase.compare("wad") != 0
       # single lump file
       fileinfo = pointerof(singleinfo)
@@ -21863,7 +21882,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
       # Set the lump
       if ismap
         (CDoom::ML_BLOCKMAP + 1).times do |m|
-          lump_p.value.handle = !CDoom.reloadname.null? ? Pointer(Void).null : Box.box(file)
+          lump_p.value.handle = !CDoom.reloadname.null? ? Pointer(Void).null : Box.box({filename, file, false})
           lump_p.value.position = fileinfo[mlump].filepos
           lump_p.value.size = fileinfo[mlump].size
           CDoom.doom_strncpy(lump_p.value.name, fileinfo[mlump].name, 8)
@@ -21871,7 +21890,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
           lump_p += 1
         end
       else
-        lump_p.value.handle = !CDoom.reloadname.null? ? Pointer(Void).null : Box.box(file)
+        lump_p.value.handle = !CDoom.reloadname.null? ? Pointer(Void).null : Box.box({filename, file, false})
         lump_p.value.position = fileinfo[mlump].filepos
         lump_p.value.size = fileinfo[mlump].size
         CDoom.doom_strncpy(lump_p.value.name, fileinfo[mlump].name, 8)
@@ -23218,7 +23237,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     CDoom.mainzone.value.blocklist.tag = CDoom::PU_STATIC
     CDoom.mainzone.value.rover = block
 
-    block.value.prev = (CDoom.mainzone.as(UInt8*) + offsetof(CDoom::Memzone, @blocklist)).as(CDoom::Memblock*)
+    block.value.prev = pointerof(CDoom.mainzone.value.@blocklist)
     block.value.next = block.value.prev
 
     # 0 indicates a free block.
@@ -23362,7 +23381,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
 
   def self.z_free_tags(lowtag : LibC::Int, hightag : LibC::Int)
     block = CDoom.mainzone.value.blocklist.next
-    while block != (CDoom.mainzone.as(UInt8*) + offsetof(CDoom::Memzone, @blocklist)).as(CDoom::Memblock*)
+    while block != pointerof(CDoom.mainzone.value.@blocklist)
       # get link before freeing
       nextb = block.value.next
 
@@ -23384,7 +23403,7 @@ CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
     block = CDoom.mainzone.value.blocklist.next
 
     loop do
-      if block.value.next == (CDoom.mainzone.as(UInt8*) + offsetof(CDoom::Memzone, @blocklist)).as(CDoom::Memblock*)
+      if block.value.next == pointerof(CDoom.mainzone.value.@blocklist)
         # all blocks have been hit
         break
       end

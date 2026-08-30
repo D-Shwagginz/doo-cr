@@ -46,7 +46,7 @@
 #define BODYQUESIZE     32
 #define QUEUESIZE 128
 #define SAMPLECOUNT 512
-#define NUM_CHANNELS 8
+#define NUM_CHANNELS 16
 #define BUFMUL 4
 #define MIXBUFFERSIZE (SAMPLECOUNT*BUFMUL)
 #define MAX_QUEUED_MIDI_MSGS 256
@@ -130,6 +130,7 @@ typedef struct thinker_s
     struct thinker_s* next;
     think_t function;
     long long pad;
+    char remove;
 } thinker_t;
 
 typedef enum
