@@ -1104,8 +1104,8 @@ module Doocr
       l.a = CDoom::Mpoint.new(x: ax, y: ay)
 
       CDoom.am_rotate(
-        (pointerof(l).as(UInt8*) + offsetof(CDoom::Mline, @a) + offsetof(CDoom::Mpoint, @x)).as(CDoom::Fixed*),
-        (pointerof(l).as(UInt8*) + offsetof(CDoom::Mline, @a) + offsetof(CDoom::Mpoint, @y)).as(CDoom::Fixed*),
+        pointerof(l.@a.@x),
+        pointerof(l.@a.@y),
         angle) if angle != 0
 
       l.a = CDoom::Mpoint.new(x: l.a.x + x, y: l.a.y + y)
@@ -1121,8 +1121,8 @@ module Doocr
       l.b = CDoom::Mpoint.new(x: bx, y: by)
 
       CDoom.am_rotate(
-        (pointerof(l).as(UInt8*) + offsetof(CDoom::Mline, @b) + offsetof(CDoom::Mpoint, @x)).as(CDoom::Fixed*),
-        (pointerof(l).as(UInt8*) + offsetof(CDoom::Mline, @b) + offsetof(CDoom::Mpoint, @y)).as(CDoom::Fixed*),
+        pointerof(l.@b.@x),
+        pointerof(l.@b.@y),
         angle) if angle != 0
 
       l.b = CDoom::Mpoint.new(x: l.b.x + x, y: l.b.y + y)
@@ -2172,17 +2172,6 @@ module Doocr
   # Checksum
   #
   def self.net_buffer_checksum : UInt32
-    # c = 0x1234567_u32
-
-    # l = (CDoom.net_buffer_size - offsetof(CDoom::Doomdata, @retransmitfrom)) // 4
-    # l.times do |i|
-    #   value = (pointerof(CDoom.netbuffer.value.@retransmitfrom)
-    #     .as(UInt32*))[i]
-
-    #   c = c &+ (value &* (i + 1).to_u32)
-    # end
-
-    # return c & NCMD_CHECKSUM
     return 0_u32
   end
 
@@ -2706,7 +2695,7 @@ module Doocr
     CDoom.i_init_network
     CDoom.i_error("Error: Doomcom buffer invalid!") if CDoom.doomcom.value.id != CDoom::DOOMCOM_ID
 
-    CDoom.netbuffer = (CDoom.doomcom.as(UInt8*) + offsetof(CDoom::Doomcom, @data)).as(CDoom::Doomdata*)
+    CDoom.netbuffer = pointerof(CDoom.doomcom.value.@data)
     CDoom.consoleplayer = CDoom.doomcom.value.consoleplayer
     CDoom.displayplayer = CDoom.consoleplayer
     CDoom.d_arbitrate_net_start if CDoom.netgame != 0
@@ -3848,7 +3837,7 @@ module Doocr
 
     CDoom::MAXPLAYERS.times do |i|
       if CDoom.playeringame[i] != 0
-        cmd = ((CDoom.players.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Player, @cmd)).as(CDoom::Ticcmd*) # Gotta be a better way to do this
+        cmd = (pointerof((CDoom.players.to_unsafe + i).value.@cmd)) # THERE WAS A BETTER WAY TO DO THIS
 
         CDoom.doom_memcpy(cmd, (CDoom.netcmds.to_unsafe + i).value.to_unsafe + buf, sizeof(CDoom::Ticcmd))
 
@@ -4836,29 +4825,29 @@ module Doocr
     it.value.lm = 0 # default left margin is start of text
     it.value.on = on
     it.value.laston = 1
-    CDoom.hulib_init_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*), x, y, font, startchar)
+    CDoom.hulib_init_text_line(pointerof(it.value.@l), x, y, font, startchar)
   end
 
   # The following deletion routines adhere to the left margin restriction
   def self.hulib_del_char_from_i_text(it : CDoom::HU_Itext*)
-    CDoom.hulib_del_char_from_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*)) if it.value.l.len != it.value.lm
+    CDoom.hulib_del_char_from_text_line(pointerof(it .value.@l)) if it.value.l.len != it.value.lm
   end
 
   def self.hulib_erase_line_from_i_text(it : CDoom::HU_Itext*)
     while it.value.lm != it.value.l.len
-      CDoom.hulib_del_char_from_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*))
+      CDoom.hulib_del_char_from_text_line(pointerof(it.value.@l))
     end
   end
 
   # Resets left margin as well
   def self.hulib_reset_i_text(it : CDoom::HU_Itext*)
     it.value.lm = 0
-    CDoom.hulib_clear_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*))
+    CDoom.hulib_clear_text_line(pointerof(it.value.@l))
   end
 
   def self.hulib_add_prefix_to_i_text(it : CDoom::HU_Itext*, str : UInt8*)
     while str.value != 0
-      CDoom.hulib_add_char_to_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*), str.value)
+      CDoom.hulib_add_char_to_text_line(pointerof(it.value.@l), str.value)
       str += 1
     end
     it.value.lm = it.value.l.len
@@ -4868,7 +4857,7 @@ module Doocr
   # returns true if it ate the key
   def self.hulib_key_in_i_text(it : CDoom::HU_Itext*, ch : UInt8) : CDoom::DoomBool
     if ch >= ' '.ord && ch <= '_'.ord
-      CDoom.hulib_add_char_to_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*), ch.to_i8!)
+      CDoom.hulib_add_char_to_text_line(pointerof(it.value.@l), ch.to_i8!)
     else
       if ch == CDoom::KEY_BACKSPACE
         CDoom.hulib_del_char_from_i_text(it)
@@ -4881,7 +4870,7 @@ module Doocr
   end
 
   def self.hulib_draw_i_text(it : CDoom::HU_Itext*)
-    l = (it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*)
+    l = pointerof(it.value.@l)
 
     return if it.value.on.value == 0
     CDoom.hulib_draw_text_line(l, 1) # draw the line w/ cursor
@@ -4892,7 +4881,7 @@ module Doocr
       it.value.l.needsupdate = 4
     end
 
-    CDoom.hulib_erase_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*))
+    CDoom.hulib_erase_text_line(pointerof(it.value.@l))
     it.value.laston = it.value.on.value
   end
 
@@ -5040,7 +5029,7 @@ module Doocr
               CDoom.hulib_reset_i_text(CDoom.w_inputbuffer.to_unsafe + i)
             end
           end
-          ((CDoom.players.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Player, @cmd)).as(CDoom::Ticcmd*).value.chatchar = 0
+          pointerof((CDoom.players.to_unsafe + i).value.@cmd).value.chatchar = 0
         end
       end
     end
@@ -7973,7 +7962,7 @@ module Doocr
     CDoom.doom_memset(pcx.value.filler.to_unsafe, 0, sizeof(typeof(pcx.value.filler)))
 
     # pack the image
-    pack = pcx.as(UInt8*) + offsetof(CDoom::PCX, @data)
+    pack = pointerof(pcx.value.@data)
 
     (width * height).times do |i|
       if (data.value & 0xc0) != 0xc0
@@ -8065,7 +8054,7 @@ module Doocr
         case ceiling.value.type
         when CDoom::Ceilingenum::SilentCrushAndRaise
         else
-          CDoom.s_start_sound((ceiling.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_stnmov)
         end
       end
@@ -8075,7 +8064,7 @@ module Doocr
         when CDoom::Ceilingenum::RaiseToHighest
           CDoom.p_remove_active_ceiling(ceiling)
         when CDoom::Ceilingenum::SilentCrushAndRaise
-          CDoom.s_start_sound((ceiling.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_pstop)
         when CDoom::Ceilingenum::FastCrushAndRaise, CDoom::Ceilingenum::CrushAndRaise
           ceiling.value.direction = -1
@@ -8092,7 +8081,7 @@ module Doocr
         case ceiling.value.type
         when CDoom::Ceilingenum::SilentCrushAndRaise
         else
-          CDoom.s_start_sound((ceiling.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_stnmov)
         end
       end
@@ -8100,7 +8089,7 @@ module Doocr
       if res == CDoom::Result::Pastdest
         case ceiling.value.type
         when CDoom::Ceilingenum::SilentCrushAndRaise
-          CDoom.s_start_sound((ceiling.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_pstop)
         when CDoom::Ceilingenum::CrushAndRaise
           ceiling.value.speed = CDoom::CEILSPEED
@@ -8140,9 +8129,9 @@ module Doocr
       # new door thinker
       rtn = 1
       ceiling = CDoom.z_malloc(sizeof(CDoom::Ceiling), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Ceiling*)
-      CDoom.p_add_thinker((ceiling.as(UInt8*) + offsetof(CDoom::Ceiling, @thinker)).as(CDoom::Thinker*))
+      CDoom.p_add_thinker(pointerof(ceiling.value.@thinker))
       sec.value.specialdata = ceiling
-      (ceiling.as(UInt8*) + offsetof(CDoom::Ceiling, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
+      pointerof(ceiling.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
       ceiling.value.sector = sec
       ceiling.value.crush = 0
 
@@ -8196,7 +8185,7 @@ module Doocr
     CDoom::MAXCEILINGS.times do |i|
       if CDoom.activeceilings[i] == c
         CDoom.activeceilings[i].value.sector.value.specialdata = Pointer(Void).null
-       CDoom.p_remove_thinker((CDoom.activeceilings[i].as(UInt8*) + offsetof(CDoom::Ceiling, @thinker)).as(CDoom::Thinker*))
+       CDoom.p_remove_thinker(pointerof(CDoom.activeceilings[i].value.@thinker))
         CDoom.activeceilings[i] = Pointer(CDoom::Ceiling).null
         break
       end
@@ -8212,7 +8201,7 @@ module Doocr
          (CDoom.activeceilings[i].value.tag == line.value.tag) &&
          (CDoom.activeceilings[i].value.direction == 0)
         CDoom.activeceilings[i].value.direction = CDoom.activeceilings[i].value.olddirection
-        (CDoom.activeceilings[i].as(UInt8*) + offsetof(CDoom::Ceiling, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
+        pointerof(CDoom.activeceilings[i].value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
       end
     end
   end
@@ -8227,7 +8216,7 @@ module Doocr
          CDoom.activeceilings[i].value.tag == line.value.tag &&
          CDoom.activeceilings[i].value.direction != 0
         CDoom.activeceilings[i].value.olddirection = CDoom.activeceilings[i].value.direction
-        (CDoom.activeceilings[i].as(UInt8*) + offsetof(CDoom::Ceiling, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfV*).value = NULL_PROC
+        pointerof(CDoom.activeceilings[i].value.@thinker.@function).as(CDoom::ActionfV*).value = NULL_PROC
         CDoom.activeceilings[i].value.direction = 0 # in-stasis
         rtn = 1
       end
@@ -8248,15 +8237,15 @@ module Doocr
         case door.value.type
         when CDoom::Vldoorenum::BlazeRaise
           door.value.direction = -1 # time to go back down
-          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_bdcls)
         when CDoom::Vldoorenum::DoorNormal
           door.value.direction = -1 # time to go back down
-          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_dorcls)
         when CDoom::Vldoorenum::Close30ThenOpen
           door.value.direction = 1
-          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_doropn)
         end
       end
@@ -8268,7 +8257,7 @@ module Doocr
         when CDoom::Vldoorenum::RaiseIn5Mins
           door.value.direction = 1
           door.value.type = CDoom::Vldoorenum::DoorNormal
-          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_doropn)
         end
       end
@@ -8282,12 +8271,12 @@ module Doocr
         case door.value.type
         when CDoom::Vldoorenum::BlazeRaise, CDoom::Vldoorenum::BlazeClose
           door.value.sector.value.specialdata = Pointer(Void).null
-          CDoom.p_remove_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*)) # unlink and free
-          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.p_remove_thinker(pointerof(door.value.@thinker)) # unlink and free
+          CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_bdcls)
         when CDoom::Vldoorenum::DoorNormal, CDoom::Vldoorenum::DoorClose
           door.value.sector.value.specialdata = Pointer(Void).null
-          CDoom.p_remove_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*)) # unlink and free
+          CDoom.p_remove_thinker(pointerof(door.value.@thinker)) # unlink and free
         when CDoom::Vldoorenum::Close30ThenOpen
           door.value.direction = 0
           door.value.topcountdown = 35 * 30
@@ -8298,7 +8287,7 @@ module Doocr
           # DO NOT GO BACK UP!
         else
           door.value.direction = 1
-          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_doropn)
         end
       end
@@ -8316,7 +8305,7 @@ module Doocr
           door.value.topcountdown = door.value.topwait
         when CDoom::Vldoorenum::Close30ThenOpen, CDoom::Vldoorenum::BlazeOpen, CDoom::Vldoorenum::DoorOpen
           door.value.sector.value.specialdata = Pointer(Void).null
-          CDoom.p_remove_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*)) # unlink and free
+          CDoom.p_remove_thinker(pointerof(door.value.@thinker)) # unlink and free
         end
       end
     end
@@ -8365,10 +8354,10 @@ module Doocr
       # new door thinker
       rtn = 1
       door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
-      CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+      CDoom.p_add_thinker(pointerof(door.value.@thinker))
       sec.value.specialdata = door
 
-      (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
+      pointerof(door.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
       door.value.sector = sec
       door.value.type = type
       door.value.topwait = CDoom::VDOORWAIT
@@ -8380,31 +8369,31 @@ module Doocr
         door.value.topheight = door.value.topheight - 4 * FRACUNIT
         door.value.direction = -1
         door.value.speed = CDoom::VDOORSPEED * 4
-        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_bdcls)
       when CDoom::Vldoorenum::DoorClose
         door.value.topheight = CDoom.p_find_lowest_ceiling_surrounding(sec)
         door.value.topheight = door.value.topheight - 4 * FRACUNIT
         door.value.direction = -1
-        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_dorcls)
       when CDoom::Vldoorenum::Close30ThenOpen
         door.value.topheight = sec.value.ceilingheight
         door.value.direction = -1
-        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_dorcls)
       when CDoom::Vldoorenum::BlazeRaise, CDoom::Vldoorenum::BlazeOpen
         door.value.direction = 1
         door.value.topheight = CDoom.p_find_lowest_ceiling_surrounding(sec)
         door.value.topheight = door.value.topheight - 4 * FRACUNIT
         door.value.speed = CDoom::VDOORSPEED * 4
-        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_bdopn) if door.value.topheight != sec.value.ceilingheight
       when CDoom::Vldoorenum::DoorNormal, CDoom::Vldoorenum::DoorOpen
         door.value.direction = 1
         door.value.topheight = CDoom.p_find_lowest_ceiling_surrounding(sec)
         door.value.topheight = door.value.topheight - 4 * FRACUNIT
-        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(door.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_doropn) if door.value.topheight != sec.value.ceilingheight
       end
     end
@@ -8467,21 +8456,21 @@ module Doocr
     # for proper sound
     case line.value.special
     when 117, 118 # BLAZING DOOR RAISE, OPEN
-      CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+      CDoom.s_start_sound(pointerof(sec.value.@soundorg),
         CDoom::Sfxenum::SFX_bdopn)
     when 1, 31 # NORMAL DOOR SOUND
-      CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+      CDoom.s_start_sound(pointerof(sec.value.@soundorg),
         CDoom::Sfxenum::SFX_doropn)
     else # LOCKED DOOR SOUND
-      CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+      CDoom.s_start_sound(pointerof(sec.value.@soundorg),
         CDoom::Sfxenum::SFX_doropn)
     end
 
     # new door thinker
     door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
-    CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(door.value.@thinker))
     sec.value.specialdata = door
-    (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
+    pointerof(door.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
     door.value.sector = sec
     door.value.direction = 1
     door.value.speed = CDoom::VDOORSPEED
@@ -8513,12 +8502,12 @@ module Doocr
   def self.p_spawn_door_close_in_30(sec : CDoom::Sector*)
     door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
 
-    CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(door.value.@thinker))
 
     sec.value.specialdata = door
     sec.value.special = 0
 
-    (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
+    pointerof(door.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
     door.value.sector = sec
     door.value.direction = 0
     door.value.type = CDoom::Vldoorenum::DoorNormal
@@ -8532,12 +8521,12 @@ module Doocr
   def self.p_spawn_door_raise_in_5_mins(sec : CDoom::Sector*, secnum : LibC::Int)
     door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
 
-    CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(door.value.@thinker))
 
     sec.value.specialdata = door
     sec.value.special = 0
 
-    (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
+    pointerof(door.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
     door.value.sector = sec
     door.value.direction = 2
     door.value.type = CDoom::Vldoorenum::RaiseIn5Mins
@@ -10010,7 +9999,7 @@ module Doocr
       floor.value.floordestheight,
       floor.value.crush, 0, floor.value.direction)
 
-    CDoom.s_start_sound((floor.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+    CDoom.s_start_sound(pointerof(floor.value.sector.value.@soundorg),
       CDoom::Sfxenum::SFX_stnmov) if CDoom.leveltime & 7 == 0
 
     if res == CDoom::Result::Pastdest
@@ -10029,9 +10018,9 @@ module Doocr
           floor.value.sector.value.floorpic = floor.value.texture
         end
       end
-      CDoom.p_remove_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+      CDoom.p_remove_thinker(pointerof(floor.value.@thinker))
 
-      CDoom.s_start_sound((floor.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+      CDoom.s_start_sound(pointerof(floor.value.sector.value.@soundorg),
         CDoom::Sfxenum::SFX_pstop)
     end
   end
@@ -10048,9 +10037,9 @@ module Doocr
       # new floor thinker
       rtn = 1
       floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
-      CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+      CDoom.p_add_thinker(pointerof(floor.value.@thinker))
       sec.value.specialdata = floor
-      (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+      pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
       floor.value.type = floortype
       floor.value.crush = 0
 
@@ -10193,9 +10182,9 @@ module Doocr
       # new floor thinker
       rtn = 1
       floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
-      CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+      CDoom.p_add_thinker(pointerof(floor.value.@thinker))
       sec.value.specialdata = floor
-      (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+      pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
       floor.value.direction = 1
       floor.value.sector = sec
       speed = 0
@@ -10239,10 +10228,10 @@ module Doocr
           secnum = newsecnum
           floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
 
-          CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+          CDoom.p_add_thinker(pointerof(floor.value.@thinker))
 
           sec.value.specialdata = floor
-          (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+          pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
           floor.value.direction = 1
           floor.value.sector = sec
           floor.value.speed = speed
@@ -10911,9 +10900,9 @@ module Doocr
 
     flick = CDoom.z_malloc(sizeof(CDoom::Fireflicker), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Fireflicker*)
 
-    CDoom.p_add_thinker((flick.as(UInt8*) + offsetof(CDoom::Fireflicker, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(flick.value.@thinker))
 
-    (flick.as(UInt8*) + offsetof(CDoom::Fireflicker, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_fire_flicker).pointer, Pointer(Void).null)
+    pointerof(flick.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_fire_flicker).pointer, Pointer(Void).null)
     flick.value.sector = sector
     flick.value.maxlight = sector.value.lightlevel
     flick.value.minlight = CDoom.p_find_min_surrounding_light(sector, sector.value.lightlevel) + 16
@@ -10950,9 +10939,9 @@ module Doocr
 
     flash = CDoom.z_malloc(sizeof(CDoom::Lightflash), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Lightflash*)
 
-    CDoom.p_add_thinker((flash.as(UInt8*) + offsetof(CDoom::Lightflash, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(flash.value.@thinker))
 
-    (flash.as(UInt8*) + offsetof(CDoom::Lightflash, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_light_flash).pointer, Pointer(Void).null)
+    pointerof(flash.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_light_flash).pointer, Pointer(Void).null)
     flash.value.sector = sector
     flash.value.maxlight = sector.value.lightlevel
 
@@ -10986,12 +10975,12 @@ module Doocr
   def self.p_spawn_strobe_flash(sector : CDoom::Sector*, fast_or_slow : LibC::Int, in_sync : LibC::Int)
     flash = CDoom.z_malloc(sizeof(CDoom::Strobe), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Strobe*)
 
-    CDoom.p_add_thinker((flash.as(UInt8*) + offsetof(CDoom::Strobe, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(flash.value.@thinker))
 
     flash.value.sector = sector
     flash.value.darktime = fast_or_slow
     flash.value.brighttime = CDoom::STROBEBRIGHT
-    (flash.as(UInt8*) + offsetof(CDoom::Strobe, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_strobe_flash).pointer, Pointer(Void).null)
+    pointerof(flash.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_strobe_flash).pointer, Pointer(Void).null)
     flash.value.maxlight = sector.value.lightlevel
     flash.value.minlight = CDoom.p_find_min_surrounding_light(sector, sector.value.lightlevel)
 
@@ -11091,12 +11080,12 @@ module Doocr
   def self.p_spawn_glowing_light(sector : CDoom::Sector*)
     g = CDoom.z_malloc(sizeof(CDoom::Glow), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Glow*)
 
-    CDoom.p_add_thinker((g.as(UInt8*) + offsetof(CDoom::Glow, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(g.value.@thinker))
 
     g.value.sector = sector
     g.value.minlight = CDoom.p_find_min_surrounding_light(sector, sector.value.lightlevel)
     g.value.maxlight = sector.value.lightlevel
-    (g.as(UInt8*) + offsetof(CDoom::Glow, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_glow).pointer, Pointer(Void).null)
+    pointerof(g.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_glow).pointer, Pointer(Void).null)
     g.value.direction = -1
 
     sector.value.special = 0
@@ -12806,7 +12795,7 @@ module Doocr
     CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept.value)
 
     # spawn the new monster
-    mthing = (mobj.as(UInt8*) + offsetof(CDoom::Mobj, @spawnpoint)).as(CDoom::Mapthing*)
+    mthing = pointerof(mobj.value.@spawnpoint)
 
     # spawn it
     if mobj.value.info.value.flags & CDoom::Mobjflag::MF_SPAWNCEILING.value != 0
@@ -12915,9 +12904,9 @@ module Doocr
       mobj.value.z = z
     end
 
-    (mobj.as(UInt8*) + offsetof(CDoom::Mobj, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.p_mobj_thinker).pointer, Pointer(Void).null)
+    pointerof(mobj.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.p_mobj_thinker).pointer, Pointer(Void).null)
 
-    CDoom.p_add_thinker((mobj.as(UInt8*) + offsetof(CDoom::Mobj, @thinker)).as(CDoom::Thinker*))
+    CDoom.p_add_thinker(pointerof(mobj.value.@thinker))
 
     return mobj
   end
@@ -13264,20 +13253,20 @@ module Doocr
 
       if plat.value.type == CDoom::Plattype::RaiseAndChange ||
          plat.value.type == CDoom::Plattype::RaiseToNearestAndChange
-        CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(plat.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_stnmov) if CDoom.leveltime & 7 == 0
       end
 
       if res == CDoom::Result::Crushed && plat.value.crush == 0
         plat.value.count = plat.value.wait
         plat.value.status = CDoom::Platenum::Down
-        CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(plat.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_pstart)
       else
         if res == CDoom::Result::Pastdest
           plat.value.count = plat.value.wait
           plat.value.status = CDoom::Platenum::Waiting
-          CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof(plat.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_pstop)
 
           case plat.value.type
@@ -13294,7 +13283,7 @@ module Doocr
       if res == CDoom::Result::Pastdest
         plat.value.count = plat.value.wait
         plat.value.status = CDoom::Platenum::Waiting
-        CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(plat.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_pstop)
       end
     when CDoom::Platenum::Waiting
@@ -13305,7 +13294,7 @@ module Doocr
         else
           plat.value.status = CDoom::Platenum::Down
         end
-        CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(plat.value.sector.value.@soundorg),
           CDoom::Sfxenum::SFX_pstart)
       end
     when CDoom::Platenum::InStasis
@@ -13334,12 +13323,12 @@ module Doocr
       # Find lowest & highest floors around sector
       rtn = 1
       plat = CDoom.z_malloc(sizeof(CDoom::Plat), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Plat*)
-      CDoom.p_add_thinker((plat.as(UInt8*) + offsetof(CDoom::Plat, @thinker)).as(CDoom::Thinker*))
+      CDoom.p_add_thinker(pointerof(plat.value.@thinker))
 
       plat.value.type = type
       plat.value.sector = sec
       plat.value.sector.value.specialdata = plat
-      (plat.as(UInt8*) + offsetof(CDoom::Plat, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
+      pointerof(plat.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
       plat.value.crush = 0
       plat.value.tag = line.value.tag
 
@@ -13352,7 +13341,7 @@ module Doocr
         plat.value.status = CDoom::Platenum::Up
         # NO MORE DAMAGE, IF APPLICABLE
         sec.value.special = 0
-        CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(sec.value.@soundorg),
           CDoom::Sfxenum::SFX_stnmov)
       when CDoom::Plattype::RaiseAndChange
         plat.value.speed = CDoom::PLATSPEED // 2
@@ -13361,7 +13350,7 @@ module Doocr
         plat.value.wait = 0
         plat.value.status = CDoom::Platenum::Up
 
-        CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(sec.value.@soundorg),
           CDoom::Sfxenum::SFX_stnmov)
       when CDoom::Plattype::DownWaitUpStay
         plat.value.speed = CDoom::PLATSPEED * 4
@@ -13372,7 +13361,7 @@ module Doocr
         plat.value.high = sec.value.floorheight
         plat.value.wait = 35 * CDoom::PLATWAIT
         plat.value.status = CDoom::Platenum::Down
-        CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(sec.value.@soundorg),
           CDoom::Sfxenum::SFX_pstart)
       when CDoom::Plattype::BlazeDWUS
         plat.value.speed = CDoom::PLATSPEED * 8
@@ -13383,7 +13372,7 @@ module Doocr
         plat.value.high = sec.value.floorheight
         plat.value.wait = 35 * CDoom::PLATWAIT
         plat.value.status = CDoom::Platenum::Down
-        CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(sec.value.@soundorg),
           CDoom::Sfxenum::SFX_pstart)
       when CDoom::Plattype::PerpetualRaise
         plat.value.speed = CDoom::PLATSPEED
@@ -13397,7 +13386,7 @@ module Doocr
 
         plat.value.wait = 35 * CDoom::PLATWAIT
         plat.value.status = CDoom::Platenum.new(CDoom.p_random & 1)
-        CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom.s_start_sound(pointerof(sec.value.@soundorg),
           CDoom::Sfxenum::SFX_pstart)
       end
       CDoom.p_add_active_plat(plat)
@@ -13412,7 +13401,7 @@ module Doocr
          CDoom.activeplats[i].value.tag == tag &&
          CDoom.activeplats[i].value.status == CDoom::Platenum::InStasis
         CDoom.activeplats[i].value.status = CDoom.activeplats[i].value.oldstatus
-        (CDoom.activeplats[i].as(UInt8*) + offsetof(CDoom::Plat, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
+        pointerof(CDoom.activeplats[i].value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
       end
     end
   end
@@ -13424,7 +13413,7 @@ module Doocr
          CDoom.activeplats[i].value.tag == line.value.tag
         CDoom.activeplats[i].value.oldstatus = CDoom.activeplats[i].value.status
         CDoom.activeplats[i].value.status = CDoom::Platenum::InStasis
-        (CDoom.activeplats[i].as(UInt8*) + offsetof(CDoom::Plat, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfV*).value = NULL_PROC
+        pointerof(CDoom.activeplats[i].value.@thinker.@function).as(CDoom::ActionfV*).value = NULL_PROC
       end
     end
   end
@@ -13443,7 +13432,7 @@ module Doocr
     CDoom::MAXPLATS.times do |i|
       if plat == CDoom.activeplats[i]
         CDoom.activeplats[i].value.sector.value.specialdata = Pointer(Void).null
-        CDoom.p_remove_thinker((CDoom.activeplats[i].as(UInt8*) + offsetof(CDoom::Plat, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_remove_thinker(pointerof(CDoom.activeplats[i].value.@thinker))
         CDoom.activeplats[i] = Pointer(CDoom::Plat).null
 
         return
@@ -14146,8 +14135,8 @@ module Doocr
         mobj.value.info = CDoom.mobjinfo + mobj.value.type.value
         mobj.value.floorz = mobj.value.subsector.value.sector.value.floorheight
         mobj.value.ceilingz = mobj.value.subsector.value.sector.value.ceilingheight
-        (mobj.as(UInt8*) + offsetof(CDoom::Mobj, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.p_mobj_thinker).pointer, Pointer(Void).null)
-        CDoom.p_add_thinker((mobj.as(UInt8*) + offsetof(CDoom::Mobj, @thinker)).as(CDoom::Thinker*))
+        pointerof(mobj.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.p_mobj_thinker).pointer, Pointer(Void).null)
+        CDoom.p_add_thinker(pointerof(mobj.value.@thinker))
       else
         CDoom.i_error("Error: Unknown tclass #{tclass} in savegame")
       end
@@ -14276,10 +14265,10 @@ module Doocr
         ceiling.value.sector.value.specialdata = ceiling
 
         if !ceiling.value.thinker.function.acp1.pointer.null?
-          (ceiling.as(UInt8*) + offsetof(CDoom::Ceiling, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
+          pointerof(ceiling.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
         end
 
-        CDoom.p_add_thinker((ceiling.as(UInt8*) + offsetof(CDoom::Ceiling, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(ceiling.value.@thinker))
         CDoom.p_add_active_ceiling(ceiling)
       when CDoom::Specials::Door
         padsavep
@@ -14288,9 +14277,9 @@ module Doocr
         file.read_fully(slice)
         door.value.sector = CDoom.sectors + door.value.sector.address
         door.value.sector.value.specialdata = door
-        (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
+        pointerof(door.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
 
-        CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(door.value.@thinker))
       when CDoom::Specials::Floor
         padsavep
         floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Floormove*)
@@ -14298,9 +14287,9 @@ module Doocr
         file.read_fully(slice)
         floor.value.sector = CDoom.sectors + floor.value.sector.address
         floor.value.sector.value.specialdata = floor
-        (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+        pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
 
-        CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(floor.value.@thinker))
       when CDoom::Specials::Plat
         padsavep
         plat = CDoom.z_malloc(sizeof(CDoom::Plat), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Plat*)
@@ -14309,10 +14298,10 @@ module Doocr
         plat.value.sector = CDoom.sectors + plat.value.sector.address
         plat.value.sector.value.specialdata = plat
         if !plat.value.thinker.function.acp1.pointer.null?
-          (plat.as(UInt8*) + offsetof(CDoom::Plat, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
+          pointerof(plat.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
         end
 
-        CDoom.p_add_thinker((plat.as(UInt8*) + offsetof(CDoom::Plat, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(plat.value.@thinker))
         CDoom.p_add_active_plat(plat)
       when CDoom::Specials::Flash
         padsavep
@@ -14320,27 +14309,27 @@ module Doocr
         slice = Slice.new(flash.as(UInt8*), sizeof(CDoom::Lightflash))
         file.read_fully(slice)
         flash.value.sector = CDoom.sectors + flash.value.sector.address
-        (flash.as(UInt8*) + offsetof(CDoom::Lightflash, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_light_flash).pointer, Pointer(Void).null)
+        pointerof(flash.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_light_flash).pointer, Pointer(Void).null)
 
-        CDoom.p_add_thinker((flash.as(UInt8*) + offsetof(CDoom::Lightflash, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(flash.value.@thinker))
       when CDoom::Specials::Strobe
         padsavep
         strobe = CDoom.z_malloc(sizeof(CDoom::Strobe), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Strobe*)
         slice = Slice.new(strobe.as(UInt8*), sizeof(CDoom::Strobe))
         file.read_fully(slice)
         strobe.value.sector = CDoom.sectors + strobe.value.sector.address
-        (strobe.as(UInt8*) + offsetof(CDoom::Strobe, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_strobe_flash).pointer, Pointer(Void).null)
+        pointerof(strobe.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_strobe_flash).pointer, Pointer(Void).null)
 
-        CDoom.p_add_thinker((strobe.as(UInt8*) + offsetof(CDoom::Strobe, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(strobe.value.@thinker))
       when CDoom::Specials::Glow
         padsavep
         glow = CDoom.z_malloc(sizeof(CDoom::Glow), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Glow*)
         slice = Slice.new(glow.as(UInt8*), sizeof(CDoom::Glow))
         file.read_fully(slice)
         glow.value.sector = CDoom.sectors + glow.value.sector.address
-        (glow.as(UInt8*) + offsetof(CDoom::Glow, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_glow).pointer, Pointer(Void).null)
+        pointerof(glow.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_glow).pointer, Pointer(Void).null)
 
-        CDoom.p_add_thinker((glow.as(UInt8*) + offsetof(CDoom::Glow, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(glow.value.@thinker))
       else
         CDoom.i_error("Error: p_unarchive_specials: Unknown tclass #{tclass} in savegame")
       end
@@ -14697,7 +14686,7 @@ module Doocr
       end
 
       # set the degenmobj_t to the middle of the bounding box
-      soundorg = (sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Degenmobj*)
+      soundorg = pointerof(sector.value.@soundorg)
       soundorg.value.x = (bbox[CDoom::BOXRIGHT] &+ bbox[CDoom::BOXLEFT]) // 2
       soundorg.value.y = (bbox[CDoom::BOXTOP] &+ bbox[CDoom::BOXBOTTOM]) // 2
 
@@ -15720,7 +15709,7 @@ module Doocr
             (CDoom.sides + CDoom.buttonlist[i].line.value.sidenum[0]).value.bottomtexture =
               CDoom.buttonlist[i].btexture
           end
-          CDoom.s_start_sound(((CDoom.buttonlist.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Button, @soundorg)).as(CDoom::Mobj*),
+          CDoom.s_start_sound(pointerof((CDoom.buttonlist.to_unsafe + i).value.@soundorg),
             CDoom::Sfxenum::SFX_swtchn.value)
           CDoom.doom_memset(CDoom.buttonlist.to_unsafe + i, 0, sizeof(CDoom::Button))
         end
@@ -15751,9 +15740,9 @@ module Doocr
 
         #        Spawn rising slime
         floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
-        CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(floor.value.@thinker))
         s2.value.specialdata = floor
-        (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+        pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
         floor.value.type = CDoom::Floorenum::DonutRaise
         floor.value.crush = 0
         floor.value.direction = 1
@@ -15765,9 +15754,9 @@ module Doocr
 
         #        Spawn lowering donut-hole
         floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
-        CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+        CDoom.p_add_thinker(pointerof(floor.value.@thinker))
         s1.value.specialdata = floor
-        (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+        pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
         floor.value.type = CDoom::Floorenum::LowerFloor
         floor.value.crush = 0
         floor.value.direction = -1
@@ -16500,7 +16489,7 @@ module Doocr
   end
 
   def self.p_move_player(player : CDoom::Player*)
-    cmd = (player.as(UInt8*) + offsetof(CDoom::Player, @cmd)).as(CDoom::Ticcmd*)
+    cmd = pointerof(player.value.@cmd)
 
     player.value.mo.value.angle = player.value.mo.value.angle &+ (cmd.value.angleturn.to_i32 << 16)
 
@@ -16569,7 +16558,7 @@ module Doocr
     end
 
     # chain saw run forward
-    cmd = (player.as(UInt8*) + offsetof(CDoom::Player, @cmd)).as(CDoom::Ticcmd*)
+    cmd = pointerof(player.value.@cmd)
     if player.value.mo.value.flags & CDoom::Mobjflag::MF_JUSTATTACKED.value != 0
       cmd.value.angleturn = 0
       cmd.value.forwardmove = 0xc800 // 512
@@ -20458,7 +20447,7 @@ module Doocr
                               on : CDoom::DoomBool*,
                               percent : CDoom::Patch*)
     CDoom.stlib_init_num(
-      (p.as(UInt8*) + offsetof(CDoom::ST_Percent, @n)).as(CDoom::ST_Number*),
+     pointerof(p.value.@n),
       x, y, pl, num, on, 3)
     p.value.p = percent
   end
@@ -20469,7 +20458,7 @@ module Doocr
     end
 
     CDoom.stlib_update_num(
-      (per.as(UInt8*) + offsetof(CDoom::ST_Percent, @n)).as(CDoom::ST_Number*),
+     pointerof(per.value.@n),
       refresh
     )
   end
@@ -21225,7 +21214,7 @@ module Doocr
       CDoom::ST_HEALTHX,
       CDoom::ST_HEALTHY,
       CDoom.tallnum,
-      (CDoom.plyr.as(UInt8*) + offsetof(CDoom::Player, @health)).as(Int32*),
+      pointerof(CDoom.plyr.value.@health),
       pointerof(CDoom.st_statusbaron),
       CDoom.tallpercent)
 
@@ -21269,7 +21258,7 @@ module Doocr
       CDoom::ST_ARMORX,
       CDoom::ST_ARMORY,
       CDoom.tallnum,
-      (CDoom.plyr.as(UInt8*) + offsetof(CDoom::Player, @armorpoints)).as(Int32*),
+      pointerof(CDoom.plyr.value.@armorpoints),
       pointerof(CDoom.st_statusbaron),
       CDoom.tallpercent)
 
@@ -23247,7 +23236,7 @@ module Doocr
     CDoom.mainzone.value.blocklist.tag = CDoom::PU_STATIC
     CDoom.mainzone.value.rover = block
 
-    block.value.prev = (CDoom.mainzone.as(UInt8*) + offsetof(CDoom::Memzone, @blocklist)).as(CDoom::Memblock*)
+    block.value.prev = pointerof(CDoom.mainzone.value.@blocklist)
     block.value.next = block.value.prev
 
     # 0 indicates a free block.
@@ -23391,7 +23380,7 @@ module Doocr
 
   def self.z_free_tags(lowtag : LibC::Int, hightag : LibC::Int)
     block = CDoom.mainzone.value.blocklist.next
-    while block != (CDoom.mainzone.as(UInt8*) + offsetof(CDoom::Memzone, @blocklist)).as(CDoom::Memblock*)
+    while block != pointerof(CDoom.mainzone.value.@blocklist)
       # get link before freeing
       nextb = block.value.next
 
@@ -23413,7 +23402,7 @@ module Doocr
     block = CDoom.mainzone.value.blocklist.next
 
     loop do
-      if block.value.next == (CDoom.mainzone.as(UInt8*) + offsetof(CDoom::Memzone, @blocklist)).as(CDoom::Memblock*)
+      if block.value.next == pointerof(CDoom.mainzone.value.@blocklist)
         # all blocks have been hit
         break
       end
