@@ -1866,7 +1866,7 @@ module Doocr
     print "\e[48;2;#{br};#{bgc};#{bb}m"
     puts "DOO-CR Operating System v#{VERSION_STR} ".center(77)
     puts " DEMO v#{DEMOVERSION} | SAVE v#{SAVEVERSION} | NET v#{NETVERSION} ".center(77)
-    print "\e[0m\e[3;999r"
+    print "\e[0m"
     print "\e[3;1H\e[38;5;250m\e[49m"
 
     print CDoom::D_DEVSTR if CDoom.devparm != 0
@@ -11025,10 +11025,7 @@ module Doocr
         sector.value.linecount.times do |i|
           templine = sector.value.lines[i]
           tsec = CDoom.get_next_sector(templine, sector)
-          if tsec.null?
-            sector += 1
-            next
-          end
+          next if tsec.null?
           min = tsec.value.lightlevel if tsec.value.lightlevel < min
         end
         sector.value.lightlevel = min
@@ -11049,10 +11046,7 @@ module Doocr
           sector.value.linecount.times do |i|
             templine = sector.value.lines[i]
             temp = CDoom.get_next_sector(templine, sector)
-            if temp.null?
-              sector += 1
-              next
-            end
+            next if temp.null?
             bright = temp.value.lightlevel if temp.value.lightlevel > bright
           end
         end
