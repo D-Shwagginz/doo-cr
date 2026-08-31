@@ -1,4 +1,5 @@
 module Doocr
+  # Misc variables
   @@deh_initial_health = 100
   @@deh_initial_bullets = 50
   @@deh_max_health = 200
@@ -16,6 +17,7 @@ module Doocr
   @@deh_bfg_cells_per_shot = 40
   @@deh_species_infighting = 0
 
+  # The type of Dehacked Block
   enum DehBlocks
     None
     Thing
@@ -32,6 +34,7 @@ module Doocr
     Codeptrs
   end
 
+  # The blocks header word, matching to it's type and the following sub-header words
   DEH_BLOCKS = {
     "thing" => {
       DehBlocks::Thing, [
@@ -137,16 +140,26 @@ module Doocr
     },
   }
 
+  # The dehacked files to load
   @@dehackeds = [] of String
+  # Current includes to load
   @@deh_cur_include = [] of Tuple(String, Bool) # name, notext
+  # The original codepointer table for use in Pointer N (Frame X)
   @@original_codepointers = [] of Void*
 
+  # Adds a dehacked file
+  # Parses it and changes everything accordingly
+  # Supports pre-bex dehacked as well as bex
   def self.deh_add_dehacked(io : IO, in_wad : Bool = false, included : Bool = false, notext : Bool = false)
+    # The parser's current data
     cur_block = DehBlocks::None
     cur_num = -1
     cur_parser = [] of String
+
+    # Init the codepointers
     @@original_codepointers = @@states.map(&.action) if @@original_codepointers.empty?
 
+    # Until the EOF
     while (line = io.gets)
       # Skip comments and null lines
       next if line.size == 0
@@ -170,7 +183,7 @@ module Doocr
           next
         end
 
-        if line.starts_with?("Text")
+        if line.starts_with?("Text") && !notext
           deh_parse_text(line, io)
           next
         end
@@ -191,6 +204,7 @@ module Doocr
           cur_block = DehBlocks::None
         end
 
+        # BEX include. Errors if include is in a wad's DEHACKED or if it is nested
         if line.downcase.starts_with?("include")
           cur_block = DehBlocks::None
 
@@ -212,25 +226,31 @@ module Doocr
         # I don't care about caps
         line = line = line.downcase
 
+        # Standard dehacked
+
+        # OG Function Pointer
         if line.starts_with?("pointer")
           cur_block = DehBlocks::Pointer
           cur_num = if m = line.match(/\(frame(\d+)\)/)
                       m[1].to_i
                     else
-                      -1 # malformed header -- Codep line below will no-op
+                      -1 # malformed header. Codep line below will no-op
                     end
           cur_parser = ["codepframe="]
           next
         end
 
-        # Standard dehacked
+        # Run through the current parsers line headers
         cur_parser.each_with_index do |start, loc|
+          # Line has header?
           if line.starts_with?(start)
             case cur_block
+              # Set thing data. Thing is laid out 1 to 1 with dehacked header hash
             when DehBlocks::Thing
               next if cur_num < 1 || cur_num > @@mobjinfo.size
               ((@@mobjinfo.to_unsafe + cur_num - 1).as(Int32*) + loc).value =
                 line[start.size..].to_i(strict: false)
+                # Fame is not all Int32 unlike thing, so parse it manually
             when DehBlocks::Frame
               next if cur_num < 0 || cur_num >= @@states.size
               state = @@states.to_unsafe + cur_num
@@ -249,6 +269,7 @@ module Doocr
               when 5 # Unknown 2
                 state.value.misc2 = value
               end
+              # Ditto
             when DehBlocks::Sound
               next if cur_num < 0 || cur_num >= @@s_sfx.size
               sound = @@s_sfx.to_unsafe + cur_num
@@ -263,6 +284,7 @@ module Doocr
               when 3 # Zero 3
                 sound.value.volume = value
               end
+              # Ditto
             when DehBlocks::Ammo
               value = line[start.size..].to_i(strict: false)
               case loc
@@ -271,10 +293,12 @@ module Doocr
               when 1 # Per ammo
                 CDoom.clipammo[cur_num] = value
               end
+              # Weapon is all Int32, parse based off loc
             when DehBlocks::Weapon
               next if cur_num < 0 || cur_num >= CDoom::Weapontype::NUMWEAPONS.value
               ((CDoom.weaponinfo.to_unsafe + cur_num).as(Int32*) + loc).value =
                 line[start.size..].to_i(strict: false)
+                # Custom cheats
             when DehBlocks::Cheat
               value = [] of UInt8
               line[start.size..].each_char { |chr| value << scramble(chr.ord.to_u8!) }
@@ -326,6 +350,7 @@ module Doocr
                 @@cheat_amap_seq= value
                 CDoom.cheat_amap.sequence = @@cheat_amap_seq.to_unsafe
               end
+              # Misc data, set all manually (maybe could use array of pointers to the variables?)
             when DehBlocks::Misc
               value = line[start.size..].to_i(strict: false)
               case loc
@@ -362,8 +387,9 @@ module Doocr
               when 15 # Monsters infight
                 @@deh_species_infighting = value == 221 ? 1 : value == 202 ? 0 : @@deh_species_infighting
               end
+              # The OG pointer
             when DehBlocks::Pointer
-              # cur_num is the target frame (from "Pointer N (Frame X)");
+              # cur_num is the target frame (rom Pointer N (Frame X)
               # value is the vanilla frame whose original action we copy.
               value = line[start.size..].to_i(strict: false)
               next if cur_num < 0 || cur_num >= @@states.size
@@ -373,6 +399,7 @@ module Doocr
           end
         end
 
+        # Check if this line is a new block
         DEH_BLOCKS.each do |block, block_info|
           if line.starts_with?(block)
             num = line[block.size..].to_i?(strict: false)
@@ -389,6 +416,7 @@ module Doocr
     end
   end
 
+  # Initializes dehacked files as well as DEHACKED in wad if present
   def self.deh_init_dehacked
     # Add in DEHACKED lump
     if (i = w_check_num_for_name("DEHACKED".to_unsafe)) != -1

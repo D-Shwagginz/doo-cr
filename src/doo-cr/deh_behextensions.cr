@@ -1,4 +1,6 @@
 module Doocr
+  # Constant values to be changed with string and text
+
   PRESSKEY = "press a key."
   PRESSYN  = "press y or n."
 
@@ -774,7 +776,11 @@ module Doocr
   @@deh_thustr_9 = "level 9: stronghold"
   @@deh_thustr_9
 
-  DEH_STRINGS = { # String vars, split?
+
+
+    # The C Constant string name mapped to it's variables
+    # For cases interp, use to variables and split on '%s'
+  DEH_STRINGS = {
     "D_DEVSTR"           => [pointerof(@@deh_d_devstr)],
     "QUITMSG"            => [pointerof(@@deh_quit_msg)],
     "LOADNET"            => [pointerof(@@deh_load_net)],
@@ -1055,6 +1061,8 @@ module Doocr
     "THUSTR_9"           => [pointerof(@@deh_thustr_9)],
   }
 
+
+  # A mapping of the BEX code name to the Crystal pointer
   DEH_CODEPTRS = {
     # Player
     "light0"        => (->CDoom.a_light0).pointer,
@@ -1135,6 +1143,7 @@ module Doocr
     "brainexplode" => (->CDoom.a_brain_explode).pointer,
   }
 
+  # Read a text section the way dehacked intends
   def self.deh_read_text(io : IO, size : Int32) : String
     result = Bytes.new(size)
     count = 0
@@ -1142,7 +1151,7 @@ module Doocr
     while count < size
       c = io.read_byte.not_nil!
 
-      unless c == 13
+      unless c == '\r'
         result[count] = c
         count += 1
       end
@@ -1151,9 +1160,12 @@ module Doocr
     String.new(result[0, count])
   end
 
+  # Parses a text block
+  # Although not a BEX extension, it uses DEH_STRINGS so I put it in here
   def self.deh_parse_text(line : String, io : IO)
     sizes = line["Text".size..].split(' ', remove_empty: true).map(&.to_i)
 
+    # Split for interp
     old = deh_read_text(io, sizes[0]).split("'%s'", 2)
     new = deh_read_text(io, sizes[1]).split("'%s'", 2)
 
@@ -1170,21 +1182,29 @@ module Doocr
     end
   end
 
+  # Parse a string block
   def self.deh_parse_string(line : String, io : IO)
     return unless eq = line.index('=')
+    
     key = line[0...eq].strip.upcase
     value = line[(eq + 1)..].lstrip
+
+    # Get multilines
     while value[-1]? == '\\'
       break unless new_line = io.gets
       value = value.rchop + new_line.lstrip
     end
+
     return unless str_data = DEH_STRINGS[key]?
+
+    # Split for interp and set if found in DEH_STRINGS
     value.split("'%s'", 2).each_with_index do |s, i|
       break if i >= str_data.size
       str_data[i].value = s
     end
   end
 
+  # Parses a par block
   def self.deh_parse_par(line : String)
     line = line.downcase
     if line.starts_with?("par")
@@ -1197,12 +1217,13 @@ module Doocr
         # Map
         CDoom.cpars[pars[0]] = pars[1]
       else
-        # Episode Mission
+        # Episode, Mission
         (CDoom.pars.to_unsafe + pars[0]).value[pars[1]] = pars[2]
       end
     end
   end
 
+  # Parses a codeptr block
   def self.deh_parse_codeptr(line : String)
     line = line.downcase
     return unless line.starts_with?("frame")
@@ -1217,12 +1238,14 @@ module Doocr
 
     name = parts[1]
 
+    # Allow null pointer name
     if name == "null"
       (@@states.to_unsafe + frame).value.action = Pointer(Void).null
       return
     end
 
-    return unless ptr = DEH_CODEPTRS[name.lchop("a_")]? # unknown pointer -> skip, don't crash
+    # a_ chop for compatibility with names
+    return unless ptr = DEH_CODEPTRS[name.lchop("a_")]? # unknown pointer
 
     (@@states.to_unsafe + frame).value.action = ptr
   end
