@@ -2366,16 +2366,6 @@ lib CDoom
 
   # __M__ARGV__
 
-  #
-  # MISC
-  #
-  $myargc : LibC::Int
-  $myargv : LibC::Char**
-
-  # Returns the position of the given parameter
-  # in the arg list (0 if not found).
-  fun m_check_parm = M_CheckParm(check : LibC::Char*) : LibC::Int
-
   # __M_CHEAT__
 
   #

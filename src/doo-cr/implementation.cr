@@ -889,10 +889,6 @@ fun i_init_graphics = I_InitGraphics
   Doocr.i_init_graphics
 end
 
-fun m_check_parm = M_CheckParm(check : LibC::Char*) : LibC::Int
-  Doocr.m_check_parm(check)
-end
-
 fun m_clear_box = M_ClearBox(box : CDoom::Fixed*)
   Doocr.m_clear_box(box)
 end

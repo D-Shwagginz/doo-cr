@@ -193,13 +193,10 @@ module Doocr
     return doom_write(handle, str.as(Void*), doom_strlen(str))
   end
 
-  def self.doom_init(argc : Int32, argv : UInt8**, flags : Int32)
+  def self.doom_init
     CDoom.screen_buffer = GC.malloc(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT).as(UInt8*)
     CDoom.final_screen_buffer = GC.malloc(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT * 4).as(UInt8*)
     CDoom.last_update_time = CDoom.i_get_time
-
-    CDoom.myargc = argc
-    CDoom.myargv = argv
 
     d_doom_main
   end
@@ -1614,15 +1611,15 @@ module Doocr
     # Custom. Prioritize over other parmgs
     customwad = Pointer(UInt8*).null
     force = false
-    p = CDoom.m_check_parm("-iwad")
-    if p == 0
-      p = CDoom.m_check_parm("-fwad")
-      forced = p != 0
+    p = ARGV.index("-iwad")
+    if !p
+      p = ARGV.index("-fwad")
+      forced = !p.nil?
     end
 
-    if p != 0 && p < CDoom.myargc - 1
+    if p && p < ARGV.size - 1
       CDoom.modifiedgame = 1 # I hope so?
-      customwad = String.new(doomwaddir) + "/" + String.new(CDoom.myargv[p + 1])
+      customwad = String.new(doomwaddir) + "/" + ARGV[p + 1]
       if (handle = doom_open(customwad.to_unsafe, "rb".to_unsafe)).null?
         # Wad not found, give them a chance
         CDoom.doom_concat(customwad, ".wad".to_unsafe)
@@ -1646,7 +1643,7 @@ module Doocr
       return
     end
 
-    if CDoom.m_check_parm("-shdev") != 0
+    if ARGV.includes?("-shdev")
       CDoom.gamemode = CDoom::GameMode::Shareware
       CDoom.gamemission = CDoom::GameMission::Doom
       CDoom.devparm = 1
@@ -1657,7 +1654,7 @@ module Doocr
       return
     end
 
-    if CDoom.m_check_parm("-regdev") != 0
+    if ARGV.includes?("-regdev")
       CDoom.gamemode = CDoom::GameMode::Registered
       CDoom.gamemission = CDoom::GameMission::Doom
       CDoom.devparm = 1
@@ -1669,7 +1666,7 @@ module Doocr
       return
     end
 
-    if CDoom.m_check_parm("-comdev") != 0
+    if ARGV.includes?("-comdev")
       CDoom.gamemode = CDoom::GameMode::Commercial
       CDoom.gamemission = CDoom::GameMission::Doom2
       CDoom.devparm = 1
@@ -1749,19 +1746,19 @@ module Doocr
   # Find a Response File
   #
   def self.find_response_file
-    (CDoom.myargc - 1).times do |i|
+    (ARGV.size - 1).times do |i|
       i += 1
 
-      if CDoom.myargv[i][0].chr == '@'
+      if ARGV[i][0] == '@'
         moreargs = uninitialized StaticArray(UInt8*, 20)
 
         # READ THE RESPONSE FILE INTO MEMORY
-        handle = doom_open(CDoom.myargv[i] + 1, "rb".to_unsafe)
+        handle = doom_open(ARGV_UNSAFE[i] + 1, "rb".to_unsafe)
         if handle.null?
           print "\nNo such response file!"
           exit(1)
         end
-        puts "Found response file #{String.new(CDoom.myargv[i] + 1)}!"
+        puts "Found response file #{ARGV[i][1..]}!"
         doom_seek(handle, 0, CDoom::DoomSeek::DOOM_SEEK_END)
         size = doom_tell(handle)
         doom_seek(handle, 0, CDoom::DoomSeek::DOOM_SEEK_SET)
@@ -1772,23 +1769,18 @@ module Doocr
         # KEEP ALL CMDLINE ARGS FOLLOWING @RESPONSEFILE ARG
         index = 0
         k = i + 1
-        while k < CDoom.myargc
-          moreargs[index] = CDoom.myargv[k]
+        while k < ARGV.size
+          moreargs[index] = ARGV_UNSAFE[k]
           index += 1
           k += 1
         end
-
-        firstargv = CDoom.myargv[i]
-        CDoom.myargv = GC.malloc(sizeof(UInt8*) * CDoom::MAXARGVS).as(UInt8**)
-        CDoom.doom_memset(CDoom.myargv, 0, sizeof(UInt8*) * CDoom::MAXARGVS)
-        CDoom.myargv[0] = firstargv
 
         infile = file.as(UInt8*)
         indexinfile = 0
         k = 0
         indexinfile += 1 # SKIP PAST ARGV[0] (KEEP IT)
         loop do
-          CDoom.myargv[indexinfile] = infile + k
+          ARGV[indexinfile] = String.new(infile + k)
           indexinfile += 1
           while k < size &&
                 (((infile + k).value >= ' '.ord + 1) && ((infile + k).value <= 'z'.ord))
@@ -1805,17 +1797,16 @@ module Doocr
 
         k = 0
         while k < index
-          CDoom.myargv[indexinfile] = moreargs[k]
+          ARGV[indexinfile] = String.new(moreargs[k])
           indexinfile += 1
           k += 1
         end
-        CDoom.myargc = indexinfile
 
         # DISPLAY ARGS
-        puts "#{CDoom.myargc} command-line args"
+        puts "#{ARGV.size} command-line args"
         k = 1
-        while k < CDoom.myargc
-          puts String.new(CDoom.myargv[k])
+        while k < ARGV.size
+          puts ARGV[k]
           k += 1
         end
 
@@ -1838,21 +1829,19 @@ module Doocr
       exit(0)
     end
 
-    file = uninitialized StaticArray(UInt8, 256)
-
     CDoom.find_response_file
 
     CDoom.identify_version
 
     CDoom.modifiedgame = 0
 
-    CDoom.nomonsters = CDoom.m_check_parm("-nomonsters")
-    CDoom.respawnparm = CDoom.m_check_parm("-respawn")
-    CDoom.fastparm = CDoom.m_check_parm("-fast")
-    CDoom.devparm = CDoom.m_check_parm("-devparm")
-    if CDoom.m_check_parm("-altdeath") != 0
+    CDoom.nomonsters = ARGV.includes?("-nomonsters") ? 1 : 0
+    CDoom.respawnparm = ARGV.includes?("-respawn") ? 1 : 0
+    CDoom.fastparm = ARGV.includes?("-fast") ? 1 : 0
+    CDoom.devparm = ARGV.includes?("-devparm") ? 1 : 0
+    if ARGV.includes?("-altdeath")
       CDoom.deathmatch = 2
-    elsif CDoom.m_check_parm("-deathmatch") != 0
+    elsif ARGV.includes?("-deathmatch")
       CDoom.deathmatch = 1
     end
 
@@ -1872,10 +1861,10 @@ module Doocr
     print @@deh_d_devstr if CDoom.devparm != 0
 
     # turbo option
-    if (p = CDoom.m_check_parm("-turbo")) != 0
+    if p = ARGV.index("-turbo")
       scale = 200
 
-      if p < CDoom.myargc - 1
+      if p < ARGV.size - 1
         scale = ARGV[p + 1].to_i
       end
       scale = 10 if scale < 10
@@ -1892,65 +1881,59 @@ module Doocr
     #
     # convenience hack to allow -wart e m to add a wad file
     # prepend a tilde to the filename so wadfile will be reloadable
-    p = CDoom.m_check_parm("-wart")
-    if p != 0
-      CDoom.myargv[p][4] = 'p'.ord.to_u8 # big hack, change to -warp
+    p = ARGV.index("-wart")
+    if p
+      ARGV[p] = ARGV[p].sub(4, 'p') # big hack, change to -warp
 
       # Map name handling
       case CDoom.gamemode
       when CDoom::GameMode::Shareware, CDoom::GameMode::Retail, CDoom::GameMode::Registered
-        CDoom.doom_strcpy(file, "~#{CDoom::DEVMAPS}E")
-        CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 1][0]))
-        CDoom.doom_concat(file, "M")
-        CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 2][0]))
-        CDoom.doom_concat(file, ".wad")
-        puts "Warping to Episode #{String.new(CDoom.myargv[p + 1])}" +
-             ", Map #{String.new(CDoom.myargv[p + 2])}."
+        file = "~#{CDoom::DEVMAPS}E" +
+        ARGV[p + 1][0] + "M" + ARGV[p + 2][0] + ".wad"
+        puts "Warping to Episode #{ARGV[p + 1]}" +
+             ", Map #{ARGV[p + 2]}."
         # when CDoom::GameMode::Commercial
       else
         p = ARGV[p + 1].to_i
         if p < 10
-          CDoom.doom_strcpy(file, "~#{CDoom::DEVMAPS}cdata/map0")
-          CDoom.doom_concat(file, CDoom.doom_itoa(p, 10))
-          CDoom.doom_concat(file, ".wad")
+          file = "~#{CDoom::DEVMAPS}cdata/map0#{p}.wad"
         else
-          CDoom.doom_strcpy(file, "~#{CDoom::DEVMAPS}cdata/map")
-          CDoom.doom_concat(file, CDoom.doom_itoa(p, 10))
-          CDoom.doom_concat(file, ".wad")
+          file = "~#{CDoom::DEVMAPS}cdata/map#{p}.wad"
         end
       end
       CDoom.d_add_file(file)
     end
 
-    p = CDoom.m_check_parm("-file")
-    if p != 0
+    p = ARGV.index("-file")
+    if p
       # the parms after p are wadfile/lump names,
       # until end of parms or another - preceded parm
       CDoom.modifiedgame = 1 # homebrew levels
-      while (p += 1) != CDoom.myargc && CDoom.myargv[p][0].chr != '-'
-        CDoom.d_add_file(CDoom.myargv[p])
+      p += 1
+      while (p != ARGV.size) && ARGV[p][0] != '-'
+        CDoom.d_add_file(ARGV[p])
+        p += 1
       end
     end
 
-    p = CDoom.m_check_parm("-merge")
-    if p != 0
+    p = ARGV.index("-merge")
+    if p
       # the parms after p are wadfile/lump names,
       # until end of parms or another - preceded parm
       CDoom.modifiedgame = 1 # homebrew levels
-      while (p += 1) != CDoom.myargc && CDoom.myargv[p][0].chr != '-'
-        d_merge_file(CDoom.myargv[p])
+      while (p += 1) != ARGV.size && ARGV[p][0] != '-'
+        d_merge_file(ARGV_UNSAFE[p])
       end
     end
 
-    p = CDoom.m_check_parm("-playdemo")
+    p = ARGV.index("-playdemo")
 
-    p = CDoom.m_check_parm("-timedemo") if p == 0
+    p = ARGV.index("-timedemo") unless p
 
-    if p != 0 && p < CDoom.myargc - 1
-      CDoom.doom_strcpy(file, CDoom.myargv[p + 1])
-      CDoom.doom_concat(file, ".lmp")
+    if p && p < ARGV.size - 1
+      file = ARGV[p + 1] + ".lmp"
       CDoom.d_add_file(file)
-      puts "Playing demo #{String.new(CDoom.myargv[p + 1])}.lmp."
+      puts "Playing demo #{ARGV[p + 1]}.lmp."
     end
 
     # get skill / episode / map from parms
@@ -1959,37 +1942,37 @@ module Doocr
     CDoom.startmap = 1
     CDoom.autostart = 0
 
-    p = CDoom.m_check_parm("-skill")
-    if p != 0 && p < CDoom.myargc - 1
-      CDoom.startskill = CDoom::Skill.new(CDoom.myargv[p + 1][0] - '1'.ord)
+    p = ARGV.index("-skill")
+    if p && p < ARGV.size - 1
+      CDoom.startskill = CDoom::Skill.new(ARGV[p + 1][0] - '1')
       CDoom.autostart = 1
     end
 
-    p = CDoom.m_check_parm("-episode")
-    if p != 0 && p < CDoom.myargc - 1
-      CDoom.startepisode = CDoom.myargv[p + 1][0] - '0'.ord
+    p = ARGV.index("-episode")
+    if p && p < ARGV.size - 1
+      CDoom.startepisode = ARGV[p + 1][0] - '0'
       CDoom.startmap = 1
       CDoom.autostart = 1
     end
 
-    CDoom.m_check_parm("-timer")
-    if p != 0 && p < CDoom.myargc - 1 && CDoom.deathmatch != 0
+    p = ARGV.index("-timer")
+    if p && p < ARGV.size - 1 && CDoom.deathmatch != 0
       time = ARGV[p + 1].to_i
       puts "Levels will end after #{time} minute" + (time > 1 ? "s" : "") + "."
     end
 
-    p = CDoom.m_check_parm("-avg")
-    if p != 0 && p < CDoom.myargc - 1 && CDoom.deathmatch != 0
+    p = ARGV.index("-avg")
+    if p && p < ARGV.size - 1 && CDoom.deathmatch != 0
       puts "Austin Virtual Gaming: Levels will end after 20 minutes"
     end
 
-    p = CDoom.m_check_parm("-warp")
-    if p != 0
-      if p < CDoom.myargc - 1 && CDoom.gamemode == CDoom::GameMode::Commercial
+    p = ARGV.index("-warp")
+    if p
+      if p < ARGV.size - 1 && CDoom.gamemode == CDoom::GameMode::Commercial
         CDoom.startmap = ARGV[p + 1].to_i
-      elsif p < CDoom.myargc - 2
-        CDoom.startepisode = CDoom.myargv[p + 1][0] - '0'.ord
-        CDoom.startmap = CDoom.myargv[p + 2][0] - '0'.ord
+      elsif p < ARGV.size - 2
+        CDoom.startepisode = ARGV[p + 1][0] - '0'
+        CDoom.startmap = ARGV[p + 2][0] - '0'
       end
       CDoom.autostart = 1
     end
@@ -2113,51 +2096,41 @@ module Doocr
     # check for a driver that wants intermission stats
     {% if false %}
       # [pd] Unsure how to test this
-      p = CDoom.m_check_parm("-statcopy")
-      if p != 0 && p < CDoom.myargc - 1
+      p = ARGV.index("-statcopy")
+      if p && p < ARGV.size - 1
         # for statistics driver
-        CDoom.statcopy = String.new(CDoom.myargv[p + 1]).to_i64.as(Void*)
+        CDoom.statcopy = String.new(ARGV[p + 1]).to_i64.as(Void*)
         puts "External statistics registered."
       end
     {% end %}
 
     # start the apropriate game based on parms
-    p = CDoom.m_check_parm("-record")
+    p = ARGV.index("-record")
 
-    if p != 0 && p < CDoom.myargc - 1
-      CDoom.g_record_demo(CDoom.myargv[p + 1])
+    if p && p < ARGV.size - 1
+      CDoom.g_record_demo(ARGV[p + 1])
       CDoom.autostart = 1
     end
 
     demo_deferred = false
-    p = CDoom.m_check_parm("-playdemo")
-    if p != 0 && p < CDoom.myargc - 1
+    p = ARGV.index("-playdemo")
+    if p && p < ARGV.size - 1
       CDoom.singledemo = 1 # quit after one demo
-      CDoom.g_defered_play_demo(CDoom.myargv[p + 1])
+      CDoom.g_defered_play_demo(ARGV[p + 1])
       CDoom.d_doom_loop # never returns
       demo_deferred = true
     end
 
-    p = CDoom.m_check_parm("-timedemo")
-    if p != 0 && p < CDoom.myargc - 1
-      CDoom.g_time_demo(CDoom.myargv[p + 1])
+    p = ARGV.index("-timedemo")
+    if p && p < ARGV.size - 1
+      CDoom.g_time_demo(ARGV[p + 1])
       CDoom.d_doom_loop # never returns
       demo_deferred = true
     end
 
-    p = CDoom.m_check_parm("-loadgame")
-    if p != 0 && p < CDoom.myargc - 1
-      # [pd] We don't support the cdrom flag
-      # if CDoom.m_check_parm("-cdrom")
-      #   CDoom.doom_strcpy(file, "c:\\doomdata\\")
-      #   CDoom.doom_concat(file, @@deh_savegamename)
-      #   CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 1][0]))
-      #   CDoom.doom_concat(file, ".dsg")
-      # else
-      CDoom.doom_strcpy(file, @@deh_savegamename)
-      CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 1][0]))
-      CDoom.doom_concat(file, ".dsg")
-      # end
+    p = ARGV.index("-loadgame")
+    if p && p < ARGV.size - 1
+      file = @@deh_savegamename + ARGV[p + 1][0] + ".dsg"
       CDoom.g_load_game(file)
     end
 
@@ -2171,12 +2144,9 @@ module Doocr
 
     CDoom.g_begin_recording if CDoom.demorecording != 0
 
-    if CDoom.m_check_parm("-debugfile") != 0
-      filename = uninitialized StaticArray(UInt8, 20)
-      CDoom.doom_strcpy(filename, "debug")
-      CDoom.doom_concat(filename, CDoom.doom_itoa(CDoom.consoleplayer, 10))
-      CDoom.doom_concat(filename, ".txt")
-      puts "debug output to: #{String.new(filename.to_unsafe)}"
+    if ARGV.includes?("-debugfile")
+      filename = "debug#{CDoom.consoleplayer}.txt"
+      puts "debug output to: #{filename}"
       CDoom.debugfile = doom_open(filename.to_unsafe, "w".to_unsafe)
     end
 
@@ -4516,8 +4486,8 @@ module Doocr
     CDoom.doom_strcpy(CDoom.demoname, name)
     CDoom.doom_concat(CDoom.demoname, ".lmp")
     maxsize = 0x20000
-    i = CDoom.m_check_parm("-maxdemo")
-    maxsize = ARGV[i + 1].to_i * 1024 if i != 0 && i < CDoom.myargc - 1
+    i = ARGV.index("-maxdemo")
+    maxsize = ARGV[i + 1].to_i * 1024 if i && i < ARGV.size - 1
     CDoom.demobuffer = CDoom.z_malloc(maxsize, CDoom::PU_STATIC, Pointer(Void).null).as(UInt8*)
     CDoom.demoend = CDoom.demobuffer + maxsize
 
@@ -4614,8 +4584,8 @@ module Doocr
   # g_time_demo
   #
   def self.g_time_demo(name : UInt8*)
-    CDoom.nodrawers = CDoom.m_check_parm("-nodraw")
-    CDoom.noblit = CDoom.m_check_parm("-noblit")
+    CDoom.nodrawers = ARGV.includes?("-nodraw") ? 1 : 0
+    CDoom.noblit = ARGV.includes?("-noblit") ? 1 : 0
     CDoom.timingdemo = 1
     CDoom.singletics = 1
 
@@ -5323,9 +5293,9 @@ module Doocr
     CDoom.doom_memset(CDoom.doomcom, 0, sizeof(typeof(CDoom.doomcom.value)))
 
     # set up for network
-    i = CDoom.m_check_parm("-dup")
-    if i != 0 && i < CDoom.myargc - 1
-      CDoom.doomcom.value.ticdup = CDoom.myargv[i + 1][0] - '0'.ord
+    i = ARGV.index("-dup")
+    if i && i < ARGV.size - 1
+      CDoom.doomcom.value.ticdup = ARGV[i + 1][0] - '0'
       CDoom.doomcom.value.ticdup = 1 if CDoom.doomcom.value.ticdup < 1
       CDoom.doomcom.value.ticdup = 9 if CDoom.doomcom.value.ticdup > 9
     else
@@ -5343,16 +5313,16 @@ module Doocr
       end
     end
 
-    p = CDoom.m_check_parm("-port")
-    if p != 0 && p < CDoom.myargc - 1
+    p = ARGV.index("-port")
+    if p && p < ARGV.size - 1
       @@doomport = ARGV[p + 1].to_i
       puts "using alternate port #{@@doomport}"
     end
 
     # parse network game options,
     #  -net <host>
-    i = CDoom.m_check_parm("-net")
-    if i == 0
+    i = ARGV.index("-net")
+    unless i
       # single player game
       CDoom.netgame = 0
       CDoom.doomcom.value.id = CDoom::DOOMCOM_ID
@@ -5371,8 +5341,8 @@ module Doocr
     CDoom.doomcom.value.numnodes = 1 # this node for sure
 
     # Host ip is given, else is host
-    if (i += 1) < CDoom.myargc && CDoom.myargv[i][0] != '-'.ord
-      arg = String.new(CDoom.myargv[i])
+    if (i += 1) < ARGV.size && ARGV[i][0] != '-'
+      arg = ARGV[i]
 
       @@sendaddress[1] =
         if arg[0] == '.'
@@ -6485,22 +6455,6 @@ module Doocr
     CDoom.i_set_palette(CDoom.w_cache_lump_name("PLAYPAL", CDoom::PU_CACHE).as(UInt8*))
   end
 
-  #
-  # m_check_parm
-  # Checks for the given parameter
-  # in the program's command line arguments.
-  # Returns the argument number (1 to argc-1)
-  # or 0 if not present
-  def self.m_check_parm(check : UInt8*) : Int32
-    i = 1
-    while i < CDoom.myargc
-      return i if CDoom.doom_strcasecmp(check, CDoom.myargv[i]) == 0
-      i += 1
-    end
-
-    return 0
-  end
-
   def self.m_clear_box(box : CDoom::Fixed*)
     (box + CDoom::BOXTOP).value = Int32::MIN
     (box + CDoom::BOXRIGHT).value = Int32::MIN
@@ -6642,9 +6596,6 @@ if !File.exists?(name)
   def self.m_load_select(choice : Int32)
     name = uninitialized StaticArray(UInt8, 256)
 
-    # if CDoom.m_check_parm("-cdrom")
-    #  CDoom.doom_sprintf(name, "c:\\doomdata\\#{@@deh_savegamename}#{choice}.dsg")
-    # else
     CDoom.doom_strcpy(name, @@deh_savegamename)
     CDoom.doom_concat(name, CDoom.doom_itoa(choice, 10))
     CDoom.doom_concat(name, ".dsg")
@@ -7860,9 +7811,9 @@ if !File.exists?(name)
     end
 
     # check for a custom default file
-    i = CDoom.m_check_parm("-config")
-    if i != 0 && i < CDoom.myargc - 1
-      CDoom.defaultfile = CDoom.myargv[i + 1]
+    i = ARGV.index("-config")
+    if i && i < ARGV.size - 1
+      CDoom.defaultfile = ARGV[i + 1]
       puts "        default file: #{String.new(CDoom.defaultfile)}"
     else
       CDoom.defaultfile = CDoom.basedefault
@@ -15781,15 +15732,15 @@ if !File.exists?(name)
     # See if -TIMER needs to be used.
     CDoom.level_timer = 0
 
-    i = CDoom.m_check_parm("-avg")
-    if i != 0 && CDoom.deathmatch != 0
+    i = ARGV.index("-avg")
+    if i && CDoom.deathmatch != 0
       CDoom.level_timer = 1
       CDoom.level_time_count = 20 * 60 * 35
     end
 
-    i = CDoom.m_check_parm("-timer")
-    if i != 0 && CDoom.deathmatch != 0
-      time = CDoom.doom_atoi(CDoom.myargv[i + 1]) * 60 * 35
+    i = ARGV.index("-timer")
+    if i && CDoom.deathmatch != 0
+      time = CDoom.doom_atoi(ARGV[i + 1]) * 60 * 35
       CDoom.level_timer = 1
       CDoom.level_time_count = time
     end

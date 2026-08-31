@@ -251,4 +251,4 @@ at_exit do
 end
 
 # Make it happen!
-Doocr.doom_init(ARGC_UNSAFE, ARGV_UNSAFE, 0)
+Doocr.doom_init
