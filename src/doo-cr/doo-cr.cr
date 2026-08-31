@@ -6611,7 +6611,7 @@ module Doocr
       return
     end
 
-    m_setup_next_menu(pointerof(@@loaddef))
+    m_setup_next_menu(@@loaddef)
     m_read_save_strings
   end
 
@@ -6668,7 +6668,7 @@ module Doocr
 
     return if CDoom.gamestate != CDoom::Gamestate::Level
 
-    m_setup_next_menu(pointerof(@@savedef))
+    m_setup_next_menu(@@savedef)
     m_read_save_strings
   end
 
@@ -6693,7 +6693,7 @@ module Doocr
     if CDoom.quick_save_slot < 0
       CDoom.m_start_control_panel
       m_read_save_strings
-      m_setup_next_menu(pointerof(@@savedef))
+      m_setup_next_menu(@@savedef)
       CDoom.quick_save_slot = -2 # means to pick a slot now
       return
     end
@@ -6761,7 +6761,7 @@ module Doocr
   end
 
   def self.m_sound(choice : Int32)
-    m_setup_next_menu(pointerof(@@sounddef))
+    m_setup_next_menu(@@sounddef)
   end
 
   def self.m_sfxvol(choice : Int32)
@@ -6808,9 +6808,9 @@ module Doocr
     end
 
     if CDoom.gamemode == CDoom::GameMode::Commercial
-      m_setup_next_menu(pointerof(@@newdef))
+      m_setup_next_menu(@@newdef)
     else
-      m_setup_next_menu(pointerof(@@epidef))
+      m_setup_next_menu(@@epidef)
     end
   end
 
@@ -6841,7 +6841,7 @@ module Doocr
   def self.m_episode(choice : Int32)
     if CDoom.gamemode == CDoom::GameMode::Shareware && choice != 0
       m_start_message(@@deh_swstring, NULL_PROCP1, 0)
-      m_setup_next_menu(pointerof(@@readdef1))
+      m_setup_next_menu(@@readdef1)
       return
     end
 
@@ -6852,7 +6852,7 @@ module Doocr
     end
 
     CDoom.epi = choice
-    m_setup_next_menu(pointerof(@@newdef))
+    m_setup_next_menu(@@newdef)
   end
 
   #
@@ -6875,7 +6875,7 @@ module Doocr
   end
 
   def self.m_options(choice : Int32)
-    m_setup_next_menu(pointerof(@@optionsdef))
+    m_setup_next_menu(@@optionsdef)
   end
 
   #
@@ -6896,7 +6896,7 @@ module Doocr
   end
 
   def self.m_moreoptions(choice : Int32)
-    m_setup_next_menu(pointerof(@@moreoptions_def))
+    m_setup_next_menu(@@moreoptions_def)
   end
 
   def self.m_draw_moreoptions
@@ -6905,7 +6905,7 @@ module Doocr
     @@moreoptions_menus[@@current_options_menu].each_with_index do |item, i|
       m_write_text(@@moreoptions_def.x, @@moreoptions_def.y +
                                         CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
-        String.new(item.text) + (
+        item.text + (
           (item.bool.null? ? "" : (item.bool.value != 0 ? "on" : "off")) +
           (item.num.null? ? "" : "#{item.num.value + 1}")
         ))
@@ -6915,8 +6915,7 @@ module Doocr
   def self.m_change_options_menu(choice : Int32)
     @@current_options_menu -= 1 if choice == 0 && @@current_options_menu > 0
     @@current_options_menu += 1 if choice == 1 && @@current_options_menu < @@moreoptions_menus.size - 1
-    @@moreoptions_def.menuitems = (@@moreoptions_menus.to_unsafe + @@current_options_menu).value.to_unsafe
-    @@moreoptions_def.numitems = @@moreoptions_menus[@@current_options_menu].size
+    @@moreoptions_def.menuitems = @@moreoptions_menus[@@current_options_menu]
   end
 
   def self.m_change_midibank(choice : Int32)
@@ -6926,7 +6925,7 @@ module Doocr
   end
 
   def self.m_edit_controls(choice : Int32)
-    m_setup_next_menu(pointerof(@@editcontrols_def))
+    m_setup_next_menu(@@editcontrols_def)
   end
 
   @@selected_edit = Pointer(Int32).null
@@ -7004,7 +7003,7 @@ module Doocr
     @@editcontrols_menu.each_with_index do |item, i|
       m_write_text(@@editcontrols_def.x, @@editcontrols_def.y +
                                          CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
-        String.new(item.text) + (item.num.null? ? "" : m_draw_key(item.num)))
+        item.text + (item.num.null? ? "" : m_draw_key(item.num)))
     end
   end
 
@@ -7090,7 +7089,7 @@ module Doocr
   def self.m_endgame_response(ch : Int32)
     return if ch != 'y'.ord
 
-    CDoom.current_menu.value.last_on = CDoom.item_on
+    @@current_menu.last_on = CDoom.item_on
     m_clear_menus
     CDoom.d_start_title
   end
@@ -7115,17 +7114,17 @@ module Doocr
   #
   def self.m_readthis(choice : Int32)
     choice = 0
-    m_setup_next_menu(pointerof(@@readdef1))
+    m_setup_next_menu(@@readdef1)
   end
 
   def self.m_readthis2(choice : Int32)
     choice = 0
-    m_setup_next_menu(pointerof(@@readdef2))
+    m_setup_next_menu(@@readdef2)
   end
 
   def self.m_finish_readthis(choice : Int32)
     choice = 0
-    m_setup_next_menu(pointerof(@@maindef))
+    m_setup_next_menu(@@maindef)
   end
 
   #
@@ -7448,7 +7447,7 @@ module Doocr
       when CDoom::KEY_F1 # Help key
         CDoom.m_start_control_panel
 
-        CDoom.current_menu = pointerof(@@readdef1)
+        @@current_menu = @@readdef1
 
         CDoom.item_on = 0
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
@@ -7465,7 +7464,7 @@ module Doocr
         return 1
       when CDoom::KEY_F4 # Sound Volume
         CDoom.m_start_control_panel
-        CDoom.current_menu = pointerof(@@sounddef)
+        @@current_menu = @@sounddef
         CDoom.item_on = CDoom::Soundenum::Sfxvol
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
         return 1
@@ -7517,62 +7516,62 @@ module Doocr
     case ch
     when CDoom::KEY_DOWNARROW
       loop do
-        CDoom.item_on = CDoom.item_on + 1 > CDoom.current_menu.value.numitems - 1 ? 0 : CDoom.item_on + 1
+        CDoom.item_on = CDoom.item_on + 1 >  @@current_menu.menuitems.size - 1 ? 0 : CDoom.item_on + 1
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pstop)
-        break unless CDoom.current_menu.value.menuitems[CDoom.item_on].status == -1
+        break unless @@current_menu.menuitems[CDoom.item_on].status == -1
       end
       return 1
     when CDoom::KEY_UPARROW
       loop do
-        CDoom.item_on = CDoom.item_on == 0 ? CDoom.current_menu.value.numitems - 1 : CDoom.item_on - 1
+        CDoom.item_on = CDoom.item_on == 0 ? @@current_menu.menuitems.size - 1 : CDoom.item_on - 1
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pstop)
-        break unless CDoom.current_menu.value.menuitems[CDoom.item_on].status == -1
+        break unless @@current_menu.menuitems[CDoom.item_on].status == -1
       end
       return 1
     when CDoom::KEY_LEFTARROW
-      if !CDoom.current_menu.value.menuitems[CDoom.item_on].routine.pointer.null? &&
-         CDoom.current_menu.value.menuitems[CDoom.item_on].status == 2
+      if !@@current_menu.menuitems[CDoom.item_on].routine.pointer.null? &&
+         @@current_menu.menuitems[CDoom.item_on].status == 2
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_stnmov)
-        CDoom.current_menu.value.menuitems[CDoom.item_on].routine.call(0)
+        @@current_menu.menuitems[CDoom.item_on].routine.call(0)
       end
       return 1
     when CDoom::KEY_RIGHTARROW
-      if !CDoom.current_menu.value.menuitems[CDoom.item_on].routine.pointer.null? &&
-         CDoom.current_menu.value.menuitems[CDoom.item_on].status == 2
+      if !@@current_menu.menuitems[CDoom.item_on].routine.pointer.null? &&
+         @@current_menu.menuitems[CDoom.item_on].status == 2
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_stnmov)
-        CDoom.current_menu.value.menuitems[CDoom.item_on].routine.call(1)
+        @@current_menu.menuitems[CDoom.item_on].routine.call(1)
       end
       return 1
     when CDoom::KEY_ENTER
-      if !CDoom.current_menu.value.menuitems[CDoom.item_on].routine.pointer.null? &&
-         CDoom.current_menu.value.menuitems[CDoom.item_on].status != 0
-        CDoom.current_menu.value.last_on = CDoom.item_on
-        if CDoom.current_menu.value.menuitems[CDoom.item_on].status == 2
-          CDoom.current_menu.value.menuitems[CDoom.item_on].routine.call(1)
+      if !@@current_menu.menuitems[CDoom.item_on].routine.pointer.null? &&
+         @@current_menu.menuitems[CDoom.item_on].status != 0
+        @@current_menu.last_on = CDoom.item_on
+        if @@current_menu.menuitems[CDoom.item_on].status == 2
+          @@current_menu.menuitems[CDoom.item_on].routine.call(1)
           CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_stnmov)
         else
-          CDoom.current_menu.value.menuitems[CDoom.item_on].routine.call(CDoom.item_on.to_i32)
+          @@current_menu.menuitems[CDoom.item_on].routine.call(CDoom.item_on.to_i32)
           CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol)
         end
       end
       return 1
     when CDoom::KEY_ESCAPE
-      CDoom.current_menu.value.last_on = CDoom.item_on
+      @@current_menu.last_on = CDoom.item_on
       m_clear_menus
       CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchx)
       return 1
     when CDoom::KEY_BACKSPACE
-      CDoom.current_menu.value.last_on = CDoom.item_on
-      if !CDoom.current_menu.value.prev_menu.null?
-        CDoom.current_menu = CDoom.current_menu.value.prev_menu
-        CDoom.item_on = CDoom.current_menu.value.last_on
+      @@current_menu.last_on = CDoom.item_on
+      if prev = @@current_menu.prev_menu
+        @@current_menu = prev
+        CDoom.item_on = @@current_menu.last_on
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
       end
       return 1
     else
       i = CDoom.item_on + 1
-      while i < CDoom.current_menu.value.numitems
-        if CDoom.current_menu.value.menuitems[i].alpha_key == ch
+      while i < @@current_menu.menuitems.size
+        if @@current_menu.menuitems[i].alpha_key == ch.chr
           CDoom.item_on = i
           CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pstop)
           return 1
@@ -7580,7 +7579,7 @@ module Doocr
         i += 1
       end
       (CDoom.item_on + 1).times do |i|
-        if CDoom.current_menu.value.menuitems[i].alpha_key == ch
+        if @@current_menu.menuitems[i].alpha_key == ch.chr
           CDoom.item_on = i
           CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pstop)
           return 1
@@ -7596,8 +7595,8 @@ module Doocr
     return if CDoom.menuactive != 0
 
     CDoom.menuactive = 1
-    CDoom.current_menu = pointerof(@@maindef)        # JDC
-    CDoom.item_on = CDoom.current_menu.value.last_on # JDC
+    @@current_menu = @@maindef        # JDC
+    CDoom.item_on = @@current_menu.last_on # JDC
   end
 
   @@x = 0
@@ -7643,23 +7642,23 @@ module Doocr
     return if CDoom.menuactive == 0
 
     # Darken background so the menu is more readable.
-    CDoom.current_menu.value.routine.call unless CDoom.current_menu.value.routine.pointer.null?
+    @@current_menu.routine.call unless @@current_menu.routine.pointer.null?
 
     # DRAW MENU
-    @@x = CDoom.current_menu.value.x.to_i32
-    @@y = CDoom.current_menu.value.y.to_i32
-    max = CDoom.current_menu.value.numitems
+    @@x = @@current_menu.x.to_i32
+    @@y = @@current_menu.y.to_i32
+    max = @@current_menu.menuitems.size
     max.times do |i|
-      menuitem = (CDoom.current_menu.value.menuitems + i)
+      menuitem = @@current_menu.menuitems[i]
 
-      if !menuitem.value.name.null? && menuitem.value.name[0] != 0
-        CDoom.v_draw_patch_direct(@@x, @@y, 0, CDoom.w_cache_lump_name(menuitem.value.name, CDoom::PU_CACHE).as(CDoom::Patch*))
+      unless menuitem.name.empty?
+        CDoom.v_draw_patch_direct(@@x, @@y, 0, CDoom.w_cache_lump_name(menuitem.name, CDoom::PU_CACHE).as(CDoom::Patch*))
       end
       @@y += CDoom::LINEHEIGHT
     end
 
     # DRAW SKULL
-    CDoom.v_draw_patch_direct(@@x + CDoom::SKULLXOFF, CDoom.current_menu.value.y - 5 + CDoom.item_on * CDoom::LINEHEIGHT, 0,
+    CDoom.v_draw_patch_direct(@@x + CDoom::SKULLXOFF, @@current_menu.y - 5 + CDoom.item_on * CDoom::LINEHEIGHT, 0,
       CDoom.w_cache_lump_name(CDoom.skull_name[CDoom.which_skull], CDoom::PU_CACHE).as(CDoom::Patch*))
   end
 
@@ -7667,9 +7666,9 @@ module Doocr
     CDoom.menuactive = 0
   end
 
-  def self.m_setup_next_menu(menudef : CDoom::Menu*)
-    CDoom.current_menu = menudef
-    CDoom.item_on = CDoom.current_menu.value.last_on
+  def self.m_setup_next_menu(menudef : Menu)
+    @@current_menu = menudef
+    CDoom.item_on = @@current_menu.last_on
   end
 
   def self.m_ticker
@@ -7681,9 +7680,9 @@ module Doocr
   end
 
   def self.m_init
-    CDoom.current_menu = pointerof(@@maindef)
+    @@current_menu = @@maindef
     CDoom.menuactive = 0
-    CDoom.item_on = CDoom.current_menu.value.last_on
+    CDoom.item_on = @@current_menu.last_on
     CDoom.which_skull = 0
     CDoom.skull_anim_counter = 10
     CDoom.screen_size = CDoom.screenblocks - 3
@@ -7698,10 +7697,10 @@ module Doocr
     case CDoom.gamemode
     when CDoom::GameMode::Commercial
       # Setup read menu for Doom II
-      (@@mainmenu.to_unsafe + CDoom::Mainenum::Readthis.value).value = @@mainmenu[CDoom::Mainenum::Quitdoom.value]
-      @@maindef.numitems = @@maindef.numitems - 1
+      @@mainmenu[CDoom::Mainenum::Readthis.value] = @@mainmenu[CDoom::Mainenum::Quitdoom.value]
+      @@maindef.menuitems.pop
       @@maindef.y = @@maindef.y + 8
-      @@newdef.prev_menu = pointerof(@@maindef)
+      @@newdef.prev_menu = @@maindef
       @@readdef1.routine = ->m_draw_commercial
       @@readdef1.x = 330
       @@readdef1.y = 165
@@ -7714,7 +7713,7 @@ module Doocr
       #  branching to an ad screen.
       #
       # We need to remove the fourth episode.
-      @@epidef.numitems = @@epidef.numitems - 1
+      @@epidef.menuitems.pop
     end
   end
 

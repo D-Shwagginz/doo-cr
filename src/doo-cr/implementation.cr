@@ -1081,14 +1081,6 @@ fun m_draw_thermo = M_DrawThermo(x : LibC::Int, y : LibC::Int, therm_width : Lib
   Doocr.m_draw_thermo(x, y, therm_width, therm_dot)
 end
 
-fun m_draw_empty_cell = M_DrawEmptyCell(menu : CDoom::Menu*, item : LibC::Int)
-  Doocr.m_draw_empty_cell(menu, item)
-end
-
-fun m_draw_selcell = M_DrawSelCell(menu : CDoom::Menu*, item : LibC::Int)
-  Doocr.m_draw_selcell(menu, item)
-end
-
 fun m_stop_message = M_StopMessage
   Doocr.m_stop_message
 end
@@ -1107,10 +1099,6 @@ end
 
 fun m_clear_menus = M_ClearMenus
   Doocr.m_clear_menus
-end
-
-fun m_setup_next_menu = M_SetupNextMenu(menudef : CDoom::Menu*)
-  Doocr.m_setup_next_menu(menudef)
 end
 
 fun m_ticker = M_Ticker

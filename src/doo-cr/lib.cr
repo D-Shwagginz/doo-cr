@@ -6277,46 +6277,7 @@ lib CDoom
   #
   # MENU TYPEDEFS
   #
-  struct Menuitem
-    # 0 = no cursor here, 1 = ok, 2 = arrows ok
-    status : LibC::Short
-
-    name : LibC::Char*
-    text : LibC::Char*
-    bool : Int32*
-    num : Int32*
-
-    # choice = menu item #.
-    # if status = 2,
-    #   choice=0:leftarrow,1:rightarrow
-    routine : Proc(LibC::Int, Nil)
-
-    # hotkey in menu
-    alpha_key : LibC::Char
-  end
-
-  struct Menu
-    numitems : LibC::Short # # of menu items
-    prev_menu : Menu*      # previous menu
-    menuitems : Menuitem*  # menu items
-    routine : Proc(Nil)    # draw routine
-    x : LibC::Short
-    y : LibC::Short       # x,y of menu
-    last_on : LibC::Short # last item user was on in menu
-  end
-
-  struct MenuCustomTextSeg
-    lump : LibC::Char*
-    x : LibC::Int
-    w : LibC::Int
-    offx : LibC::Int
-    offy : LibC::Int
-  end
-
-  struct MenuCustomText
-    name : LibC::Char*
-    segs : MenuCustomTextSeg[16]
-  end
+  
 
   # Blocky mode, has default, 0 = high, 1 = normal
   $detail_level = detailLevel : LibC::Int
@@ -6360,11 +6321,9 @@ lib CDoom
   $skull_name = skullName : LibC::Char*[2]
 
   # current menudef
-  $current_menu = currentMenu : Menu*
 
   # We create new menu text by cutting into existing graphics and pasting them to create the new text.
   # This way we don't ship code with embeded graphics that come from WAD files.
-  $menu_custom_texts : MenuCustomText[4]
 
   $custom_texts_count : LibC::Int
 
@@ -6389,9 +6348,6 @@ lib CDoom
     MainEnd
   end
 
-  $mainmenu = MainMenu : Menuitem[6]
-
-  $maindef = MainDef : Menu
 
   #
   # EPISODE SELECT
@@ -6403,10 +6359,6 @@ lib CDoom
     Ep4
     EpEnd
   end
-
-  $episodemenu = EpisodeMenu : Menuitem[4]
-
-  $epidef = EpiDef : Menu
 
   #
   # NEW GAME
@@ -6420,9 +6372,7 @@ lib CDoom
     NewgEnd
   end
 
-  $newgame_menu = NewGameMenu : Menuitem[5]
 
-  $newdef = NewDef : Menu
 
   #
   # OPTIONS MENU
@@ -6439,9 +6389,6 @@ lib CDoom
     OptEnd
   end
 
-  $options_menu = OptionsMenuFull : Menuitem[8]
-
-  $optionsdef = OptionsDef : Menu
 
   #
   # MOUSE OPTIONS
@@ -6453,9 +6400,6 @@ lib CDoom
     MouseOptEnd
   end
 
-  $mouse_options_menu = MouseOptionsMenu : Menuitem[3]
-
-  $mouseoptionsdef = MouseOptionsDef : Menu
 
   #
   # Read This! MENU 1 & 2
@@ -6465,18 +6409,11 @@ lib CDoom
     Read1End
   end
 
-  $readmenu1 = ReadMenu1 : Menuitem[1]
-
-  $readdef1 = ReadDef1 : Menu
 
   enum Read2enum
     Rdthsempty2
     Read2End
   end
-
-  $readmenu2 = ReadMenu2 : Menuitem[1]
-
-  $readdef2 = ReadDef2 : Menu
 
   #
   # SOUND VOLUME MENU
@@ -6489,9 +6426,6 @@ lib CDoom
     SoundEnd
   end
 
-  $soundmenu = SoundMenuFull : Menuitem[4]
-
-  $sounddef = SoundDef : Menu
 
   #
   # LOAD GAME MENU
@@ -6506,18 +6440,6 @@ lib CDoom
     LoadEnd
   end
 
-  $loadmenu = DOOM_LoadMenu : Menuitem[6]
-
-  $loaddef = LoadDef : Menu
-
-  #
-  # SAVE GAME MENU
-  #
-  $savemenu = SaveMenu : Menuitem[6]
-
-  $savedef = SaveDef : Menu
-
-  fun m_draw_custom_menu_text = M_DrawCustomMenuText(name : LibC::Char*, x : LibC::Int, y : LibC::Int)
 
   fun m_do_save = M_DoSave(slot : LibC::Int)
 
