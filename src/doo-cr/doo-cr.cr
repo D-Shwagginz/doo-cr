@@ -251,7 +251,7 @@ module Doocr
         next
       end
       open(name, "r") do |file|
-        @@savegamestrings[i] = file.read_string(CDoom::SAVESTRINGSIZE)
+        @@savegamestrings[i] = file.read_string(CDoom::SAVESTRINGSIZE).split('\0', 2)[0]
       end
       (@@loadmenu.to_unsafe + i).value.status = 1
     end
