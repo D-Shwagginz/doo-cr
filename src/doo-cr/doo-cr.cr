@@ -678,16 +678,16 @@ module Doocr
           CDoom.m_paninc.y = 0
         end
         CDoom.f_oldloc.x = Int32::MAX
-        CDoom.plr.value.message = CDoom.followplayer != 0 ? CDoom::AMSTR_FOLLOWON : CDoom::AMSTR_FOLLOWOFF
+        CDoom.plr.value.message = CDoom.followplayer != 0 ? @@deh_amstr_followon : @@deh_amstr_followoff
       when CDoom::AM_GRIDKEY
         CDoom.grid = CDoom.grid != 0 ? 0 : 1
-        CDoom.plr.value.message = CDoom.grid != 0 ? CDoom::AMSTR_GRIDON : CDoom::AMSTR_GRIDOFF
+        CDoom.plr.value.message = CDoom.grid != 0 ? @@deh_amstr_gridon : @@deh_amstr_gridoff
       when CDoom::AM_MARKKEY
-        CDoom.plr.value.message = "#{CDoom::AMSTR_MARKEDSPOT} #{CDoom.markpointnum}"
+        CDoom.plr.value.message = "#{@@deh_amstr_markedspot} #{CDoom.markpointnum}"
         CDoom.am_add_mark
       when CDoom::AM_CLEARMARKKEY
         CDoom.am_clear_marks
-        CDoom.plr.value.message = CDoom::AMSTR_MARKSCLEARED
+        CDoom.plr.value.message = @@deh_amstr_markscleared
       else
         @@cheatstate = 0
         rc = 0
@@ -1869,7 +1869,7 @@ module Doocr
     print "\e[0m"
     print "\e[3;1H\e[38;5;250m\e[49m"
 
-    print CDoom::D_DEVSTR if CDoom.devparm != 0
+    print @@deh_d_devstr if CDoom.devparm != 0
 
     # turbo option
     if (p = CDoom.m_check_parm("-turbo")) != 0
@@ -2001,6 +2001,14 @@ module Doocr
       end
     end
 
+    i = 0
+    ARGV.index("-deh").try do |p|
+      ARGV[(p + 1)..].each do |a|
+        break if a[0] == '-'
+        @@dehackeds << a
+      end
+    end
+
     # init subsystems
     puts "v_init: Allocate screens."
     CDoom.v_init
@@ -2016,6 +2024,13 @@ module Doocr
 
     puts "        Init Mergefiles." if ARGV.includes?("-merge")
     w_merge_multiple_files(@@merge_files)
+
+    if @@dehackeds.size > 0 || w_check_num_for_name("DEHACKED".to_unsafe) != -1
+      puts "        Init DeHackEd."
+      deh_init_dehacked
+    end
+
+    sync_deh_strings
 
     confirm_version()
 
@@ -2135,11 +2150,11 @@ module Doocr
       # [pd] We don't support the cdrom flag
       # if CDoom.m_check_parm("-cdrom")
       #   CDoom.doom_strcpy(file, "c:\\doomdata\\")
-      #   CDoom.doom_concat(file, CDoom::SAVEGAMENAME)
+      #   CDoom.doom_concat(file, @@deh_savegamename)
       #   CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 1][0]))
       #   CDoom.doom_concat(file, ".dsg")
       # else
-      CDoom.doom_strcpy(file, CDoom::SAVEGAMENAME)
+      CDoom.doom_strcpy(file, @@deh_savegamename)
       CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 1][0]))
       CDoom.doom_concat(file, ".dsg")
       # end
@@ -2872,16 +2887,16 @@ module Doocr
       case CDoom.gameepisode
       when 1
         CDoom.finaleflat = "FLOOR4_8"
-        CDoom.finaletext = CDoom.e1text
+        CDoom.finaletext = @@deh_e1text
       when 2
         CDoom.finaleflat = "SFLR6_1"
-        CDoom.finaletext = CDoom.e2text
+        CDoom.finaletext = @@deh_e2text
       when 3
         CDoom.finaleflat = "MFLR8_4"
-        CDoom.finaletext = CDoom.e3text
+        CDoom.finaletext = @@deh_e3text
       when 4
         CDoom.finaleflat = "MFLR8_3"
-        CDoom.finaletext = CDoom.e4text
+        CDoom.finaletext = @@deh_e4text
       else
         # Ouch.
       end
@@ -2892,22 +2907,22 @@ module Doocr
       case CDoom.gamemap
       when 6
         CDoom.finaleflat = "SLIME16"
-        CDoom.finaletext = CDoom.c1text
+        CDoom.finaletext = @@deh_c1text
       when 11
         CDoom.finaleflat = "RROCK14"
-        CDoom.finaletext = CDoom.c2text
+        CDoom.finaletext = @@deh_c2text
       when 20
         CDoom.finaleflat = "RROCK07"
-        CDoom.finaletext = CDoom.c3text
+        CDoom.finaletext = @@deh_c3text
       when 30
         CDoom.finaleflat = "RROCK17"
-        CDoom.finaletext = CDoom.c4text
+        CDoom.finaletext = @@deh_c4text
       when 15
         CDoom.finaleflat = "RROCK13"
-        CDoom.finaletext = CDoom.c5text
+        CDoom.finaletext = @@deh_c5text
       when 31
         CDoom.finaleflat = "RROCK19"
-        CDoom.finaletext = CDoom.c6text
+        CDoom.finaletext = @@deh_c6text
       else
         # Ouch
       end
@@ -2916,7 +2931,7 @@ module Doocr
     else
       CDoom.s_change_music(CDoom::Musicenum::MUS_read_m, 1)
       CDoom.finaleflat = "F_SKY1"     # Not used anywhere else.
-      CDoom.finaletext = CDoom.c1text # FIXME - other text, music?
+      CDoom.finaletext = @@deh_c1text # FIXME - other text, music?
     end
 
     CDoom.finalestage = 0
@@ -3347,30 +3362,30 @@ module Doocr
   end
 
   def self.wipe_do_color_x_form(width : Int32, height : Int32, ticks : Int32) : Int32
-  changed = 0
-  w = CDoom.wipe_scr
-  e = CDoom.wipe_scr_end
-  stop = w + width * height
+    changed = 0
+    w = CDoom.wipe_scr
+    e = CDoom.wipe_scr_end
+    stop = w + width * height
 
-  while w != stop
-    wv = w.value.to_i32
-    ev = e.value.to_i32
-    if wv != ev
-      if wv > ev
-        newval = wv - ticks
-        w.value = (newval < ev ? ev : newval).to_u8
-      elsif wv < ev
-        newval = wv + ticks
-        w.value = (newval > ev ? ev : newval).to_u8
+    while w != stop
+      wv = w.value.to_i32
+      ev = e.value.to_i32
+      if wv != ev
+        if wv > ev
+          newval = wv - ticks
+          w.value = (newval < ev ? ev : newval).to_u8
+        elsif wv < ev
+          newval = wv + ticks
+          w.value = (newval > ev ? ev : newval).to_u8
+        end
+        changed = 1
       end
-      changed = 1
+      w += 1
+      e += 1
     end
-    w += 1
-    e += 1
-  end
 
-  return (changed == 0).to_unsafe
-end
+    return (changed == 0).to_unsafe
+  end
 
   def self.wipe_exit_color_x_form(width : Int32, height : Int32, ticks : Int32) : Int32
     return 0
@@ -3957,12 +3972,12 @@ end
     p.value.usedown = 0 # don't do anything immediately
     p.value.attackdown = 0
     p.value.playerstate = CDoom::Playerstate::PST_LIVE
-    p.value.health = CDoom::MAXHEALTH
+    p.value.health = @@deh_initial_health
     p.value.readyweapon = CDoom::Weapontype::Pistol
     p.value.pendingweapon = CDoom::Weapontype::Pistol
     p.value.weaponowned[CDoom::Weapontype::Fist.value] = 1
     p.value.weaponowned[CDoom::Weapontype::Pistol.value] = 1
-    p.value.ammo[CDoom::Ammotype::Clip.value] = 50
+    p.value.ammo[CDoom::Ammotype::Clip.value] = @@deh_initial_bullets
 
     CDoom::Ammotype::NUMAMMO.value.times do |i|
       p.value.maxammo[i] = CDoom.maxammo[i]
@@ -4170,7 +4185,7 @@ end
     if CDoom.gamemode == CDoom::GameMode::Commercial
       CDoom.wminfo.partime = 35 * CDoom.cpars[CDoom.gamemap - 1]
     else
-      CDoom.wminfo.partime = 35 * CDoom.pars[CDoom.gameepisode-1][CDoom.gamemap-1]
+      CDoom.wminfo.partime = 35 * CDoom.pars[CDoom.gameepisode - 1][CDoom.gamemap - 1]
     end
     CDoom.wminfo.pnum = CDoom.consoleplayer
 
@@ -4292,7 +4307,7 @@ end
   end
 
   def self.g_do_save_game
-    name = "#{CDoom::SAVEGAMENAME}#{CDoom.savegameslot}.dsg"
+    name = "#{@@deh_savegamename}#{CDoom.savegameslot}.dsg"
     description = CDoom.savedescription.to_slice
     buf = IO::Memory.new
     buf.write_string(description[0...CDoom::SAVESTRINGSIZE])
@@ -4325,7 +4340,7 @@ end
     CDoom.gameaction = CDoom::Gameaction::Nothing
     CDoom.savedescription[0] = 0
 
-    (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = CDoom::GGSAVED
+    (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = @@deh_ggsaved
 
     # draw the pattern into the back screen
     CDoom.r_fill_back_screen
@@ -5034,7 +5049,7 @@ end
 
   def self.hu_queue_chat_char(c : UInt8)
     if ((CDoom.head + 1) & (CDoom::QUEUESIZE - 1)) == CDoom.tail
-      CDoom.plr.value.message = CDoom::HUSTR_MSGU
+      CDoom.plr.value.message = @@deh_hustr_msgu
     else
       CDoom.chatchars[CDoom.head] = c
       CDoom.head = (CDoom.head + 1) & (CDoom::QUEUESIZE - 1)
@@ -5100,15 +5115,15 @@ end
             elsif i == CDoom.consoleplayer
               @@num_nobrainers += 1
               if @@num_nobrainers < 3
-                CDoom.plr.value.message = CDoom::HUSTR_TALKTOSELF1
+                CDoom.plr.value.message = @@deh_hustr_talktoself1
               elsif @@num_nobrainers < 6
-                CDoom.plr.value.message = CDoom::HUSTR_TALKTOSELF2
+                CDoom.plr.value.message = @@deh_hustr_talktoself2
               elsif @@num_nobrainers < 9
-                CDoom.plr.value.message = CDoom::HUSTR_TALKTOSELF3
+                CDoom.plr.value.message = @@deh_hustr_talktoself3
               elsif @@num_nobrainers < 32
-                CDoom.plr.value.message = CDoom::HUSTR_TALKTOSELF4
+                CDoom.plr.value.message = @@deh_hustr_talktoself4
               else
-                CDoom.plr.value.message = CDoom::HUSTR_TALKTOSELF5
+                CDoom.plr.value.message = @@deh_hustr_talktoself5
               end
             end
           end
@@ -6586,15 +6601,15 @@ end
 
     CDoom::Loadenum::LoadEnd.value.times do |i|
       # if CDoom.m_check_parm("-cdrom") != 0
-      #  doom_sprintf(name, "c:\\doomdata\\" + CDoom::SAVEGAMENAME + i + ".dsg")
+      #  doom_sprintf(name, "c:\\doomdata\\" + @@deh_savegamename + i + ".dsg")
       # else
-      CDoom.doom_strcpy(name, CDoom::SAVEGAMENAME)
+      CDoom.doom_strcpy(name, @@deh_savegamename)
       CDoom.doom_concat(name, CDoom.doom_itoa(i, 10))
       CDoom.doom_concat(name, ".dsg")
 
       handle = doom_open(name.to_unsafe, "r".to_unsafe)
       if handle.null?
-        CDoom.doom_strcpy((CDoom.savegamestrings.to_unsafe + i).value.to_unsafe, CDoom::EMPTYSTRING)
+        CDoom.doom_strcpy((CDoom.savegamestrings.to_unsafe + i).value.to_unsafe, @@deh_emptystring)
         (@@loadmenu.to_unsafe + i).value.status = 0
         next
       end
@@ -6634,9 +6649,9 @@ end
     name = uninitialized StaticArray(UInt8, 256)
 
     # if CDoom.m_check_parm("-cdrom")
-    #  CDoom.doom_sprintf(name, "c:\\doomdata\\#{CDoom::SAVEGAMENAME}#{choice}.dsg")
+    #  CDoom.doom_sprintf(name, "c:\\doomdata\\#{@@deh_savegamename}#{choice}.dsg")
     # else
-    CDoom.doom_strcpy(name, CDoom::SAVEGAMENAME)
+    CDoom.doom_strcpy(name, @@deh_savegamename)
     CDoom.doom_concat(name, CDoom.doom_itoa(choice, 10))
     CDoom.doom_concat(name, ".dsg")
 
@@ -6649,7 +6664,7 @@ end
   #
   def self.m_load_game(choice : Int32)
     if CDoom.netgame != 0
-      CDoom.m_start_message(CDoom::LOADNET, NULL_PROCP1, 0)
+      CDoom.m_start_message(@@deh_load_net, NULL_PROCP1, 0)
       return
     end
 
@@ -6693,7 +6708,7 @@ end
 
     CDoom.save_slot = choice
     CDoom.doom_strcpy(CDoom.save_old_string, CDoom.savegamestrings[choice])
-    if CDoom.doom_strcmp(CDoom.savegamestrings[choice], CDoom::EMPTYSTRING) == 0
+    if CDoom.doom_strcmp(CDoom.savegamestrings[choice], @@deh_emptystring) == 0
       (CDoom.savegamestrings.to_unsafe + choice).value.to_unsafe.value = 0
     end
     CDoom.save_char_index = CDoom.doom_strlen(CDoom.savegamestrings[choice]).to_i32!
@@ -6704,7 +6719,7 @@ end
   #
   def self.m_save_game(choice : Int32)
     if CDoom.usergame == 0
-      CDoom.m_start_message(CDoom::SAVEDEAD, NULL_PROCP1, 0)
+      CDoom.m_start_message(@@deh_save_dead, NULL_PROCP1, 0)
       return
     end
 
@@ -6739,7 +6754,7 @@ end
       CDoom.quick_save_slot = -2 # means to pick a slot now
       return
     end
-    CDoom.m_start_message(CDoom::QSPROMPT_1 + String.new(CDoom.savegamestrings[CDoom.quick_save_slot].to_unsafe) + CDoom::QSPROMPT_2,
+    CDoom.m_start_message(@@deh_qsprompt_1 + String.new(CDoom.savegamestrings[CDoom.quick_save_slot].to_unsafe) + @@deh_qsprompt_2,
       ->CDoom.m_quicksave_response(Int32), 1)
   end
 
@@ -6755,15 +6770,15 @@ end
 
   def self.m_quickload
     if CDoom.netgame != 0
-      CDoom.m_start_message(CDoom::QLOADNET, NULL_PROCP1, 0)
+      CDoom.m_start_message(@@deh_qload_net, NULL_PROCP1, 0)
       return
     end
 
     if CDoom.quick_save_slot < 0
-      CDoom.m_start_message(CDoom::QSAVESPOT, NULL_PROCP1, 0)
+      CDoom.m_start_message(@@deh_qsave_spot, NULL_PROCP1, 0)
       return
     end
-    CDoom.m_start_message(CDoom::QLPROMPT_1 + String.new(CDoom.savegamestrings[CDoom.quick_save_slot].to_unsafe) + CDoom::QLPROMPT_2,
+    CDoom.m_start_message(@@deh_qlprompt_1 + String.new(CDoom.savegamestrings[CDoom.quick_save_slot].to_unsafe) + @@deh_qlprompt_2,
       ->CDoom.m_quickload_response(Int32), 1)
   end
 
@@ -6845,7 +6860,7 @@ end
 
   def self.m_new_game(choice : Int32)
     if CDoom.netgame != 0 && CDoom.demoplayback == 0
-      CDoom.m_start_message(CDoom::NEWGAME, NULL_PROCP1, 0)
+      CDoom.m_start_message(@@deh_newgame, NULL_PROCP1, 0)
       return
     end
 
@@ -6872,7 +6887,7 @@ end
 
   def self.m_choose_skill(choice : Int32)
     if choice == CDoom::Skill::Nightmare.value
-      CDoom.m_start_message(CDoom::NIGHTMARE, ->CDoom.m_verify_nightmare(Int32), 1)
+      CDoom.m_start_message(@@deh_nightmare, ->CDoom.m_verify_nightmare(Int32), 1)
       return
     end
 
@@ -6882,7 +6897,7 @@ end
 
   def self.m_episode(choice : Int32)
     if CDoom.gamemode == CDoom::GameMode::Shareware && choice != 0
-      CDoom.m_start_message(CDoom::SWSTRING, NULL_PROCP1, 0)
+      CDoom.m_start_message(@@deh_swstring, NULL_PROCP1, 0)
       CDoom.m_setup_next_menu(pointerof(@@readdef1))
       return
     end
@@ -6929,9 +6944,9 @@ end
     CDoom.show_messages = 1 - CDoom.show_messages
 
     if CDoom.show_messages == 0
-      (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = CDoom::MSGOFF
+      (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = @@deh_msgoff
     else
-      (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = CDoom::MSGON
+      (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = @@deh_msgon
     end
 
     CDoom.message_dontfuckwithme = 1
@@ -7145,11 +7160,11 @@ end
     end
 
     if CDoom.netgame != 0
-      CDoom.m_start_message(CDoom::NETEND, NULL_PROCP1, 0)
+      CDoom.m_start_message(@@deh_netend, NULL_PROCP1, 0)
       return
     end
 
-    CDoom.m_start_message(CDoom::ENDGAME, ->CDoom.m_endgame_response(Int32), 1)
+    CDoom.m_start_message(@@deh_endgame, ->CDoom.m_endgame_response(Int32), 1)
   end
 
   #
@@ -8316,19 +8331,19 @@ end
     case line.value.special
     when 99, 133 # Blue Lock
       if p.value.cards[CDoom::Card::Bluecard.value] == 0 && p.value.cards[CDoom::Card::Blueskull.value] == 0
-        p.value.message = CDoom::PD_BLUEO
+        p.value.message = @@deh_pd_blueo
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
         return 0
       end
     when 134, 135 # Red Lock
       if p.value.cards[CDoom::Card::Redcard.value] == 0 && p.value.cards[CDoom::Card::Redskull.value] == 0
-        p.value.message = CDoom::PD_REDO
+        p.value.message = @@deh_pd_redo
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
         return 0
       end
     when 136, 137 # Yellow Lock
       if p.value.cards[CDoom::Card::Yellowcard.value] == 0 && p.value.cards[CDoom::Card::Yellowskull.value] == 0
-        p.value.message = CDoom::PD_YELLOWO
+        p.value.message = @@deh_pd_yellowo
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
         return 0
       end
@@ -8409,7 +8424,7 @@ end
       return if player.null?
 
       if player.value.cards[CDoom::Card::Bluecard.value] == 0 && player.value.cards[CDoom::Card::Blueskull.value] == 0
-        player.value.message = CDoom::PD_BLUEK
+        player.value.message = @@deh_pd_bluek
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
         return
       end
@@ -8417,7 +8432,7 @@ end
       return if player.null?
 
       if player.value.cards[CDoom::Card::Yellowcard.value] == 0 && player.value.cards[CDoom::Card::Yellowskull.value] == 0
-        player.value.message = CDoom::PD_YELLOWK
+        player.value.message = @@deh_pd_yellowk
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
         return
       end
@@ -8425,7 +8440,7 @@ end
       return if player.null?
 
       if player.value.cards[CDoom::Card::Redcard.value] == 0 && player.value.cards[CDoom::Card::Redskull.value] == 0
-        player.value.message = CDoom::PD_REDK
+        player.value.message = @@deh_pd_redk
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
         return
       end
@@ -10458,72 +10473,72 @@ end
     case special.value.sprite
     # armor
     when CDoom::Spritenum::SPR_ARM1
-      return if CDoom.p_give_armor(player, 1) == 0
-      player.value.message = CDoom::GOTARMOR
+      return if CDoom.p_give_armor(player, @@deh_green_armor_class) == 0
+      player.value.message = @@deh_gotarmor
     when CDoom::Spritenum::SPR_ARM2
-      return if CDoom.p_give_armor(player, 2) == 0
-      player.value.message = CDoom::GOTMEGA
+      return if CDoom.p_give_armor(player, @@deh_blue_armor_class) == 0
+      player.value.message = @@deh_gotmega
 
       # bonus items
     when CDoom::Spritenum::SPR_BON1
       player.value.health = player.value.health + 1 # can go over 100%
-      player.value.health = 200 if player.value.health > 200
+      player.value.health = @@deh_max_health if player.value.health > @@deh_max_health
       player.value.mo.value.health = player.value.health
-      player.value.message = CDoom::GOTHTHBONUS
+      player.value.message = @@deh_goththbonus
     when CDoom::Spritenum::SPR_BON2
       player.value.armorpoints = player.value.armorpoints + 1 # can go over 100%
-      player.value.armorpoints = 200 if player.value.armorpoints > 200
+      player.value.armorpoints = @@deh_max_armor if player.value.armorpoints > @@deh_max_armor
       player.value.armortype = 1 if player.value.armortype == 0
-      player.value.message = CDoom::GOTARMBONUS
+      player.value.message = @@deh_gotarmbonus
     when CDoom::Spritenum::SPR_SOUL
-      player.value.health = player.value.health + 100
-      player.value.health = 200 if player.value.health > 200
+      player.value.health = player.value.health + @@deh_soulsphere_health
+      player.value.health = @@deh_max_soulsphere if player.value.health > @@deh_max_soulsphere
       player.value.mo.value.health = player.value.health
-      player.value.message = CDoom::GOTSUPER
+      player.value.message = @@deh_gotsuper
       sound = CDoom::Sfxenum::SFX_getpow
     when CDoom::Spritenum::SPR_MEGA
       return if CDoom.gamemode != CDoom::GameMode::Commercial
-      player.value.health = 200
+      player.value.health = @@deh_megasphere_health
       player.value.mo.value.health = player.value.health
       CDoom.p_give_armor(player, 2)
-      player.value.message = CDoom::GOTMSPHERE
+      player.value.message = @@deh_gotmsphere
       sound = CDoom::Sfxenum::SFX_getpow
 
       # card
       # leave cards for everyone
     when CDoom::Spritenum::SPR_BKEY
       if player.value.cards[CDoom::Card::Bluecard.value] == 0
-        player.value.message = CDoom::GOTBLUECARD
+        player.value.message = @@deh_gotbluecard
       end
       CDoom.p_give_card(player, CDoom::Card::Bluecard)
       return if CDoom.netgame != 0
     when CDoom::Spritenum::SPR_YKEY
       if player.value.cards[CDoom::Card::Yellowcard.value] == 0
-        player.value.message = CDoom::GOTYELWCARD
+        player.value.message = @@deh_gotyelwcard
       end
       CDoom.p_give_card(player, CDoom::Card::Yellowcard)
       return if CDoom.netgame != 0
     when CDoom::Spritenum::SPR_RKEY
       if player.value.cards[CDoom::Card::Redcard.value] == 0
-        player.value.message = CDoom::GOTREDCARD
+        player.value.message = @@deh_gotredcard
       end
       CDoom.p_give_card(player, CDoom::Card::Redcard)
       return if CDoom.netgame != 0
     when CDoom::Spritenum::SPR_BSKU
       if player.value.cards[CDoom::Card::Blueskull.value] == 0
-        player.value.message = CDoom::GOTBLUESKUL
+        player.value.message = @@deh_gotblueskul
       end
       CDoom.p_give_card(player, CDoom::Card::Blueskull)
       return if CDoom.netgame != 0
     when CDoom::Spritenum::SPR_RSKU
       if player.value.cards[CDoom::Card::Redskull.value] == 0
-        player.value.message = CDoom::GOTREDSKULL
+        player.value.message = @@deh_gotredskull
       end
       CDoom.p_give_card(player, CDoom::Card::Redskull)
       return if CDoom.netgame != 0
     when CDoom::Spritenum::SPR_YSKU
       if player.value.cards[CDoom::Card::Yellowskull.value] == 0
-        player.value.message = CDoom::GOTYELWSKUL
+        player.value.message = @@deh_gotyelwskul
       end
       CDoom.p_give_card(player, CDoom::Card::Yellowskull)
       return if CDoom.netgame != 0
@@ -10531,39 +10546,39 @@ end
       # medikits, heals
     when CDoom::Spritenum::SPR_STIM
       return if CDoom.p_give_body(player, 10) == 0
-      player.value.message = CDoom::GOTSTIM
+      player.value.message = @@deh_gotstim
     when CDoom::Spritenum::SPR_MEDI
       return if CDoom.p_give_body(player, 25) == 0
 
       if (player.value.health - 25) < 25
-        player.value.message = CDoom::GOTMEDINEED
+        player.value.message = @@deh_gotmedineed
       else
-        player.value.message = CDoom::GOTMEDIKIT
+        player.value.message = @@deh_gotmedikit
       end
     when CDoom::Spritenum::SPR_PINV
       return if CDoom.p_give_power(player, CDoom::Powertype::Invulnerability.value) == 0
-      player.value.message = CDoom::GOTINVUL
+      player.value.message = @@deh_gotinvul
       sound = CDoom::Sfxenum::SFX_getpow
     when CDoom::Spritenum::SPR_PSTR
       return if CDoom.p_give_power(player, CDoom::Powertype::Strength.value) == 0
-      player.value.message = CDoom::GOTBERSERK
+      player.value.message = @@deh_gotberserk
       player.value.pendingweapon = CDoom::Weapontype::Fist if player.value.readyweapon != CDoom::Weapontype::Fist
       sound = CDoom::Sfxenum::SFX_getpow
     when CDoom::Spritenum::SPR_PINS
       return if CDoom.p_give_power(player, CDoom::Powertype::Invisibility.value) == 0
-      player.value.message = CDoom::GOTINVIS
+      player.value.message = @@deh_gotinvis
       sound = CDoom::Sfxenum::SFX_getpow
     when CDoom::Spritenum::SPR_SUIT
       return if CDoom.p_give_power(player, CDoom::Powertype::Ironfeet.value) == 0
-      player.value.message = CDoom::GOTSUIT
+      player.value.message = @@deh_gotsuit
       sound = CDoom::Sfxenum::SFX_getpow
     when CDoom::Spritenum::SPR_PMAP
       return if CDoom.p_give_power(player, CDoom::Powertype::Allmap.value) == 0
-      player.value.message = CDoom::GOTMAP
+      player.value.message = @@deh_gotmap
       sound = CDoom::Sfxenum::SFX_getpow
     when CDoom::Spritenum::SPR_PVIS
       return if CDoom.p_give_power(player, CDoom::Powertype::Infrared.value) == 0
-      player.value.message = CDoom::GOTVISOR
+      player.value.message = @@deh_gotvisor
       sound = CDoom::Sfxenum::SFX_getpow
 
       # ammo
@@ -10573,28 +10588,28 @@ end
       else
         return if CDoom.p_give_ammo(player, CDoom::Ammotype::Clip, 1) == 0
       end
-      player.value.message = CDoom::GOTCLIP
+      player.value.message = @@deh_gotclip
     when CDoom::Spritenum::SPR_AMMO
       return if CDoom.p_give_ammo(player, CDoom::Ammotype::Clip, 5) == 0
-      player.value.message = CDoom::GOTCLIPBOX
+      player.value.message = @@deh_gotclipbox
     when CDoom::Spritenum::SPR_ROCK
       return if CDoom.p_give_ammo(player, CDoom::Ammotype::Misl, 1) == 0
-      player.value.message = CDoom::GOTROCKET
+      player.value.message = @@deh_gotrocket
     when CDoom::Spritenum::SPR_BROK
       return if CDoom.p_give_ammo(player, CDoom::Ammotype::Misl, 5) == 0
-      player.value.message = CDoom::GOTROCKBOX
+      player.value.message = @@deh_gotrockbox
     when CDoom::Spritenum::SPR_CELL
       return if CDoom.p_give_ammo(player, CDoom::Ammotype::Cell, 1) == 0
-      player.value.message = CDoom::GOTCELL
+      player.value.message = @@deh_gotcell
     when CDoom::Spritenum::SPR_CELP
       return if CDoom.p_give_ammo(player, CDoom::Ammotype::Cell, 5) == 0
-      player.value.message = CDoom::GOTCELLBOX
+      player.value.message = @@deh_gotcellbox
     when CDoom::Spritenum::SPR_SHEL
       return if CDoom.p_give_ammo(player, CDoom::Ammotype::Shell, 1) == 0
-      player.value.message = CDoom::GOTSHELLS
+      player.value.message = @@deh_gotshells
     when CDoom::Spritenum::SPR_SBOX
       return if CDoom.p_give_ammo(player, CDoom::Ammotype::Shell, 5) == 0
-      player.value.message = CDoom::GOTSHELLBOX
+      player.value.message = @@deh_gotshellbox
     when CDoom::Spritenum::SPR_BPAK
       if player.value.backpack == 0
         CDoom::Ammotype::NUMAMMO.value.times do |i|
@@ -10605,36 +10620,36 @@ end
       CDoom::Ammotype::NUMAMMO.value.times do |i|
         CDoom.p_give_ammo(player, CDoom::Ammotype.new(i), 1)
       end
-      player.value.message = CDoom::GOTBACKPACK
+      player.value.message = @@deh_gotbackpack
 
       # weapons
     when CDoom::Spritenum::SPR_BFUG
       return if CDoom.p_give_weapon(player, CDoom::Weapontype::Bfg, 0) == 0
-      player.value.message = CDoom::GOTBFG9000
+      player.value.message = @@deh_gotbfg9000
       sound = CDoom::Sfxenum::SFX_wpnup
     when CDoom::Spritenum::SPR_MGUN
       return if CDoom.p_give_weapon(player, CDoom::Weapontype::Chaingun, (special.value.flags & CDoom::Mobjflag::MF_DROPPED.value != 0).to_unsafe) == 0
-      player.value.message = CDoom::GOTCHAINGUN
+      player.value.message = @@deh_gotchaingun
       sound = CDoom::Sfxenum::SFX_wpnup
     when CDoom::Spritenum::SPR_CSAW
       return if CDoom.p_give_weapon(player, CDoom::Weapontype::Chainsaw, 0) == 0
-      player.value.message = CDoom::GOTCHAINSAW
+      player.value.message = @@deh_gotchainsaw
       sound = CDoom::Sfxenum::SFX_wpnup
     when CDoom::Spritenum::SPR_LAUN
       return if CDoom.p_give_weapon(player, CDoom::Weapontype::Missile, 0) == 0
-      player.value.message = CDoom::GOTLAUNCHER
+      player.value.message = @@deh_gotlauncher
       sound = CDoom::Sfxenum::SFX_wpnup
     when CDoom::Spritenum::SPR_PLAS
       return if CDoom.p_give_weapon(player, CDoom::Weapontype::Plasma, 0) == 0
-      player.value.message = CDoom::GOTPLASMA
+      player.value.message = @@deh_gotplasma
       sound = CDoom::Sfxenum::SFX_wpnup
     when CDoom::Spritenum::SPR_SHOT
       return if CDoom.p_give_weapon(player, CDoom::Weapontype::Shotgun, (special.value.flags & CDoom::Mobjflag::MF_DROPPED.value != 0).to_unsafe) == 0
-      player.value.message = CDoom::GOTSHOTGUN
+      player.value.message = @@deh_gotshotgun
       sound = CDoom::Sfxenum::SFX_wpnup
     when CDoom::Spritenum::SPR_SGN2
       return if CDoom.p_give_weapon(player, CDoom::Weapontype::Supershotgun, (special.value.flags & CDoom::Mobjflag::MF_DROPPED.value != 0).to_unsafe) == 0
-      player.value.message = CDoom::GOTSHOTGUN2
+      player.value.message = @@deh_gotshotgun2
       sound = CDoom::Sfxenum::SFX_wpnup
     else
       CDoom.i_error("p_special_thing: Unknown gettable thing")
@@ -11267,7 +11282,7 @@ end
         # Don't hit same species as originator.
         return 1 if thing == CDoom.tmthing.value.target
 
-        if thing.value.type != CDoom::Mobjtype::MT_PLAYER
+        if thing.value.type != CDoom::Mobjtype::MT_PLAYER && @@deh_species_infighting == 0
           # Explode, but do no damage.
           # Let players missile other players.
           return 0
@@ -13493,7 +13508,7 @@ end
 
     # Minimal amount for one shot varies.
     if player.value.readyweapon == CDoom::Weapontype::Bfg
-      count = CDoom::BFGCELLS
+      count = @@deh_bfg_cells_per_shot
     elsif player.value.readyweapon == CDoom::Weapontype::Supershotgun
       count = 2 # Double barrel.
     else
@@ -13762,7 +13777,7 @@ end
 
   def self.a_fire_bfg(player : CDoom::Player*, psp : CDoom::Pspdef*)
     player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - CDoom::BFGCELLS
+      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - @@deh_bfg_cells_per_shot
     CDoom.p_spawn_player_missile(player.value.mo, CDoom::Mobjtype::MT_BFG)
   end
 
@@ -17403,6 +17418,38 @@ end
     CDoom.lastflat = CDoom.w_get_num_for_name("F_END") - 1
     CDoom.numflats = CDoom.lastflat - CDoom.firstflat + 1
 
+    # Musical sprites!
+    CDoom.firstspritelump = CDoom.w_get_num_for_name("S_START") + 1
+    CDoom.lastspritelump = CDoom.firstspritelump
+    until doom_strncmp(@@lumpinfo[CDoom.lastspritelump].name.to_unsafe, "S_END".to_unsafe, 8) == 0
+      CDoom.lastspritelump += 1
+    end
+    CDoom.lastspritelump -= 1
+
+    if (s = (CDoom.w_check_num_for_name("SS_START") + 1)) != 0
+      e = s
+      until doom_strncmp(@@lumpinfo[e].name.to_unsafe, "S_END".to_unsafe, 8) == 0 ||
+            doom_strncmp(@@lumpinfo[e].name.to_unsafe, "SS_END".to_unsafe, 8) == 0
+        e += 1
+      end
+      ssprites = @@lumpinfo[s...e]
+
+      @@lumpinfo.delete_at(s - 1, e - s + 1)
+
+      # Incase ssprite were before sprites
+      # Delete at removes SS start and end
+      CDoom.lastspritelump = CDoom.w_get_num_for_name("S_END")
+
+      @@lumpinfo.insert_all(CDoom.lastspritelump, ssprites)
+
+      # delete_at above permanently removes the SS_START marker and the
+      # terminating S_END/SS_END marker (net -2 elements; the sprite lumps
+      # themselves are preserved via insert_all). numlumps must track the
+      # array's actual size, or w_check_num_for_name's backward scan starts
+      # past the real end of @@lumpinfo and reads out-of-bounds memory.
+      CDoom.numlumps = @@lumpinfo.size
+    end
+
     CDoom.firstspritelump = CDoom.w_get_num_for_name("S_START") + 1
     CDoom.lastspritelump = CDoom.w_get_num_for_name("S_END") - 1
     CDoom.numspritelumps = CDoom.lastspritelump - CDoom.firstspritelump + 1
@@ -17488,7 +17535,7 @@ end
     CDoom.numflats.times do |i|
       if flatpresent[i] != 0
         lump = CDoom.firstflat + i
-        CDoom.flatmemory += CDoom.lumpinfo[lump].size
+        CDoom.flatmemory += @@lumpinfo[lump].size
         CDoom.w_cache_lump_num(lump, CDoom::PU_CACHE)
       end
     end
@@ -17519,7 +17566,7 @@ end
 
       texture.value.patchcount.times do |j|
         lump = (texture.value.patches.to_unsafe + j).value.patch
-        CDoom.texturememory += CDoom.lumpinfo[lump].size
+        CDoom.texturememory += @@lumpinfo[lump].size
         CDoom.w_cache_lump_num(lump, CDoom::PU_CACHE)
       end
     end
@@ -17545,7 +17592,7 @@ end
         sf = (CDoom.sprites + i).value.spriteframes + j
         8.times do |k|
           lump = CDoom.firstspritelump + sf.value.lump[k]
-          CDoom.spritememory += CDoom.lumpinfo[lump].size
+          CDoom.spritememory += @@lumpinfo[lump].size
           CDoom.w_cache_lump_num(lump, CDoom::PU_CACHE)
         end
       end
@@ -19259,11 +19306,11 @@ end
     if rotation == 0
       # the lump should be used for all rotations
       if CDoom.sprtemp[frame].rotate == 0
-        CDoom.i_error("Error: r_install_sprite_lump: Sprite  #{String.new(CDoom.spritename)} frame #{'A' + frame} has multip rot=0 lump")
+        STDERR.puts "Warning: r_install_sprite_lump: Sprite  #{String.new(CDoom.spritename)} frame #{'A' + frame} has multip rot=0 lump, using lump #{lump}"
       end
 
       if CDoom.sprtemp[frame].rotate == 1
-        CDoom.i_error("Error: r_install_sprite_lump: Sprite  #{String.new(CDoom.spritename)} frame #{'A' + frame} has rotations")
+        STDERR.puts "Warning: r_install_sprite_lump: Sprite  #{String.new(CDoom.spritename)} frame #{'A' + frame} has rotations, overriding with rot=0 lump #{lump}"
       end
 
       (CDoom.sprtemp.to_unsafe + frame).value.rotate = 0
@@ -19276,7 +19323,14 @@ end
 
     # the lump is only used for one rotation
     if CDoom.sprtemp[frame].rotate == 0
-      CDoom.i_error("Error: r_install_sprite_lump: Sprite  #{String.new(CDoom.spritename)} frame #{'A' + frame} has rotations")
+      STDERR.puts "Warning: r_install_sprite_lump: Sprite  #{String.new(CDoom.spritename)} frame #{'A' + frame} has rotations, but a rot=0 lump was already set; discarding it"
+      # Reset to the -1 "unset" sentinel (matches sprtemp's initial memset) so
+      # partial per-rotation data can take over cleanly instead of leaving
+      # stale rot=0 lump indices (which could otherwise look like valid,
+      # already-filled rotation slots and silently mask missing rotations).
+      8.times do |r|
+        ((CDoom.sprtemp.to_unsafe + frame).value.lump.to_unsafe + r).value = -1_i16
+      end
     end
 
     (CDoom.sprtemp.to_unsafe + frame).value.rotate = 1
@@ -19284,7 +19338,7 @@ end
     # make - based
     rotation -= 1
     if CDoom.sprtemp[frame].lump[rotation] != -1
-      CDoom.i_error("Error: r_install_sprite_lump: Sprite #{String.new(CDoom.spritename)} : #{'A' + frame} : #{'1' + rotation} ")
+      STDERR.puts "Warning: r_install_sprite_lump: Sprite #{String.new(CDoom.spritename)} : #{'A' + frame} : #{'1' + rotation} has two lumps mapped to it, using lump #{lump}"
     end
 
     ((CDoom.sprtemp.to_unsafe + frame).value.lump.to_unsafe + rotation).value = (lump - CDoom.firstspritelump).to_i16!
@@ -19335,21 +19389,21 @@ end
       #  filling in the frames for whatever is found
       l = start + 1
       while l < endl
-        if CDoom.lumpinfo[l].name.to_unsafe.as(Int32*).value == intname
-          frame = CDoom.lumpinfo[l].name[4] - 'A'.ord
-          rotation = CDoom.lumpinfo[l].name[5] - '0'.ord
+        if @@lumpinfo[l].name.to_unsafe.as(Int32*).value == intname
+          frame = @@lumpinfo[l].name[4] - 'A'.ord
+          rotation = @@lumpinfo[l].name[5] - '0'.ord
 
           if CDoom.modifiedgame != 0
-            patched = CDoom.w_get_num_for_name(CDoom.lumpinfo[l].name)
+            patched = CDoom.w_get_num_for_name(@@lumpinfo[l].name)
           else
             patched = l
           end
 
           CDoom.r_install_sprite_lump(patched, frame, rotation, 0)
 
-          if CDoom.lumpinfo[l].name[6] != 0
-            frame = CDoom.lumpinfo[l].name[6] - 'A'.ord
-            rotation = CDoom.lumpinfo[l].name[7] - '0'.ord
+          if @@lumpinfo[l].name[6] != 0
+            frame = @@lumpinfo[l].name[6] - 'A'.ord
+            rotation = @@lumpinfo[l].name[7] - '0'.ord
             CDoom.r_install_sprite_lump(l, frame, rotation, 1)
           end
         end
@@ -19491,6 +19545,8 @@ end
   #  if it might be visible.
   #
   def self.r_project_sprite(thing : CDoom::Mobj*)
+    return if thing.value.sprite == CDoom::Spritenum::SPR_TNT
+
     # transform the origin point
     tr_x = thing.value.x - CDoom.viewx
     tr_y = thing.value.y - CDoom.viewy
@@ -19629,6 +19685,8 @@ end
   end
 
   def self.r_draw_psprite(psp : CDoom::Pspdef*)
+    return if psp.value.state.value.sprite == CDoom::Spritenum::SPR_TNT
+
     # decide which patch to use
     {% if flag?("RANGECHECK") %}
       if psp.value.state.value.sprite.value >= CDoom.numsprites
@@ -20585,29 +20643,29 @@ end
         if CDoom.cht_check_cheat(pointerof(CDoom.cheat_god), ev.value.data1) != 0
           CDoom.plyr.value.cheats = CDoom.plyr.value.cheats ^ CDoom::Cheat::CF_GODMODE.value
           if CDoom.plyr.value.cheats & CDoom::Cheat::CF_GODMODE.value != 0
-            CDoom.plyr.value.mo.value.health = 100 unless CDoom.plyr.value.mo.null?
+            CDoom.plyr.value.mo.value.health = @@deh_god_mode_health unless CDoom.plyr.value.mo.null?
 
-            CDoom.plyr.value.health = 100
-            CDoom.plyr.value.message = CDoom::STSTR_DQDON
+            CDoom.plyr.value.health = @@deh_god_mode_health
+            CDoom.plyr.value.message = @@deh_ststr_dqdon
           else
-            CDoom.plyr.value.message = CDoom::STSTR_DQDOFF
+            CDoom.plyr.value.message = @@deh_ststr_dqdoff
           end
 
           # 'fa' cheat for killer fucking arsenal
         elsif CDoom.cht_check_cheat(pointerof(CDoom.cheat_ammonokey), ev.value.data1) != 0
-          CDoom.plyr.value.armorpoints = 200
-          CDoom.plyr.value.armortype = 2
+          CDoom.plyr.value.armorpoints = @@deh_idfa_armor
+          CDoom.plyr.value.armortype = @@deh_idfa_armor_class
 
           CDoom::Weapontype::NUMWEAPONS.value.times { |i| CDoom.plyr.value.weaponowned[i] = 1 }
 
           CDoom::Ammotype::NUMAMMO.value.times { |i| CDoom.plyr.value.ammo[i] = CDoom.plyr.value.maxammo[i] }
 
-          CDoom.plyr.value.message = CDoom::STSTR_FAADDED
+          CDoom.plyr.value.message = @@deh_ststr_faadded
 
           # 'kfa' cheat for key full ammo
         elsif CDoom.cht_check_cheat(pointerof(CDoom.cheat_ammo), ev.value.data1) != 0
-          CDoom.plyr.value.armorpoints = 200
-          CDoom.plyr.value.armortype = 2
+          CDoom.plyr.value.armorpoints = @@deh_idkfa_armor
+          CDoom.plyr.value.armortype = @@deh_idkfa_armor_class
 
           CDoom::Weapontype::NUMWEAPONS.value.times { |i| CDoom.plyr.value.weaponowned[i] = 1 }
 
@@ -20615,13 +20673,13 @@ end
 
           CDoom::Card::NUMCARDS.value.times { |i| CDoom.plyr.value.cards[i] = 1 }
 
-          CDoom.plyr.value.message = CDoom::STSTR_KFAADDED
+          CDoom.plyr.value.message = @@deh_ststr_kfaadded
 
           # 'mus' cheat for changing music
         elsif CDoom.cht_check_cheat(pointerof(CDoom.cheat_mus), ev.value.data1) != 0
           buf = Pointer(UInt8).malloc(3)
 
-          CDoom.plyr.value.message = CDoom::STSTR_MUS
+          CDoom.plyr.value.message = @@deh_ststr_mus
           CDoom.cht_get_param(pointerof(CDoom.cheat_mus), buf)
 
           if CDoom.gamemode == CDoom::GameMode::Commercial
@@ -20629,7 +20687,7 @@ end
             musnum = CDoom::Musicenum::MUS_runnin.value + map
 
             if map > 31
-              CDoom.plyr.value.message = CDoom::STSTR_NOMUS
+              CDoom.plyr.value.message = @@deh_ststr_nomus
             else
               CDoom.s_change_music(musnum, 1)
             end
@@ -20640,7 +20698,7 @@ end
             if m > 8 || (e > 3 && CDoom.gamemode == CDoom::GameMode::Retail) ||
                (e > 2 && CDoom.gamemode == CDoom::GameMode::Registered) ||
                (e > 0 && CDoom.gamemode == CDoom::GameMode::Shareware)
-              CDoom.plyr.value.message = CDoom::STSTR_NOMUS
+              CDoom.plyr.value.message = @@deh_ststr_nomus
             else
               mus = CDoom.gamemode == CDoom::GameMode::Retail ? @@regmus[m].value : CDoom::Musicenum::MUS_e1m1.value + e * 9 + m
               CDoom.s_change_music(mus, 1)
@@ -20654,9 +20712,9 @@ end
           CDoom.plyr.value.cheats = CDoom.plyr.value.cheats ^ CDoom::Cheat::CF_NOCLIP.value
 
           if CDoom.plyr.value.cheats & CDoom::Cheat::CF_NOCLIP.value != 0
-            CDoom.plyr.value.message = CDoom::STSTR_NCON
+            CDoom.plyr.value.message = @@deh_ststr_ncon
           else
-            CDoom.plyr.value.message = CDoom::STSTR_NCOFF
+            CDoom.plyr.value.message = @@deh_ststr_ncoff
           end
         end
 
@@ -20671,19 +20729,19 @@ end
               CDoom.plyr.value.powers[i] = 0
             end
 
-            CDoom.plyr.value.message = CDoom::STSTR_BEHOLDX
+            CDoom.plyr.value.message = @@deh_ststr_beholdx
           end
         end
 
         # 'behold' power-up menu
         if CDoom.cht_check_cheat(CDoom.cheat_powerup.to_unsafe + 6, ev.value.data1) != 0
-          CDoom.plyr.value.message = CDoom::STSTR_BEHOLD
+          CDoom.plyr.value.message = @@deh_ststr_behold
 
           # 'choppers' invulnerability & chainsaw
         elsif CDoom.cht_check_cheat(pointerof(CDoom.cheat_choppers), ev.value.data1) != 0
           CDoom.plyr.value.weaponowned[CDoom::Weapontype::Chainsaw.value] = 1
           CDoom.plyr.value.powers[CDoom::Powertype::Invulnerability.value] = 1
-          CDoom.plyr.value.message = CDoom::STSTR_CHOPPERS
+          CDoom.plyr.value.message = @@deh_ststr_choppers
 
           # 'mypos' for player position
         elsif CDoom.cht_check_cheat(pointerof(CDoom.cheat_mypos), ev.value.data1) != 0
@@ -20730,7 +20788,7 @@ end
                       map > 32
 
           # So be it.
-          CDoom.plyr.value.message = CDoom::STSTR_CLEV
+          CDoom.plyr.value.message = @@deh_ststr_clev
           CDoom.g_defered_init_new(CDoom.gameskill, epsd, map)
         end
       end
@@ -21750,26 +21808,17 @@ end
     end
 
     # Fill in lumpinfo
-    new_lumpinfo = GC.malloc(CDoom.numlumps * sizeof(CDoom::Lumpinfo))
-    CDoom.doom_memcpy(new_lumpinfo, CDoom.lumpinfo, @@previous_realloc_size)
-    @@previous_realloc_size = CDoom.numlumps * sizeof(CDoom::Lumpinfo)
-    CDoom.lumpinfo = new_lumpinfo.as(CDoom::Lumpinfo*)
-
-    CDoom.i_error("Error: Couldn't realloc lumpinfo") if CDoom.lumpinfo.null?
-
-    lump_p = CDoom.lumpinfo + startlump
-
     storehandle = !CDoom.reloadname.null? ? Pointer(Void).null : handle
 
     i = startlump
     while i < CDoom.numlumps.to_u32!
+      @@lumpinfo << CDoom::Lumpinfo.new
+      lump_p = @@lumpinfo.to_unsafe + i
       lump_p.value.handle = storehandle
       lump_p.value.position = fileinfo.value.filepos
       lump_p.value.size = fileinfo.value.size
       CDoom.doom_strncpy(lump_p.value.name, fileinfo.value.name, 8)
-
       i += 1
-      lump_p += 1
       fileinfo += 1
     end
 
@@ -21841,30 +21890,30 @@ end
       name_str = String.new(fileinfo[mlump].name.to_unsafe, 8).downcase.delete('\0')
       ismap = (name_str[0]? == 'e' && name_str[2]? == 'm') || name_str.starts_with?("map")
 
-      # Find lump
-      lump_num = 0
-      CDoom.numlumps.times do |j|
-        if String.new(CDoom.lumpinfo[j].name.to_unsafe, 8).downcase.delete('\0') == String.new(fileinfo[mlump].name.to_unsafe, 8).downcase.delete('\0')
-          break
+      if name_str == "s_end" # Don't overwrite S_END for use of SS_START
+        lump_num = CDoom.numlumps
+      else
+        # Find lump
+        lump_num = 0
+        CDoom.numlumps.times do |j|
+          if String.new(@@lumpinfo[j].name.to_unsafe, 8).downcase.delete('\0') == name_str
+            break
+          end
+          lump_num += 1
         end
-        lump_num += 1
       end
 
       if lump_num == CDoom.numlumps
         # Not been loaded. Initialize lump
         CDoom.numlumps += ismap ? CDoom::ML_BLOCKMAP + 1 : 1
-        new_lumpinfo = Pointer(CDoom::Lumpinfo).malloc(CDoom.numlumps)
-        CDoom.doom_memcpy(new_lumpinfo, CDoom.lumpinfo, @@previous_realloc_size)
-        @@previous_realloc_size = CDoom.numlumps * sizeof(CDoom::Lumpinfo)
-        CDoom.lumpinfo = new_lumpinfo.as(CDoom::Lumpinfo*)
-        CDoom.i_error("Error: Couldn't realloc lumpinfo") if CDoom.lumpinfo.null?
 
-        lump_p = CDoom.lumpinfo + startlump
+        @@lumpinfo << CDoom::Lumpinfo.new
+        lump_p = @@lumpinfo.to_unsafe + startlump
 
         startlump += 1
       else
         # Lump exists
-        lump_p = CDoom.lumpinfo + lump_num
+        lump_p = @@lumpinfo.to_unsafe + lump_num
       end
       # Set the lump
       if ismap
@@ -21874,7 +21923,6 @@ end
           lump_p.value.size = fileinfo[mlump].size
           CDoom.doom_strncpy(lump_p.value.name, fileinfo[mlump].name, 8)
           mlump += 1
-          lump_p += 1
         end
       else
         lump_p.value.handle = !CDoom.reloadname.null? ? Pointer(Void).null : Box.box({filename, file, false})
@@ -21912,7 +21960,7 @@ end
     doom_read(handle, fileinfo.as(Void*), length)
 
     # Fill in lumpinfo
-    lump_p = CDoom.lumpinfo + CDoom.reloadlump
+    lump_p = @@lumpinfo.to_unsafe + CDoom.reloadlump
 
     i = CDoom.reloadlump
     while i < (CDoom.reloadlump + lumpcount).to_u32!
@@ -21964,7 +22012,7 @@ end
     CDoom.numlumps = 0
 
     # will be realloced as lumps are added
-    CDoom.lumpinfo = GC.malloc(1).as(CDoom::Lumpinfo*)
+    @@lumpinfo.clear
 
     until filenames.value.null?
       CDoom.w_add_file(filenames.value)
@@ -22011,13 +22059,13 @@ end
     v2 = name8.x[1]
 
     # scan backwards so patch lump files take precedence
-    lump_p = CDoom.lumpinfo + CDoom.numlumps
+    lump_p = @@lumpinfo.to_unsafe + CDoom.numlumps
 
-    while lump_p != CDoom.lumpinfo
+    while lump_p != @@lumpinfo.to_unsafe
       lump_p -= 1
       if lump_p.value.name.to_unsafe.as(Int32*).value == v1 &&
          (lump_p.value.name.to_unsafe + 4).as(Int32*).value == v2
-        return (lump_p - CDoom.lumpinfo).to_i32!
+        return (lump_p - @@lumpinfo.to_unsafe).to_i32!
       end
     end
 
@@ -22052,7 +22100,7 @@ end
       CDoom.i_error("Error: w_lump_length: #{lump} >= numlumps")
     end
 
-    return CDoom.lumpinfo[lump].size
+    return @@lumpinfo[lump].size
   end
 
   #
@@ -22064,7 +22112,7 @@ end
       CDoom.i_error("Error: w_read_lump: #{lump} >= numlumps")
     end
 
-    l = CDoom.lumpinfo + lump
+    l = @@lumpinfo.to_unsafe + lump
 
     if l.value.handle.null?
       # reloadable file, so use open / read / close
@@ -22886,8 +22934,8 @@ end
     CDoom.v_draw_patch(CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom::FB, CDoom.time_patch)
     CDoom.wi_draw_time(CDoom::SCREENWIDTH // 2 - CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom.cnt_time)
 
-      CDoom.v_draw_patch(CDoom::SCREENWIDTH // 2 + CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom::FB, CDoom.par)
-      CDoom.wi_draw_time(CDoom::SCREENWIDTH - CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom.cnt_par)
+    CDoom.v_draw_patch(CDoom::SCREENWIDTH // 2 + CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom::FB, CDoom.par)
+    CDoom.wi_draw_time(CDoom::SCREENWIDTH - CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom.cnt_par)
   end
 
   def self.wi_check_for_accelerate

@@ -19,6 +19,8 @@ require "socket"
 
 require "./doo-cr/lib.cr"
 require "./doo-cr/variables.cr"
+require "./doo-cr/deh_dehacked.cr"
+require "./doo-cr/deh_behextensions.cr"
 require "./doo-cr/doo-cr.cr"
 require "./doo-cr/implementation.cr"
 
