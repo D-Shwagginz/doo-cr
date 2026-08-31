@@ -28,6 +28,7 @@ require "raylib-cr"
 require "raylib-cr/audio.cr"
 require "./adlmidi.cr"
 
+# VGA DOS terminal colorings
 SHELLCOLORS = [
   {0, 0, 0},       # 0  black
   {0, 0, 170},     # 1  blue
@@ -49,8 +50,11 @@ SHELLCOLORS = [
 
 module Doocr
   VERSION_STR = "1.5" # Used for displaying
+  # Demo compatible version (Gameplay version)
   DEMOVERSION = 110
+  # Save compatible version (Save data version)
   SAVEVERSION =  11
+  # Net compatible version (Netcode version)
   NETVERSION  =  15
 
   BUILD_TIME = {{ "#{`date -u +"%m-%d-%Y %H:%M:%S UTC"`.strip}" }}
@@ -90,7 +94,6 @@ end
   Doocr.doom_button_up(CDoom::DoomButton::{{doombutton}}) if !is_down && was_down
 end
 
-  # -- Macros for quick key polling --
 
   unless ARGV.includes?("-nosound")
     # Create seperate thread so audio updates seperately from game code
@@ -122,6 +125,7 @@ end
   alias IOJob = {String, String, Bytes?, Channel({Bytes, Bool})} # path, mode, write_data (nil=read), response
   @@io_jobs = Channel(IOJob).new
 
+  # Create a thread for File IO
   io_context = Fiber::ExecutionContext::Isolated.new("doom-io") do
     loop do
       path, mode, write_data, response = @@io_jobs.receive
@@ -167,6 +171,7 @@ end
 Fiber::ExecutionContext.default.resize(1)
 MAIN_THREAD = Thread.current
 
+# Terminal exit stuff (Should move raylib deinit into here?)
 at_exit do
   print "\e7"     # save cursor position
   print "\e[r"    # reset scrolling region

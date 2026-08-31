@@ -5920,7 +5920,7 @@ module Doocr
       return if @@closing
       @@audio_stream.try do |a|
         if RAudio.audio_stream_processed?(a)
-          RAudio.update_audio_stream(a, CDoom.doom_get_sound_buffer, 512)
+          RAudio.update_audio_stream(a, doom_get_sound_buffer, 512)
         end
       end
     end
@@ -14261,7 +14261,6 @@ module Doocr
       when CDoom::Specials::End
         return # end of list
       when CDoom::Specials::Ceiling
-        padsavep
         ceiling = CDoom.z_malloc(sizeof(CDoom::Ceiling), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Ceiling*)
         slice = Slice.new(ceiling.as(UInt8*), sizeof(CDoom::Ceiling))
         file.read_fully(slice)
@@ -14277,7 +14276,7 @@ module Doocr
         CDoom.p_add_thinker(pointerof(ceiling.value.@thinker))
         CDoom.p_add_active_ceiling(ceiling)
       when CDoom::Specials::Door
-        padsavep
+        
         door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Vldoor*)
         slice = Slice.new(door.as(UInt8*), sizeof(CDoom::Vldoor))
         file.read_fully(slice)
@@ -14287,7 +14286,7 @@ module Doocr
 
         CDoom.p_add_thinker(pointerof(door.value.@thinker))
       when CDoom::Specials::Floor
-        padsavep
+        
         floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Floormove*)
         slice = Slice.new(floor.as(UInt8*), sizeof(CDoom::Floormove))
         file.read_fully(slice)
@@ -14297,7 +14296,7 @@ module Doocr
 
         CDoom.p_add_thinker(pointerof(floor.value.@thinker))
       when CDoom::Specials::Plat
-        padsavep
+        
         plat = CDoom.z_malloc(sizeof(CDoom::Plat), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Plat*)
         slice = Slice.new(plat.as(UInt8*), sizeof(CDoom::Plat))
         file.read_fully(slice)
@@ -14310,7 +14309,7 @@ module Doocr
         CDoom.p_add_thinker(pointerof(plat.value.@thinker))
         CDoom.p_add_active_plat(plat)
       when CDoom::Specials::Flash
-        padsavep
+        
         flash = CDoom.z_malloc(sizeof(CDoom::Lightflash), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Lightflash*)
         slice = Slice.new(flash.as(UInt8*), sizeof(CDoom::Lightflash))
         file.read_fully(slice)
@@ -14319,7 +14318,7 @@ module Doocr
 
         CDoom.p_add_thinker(pointerof(flash.value.@thinker))
       when CDoom::Specials::Strobe
-        padsavep
+        
         strobe = CDoom.z_malloc(sizeof(CDoom::Strobe), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Strobe*)
         slice = Slice.new(strobe.as(UInt8*), sizeof(CDoom::Strobe))
         file.read_fully(slice)
@@ -14328,7 +14327,7 @@ module Doocr
 
         CDoom.p_add_thinker(pointerof(strobe.value.@thinker))
       when CDoom::Specials::Glow
-        padsavep
+        
         glow = CDoom.z_malloc(sizeof(CDoom::Glow), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Glow*)
         slice = Slice.new(glow.as(UInt8*), sizeof(CDoom::Glow))
         file.read_fully(slice)

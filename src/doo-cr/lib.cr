@@ -15,10 +15,12 @@
 #
 # ==> The "C" side of Doo-cr. Hope to get rid of this someday.
 
+# Abs macroo
 macro doom_abs(x)
   (({{x}}) < 0 ? -({{x}}) : ({{x}}))
 end
 
+# Cheat Scrambler
 macro scramble(a)
   (((({{a}})&1)<<7) + ((({{a}})&2)<<5) + (({{a}})&4) + ((({{a}})&8)<<1) \
  + ((({{a}})&16)>>1) + (({{a}})&32) + ((({{a}})&64)>>5) + ((({{a}})&128)>>7))
@@ -59,6 +61,7 @@ macro cymtof(y)
   (CDoom.f_y + (CDoom.f_h - mtof({{y}}-CDoom.m_y)))
 end
 
+# Macros for filling C StaticArrays
 macro c_array(array, *objs)
   {% for elm, i in objs %}
     {{array}}[{{i}}] = {{elm}}
@@ -89,14 +92,12 @@ macro c_array_animinfo(array, *objs)
   {% end %}
 end
 
+# Was a define in C
 macro ng_statsx
   (32 + CDoom.star.value.width//2 + 32*(CDoom.dofrags == 0).to_unsafe)
 end
 
-macro padsavep
-  CDoom.save_p += (4 - (CDoom.save_p.address & 3)) & 3
-end
-
+# The C Library
 @[Link(ldflags: "-L#{__DIR__}/../.. -lcvars")]
 lib CDoom
   # Sample rate of sound samples from doom
@@ -122,20 +123,6 @@ lib CDoom
     DOOM_SEEK_END = 2
     DOOM_SEEK_SET = 0
   end
-
-  alias DoomPrintFn = Proc(LibC::Char*, Nil)
-  alias DoomMallocFn = Proc(LibC::Int, Void*)
-  alias DoomFreeFn = Proc(Void*, Nil)
-  alias DoomOpenFn = Proc(LibC::Char*, LibC::Char*, Void*)
-  alias DoomCloseFn = Proc(Void*, Nil)
-  alias DoomReadFn = Proc(Void*, Void*, LibC::Int, LibC::Int)
-  alias DoomWriteFn = Proc(Void*, Void*, LibC::Int, LibC::Int)
-  alias DoomSeekFn = Proc(Void*, LibC::Int, DoomSeek, LibC::Int)
-  alias DoomTellFn = Proc(Void*, LibC::Int)
-  alias DoomEofFn = Proc(Void*, LibC::Int)
-  alias DoomGettimeFn = Proc(LibC::Int*, LibC::Int*, Nil)
-  alias DoomExitFn = Proc(LibC::Int, Nil)
-  alias DoomGetenvFn = Proc(LibC::Char*, LibC::Char*)
 
   # Doom key mapping
   enum DoomKey
@@ -219,34 +206,6 @@ lib CDoom
     RIGHT  = 1
     MIDDLE = 2
   end
-
-  # set callbacks
-  fun doom_set_print(print_fn : DoomPrintFn)
-  fun doom_set_malloc(malloc_fn : DoomMallocFn, free_fn : DoomFreeFn)
-  fun doom_set_file_io(open_fn : DoomOpenFn,
-                       close_fn : DoomCloseFn,
-                       read_fn : DoomReadFn,
-                       write_fn : DoomWriteFn,
-                       seek_fn : DoomSeekFn,
-                       tell_fn : DoomTellFn,
-                       eof_fn : DoomEofFn)
-  fun doom_set_gettime(gettime_fn : DoomGettimeFn)
-  fun doom_set_exit(exit_fn : DoomExitFn)
-  fun doom_set_getenv(getenv_fn : DoomGetenvFn)
-
-  # Initializes DOOM and start things up. Call only call one
-  fun doom_init(argc : LibC::Int, argv : LibC::Char**, flags : LibC::Int)
-
-  # Call this every frame
-  fun doom_update       # This will update at 35 FPS
-  fun doom_force_update # This will run a frame everytime it's called, regardless of FPS.
-
-  # Channels : 1 = indexed, 3 = RGB, 4 = RGBA
-  fun doom_get_framebuffer(channels : LibC::Int) : LibC::UChar*
-
-  # It is always 2048 bytes in size
-  fun doom_get_sound_buffer : LibC::Short*
-
   # Call this 140 times per second. Or about every 7ms.
   # Returns midi message. Keep calling it until it returns 0.
   fun doom_tick_midi : LibC::ULongLong
@@ -387,19 +346,6 @@ lib CDoom
   {% else %}
     DOOM_LINUX = true
   {% end %}
-
-  $doom_malloc : DoomMallocFn
-  $doom_free : DoomFreeFn
-  $doom_open : DoomOpenFn
-  $doom_close : DoomCloseFn
-  $doom_read : DoomReadFn
-  $doom_write : DoomWriteFn
-  $doom_seek : DoomSeekFn
-  $doom_tell : DoomTellFn
-  $doom_eof : DoomEofFn
-  $doom_gettime_fn : DoomGettimeFn
-  $doom_exit : DoomExitFn
-  $doom_getenv : DoomGetenvFn
 
   fun doom_itoa(i : LibC::Int, radix : LibC::Int) : LibC::Char*
   fun doom_ctoa(c : LibC::Char) : LibC::Char*
@@ -5452,19 +5398,6 @@ lib CDoom
   $last_update_time : LibC::Int
   $button_states : LibC::Int[3]
   $itoa_buf : LibC::Char[20]
-
-  $doom_malloc : DoomMallocFn
-  $doom_free : DoomFreeFn
-  $doom_open : DoomOpenFn
-  $doom_close : DoomCloseFn
-  $doom_read : DoomReadFn
-  $doom_write : DoomWriteFn
-  $doom_seek : DoomSeekFn
-  $doom_tell : DoomTellFn
-  $doom_eof : DoomEofFn
-  $doom_gettime : DoomGettimeFn
-  $doom_exit : DoomExitFn
-  $doom_getenv : DoomGetenvFn
 
   $setsizeneeded : DoomBool
   $setblocks : LibC::Int

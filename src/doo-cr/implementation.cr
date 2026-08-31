@@ -84,10 +84,6 @@ fun doom_fprint(handle : Void*, str : UInt8*) : Int32
   Doocr.doom_fprint(handle, str)
 end
 
-fun doom_init(argc : Int32, argv : UInt8**, flags : Int32)
-  Doocr.doom_init(argc, argv, flags)
-end
-
 fun doom_tick_midi : LibC::ULongLong
   Doocr.doom_tick_midi
 end
