@@ -318,10 +318,6 @@ fun find_response_file = FindResponseFile
   Doocr.find_response_file
 end
 
-fun d_doom_main = D_DoomMain
-  Doocr.d_doom_main
-end
-
 fun net_buffer_size = NetBufferSize : LibC::Int
   Doocr.net_buffer_size
 end
@@ -1073,10 +1069,6 @@ fun m_quit_response = M_QuitResponse(ch : LibC::Int)
   Doocr.m_quit_response(ch)
 end
 
-fun m_quitdoom = M_QuitDOOM(choice : LibC::Int)
-  Doocr.m_quitdoom(choice)
-end
-
 fun m_change_sensitivity = M_ChangeSensitivity(choice : LibC::Int)
   Doocr.m_change_sensitivity(choice)
 end
@@ -1101,28 +1093,12 @@ fun m_draw_selcell = M_DrawSelCell(menu : CDoom::Menu*, item : LibC::Int)
   Doocr.m_draw_selcell(menu, item)
 end
 
-fun m_start_message = M_StartMessage(string : LibC::Char*, routine : Proc(Int32, Nil), input : CDoom::DoomBool)
-  Doocr.m_start_message(string, routine, input)
-end
-
 fun m_stop_message = M_StopMessage
   Doocr.m_stop_message
 end
 
-fun m_string_width = M_StringWidth(string : LibC::Char*) : LibC::Int
-  Doocr.m_string_width(string)
-end
-
 fun m_string_height = M_StringHeight(string : LibC::Char*) : LibC::Int
   Doocr.m_string_height(string)
-end
-
-fun m_write_text = M_WriteText(x : LibC::Int, y : LibC::Int, string : LibC::Char*)
-  Doocr.m_write_text(x, y, string)
-end
-
-fun m_responder = M_Responder(ev : CDoom::Event*) : CDoom::DoomBool
-  Doocr.m_responder(ev)
 end
 
 fun m_start_control_panel = M_StartControlPanel
@@ -1143,10 +1119,6 @@ end
 
 fun m_ticker = M_Ticker
   Doocr.m_ticker
-end
-
-fun m_init = M_Init
-  Doocr.m_init
 end
 
 fun m_draw_text(x : LibC::Int, y : LibC::Int, direct : CDoom::DoomBool, string : LibC::Char*) : LibC::Int

@@ -102,7 +102,7 @@ module Doocr
   CDoom.final_screen_buffer = Pointer(UInt8).null
   CDoom.last_update_time = 0
   CDoom.button_states = StaticArray(Int32, 3).new(0)
-  
+
   CDoom.player_arrow[0] = CDoom::Mline.new(
     a: CDoom::Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: CDoom::Mpoint.new(x: CDoom::R, y: 0)) # -----
   CDoom.player_arrow[1] = CDoom::Mline.new(
@@ -347,24 +347,24 @@ module Doocr
   # Set if homebrew PWAD stuff has been added.
   CDoom.modifiedgame
   # DOOM1
-  CDoom.doom1_endmsg[0] = @@deh_quit_msg.to_unsafe
-  CDoom.doom1_endmsg[1] = "please don't leave, there's more\ndemons to toast!".to_unsafe
-  CDoom.doom1_endmsg[2] = "let's beat it -- this is turning\ninto a bloodbath!".to_unsafe
-  CDoom.doom1_endmsg[3] = "i wouldn't leave if i were you.\ndos is much worse.".to_unsafe
-  CDoom.doom1_endmsg[4] = "you're trying to say you like dos\nbetter than me, right?".to_unsafe
-  CDoom.doom1_endmsg[5] = "don't leave yet -- there's a\ndemon around that corner!".to_unsafe
-  CDoom.doom1_endmsg[6] = "ya know, next time you come in here\ni'm gonna toast ya.".to_unsafe
-  CDoom.doom1_endmsg[7] = "go ahead and leave. see if i care.".to_unsafe
+  @@doom1_endmsg = [@@deh_quit_msg,
+    "please don't leave, there's more\ndemons to toast!",
+    "let's beat it -- this is turning\ninto a bloodbath!",
+    "i wouldn't leave if i were you.\ndos is much worse.",
+    "you're trying to say you like dos\nbetter than me, right?",
+    "don't leave yet -- there's a\ndemon around that corner!",
+    "ya know, next time you come in here\ni'm gonna toast ya.",
+    "go ahead and leave. see if i care."]
 
   # QuitDOOM II messages
-  CDoom.doom2_endmsg[0] = @@deh_quit_msg.to_unsafe
-  CDoom.doom2_endmsg[1] = "you want to quit?\nthen, thou hast lost an eighth!".to_unsafe
-  CDoom.doom2_endmsg[2] = "don't go now, there's a \ndimensional shambler waiting\nat the dos prompt!".to_unsafe
-  CDoom.doom2_endmsg[3] = "get outta here and go back\nto your boring programs.".to_unsafe
-  CDoom.doom2_endmsg[4] = "if i were your boss, i'd \n deathmatch ya in a minute!".to_unsafe
-  CDoom.doom2_endmsg[5] = "look, bud. you leave now\nand you forfeit your body count!".to_unsafe
-  CDoom.doom2_endmsg[6] = "just leave. when you come\nback, i'll be waiting with a bat.".to_unsafe
-  CDoom.doom2_endmsg[7] = "you're lucky i don't smack\nyou for thinking about leaving.".to_unsafe
+  @@doom2_endmsg = [ @@deh_quit_msg,
+    "you want to quit?\nthen, thou hast lost an eighth!",
+    "don't go now, there's a \ndimensional shambler waiting\nat the dos prompt!",
+     "get outta here and go back\nto your boring programs.",
+   "if i were your boss, i'd \n deathmatch ya in a minute!",
+    "look, bud. you leave now\nand you forfeit your body count!",
+  "just leave. when you come\nback, i'll be waiting with a bat.",
+   "you're lucky i don't smack\nyou for thinking about leaving."]
 
   # Stage of animation:
   #  0 = text, 1 = art screen, 2 = character cast
@@ -5529,67 +5529,67 @@ module Doocr
     CDoom::Sfxenum::SFX_sgtatk.value)
 
   @@mainmenu = [
-    CDoom::Menuitem.new(status: 1, name: "M_NGAME".to_unsafe, routine: ->CDoom.m_new_game(Int32), alpha_key: 'n'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_OPTION".to_unsafe, routine: ->CDoom.m_options(Int32), alpha_key: 'o'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_LOADG".to_unsafe, routine: ->CDoom.m_load_game(Int32), alpha_key: 'l'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_SAVEG".to_unsafe, routine: ->CDoom.m_save_game(Int32), alpha_key: 's'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_NGAME".to_unsafe, routine: ->m_new_game(Int32), alpha_key: 'n'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_OPTION".to_unsafe, routine: ->m_options(Int32), alpha_key: 'o'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_LOADG".to_unsafe, routine: ->m_load_game(Int32), alpha_key: 'l'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_SAVEG".to_unsafe, routine: ->m_save_game(Int32), alpha_key: 's'.ord),
     # Another hickup with Special edition.
-    CDoom::Menuitem.new(status: 1, name: "M_RDTHIS".to_unsafe, routine: ->CDoom.m_readthis(Int32), alpha_key: 'r'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_QUITG".to_unsafe, routine: ->CDoom.m_quitdoom(Int32), alpha_key: 'q'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_RDTHIS".to_unsafe, routine: ->m_readthis(Int32), alpha_key: 'r'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_QUITG".to_unsafe, routine: ->m_quitdoom(Int32), alpha_key: 'q'.ord),
   ]
 
   @@maindef = CDoom::Menu.new(
     numitems: @@mainmenu.size,
     prev_menu: Pointer(CDoom::Menu).null,
     menuitems: @@mainmenu.to_unsafe,
-    routine: ->CDoom.m_draw_mainmenu,
+    routine: ->m_draw_mainmenu,
     x: 97, y: 64,
     last_on: 0)
   @@maindef
 
   @@episodemenu = [
-    CDoom::Menuitem.new(status: 1, name: "M_EPI1".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 'k'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_EPI2".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 't'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_EPI3".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 'i'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_EPI4".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 't'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_EPI1".to_unsafe, routine: ->m_episode(Int32), alpha_key: 'k'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_EPI2".to_unsafe, routine: ->m_episode(Int32), alpha_key: 't'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_EPI3".to_unsafe, routine: ->m_episode(Int32), alpha_key: 'i'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_EPI4".to_unsafe, routine: ->m_episode(Int32), alpha_key: 't'.ord),
   ]
 
   @@epidef = CDoom::Menu.new(
     numitems: @@episodemenu.size,
     prev_menu: pointerof(@@maindef),
     menuitems: @@episodemenu.to_unsafe,
-    routine: ->CDoom.m_draw_episode,
+    routine: ->m_draw_episode,
     x: 48, y: 63,
     last_on: CDoom::Episodesenum::Ep1.value
   )
   @@epidef
 
   @@newgame_menu = [
-    CDoom::Menuitem.new(status: 1, name: "M_JKILL".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'i'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_ROUGH".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'h'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_HURT".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'h'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_ULTRA".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'u'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_NMARE".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'n'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_JKILL".to_unsafe, routine: ->m_choose_skill(Int32), alpha_key: 'i'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_ROUGH".to_unsafe, routine: ->m_choose_skill(Int32), alpha_key: 'h'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_HURT".to_unsafe, routine: ->m_choose_skill(Int32), alpha_key: 'h'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_ULTRA".to_unsafe, routine: ->m_choose_skill(Int32), alpha_key: 'u'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_NMARE".to_unsafe, routine: ->m_choose_skill(Int32), alpha_key: 'n'.ord),
   ]
 
   @@newdef = CDoom::Menu.new(
     numitems: @@newgame_menu.size,
     prev_menu: pointerof(@@epidef),
     menuitems: @@newgame_menu.to_unsafe,
-    routine: ->CDoom.m_draw_newgame,
+    routine: ->m_draw_newgame,
     x: 48, y: 63,
     last_on: CDoom::NewgameEnum::Hurtme.value
   )
   @@newdef
 
   @@options_menu = [
-    CDoom::Menuitem.new(status: 1, name: "M_ENDGAM".to_unsafe, routine: ->CDoom.m_endgame(Int32), alpha_key: 'e'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_MESSG".to_unsafe, routine: ->CDoom.m_change_messages(Int32), alpha_key: 'm'.ord),
-    CDoom::Menuitem.new(status: 2, name: "M_SCRNSZ".to_unsafe, routine: ->CDoom.m_size_display(Int32), alpha_key: 's'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_ENDGAM".to_unsafe, routine: ->m_endgame(Int32), alpha_key: 'e'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_MESSG".to_unsafe, routine: ->m_change_messages(Int32), alpha_key: 'm'.ord),
+    CDoom::Menuitem.new(status: 2, name: "M_SCRNSZ".to_unsafe, routine: ->m_size_display(Int32), alpha_key: 's'.ord),
     CDoom::Menuitem.new(status: -1, name: "".to_unsafe),
-    CDoom::Menuitem.new(status: 2, name: "M_MSENS".to_unsafe, routine: ->CDoom.m_change_sensitivity(Int32), alpha_key: 'm'.ord),
+    CDoom::Menuitem.new(status: 2, name: "M_MSENS".to_unsafe, routine: ->m_change_sensitivity(Int32), alpha_key: 'm'.ord),
     CDoom::Menuitem.new(status: -1, name: "".to_unsafe),
-    CDoom::Menuitem.new(status: 1, name: "M_SVOL".to_unsafe, routine: ->CDoom.m_sound(Int32), alpha_key: 's'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_SVOL".to_unsafe, routine: ->m_sound(Int32), alpha_key: 's'.ord),
     CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_moreoptions(Int32), alpha_key: 'm'.ord),
   ]
 
@@ -5597,7 +5597,7 @@ module Doocr
     numitems: @@options_menu.size,
     prev_menu: pointerof(@@maindef),
     menuitems: @@options_menu.to_unsafe,
-    routine: ->CDoom.m_draw_options,
+    routine: ->m_draw_options,
     x: 60, y: 37,
     last_on: 0
   )
@@ -5656,37 +5656,37 @@ module Doocr
   @@editcontrols_def
 
   @@readmenu1 = [
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_readthis2(Int32)),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_readthis2(Int32)),
   ]
 
   @@readdef1 = CDoom::Menu.new(
     numitems: @@readmenu1.size,
     prev_menu: pointerof(@@maindef),
     menuitems: @@readmenu1.to_unsafe,
-    routine: ->CDoom.m_draw_readthis1,
+    routine: ->m_draw_readthis1,
     x: 280, y: 185,
     last_on: 0
   )
   @@readdef1
 
   @@readmenu2 = [
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_finish_readthis(Int32)),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_finish_readthis(Int32)),
   ]
 
   @@readdef2 = CDoom::Menu.new(
     numitems: @@readmenu2.size,
     prev_menu: pointerof(@@readdef1),
     menuitems: @@readmenu2.to_unsafe,
-    routine: ->CDoom.m_draw_readthis2,
+    routine: ->m_draw_readthis2,
     x: 330, y: 175,
     last_on: 0
   )
   @@readdef2
 
   @@soundmenu = [
-    CDoom::Menuitem.new(status: 2, name: "M_SFXVOL".to_unsafe, routine: ->CDoom.m_sfxvol(Int32), alpha_key: 's'.ord),
+    CDoom::Menuitem.new(status: 2, name: "M_SFXVOL".to_unsafe, routine: ->m_sfxvol(Int32), alpha_key: 's'.ord),
     CDoom::Menuitem.new(status: -1, name: "".to_unsafe),
-    CDoom::Menuitem.new(status: 2, name: "M_MUSVOL".to_unsafe, routine: ->CDoom.m_musicvol(Int32), alpha_key: 'm'.ord),
+    CDoom::Menuitem.new(status: 2, name: "M_MUSVOL".to_unsafe, routine: ->m_musicvol(Int32), alpha_key: 'm'.ord),
     CDoom::Menuitem.new(status: -1, name: "".to_unsafe),
   ]
 
@@ -5694,45 +5694,45 @@ module Doocr
     numitems: @@soundmenu.size,
     prev_menu: pointerof(@@optionsdef),
     menuitems: @@soundmenu.to_unsafe,
-    routine: ->CDoom.m_draw_sound,
+    routine: ->m_draw_sound,
     x: 80, y: 64,
     last_on: 0
   )
   @@sounddef
 
   @@loadmenu = [
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '1'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '2'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '3'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '4'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '5'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '6'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_load_select(Int32), alpha_key: '1'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_load_select(Int32), alpha_key: '2'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_load_select(Int32), alpha_key: '3'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_load_select(Int32), alpha_key: '4'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_load_select(Int32), alpha_key: '5'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_load_select(Int32), alpha_key: '6'.ord),
   ]
 
   @@loaddef = CDoom::Menu.new(
     numitems: @@loadmenu.size,
     prev_menu: pointerof(@@maindef),
     menuitems: @@loadmenu.to_unsafe,
-    routine: ->CDoom.m_draw_load,
+    routine: ->m_draw_load,
     x: 80, y: 54,
     last_on: 0
   )
   @@loaddef
 
   @@savemenu = [
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '1'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '2'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '3'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '4'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '5'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '6'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_save_select(Int32), alpha_key: '1'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_save_select(Int32), alpha_key: '2'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_save_select(Int32), alpha_key: '3'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_save_select(Int32), alpha_key: '4'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_save_select(Int32), alpha_key: '5'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_save_select(Int32), alpha_key: '6'.ord),
   ]
 
   @@savedef = CDoom::Menu.new(
     numitems: @@savemenu.size,
     prev_menu: pointerof(@@maindef),
     menuitems: @@savemenu.to_unsafe,
-    routine: ->CDoom.m_draw_save,
+    routine: ->m_draw_save,
     x: 80, y: 54,
     last_on: 0
   )
@@ -5744,6 +5744,9 @@ module Doocr
   @@amactivedraw = 1
   @@weaponfirecentered = 1
   @@midibank = 16
+
+  @@savegamestrings : Array(String) = Array(String).new(10, "")
+  @@save_old_string = ""
 
   @@defaults = [CDoom::Default.new(name: "mouse_sensitivity", location: pointerof(CDoom.mouse_sensitivity), defaultvalue: 5),
                 CDoom::Default.new(name: "sfx_volume", location: pointerof(CDoom.snd_sfx_volume), defaultvalue: 8),
@@ -8529,24 +8532,10 @@ module Doocr
 
   def self.sync_deh_strings
     # DOOM1
-    CDoom.doom1_endmsg[0] = @@deh_quit_msg.to_unsafe
-    CDoom.doom1_endmsg[1] = "please don't leave, there's more\ndemons to toast!".to_unsafe
-    CDoom.doom1_endmsg[2] = "let's beat it -- this is turning\ninto a bloodbath!".to_unsafe
-    CDoom.doom1_endmsg[3] = "i wouldn't leave if i were you.\ndos is much worse.".to_unsafe
-    CDoom.doom1_endmsg[4] = "you're trying to say you like dos\nbetter than me, right?".to_unsafe
-    CDoom.doom1_endmsg[5] = "don't leave yet -- there's a\ndemon around that corner!".to_unsafe
-    CDoom.doom1_endmsg[6] = "ya know, next time you come in here\ni'm gonna toast ya.".to_unsafe
-    CDoom.doom1_endmsg[7] = "go ahead and leave. see if i care.".to_unsafe
+    @@doom1_endmsg[0] = @@deh_quit_msg
 
     # QuitDOOM II messages
-    CDoom.doom2_endmsg[0] = @@deh_quit_msg.to_unsafe
-    CDoom.doom2_endmsg[1] = "you want to quit?\nthen, thou hast lost an eighth!".to_unsafe
-    CDoom.doom2_endmsg[2] = "don't go now, there's a \ndimensional shambler waiting\nat the dos prompt!".to_unsafe
-    CDoom.doom2_endmsg[3] = "get outta here and go back\nto your boring programs.".to_unsafe
-    CDoom.doom2_endmsg[4] = "if i were your boss, i'd \n deathmatch ya in a minute!".to_unsafe
-    CDoom.doom2_endmsg[5] = "look, bud. you leave now\nand you forfeit your body count!".to_unsafe
-    CDoom.doom2_endmsg[6] = "just leave. when you come\nback, i'll be waiting with a bat.".to_unsafe
-    CDoom.doom2_endmsg[7] = "you're lucky i don't smack\nyou for thinking about leaving.".to_unsafe
+    @@doom2_endmsg[0] = @@deh_quit_msg
 
     CDoom.chat_macros[0] = @@deh_hustr_chatmacro0.to_unsafe
     CDoom.chat_macros[1] = @@deh_hustr_chatmacro1.to_unsafe

@@ -201,7 +201,7 @@ module Doocr
     CDoom.myargc = argc
     CDoom.myargv = argv
 
-    CDoom.d_doom_main
+    d_doom_main
   end
 
   @@raylibbuffer = Bytes.new(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT * 4)
@@ -1243,7 +1243,7 @@ module Doocr
 
     while CDoom.eventtail != CDoom.eventhead
       ev = CDoom.events.to_unsafe + CDoom.eventtail
-      CDoom.g_responder(ev) if CDoom.m_responder(ev) == 0
+      CDoom.g_responder(ev) if m_responder(ev) == 0
       # else menu ate the event
       CDoom.eventtail += 1
       CDoom.eventtail = (CDoom.eventtail) & (CDoom::MAXEVENTS - 1)
@@ -2087,7 +2087,7 @@ module Doocr
     end
 
     puts "m_init: Init miscellaneous info."
-    CDoom.m_init
+    m_init
 
     print "r_init: Init DOO-CR refresh daemon - "
     CDoom.r_init
@@ -2545,8 +2545,8 @@ module Doocr
       puts "sending connection info..."
       loop do
         CDoom.screens[0].clear(CDoom::SCREENWIDTH * 17)
-        CDoom.m_write_text(0, 0, "Escape to exit")
-        CDoom.m_write_text(0, 9, "Sending connection data on port #{@@doomport}")
+        m_write_text(0, 0, "Escape to exit")
+        m_write_text(0, 9, "Sending connection data on port #{@@doomport}")
         doom_draw
         check_abort
         CDoom.netbuffer.value.retransmitfrom = 69
@@ -2575,8 +2575,8 @@ module Doocr
           puts "connected! waiting for host to start"
           loop do
             CDoom.screens[0].clear(CDoom::SCREENWIDTH * 17)
-            CDoom.m_write_text(0, 0, "Escape to exit")
-            CDoom.m_write_text(0, 9, "Connected to host!")
+            m_write_text(0, 0, "Escape to exit")
+            m_write_text(0, 9, "Connected to host!")
             doom_draw
             check_abort
             next if CDoom.h_get_packet == 0
@@ -2585,7 +2585,7 @@ module Doocr
             if CDoom.netbuffer.value.checksum & NCMD_DISTRIBUTE != 0
               puts "retrieving all clients info"
               CDoom.screens[0].clear(CDoom::SCREENWIDTH * 17)
-              CDoom.m_write_text(0, 0, "Gathering IPs")
+              m_write_text(0, 0, "Gathering IPs")
               doom_draw
               if CDoom.netbuffer.value.retransmitfrom != 19 ||
                  CDoom.netbuffer.value.starttic != 69
@@ -2654,9 +2654,9 @@ module Doocr
 
         # Space to start game and end waiting for connections
         CDoom.screens[0].clear(CDoom::SCREENWIDTH * (18 + 8))
-        CDoom.m_write_text(0, 0, "Press space to start. Escape to exit")
-        CDoom.m_write_text(0, 9, "Listening for clients on port #{@@doomport}")
-        CDoom.m_write_text(0, 18, "#{CDoom.doomcom.value.numnodes - 1} player#{
+        m_write_text(0, 0, "Press space to start. Escape to exit")
+        m_write_text(0, 9, "Listening for clients on port #{@@doomport}")
+        m_write_text(0, 18, "#{CDoom.doomcom.value.numnodes - 1} player#{
   CDoom.doomcom.value.numnodes != 2 ? "s" : ""
 } connected")
         doom_draw
@@ -5865,7 +5865,7 @@ module Doocr
 
       unless @@mus_is_midi
         while @@midi_tick_accumulator >= MIDI_TICK_TIME
-          while (msg = CDoom.doom_tick_midi) != 0
+          while (msg = doom_tick_midi) != 0
             status = (msg & 0xFF).to_u8
             data1 = ((msg >> 8) & 0xFF).to_u8
             data2 = ((msg >> 16) & 0xFF).to_u8
@@ -6597,25 +6597,19 @@ module Doocr
   # read the strings from the savegame files
   #
   def self.m_read_save_strings
-    name = uninitialized StaticArray(UInt8, 256)
 
     CDoom::Loadenum::LoadEnd.value.times do |i|
-      # if CDoom.m_check_parm("-cdrom") != 0
-      #  doom_sprintf(name, "c:\\doomdata\\" + @@deh_savegamename + i + ".dsg")
-      # else
-      CDoom.doom_strcpy(name, @@deh_savegamename)
-      CDoom.doom_concat(name, CDoom.doom_itoa(i, 10))
-      CDoom.doom_concat(name, ".dsg")
+name = "#{@@deh_savegamename}#{i}.dsg"
 
-      handle = doom_open(name.to_unsafe, "r".to_unsafe)
-      if handle.null?
-        CDoom.doom_strcpy((CDoom.savegamestrings.to_unsafe + i).value.to_unsafe, @@deh_emptystring)
+if !File.exists?(name)
+        @@savegamestrings[i] = @@deh_emptystring
         (@@loadmenu.to_unsafe + i).value.status = 0
         next
       end
-      count = doom_read(handle, (CDoom.savegamestrings.to_unsafe + i).as(Void*), CDoom::SAVESTRINGSIZE)
-      doom_close(handle)
-      (@@loadmenu.to_unsafe + i).value.status = 1
+      File.open(name, "r") do |file|
+        @@savegamestrings[i] = file.read_string(CDoom::SAVESTRINGSIZE)
+      end
+            (@@loadmenu.to_unsafe + i).value.status = 1
     end
   end
 
@@ -6623,8 +6617,8 @@ module Doocr
   def self.m_draw_load
     CDoom.v_draw_patch_direct(72, 28, 0, CDoom.w_cache_lump_name("M_LOADG", CDoom::PU_CACHE).as(CDoom::Patch*))
     CDoom::Loadenum::LoadEnd.value.times do |i|
-      CDoom.m_draw_save_load_border(@@loaddef.x, @@loaddef.y + CDoom::LINEHEIGHT * i)
-      CDoom.m_write_text(@@loaddef.x, @@loaddef.y + CDoom::LINEHEIGHT * i, CDoom.savegamestrings[i])
+      m_draw_save_load_border(@@loaddef.x, @@loaddef.y + CDoom::LINEHEIGHT * i)
+      m_write_text(@@loaddef.x, @@loaddef.y + CDoom::LINEHEIGHT * i, @@savegamestrings[i])
     end
   end
 
@@ -6656,7 +6650,7 @@ module Doocr
     CDoom.doom_concat(name, ".dsg")
 
     CDoom.g_load_game(name)
-    CDoom.m_clear_menus
+    m_clear_menus
   end
 
   #
@@ -6664,12 +6658,12 @@ module Doocr
   #
   def self.m_load_game(choice : Int32)
     if CDoom.netgame != 0
-      CDoom.m_start_message(@@deh_load_net, NULL_PROCP1, 0)
+      m_start_message(@@deh_load_net, NULL_PROCP1, 0)
       return
     end
 
-    CDoom.m_setup_next_menu(pointerof(@@loaddef))
-    CDoom.m_read_save_strings
+    m_setup_next_menu(pointerof(@@loaddef))
+    m_read_save_strings
   end
 
   #
@@ -6678,13 +6672,13 @@ module Doocr
   def self.m_draw_save
     CDoom.v_draw_patch_direct(72, 28, 0, CDoom.w_cache_lump_name("M_SAVEG", CDoom::PU_CACHE).as(CDoom::Patch*))
     CDoom::Loadenum::LoadEnd.value.times do |i|
-      CDoom.m_draw_save_load_border(@@loaddef.x, @@loaddef.y + CDoom::LINEHEIGHT * i)
-      CDoom.m_write_text(@@loaddef.x, @@loaddef.y + CDoom::LINEHEIGHT * i, CDoom.savegamestrings[i])
+      m_draw_save_load_border(@@loaddef.x, @@loaddef.y + CDoom::LINEHEIGHT * i)
+      m_write_text(@@loaddef.x, @@loaddef.y + CDoom::LINEHEIGHT * i, @@savegamestrings[i])
     end
 
     if CDoom.save_string_enter != 0
-      i = CDoom.m_string_width(CDoom.savegamestrings[CDoom.save_slot])
-      CDoom.m_write_text(@@loaddef.x + i, @@loaddef.y + CDoom::LINEHEIGHT * CDoom.save_slot, "_")
+      i = m_string_width(@@savegamestrings[CDoom.save_slot])
+      m_write_text(@@loaddef.x + i, @@loaddef.y + CDoom::LINEHEIGHT * CDoom.save_slot, "_")
     end
   end
 
@@ -6692,8 +6686,8 @@ module Doocr
   # m_responder calls this when user is finished
   #
   def self.m_do_save(slot : Int32)
-    CDoom.g_save_game(slot, CDoom.savegamestrings[slot])
-    CDoom.m_clear_menus
+    CDoom.g_save_game(slot, @@savegamestrings[slot])
+    m_clear_menus
 
     # PICK QUICKSAVE SLOT YET?
     CDoom.quick_save_slot = slot if CDoom.quick_save_slot == -2
@@ -6707,11 +6701,11 @@ module Doocr
     CDoom.save_string_enter = 1
 
     CDoom.save_slot = choice
-    CDoom.doom_strcpy(CDoom.save_old_string, CDoom.savegamestrings[choice])
-    if CDoom.doom_strcmp(CDoom.savegamestrings[choice], @@deh_emptystring) == 0
-      (CDoom.savegamestrings.to_unsafe + choice).value.to_unsafe.value = 0
+
+    @@save_old_string = @@savegamestrings[choice]
+    if @@savegamestrings[choice] == @@deh_emptystring
+      @@savegamestrings[choice] = ""
     end
-    CDoom.save_char_index = CDoom.doom_strlen(CDoom.savegamestrings[choice]).to_i32!
   end
 
   #
@@ -6719,14 +6713,14 @@ module Doocr
   #
   def self.m_save_game(choice : Int32)
     if CDoom.usergame == 0
-      CDoom.m_start_message(@@deh_save_dead, NULL_PROCP1, 0)
+      m_start_message(@@deh_save_dead, NULL_PROCP1, 0)
       return
     end
 
     return if CDoom.gamestate != CDoom::Gamestate::Level
 
-    CDoom.m_setup_next_menu(pointerof(@@savedef))
-    CDoom.m_read_save_strings
+    m_setup_next_menu(pointerof(@@savedef))
+    m_read_save_strings
   end
 
   #
@@ -6749,12 +6743,12 @@ module Doocr
 
     if CDoom.quick_save_slot < 0
       CDoom.m_start_control_panel
-      CDoom.m_read_save_strings
-      CDoom.m_setup_next_menu(pointerof(@@savedef))
+      m_read_save_strings
+      m_setup_next_menu(pointerof(@@savedef))
       CDoom.quick_save_slot = -2 # means to pick a slot now
       return
     end
-    CDoom.m_start_message(@@deh_qsprompt_1 + String.new(CDoom.savegamestrings[CDoom.quick_save_slot].to_unsafe) + @@deh_qsprompt_2,
+    m_start_message(@@deh_qsprompt_1 + @@savegamestrings[CDoom.quick_save_slot] + @@deh_qsprompt_2,
       ->CDoom.m_quicksave_response(Int32), 1)
   end
 
@@ -6763,22 +6757,22 @@ module Doocr
   #
   def self.m_quickload_response(ch : Int32)
     if ch == 'y'.ord
-      CDoom.m_load_select(CDoom.quick_save_slot)
+      m_load_select(CDoom.quick_save_slot)
       CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchx)
     end
   end
 
   def self.m_quickload
     if CDoom.netgame != 0
-      CDoom.m_start_message(@@deh_qload_net, NULL_PROCP1, 0)
+      m_start_message(@@deh_qload_net, NULL_PROCP1, 0)
       return
     end
 
     if CDoom.quick_save_slot < 0
-      CDoom.m_start_message(@@deh_qsave_spot, NULL_PROCP1, 0)
+      m_start_message(@@deh_qsave_spot, NULL_PROCP1, 0)
       return
     end
-    CDoom.m_start_message(@@deh_qlprompt_1 + String.new(CDoom.savegamestrings[CDoom.quick_save_slot].to_unsafe) + @@deh_qlprompt_2,
+    m_start_message(@@deh_qlprompt_1 + @@savegamestrings[CDoom.quick_save_slot] + @@deh_qlprompt_2,
       ->CDoom.m_quickload_response(Int32), 1)
   end
 
@@ -6810,15 +6804,15 @@ module Doocr
   def self.m_draw_sound
     CDoom.v_draw_patch_direct(60, 38, 0, CDoom.w_cache_lump_name("M_SVOL", CDoom::PU_CACHE).as(CDoom::Patch*))
 
-    CDoom.m_draw_thermo(@@sounddef.x, @@sounddef.y + CDoom::LINEHEIGHT * (CDoom::Soundenum::Sfxvol.value + 1),
+    m_draw_thermo(@@sounddef.x, @@sounddef.y + CDoom::LINEHEIGHT * (CDoom::Soundenum::Sfxvol.value + 1),
       16, CDoom.snd_sfx_volume)
 
-    CDoom.m_draw_thermo(@@sounddef.x, @@sounddef.y + CDoom::LINEHEIGHT * (CDoom::Soundenum::Musicvol.value + 1),
+    m_draw_thermo(@@sounddef.x, @@sounddef.y + CDoom::LINEHEIGHT * (CDoom::Soundenum::Musicvol.value + 1),
       16, CDoom.snd_music_volume)
   end
 
   def self.m_sound(choice : Int32)
-    CDoom.m_setup_next_menu(pointerof(@@sounddef))
+    m_setup_next_menu(pointerof(@@sounddef))
   end
 
   def self.m_sfxvol(choice : Int32)
@@ -6860,14 +6854,14 @@ module Doocr
 
   def self.m_new_game(choice : Int32)
     if CDoom.netgame != 0 && CDoom.demoplayback == 0
-      CDoom.m_start_message(@@deh_newgame, NULL_PROCP1, 0)
+      m_start_message(@@deh_newgame, NULL_PROCP1, 0)
       return
     end
 
     if CDoom.gamemode == CDoom::GameMode::Commercial
-      CDoom.m_setup_next_menu(pointerof(@@newdef))
+      m_setup_next_menu(pointerof(@@newdef))
     else
-      CDoom.m_setup_next_menu(pointerof(@@epidef))
+      m_setup_next_menu(pointerof(@@epidef))
     end
   end
 
@@ -6882,23 +6876,23 @@ module Doocr
     return if ch != 'y'.ord
 
     CDoom.g_defered_init_new(CDoom::Skill::Nightmare, CDoom.epi + 1, 1)
-    CDoom.m_clear_menus
+    m_clear_menus
   end
 
   def self.m_choose_skill(choice : Int32)
     if choice == CDoom::Skill::Nightmare.value
-      CDoom.m_start_message(@@deh_nightmare, ->CDoom.m_verify_nightmare(Int32), 1)
+      m_start_message(@@deh_nightmare, ->CDoom.m_verify_nightmare(Int32), 1)
       return
     end
 
     CDoom.g_defered_init_new(CDoom::Skill.new(choice), CDoom.epi + 1, 1)
-    CDoom.m_clear_menus
+    m_clear_menus
   end
 
   def self.m_episode(choice : Int32)
     if CDoom.gamemode == CDoom::GameMode::Shareware && choice != 0
-      CDoom.m_start_message(@@deh_swstring, NULL_PROCP1, 0)
-      CDoom.m_setup_next_menu(pointerof(@@readdef1))
+      m_start_message(@@deh_swstring, NULL_PROCP1, 0)
+      m_setup_next_menu(pointerof(@@readdef1))
       return
     end
 
@@ -6909,7 +6903,7 @@ module Doocr
     end
 
     CDoom.epi = choice
-    CDoom.m_setup_next_menu(pointerof(@@newdef))
+    m_setup_next_menu(pointerof(@@newdef))
   end
 
   #
@@ -6920,19 +6914,19 @@ module Doocr
 
     CDoom.v_draw_patch_direct(@@optionsdef.x + 120, @@optionsdef.y + CDoom::LINEHEIGHT * CDoom::OptionsEnum::Messages.value, 0, CDoom.w_cache_lump_name(CDoom.msg_names[CDoom.show_messages], CDoom::PU_CACHE).as(CDoom::Patch*))
 
-    CDoom.m_draw_thermo(@@optionsdef.x, @@optionsdef.y + CDoom::LINEHEIGHT * (CDoom::OptionsEnum::Scrnsize.value + 1),
+    m_draw_thermo(@@optionsdef.x, @@optionsdef.y + CDoom::LINEHEIGHT * (CDoom::OptionsEnum::Scrnsize.value + 1),
       9, CDoom.screen_size)
 
-    CDoom.m_draw_thermo(@@optionsdef.x, @@optionsdef.y + CDoom::LINEHEIGHT * (CDoom::OptionsEnum::Mousesensitivity.value + 1),
+    m_draw_thermo(@@optionsdef.x, @@optionsdef.y + CDoom::LINEHEIGHT * (CDoom::OptionsEnum::Mousesensitivity.value + 1),
       10, CDoom.mouse_sensitivity)
 
-    CDoom.m_write_text(@@optionsdef.x, @@optionsdef.y +
+    m_write_text(@@optionsdef.x, @@optionsdef.y +
                                        CDoom::LINEHEIGHT * CDoom::OptionsEnum::More.value + CDoom.hu_font[0].value.height // 2,
       "more options")
   end
 
   def self.m_options(choice : Int32)
-    CDoom.m_setup_next_menu(pointerof(@@optionsdef))
+    m_setup_next_menu(pointerof(@@optionsdef))
   end
 
   #
@@ -6953,14 +6947,14 @@ module Doocr
   end
 
   def self.m_moreoptions(choice : Int32)
-    CDoom.m_setup_next_menu(pointerof(@@moreoptions_def))
+    m_setup_next_menu(pointerof(@@moreoptions_def))
   end
 
   def self.m_draw_moreoptions
     CDoom.v_draw_patch_direct(108, 8, 0, CDoom.w_cache_lump_name("M_OPTTTL", CDoom::PU_CACHE).as(CDoom::Patch*))
 
     @@moreoptions_menus[@@current_options_menu].each_with_index do |item, i|
-      CDoom.m_write_text(@@moreoptions_def.x, @@moreoptions_def.y +
+      m_write_text(@@moreoptions_def.x, @@moreoptions_def.y +
                                               CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
         String.new(item.text) + (
           (item.bool.null? ? "" : (item.bool.value != 0 ? "on" : "off")) +
@@ -6983,7 +6977,7 @@ module Doocr
   end
 
   def self.m_edit_controls(choice : Int32)
-    CDoom.m_setup_next_menu(pointerof(@@editcontrols_def))
+    m_setup_next_menu(pointerof(@@editcontrols_def))
   end
 
   @@selected_edit = Pointer(Int32).null
@@ -7054,12 +7048,12 @@ module Doocr
   end
 
   def self.m_draw_edit_controls
-    CDoom.m_write_text(CDoom::SCREENWIDTH // 2 - CDoom.m_string_width("Controls") // 2, @@editcontrols_def.y +
+    m_write_text(CDoom::SCREENWIDTH // 2 - "Controls".size // 2, @@editcontrols_def.y +
                                                                                         -CDoom::LINEHEIGHT + CDoom.hu_font[0].value.height // 2,
       "Controls")
 
     @@editcontrols_menu.each_with_index do |item, i|
-      CDoom.m_write_text(@@editcontrols_def.x, @@editcontrols_def.y +
+      m_write_text(@@editcontrols_def.x, @@editcontrols_def.y +
                                                CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
         String.new(item.text) + (item.num.null? ? "" : m_draw_key(item.num)))
     end
@@ -7148,7 +7142,7 @@ module Doocr
     return if ch != 'y'.ord
 
     CDoom.current_menu.value.last_on = CDoom.item_on
-    CDoom.m_clear_menus
+    m_clear_menus
     CDoom.d_start_title
   end
 
@@ -7160,11 +7154,11 @@ module Doocr
     end
 
     if CDoom.netgame != 0
-      CDoom.m_start_message(@@deh_netend, NULL_PROCP1, 0)
+      m_start_message(@@deh_netend, NULL_PROCP1, 0)
       return
     end
 
-    CDoom.m_start_message(@@deh_endgame, ->CDoom.m_endgame_response(Int32), 1)
+    m_start_message(@@deh_endgame, ->CDoom.m_endgame_response(Int32), 1)
   end
 
   #
@@ -7172,17 +7166,17 @@ module Doocr
   #
   def self.m_readthis(choice : Int32)
     choice = 0
-    CDoom.m_setup_next_menu(pointerof(@@readdef1))
+    m_setup_next_menu(pointerof(@@readdef1))
   end
 
   def self.m_readthis2(choice : Int32)
     choice = 0
-    CDoom.m_setup_next_menu(pointerof(@@readdef2))
+    m_setup_next_menu(pointerof(@@readdef2))
   end
 
   def self.m_finish_readthis(choice : Int32)
     choice = 0
-    CDoom.m_setup_next_menu(pointerof(@@maindef))
+    m_setup_next_menu(pointerof(@@maindef))
   end
 
   #
@@ -7204,18 +7198,19 @@ module Doocr
   def self.m_quitdoom(choice : Int32)
     # We pick index 0 which is language sensitive,
     #  or one at random, between 1 and maximum number.
+    string = ""
     if CDoom.language != CDoom::Language::English
-      CDoom.doom_strcpy(CDoom.endstring, CDoom.doom1_endmsg[0])
+      string = @@doom1_endmsg[0]
     else
       if CDoom.gamemode == CDoom::GameMode::Commercial
-        CDoom.doom_strcpy(CDoom.endstring, CDoom.doom2_endmsg[CDoom.gametic % (sizeof(typeof(CDoom.doom2_endmsg)) // sizeof(UInt8*) - 1) + 1])
+        string = @@doom2_endmsg[CDoom.gametic % @@doom2_endmsg.size + 1]
       else
-        CDoom.doom_strcpy(CDoom.endstring, CDoom.doom1_endmsg[CDoom.gametic % (sizeof(typeof(CDoom.doom1_endmsg)) // sizeof(UInt8*) - 1) + 1])
+        string = @@doom1_endmsg[CDoom.gametic % @@doom1_endmsg.size + 1]
       end
     end
-    CDoom.doom_concat(CDoom.endstring, "\n\n" + CDoom::DOSY)
+    string += "\n\n(press y to quit)"
 
-    CDoom.m_start_message(CDoom.endstring, ->CDoom.m_quit_response(Int32), 1)
+    m_start_message(string, ->CDoom.m_quit_response(Int32), 1)
   end
 
   def self.m_change_sensitivity(choice : Int32)
@@ -7275,7 +7270,7 @@ module Doocr
       CDoom.w_cache_lump_name("M_CELL2", CDoom::PU_CACHE).as(CDoom::Patch*))
   end
 
-  def self.m_start_message(string : LibC::Char*, routine : Proc(Int32, Nil), input : CDoom::DoomBool)
+  def self.m_start_message(string : String, routine : Proc(Int32, Nil), input : CDoom::DoomBool)
     CDoom.message_last_menu_active = CDoom.menuactive
     CDoom.message_to_print = 1
     CDoom.message_string = string
@@ -7292,11 +7287,11 @@ module Doocr
   #
   # Find string width from hu_font chars
   #
-  def self.m_string_width(string : UInt8*) : Int32
+  def self.m_string_width(string : String) : Int32
     w = 0
 
-    CDoom.doom_strlen(string).times do |i|
-      c = CDoom.doom_toupper(string[i]) - CDoom::HU_FONTSTART
+    string.each_char do |c|
+      c = c.upcase.ord - CDoom::HU_FONTSTART
       if c < 0 || c >= CDoom::HU_FONTSIZE
         w += 4
       else
@@ -7324,22 +7319,19 @@ module Doocr
   #
   # Write a string using the hu_font
   #
-  def self.m_write_text(x : Int32, y : Int32, string : UInt8*)
-    ch = string
+  def self.m_write_text(x : Int, y : Int, string : String)
     cx = x
     cy = y
 
-    while true
-      c = ch.value
-      ch += 1
-      break if c == 0
-      if c == '\n'.ord
+    string.each_char do |c|
+      break if c == '\0'
+      if c == '\n'
         cx = x
         cy += 12
         next
       end
 
-      c = doom_toupper(c) - CDoom::HU_FONTSTART
+      c = c.upcase.ord - CDoom::HU_FONTSTART
       if c < 0 || c >= CDoom::HU_FONTSIZE
         cx += 4
         next
@@ -7448,13 +7440,12 @@ module Doocr
     if CDoom.save_string_enter != 0
       case ch
       when CDoom::KEY_BACKSPACE
-        if CDoom.save_char_index > 0
-          CDoom.save_char_index -= 1
-          ((CDoom.savegamestrings.to_unsafe + CDoom.save_slot).value.to_unsafe + CDoom.save_char_index).value = 0
+        if @@savegamestrings[CDoom.save_slot].size > 0
+          @@savegamestrings[CDoom.save_slot] = @@savegamestrings[CDoom.save_slot].rchop
         end
       when CDoom::KEY_ESCAPE
         CDoom.save_string_enter = 0
-        CDoom.doom_strcpy(CDoom.savegamestrings[CDoom.save_slot].to_unsafe, CDoom.save_old_string)
+        @@savegamestrings[CDoom.save_slot] = @@save_old_string
       when CDoom::KEY_ENTER
         CDoom.save_string_enter = 0
         CDoom.m_do_save(CDoom.save_slot) # if CDoom.savegamestrings[CDoom.save_slot][0] != 0 allows empty saves
@@ -7462,12 +7453,10 @@ module Doocr
         ch = CDoom.doom_toupper(ch)
         unless ch != 32 && (ch - CDoom::HU_FONTSTART < 0 || ch - CDoom::HU_FONTSTART >= CDoom::HU_FONTSIZE)
           if ch >= 32 && ch <= 127 &&
-             CDoom.save_char_index < CDoom::SAVESTRINGSIZE - 1 &&
-             CDoom.m_string_width(CDoom.savegamestrings[CDoom.save_slot]) <
+             @@savegamestrings[CDoom.save_slot].size < CDoom::SAVESTRINGSIZE - 1 &&
+             m_string_width(@@savegamestrings[CDoom.save_slot]) <
                (CDoom::SAVESTRINGSIZE - 2) * 8
-            ((CDoom.savegamestrings.to_unsafe + CDoom.save_slot).value.to_unsafe + CDoom.save_char_index).value = ch.to_u8!
-            CDoom.save_char_index += 1
-            ((CDoom.savegamestrings.to_unsafe + CDoom.save_slot).value.to_unsafe + CDoom.save_char_index).value = 0
+            @@savegamestrings[CDoom.save_slot] += ch.chr
           end
         end
       end
@@ -7499,12 +7488,12 @@ module Doocr
       case ch
       when CDoom::KEY_MINUS # Screen size down
         return 0 if CDoom.automapactive != 0 || CDoom.chat_on != 0
-        CDoom.m_size_display(0)
+        m_size_display(0)
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_stnmov)
         return 1
       when CDoom::KEY_EQUALS # Screen size up
         return 0 if CDoom.automapactive != 0 || CDoom.chat_on != 0
-        CDoom.m_size_display(1)
+        m_size_display(1)
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_stnmov)
         return 1
       when CDoom::KEY_F1 # Help key
@@ -7518,12 +7507,12 @@ module Doocr
       when CDoom::KEY_F2 # Save
         CDoom.m_start_control_panel
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
-        CDoom.m_save_game(0)
+        m_save_game(0)
         return 1
       when CDoom::KEY_F3 # Load
         CDoom.m_start_control_panel
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
-        CDoom.m_load_game(0)
+        m_load_game(0)
         return 1
       when CDoom::KEY_F4 # Sound Volume
         CDoom.m_start_control_panel
@@ -7538,23 +7527,23 @@ module Doocr
         return 1
       when CDoom::KEY_F6 # Quicksave
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
-        CDoom.m_quicksave
+        m_quicksave
         return 1
       when CDoom::KEY_F7 # End game
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
-        CDoom.m_endgame(0)
+        m_endgame(0)
         return 1
       when CDoom::KEY_F8 # Toggle messages
-        CDoom.m_change_messages(0)
+        m_change_messages(0)
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
         return 1
       when CDoom::KEY_F9 # Quickload
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
-        CDoom.m_quickload
+        m_quickload
         return 1
       when CDoom::KEY_F10 # Quit DOOM
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
-        CDoom.m_quitdoom(0)
+        m_quitdoom(0)
         return 1
       when CDoom::KEY_F11 # gamma toggle
         CDoom.usegamma += 1
@@ -7620,7 +7609,7 @@ module Doocr
       return 1
     when CDoom::KEY_ESCAPE
       CDoom.current_menu.value.last_on = CDoom.item_on
-      CDoom.m_clear_menus
+      m_clear_menus
       CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchx)
       return 1
     when CDoom::KEY_BACKSPACE
@@ -7678,7 +7667,7 @@ module Doocr
     # Horiz. & Vertically center string and print it.
     if CDoom.message_to_print != 0
       start = 0
-      @@y = 100 - CDoom.m_string_height(CDoom.message_string) // 2
+      @@y = 100 - m_string_height(CDoom.message_string) // 2
       while (CDoom.message_string + start).value != 0
         i = 0
         while i < CDoom.doom_strlen(CDoom.message_string + start)
@@ -7695,8 +7684,8 @@ module Doocr
           start += i
         end
 
-        @@x = 160 - CDoom.m_string_width(string) // 2
-        CDoom.m_write_text(@@x, @@y, string)
+        @@x = 160 - m_string_width(string) // 2
+        m_write_text(@@x, @@y, string)
         @@y += CDoom.hu_font[0].value.height.to_i16!
       end
       return
@@ -7767,7 +7756,7 @@ module Doocr
       @@readdef1.routine = ->m_draw_commercial
       @@readdef1.x = 330
       @@readdef1.y = 165
-      @@readmenu1.to_unsafe.value.routine = ->CDoom.m_finish_readthis(Int32)
+      @@readmenu1.to_unsafe.value.routine = ->m_finish_readthis(Int32)
     when CDoom::GameMode::Retail
       # Skip first menu on Ultimate Doom
       pointerof(@@readdef1).value = @@readdef2

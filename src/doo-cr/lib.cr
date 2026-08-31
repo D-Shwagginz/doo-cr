@@ -206,37 +206,6 @@ lib CDoom
     RIGHT  = 1
     MIDDLE = 2
   end
-  # Call this 140 times per second. Or about every 7ms.
-  # Returns midi message. Keep calling it until it returns 0.
-  fun doom_tick_midi : LibC::ULongLong
-
-  # Events
-  fun doom_key_down(key : DoomKey)
-  fun doom_key_up(key : DoomKey)
-  fun doom_button_down(button : DoomButton)
-  fun doom_button_up(button : DoomButton)
-  fun doom_mouse_move(delta_x : LibC::Int, delta_y : LibC::Int)
-
-  # __D__ENGLSH__
-
-  #
-  # Printed strings for translation
-  #
-
-  #
-  # D_Main.C
-  #
-
-  #
-  #        M_Menu.C
-  #
-
-  CROSSOFF     = "Crosshair OFF"
-  CROSSON      = "Crosshair ON"
-  ALWAYSRUNOFF = "Always run OFF"
-  ALWAYSRUNON  = "Always run ON"
-
-  DOSY = "(press y to quit)"
 
   #
   # P_inter.C
@@ -687,14 +656,6 @@ lib CDoom
 
   fun d_add_file = D_AddFile(file : LibC::Char*)
 
-  #
-  # D_DoomMain()
-  # Not a globally visible function, just included for source reference,
-  # calls all startup code, parses command line options.
-  # If not overrided by user input, calls N_AdvanceDemo.
-  #
-  fun d_doom_main = D_DoomMain
-
   # Called by IO functions when input is detected.
   fun d_post_event = D_PostEvent(ev : Event*)
 
@@ -914,9 +875,6 @@ lib CDoom
 
   # QuitDOOM messages
   NUM_QUITMESSAGES = 22
-
-  $doom1_endmsg : LibC::Char*[8]
-  $doom2_endmsg : LibC::Char*[8]
 
   # __F_FINALE__
 
@@ -2464,23 +2422,12 @@ lib CDoom
   #
 
   # Called by main loop,
-  # saves config file and calls I_Quit when user exits.
-  # Even when the menu is not displayed,
-  # this can resize the view and change game parameters.
-  # Does all the real work of the menu interaction.
-  fun m_responder = M_Responder(ev : Event*) : DoomBool
-
-  # Called by main loop,
   # only used for menu (skull cursor) animation.
   fun m_ticker = M_Ticker
 
   # Called by main loop,
   # draws the menus directly into the screen buffer.
   fun m_drawer = M_Drawer
-
-  # Called by D_DoomMain,
-  # loads the config file.
-  fun m_init = M_Init
 
   # Called by intro code to force menu up upon a keypress,
   # does nothing if menu is already up.
@@ -5767,8 +5714,6 @@ lib CDoom
 
   fun find_response_file = FindResponseFile
 
-  fun d_doom_main = D_DoomMain
-
   $doomcom : Doomcom*
   $netbuffer : Doomdata* # points inside doomcom
 
@@ -6413,11 +6358,6 @@ lib CDoom
   # we are going to be entering a savegame string
   $save_string_enter = saveStringEnter : LibC::Int
   $save_slot = saveSlot : LibC::Int            # which slot to save in
-  $save_char_index = saveCharIndex : LibC::Int # which char we're editing
-  # old save description before edit
-  $save_old_string = saveOldString : LibC::Char[SAVESTRINGSIZE]
-
-  $savegamestrings : LibC::Char[SAVESTRINGSIZE][10]
 
   $endstring : LibC::Char[160]
 
@@ -6447,62 +6387,6 @@ lib CDoom
 
   $quitsounds2 : LibC::Int[8]
 
-  fun m_new_game = M_NewGame(choice : LibC::Int)
-  fun m_episode = M_Episode(choice : LibC::Int)
-  fun m_choose_skill = M_ChooseSkill(choice : LibC::Int)
-  fun m_load_game = M_LoadGame(choice : LibC::Int)
-  fun m_save_game = M_SaveGame(choice : LibC::Int)
-  fun m_options = M_Options(choice : LibC::Int)
-  fun m_endgame = M_EndGame(choice : LibC::Int)
-  fun m_readthis = M_ReadThis(choice : LibC::Int)
-  fun m_readthis2 = M_ReadThis2(choice : LibC::Int)
-  fun m_quitdoom = M_QuitDOOM(choice : LibC::Int)
-
-  fun m_change_messages = M_ChangeMessages(choice : LibC::Int)
-  fun m_sfxvol = M_SfxVol(choice : LibC::Int)
-  fun m_musicvol = M_MusicVol(choice : LibC::Int)
-  fun m_mouse_options = M_MouseOptions(choice : LibC::Int)
-  fun m_size_display = M_SizeDisplay(choice : LibC::Int)
-  fun m_startgame = M_StartGame(choice : LibC::Int)
-  fun m_sound = M_Sound(choice : LibC::Int)
-  fun m_change_crosshair = M_ChangeCrosshair(choice : LibC::Int)
-  fun m_change_alwaysrun = M_ChangeAlwaysRun(choice : LibC::Int)
-
-  fun m_mouse_move = M_MouseMove(choice : LibC::Int)
-  fun m_change_sensitivity = M_ChangeSensitivity(choice : LibC::Int)
-
-  fun m_finish_readthis = M_FinishReadThis(choice : LibC::Int)
-  fun m_load_select = M_LoadSelect(choice : LibC::Int)
-  fun m_save_select = M_SaveSelect(choice : LibC::Int)
-  fun m_read_save_strings = M_ReadSaveStrings
-  fun m_quicksave = M_QuickSave
-  fun m_quickload = M_QuickLoad
-
-  fun m_draw_mainmenu = M_DrawMainMenu
-  fun m_draw_readthis1 = M_DrawReadThis1
-  fun m_draw_readthis2 = M_DrawReadThis2
-  fun m_draw_newgame = M_DrawNewGame
-  fun m_draw_episode = M_DrawEpisode
-  fun m_draw_options = M_DrawOptions
-  fun m_draw_sound = M_DrawSound
-  fun m_draw_load = M_DrawLoad
-  fun m_draw_save = M_DrawSave
-
-  fun m_draw_save_load_border = M_DrawSaveLoadBorder(x : LibC::Int, y : LibC::Int)
-  fun m_setup_next_menu = M_SetupNextMenu(menudef : Menu*)
-  fun m_draw_thermo = M_DrawThermo(x : LibC::Int, y : LibC::Int, therm_width : LibC::Int, therm_dot : LibC::Int)
-  fun m_draw_empty_cell = M_DrawEmptyCell(menu : Menu*, item : LibC::Int)
-  fun m_draw_selcell = M_DrawSelCell(menu : Menu*, item : LibC::Int)
-  fun m_write_text = M_WriteText(x : LibC::Int, y : LibC::Int, string : LibC::Char*)
-  fun m_string_width = M_StringWidth(string : LibC::Char*) : LibC::Int
-  fun m_string_height = M_StringHeight(string : LibC::Char*) : LibC::Int
-  fun m_start_control_panel = M_StartControlPanel
-  fun m_start_message = M_StartMessage(string : LibC::Char*, routine : Proc(Int32, Nil), input : DoomBool)
-  fun m_stop_message = M_StopMessage
-  fun m_clear_menus = M_ClearMenus
-  fun m_draw_mouse_options = M_DrawMouseOptions
-
-  #
   # DOOM MENU
   #
   enum Mainenum
@@ -6656,8 +6540,6 @@ lib CDoom
   fun m_endgame_response = M_EndGameResponse(ch : LibC::Int)
 
   fun m_quit_response = M_QuitResponse(ch : LibC::Int)
-
-  fun m_responder = M_Responder(ev : Event*) : DoomBool
 
   STRING_VALUE = 0xffff
 
