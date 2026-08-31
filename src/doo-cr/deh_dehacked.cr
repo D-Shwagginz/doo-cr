@@ -262,12 +262,12 @@ module Doocr
           # Line has header?
           if line.starts_with?(start)
             case cur_block
-              # Set thing data. Thing is laid out 1 to 1 with dehacked header hash
+            # Set thing data. Thing is laid out 1 to 1 with dehacked header hash
             when DehBlocks::Thing
               next if cur_num < 1 || cur_num > @@mobjinfo.size
               ((@@mobjinfo.to_unsafe + cur_num - 1).as(Int32*) + loc).value =
                 line[start.size..].to_i(strict: false)
-                # Fame is not all Int32 unlike thing, so parse it manually
+              # Fame is not all Int32 unlike thing, so parse it manually
             when DehBlocks::Frame
               next if cur_num < 0 || cur_num >= @@states.size
               state = @@states.to_unsafe + cur_num
@@ -315,7 +315,7 @@ module Doocr
               next if cur_num < 0 || cur_num >= CDoom::Weapontype::NUMWEAPONS.value
               ((CDoom.weaponinfo.to_unsafe + cur_num).as(Int32*) + loc).value =
                 line[start.size..].to_i(strict: false)
-                # Custom cheats
+              # Custom cheats
             when DehBlocks::Cheat
               value = [] of UInt8
               line[start.size..].each_char { |chr| value << scramble(chr.ord.to_u8!) }
@@ -330,25 +330,23 @@ module Doocr
                 CDoom.cheat_choppers.sequence = @@cheat_choppers_seq.to_unsafe
               when 2 # IDDQD
                 value.push 0xff
-                @@cheat_god_seq= value
+                @@cheat_god_seq = value
                 CDoom.cheat_god.sequence = @@cheat_god_seq.to_unsafe
               when 3 # IDKFA
                 value.push 0xff
-                @@cheat_ammo_seq= value
+                @@cheat_ammo_seq = value
                 CDoom.cheat_ammo.sequence = @@cheat_ammo_seq.to_unsafe
               when 4 # IDFA
                 value.push 0xff
-                @@cheat_ammonokey_seq= value
+                @@cheat_ammonokey_seq = value
                 CDoom.cheat_ammonokey.sequence = @@cheat_ammonokey_seq.to_unsafe
-
               when 5 # IDSPISPOPD
                 value.push 0xff
-                @@cheat_noclip_seq= value
+                @@cheat_noclip_seq = value
                 CDoom.cheat_noclip.sequence = @@cheat_noclip_seq.to_unsafe
-
               when 6 # IDCLIP
                 value.push 0xff
-                @@cheat_commercial_noclip_seq= value
+                @@cheat_commercial_noclip_seq = value
                 CDoom.cheat_commercial_noclip.sequence = @@cheat_commercial_noclip_seq.to_unsafe
               when 7, 8, 9, 10, 11, 12, 13 # IDBEHOLDX
                 value.push 0xff
@@ -356,15 +354,15 @@ module Doocr
                 (CDoom.cheat_powerup.to_unsafe + loc - 7).value.sequence = @@cheat_powerup_seq[loc - 7].to_unsafe
               when 14 # IDCLEV
                 value.push 1, 0, 0, 0xff
-                @@cheat_clev_seq= value
+                @@cheat_clev_seq = value
                 CDoom.cheat_clev.sequence = @@cheat_clev_seq.to_unsafe
               when 15 # IDMYPOS
                 value.push 0xff
-                @@cheat_mypos_seq= value
+                @@cheat_mypos_seq = value
                 CDoom.cheat_mypos.sequence = @@cheat_mypos_seq.to_unsafe
               when 16 # IDDT
                 value.push 0xff
-                @@cheat_amap_seq= value
+                @@cheat_amap_seq = value
                 CDoom.cheat_amap.sequence = @@cheat_amap_seq.to_unsafe
               end
               # Misc data, set all manually (maybe could use array of pointers to the variables?)

@@ -33,7 +33,6 @@ module Doocr
     path = String.new(filename)
     m = String.new(mode)
     write_mode = m.includes?('w') || m.includes?('a')
-
     begin
       if write_mode
         return Box.box({path, IO::Memory.new, true})
@@ -1889,7 +1888,7 @@ module Doocr
       case CDoom.gamemode
       when CDoom::GameMode::Shareware, CDoom::GameMode::Retail, CDoom::GameMode::Registered
         file = "~#{CDoom::DEVMAPS}E" +
-        ARGV[p + 1][0] + "M" + ARGV[p + 2][0] + ".wad"
+               ARGV[p + 1][0] + "M" + ARGV[p + 2][0] + ".wad"
         puts "Warping to Episode #{ARGV[p + 1]}" +
              ", Map #{ARGV[p + 2]}."
         # when CDoom::GameMode::Commercial
@@ -6551,11 +6550,10 @@ module Doocr
   # read the strings from the savegame files
   #
   def self.m_read_save_strings
-
     CDoom::Loadenum::LoadEnd.value.times do |i|
-name = "#{@@deh_savegamename}#{i}.dsg"
+      name = "#{@@deh_savegamename}#{i}.dsg"
 
-if !File.exists?(name)
+      if !File.exists?(name)
         @@savegamestrings[i] = @@deh_emptystring
         (@@loadmenu.to_unsafe + i).value.status = 0
         next
@@ -6563,7 +6561,7 @@ if !File.exists?(name)
       File.open(name, "r") do |file|
         @@savegamestrings[i] = file.read_string(CDoom::SAVESTRINGSIZE)
       end
-            (@@loadmenu.to_unsafe + i).value.status = 1
+      (@@loadmenu.to_unsafe + i).value.status = 1
     end
   end
 
@@ -6872,7 +6870,7 @@ if !File.exists?(name)
       10, CDoom.mouse_sensitivity)
 
     m_write_text(@@optionsdef.x, @@optionsdef.y +
-                                       CDoom::LINEHEIGHT * CDoom::OptionsEnum::More.value + CDoom.hu_font[0].value.height // 2,
+                                 CDoom::LINEHEIGHT * CDoom::OptionsEnum::More.value + CDoom.hu_font[0].value.height // 2,
       "more options")
   end
 
@@ -6906,7 +6904,7 @@ if !File.exists?(name)
 
     @@moreoptions_menus[@@current_options_menu].each_with_index do |item, i|
       m_write_text(@@moreoptions_def.x, @@moreoptions_def.y +
-                                              CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
+                                        CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
         String.new(item.text) + (
           (item.bool.null? ? "" : (item.bool.value != 0 ? "on" : "off")) +
           (item.num.null? ? "" : "#{item.num.value + 1}")
@@ -7000,12 +6998,12 @@ if !File.exists?(name)
 
   def self.m_draw_edit_controls
     m_write_text(CDoom::SCREENWIDTH // 2 - "Controls".size // 2, @@editcontrols_def.y +
-                                                                                        -CDoom::LINEHEIGHT + CDoom.hu_font[0].value.height // 2,
+                                                                 -CDoom::LINEHEIGHT + CDoom.hu_font[0].value.height // 2,
       "Controls")
 
     @@editcontrols_menu.each_with_index do |item, i|
       m_write_text(@@editcontrols_def.x, @@editcontrols_def.y +
-                                               CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
+                                         CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
         String.new(item.text) + (item.num.null? ? "" : m_draw_key(item.num)))
     end
   end
@@ -14216,7 +14214,6 @@ if !File.exists?(name)
         CDoom.p_add_thinker(pointerof(ceiling.value.@thinker))
         CDoom.p_add_active_ceiling(ceiling)
       when CDoom::Specials::Door
-        
         door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Vldoor*)
         slice = Slice.new(door.as(UInt8*), sizeof(CDoom::Vldoor))
         file.read_fully(slice)
@@ -14226,7 +14223,6 @@ if !File.exists?(name)
 
         CDoom.p_add_thinker(pointerof(door.value.@thinker))
       when CDoom::Specials::Floor
-        
         floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Floormove*)
         slice = Slice.new(floor.as(UInt8*), sizeof(CDoom::Floormove))
         file.read_fully(slice)
@@ -14236,7 +14232,6 @@ if !File.exists?(name)
 
         CDoom.p_add_thinker(pointerof(floor.value.@thinker))
       when CDoom::Specials::Plat
-        
         plat = CDoom.z_malloc(sizeof(CDoom::Plat), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Plat*)
         slice = Slice.new(plat.as(UInt8*), sizeof(CDoom::Plat))
         file.read_fully(slice)
@@ -14249,7 +14244,6 @@ if !File.exists?(name)
         CDoom.p_add_thinker(pointerof(plat.value.@thinker))
         CDoom.p_add_active_plat(plat)
       when CDoom::Specials::Flash
-        
         flash = CDoom.z_malloc(sizeof(CDoom::Lightflash), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Lightflash*)
         slice = Slice.new(flash.as(UInt8*), sizeof(CDoom::Lightflash))
         file.read_fully(slice)
@@ -14258,7 +14252,6 @@ if !File.exists?(name)
 
         CDoom.p_add_thinker(pointerof(flash.value.@thinker))
       when CDoom::Specials::Strobe
-        
         strobe = CDoom.z_malloc(sizeof(CDoom::Strobe), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Strobe*)
         slice = Slice.new(strobe.as(UInt8*), sizeof(CDoom::Strobe))
         file.read_fully(slice)
@@ -14267,7 +14260,6 @@ if !File.exists?(name)
 
         CDoom.p_add_thinker(pointerof(strobe.value.@thinker))
       when CDoom::Specials::Glow
-        
         glow = CDoom.z_malloc(sizeof(CDoom::Glow), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Glow*)
         slice = Slice.new(glow.as(UInt8*), sizeof(CDoom::Glow))
         file.read_fully(slice)

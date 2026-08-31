@@ -53,9 +53,9 @@ module Doocr
   # Demo compatible version (Gameplay version)
   DEMOVERSION = 110
   # Save compatible version (Save data version)
-  SAVEVERSION =  11
+  SAVEVERSION = 11
   # Net compatible version (Netcode version)
-  NETVERSION  =  15
+  NETVERSION = 15
 
   BUILD_TIME = {{ "#{`date -u +"%m-%d-%Y %H:%M:%S UTC"`.strip}" }}
 
@@ -93,7 +93,6 @@ end
   Doocr.doom_button_down(CDoom::DoomButton::{{doombutton}}) if is_down && !was_down
   Doocr.doom_button_up(CDoom::DoomButton::{{doombutton}}) if !is_down && was_down
 end
-
 
   unless ARGV.includes?("-nosound")
     # Create seperate thread so audio updates seperately from game code

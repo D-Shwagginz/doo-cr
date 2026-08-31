@@ -6347,7 +6347,7 @@ lib CDoom
 
   # we are going to be entering a savegame string
   $save_string_enter = saveStringEnter : LibC::Int
-  $save_slot = saveSlot : LibC::Int            # which slot to save in
+  $save_slot = saveSlot : LibC::Int # which slot to save in
 
   $endstring : LibC::Char[160]
 

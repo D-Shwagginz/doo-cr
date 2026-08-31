@@ -793,10 +793,8 @@ module Doocr
   @@deh_thustr_9 = "level 9: stronghold"
   @@deh_thustr_9
 
-
-
-    # The C Constant string name mapped to it's variables
-    # For cases interp, use to variables and split on '%s'
+  # The C Constant string name mapped to it's variables
+  # For cases interp, use to variables and split on '%s'
   DEH_STRINGS = {
     "D_DEVSTR"           => [pointerof(@@deh_d_devstr)],
     "QUITMSG"            => [pointerof(@@deh_quit_msg)],
@@ -1078,7 +1076,6 @@ module Doocr
     "THUSTR_9"           => [pointerof(@@deh_thustr_9)],
   }
 
-
   # A mapping of the BEX code name to the Crystal pointer
   DEH_CODEPTRS = {
     # Player
@@ -1202,7 +1199,7 @@ module Doocr
   # Parse a string block
   def self.deh_parse_string(line : String, io : IO)
     return unless eq = line.index('=')
-    
+
     key = line[0...eq].strip.upcase
     value = line[(eq + 1)..].lstrip
 
