@@ -2549,7 +2549,6 @@ lib CDoom
   fun s_update_sounds = S_UpdateSounds(listener_p : Void*)
 
   fun s_set_music_volume = S_SetMusicVolume(volume : LibC::Int)
-  fun s_set_sfx_volume = S_SetSfxVolume(volume : LibC::Int)
 
   # __SOUNDS__
 
@@ -3445,7 +3444,6 @@ lib CDoom
   # Sound FX volume has default, 0 - 15
   # Music volume has default, 0 - 15
   # These are multiplied by 8.
-  $snd_sfx_volume = snd_SfxVolume : LibC::Int     # maximum volume for sound
   $snd_music_volume = snd_MusicVolume : LibC::Int # maximum volume for music
 
   # -------------------------
@@ -6181,7 +6179,6 @@ lib CDoom
   fun getsfx(sfxname : LibC::Char*, len : LibC::Int*) : Void*
   fun addsfx(sfxid : LibC::Int, volume : LibC::Int, step : LibC::Int, seperation : LibC::Int) : LibC::Int
 
-  fun i_set_sfx_volume = I_SetSfxVolume(volume : LibC::Int)
   fun i_set_music_volume = I_SetMusicVolume(volume : LibC::Int)
 
   fun reset_all_channels

@@ -18,11 +18,7 @@
 require "socket"
 
 require "./doo-cr/lib.cr"
-require "./doo-cr/variables.cr"
-require "./doo-cr/deh_dehacked.cr"
-require "./doo-cr/deh_behextensions.cr"
-require "./doo-cr/doo-cr.cr"
-require "./doo-cr/implementation.cr"
+require "./doo-cr/**"
 
 require "raylib-cr"
 require "raylib-cr/audio.cr"
@@ -64,35 +60,6 @@ module Doocr
   #        the game will snap from 320 x 240 to whatever res is set here after wiping
   @@sres_x = 320
   @@sres_y = 240
-
-  # Midi info
-  MIDI_BUFFER_SIZE =  1024
-  MIDI_SAMPLE_RATE = 44100
-  MIDI_TICK_TIME   = 1.0 / 140.0
-
-  # -- Macros for quick key polling --
-  macro poll_key(doomkey, raylibkey)
-  was_down = Doocr.keystates[CDoom::DoomKey::{{doomkey}}.value]
-  is_down = Raylib::KeyboardKey::{{raylibkey}}.down?
-
-  Doocr.doom_key_down(CDoom::DoomKey::{{doomkey}}) if is_down && !was_down
-  Doocr.doom_key_up(CDoom::DoomKey::{{doomkey}}) if !is_down && was_down
-end
-
-  macro poll_two_key(doomkey, raylibkey1, raylibkey2)
-  was_down = Doocr.keystates[CDoom::DoomKey::{{doomkey}}.value]
-  is_down = Raylib::KeyboardKey::{{raylibkey1}}.down? || Raylib::KeyboardKey::{{raylibkey2}}.down?
-  
-  Doocr.doom_key_down(CDoom::DoomKey::{{doomkey}}) if is_down && !was_down
-  Doocr.doom_key_up(CDoom::DoomKey::{{doomkey}}) if !is_down && was_down
-end
-
-  macro poll_button(doombutton, raylibbutton)
-  was_down = CDoom.button_states[CDoom::DoomButton::{{doombutton}}.value] != 0
-  is_down = Raylib::MouseButton::{{raylibbutton}}.down?
-  Doocr.doom_button_down(CDoom::DoomButton::{{doombutton}}) if is_down && !was_down
-  Doocr.doom_button_up(CDoom::DoomButton::{{doombutton}}) if !is_down && was_down
-end
 
   unless ARGV.includes?("-nosound")
     # Create seperate thread so audio updates seperately from game code

@@ -5792,7 +5792,7 @@ module Doocr
   @@save_old_string = ""
 
   @@defaults = [CDoom::Default.new(name: "mouse_sensitivity", location: pointerof(CDoom.mouse_sensitivity), defaultvalue: 5),
-                CDoom::Default.new(name: "sfx_volume", location: pointerof(CDoom.snd_sfx_volume), defaultvalue: 8),
+                CDoom::Default.new(name: "sfx_volume", location: pointerof(@@snd_sfx_volume), defaultvalue: 8),
                 CDoom::Default.new(name: "music_volume", location: pointerof(CDoom.snd_music_volume), defaultvalue: 8),
                 CDoom::Default.new(name: "show_messages", location: pointerof(CDoom.show_messages), defaultvalue: 1),
 
@@ -6027,8 +6027,6 @@ module Doocr
   CDoom.validcount = 1
 
   CDoom.mus_playing_s_sound = Pointer(CDoom::Musicinfo).null
-
-  CDoom.snd_sfx_volume = 15
 
   CDoom.snd_music_volume = 15
 

@@ -725,10 +725,6 @@ fun i_set_channels = I_SetChannels
   Doocr.i_set_channels
 end
 
-fun i_set_sfx_volume = I_SetSfxVolume(volume : LibC::Int)
-  Doocr.i_set_sfx_volume(volume)
-end
-
 fun i_set_music_volume = I_SetMusicVolume(volume : LibC::Int)
   Doocr.i_set_music_volume(volume)
 end
@@ -2399,10 +2395,6 @@ end
 
 fun s_set_music_volume = S_SetMusicVolume(volume : LibC::Int)
   Doocr.s_set_music_volume(volume)
-end
-
-fun s_set_sfx_volume = S_SetSfxVolume(volume : LibC::Int)
-  Doocr.s_set_sfx_volume(volume)
 end
 
 fun s_start_music = S_StartMusic(music_id : LibC::Int)
