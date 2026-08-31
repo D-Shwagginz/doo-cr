@@ -179,8 +179,8 @@ module Doocr
     # Until the EOF
     while (line = io.gets)
       # Skip comments and null lines
-      next if line.size == 0
       line = line.lstrip
+      next if line.size == 0
       next if line[0] == '#'
 
       begin
