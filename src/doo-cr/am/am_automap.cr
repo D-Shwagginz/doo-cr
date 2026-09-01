@@ -395,9 +395,6 @@ module Doocr
     CDoom.doom_memset(CDoom.fb, color, CDoom.f_w * CDoom.f_h)
   end
 
-
-
-
   LEFT   = 1
   RIGHT  = 2
   BOTTOM = 4

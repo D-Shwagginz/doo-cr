@@ -573,7 +573,6 @@ module Doocr
     end
   end
 
-
   def self.doom_htons(x : Int16) : Int16
     NEEDS_BYTE_SWAP ? x.byte_swap : x
   end

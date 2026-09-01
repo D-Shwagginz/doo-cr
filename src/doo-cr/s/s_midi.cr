@@ -4,7 +4,6 @@ module Doocr
   MIDI_SAMPLE_RATE = 44100
   MIDI_TICK_TIME   = 1.0 / 140.0
 
-  
   def self.doom_tick_midi : UInt64
     return CDoom.i_tick_song
   end

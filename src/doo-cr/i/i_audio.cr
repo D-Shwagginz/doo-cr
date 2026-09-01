@@ -312,7 +312,7 @@ module Doocr
 
       return if @@closing
       @@audio_stream.try do |a|
-          RAudio.set_audio_stream_volume(a, @@snd_sfx_volume / 15.0)
+        RAudio.set_audio_stream_volume(a, @@snd_sfx_volume / 15.0)
         if RAudio.audio_stream_processed?(a)
           RAudio.update_audio_stream(a, doom_get_sound_buffer, 512)
         end

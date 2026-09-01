@@ -468,8 +468,9 @@ lib CDoom
     Shell # Shotgun / double barreled shotgun.
     Cell  # Plasma rifle, BFG.
     Misl  # Missile launcher.
-    NUMAMMO
+    OG_NumAmmo
     Noammo # Unlimited for chainsaw / fist.
+    NUMAMMO
   end
 
   # Power up artifacts.
@@ -4672,9 +4673,6 @@ lib CDoom
   # Segs count?
   $sscount : LibC::Int
 
-  $floorplane : Visplane*
-  $ceilingplane : Visplane*
-
   # __R_DATA__
 
   # Retrieve column data for span blitting.
@@ -4801,8 +4799,6 @@ lib CDoom
   fun r_map_plane = R_MapPlane(y : LibC::Int, x1 : LibC::Int, x2 : LibC::Int)
   fun r_make_spans = R_MakeSpans(x : LibC::Int, t1 : LibC::Int, b1 : LibC::Int, t2 : LibC::Int, b2 : LibC::Int)
   fun r_draw_planes = R_DrawPlanes
-  fun r_find_plane = R_FindPlane(height : Fixed, picnum : LibC::Int, lightlevel : LibC::Int) : Visplane*
-  fun r_check_plane = R_CheckPlane(pl : Visplane*, start : LibC::Int, stop : LibC::Int) : Visplane*
 
   # __R_THINGS__
 
@@ -6274,7 +6270,6 @@ lib CDoom
   #
   # MENU TYPEDEFS
   #
-  
 
   # Blocky mode, has default, 0 = high, 1 = normal
   $detail_level = detailLevel : LibC::Int
@@ -6345,7 +6340,6 @@ lib CDoom
     MainEnd
   end
 
-
   #
   # EPISODE SELECT
   #
@@ -6369,8 +6363,6 @@ lib CDoom
     NewgEnd
   end
 
-
-
   #
   # OPTIONS MENU
   #
@@ -6386,7 +6378,6 @@ lib CDoom
     OptEnd
   end
 
-
   #
   # MOUSE OPTIONS
   #
@@ -6397,7 +6388,6 @@ lib CDoom
     MouseOptEnd
   end
 
-
   #
   # Read This! MENU 1 & 2
   #
@@ -6405,7 +6395,6 @@ lib CDoom
     Rdthsempty1
     Read1End
   end
-
 
   enum Read2enum
     Rdthsempty2
@@ -6423,7 +6412,6 @@ lib CDoom
     SoundEnd
   end
 
-
   #
   # LOAD GAME MENU
   #
@@ -6436,7 +6424,6 @@ lib CDoom
     Load6
     LoadEnd
   end
-
 
   fun m_do_save = M_DoSave(slot : LibC::Int)
 
@@ -6912,7 +6899,6 @@ lib CDoom
   #
 
   # Here comes the obnoxious "visplane".
-  $lastvisplane : Visplane*
 
   $openings : LibC::Short[MAXOPENINGS]
 

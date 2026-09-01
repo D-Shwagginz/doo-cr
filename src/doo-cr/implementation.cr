@@ -2273,14 +2273,6 @@ fun r_clear_planes = R_ClearPlanes
   Doocr.r_clear_planes
 end
 
-fun r_find_plane = R_FindPlane(height : CDoom::Fixed, picnum : LibC::Int, lightlevel : LibC::Int) : CDoom::Visplane*
-  Doocr.r_find_plane(height, picnum, lightlevel)
-end
-
-fun r_check_plane = R_CheckPlane(pl : CDoom::Visplane*, start : LibC::Int, stop : LibC::Int) : CDoom::Visplane*
-  Doocr.r_check_plane(pl, start, stop)
-end
-
 fun r_make_spans = R_MakeSpans(x : LibC::Int, t1 : LibC::Int, b1 : LibC::Int, t2 : LibC::Int, b2 : LibC::Int)
   Doocr.r_make_spans(x, t1, b1, t2, b2)
 end

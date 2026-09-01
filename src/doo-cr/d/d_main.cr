@@ -1,5 +1,5 @@
 module Doocr
-#
+  #
   # d_post_event
   # Called by the I/O functions when input is detected
   #
@@ -311,8 +311,8 @@ module Doocr
     CDoom.wadfiles[numwadfiles] = newfile.as(UInt8*)
   end
 
-  def self.d_merge_file(file : UInt8*)
-    @@merge_files << String.new(file)
+  def self.d_merge_file(file : String)
+    @@merge_files << file
   end
 
   #
@@ -701,8 +701,10 @@ module Doocr
       # the parms after p are wadfile/lump names,
       # until end of parms or another - preceded parm
       CDoom.modifiedgame = 1 # homebrew levels
-      while (p += 1) != ARGV.size && ARGV[p][0] != '-'
-        d_merge_file(ARGV_UNSAFE[p])
+      p += 1
+      while (p != ARGV.size) && ARGV[p][0] != '-'
+        d_merge_file(ARGV[p])
+        p += 1
       end
     end
 

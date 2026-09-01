@@ -1,5 +1,6 @@
 module Doocr
   @@snd_sfx_volume = 8
+
   #
   # This function loads the sound data from the WAD lump,
   #  for single sound.

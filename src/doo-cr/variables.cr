@@ -44,8 +44,6 @@ module Doocr
 
   MENU_SCROLL_DEADZONE = 80
 
-  
-
   class Menuitem
     # 0 = no cursor here, 1 = ok, 2 = arrows ok
     property status : Int32 = 0
@@ -64,24 +62,22 @@ module Doocr
     property alpha_key : Char = '\0'
 
     def initialize(@status = 0,
-      @name = "",
-      @text = "",
-      @bool = Pointer(Int32).null,
-      @num = Pointer(Int32).null,
-      @routine = NULL_PROCP1,
-      @alpha_key = '\0'
-      )
-      
+                   @name = "",
+                   @text = "",
+                   @bool = Pointer(Int32).null,
+                   @num = Pointer(Int32).null,
+                   @routine = NULL_PROCP1,
+                   @alpha_key = '\0')
     end
   end
 
   class Menu
-    property prev_menu : Menu?      # previous menu
-    property menuitems : Array(Menuitem) = [] of Menuitem  # menu items
-    property routine : Proc(Nil) = NULL_PROC    # draw routine
-    property x  : Int32 = 0 
-    property y : Int32 = 0        # x,y of menu
-    property last_on  : Int32 = 0  # last item user was on in menu
+    property prev_menu : Menu?                            # previous menu
+    property menuitems : Array(Menuitem) = [] of Menuitem # menu items
+    property routine : Proc(Nil) = NULL_PROC              # draw routine
+    property x : Int32 = 0
+    property y : Int32 = 0       # x,y of menu
+    property last_on : Int32 = 0 # last item user was on in menu
 
     def initialize(
       @prev_menu = nil,
@@ -89,13 +85,10 @@ module Doocr
       @routine = NULL_PROC,
       @x = 0,
       @y = 0,
-      @last_on = 0
+      @last_on = 0,
     )
-      
     end
   end
-
-
 
   CDoom.precache = 1
 
@@ -155,6 +148,11 @@ module Doocr
   CDoom.final_screen_buffer = Pointer(UInt8).null
   CDoom.last_update_time = 0
   CDoom.button_states = StaticArray(Int32, 3).new(0)
+
+  @@visplanes : Array(CDoom::Visplane) = [] of CDoom::Visplane
+  @@ceilingplane : Int32 = -1
+  @@floorplane : Int32 = -1
+  @@lastvisplane : Int32 = -1
 
   CDoom.player_arrow[0] = CDoom::Mline.new(
     a: CDoom::Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: CDoom::Mpoint.new(x: CDoom::R, y: 0)) # -----
@@ -5581,7 +5579,7 @@ module Doocr
     CDoom::Sfxenum::SFX_bspact.value,
     CDoom::Sfxenum::SFX_sgtatk.value)
 
-    @@current_menu : Menu = @@maindef
+  @@current_menu : Menu = @@maindef
 
   @@mainmenu = [
     Menuitem.new(status: 1, name: "M_NGAME", routine: ->m_new_game(Int32), alpha_key: 'n'),

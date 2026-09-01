@@ -1194,6 +1194,16 @@ module Doocr
         end
       end
     end
+
+    @@sprnames.each_with_index do |n, i|
+        if String.new(n) == old[0]
+          if new[0]?
+            @@sprnames[i] = new[0].to_unsafe
+          else
+            @@sprnames[i] = "\0".to_unsafe
+          end
+        end
+    end
   end
 
   # Parse a string block

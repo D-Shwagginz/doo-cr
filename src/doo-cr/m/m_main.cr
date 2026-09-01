@@ -1,5 +1,5 @@
 module Doocr
-def self.m_clear_box(box : CDoom::Fixed*)
+  def self.m_clear_box(box : CDoom::Fixed*)
     (box + CDoom::BOXTOP).value = Int32::MIN
     (box + CDoom::BOXRIGHT).value = Int32::MIN
     (box + CDoom::BOXLEFT).value = Int32::MAX

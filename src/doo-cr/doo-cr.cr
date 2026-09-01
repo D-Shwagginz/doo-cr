@@ -30,10 +30,10 @@ module Doocr
   alias DoomHandle = {String, IO::Memory, Bool} # path, buffer, write_mode
 
   def self.open(filename : String, mode : String) : IO
-      response = Channel({Bytes, Bool}).new
-      @@io_jobs.send({filename, "rb", nil, response})
-      data, ok = response.receive
-      return IO::Memory.new(data)
+    response = Channel({Bytes, Bool}).new
+    @@io_jobs.send({filename, "rb", nil, response})
+    data, ok = response.receive
+    return IO::Memory.new(data)
   end
 
   def self.open(filename : String, mode : String, &)
@@ -210,16 +210,6 @@ module Doocr
 
     d_doom_main
   end
-
-  
-
-  
-
-  
-
-  
-
-  
 
   def self.fixed_mul(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
     return ((a.to_i64 * b.to_i64) >> FRACBITS).to_i32!
@@ -459,7 +449,7 @@ module Doocr
   def self.m_sfxvol(choice : Int32)
     case choice
     when 0
-      @@snd_sfx_volume -= 1 if@@snd_sfx_volume > 0
+      @@snd_sfx_volume -= 1 if @@snd_sfx_volume > 0
     when 1
       @@snd_sfx_volume += 1 if @@snd_sfx_volume < 15
     end
@@ -1206,7 +1196,7 @@ module Doocr
     case ch
     when CDoom::KEY_DOWNARROW
       loop do
-        CDoom.item_on = CDoom.item_on + 1 >  @@current_menu.menuitems.size - 1 ? 0 : CDoom.item_on + 1
+        CDoom.item_on = CDoom.item_on + 1 > @@current_menu.menuitems.size - 1 ? 0 : CDoom.item_on + 1
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pstop)
         break unless @@current_menu.menuitems[CDoom.item_on].status == -1
       end
@@ -1285,7 +1275,7 @@ module Doocr
     return if CDoom.menuactive != 0
 
     CDoom.menuactive = 1
-    @@current_menu = @@maindef        # JDC
+    @@current_menu = @@maindef             # JDC
     CDoom.item_on = @@current_menu.last_on # JDC
   end
 
@@ -10643,20 +10633,20 @@ module Doocr
     line = CDoom.segs + sub.value.firstline
 
     if CDoom.frontsector.value.floorheight < CDoom.viewz
-      CDoom.floorplane = CDoom.r_find_plane(CDoom.frontsector.value.floorheight,
+      @@floorplane = r_find_plane(CDoom.frontsector.value.floorheight,
         CDoom.frontsector.value.floorpic,
         CDoom.frontsector.value.lightlevel)
     else
-      CDoom.floorplane = Pointer(CDoom::Visplane).null
+      @@floorplane = -1
     end
 
     if CDoom.frontsector.value.ceilingheight > CDoom.viewz ||
        CDoom.frontsector.value.ceilingpic == CDoom.skyflatnum
-      CDoom.ceilingplane = CDoom.r_find_plane(CDoom.frontsector.value.ceilingheight,
+      @@ceilingplane = r_find_plane(CDoom.frontsector.value.ceilingheight,
         CDoom.frontsector.value.ceilingpic,
         CDoom.frontsector.value.lightlevel)
     else
-      CDoom.ceilingplane = Pointer(CDoom::Visplane).null
+      @@ceilingplane = -1
     end
 
     CDoom.r_add_sprites(CDoom.frontsector)
@@ -11028,51 +11018,64 @@ module Doocr
     CDoom.w_read_lump(lump, CDoom.colormaps)
   end
 
+  def self.r_order_lump_section(starts : Array(String), ends : Array(String))
+    # Musical lumps!
+
+    # Find all lump sections
+    sections = [] of Tuple(Int32, Int32)
+    start = -1
+    @@lumpinfo.each_with_index do |lump, i|
+      starts.each do |s|
+        if doom_strncmp(lump.name.to_unsafe, s.to_unsafe, 8) == 0
+          start = i
+          break
+        end
+      end
+
+      if start != 1
+        ends.each do |e|
+          if doom_strncmp(lump.name.to_unsafe, e.to_unsafe, 8) == 0
+            sections << {start, i}
+            start = -1
+          end
+        end
+      end
+    end
+
+    lumps = [] of CDoom::Lumpinfo
+    lumps << CDoom::Lumpinfo.new
+    doom_strcpy(lumps.to_unsafe.value.name.to_unsafe, starts[0].to_unsafe)
+    # Reverse so deleting doesn't mess with alignment
+    sections.reverse.each do |section|
+      lumps.concat(@@lumpinfo[(section[0] + 1)...section[1]]) # Respect s_start/end lumps
+      @@lumpinfo.delete_at(section[0]..section[1])
+    end
+    lumps << CDoom::Lumpinfo.new
+    doom_strcpy((lumps.to_unsafe + lumps.size - 1).value.name.to_unsafe, ends[0].to_unsafe)
+
+    # Now all are in order, add back onto end with start and end lumps
+    @@lumpinfo.concat(lumps)
+  end
+
   #
   # Locates all the lumps
   #  that will be used by all views
   # Must be called after W_Init.
   #
   def self.r_init_data
-    CDoom.firstflat = CDoom.w_get_num_for_name("F_START") + 1
-    CDoom.lastflat = CDoom.w_get_num_for_name("F_END") - 1
-    CDoom.numflats = CDoom.lastflat - CDoom.firstflat + 1
+    r_order_lump_section(["S_START", "SS_START"], ["S_END", "SS_END"])
+    r_order_lump_section(["F_START", "FF_START"], ["F_END", "FF_END"])
 
-    # Musical sprites!
-    CDoom.firstspritelump = CDoom.w_get_num_for_name("S_START") + 1
-    CDoom.lastspritelump = CDoom.firstspritelump
-    until doom_strncmp(@@lumpinfo[CDoom.lastspritelump].name.to_unsafe, "S_END".to_unsafe, 8) == 0
-      CDoom.lastspritelump += 1
-    end
-    CDoom.lastspritelump -= 1
-
-    if (s = (CDoom.w_check_num_for_name("SS_START") + 1)) != 0
-      e = s
-      until doom_strncmp(@@lumpinfo[e].name.to_unsafe, "S_END".to_unsafe, 8) == 0 ||
-            doom_strncmp(@@lumpinfo[e].name.to_unsafe, "SS_END".to_unsafe, 8) == 0
-        e += 1
-      end
-      ssprites = @@lumpinfo[s...e]
-
-      @@lumpinfo.delete_at(s - 1, e - s + 1)
-
-      # Incase ssprite were before sprites
-      # Delete at removes SS start and end
-      CDoom.lastspritelump = CDoom.w_get_num_for_name("S_END")
-
-      @@lumpinfo.insert_all(CDoom.lastspritelump, ssprites)
-
-      # delete_at above permanently removes the SS_START marker and the
-      # terminating S_END/SS_END marker (net -2 elements; the sprite lumps
-      # themselves are preserved via insert_all). numlumps must track the
-      # array's actual size, or w_check_num_for_name's backward scan starts
-      # past the real end of @@lumpinfo and reads out-of-bounds memory.
-      CDoom.numlumps = @@lumpinfo.size
-    end
+    CDoom.numlumps = @@lumpinfo.size
+    CDoom.lumpcache.clear(CDoom.numlumps)
 
     CDoom.firstspritelump = CDoom.w_get_num_for_name("S_START") + 1
     CDoom.lastspritelump = CDoom.w_get_num_for_name("S_END") - 1
     CDoom.numspritelumps = CDoom.lastspritelump - CDoom.firstspritelump + 1
+
+    CDoom.firstflat = CDoom.w_get_num_for_name("F_START") + 1
+    CDoom.lastflat = CDoom.w_get_num_for_name("F_END") - 1
+    CDoom.numflats = CDoom.lastflat - CDoom.firstflat + 1
 
     nums = (CDoom.numtextures + 63) // 64 +
            (CDoom.numflats + 63) // 64 +
@@ -12196,7 +12199,9 @@ module Doocr
       CDoom.ceilingclip[i] = -1
     end
 
-    CDoom.lastvisplane = CDoom.visplanes
+    @@visplanes.clear
+    @@visplanes << CDoom::Visplane.new
+    @@lastvisplane = 0
     CDoom.lastopening = CDoom.openings
 
     # texture calculation
@@ -12210,85 +12215,91 @@ module Doocr
     CDoom.baseyscale = -CDoom.fixed_div(@@finesine[angle], CDoom.centerxfrac)
   end
 
-  def self.r_find_plane(height : CDoom::Fixed, picnum : LibC::Int, lightlevel : LibC::Int) : CDoom::Visplane*
+  def self.r_find_plane(height : CDoom::Fixed, picnum : LibC::Int, lightlevel : LibC::Int) : Int32
     if picnum == CDoom.skyflatnum
       height = 0 # all skys map together
       lightlevel = 0
     end
 
-    check = CDoom.visplanes.to_unsafe
-    while check < CDoom.lastvisplane
-      if height == check.value.height &&
-         picnum == check.value.picnum &&
-         lightlevel == check.value.lightlevel
+    check = 0
+    while check < @@lastvisplane
+      if height == @@visplanes[check].height &&
+         picnum == @@visplanes[check].picnum &&
+         lightlevel == @@visplanes[check].lightlevel
         break
       end
 
       check += 1
     end
 
-    return check if check < CDoom.lastvisplane
+    return check if check < @@lastvisplane
 
-    CDoom.i_error("Error: r_find_plane: no more visplanes") if CDoom.lastvisplane - CDoom.visplanes.to_unsafe == CDoom::MAXVISPLANES
+    @@visplanes << CDoom::Visplane.new if @@lastvisplane == @@visplanes.size - 1
 
-    CDoom.lastvisplane += 1
+    @@lastvisplane = check + 1
 
-    check.value.height = height
-    check.value.picnum = picnum
-    check.value.lightlevel = lightlevel
-    check.value.minx = CDoom::SCREENWIDTH
-    check.value.maxx = -1
+    checkp = @@visplanes.to_unsafe + check
+    checkp.value.height = height
+    checkp.value.picnum = picnum
+    checkp.value.lightlevel = lightlevel
+    checkp.value.minx = CDoom::SCREENWIDTH
+    checkp.value.maxx = -1
 
-    CDoom.doom_memset(check.value.top, 0xff, sizeof(typeof(check.value.top)))
+    CDoom.doom_memset(checkp.value.top, 0xff, sizeof(typeof(checkp.value.top)))
 
     return check
   end
 
-  def self.r_check_plane(pl : CDoom::Visplane*, start : LibC::Int, stop : LibC::Int) : CDoom::Visplane*
-    if start < pl.value.minx
-      intrl = pl.value.minx
-      unionl = start
-    else
-      unionl = pl.value.minx
-      intrl = start
-    end
+  def self.r_check_plane(plv : Int32, start : LibC::Int, stop : LibC::Int) : Int32
+  pl = @@visplanes.to_unsafe + plv
 
-    if stop > pl.value.maxx
-      intrh = pl.value.maxx
-      unionh = stop
-    else
-      unionh = pl.value.maxx
-      intrh = stop
-    end
-
-    x = intrl
-    while x <= intrh
-      break if pl.value.top[x] != 0xff
-      x += 1
-    end
-
-    if x > intrh
-      pl.value.minx = unionl
-      pl.value.maxx = unionh
-
-      # use the same one
-      return pl
-    end
-
-    # make a new visplane
-    CDoom.lastvisplane.value.height = pl.value.height
-    CDoom.lastvisplane.value.picnum = pl.value.picnum
-    CDoom.lastvisplane.value.lightlevel = pl.value.lightlevel
-
-    pl = CDoom.lastvisplane
-    CDoom.lastvisplane += 1
-    pl.value.minx = start
-    pl.value.maxx = stop
-
-    CDoom.doom_memset(pl.value.top, 0xff, sizeof(typeof(pl.value.top)))
-
-    return pl
+  if start < pl.value.minx
+    intrl = pl.value.minx
+    unionl = start
+  else
+    unionl = pl.value.minx
+    intrl = start
   end
+
+  if stop > pl.value.maxx
+    intrh = pl.value.maxx
+    unionh = stop
+  else
+    unionh = pl.value.maxx
+    intrh = stop
+  end
+
+  x = intrl
+  while x <= intrh
+    break if pl.value.top[x] != 0xff
+    x += 1
+  end
+
+  if x > intrh
+    pl.value.minx = unionl
+    pl.value.maxx = unionh
+
+    # use the same one
+    return plv
+  end
+
+  # make a new visplane
+  @@visplanes << CDoom::Visplane.new if @@lastvisplane == @@visplanes.size - 1
+  new_index = @@lastvisplane
+  @@lastvisplane += 1
+
+  src = @@visplanes.to_unsafe + plv        # re-derive after the push, not before
+  dst = @@visplanes.to_unsafe + new_index
+  dst.value.height = src.value.height
+  dst.value.picnum = src.value.picnum
+  dst.value.lightlevel = src.value.lightlevel
+  dst.value.minx = start
+  dst.value.maxx = stop
+
+  CDoom.doom_memset(dst.value.top, 0xff, sizeof(typeof(dst.value.top)))
+
+  new_index
+end
 
   def self.r_make_spans(x : LibC::Int, t1 : LibC::Int, b1 : LibC::Int, t2 : LibC::Int, b2 : LibC::Int)
     while t1 < t2 && t1 <= b1
@@ -12319,8 +12330,8 @@ module Doocr
         CDoom.i_error("Error: r_draw_planes: drawsegs overflow (#{CDoom.ds_p - CDoom.drawsegs.to_unsafe})")
       end
 
-      if CDoom.lastvisplane - CDoom.visplanes.to_unsafe > CDoom::MAXVISPLANES
-        CDoom.i_error("Error: r_draw_planes: visplane overflow (#{CDoom.lastvisplane - CDoom.visplanes.to_unsafe})")
+      if @@lastvisplane > @@visplanes.size - 1
+        CDoom.i_error("Error: r_draw_planes: visplane overflow (#{@@lastvisplane})")
       end
 
       if CDoom.lastopening - CDoom.openings.to_unsafe > CDoom::MAXOPENINGS
@@ -12328,8 +12339,8 @@ module Doocr
       end
     {% end %}
 
-    pl = CDoom.visplanes.to_unsafe
-    while pl < CDoom.lastvisplane
+    pl = @@visplanes.to_unsafe
+    while pl - @@visplanes.to_unsafe < @@lastvisplane
       if pl.value.minx > pl.value.maxx
         pl += 1
         next
@@ -12491,8 +12502,8 @@ module Doocr
         bottom = CDoom.floorclip[CDoom.rw_x] - 1 if bottom >= CDoom.floorclip[CDoom.rw_x]
 
         if top <= bottom
-          (CDoom.ceilingplane.value.top.to_unsafe + CDoom.rw_x).value = top.to_u8!
-          (CDoom.ceilingplane.value.bottom.to_unsafe + CDoom.rw_x).value = bottom.to_u8!
+          ((@@visplanes.to_unsafe + @@ceilingplane).value.top.to_unsafe + CDoom.rw_x).value = top.to_u8!
+          ((@@visplanes.to_unsafe + @@ceilingplane).value.bottom.to_unsafe + CDoom.rw_x).value = bottom.to_u8!
         end
       end
 
@@ -12505,8 +12516,8 @@ module Doocr
         bottom = CDoom.floorclip[CDoom.rw_x] - 1
         top = CDoom.ceilingclip[CDoom.rw_x] + 1 if top <= CDoom.ceilingclip[CDoom.rw_x]
         if top <= bottom
-          (CDoom.floorplane.value.top.to_unsafe + CDoom.rw_x).value = top.to_u8!
-          (CDoom.floorplane.value.bottom.to_unsafe + CDoom.rw_x).value = bottom.to_u8!
+          ((@@visplanes.to_unsafe + @@floorplane).value.top.to_unsafe + CDoom.rw_x).value = top.to_u8!
+          ((@@visplanes.to_unsafe + @@floorplane).value.bottom.to_unsafe + CDoom.rw_x).value = bottom.to_u8!
         end
       end
 
@@ -12870,9 +12881,9 @@ module Doocr
     end
 
     # render it
-    CDoom.ceilingplane = CDoom.r_check_plane(CDoom.ceilingplane, CDoom.rw_x, CDoom.rw_stopx - 1) if CDoom.markceiling != 0
+    @@ceilingplane = r_check_plane(@@ceilingplane, CDoom.rw_x, CDoom.rw_stopx - 1) if CDoom.markceiling != 0
 
-    CDoom.floorplane = CDoom.r_check_plane(CDoom.floorplane, CDoom.rw_x, CDoom.rw_stopx - 1) if CDoom.markfloor != 0
+    @@floorplane = r_check_plane(@@floorplane, CDoom.rw_x, CDoom.rw_stopx - 1) if CDoom.markfloor != 0
 
     CDoom.r_render_seg_loop
 
@@ -13042,14 +13053,14 @@ module Doocr
       CDoom.maxframe.times do |frame|
         case CDoom.sprtemp[frame].rotate
         when -1
-          CDoom.i_error("Error: r_init_sprite_defs: No patches found for #{namelist[i]} frame #{'A' + frame}")
+          CDoom.i_error("Error: r_init_sprite_defs: No patches found for #{String.new(namelist[i])} frame #{'A' + frame}")
         when 0
           # only the first rotation is needed
         when 1
           # must have all 8 frames
           8.times do |rotation|
             if CDoom.sprtemp[frame].lump[rotation] == -1
-              CDoom.i_error("Error: r_init_sprite_defs: Sprite #{namelist[i]} frame #{'A' + frame} is missing rotations")
+              CDoom.i_error("Error: r_init_sprite_defs: Sprite #{String.new(namelist[i])} frame #{'A' + frame} is missing rotations")
             end
           end
         end
@@ -15496,10 +15507,13 @@ module Doocr
     # Adds the lump if it isn't already found (same as -file)
     mlump = 0
     while mlump < num_merge_lumps
-      name_str = String.new(fileinfo[mlump].name.to_unsafe, 8).downcase.delete('\0')
+      name_str = String.new((fileinfo + mlump).value.name.to_unsafe, 8).downcase.delete('\0')
       ismap = (name_str[0]? == 'e' && name_str[2]? == 'm') || name_str.starts_with?("map")
 
-      if name_str == "s_end" # Don't overwrite S_END for use of SS_START
+      if name_str == "s_start" || name_str == "ss_start" ||
+         name_str == "s_end" || name_str == "ss_end" || # Don't overwrite sprite or lump stuff
+         name_str == "f_start" || name_str == "ff_start" ||
+         name_str == "f_end" || name_str == "ff_end"
         lump_num = CDoom.numlumps
       else
         # Find lump
@@ -15516,7 +15530,9 @@ module Doocr
         # Not been loaded. Initialize lump
         CDoom.numlumps += ismap ? CDoom::ML_BLOCKMAP + 1 : 1
 
-        @@lumpinfo << CDoom::Lumpinfo.new
+        (ismap ? CDoom::ML_BLOCKMAP + 1 : 1).times do |i|
+          @@lumpinfo << CDoom::Lumpinfo.new
+        end
         lump_p = @@lumpinfo.to_unsafe + startlump
 
         startlump += 1
@@ -15530,14 +15546,15 @@ module Doocr
           lump_p.value.handle = !CDoom.reloadname.null? ? Pointer(Void).null : Box.box({filename, file, false})
           lump_p.value.position = fileinfo[mlump].filepos
           lump_p.value.size = fileinfo[mlump].size
-          CDoom.doom_strncpy(lump_p.value.name, fileinfo[mlump].name, 8)
+          CDoom.doom_strncpy(lump_p.value.name, (fileinfo + mlump).value.name, 8)
+          lump_p += 1
           mlump += 1
         end
       else
         lump_p.value.handle = !CDoom.reloadname.null? ? Pointer(Void).null : Box.box({filename, file, false})
         lump_p.value.position = fileinfo[mlump].filepos
         lump_p.value.size = fileinfo[mlump].size
-        CDoom.doom_strncpy(lump_p.value.name, fileinfo[mlump].name, 8)
+        CDoom.doom_strncpy(lump_p.value.name, (fileinfo + mlump).value.name, 8)
         mlump += 1
       end
     end

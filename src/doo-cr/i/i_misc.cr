@@ -1,5 +1,5 @@
 module Doocr
-def self.i_get_heap_size : LibC::Int
+  def self.i_get_heap_size : LibC::Int
     return CDoom.mb_used * 1024 * 1024
   end
 

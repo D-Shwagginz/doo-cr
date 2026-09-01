@@ -22,7 +22,7 @@ end
   Doocr.doom_button_down(CDoom::DoomButton::{{doombutton}}) if is_down && !was_down
   Doocr.doom_button_up(CDoom::DoomButton::{{doombutton}}) if !is_down && was_down
 end
-  
+
   def self.doom_key_down(key : CDoom::DoomKey)
     @@keystates[key.value] = true
     event = CDoom::Event.new
@@ -104,4 +104,4 @@ end
       y: @@mouse_queued.y + delta.y
     )
   end
-end 
+end

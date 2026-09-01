@@ -1,5 +1,5 @@
 module Doocr
-@@firsttime = 1
+  @@firsttime = 1
   @@cheat_xlate_table = uninitialized StaticArray(UInt8, 256)
 
   def self.cht_check_cheat(cht : CDoom::Cheatseq*, key : LibC::Char) : LibC::Int
