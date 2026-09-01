@@ -4837,6 +4837,8 @@ module Doocr
   def self.p_spawn_mobj(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, type : CDoom::Mobjtype) : CDoom::Mobj*
     mobj = CDoom.z_malloc(sizeof(CDoom::Mobj), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Mobj*)
     CDoom.doom_memset(mobj, 0, sizeof(CDoom::Mobj))
+    type = CDoom::Mobjtype::MT_SERGEANT if ARGV.includes?("-nospectre") && type == CDoom::Mobjtype::MT_SHADOWS
+      
     info = CDoom.mobjinfo + type.value
 
     mobj.value.type = type

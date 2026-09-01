@@ -226,6 +226,9 @@ module Doocr
 
           CDoom.cht_get_param(pointerof(CDoom.cheat_clev), buf)
 
+          return 0 if (buf[0] < '0'.ord || buf[0] > '9'.ord) ||
+          (buf[1] < '0'.ord || buf[1] > '9'.ord)
+
           if CDoom.gamemode == CDoom::GameMode::Commercial
             epsd = 0
             map = (buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord
@@ -316,8 +319,13 @@ module Doocr
         elsif CDoom.cht_check_cheat(pointerof(CDoom.cheat_mus), ev.value.data1) != 0
           buf = Pointer(UInt8).malloc(3)
 
-          CDoom.plyr.value.message = @@deh_ststr_mus
           CDoom.cht_get_param(pointerof(CDoom.cheat_mus), buf)
+
+          return 0 if (buf[0] < '0'.ord || buf[0] > '9'.ord) ||
+          (buf[1] < '0'.ord || buf[1] > '9'.ord)
+          
+          CDoom.plyr.value.message = @@deh_ststr_mus
+
 
           if CDoom.gamemode == CDoom::GameMode::Commercial
             map = ((buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord) &- 1
