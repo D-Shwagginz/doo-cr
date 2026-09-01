@@ -219,6 +219,46 @@ module Doocr
       # if a user keypress...
     elsif ev.value.type == CDoom::Evtype::Keydown
       if CDoom.netgame == 0
+
+        # 'clev' change-level cheat
+        if CDoom.cht_check_cheat(pointerof(CDoom.cheat_clev), ev.value.data1) != 0
+          buf = Pointer(UInt8).malloc(3)
+
+          CDoom.cht_get_param(pointerof(CDoom.cheat_clev), buf)
+
+          if CDoom.gamemode == CDoom::GameMode::Commercial
+            epsd = 0
+            map = (buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord
+          else
+            epsd = buf[0] - '0'.ord
+            map = buf[1] - '0'.ord
+          end
+
+          # Catch invalid maps
+          return 0 if CDoom.gamemode != CDoom::GameMode::Commercial && epsd < 1
+
+          return 0 if map < 1
+
+          # Ohmygod - this is not going to work.
+          return 0 if CDoom.gamemode == CDoom::GameMode::Retail &&
+                      (epsd > 4 || map > 9)
+
+          return 0 if CDoom.gamemode == CDoom::GameMode::Registered &&
+                      (epsd > 3 || map > 9)
+
+          return 0 if CDoom.gamemode == CDoom::GameMode::Shareware &&
+                      (epsd > 1 || map > 9)
+
+          return 0 if CDoom.gamemode == CDoom::GameMode::Commercial &&
+                      map > 32
+
+          # So be it.
+          CDoom.plyr.value.message = @@deh_ststr_clev
+          CDoom.g_defered_init_new(CDoom.gameskill, epsd, map)
+        end
+        
+        return 0 if CDoom.gameskill == CDoom::Skill::Nightmare
+
         # my little cheat
         if cht_check_cheat(pointerof(@@cheat_me), ev.value.data1.to_u8) != 0
           CDoom.plyr.value.cheats = CDoom.plyr.value.cheats ^ CDoom::Cheat::CF_ME.value
@@ -350,43 +390,6 @@ module Doocr
           CDoom.doom_concat(@@buf, CDoom.doom_itoa(CDoom.players[CDoom.consoleplayer].mo.value.y, 16))
           CDoom.doom_concat(@@buf, ")")
           CDoom.plyr.value.message = @@buf
-        end
-
-        # 'clev' change-level cheat
-        if CDoom.cht_check_cheat(pointerof(CDoom.cheat_clev), ev.value.data1) != 0
-          buf = Pointer(UInt8).malloc(3)
-
-          CDoom.cht_get_param(pointerof(CDoom.cheat_clev), buf)
-
-          if CDoom.gamemode == CDoom::GameMode::Commercial
-            epsd = 0
-            map = (buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord
-          else
-            epsd = buf[0] - '0'.ord
-            map = buf[1] - '0'.ord
-          end
-
-          # Catch invalid maps
-          return 0 if CDoom.gamemode != CDoom::GameMode::Commercial && epsd < 1
-
-          return 0 if map < 1
-
-          # Ohmygod - this is not going to work.
-          return 0 if CDoom.gamemode == CDoom::GameMode::Retail &&
-                      (epsd > 4 || map > 9)
-
-          return 0 if CDoom.gamemode == CDoom::GameMode::Registered &&
-                      (epsd > 3 || map > 9)
-
-          return 0 if CDoom.gamemode == CDoom::GameMode::Shareware &&
-                      (epsd > 1 || map > 9)
-
-          return 0 if CDoom.gamemode == CDoom::GameMode::Commercial &&
-                      map > 32
-
-          # So be it.
-          CDoom.plyr.value.message = @@deh_ststr_clev
-          CDoom.g_defered_init_new(CDoom.gameskill, epsd, map)
         end
       end
     end

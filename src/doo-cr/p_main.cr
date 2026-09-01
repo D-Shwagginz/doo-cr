@@ -2234,7 +2234,7 @@ module Doocr
     return 0 if ammo == CDoom::Ammotype::Noammo
 
     if ammo.value < 0 || ammo.value > CDoom::Ammotype::NUMAMMO.value
-      CDoom.i_error("p_give_ammo: bad type #{ammo}")
+      CDoom.i_error("Error: p_give_ammo: bad type #{ammo}")
     end
 
     return 0 if player.value.ammo[ammo.value] == player.value.maxammo[ammo.value]
@@ -2616,7 +2616,7 @@ module Doocr
       player.value.message = @@deh_gotshotgun2
       sound = CDoom::Sfxenum::SFX_wpnup
     else
-      CDoom.i_error("p_special_thing: Unknown gettable thing")
+      CDoom.i_error("Error: p_special_thing: Unknown gettable thing")
     end
 
     player.value.itemcount = player.value.itemcount + 1 if special.value.flags & CDoom::Mobjflag::MF_COUNTITEM.value != 0
@@ -6108,7 +6108,7 @@ module Doocr
         pointerof(mobj.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.p_mobj_thinker).pointer, Pointer(Void).null)
         CDoom.p_add_thinker(pointerof(mobj.value.@thinker))
       else
-        CDoom.i_error("Error: Unknown tclass #{tclass} in savegame")
+        CDoom.i_error("Error: p_unarchive_thinkers: Unknown tclass #{tclass} in savegame")
       end
     end
   end
@@ -8487,7 +8487,8 @@ module Doocr
     CDoom.onground = (player.value.mo.value.z <= player.value.mo.value.floorz).to_unsafe
     CDoom.p_calc_height(player)
 
-    if !player.value.attacker.null? && player.value.attacker != player.value.mo
+    if !player.value.attacker.null? && player.value.attacker != player.value.mo &&
+      p_check_sight(player.value.mo, player.value.attacker) != 0
       angle = CDoom.r_point_to_angle2(player.value.mo.value.x,
         player.value.mo.value.y,
         player.value.attacker.value.x,

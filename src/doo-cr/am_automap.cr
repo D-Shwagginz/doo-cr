@@ -306,7 +306,7 @@ module Doocr
         @@cheatstate = 0
         rc = 0
       end
-      if CDoom.deathmatch == 0 && CDoom.cht_check_cheat(pointerof(CDoom.cheat_amap), ev.value.data1) != 0
+      if CDoom.netgame == 0 && CDoom.cht_check_cheat(pointerof(CDoom.cheat_amap), ev.value.data1) != 0
         rc = 0
         CDoom.cheating = (CDoom.cheating + 1) % 3
       end
