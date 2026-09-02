@@ -2302,7 +2302,11 @@ module Doocr
     when CDoom::Ammotype::Shell
       if player.value.readyweapon == CDoom::Weapontype::Fist ||
          player.value.readyweapon == CDoom::Weapontype::Pistol
-        if player.value.weaponowned[CDoom::Weapontype::Shotgun.value] != 0
+         if CDoom.gamemode == CDoom::GameMode::Commercial &&
+          player.value.weaponowned[CDoom::Weapontype::Supershotgun.value] != 0
+          player.value.pendingweapon = CDoom::Weapontype::Supershotgun
+
+         elsif player.value.weaponowned[CDoom::Weapontype::Shotgun.value] != 0
           player.value.pendingweapon = CDoom::Weapontype::Shotgun
         end
       end
