@@ -1339,8 +1339,8 @@ module Doocr
       return (node.value.dx > 0).to_unsafe
     end
 
-    dx = (x - node.value.x)
-    dy = (y - node.value.y)
+    dx = (x &- node.value.x)
+    dy = (y &- node.value.y)
 
     # Try to quickly decide by looking at sign bits.
     if (node.value.dy ^ node.value.dx ^ dx ^ dy) & 0x80000000 != 0
@@ -2878,7 +2878,7 @@ module Doocr
     gxt = CDoom.fixed_mul(tr_x, CDoom.viewcos)
     gyt = -CDoom.fixed_mul(tr_y, CDoom.viewsin)
 
-    tz = gxt - gyt
+    tz = gxt &- gyt
 
     # thing is behind view plane?
     return if tz < CDoom::MINZ
