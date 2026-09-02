@@ -61,7 +61,7 @@ module Doocr
   @@sres_x = 320
   @@sres_y = 240
 
-  unless ARGV.includes?("-nosound")
+  unless ARGV.includes?("-headless") || ARGV.includes?("-nosound")
     # Create seperate thread so audio updates seperately from game code
     audio_context = Fiber::ExecutionContext::Isolated.new("doom-audio") do
       Doocr.update_audio

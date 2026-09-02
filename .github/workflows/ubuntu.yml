@@ -21,10 +21,8 @@ jobs:
         run: make
       - name: Run Demos
         run: |
-          ls
           mv ./DOOM1.WAD ./bin/
           cd bin
-          ls
           ./doo-cr -timedemo demo1 -headless -iwad DOOM1.WAD
-          ./doo-cr -timedemo demo2 -headless
-          ./doo-cr -timedemo demo3 -headless
+          ./doo-cr -timedemo demo2 -headless -iwad DOOM1.WAD
+          ./doo-cr -timedemo demo3 -headless -iwad DOOM1.WAD
