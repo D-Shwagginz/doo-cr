@@ -552,7 +552,7 @@ module Doocr
 
   def self.m_toggle_fullscreen(choice : Int32)
     @@rlfullscreen = 1 - @@rlfullscreen
-    Raylib.toggle_borderless_windowed
+    Raylib.toggle_borderless_windowed unless @@headless
   end
 
   def self.m_toggle_smoothpan(choice : Int32)

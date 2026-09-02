@@ -81,6 +81,7 @@ end
   #  draw current display, possibly wiping it from the previous
   #
   def self.d_display
+     unless @@headless
     if @@was_focused != Raylib.window_focused?
       if (@@was_focused = Raylib.window_focused?)
         Raylib.disable_cursor
@@ -88,6 +89,7 @@ end
         Raylib.enable_cursor
       end
     end
+  end
 
     return if CDoom.nodrawers != 0 # for comparative timing / profiling
 
@@ -234,7 +236,7 @@ end
   end
 
   def self.d_doom_loop
-    until Raylib.close_window?
+    until (!@@headless && Raylib.close_window?) || @@closing
       # frame syncronous IO operations
       CDoom.i_start_frame
 
@@ -823,6 +825,8 @@ end
         @@dehackeds << a
       end
     end
+
+    @@headless = ARGV.includes?("-headless")
 
     # init subsystems
     puts "v_init: Allocate screens."

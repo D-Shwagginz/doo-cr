@@ -114,6 +114,7 @@ end
   @@mouse_queued = Raylib::Vector2.new
 
   def self.i_poll_mouse
+    return if @@headless
     Raylib.poll_input_events
     delta = Raylib.get_mouse_delta * 2 # Rough sensitivity increase
     @@mouse_queued = Raylib::Vector2.new(

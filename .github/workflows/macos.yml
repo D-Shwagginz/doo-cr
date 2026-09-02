@@ -19,6 +19,6 @@ jobs:
         run: |
           mv DOOM1.WAD ./bin
           cd bin
-          ./doo-cr -playdemo demo1
-          ./doo-cr -playdemo demo2
-          ./doo-cr -playdemo demo3
+          ./doo-cr -timedemo demo1 -headless
+          ./doo-cr -timedemo demo2 -headless
+          ./doo-cr -timedemo demo3 -headless

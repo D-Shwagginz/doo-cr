@@ -244,6 +244,7 @@ module Doocr
   end
 
   def self.update_audio
+    return if @@headless
     RAudio.init_audio_device
     RAudio.set_master_volume(10.0)
     RAudio.set_audio_stream_buffer_size_default(512)

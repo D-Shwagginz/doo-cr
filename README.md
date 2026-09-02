@@ -70,6 +70,9 @@ Common command line arguments are:
   Sets the default zone memory size in MB. The default is 12MB
 - -nosound \
   Runs the game without activating the sound thread
+- -headless \
+  Runs without initializing Raylib (no video or audio). Mainly only used
+  for Github Actions
 
 - -record \<name> \
   Record a demo with name to a .lmp file. Use Q to end demo

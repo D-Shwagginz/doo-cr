@@ -46,7 +46,7 @@ module Doocr
       # Hopefully this fixes God's cursed bug
     end
 
-    return unless Raylib.window_ready?
+    return unless Raylib.window_ready? || @@headless
     # Pointers for speed. "Oh! But it's oop!". I don't see you having a source port of Doom.
     screen_ptr = CDoom.screens[0]
     buf_ptr = @@raylibbuffer.to_unsafe.as(UInt32*)

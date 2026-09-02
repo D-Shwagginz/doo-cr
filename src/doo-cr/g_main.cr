@@ -1252,7 +1252,8 @@ module Doocr
     if CDoom.timingdemo != 0
       endtime = CDoom.i_get_time
 
-      CDoom.i_error("Error: timed #{CDoom.gametic} gametics in #{endtime - CDoom.starttime} realtics")
+      puts " Timed #{CDoom.gametic} gametics in #{endtime - CDoom.starttime} realtics"
+      i_quit
     end
 
     if CDoom.demoplayback != 0
@@ -1281,7 +1282,8 @@ module Doocr
       CDoom.z_free(CDoom.demobuffer)
       CDoom.demorecording = 0
 
-      CDoom.i_error("Error: Demo #{String.new(CDoom.demoname.to_unsafe)} recorded")
+      puts " Demo #{String.new(CDoom.demoname.to_unsafe)} recorded"
+      i_quit
     end
 
     return 0

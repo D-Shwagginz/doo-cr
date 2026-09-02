@@ -133,6 +133,8 @@ module Doocr
   @@viewport_target : Raylib::RenderTexture?
   @@render_target : Raylib::RenderTexture?
 
+  @@headless : Bool = false
+
   @@software_screen = Bytes.new(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
 
   @@loading_patch : CDoom::Patch* = Pointer(CDoom::Patch).null
