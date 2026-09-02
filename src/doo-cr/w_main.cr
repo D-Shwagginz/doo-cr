@@ -297,6 +297,10 @@ module Doocr
     CDoom.i_error("Error: Couldn't allocate lumpcache") if CDoom.lumpcache.null?
 
     CDoom.doom_memset(CDoom.lumpcache, 0, size)
+
+    if w_check_num_for_name("STDISK".to_unsafe) != -1
+        @@loading_patch = w_cache_lump_name("STDISK".to_unsafe, CDoom::PU_STATIC).as(CDoom::Patch*)
+    end
   end
 
   #
@@ -402,6 +406,9 @@ module Doocr
     doom_close(handle) if l.value.handle.null?
   end
 
+  @@do_loading_disk = false
+  @@loading_disk_shown = false
+
   def self.w_cache_lump_num(lump : LibC::Int, tag : LibC::Int) : Void*
     if lump.to_u32! >= CDoom.numlumps.to_u32!
       CDoom.i_error("Error: w_cache_lump_num #{lump} >= numlumps")
@@ -409,6 +416,7 @@ module Doocr
 
     if CDoom.lumpcache[lump].null?
       # read the lump in
+        @@do_loading_disk = true
 
       ptr = CDoom.z_malloc(CDoom.w_lump_length(lump), tag, CDoom.lumpcache + lump).as(CDoom::Byte*)
       CDoom.w_read_lump(lump, CDoom.lumpcache[lump])

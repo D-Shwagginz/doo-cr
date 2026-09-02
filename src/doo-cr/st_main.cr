@@ -1022,6 +1022,6 @@ module Doocr
   def self.st_init
     CDoom.veryfirsttime = 0
     CDoom.st_load_data
-    CDoom.screens[4] = CDoom.z_malloc(CDoom::ST_WIDTH * CDoom::ST_HEIGHT, CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Byte*)
+    CDoom.screens[4] = CDoom.z_malloc(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT, CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Byte*)
   end
 end

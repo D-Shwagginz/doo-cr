@@ -34,6 +34,31 @@ module Doocr
   @@oldgamestate = -1
   @@borderdrawcount = 0
 
+  def self.d_display_load
+    if !@@loading_patch.null?
+      x = CDoom::SCREENWIDTH - @@loading_patch.value.width
+        y = CDoom::SCREENHEIGHT - @@loading_patch.value.height
+        v_copy_rect(x, y, 0, 
+        @@loading_patch.value.width, @@loading_patch.value.height,
+        x, y, 4)
+
+        CDoom.v_draw_patch(x, y, 0, @@loading_patch)
+        @@loading_disk_shown = true
+    end
+        @@do_loading_disk = false
+  end
+
+  def self.d_display_clear_load
+if !@@loading_patch.null?
+  x = CDoom::SCREENWIDTH - @@loading_patch.value.width
+        y = CDoom::SCREENHEIGHT - @@loading_patch.value.height
+        v_copy_rect(x, y, 4, 
+        @@loading_patch.value.width, @@loading_patch.value.height,
+        x, y, 0)
+end
+ @@loading_disk_shown = false
+end
+
   #
   # d_display
   #  draw current display, possibly wiping it from the previous
@@ -62,9 +87,13 @@ module Doocr
     # save the current screen if about to wipe
     if CDoom.gamestate != CDoom.wipegamestate
       wipe = true
+      d_display_load
+      i_finish_update
       CDoom.wipe_start_screen(0, 0, CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT)
     end
     CDoom.screens[0].fill(CDoom::SCREENHEIGHT * CDoom::SCREENWIDTH, 255) unless @@software_rendering
+
+    d_display_clear_load if @@loading_disk_shown
 
     CDoom.hu_erase if CDoom.gamestate == CDoom::Gamestate::Level && CDoom.gametic != 0
 
@@ -146,6 +175,8 @@ module Doocr
     CDoom.m_drawer   # menu is drawn even on top of everything
     CDoom.net_update # send out any new accumulation
 
+    d_display_load if @@do_loading_disk
+
     # normal update
     if !wipe
       CDoom.i_finish_update # page flip or blit buffer
@@ -158,6 +189,8 @@ module Doocr
         update_viewport(vt)
       end
     end
+
+    d_display_clear_load if @@loading_disk_shown
 
     CDoom.wipe_end_screen(0, 0, CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT)
 

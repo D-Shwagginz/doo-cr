@@ -135,6 +135,8 @@ module Doocr
 
   @@software_screen = Bytes.new(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
 
+  @@loading_patch : CDoom::Patch* = Pointer(CDoom::Patch).null
+
   @@audio_stream : RAudio::AudioStream?
   @@adl_player : ADLMIDI::Player*?
   @@music_stream : RAudio::AudioStream?
