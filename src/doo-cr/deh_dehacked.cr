@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-# ==> The standars and globalish DeHackEd interpreter and parser
+# ==> The standard and globalish DeHackEd interpreter and parser
 
 module Doocr
   # Misc variables

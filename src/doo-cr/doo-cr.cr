@@ -13,9 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-# ==> Every method of DOOM
+# ==> The entry point of DOO-CR
 
-# The majority of this file will be rewritten to be modernized,
+# The majority of these fils will be rewritten to be modernized,
 # Crystalized, and overall improved (changed to be how I want it lol)
 #
 # A lot of this should scare you. It sure scared me.
