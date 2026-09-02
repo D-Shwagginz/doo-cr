@@ -31,7 +31,7 @@ jobs:
         run: make
       - name: Run Demos
         run: |
-          mv DOOM1.WAD ./bin
+          mv ./DOOM1.WAD ./bin/
           cd bin
           ./doo-cr.exe -timedemo demo1 -headless
           ./doo-cr.exe -timedemo demo2 -headless

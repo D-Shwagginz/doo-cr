@@ -72,7 +72,7 @@ Common command line arguments are:
   Runs the game without activating the sound thread
 - -headless \
   Runs without initializing Raylib (no video or audio). Mainly only used
-  for Github Actions
+  for Github Actions. Still runs underlying rendering code unlike -nodraw
 
 - -record \<name> \
   Record a demo with name to a .lmp file. Use Q to end demo
