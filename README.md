@@ -14,8 +14,8 @@ A DOOM source port written in Crystal Lang based on [PureDoom](https://github.co
 - Working networked multiplayer
 - Extra in-game settings
 - Bug fixes and little additions <sup>[ask me about them!](mailto:devin@shwaggi.nz)</sup>
-- Modern saving and loading system: no more crashing if saving a big map
-- *.midi music support
+- A handful of limits removed
+- midi music support
 - Command line args (see below)
 - A scary look into what very unsafe low level Crystal code looks like!
 - Somewhat compatible demo playback
