@@ -45,7 +45,7 @@ SHELLCOLORS = [
 ]
 
 module Doocr
-  VERSION_STR = "1.5" # Used for displaying
+  VERSION_STR = "1.6" # Used for displaying
   # Demo compatible version (Gameplay version)
   DEMOVERSION = 110
   # Save compatible version (Save data version)

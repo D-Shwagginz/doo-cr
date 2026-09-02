@@ -816,7 +816,7 @@ module Doocr
       namet[8] = 0
       CDoom.doom_memcpy(namet, name, 8)
 
-      CDoom.i_error("Error: r_flat_num_for_name #{namet} not found")
+      CDoom.i_error("Error: r_flat_num_for_name #{String.new(namet.to_unsafe, 8)} not found")
     end
     return i - CDoom.firstflat
   end
