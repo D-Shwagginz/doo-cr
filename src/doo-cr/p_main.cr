@@ -38,11 +38,13 @@ module Doocr
       if res == CDoom::Result::Pastdest
         case ceiling.value.type
         when CDoom::Ceilingenum::RaiseToHighest
-          CDoom.p_remove_active_ceiling(ceiling)
-        when CDoom::Ceilingenum::SilentCrushAndRaise
+          CDoom.p_remove_active_ceiling(ceiling)         
+        when CDoom::Ceilingenum::SilentCrushAndRaise, CDoom::Ceilingenum::FastCrushAndRaise, CDoom::Ceilingenum::CrushAndRaise
+          if ceiling.value.type == CDoom::Ceilingenum::SilentCrushAndRaise 
           CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_pstop)
-        when CDoom::Ceilingenum::FastCrushAndRaise, CDoom::Ceilingenum::CrushAndRaise
+          end
+
           ceiling.value.direction = -1
         end
       end
@@ -64,12 +66,17 @@ module Doocr
 
       if res == CDoom::Result::Pastdest
         case ceiling.value.type
-        when CDoom::Ceilingenum::SilentCrushAndRaise
+        when  CDoom::Ceilingenum::SilentCrushAndRaise, CDoom::Ceilingenum::CrushAndRaise, CDoom::Ceilingenum::FastCrushAndRaise
+          if ceiling.value.type == CDoom::Ceilingenum::SilentCrushAndRaise
           CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
             CDoom::Sfxenum::SFX_pstop)
-        when CDoom::Ceilingenum::CrushAndRaise
+          end
+
+            if ceiling.value.type == CDoom::Ceilingenum::CrushAndRaise || 
+              ceiling.value.type == CDoom::Ceilingenum::SilentCrushAndRaise
           ceiling.value.speed = CDoom::CEILSPEED
-        when CDoom::Ceilingenum::FastCrushAndRaise
+            end
+
           ceiling.value.direction = 1
         when CDoom::Ceilingenum::LowerAndCrush, CDoom::Ceilingenum::LowerToFloor
           CDoom.p_remove_active_ceiling(ceiling)
@@ -118,10 +125,11 @@ module Doocr
         ceiling.value.bottomheight = sec.value.floorheight + (8 * FRACUNIT)
         ceiling.value.direction = -1
         ceiling.value.speed = CDoom::CEILSPEED * 2
-      when CDoom::Ceilingenum::SilentCrushAndRaise, CDoom::Ceilingenum::CrushAndRaise
-        ceiling.value.crush = 1
-        ceiling.value.topheight = sec.value.ceilingheight
-      when CDoom::Ceilingenum::LowerAndCrush, CDoom::Ceilingenum::LowerToFloor
+      when CDoom::Ceilingenum::SilentCrushAndRaise, CDoom::Ceilingenum::CrushAndRaise, CDoom::Ceilingenum::LowerAndCrush, CDoom::Ceilingenum::LowerToFloor
+        if type == CDoom::Ceilingenum::SilentCrushAndRaise || type == CDoom::Ceilingenum::CrushAndRaise
+          ceiling.value.crush = 1
+          ceiling.value.topheight = sec.value.ceilingheight
+        end
         ceiling.value.bottomheight = sec.value.floorheight
         if type != CDoom::Ceilingenum::LowerToFloor
           ceiling.value.bottomheight = ceiling.value.bottomheight + 8 * FRACUNIT
@@ -2670,7 +2678,7 @@ module Doocr
     end
 
     if !target.value.player.null?
-      if (source.null? || source.value.player.null?) &&                         # Player was not killed by player
+      if (source.null? || source.value.player.null?) &&                       # Player was not killed by player
          target.value.player - CDoom.players.to_unsafe != CDoom.consoleplayer # Isn't self. They know they died
         (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message =
           @@died_strings.sample(Random.new(CDoom.m_random)).gsub(
@@ -4838,7 +4846,7 @@ module Doocr
     mobj = CDoom.z_malloc(sizeof(CDoom::Mobj), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Mobj*)
     CDoom.doom_memset(mobj, 0, sizeof(CDoom::Mobj))
     type = CDoom::Mobjtype::MT_SERGEANT if ARGV.includes?("-nospectre") && type == CDoom::Mobjtype::MT_SHADOWS
-      
+
     info = CDoom.mobjinfo + type.value
 
     mobj.value.type = type
@@ -8490,7 +8498,7 @@ module Doocr
     CDoom.p_calc_height(player)
 
     if !player.value.attacker.null? && player.value.attacker != player.value.mo &&
-      p_check_sight(player.value.mo, player.value.attacker) != 0
+       p_check_sight(player.value.mo, player.value.attacker) != 0
       angle = CDoom.r_point_to_angle2(player.value.mo.value.x,
         player.value.mo.value.y,
         player.value.attacker.value.x,

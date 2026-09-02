@@ -219,7 +219,6 @@ module Doocr
       # if a user keypress...
     elsif ev.value.type == CDoom::Evtype::Keydown
       if CDoom.netgame == 0
-
         # 'clev' change-level cheat
         if CDoom.cht_check_cheat(pointerof(CDoom.cheat_clev), ev.value.data1) != 0
           buf = Pointer(UInt8).malloc(3)
@@ -227,7 +226,7 @@ module Doocr
           CDoom.cht_get_param(pointerof(CDoom.cheat_clev), buf)
 
           return 0 if (buf[0] < '0'.ord || buf[0] > '9'.ord) ||
-          (buf[1] < '0'.ord || buf[1] > '9'.ord)
+                      (buf[1] < '0'.ord || buf[1] > '9'.ord)
 
           if CDoom.gamemode == CDoom::GameMode::Commercial
             epsd = 0
@@ -259,7 +258,7 @@ module Doocr
           CDoom.plyr.value.message = @@deh_ststr_clev
           CDoom.g_defered_init_new(CDoom.gameskill, epsd, map)
         end
-        
+
         return 0 if CDoom.gameskill == CDoom::Skill::Nightmare
 
         # my little cheat
@@ -322,10 +321,9 @@ module Doocr
           CDoom.cht_get_param(pointerof(CDoom.cheat_mus), buf)
 
           return 0 if (buf[0] < '0'.ord || buf[0] > '9'.ord) ||
-          (buf[1] < '0'.ord || buf[1] > '9'.ord)
-          
-          CDoom.plyr.value.message = @@deh_ststr_mus
+                      (buf[1] < '0'.ord || buf[1] > '9'.ord)
 
+          CDoom.plyr.value.message = @@deh_ststr_mus
 
           if CDoom.gamemode == CDoom::GameMode::Commercial
             map = ((buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord) &- 1
