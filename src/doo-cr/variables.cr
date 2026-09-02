@@ -44,6 +44,52 @@ module Doocr
 
   MENU_SCROLL_DEADZONE = 80
 
+  class Menuitem
+    # 0 = no cursor here, 1 = ok, 2 = arrows ok
+    property status : Int32 = 0
+
+    property name : String = ""
+    property text : String = ""
+    property bool : Int32* = Pointer(Int32).null
+    property num : Int32* = Pointer(Int32).null
+
+    # choice = menu item #.
+    # if status = 2,
+    #   choice=0:leftarrow,1:rightarrow
+    property routine : Proc(LibC::Int, Nil) = NULL_PROCP1
+
+    # hotkey in menu
+    property alpha_key : Char = '\0'
+
+    def initialize(@status = 0,
+                   @name = "",
+                   @text = "",
+                   @bool = Pointer(Int32).null,
+                   @num = Pointer(Int32).null,
+                   @routine = NULL_PROCP1,
+                   @alpha_key = '\0')
+    end
+  end
+
+  class Menu
+    property prev_menu : Menu?                            # previous menu
+    property menuitems : Array(Menuitem) = [] of Menuitem # menu items
+    property routine : Proc(Nil) = NULL_PROC              # draw routine
+    property x : Int32 = 0
+    property y : Int32 = 0       # x,y of menu
+    property last_on : Int32 = 0 # last item user was on in menu
+
+    def initialize(
+      @prev_menu = nil,
+      @menuitems = [] of Array(Menuitem),
+      @routine = NULL_PROC,
+      @x = 0,
+      @y = 0,
+      @last_on = 0,
+    )
+    end
+  end
+
   CDoom.precache = 1
 
   class_getter keystates = Array(Bool).new(CDoom::NUMKEYS, false)
@@ -87,7 +133,11 @@ module Doocr
   @@viewport_target : Raylib::RenderTexture?
   @@render_target : Raylib::RenderTexture?
 
+  @@headless : Bool = false
+
   @@software_screen = Bytes.new(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
+
+  @@loading_patch : CDoom::Patch* = Pointer(CDoom::Patch).null
 
   @@audio_stream : RAudio::AudioStream?
   @@adl_player : ADLMIDI::Player*?
@@ -103,18 +153,10 @@ module Doocr
   CDoom.last_update_time = 0
   CDoom.button_states = StaticArray(Int32, 3).new(0)
 
-  CDoom.doom_malloc = CDoom::DoomMallocFn.new(Pointer(Void).null, Pointer(Void).null)
-  CDoom.doom_free = CDoom::DoomFreeFn.new(Pointer(Void).null, Pointer(Void).null)
-  CDoom.doom_open = CDoom::DoomOpenFn.new(Pointer(Void).null, Pointer(Void).null)
-  CDoom.doom_close = CDoom::DoomCloseFn.new(Pointer(Void).null, Pointer(Void).null)
-  CDoom.doom_read = CDoom::DoomReadFn.new(Pointer(Void).null, Pointer(Void).null)
-  CDoom.doom_write = CDoom::DoomWriteFn.new(Pointer(Void).null, Pointer(Void).null)
-  CDoom.doom_seek = CDoom::DoomSeekFn.new(Pointer(Void).null, Pointer(Void).null)
-  CDoom.doom_tell = CDoom::DoomTellFn.new(Pointer(Void).null, Pointer(Void).null)
-  CDoom.doom_eof = CDoom::DoomEofFn.new(Pointer(Void).null, Pointer(Void).null)
-  CDoom.doom_gettime = CDoom::DoomGettimeFn.new(Pointer(Void).null, Pointer(Void).null)
-  CDoom.doom_exit = CDoom::DoomExitFn.new(Pointer(Void).null, Pointer(Void).null)
-  CDoom.doom_getenv = CDoom::DoomGetenvFn.new(Pointer(Void).null, Pointer(Void).null)
+  @@visplanes : Array(CDoom::Visplane) = [] of CDoom::Visplane
+  @@ceilingplane : Int32 = -1
+  @@floorplane : Int32 = -1
+  @@lastvisplane : Int32 = -1
 
   CDoom.player_arrow[0] = CDoom::Mline.new(
     a: CDoom::Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: CDoom::Mpoint.new(x: CDoom::R, y: 0)) # -----
@@ -249,12 +291,6 @@ module Doocr
     "1 and 2 have a new rivalry",
   ]
 
-  c_array(CDoom.cheat_amap_seq,
-    0xb2, 0x26, 0x26, 0x2e, 0xff
-  )
-  CDoom.cheat_amap.sequence = CDoom.cheat_amap_seq.to_unsafe.as(UInt8*)
-  CDoom.cheat_amap.p = Pointer(UInt8).null
-
   CDoom.stopped = 1
 
   CDoom.automapactive = 0
@@ -366,72 +402,45 @@ module Doocr
   # Set if homebrew PWAD stuff has been added.
   CDoom.modifiedgame
   # DOOM1
-  CDoom.doom1_endmsg[0] = CDoom::QUITMSG.to_unsafe
-  CDoom.doom1_endmsg[1] = "please don't leave, there's more\ndemons to toast!".to_unsafe
-  CDoom.doom1_endmsg[2] = "let's beat it -- this is turning\ninto a bloodbath!".to_unsafe
-  CDoom.doom1_endmsg[3] = "i wouldn't leave if i were you.\ndos is much worse.".to_unsafe
-  CDoom.doom1_endmsg[4] = "you're trying to say you like dos\nbetter than me, right?".to_unsafe
-  CDoom.doom1_endmsg[5] = "don't leave yet -- there's a\ndemon around that corner!".to_unsafe
-  CDoom.doom1_endmsg[6] = "ya know, next time you come in here\ni'm gonna toast ya.".to_unsafe
-  CDoom.doom1_endmsg[7] = "go ahead and leave. see if i care.".to_unsafe
+  @@doom1_endmsg = [@@deh_quit_msg,
+                    "please don't leave, there's more\ndemons to toast!",
+                    "let's beat it -- this is turning\ninto a bloodbath!",
+                    "i wouldn't leave if i were you.\ndos is much worse.",
+                    "you're trying to say you like dos\nbetter than me, right?",
+                    "don't leave yet -- there's a\ndemon around that corner!",
+                    "ya know, next time you come in here\ni'm gonna toast ya.",
+                    "go ahead and leave. see if i care."]
 
   # QuitDOOM II messages
-  CDoom.doom2_endmsg[0] = CDoom::QUITMSG.to_unsafe
-  CDoom.doom2_endmsg[1] = "you want to quit?\nthen, thou hast lost an eighth!".to_unsafe
-  CDoom.doom2_endmsg[2] = "don't go now, there's a \ndimensional shambler waiting\nat the dos prompt!".to_unsafe
-  CDoom.doom2_endmsg[3] = "get outta here and go back\nto your boring programs.".to_unsafe
-  CDoom.doom2_endmsg[4] = "if i were your boss, i'd \n deathmatch ya in a minute!".to_unsafe
-  CDoom.doom2_endmsg[5] = "look, bud. you leave now\nand you forfeit your body count!".to_unsafe
-  CDoom.doom2_endmsg[6] = "just leave. when you come\nback, i'll be waiting with a bat.".to_unsafe
-  CDoom.doom2_endmsg[7] = "you're lucky i don't smack\nyou for thinking about leaving.".to_unsafe
+  @@doom2_endmsg = [@@deh_quit_msg,
+                    "you want to quit?\nthen, thou hast lost an eighth!",
+                    "don't go now, there's a \ndimensional shambler waiting\nat the dos prompt!",
+                    "get outta here and go back\nto your boring programs.",
+                    "if i were your boss, i'd \n deathmatch ya in a minute!",
+                    "look, bud. you leave now\nand you forfeit your body count!",
+                    "just leave. when you come\nback, i'll be waiting with a bat.",
+                    "you're lucky i don't smack\nyou for thinking about leaving."]
 
   # Stage of animation:
   #  0 = text, 1 = art screen, 2 = character cast
   # CDoom.finalstage
-
-  CDoom.e1text = CDoom::E1TEXT
-  CDoom.e2text = CDoom::E2TEXT
-  CDoom.e3text = CDoom::E3TEXT
-  CDoom.e4text = CDoom::E4TEXT
-
-  CDoom.c1text = CDoom::C1TEXT
-  CDoom.c2text = CDoom::C2TEXT
-  CDoom.c3text = CDoom::C3TEXT
-  CDoom.c4text = CDoom::C4TEXT
-  CDoom.c5text = CDoom::C5TEXT
-  CDoom.c6text = CDoom::C6TEXT
-
-  CDoom.p1text = CDoom::P1TEXT
-  CDoom.p2text = CDoom::P2TEXT
-  CDoom.p3text = CDoom::P3TEXT
-  CDoom.p4text = CDoom::P4TEXT
-  CDoom.p5text = CDoom::P5TEXT
-  CDoom.p6text = CDoom::P6TEXT
-
-  CDoom.t1text = CDoom::T1TEXT
-  CDoom.t2text = CDoom::T2TEXT
-  CDoom.t3text = CDoom::T3TEXT
-  CDoom.t4text = CDoom::T4TEXT
-  CDoom.t5text = CDoom::T5TEXT
-  CDoom.t6text = CDoom::T6TEXT
-
-  CDoom.castorder[0] = CDoom::Castinfo.new(name: CDoom::CC_ZOMBIE, type: CDoom::Mobjtype::MT_POSSESSED)
-  CDoom.castorder[1] = CDoom::Castinfo.new(name: CDoom::CC_SHOTGUN, type: CDoom::Mobjtype::MT_SHOTGUY)
-  CDoom.castorder[2] = CDoom::Castinfo.new(name: CDoom::CC_HEAVY, type: CDoom::Mobjtype::MT_CHAINGUY)
-  CDoom.castorder[3] = CDoom::Castinfo.new(name: CDoom::CC_IMP, type: CDoom::Mobjtype::MT_TROOP)
-  CDoom.castorder[4] = CDoom::Castinfo.new(name: CDoom::CC_DEMON, type: CDoom::Mobjtype::MT_SERGEANT)
-  CDoom.castorder[5] = CDoom::Castinfo.new(name: CDoom::CC_LOST, type: CDoom::Mobjtype::MT_SKULL)
-  CDoom.castorder[6] = CDoom::Castinfo.new(name: CDoom::CC_CACO, type: CDoom::Mobjtype::MT_HEAD)
-  CDoom.castorder[7] = CDoom::Castinfo.new(name: CDoom::CC_HELL, type: CDoom::Mobjtype::MT_KNIGHT)
-  CDoom.castorder[8] = CDoom::Castinfo.new(name: CDoom::CC_BARON, type: CDoom::Mobjtype::MT_BRUISER)
-  CDoom.castorder[9] = CDoom::Castinfo.new(name: CDoom::CC_ARACH, type: CDoom::Mobjtype::MT_BABY)
-  CDoom.castorder[10] = CDoom::Castinfo.new(name: CDoom::CC_PAIN, type: CDoom::Mobjtype::MT_PAIN)
-  CDoom.castorder[11] = CDoom::Castinfo.new(name: CDoom::CC_REVEN, type: CDoom::Mobjtype::MT_UNDEAD)
-  CDoom.castorder[12] = CDoom::Castinfo.new(name: CDoom::CC_MANCU, type: CDoom::Mobjtype::MT_FATSO)
-  CDoom.castorder[13] = CDoom::Castinfo.new(name: CDoom::CC_ARCH, type: CDoom::Mobjtype::MT_VILE)
-  CDoom.castorder[14] = CDoom::Castinfo.new(name: CDoom::CC_SPIDER, type: CDoom::Mobjtype::MT_SPIDER)
-  CDoom.castorder[15] = CDoom::Castinfo.new(name: CDoom::CC_CYBER, type: CDoom::Mobjtype::MT_CYBORG)
-  CDoom.castorder[16] = CDoom::Castinfo.new(name: CDoom::CC_HERO, type: CDoom::Mobjtype::MT_PLAYER)
+  CDoom.castorder[0] = CDoom::Castinfo.new(name: @@deh_cc_zombie, type: CDoom::Mobjtype::MT_POSSESSED)
+  CDoom.castorder[1] = CDoom::Castinfo.new(name: @@deh_cc_shotgun, type: CDoom::Mobjtype::MT_SHOTGUY)
+  CDoom.castorder[2] = CDoom::Castinfo.new(name: @@deh_cc_heavy, type: CDoom::Mobjtype::MT_CHAINGUY)
+  CDoom.castorder[3] = CDoom::Castinfo.new(name: @@deh_cc_imp, type: CDoom::Mobjtype::MT_TROOP)
+  CDoom.castorder[4] = CDoom::Castinfo.new(name: @@deh_cc_demon, type: CDoom::Mobjtype::MT_SERGEANT)
+  CDoom.castorder[5] = CDoom::Castinfo.new(name: @@deh_cc_lost, type: CDoom::Mobjtype::MT_SKULL)
+  CDoom.castorder[6] = CDoom::Castinfo.new(name: @@deh_cc_caco, type: CDoom::Mobjtype::MT_HEAD)
+  CDoom.castorder[7] = CDoom::Castinfo.new(name: @@deh_cc_hell, type: CDoom::Mobjtype::MT_KNIGHT)
+  CDoom.castorder[8] = CDoom::Castinfo.new(name: @@deh_cc_baron, type: CDoom::Mobjtype::MT_BRUISER)
+  CDoom.castorder[9] = CDoom::Castinfo.new(name: @@deh_cc_arach, type: CDoom::Mobjtype::MT_BABY)
+  CDoom.castorder[10] = CDoom::Castinfo.new(name: @@deh_cc_pain, type: CDoom::Mobjtype::MT_PAIN)
+  CDoom.castorder[11] = CDoom::Castinfo.new(name: @@deh_cc_reven, type: CDoom::Mobjtype::MT_UNDEAD)
+  CDoom.castorder[12] = CDoom::Castinfo.new(name: @@deh_cc_mancu, type: CDoom::Mobjtype::MT_FATSO)
+  CDoom.castorder[13] = CDoom::Castinfo.new(name: @@deh_cc_arch, type: CDoom::Mobjtype::MT_VILE)
+  CDoom.castorder[14] = CDoom::Castinfo.new(name: @@deh_cc_spider, type: CDoom::Mobjtype::MT_SPIDER)
+  CDoom.castorder[15] = CDoom::Castinfo.new(name: @@deh_cc_cyber, type: CDoom::Mobjtype::MT_CYBORG)
+  CDoom.castorder[16] = CDoom::Castinfo.new(name: @@deh_cc_hero, type: CDoom::Mobjtype::MT_PLAYER)
 
   CDoom.castorder[17] = CDoom::Castinfo.new
 
@@ -443,16 +452,16 @@ module Doocr
 
   # DOOM Par Times
   c_array((CDoom.pars.to_unsafe).value,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    30, 75, 120, 90, 165, 180, 180, 165, 165
   )
   c_array((CDoom.pars.to_unsafe + 1).value,
-    0, 30, 75, 120, 90, 165, 180, 180, 30, 165
+    90, 90, 90, 120, 90, 360, 240, 135, 170
   )
   c_array((CDoom.pars.to_unsafe + 2).value,
-    0, 90, 90, 90, 120, 90, 360, 240, 30, 170
+    90, 45, 90, 150, 90, 90, 165, 105, 135
   )
   c_array((CDoom.pars.to_unsafe + 3).value,
-    0, 90, 45, 90, 150, 90, 90, 165, 30, 135
+    165, 255, 135, 150, 180, 390, 135, 360, 180 # Pulled from Doom Classic
   )
 
   c_array(CDoom.cpars,
@@ -467,22 +476,22 @@ module Doocr
   CDoom.head = 0
   CDoom.tail = 0
 
-  CDoom.chat_macros[0] = CDoom::HUSTR_CHATMACRO0.to_unsafe
-  CDoom.chat_macros[1] = CDoom::HUSTR_CHATMACRO1.to_unsafe
-  CDoom.chat_macros[2] = CDoom::HUSTR_CHATMACRO2.to_unsafe
-  CDoom.chat_macros[3] = CDoom::HUSTR_CHATMACRO3.to_unsafe
-  CDoom.chat_macros[4] = CDoom::HUSTR_CHATMACRO4.to_unsafe
-  CDoom.chat_macros[5] = CDoom::HUSTR_CHATMACRO5.to_unsafe
-  CDoom.chat_macros[6] = CDoom::HUSTR_CHATMACRO6.to_unsafe
-  CDoom.chat_macros[7] = CDoom::HUSTR_CHATMACRO7.to_unsafe
-  CDoom.chat_macros[8] = CDoom::HUSTR_CHATMACRO8.to_unsafe
-  CDoom.chat_macros[9] = CDoom::HUSTR_CHATMACRO9.to_unsafe
+  CDoom.chat_macros[0] = @@deh_hustr_chatmacro0.to_unsafe
+  CDoom.chat_macros[1] = @@deh_hustr_chatmacro1.to_unsafe
+  CDoom.chat_macros[2] = @@deh_hustr_chatmacro2.to_unsafe
+  CDoom.chat_macros[3] = @@deh_hustr_chatmacro3.to_unsafe
+  CDoom.chat_macros[4] = @@deh_hustr_chatmacro4.to_unsafe
+  CDoom.chat_macros[5] = @@deh_hustr_chatmacro5.to_unsafe
+  CDoom.chat_macros[6] = @@deh_hustr_chatmacro6.to_unsafe
+  CDoom.chat_macros[7] = @@deh_hustr_chatmacro7.to_unsafe
+  CDoom.chat_macros[8] = @@deh_hustr_chatmacro8.to_unsafe
+  CDoom.chat_macros[9] = @@deh_hustr_chatmacro9.to_unsafe
 
   c_array(CDoom.player_names,
-    CDoom::HUSTR_PLRGREEN.to_unsafe,
-    CDoom::HUSTR_PLRINDIGO.to_unsafe,
-    CDoom::HUSTR_PLRBROWN.to_unsafe,
-    CDoom::HUSTR_PLRRED.to_unsafe)
+    @@deh_hustr_plrgreen.to_unsafe,
+    @@deh_hustr_plrindigo.to_unsafe,
+    @@deh_hustr_plrbrown.to_unsafe,
+    @@deh_hustr_plrred.to_unsafe)
 
   CDoom.french_shiftxform[0] = 0_u8
   CDoom.french_shiftxform[1] = 1
@@ -877,45 +886,45 @@ module Doocr
   #
 
   # DOOM shareware/registered/retail (Ultimate) names.
-  CDoom.mapnames[0] = CDoom::HUSTR_E1M1.to_unsafe
-  CDoom.mapnames[1] = CDoom::HUSTR_E1M2.to_unsafe
-  CDoom.mapnames[2] = CDoom::HUSTR_E1M3.to_unsafe
-  CDoom.mapnames[3] = CDoom::HUSTR_E1M4.to_unsafe
-  CDoom.mapnames[4] = CDoom::HUSTR_E1M5.to_unsafe
-  CDoom.mapnames[5] = CDoom::HUSTR_E1M6.to_unsafe
-  CDoom.mapnames[6] = CDoom::HUSTR_E1M7.to_unsafe
-  CDoom.mapnames[7] = CDoom::HUSTR_E1M8.to_unsafe
-  CDoom.mapnames[8] = CDoom::HUSTR_E1M9.to_unsafe
+  CDoom.mapnames[0] = @@deh_hustr_e1m1.to_unsafe
+  CDoom.mapnames[1] = @@deh_hustr_e1m2.to_unsafe
+  CDoom.mapnames[2] = @@deh_hustr_e1m3.to_unsafe
+  CDoom.mapnames[3] = @@deh_hustr_e1m4.to_unsafe
+  CDoom.mapnames[4] = @@deh_hustr_e1m5.to_unsafe
+  CDoom.mapnames[5] = @@deh_hustr_e1m6.to_unsafe
+  CDoom.mapnames[6] = @@deh_hustr_e1m7.to_unsafe
+  CDoom.mapnames[7] = @@deh_hustr_e1m8.to_unsafe
+  CDoom.mapnames[8] = @@deh_hustr_e1m9.to_unsafe
 
-  CDoom.mapnames[9] = CDoom::HUSTR_E2M1.to_unsafe
-  CDoom.mapnames[10] = CDoom::HUSTR_E2M2.to_unsafe
-  CDoom.mapnames[11] = CDoom::HUSTR_E2M3.to_unsafe
-  CDoom.mapnames[12] = CDoom::HUSTR_E2M4.to_unsafe
-  CDoom.mapnames[13] = CDoom::HUSTR_E2M5.to_unsafe
-  CDoom.mapnames[14] = CDoom::HUSTR_E2M6.to_unsafe
-  CDoom.mapnames[15] = CDoom::HUSTR_E2M7.to_unsafe
-  CDoom.mapnames[16] = CDoom::HUSTR_E2M8.to_unsafe
-  CDoom.mapnames[17] = CDoom::HUSTR_E2M9.to_unsafe
+  CDoom.mapnames[9] = @@deh_hustr_e2m1.to_unsafe
+  CDoom.mapnames[10] = @@deh_hustr_e2m2.to_unsafe
+  CDoom.mapnames[11] = @@deh_hustr_e2m3.to_unsafe
+  CDoom.mapnames[12] = @@deh_hustr_e2m4.to_unsafe
+  CDoom.mapnames[13] = @@deh_hustr_e2m5.to_unsafe
+  CDoom.mapnames[14] = @@deh_hustr_e2m6.to_unsafe
+  CDoom.mapnames[15] = @@deh_hustr_e2m7.to_unsafe
+  CDoom.mapnames[16] = @@deh_hustr_e2m8.to_unsafe
+  CDoom.mapnames[17] = @@deh_hustr_e2m9.to_unsafe
 
-  CDoom.mapnames[18] = CDoom::HUSTR_E3M1.to_unsafe
-  CDoom.mapnames[19] = CDoom::HUSTR_E3M2.to_unsafe
-  CDoom.mapnames[20] = CDoom::HUSTR_E3M3.to_unsafe
-  CDoom.mapnames[21] = CDoom::HUSTR_E3M4.to_unsafe
-  CDoom.mapnames[22] = CDoom::HUSTR_E3M5.to_unsafe
-  CDoom.mapnames[23] = CDoom::HUSTR_E3M6.to_unsafe
-  CDoom.mapnames[24] = CDoom::HUSTR_E3M7.to_unsafe
-  CDoom.mapnames[25] = CDoom::HUSTR_E3M8.to_unsafe
-  CDoom.mapnames[26] = CDoom::HUSTR_E3M9.to_unsafe
+  CDoom.mapnames[18] = @@deh_hustr_e3m1.to_unsafe
+  CDoom.mapnames[19] = @@deh_hustr_e3m2.to_unsafe
+  CDoom.mapnames[20] = @@deh_hustr_e3m3.to_unsafe
+  CDoom.mapnames[21] = @@deh_hustr_e3m4.to_unsafe
+  CDoom.mapnames[22] = @@deh_hustr_e3m5.to_unsafe
+  CDoom.mapnames[23] = @@deh_hustr_e3m6.to_unsafe
+  CDoom.mapnames[24] = @@deh_hustr_e3m7.to_unsafe
+  CDoom.mapnames[25] = @@deh_hustr_e3m8.to_unsafe
+  CDoom.mapnames[26] = @@deh_hustr_e3m9.to_unsafe
 
-  CDoom.mapnames[27] = CDoom::HUSTR_E4M1.to_unsafe
-  CDoom.mapnames[28] = CDoom::HUSTR_E4M2.to_unsafe
-  CDoom.mapnames[29] = CDoom::HUSTR_E4M3.to_unsafe
-  CDoom.mapnames[30] = CDoom::HUSTR_E4M4.to_unsafe
-  CDoom.mapnames[31] = CDoom::HUSTR_E4M5.to_unsafe
-  CDoom.mapnames[32] = CDoom::HUSTR_E4M6.to_unsafe
-  CDoom.mapnames[33] = CDoom::HUSTR_E4M7.to_unsafe
-  CDoom.mapnames[34] = CDoom::HUSTR_E4M8.to_unsafe
-  CDoom.mapnames[35] = CDoom::HUSTR_E4M9.to_unsafe
+  CDoom.mapnames[27] = @@deh_hustr_e4m1.to_unsafe
+  CDoom.mapnames[28] = @@deh_hustr_e4m2.to_unsafe
+  CDoom.mapnames[29] = @@deh_hustr_e4m3.to_unsafe
+  CDoom.mapnames[30] = @@deh_hustr_e4m4.to_unsafe
+  CDoom.mapnames[31] = @@deh_hustr_e4m5.to_unsafe
+  CDoom.mapnames[32] = @@deh_hustr_e4m6.to_unsafe
+  CDoom.mapnames[33] = @@deh_hustr_e4m7.to_unsafe
+  CDoom.mapnames[34] = @@deh_hustr_e4m8.to_unsafe
+  CDoom.mapnames[35] = @@deh_hustr_e4m9.to_unsafe
 
   CDoom.mapnames[36] = "NEWLEVEL".to_unsafe
   CDoom.mapnames[37] = "NEWLEVEL".to_unsafe
@@ -928,112 +937,112 @@ module Doocr
   CDoom.mapnames[44] = "NEWLEVEL".to_unsafe
 
   # DOOM 2 map names.
-  CDoom.mapnames2[0] = CDoom::HUSTR_1.to_unsafe
-  CDoom.mapnames2[1] = CDoom::HUSTR_2.to_unsafe
-  CDoom.mapnames2[2] = CDoom::HUSTR_3.to_unsafe
-  CDoom.mapnames2[3] = CDoom::HUSTR_4.to_unsafe
-  CDoom.mapnames2[4] = CDoom::HUSTR_5.to_unsafe
-  CDoom.mapnames2[5] = CDoom::HUSTR_6.to_unsafe
-  CDoom.mapnames2[6] = CDoom::HUSTR_7.to_unsafe
-  CDoom.mapnames2[7] = CDoom::HUSTR_8.to_unsafe
-  CDoom.mapnames2[8] = CDoom::HUSTR_9.to_unsafe
-  CDoom.mapnames2[9] = CDoom::HUSTR_10.to_unsafe
-  CDoom.mapnames2[10] = CDoom::HUSTR_11.to_unsafe
+  CDoom.mapnames2[0] = @@deh_hustr_1.to_unsafe
+  CDoom.mapnames2[1] = @@deh_hustr_2.to_unsafe
+  CDoom.mapnames2[2] = @@deh_hustr_3.to_unsafe
+  CDoom.mapnames2[3] = @@deh_hustr_4.to_unsafe
+  CDoom.mapnames2[4] = @@deh_hustr_5.to_unsafe
+  CDoom.mapnames2[5] = @@deh_hustr_6.to_unsafe
+  CDoom.mapnames2[6] = @@deh_hustr_7.to_unsafe
+  CDoom.mapnames2[7] = @@deh_hustr_8.to_unsafe
+  CDoom.mapnames2[8] = @@deh_hustr_9.to_unsafe
+  CDoom.mapnames2[9] = @@deh_hustr_10.to_unsafe
+  CDoom.mapnames2[10] = @@deh_hustr_11.to_unsafe
 
-  CDoom.mapnames2[11] = CDoom::HUSTR_12.to_unsafe
-  CDoom.mapnames2[12] = CDoom::HUSTR_13.to_unsafe
-  CDoom.mapnames2[13] = CDoom::HUSTR_14.to_unsafe
-  CDoom.mapnames2[14] = CDoom::HUSTR_15.to_unsafe
-  CDoom.mapnames2[15] = CDoom::HUSTR_16.to_unsafe
-  CDoom.mapnames2[16] = CDoom::HUSTR_17.to_unsafe
-  CDoom.mapnames2[17] = CDoom::HUSTR_18.to_unsafe
-  CDoom.mapnames2[18] = CDoom::HUSTR_19.to_unsafe
-  CDoom.mapnames2[19] = CDoom::HUSTR_20.to_unsafe
+  CDoom.mapnames2[11] = @@deh_hustr_12.to_unsafe
+  CDoom.mapnames2[12] = @@deh_hustr_13.to_unsafe
+  CDoom.mapnames2[13] = @@deh_hustr_14.to_unsafe
+  CDoom.mapnames2[14] = @@deh_hustr_15.to_unsafe
+  CDoom.mapnames2[15] = @@deh_hustr_16.to_unsafe
+  CDoom.mapnames2[16] = @@deh_hustr_17.to_unsafe
+  CDoom.mapnames2[17] = @@deh_hustr_18.to_unsafe
+  CDoom.mapnames2[18] = @@deh_hustr_19.to_unsafe
+  CDoom.mapnames2[19] = @@deh_hustr_20.to_unsafe
 
-  CDoom.mapnames2[20] = CDoom::HUSTR_21.to_unsafe
-  CDoom.mapnames2[21] = CDoom::HUSTR_22.to_unsafe
-  CDoom.mapnames2[22] = CDoom::HUSTR_23.to_unsafe
-  CDoom.mapnames2[23] = CDoom::HUSTR_24.to_unsafe
-  CDoom.mapnames2[24] = CDoom::HUSTR_25.to_unsafe
-  CDoom.mapnames2[25] = CDoom::HUSTR_26.to_unsafe
-  CDoom.mapnames2[26] = CDoom::HUSTR_27.to_unsafe
-  CDoom.mapnames2[27] = CDoom::HUSTR_28.to_unsafe
-  CDoom.mapnames2[28] = CDoom::HUSTR_29.to_unsafe
-  CDoom.mapnames2[29] = CDoom::HUSTR_30.to_unsafe
-  CDoom.mapnames2[30] = CDoom::HUSTR_31.to_unsafe
-  CDoom.mapnames2[31] = CDoom::HUSTR_32.to_unsafe
+  CDoom.mapnames2[20] = @@deh_hustr_21.to_unsafe
+  CDoom.mapnames2[21] = @@deh_hustr_22.to_unsafe
+  CDoom.mapnames2[22] = @@deh_hustr_23.to_unsafe
+  CDoom.mapnames2[23] = @@deh_hustr_24.to_unsafe
+  CDoom.mapnames2[24] = @@deh_hustr_25.to_unsafe
+  CDoom.mapnames2[25] = @@deh_hustr_26.to_unsafe
+  CDoom.mapnames2[26] = @@deh_hustr_27.to_unsafe
+  CDoom.mapnames2[27] = @@deh_hustr_28.to_unsafe
+  CDoom.mapnames2[28] = @@deh_hustr_29.to_unsafe
+  CDoom.mapnames2[29] = @@deh_hustr_30.to_unsafe
+  CDoom.mapnames2[30] = @@deh_hustr_31.to_unsafe
+  CDoom.mapnames2[31] = @@deh_hustr_32.to_unsafe
 
   # Plutonia WAD map names.
-  CDoom.mapnamesp[0] = CDoom::PHUSTR_1.to_unsafe
-  CDoom.mapnamesp[1] = CDoom::PHUSTR_2.to_unsafe
-  CDoom.mapnamesp[2] = CDoom::PHUSTR_3.to_unsafe
-  CDoom.mapnamesp[3] = CDoom::PHUSTR_4.to_unsafe
-  CDoom.mapnamesp[4] = CDoom::PHUSTR_5.to_unsafe
-  CDoom.mapnamesp[5] = CDoom::PHUSTR_6.to_unsafe
-  CDoom.mapnamesp[6] = CDoom::PHUSTR_7.to_unsafe
-  CDoom.mapnamesp[7] = CDoom::PHUSTR_8.to_unsafe
-  CDoom.mapnamesp[8] = CDoom::PHUSTR_9.to_unsafe
-  CDoom.mapnamesp[9] = CDoom::PHUSTR_10.to_unsafe
-  CDoom.mapnamesp[10] = CDoom::PHUSTR_11.to_unsafe
+  CDoom.mapnamesp[0] = @@deh_phustr_1.to_unsafe
+  CDoom.mapnamesp[1] = @@deh_phustr_2.to_unsafe
+  CDoom.mapnamesp[2] = @@deh_phustr_3.to_unsafe
+  CDoom.mapnamesp[3] = @@deh_phustr_4.to_unsafe
+  CDoom.mapnamesp[4] = @@deh_phustr_5.to_unsafe
+  CDoom.mapnamesp[5] = @@deh_phustr_6.to_unsafe
+  CDoom.mapnamesp[6] = @@deh_phustr_7.to_unsafe
+  CDoom.mapnamesp[7] = @@deh_phustr_8.to_unsafe
+  CDoom.mapnamesp[8] = @@deh_phustr_9.to_unsafe
+  CDoom.mapnamesp[9] = @@deh_phustr_10.to_unsafe
+  CDoom.mapnamesp[10] = @@deh_phustr_11.to_unsafe
 
-  CDoom.mapnamesp[11] = CDoom::PHUSTR_12.to_unsafe
-  CDoom.mapnamesp[12] = CDoom::PHUSTR_13.to_unsafe
-  CDoom.mapnamesp[13] = CDoom::PHUSTR_14.to_unsafe
-  CDoom.mapnamesp[14] = CDoom::PHUSTR_15.to_unsafe
-  CDoom.mapnamesp[15] = CDoom::PHUSTR_16.to_unsafe
-  CDoom.mapnamesp[16] = CDoom::PHUSTR_17.to_unsafe
-  CDoom.mapnamesp[17] = CDoom::PHUSTR_18.to_unsafe
-  CDoom.mapnamesp[18] = CDoom::PHUSTR_19.to_unsafe
-  CDoom.mapnamesp[19] = CDoom::PHUSTR_20.to_unsafe
+  CDoom.mapnamesp[11] = @@deh_phustr_12.to_unsafe
+  CDoom.mapnamesp[12] = @@deh_phustr_13.to_unsafe
+  CDoom.mapnamesp[13] = @@deh_phustr_14.to_unsafe
+  CDoom.mapnamesp[14] = @@deh_phustr_15.to_unsafe
+  CDoom.mapnamesp[15] = @@deh_phustr_16.to_unsafe
+  CDoom.mapnamesp[16] = @@deh_phustr_17.to_unsafe
+  CDoom.mapnamesp[17] = @@deh_phustr_18.to_unsafe
+  CDoom.mapnamesp[18] = @@deh_phustr_19.to_unsafe
+  CDoom.mapnamesp[19] = @@deh_phustr_20.to_unsafe
 
-  CDoom.mapnamesp[20] = CDoom::PHUSTR_21.to_unsafe
-  CDoom.mapnamesp[21] = CDoom::PHUSTR_22.to_unsafe
-  CDoom.mapnamesp[22] = CDoom::PHUSTR_23.to_unsafe
-  CDoom.mapnamesp[23] = CDoom::PHUSTR_24.to_unsafe
-  CDoom.mapnamesp[24] = CDoom::PHUSTR_25.to_unsafe
-  CDoom.mapnamesp[25] = CDoom::PHUSTR_26.to_unsafe
-  CDoom.mapnamesp[26] = CDoom::PHUSTR_27.to_unsafe
-  CDoom.mapnamesp[27] = CDoom::PHUSTR_28.to_unsafe
-  CDoom.mapnamesp[28] = CDoom::PHUSTR_29.to_unsafe
-  CDoom.mapnamesp[29] = CDoom::PHUSTR_30.to_unsafe
-  CDoom.mapnamesp[30] = CDoom::PHUSTR_31.to_unsafe
-  CDoom.mapnamesp[31] = CDoom::PHUSTR_32.to_unsafe
+  CDoom.mapnamesp[20] = @@deh_phustr_21.to_unsafe
+  CDoom.mapnamesp[21] = @@deh_phustr_22.to_unsafe
+  CDoom.mapnamesp[22] = @@deh_phustr_23.to_unsafe
+  CDoom.mapnamesp[23] = @@deh_phustr_24.to_unsafe
+  CDoom.mapnamesp[24] = @@deh_phustr_25.to_unsafe
+  CDoom.mapnamesp[25] = @@deh_phustr_26.to_unsafe
+  CDoom.mapnamesp[26] = @@deh_phustr_27.to_unsafe
+  CDoom.mapnamesp[27] = @@deh_phustr_28.to_unsafe
+  CDoom.mapnamesp[28] = @@deh_phustr_29.to_unsafe
+  CDoom.mapnamesp[29] = @@deh_phustr_30.to_unsafe
+  CDoom.mapnamesp[30] = @@deh_phustr_31.to_unsafe
+  CDoom.mapnamesp[31] = @@deh_phustr_32.to_unsafe
 
   # TNT WAD map names.
-  CDoom.mapnamest[0] = CDoom::THUSTR_1.to_unsafe
-  CDoom.mapnamest[1] = CDoom::THUSTR_2.to_unsafe
-  CDoom.mapnamest[2] = CDoom::THUSTR_3.to_unsafe
-  CDoom.mapnamest[3] = CDoom::THUSTR_4.to_unsafe
-  CDoom.mapnamest[4] = CDoom::THUSTR_5.to_unsafe
-  CDoom.mapnamest[5] = CDoom::THUSTR_6.to_unsafe
-  CDoom.mapnamest[6] = CDoom::THUSTR_7.to_unsafe
-  CDoom.mapnamest[7] = CDoom::THUSTR_8.to_unsafe
-  CDoom.mapnamest[8] = CDoom::THUSTR_9.to_unsafe
-  CDoom.mapnamest[9] = CDoom::THUSTR_10.to_unsafe
-  CDoom.mapnamest[10] = CDoom::THUSTR_11.to_unsafe
+  CDoom.mapnamest[0] = @@deh_thustr_1.to_unsafe
+  CDoom.mapnamest[1] = @@deh_thustr_2.to_unsafe
+  CDoom.mapnamest[2] = @@deh_thustr_3.to_unsafe
+  CDoom.mapnamest[3] = @@deh_thustr_4.to_unsafe
+  CDoom.mapnamest[4] = @@deh_thustr_5.to_unsafe
+  CDoom.mapnamest[5] = @@deh_thustr_6.to_unsafe
+  CDoom.mapnamest[6] = @@deh_thustr_7.to_unsafe
+  CDoom.mapnamest[7] = @@deh_thustr_8.to_unsafe
+  CDoom.mapnamest[8] = @@deh_thustr_9.to_unsafe
+  CDoom.mapnamest[9] = @@deh_thustr_10.to_unsafe
+  CDoom.mapnamest[10] = @@deh_thustr_11.to_unsafe
 
-  CDoom.mapnamest[11] = CDoom::THUSTR_12.to_unsafe
-  CDoom.mapnamest[12] = CDoom::THUSTR_13.to_unsafe
-  CDoom.mapnamest[13] = CDoom::THUSTR_14.to_unsafe
-  CDoom.mapnamest[14] = CDoom::THUSTR_15.to_unsafe
-  CDoom.mapnamest[15] = CDoom::THUSTR_16.to_unsafe
-  CDoom.mapnamest[16] = CDoom::THUSTR_17.to_unsafe
-  CDoom.mapnamest[17] = CDoom::THUSTR_18.to_unsafe
-  CDoom.mapnamest[18] = CDoom::THUSTR_19.to_unsafe
-  CDoom.mapnamest[19] = CDoom::THUSTR_20.to_unsafe
+  CDoom.mapnamest[11] = @@deh_thustr_12.to_unsafe
+  CDoom.mapnamest[12] = @@deh_thustr_13.to_unsafe
+  CDoom.mapnamest[13] = @@deh_thustr_14.to_unsafe
+  CDoom.mapnamest[14] = @@deh_thustr_15.to_unsafe
+  CDoom.mapnamest[15] = @@deh_thustr_16.to_unsafe
+  CDoom.mapnamest[16] = @@deh_thustr_17.to_unsafe
+  CDoom.mapnamest[17] = @@deh_thustr_18.to_unsafe
+  CDoom.mapnamest[18] = @@deh_thustr_19.to_unsafe
+  CDoom.mapnamest[19] = @@deh_thustr_20.to_unsafe
 
-  CDoom.mapnamest[20] = CDoom::THUSTR_21.to_unsafe
-  CDoom.mapnamest[21] = CDoom::THUSTR_22.to_unsafe
-  CDoom.mapnamest[22] = CDoom::THUSTR_23.to_unsafe
-  CDoom.mapnamest[23] = CDoom::THUSTR_24.to_unsafe
-  CDoom.mapnamest[24] = CDoom::THUSTR_25.to_unsafe
-  CDoom.mapnamest[25] = CDoom::THUSTR_26.to_unsafe
-  CDoom.mapnamest[26] = CDoom::THUSTR_27.to_unsafe
-  CDoom.mapnamest[27] = CDoom::THUSTR_28.to_unsafe
-  CDoom.mapnamest[28] = CDoom::THUSTR_29.to_unsafe
-  CDoom.mapnamest[29] = CDoom::THUSTR_30.to_unsafe
-  CDoom.mapnamest[30] = CDoom::THUSTR_31.to_unsafe
-  CDoom.mapnamest[31] = CDoom::THUSTR_32.to_unsafe
+  CDoom.mapnamest[20] = @@deh_thustr_21.to_unsafe
+  CDoom.mapnamest[21] = @@deh_thustr_22.to_unsafe
+  CDoom.mapnamest[22] = @@deh_thustr_23.to_unsafe
+  CDoom.mapnamest[23] = @@deh_thustr_24.to_unsafe
+  CDoom.mapnamest[24] = @@deh_thustr_25.to_unsafe
+  CDoom.mapnamest[25] = @@deh_thustr_26.to_unsafe
+  CDoom.mapnamest[26] = @@deh_thustr_27.to_unsafe
+  CDoom.mapnamest[27] = @@deh_thustr_28.to_unsafe
+  CDoom.mapnamest[28] = @@deh_thustr_29.to_unsafe
+  CDoom.mapnamest[29] = @@deh_thustr_30.to_unsafe
+  CDoom.mapnamest[30] = @@deh_thustr_31.to_unsafe
+  CDoom.mapnamest[31] = @@deh_thustr_32.to_unsafe
 
   CDoom.flag = 0
 
@@ -1070,6 +1079,8 @@ module Doocr
                 "HDB4".to_unsafe, "HDB5".to_unsafe, "HDB6".to_unsafe, "POB1".to_unsafe, "POB2".to_unsafe, "BRS1".to_unsafe, "TLMP".to_unsafe, "TLP2".to_unsafe, "\0".to_unsafe]
 
   CDoom.sprnames = @@sprnames.to_unsafe
+
+  MINSTATES = 4000
 
   @@statedata : Array(Tuple(CDoom::Spritenum, Int32, Int32, Void*, CDoom::Statenum, Int32, Int32)) = [
     {CDoom::Spritenum::SPR_TROO, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_NULL
@@ -2051,6 +2062,10 @@ module Doocr
     (@@states.to_unsafe + i).value.misc2 = elm[6]
   end
 
+  while @@states.size < MINSTATES
+    i = @@states.size
+    @@states << CDoom::State.new(sprite: CDoom::Spritenum::SPR_TNT, tics: -1, nextstate: CDoom::Statenum.new(i))
+  end
   CDoom.states = @@states.to_unsafe
 
   @@mobjinfo_data : Array(Tuple(
@@ -5533,11 +5548,11 @@ module Doocr
   CDoom.mobjinfo = @@mobjinfo.to_unsafe
 
   c_array_strings(CDoom.gammamsg,
-    CDoom::GAMMALVL0,
-    CDoom::GAMMALVL1,
-    CDoom::GAMMALVL2,
-    CDoom::GAMMALVL3,
-    CDoom::GAMMALVL4)
+    @@deh_gammalvl0,
+    @@deh_gammalvl1,
+    @@deh_gammalvl2,
+    @@deh_gammalvl3,
+    @@deh_gammalvl4)
 
   c_array_strings(CDoom.skull_name,
     "M_SKULL1",
@@ -5568,76 +5583,73 @@ module Doocr
     CDoom::Sfxenum::SFX_bspact.value,
     CDoom::Sfxenum::SFX_sgtatk.value)
 
+  @@current_menu : Menu = @@maindef
+
   @@mainmenu = [
-    CDoom::Menuitem.new(status: 1, name: "M_NGAME".to_unsafe, routine: ->CDoom.m_new_game(Int32), alpha_key: 'n'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_OPTION".to_unsafe, routine: ->CDoom.m_options(Int32), alpha_key: 'o'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_LOADG".to_unsafe, routine: ->CDoom.m_load_game(Int32), alpha_key: 'l'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_SAVEG".to_unsafe, routine: ->CDoom.m_save_game(Int32), alpha_key: 's'.ord),
+    Menuitem.new(status: 1, name: "M_NGAME", routine: ->m_new_game(Int32), alpha_key: 'n'),
+    Menuitem.new(status: 1, name: "M_OPTION", routine: ->m_options(Int32), alpha_key: 'o'),
+    Menuitem.new(status: 1, name: "M_LOADG", routine: ->m_load_game(Int32), alpha_key: 'l'),
+    Menuitem.new(status: 1, name: "M_SAVEG", routine: ->m_save_game(Int32), alpha_key: 's'),
     # Another hickup with Special edition.
-    CDoom::Menuitem.new(status: 1, name: "M_RDTHIS".to_unsafe, routine: ->CDoom.m_readthis(Int32), alpha_key: 'r'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_QUITG".to_unsafe, routine: ->CDoom.m_quitdoom(Int32), alpha_key: 'q'.ord),
+    Menuitem.new(status: 1, name: "M_RDTHIS", routine: ->m_readthis(Int32), alpha_key: 'r'),
+    Menuitem.new(status: 1, name: "M_QUITG", routine: ->m_quitdoom(Int32), alpha_key: 'q'),
   ]
 
-  @@maindef = CDoom::Menu.new(
-    numitems: @@mainmenu.size,
-    prev_menu: Pointer(CDoom::Menu).null,
-    menuitems: @@mainmenu.to_unsafe,
-    routine: ->CDoom.m_draw_mainmenu,
+  @@maindef = Menu.new(
+    menuitems: @@mainmenu,
+    routine: ->m_draw_mainmenu,
     x: 97, y: 64,
     last_on: 0)
   @@maindef
 
   @@episodemenu = [
-    CDoom::Menuitem.new(status: 1, name: "M_EPI1".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 'k'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_EPI2".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 't'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_EPI3".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 'i'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_EPI4".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 't'.ord),
+    Menuitem.new(status: 1, name: "M_EPI1", routine: ->m_episode(Int32), alpha_key: 'k'),
+    Menuitem.new(status: 1, name: "M_EPI2", routine: ->m_episode(Int32), alpha_key: 't'),
+    Menuitem.new(status: 1, name: "M_EPI3", routine: ->m_episode(Int32), alpha_key: 'i'),
+    Menuitem.new(status: 1, name: "M_EPI4", routine: ->m_episode(Int32), alpha_key: 't'),
   ]
 
-  @@epidef = CDoom::Menu.new(
-    numitems: @@episodemenu.size,
-    prev_menu: pointerof(@@maindef),
-    menuitems: @@episodemenu.to_unsafe,
-    routine: ->CDoom.m_draw_episode,
+  @@epidef = Menu.new(
+    prev_menu: @@maindef,
+    menuitems: @@episodemenu,
+    routine: ->m_draw_episode,
     x: 48, y: 63,
     last_on: CDoom::Episodesenum::Ep1.value
   )
   @@epidef
 
   @@newgame_menu = [
-    CDoom::Menuitem.new(status: 1, name: "M_JKILL".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'i'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_ROUGH".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'h'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_HURT".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'h'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_ULTRA".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'u'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_NMARE".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'n'.ord),
+    Menuitem.new(status: 1, name: "M_JKILL", routine: ->m_choose_skill(Int32), alpha_key: 'i'),
+    Menuitem.new(status: 1, name: "M_ROUGH", routine: ->m_choose_skill(Int32), alpha_key: 'h'),
+    Menuitem.new(status: 1, name: "M_HURT", routine: ->m_choose_skill(Int32), alpha_key: 'h'),
+    Menuitem.new(status: 1, name: "M_ULTRA", routine: ->m_choose_skill(Int32), alpha_key: 'u'),
+    Menuitem.new(status: 1, name: "M_NMARE", routine: ->m_choose_skill(Int32), alpha_key: 'n'),
   ]
 
-  @@newdef = CDoom::Menu.new(
-    numitems: @@newgame_menu.size,
-    prev_menu: pointerof(@@epidef),
-    menuitems: @@newgame_menu.to_unsafe,
-    routine: ->CDoom.m_draw_newgame,
+  @@newdef = Menu.new(
+    prev_menu: @@epidef,
+    menuitems: @@newgame_menu,
+    routine: ->m_draw_newgame,
     x: 48, y: 63,
     last_on: CDoom::NewgameEnum::Hurtme.value
   )
   @@newdef
 
   @@options_menu = [
-    CDoom::Menuitem.new(status: 1, name: "M_ENDGAM".to_unsafe, routine: ->CDoom.m_endgame(Int32), alpha_key: 'e'.ord),
-    CDoom::Menuitem.new(status: 1, name: "M_MESSG".to_unsafe, routine: ->CDoom.m_change_messages(Int32), alpha_key: 'm'.ord),
-    CDoom::Menuitem.new(status: 2, name: "M_SCRNSZ".to_unsafe, routine: ->CDoom.m_size_display(Int32), alpha_key: 's'.ord),
-    CDoom::Menuitem.new(status: -1, name: "".to_unsafe),
-    CDoom::Menuitem.new(status: 2, name: "M_MSENS".to_unsafe, routine: ->CDoom.m_change_sensitivity(Int32), alpha_key: 'm'.ord),
-    CDoom::Menuitem.new(status: -1, name: "".to_unsafe),
-    CDoom::Menuitem.new(status: 1, name: "M_SVOL".to_unsafe, routine: ->CDoom.m_sound(Int32), alpha_key: 's'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->m_moreoptions(Int32), alpha_key: 'm'.ord),
+    Menuitem.new(status: 1, name: "M_ENDGAM", routine: ->m_endgame(Int32), alpha_key: 'e'),
+    Menuitem.new(status: 1, name: "M_MESSG", routine: ->m_change_messages(Int32), alpha_key: 'm'),
+    Menuitem.new(status: 2, name: "M_SCRNSZ", routine: ->m_size_display(Int32), alpha_key: 's'),
+    Menuitem.new(status: -1, name: ""),
+    Menuitem.new(status: 2, name: "M_MSENS", routine: ->m_change_sensitivity(Int32), alpha_key: 'm'),
+    Menuitem.new(status: -1, name: ""),
+    Menuitem.new(status: 1, name: "M_SVOL", routine: ->m_sound(Int32), alpha_key: 's'),
+    Menuitem.new(status: 1, name: "", routine: ->m_moreoptions(Int32), alpha_key: 'm'),
   ]
 
-  @@optionsdef = CDoom::Menu.new(
-    numitems: @@options_menu.size,
-    prev_menu: pointerof(@@maindef),
-    menuitems: @@options_menu.to_unsafe,
-    routine: ->CDoom.m_draw_options,
+  @@optionsdef = Menu.new(
+    prev_menu: @@maindef,
+    menuitems: @@options_menu,
+    routine: ->m_draw_options,
     x: 60, y: 37,
     last_on: 0
   )
@@ -5646,27 +5658,26 @@ module Doocr
   @@current_options_menu = 0
 
   @@moreoptions_menus = [[
-    CDoom::Menuitem.new(status: 2, text: "page ", num: pointerof(@@current_options_menu), routine: ->m_change_options_menu(Int32), alpha_key: 'e'.ord),
-    CDoom::Menuitem.new(status: 1, text: "edit controls ->", routine: ->m_edit_controls(Int32), alpha_key: 'e'.ord),
-    CDoom::Menuitem.new(status: 1, text: "toggle fullscreen", routine: ->m_toggle_fullscreen(Int32), alpha_key: 't'.ord),
-    CDoom::Menuitem.new(status: 1, text: "always run: ", bool: pointerof(CDoom.always_run), routine: ->m_change_alwaysrun(Int32), alpha_key: 'a'.ord),
-    CDoom::Menuitem.new(status: 1, text: "smooth midi panning: ", bool: pointerof(@@midismoothpan), routine: ->m_toggle_smoothpan(Int32), alpha_key: 's'.ord),
-    CDoom::Menuitem.new(status: 2, text: "midi bank: ", num: pointerof(@@midibank), routine: ->m_change_midibank(Int32), alpha_key: 'm'.ord),
-    CDoom::Menuitem.new(status: 1, text: "random audio pitch: ", bool: pointerof(@@randompitch), routine: ->m_toggle_pitching(Int32), alpha_key: 'r'.ord),
-    CDoom::Menuitem.new(status: 1, text: "active automap drawing: ", bool: pointerof(@@amactivedraw), routine: ->m_toggle_amactivedraw(Int32), alpha_key: 'a'.ord),
+    Menuitem.new(status: 2, text: "page ", num: pointerof(@@current_options_menu), routine: ->m_change_options_menu(Int32), alpha_key: 'e'),
+    Menuitem.new(status: 1, text: "edit controls ->", routine: ->m_edit_controls(Int32), alpha_key: 'e'),
+    Menuitem.new(status: 1, text: "toggle fullscreen", routine: ->m_toggle_fullscreen(Int32), alpha_key: 't'),
+    Menuitem.new(status: 1, text: "always run: ", bool: pointerof(CDoom.always_run), routine: ->m_change_alwaysrun(Int32), alpha_key: 'a'),
+    Menuitem.new(status: 1, text: "smooth midi panning: ", bool: pointerof(@@midismoothpan), routine: ->m_toggle_smoothpan(Int32), alpha_key: 's'),
+    Menuitem.new(status: 2, text: "midi bank: ", num: pointerof(@@midibank), routine: ->m_change_midibank(Int32), alpha_key: 'm'),
+    Menuitem.new(status: 1, text: "random audio pitch: ", bool: pointerof(@@randompitch), routine: ->m_toggle_pitching(Int32), alpha_key: 'r'),
+    Menuitem.new(status: 1, text: "active automap drawing: ", bool: pointerof(@@amactivedraw), routine: ->m_toggle_amactivedraw(Int32), alpha_key: 'a'),
   ],
                          [
-                           CDoom::Menuitem.new(status: 2, text: "page ", num: pointerof(@@current_options_menu), routine: ->m_change_options_menu(Int32), alpha_key: 'e'.ord),
-                           CDoom::Menuitem.new(status: 1, text: "Mouse Y movement: ", bool: pointerof(CDoom.mousemove), routine: ->m_mouse_move(Int32), alpha_key: 'm'.ord),
-                           CDoom::Menuitem.new(status: 1, text: "Fire weapon centered: ", bool: pointerof(@@weaponfirecentered), routine: ->m_toggle_weaponfirecentered(Int32), alpha_key: 'f'.ord),
-                           CDoom::Menuitem.new(status: 1, text: "crosshair: ", bool: pointerof(CDoom.crosshair), routine: ->m_change_crosshair(Int32), alpha_key: 'c'.ord),
+                           Menuitem.new(status: 2, text: "page ", num: pointerof(@@current_options_menu), routine: ->m_change_options_menu(Int32), alpha_key: 'e'),
+                           Menuitem.new(status: 1, text: "Mouse Y movement: ", bool: pointerof(CDoom.mousemove), routine: ->m_mouse_move(Int32), alpha_key: 'm'),
+                           Menuitem.new(status: 1, text: "Fire weapon centered: ", bool: pointerof(@@weaponfirecentered), routine: ->m_toggle_weaponfirecentered(Int32), alpha_key: 'f'),
+                           Menuitem.new(status: 1, text: "crosshair: ", bool: pointerof(CDoom.crosshair), routine: ->m_change_crosshair(Int32), alpha_key: 'c'),
                          ],
   ]
 
-  @@moreoptions_def = CDoom::Menu.new(
-    numitems: @@moreoptions_menus[0].size,
-    prev_menu: pointerof(@@optionsdef),
-    menuitems: @@moreoptions_menus.to_unsafe.value.to_unsafe,
+  @@moreoptions_def = Menu.new(
+    prev_menu: @@optionsdef,
+    menuitems: @@moreoptions_menus[0],
     routine: ->m_draw_moreoptions,
     x: 70, y: 30,
     last_on: 0
@@ -5674,21 +5685,20 @@ module Doocr
   @@moreoptions_def
 
   @@editcontrols_menu = [
-    CDoom::Menuitem.new(status: 1, text: "Forward =", num: pointerof(CDoom.key_up), routine: ->m_edit_forward(Int32), alpha_key: 'f'.ord),
-    CDoom::Menuitem.new(status: 1, text: "Backward =", num: pointerof(CDoom.key_down), routine: ->m_edit_backward(Int32), alpha_key: 'b'.ord),
-    CDoom::Menuitem.new(status: 1, text: "Strafe Left =", num: pointerof(CDoom.key_strafeleft), routine: ->m_edit_sleft(Int32), alpha_key: 's'.ord),
-    CDoom::Menuitem.new(status: 1, text: "Strafe Right =", num: pointerof(CDoom.key_straferight), routine: ->m_edit_sright(Int32), alpha_key: 's'.ord),
-    CDoom::Menuitem.new(status: 1, text: "Turn Left =", num: pointerof(CDoom.key_left), routine: ->m_edit_tleft(Int32), alpha_key: 't'.ord),
-    CDoom::Menuitem.new(status: 1, text: "Turn Right =", num: pointerof(CDoom.key_right), routine: ->m_edit_tright(Int32), alpha_key: 't'.ord),
-    CDoom::Menuitem.new(status: 1, text: "Sprint =", num: pointerof(CDoom.key_speed), routine: ->m_edit_sprint(Int32), alpha_key: 's'.ord),
-    CDoom::Menuitem.new(status: 1, text: "Shoot =", num: pointerof(CDoom.key_fire), routine: ->m_edit_shoot(Int32), alpha_key: 's'.ord),
-    CDoom::Menuitem.new(status: 1, text: "Use =", num: pointerof(CDoom.key_use), routine: ->m_edit_use(Int32), alpha_key: 'u'.ord),
+    Menuitem.new(status: 1, text: "Forward =", num: pointerof(CDoom.key_up), routine: ->m_edit_forward(Int32), alpha_key: 'f'),
+    Menuitem.new(status: 1, text: "Backward =", num: pointerof(CDoom.key_down), routine: ->m_edit_backward(Int32), alpha_key: 'b'),
+    Menuitem.new(status: 1, text: "Strafe Left =", num: pointerof(CDoom.key_strafeleft), routine: ->m_edit_sleft(Int32), alpha_key: 's'),
+    Menuitem.new(status: 1, text: "Strafe Right =", num: pointerof(CDoom.key_straferight), routine: ->m_edit_sright(Int32), alpha_key: 's'),
+    Menuitem.new(status: 1, text: "Turn Left =", num: pointerof(CDoom.key_left), routine: ->m_edit_tleft(Int32), alpha_key: 't'),
+    Menuitem.new(status: 1, text: "Turn Right =", num: pointerof(CDoom.key_right), routine: ->m_edit_tright(Int32), alpha_key: 't'),
+    Menuitem.new(status: 1, text: "Sprint =", num: pointerof(CDoom.key_speed), routine: ->m_edit_sprint(Int32), alpha_key: 's'),
+    Menuitem.new(status: 1, text: "Shoot =", num: pointerof(CDoom.key_fire), routine: ->m_edit_shoot(Int32), alpha_key: 's'),
+    Menuitem.new(status: 1, text: "Use =", num: pointerof(CDoom.key_use), routine: ->m_edit_use(Int32), alpha_key: 'u'),
   ]
 
-  @@editcontrols_def = CDoom::Menu.new(
-    numitems: @@editcontrols_menu.size,
-    prev_menu: pointerof(@@moreoptions_def),
-    menuitems: @@editcontrols_menu.to_unsafe,
+  @@editcontrols_def = Menu.new(
+    prev_menu: @@moreoptions_def,
+    menuitems: @@editcontrols_menu,
     routine: ->m_draw_edit_controls,
     x: 70, y: 25,
     last_on: 0
@@ -5696,83 +5706,78 @@ module Doocr
   @@editcontrols_def
 
   @@readmenu1 = [
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_readthis2(Int32)),
+    Menuitem.new(status: 1, name: "", routine: ->m_readthis2(Int32)),
   ]
 
-  @@readdef1 = CDoom::Menu.new(
-    numitems: @@readmenu1.size,
-    prev_menu: pointerof(@@maindef),
-    menuitems: @@readmenu1.to_unsafe,
-    routine: ->CDoom.m_draw_readthis1,
+  @@readdef1 = Menu.new(
+    prev_menu: @@maindef,
+    menuitems: @@readmenu1,
+    routine: ->m_draw_readthis1,
     x: 280, y: 185,
     last_on: 0
   )
   @@readdef1
 
   @@readmenu2 = [
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_finish_readthis(Int32)),
+    Menuitem.new(status: 1, name: "", routine: ->m_finish_readthis(Int32)),
   ]
 
-  @@readdef2 = CDoom::Menu.new(
-    numitems: @@readmenu2.size,
-    prev_menu: pointerof(@@readdef1),
-    menuitems: @@readmenu2.to_unsafe,
-    routine: ->CDoom.m_draw_readthis2,
+  @@readdef2 = Menu.new(
+    prev_menu: @@readdef1,
+    menuitems: @@readmenu2,
+    routine: ->m_draw_readthis2,
     x: 330, y: 175,
     last_on: 0
   )
   @@readdef2
 
   @@soundmenu = [
-    CDoom::Menuitem.new(status: 2, name: "M_SFXVOL".to_unsafe, routine: ->CDoom.m_sfxvol(Int32), alpha_key: 's'.ord),
-    CDoom::Menuitem.new(status: -1, name: "".to_unsafe),
-    CDoom::Menuitem.new(status: 2, name: "M_MUSVOL".to_unsafe, routine: ->CDoom.m_musicvol(Int32), alpha_key: 'm'.ord),
-    CDoom::Menuitem.new(status: -1, name: "".to_unsafe),
+    Menuitem.new(status: 2, name: "M_SFXVOL", routine: ->m_sfxvol(Int32), alpha_key: 's'),
+    Menuitem.new(status: -1, name: ""),
+    Menuitem.new(status: 2, name: "M_MUSVOL", routine: ->m_musicvol(Int32), alpha_key: 'm'),
+    Menuitem.new(status: -1, name: ""),
   ]
 
-  @@sounddef = CDoom::Menu.new(
-    numitems: @@soundmenu.size,
-    prev_menu: pointerof(@@optionsdef),
-    menuitems: @@soundmenu.to_unsafe,
-    routine: ->CDoom.m_draw_sound,
+  @@sounddef = Menu.new(
+    prev_menu: @@optionsdef,
+    menuitems: @@soundmenu,
+    routine: ->m_draw_sound,
     x: 80, y: 64,
     last_on: 0
   )
   @@sounddef
 
   @@loadmenu = [
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '1'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '2'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '3'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '4'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '5'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '6'.ord),
+    Menuitem.new(status: 1, name: "", routine: ->m_load_select(Int32), alpha_key: '1'),
+    Menuitem.new(status: 1, name: "", routine: ->m_load_select(Int32), alpha_key: '2'),
+    Menuitem.new(status: 1, name: "", routine: ->m_load_select(Int32), alpha_key: '3'),
+    Menuitem.new(status: 1, name: "", routine: ->m_load_select(Int32), alpha_key: '4'),
+    Menuitem.new(status: 1, name: "", routine: ->m_load_select(Int32), alpha_key: '5'),
+    Menuitem.new(status: 1, name: "", routine: ->m_load_select(Int32), alpha_key: '6'),
   ]
 
-  @@loaddef = CDoom::Menu.new(
-    numitems: @@loadmenu.size,
-    prev_menu: pointerof(@@maindef),
-    menuitems: @@loadmenu.to_unsafe,
-    routine: ->CDoom.m_draw_load,
+  @@loaddef = Menu.new(
+    prev_menu: @@maindef,
+    menuitems: @@loadmenu,
+    routine: ->m_draw_load,
     x: 80, y: 54,
     last_on: 0
   )
   @@loaddef
 
   @@savemenu = [
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '1'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '2'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '3'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '4'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '5'.ord),
-    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '6'.ord),
+    Menuitem.new(status: 1, name: "", routine: ->m_save_select(Int32), alpha_key: '1'),
+    Menuitem.new(status: 1, name: "", routine: ->m_save_select(Int32), alpha_key: '2'),
+    Menuitem.new(status: 1, name: "", routine: ->m_save_select(Int32), alpha_key: '3'),
+    Menuitem.new(status: 1, name: "", routine: ->m_save_select(Int32), alpha_key: '4'),
+    Menuitem.new(status: 1, name: "", routine: ->m_save_select(Int32), alpha_key: '5'),
+    Menuitem.new(status: 1, name: "", routine: ->m_save_select(Int32), alpha_key: '6'),
   ]
 
-  @@savedef = CDoom::Menu.new(
-    numitems: @@savemenu.size,
-    prev_menu: pointerof(@@maindef),
-    menuitems: @@savemenu.to_unsafe,
-    routine: ->CDoom.m_draw_save,
+  @@savedef = Menu.new(
+    prev_menu: @@maindef,
+    menuitems: @@savemenu,
+    routine: ->m_draw_save,
     x: 80, y: 54,
     last_on: 0
   )
@@ -5785,8 +5790,11 @@ module Doocr
   @@weaponfirecentered = 1
   @@midibank = 16
 
+  @@savegamestrings : Array(String) = Array(String).new(10, "")
+  @@save_old_string = ""
+
   @@defaults = [CDoom::Default.new(name: "mouse_sensitivity", location: pointerof(CDoom.mouse_sensitivity), defaultvalue: 5),
-                CDoom::Default.new(name: "sfx_volume", location: pointerof(CDoom.snd_sfx_volume), defaultvalue: 8),
+                CDoom::Default.new(name: "sfx_volume", location: pointerof(@@snd_sfx_volume), defaultvalue: 8),
                 CDoom::Default.new(name: "music_volume", location: pointerof(CDoom.snd_music_volume), defaultvalue: 8),
                 CDoom::Default.new(name: "show_messages", location: pointerof(CDoom.show_messages), defaultvalue: 1),
 
@@ -5823,16 +5831,16 @@ module Doocr
 
                 CDoom::Default.new(name: "usegamma", location: pointerof(CDoom.usegamma), defaultvalue: 0),
 
-                CDoom::Default.new(name: "chatmacro0", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe, default_text_value: CDoom::HUSTR_CHATMACRO0),
-                CDoom::Default.new(name: "chatmacro1", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 1, default_text_value: CDoom::HUSTR_CHATMACRO1),
-                CDoom::Default.new(name: "chatmacro2", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 2, default_text_value: CDoom::HUSTR_CHATMACRO2),
-                CDoom::Default.new(name: "chatmacro3", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 3, default_text_value: CDoom::HUSTR_CHATMACRO3),
-                CDoom::Default.new(name: "chatmacro4", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 4, default_text_value: CDoom::HUSTR_CHATMACRO4),
-                CDoom::Default.new(name: "chatmacro5", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 5, default_text_value: CDoom::HUSTR_CHATMACRO5),
-                CDoom::Default.new(name: "chatmacro6", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 6, default_text_value: CDoom::HUSTR_CHATMACRO6),
-                CDoom::Default.new(name: "chatmacro7", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 7, default_text_value: CDoom::HUSTR_CHATMACRO7),
-                CDoom::Default.new(name: "chatmacro8", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 8, default_text_value: CDoom::HUSTR_CHATMACRO8),
-                CDoom::Default.new(name: "chatmacro9", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 9, default_text_value: CDoom::HUSTR_CHATMACRO9),
+                CDoom::Default.new(name: "chatmacro0", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe, default_text_value: @@deh_hustr_chatmacro0),
+                CDoom::Default.new(name: "chatmacro1", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 1, default_text_value: @@deh_hustr_chatmacro1),
+                CDoom::Default.new(name: "chatmacro2", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 2, default_text_value: @@deh_hustr_chatmacro2),
+                CDoom::Default.new(name: "chatmacro3", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 3, default_text_value: @@deh_hustr_chatmacro3),
+                CDoom::Default.new(name: "chatmacro4", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 4, default_text_value: @@deh_hustr_chatmacro4),
+                CDoom::Default.new(name: "chatmacro5", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 5, default_text_value: @@deh_hustr_chatmacro5),
+                CDoom::Default.new(name: "chatmacro6", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 6, default_text_value: @@deh_hustr_chatmacro6),
+                CDoom::Default.new(name: "chatmacro7", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 7, default_text_value: @@deh_hustr_chatmacro7),
+                CDoom::Default.new(name: "chatmacro8", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 8, default_text_value: @@deh_hustr_chatmacro8),
+                CDoom::Default.new(name: "chatmacro9", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 9, default_text_value: @@deh_hustr_chatmacro9),
                 CDoom::Default.new(name: "fullscreen", location: pointerof(@@rlfullscreen), defaultvalue: 0),
                 CDoom::Default.new(name: "midismoothpan", location: pointerof(@@midismoothpan), defaultvalue: 1),
                 CDoom::Default.new(name: "randompitching", location: pointerof(@@randompitch), defaultvalue: 0),
@@ -5886,6 +5894,7 @@ module Doocr
   CDoom.traceangle = 0xc000000
 
   @@merge_files : Array(String) = [] of String
+  @@lumpinfo : Array(CDoom::Lumpinfo) = [] of CDoom::Lumpinfo
 
   # Floor/ceiling animation sequences,
   #  defined by first and last frame,
@@ -6020,8 +6029,6 @@ module Doocr
   CDoom.validcount = 1
 
   CDoom.mus_playing_s_sound = Pointer(CDoom::Musicinfo).null
-
-  CDoom.snd_sfx_volume = 15
 
   CDoom.snd_music_volume = 15
 
@@ -6234,82 +6241,77 @@ module Doocr
   CDoom.st_palette = 0
   CDoom.st_stopped = 1
 
-  c_array(CDoom.cheat_mus_seq,
-    0xb2, 0x26, 0xb6, 0xae, 0xea, 1, 0, 0, 0xff
-  )
+  @@cheat_mus_seq = [
+    0xb2, 0x26, 0xb6, 0xae, 0xea, 1, 0, 0, 0xff,
+  ] of UInt8
 
-  c_array(CDoom.cheat_choppers_seq,
-    0xb2, 0x26, 0xe2, 0x32, 0xf6, 0x2a, 0x2a, 0xa6, 0x6a, 0xea, 0xff # id...
-  )
+  @@cheat_choppers_seq = [
+    0xb2, 0x26, 0xe2, 0x32, 0xf6, 0x2a, 0x2a, 0xa6, 0x6a, 0xea, 0xff, # id...
+  ] of UInt8
 
-  c_array(CDoom.cheat_god_seq,
-    0xb2, 0x26, 0x26, 0xaa, 0x26, 0xff # iddqd
-  )
+  @@cheat_god_seq = [
+    0xb2, 0x26, 0x26, 0xaa, 0x26, 0xff, # iddqd
+  ] of UInt8
 
-  c_array(CDoom.cheat_ammo_seq,
-    0xb2, 0x26, 0xf2, 0x66, 0xa2, 0xff # idkfa
-  )
+  @@cheat_ammo_seq = [
+    0xb2, 0x26, 0xf2, 0x66, 0xa2, 0xff, # idkfa
+  ] of UInt8
 
-  c_array(CDoom.cheat_ammonokey_seq,
-    0xb2, 0x26, 0x66, 0xa2, 0xff # idfa
-  )
+  @@cheat_ammonokey_seq = [
+    0xb2, 0x26, 0x66, 0xa2, 0xff, # idfa
+  ] of UInt8
 
-  c_array(CDoom.cheat_noclip_seq,
+  @@cheat_noclip_seq = [
     0xb2, 0x26, 0xea, 0x2a, 0xb2, # idspispopd
-    0xea, 0x2a, 0xf6, 0x2a, 0x26, 0xff
-  )
+    0xea, 0x2a, 0xf6, 0x2a, 0x26, 0xff,
+  ] of UInt8
 
-  c_array(CDoom.cheat_commercial_noclip_seq,
-    0xb2, 0x26, 0xe2, 0x36, 0xb2, 0x2a, 0xff # idclip
-  )
+  @@cheat_commercial_noclip_seq = [
+    0xb2, 0x26, 0xe2, 0x36, 0xb2, 0x2a, 0xff, # idclip
+  ] of UInt8
 
-  c_array(CDoom.cheat_powerup_seq.to_unsafe.value,
-    0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0x6e, 0xff # beholdv
-  )
-  c_array((CDoom.cheat_powerup_seq.to_unsafe + 1).value,
-    0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0xea, 0xff # beholds
-  )
-  c_array((CDoom.cheat_powerup_seq.to_unsafe + 2).value,
-    0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0xb2, 0xff # beholdi
-  )
-  c_array((CDoom.cheat_powerup_seq.to_unsafe + 3).value,
-    0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0x6a, 0xff # beholdr
-  )
-  c_array((CDoom.cheat_powerup_seq.to_unsafe + 4).value,
-    0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0xa2, 0xff # beholda
-  )
-  c_array((CDoom.cheat_powerup_seq.to_unsafe + 5).value,
-    0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0x36, 0xff # beholdl
-  )
-  c_array((CDoom.cheat_powerup_seq.to_unsafe + 6).value,
-    0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0xff # behold
-  )
+  @@cheat_powerup_seq = [
+    [0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0x6e, 0xff] of UInt8, # beholdv
+    [0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0xea, 0xff] of UInt8, # beholds
+    [0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0xb2, 0xff] of UInt8, # beholdi
+    [0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0x6a, 0xff] of UInt8, # beholdr
+    [0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0xa2, 0xff] of UInt8, # beholda
+    [0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0x36, 0xff] of UInt8, # beholdl
+    [0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0xff] of UInt8,       # behold
+  ]
 
-  c_array(CDoom.cheat_clev_seq,
-    0xb2, 0x26, 0xe2, 0x36, 0xa6, 0x6e, 1, 0, 0, 0xff # idclev
-  )
+  @@cheat_clev_seq = [
+    0xb2, 0x26, 0xe2, 0x36, 0xa6, 0x6e, 1, 0, 0, 0xff, # idclev
+  ] of UInt8
 
-  c_array(CDoom.cheat_mypos_seq,
-    0xb2, 0x26, 0xb6, 0xba, 0x2a, 0xf6, 0xea, 0xff # idmypos
-  )
+  @@cheat_mypos_seq = [
+    0xb2, 0x26, 0xb6, 0xba, 0x2a, 0xf6, 0xea, 0xff, # idmypos
+  ] of UInt8
+
+  @@cheat_amap_seq = [
+    0xb2, 0x26, 0x26, 0x2e, 0xff,
+  ] of UInt8
 
   @@cheat_me_seq = [0x26, 0xA2, 0xEA, 0x32, 0xEE, 0xA2, 0xE6, 0xFF] of UInt8
 
-  CDoom.cheat_mus.sequence = CDoom.cheat_mus_seq.to_unsafe
+  CDoom.cheat_mus.sequence = @@cheat_mus_seq.to_unsafe
   CDoom.cheat_mus.p = Pointer(UInt8).null
-  CDoom.cheat_god.sequence = CDoom.cheat_god_seq.to_unsafe
+  CDoom.cheat_god.sequence = @@cheat_god_seq.to_unsafe
   CDoom.cheat_god.p = Pointer(UInt8).null
-  CDoom.cheat_ammo.sequence = CDoom.cheat_ammo_seq.to_unsafe
+  CDoom.cheat_ammo.sequence = @@cheat_ammo_seq.to_unsafe
   CDoom.cheat_ammo.p = Pointer(UInt8).null
-  CDoom.cheat_ammonokey.sequence = CDoom.cheat_ammonokey_seq.to_unsafe
+  CDoom.cheat_ammonokey.sequence = @@cheat_ammonokey_seq.to_unsafe
   CDoom.cheat_ammonokey.p = Pointer(UInt8).null
-  CDoom.cheat_noclip.sequence = CDoom.cheat_noclip_seq.to_unsafe
+  CDoom.cheat_noclip.sequence = @@cheat_noclip_seq.to_unsafe
   CDoom.cheat_noclip.p = Pointer(UInt8).null
-  CDoom.cheat_commercial_noclip.sequence = CDoom.cheat_commercial_noclip_seq.to_unsafe
+  CDoom.cheat_commercial_noclip.sequence = @@cheat_commercial_noclip_seq.to_unsafe
   CDoom.cheat_commercial_noclip.p = Pointer(UInt8).null
+  CDoom.cheat_amap.sequence = @@cheat_amap_seq.to_unsafe
+  CDoom.cheat_amap.p = Pointer(UInt8).null
   @@cheat_me = CDoom::Cheatseq.new(sequence: @@cheat_me_seq.to_unsafe, p: Pointer(UInt8).null)
   @@cheat_me
 
+  CDoom.cheat_powerup
   c_array_cheat(CDoom.cheat_powerup,
     {CDoom.cheat_powerup_seq[0].to_unsafe, Pointer(UInt8).null},
     {CDoom.cheat_powerup_seq[1].to_unsafe, Pointer(UInt8).null},
@@ -6320,11 +6322,11 @@ module Doocr
     {CDoom.cheat_powerup_seq[6].to_unsafe, Pointer(UInt8).null}
   )
 
-  CDoom.cheat_choppers.sequence = CDoom.cheat_choppers_seq.to_unsafe
+  CDoom.cheat_choppers.sequence = @@cheat_choppers_seq.to_unsafe
   CDoom.cheat_choppers.p = Pointer(UInt8).null
-  CDoom.cheat_clev.sequence = CDoom.cheat_clev_seq.to_unsafe
+  CDoom.cheat_clev.sequence = @@cheat_clev_seq.to_unsafe
   CDoom.cheat_clev.p = Pointer(UInt8).null
-  CDoom.cheat_mypos.sequence = CDoom.cheat_mypos_seq.to_unsafe
+  CDoom.cheat_mypos.sequence = @@cheat_mypos_seq.to_unsafe
   CDoom.cheat_mypos.p = Pointer(UInt8).null
 
   {% if flag?("PRECOMPUTED") %}
@@ -8570,4 +8572,193 @@ module Doocr
   )
 
   CDoom.snl_pointeron = 0
+
+  def self.sync_deh_strings
+    # DOOM1
+    @@doom1_endmsg[0] = @@deh_quit_msg
+
+    # QuitDOOM II messages
+    @@doom2_endmsg[0] = @@deh_quit_msg
+
+    CDoom.chat_macros[0] = @@deh_hustr_chatmacro0.to_unsafe
+    CDoom.chat_macros[1] = @@deh_hustr_chatmacro1.to_unsafe
+    CDoom.chat_macros[2] = @@deh_hustr_chatmacro2.to_unsafe
+    CDoom.chat_macros[3] = @@deh_hustr_chatmacro3.to_unsafe
+    CDoom.chat_macros[4] = @@deh_hustr_chatmacro4.to_unsafe
+    CDoom.chat_macros[5] = @@deh_hustr_chatmacro5.to_unsafe
+    CDoom.chat_macros[6] = @@deh_hustr_chatmacro6.to_unsafe
+    CDoom.chat_macros[7] = @@deh_hustr_chatmacro7.to_unsafe
+    CDoom.chat_macros[8] = @@deh_hustr_chatmacro8.to_unsafe
+    CDoom.chat_macros[9] = @@deh_hustr_chatmacro9.to_unsafe
+
+    c_array(CDoom.player_names,
+      @@deh_hustr_plrgreen.to_unsafe,
+      @@deh_hustr_plrindigo.to_unsafe,
+      @@deh_hustr_plrbrown.to_unsafe,
+      @@deh_hustr_plrred.to_unsafe)
+
+    #
+    # Builtin map names.
+    # The actual names can be found in DStrings.h.
+    #
+
+    # DOOM shareware/registered/retail (Ultimate) names.
+    CDoom.mapnames[0] = @@deh_hustr_e1m1.to_unsafe
+    CDoom.mapnames[1] = @@deh_hustr_e1m2.to_unsafe
+    CDoom.mapnames[2] = @@deh_hustr_e1m3.to_unsafe
+    CDoom.mapnames[3] = @@deh_hustr_e1m4.to_unsafe
+    CDoom.mapnames[4] = @@deh_hustr_e1m5.to_unsafe
+    CDoom.mapnames[5] = @@deh_hustr_e1m6.to_unsafe
+    CDoom.mapnames[6] = @@deh_hustr_e1m7.to_unsafe
+    CDoom.mapnames[7] = @@deh_hustr_e1m8.to_unsafe
+    CDoom.mapnames[8] = @@deh_hustr_e1m9.to_unsafe
+
+    CDoom.mapnames[9] = @@deh_hustr_e2m1.to_unsafe
+    CDoom.mapnames[10] = @@deh_hustr_e2m2.to_unsafe
+    CDoom.mapnames[11] = @@deh_hustr_e2m3.to_unsafe
+    CDoom.mapnames[12] = @@deh_hustr_e2m4.to_unsafe
+    CDoom.mapnames[13] = @@deh_hustr_e2m5.to_unsafe
+    CDoom.mapnames[14] = @@deh_hustr_e2m6.to_unsafe
+    CDoom.mapnames[15] = @@deh_hustr_e2m7.to_unsafe
+    CDoom.mapnames[16] = @@deh_hustr_e2m8.to_unsafe
+    CDoom.mapnames[17] = @@deh_hustr_e2m9.to_unsafe
+
+    CDoom.mapnames[18] = @@deh_hustr_e3m1.to_unsafe
+    CDoom.mapnames[19] = @@deh_hustr_e3m2.to_unsafe
+    CDoom.mapnames[20] = @@deh_hustr_e3m3.to_unsafe
+    CDoom.mapnames[21] = @@deh_hustr_e3m4.to_unsafe
+    CDoom.mapnames[22] = @@deh_hustr_e3m5.to_unsafe
+    CDoom.mapnames[23] = @@deh_hustr_e3m6.to_unsafe
+    CDoom.mapnames[24] = @@deh_hustr_e3m7.to_unsafe
+    CDoom.mapnames[25] = @@deh_hustr_e3m8.to_unsafe
+    CDoom.mapnames[26] = @@deh_hustr_e3m9.to_unsafe
+
+    CDoom.mapnames[27] = @@deh_hustr_e4m1.to_unsafe
+    CDoom.mapnames[28] = @@deh_hustr_e4m2.to_unsafe
+    CDoom.mapnames[29] = @@deh_hustr_e4m3.to_unsafe
+    CDoom.mapnames[30] = @@deh_hustr_e4m4.to_unsafe
+    CDoom.mapnames[31] = @@deh_hustr_e4m5.to_unsafe
+    CDoom.mapnames[32] = @@deh_hustr_e4m6.to_unsafe
+    CDoom.mapnames[33] = @@deh_hustr_e4m7.to_unsafe
+    CDoom.mapnames[34] = @@deh_hustr_e4m8.to_unsafe
+    CDoom.mapnames[35] = @@deh_hustr_e4m9.to_unsafe
+
+    CDoom.mapnames[36] = "NEWLEVEL".to_unsafe
+    CDoom.mapnames[37] = "NEWLEVEL".to_unsafe
+    CDoom.mapnames[38] = "NEWLEVEL".to_unsafe
+    CDoom.mapnames[39] = "NEWLEVEL".to_unsafe
+    CDoom.mapnames[40] = "NEWLEVEL".to_unsafe
+    CDoom.mapnames[41] = "NEWLEVEL".to_unsafe
+    CDoom.mapnames[42] = "NEWLEVEL".to_unsafe
+    CDoom.mapnames[43] = "NEWLEVEL".to_unsafe
+    CDoom.mapnames[44] = "NEWLEVEL".to_unsafe
+
+    # DOOM 2 map names.
+    CDoom.mapnames2[0] = @@deh_hustr_1.to_unsafe
+    CDoom.mapnames2[1] = @@deh_hustr_2.to_unsafe
+    CDoom.mapnames2[2] = @@deh_hustr_3.to_unsafe
+    CDoom.mapnames2[3] = @@deh_hustr_4.to_unsafe
+    CDoom.mapnames2[4] = @@deh_hustr_5.to_unsafe
+    CDoom.mapnames2[5] = @@deh_hustr_6.to_unsafe
+    CDoom.mapnames2[6] = @@deh_hustr_7.to_unsafe
+    CDoom.mapnames2[7] = @@deh_hustr_8.to_unsafe
+    CDoom.mapnames2[8] = @@deh_hustr_9.to_unsafe
+    CDoom.mapnames2[9] = @@deh_hustr_10.to_unsafe
+    CDoom.mapnames2[10] = @@deh_hustr_11.to_unsafe
+
+    CDoom.mapnames2[11] = @@deh_hustr_12.to_unsafe
+    CDoom.mapnames2[12] = @@deh_hustr_13.to_unsafe
+    CDoom.mapnames2[13] = @@deh_hustr_14.to_unsafe
+    CDoom.mapnames2[14] = @@deh_hustr_15.to_unsafe
+    CDoom.mapnames2[15] = @@deh_hustr_16.to_unsafe
+    CDoom.mapnames2[16] = @@deh_hustr_17.to_unsafe
+    CDoom.mapnames2[17] = @@deh_hustr_18.to_unsafe
+    CDoom.mapnames2[18] = @@deh_hustr_19.to_unsafe
+    CDoom.mapnames2[19] = @@deh_hustr_20.to_unsafe
+
+    CDoom.mapnames2[20] = @@deh_hustr_21.to_unsafe
+    CDoom.mapnames2[21] = @@deh_hustr_22.to_unsafe
+    CDoom.mapnames2[22] = @@deh_hustr_23.to_unsafe
+    CDoom.mapnames2[23] = @@deh_hustr_24.to_unsafe
+    CDoom.mapnames2[24] = @@deh_hustr_25.to_unsafe
+    CDoom.mapnames2[25] = @@deh_hustr_26.to_unsafe
+    CDoom.mapnames2[26] = @@deh_hustr_27.to_unsafe
+    CDoom.mapnames2[27] = @@deh_hustr_28.to_unsafe
+    CDoom.mapnames2[28] = @@deh_hustr_29.to_unsafe
+    CDoom.mapnames2[29] = @@deh_hustr_30.to_unsafe
+    CDoom.mapnames2[30] = @@deh_hustr_31.to_unsafe
+    CDoom.mapnames2[31] = @@deh_hustr_32.to_unsafe
+
+    # Plutonia WAD map names.
+    CDoom.mapnamesp[0] = @@deh_phustr_1.to_unsafe
+    CDoom.mapnamesp[1] = @@deh_phustr_2.to_unsafe
+    CDoom.mapnamesp[2] = @@deh_phustr_3.to_unsafe
+    CDoom.mapnamesp[3] = @@deh_phustr_4.to_unsafe
+    CDoom.mapnamesp[4] = @@deh_phustr_5.to_unsafe
+    CDoom.mapnamesp[5] = @@deh_phustr_6.to_unsafe
+    CDoom.mapnamesp[6] = @@deh_phustr_7.to_unsafe
+    CDoom.mapnamesp[7] = @@deh_phustr_8.to_unsafe
+    CDoom.mapnamesp[8] = @@deh_phustr_9.to_unsafe
+    CDoom.mapnamesp[9] = @@deh_phustr_10.to_unsafe
+    CDoom.mapnamesp[10] = @@deh_phustr_11.to_unsafe
+
+    CDoom.mapnamesp[11] = @@deh_phustr_12.to_unsafe
+    CDoom.mapnamesp[12] = @@deh_phustr_13.to_unsafe
+    CDoom.mapnamesp[13] = @@deh_phustr_14.to_unsafe
+    CDoom.mapnamesp[14] = @@deh_phustr_15.to_unsafe
+    CDoom.mapnamesp[15] = @@deh_phustr_16.to_unsafe
+    CDoom.mapnamesp[16] = @@deh_phustr_17.to_unsafe
+    CDoom.mapnamesp[17] = @@deh_phustr_18.to_unsafe
+    CDoom.mapnamesp[18] = @@deh_phustr_19.to_unsafe
+    CDoom.mapnamesp[19] = @@deh_phustr_20.to_unsafe
+
+    CDoom.mapnamesp[20] = @@deh_phustr_21.to_unsafe
+    CDoom.mapnamesp[21] = @@deh_phustr_22.to_unsafe
+    CDoom.mapnamesp[22] = @@deh_phustr_23.to_unsafe
+    CDoom.mapnamesp[23] = @@deh_phustr_24.to_unsafe
+    CDoom.mapnamesp[24] = @@deh_phustr_25.to_unsafe
+    CDoom.mapnamesp[25] = @@deh_phustr_26.to_unsafe
+    CDoom.mapnamesp[26] = @@deh_phustr_27.to_unsafe
+    CDoom.mapnamesp[27] = @@deh_phustr_28.to_unsafe
+    CDoom.mapnamesp[28] = @@deh_phustr_29.to_unsafe
+    CDoom.mapnamesp[29] = @@deh_phustr_30.to_unsafe
+    CDoom.mapnamesp[30] = @@deh_phustr_31.to_unsafe
+    CDoom.mapnamesp[31] = @@deh_phustr_32.to_unsafe
+
+    # TNT WAD map names.
+    CDoom.mapnamest[0] = @@deh_thustr_1.to_unsafe
+    CDoom.mapnamest[1] = @@deh_thustr_2.to_unsafe
+    CDoom.mapnamest[2] = @@deh_thustr_3.to_unsafe
+    CDoom.mapnamest[3] = @@deh_thustr_4.to_unsafe
+    CDoom.mapnamest[4] = @@deh_thustr_5.to_unsafe
+    CDoom.mapnamest[5] = @@deh_thustr_6.to_unsafe
+    CDoom.mapnamest[6] = @@deh_thustr_7.to_unsafe
+    CDoom.mapnamest[7] = @@deh_thustr_8.to_unsafe
+    CDoom.mapnamest[8] = @@deh_thustr_9.to_unsafe
+    CDoom.mapnamest[9] = @@deh_thustr_10.to_unsafe
+    CDoom.mapnamest[10] = @@deh_thustr_11.to_unsafe
+
+    CDoom.mapnamest[11] = @@deh_thustr_12.to_unsafe
+    CDoom.mapnamest[12] = @@deh_thustr_13.to_unsafe
+    CDoom.mapnamest[13] = @@deh_thustr_14.to_unsafe
+    CDoom.mapnamest[14] = @@deh_thustr_15.to_unsafe
+    CDoom.mapnamest[15] = @@deh_thustr_16.to_unsafe
+    CDoom.mapnamest[16] = @@deh_thustr_17.to_unsafe
+    CDoom.mapnamest[17] = @@deh_thustr_18.to_unsafe
+    CDoom.mapnamest[18] = @@deh_thustr_19.to_unsafe
+    CDoom.mapnamest[19] = @@deh_thustr_20.to_unsafe
+
+    CDoom.mapnamest[20] = @@deh_thustr_21.to_unsafe
+    CDoom.mapnamest[21] = @@deh_thustr_22.to_unsafe
+    CDoom.mapnamest[22] = @@deh_thustr_23.to_unsafe
+    CDoom.mapnamest[23] = @@deh_thustr_24.to_unsafe
+    CDoom.mapnamest[24] = @@deh_thustr_25.to_unsafe
+    CDoom.mapnamest[25] = @@deh_thustr_26.to_unsafe
+    CDoom.mapnamest[26] = @@deh_thustr_27.to_unsafe
+    CDoom.mapnamest[27] = @@deh_thustr_28.to_unsafe
+    CDoom.mapnamest[28] = @@deh_thustr_29.to_unsafe
+    CDoom.mapnamest[29] = @@deh_thustr_30.to_unsafe
+    CDoom.mapnamest[30] = @@deh_thustr_31.to_unsafe
+    CDoom.mapnamest[31] = @@deh_thustr_32.to_unsafe
+  end
 end

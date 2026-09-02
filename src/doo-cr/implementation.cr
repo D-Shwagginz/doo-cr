@@ -84,10 +84,6 @@ fun doom_fprint(handle : Void*, str : UInt8*) : Int32
   Doocr.doom_fprint(handle, str)
 end
 
-fun doom_init(argc : Int32, argv : UInt8**, flags : Int32)
-  Doocr.doom_init(argc, argv, flags)
-end
-
 fun doom_tick_midi : LibC::ULongLong
   Doocr.doom_tick_midi
 end
@@ -320,10 +316,6 @@ end
 
 fun find_response_file = FindResponseFile
   Doocr.find_response_file
-end
-
-fun d_doom_main = D_DoomMain
-  Doocr.d_doom_main
 end
 
 fun net_buffer_size = NetBufferSize : LibC::Int
@@ -733,10 +725,6 @@ fun i_set_channels = I_SetChannels
   Doocr.i_set_channels
 end
 
-fun i_set_sfx_volume = I_SetSfxVolume(volume : LibC::Int)
-  Doocr.i_set_sfx_volume(volume)
-end
-
 fun i_set_music_volume = I_SetMusicVolume(volume : LibC::Int)
   Doocr.i_set_music_volume(volume)
 end
@@ -895,10 +883,6 @@ end
 
 fun i_init_graphics = I_InitGraphics
   Doocr.i_init_graphics
-end
-
-fun m_check_parm = M_CheckParm(check : LibC::Char*) : LibC::Int
-  Doocr.m_check_parm(check)
 end
 
 fun m_clear_box = M_ClearBox(box : CDoom::Fixed*)
@@ -1077,10 +1061,6 @@ fun m_quit_response = M_QuitResponse(ch : LibC::Int)
   Doocr.m_quit_response(ch)
 end
 
-fun m_quitdoom = M_QuitDOOM(choice : LibC::Int)
-  Doocr.m_quitdoom(choice)
-end
-
 fun m_change_sensitivity = M_ChangeSensitivity(choice : LibC::Int)
   Doocr.m_change_sensitivity(choice)
 end
@@ -1097,36 +1077,12 @@ fun m_draw_thermo = M_DrawThermo(x : LibC::Int, y : LibC::Int, therm_width : Lib
   Doocr.m_draw_thermo(x, y, therm_width, therm_dot)
 end
 
-fun m_draw_empty_cell = M_DrawEmptyCell(menu : CDoom::Menu*, item : LibC::Int)
-  Doocr.m_draw_empty_cell(menu, item)
-end
-
-fun m_draw_selcell = M_DrawSelCell(menu : CDoom::Menu*, item : LibC::Int)
-  Doocr.m_draw_selcell(menu, item)
-end
-
-fun m_start_message = M_StartMessage(string : LibC::Char*, routine : Proc(Int32, Nil), input : CDoom::DoomBool)
-  Doocr.m_start_message(string, routine, input)
-end
-
 fun m_stop_message = M_StopMessage
   Doocr.m_stop_message
 end
 
-fun m_string_width = M_StringWidth(string : LibC::Char*) : LibC::Int
-  Doocr.m_string_width(string)
-end
-
 fun m_string_height = M_StringHeight(string : LibC::Char*) : LibC::Int
   Doocr.m_string_height(string)
-end
-
-fun m_write_text = M_WriteText(x : LibC::Int, y : LibC::Int, string : LibC::Char*)
-  Doocr.m_write_text(x, y, string)
-end
-
-fun m_responder = M_Responder(ev : CDoom::Event*) : CDoom::DoomBool
-  Doocr.m_responder(ev)
 end
 
 fun m_start_control_panel = M_StartControlPanel
@@ -1141,16 +1097,8 @@ fun m_clear_menus = M_ClearMenus
   Doocr.m_clear_menus
 end
 
-fun m_setup_next_menu = M_SetupNextMenu(menudef : CDoom::Menu*)
-  Doocr.m_setup_next_menu(menudef)
-end
-
 fun m_ticker = M_Ticker
   Doocr.m_ticker
-end
-
-fun m_init = M_Init
-  Doocr.m_init
 end
 
 fun m_draw_text(x : LibC::Int, y : LibC::Int, direct : CDoom::DoomBool, string : LibC::Char*) : LibC::Int
@@ -2325,14 +2273,6 @@ fun r_clear_planes = R_ClearPlanes
   Doocr.r_clear_planes
 end
 
-fun r_find_plane = R_FindPlane(height : CDoom::Fixed, picnum : LibC::Int, lightlevel : LibC::Int) : CDoom::Visplane*
-  Doocr.r_find_plane(height, picnum, lightlevel)
-end
-
-fun r_check_plane = R_CheckPlane(pl : CDoom::Visplane*, start : LibC::Int, stop : LibC::Int) : CDoom::Visplane*
-  Doocr.r_check_plane(pl, start, stop)
-end
-
 fun r_make_spans = R_MakeSpans(x : LibC::Int, t1 : LibC::Int, b1 : LibC::Int, t2 : LibC::Int, b2 : LibC::Int)
   Doocr.r_make_spans(x, t1, b1, t2, b2)
 end
@@ -2447,10 +2387,6 @@ end
 
 fun s_set_music_volume = S_SetMusicVolume(volume : LibC::Int)
   Doocr.s_set_music_volume(volume)
-end
-
-fun s_set_sfx_volume = S_SetSfxVolume(volume : LibC::Int)
-  Doocr.s_set_sfx_volume(volume)
 end
 
 fun s_start_music = S_StartMusic(music_id : LibC::Int)

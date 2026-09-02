@@ -2,9 +2,9 @@
 
 [![Windows Artifact](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows-artifact.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows-artifact.yml) - Download Here!
 
-[![Windows Build](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows-build.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows-build.yml)
-[![Ubuntu Build](https://github.com/D-Shwagginz/doo-cr/actions/workflows/ubuntu-build.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/ubuntu-build.yml)<br>
-[![Macos Build](https://github.com/D-Shwagginz/doo-cr/actions/workflows/macos-build.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/macos-build.yml)
+[![Windows Demos](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows.yml)
+[![Ubuntu Demos](https://github.com/D-Shwagginz/doo-cr/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/ubuntu.yml)<br>
+[![Macos Demos](https://github.com/D-Shwagginz/doo-cr/actions/workflows/macos.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/macos.yml)
 
 A DOOM source port written in Crystal Lang based on [PureDoom](https://github.com/Daivuk/PureDOOM) and [LinuxDoom](https://github.com/id-Software/DOOM)
 
@@ -14,13 +14,15 @@ A DOOM source port written in Crystal Lang based on [PureDoom](https://github.co
 - Working networked multiplayer
 - Extra in-game settings
 - Bug fixes and little additions <sup>[ask me about them!](mailto:devin@shwaggi.nz)</sup>
-- Modern saving and loading system: no more crashing if saving a big map
-- *.midi music support
+- A handful of limits removed
+- midi music support
 - Command line args (see below)
 - A scary look into what very unsafe low level Crystal code looks like!
 - Somewhat compatible demo playback
-- Runtime calculated finesine, finetangent, and tantoangle data tables (Remove -DPRECOMPUTED in makefile)
+- Runtime calculated finesine, finetangent, and tantoangle data tables <br>&ensp;(Remove -DPRECOMPUTED in makefile)
 - Smooth midi panning <sup>Thanks ADLMDI!</sup>
+- DeHackEd and BEX support
+- Multiple sprite and flat section support
 
 ## Usage
 Running doo-cr will boot up an autodetected .wad file and will place the config file in the current directory.
@@ -46,6 +48,8 @@ Common command line arguments are:
   Will overwrite lumps already loaded with same name<br>
   If a lump doesn't exist yet, it will add it in like -file<br>
   Used to load a wad file as a pwad, but treat it with higher priority than an iwad
+- -deh \<file> \
+  Loads in a dehacked file
 - -deathmatch \
   Used with -net to specify a deathmatch game
 - -altdeath \
@@ -64,6 +68,11 @@ Common command line arguments are:
   Used with warp to enable monster respawning
 - -mem \<MB> \
   Sets the default zone memory size in MB. The default is 12MB
+- -nosound \
+  Runs the game without activating the sound thread
+- -headless \
+  Runs without initializing Raylib (no video or audio). Mainly only used
+  for Github Actions. Still runs underlying rendering code unlike -nodraw
 
 - -record \<name> \
   Record a demo with name to a .lmp file. Use Q to end demo
@@ -78,7 +87,8 @@ Common command line arguments are:
 ## How to build
 Use a unix shell, on Windows I use msys2 with UCRT64, with make, cmake and tools, Crystal, and Shards all installed and run `make`.
 
-On Windows you may need to copy Crystal dlls over from wherever Crystal installed into your bin folder if you want to run doo-cr outside of your shell
+The make file should copy over all necessary lib files for any OS
+into the bin folder.
 
 ## Status as a Source Port
 This source port will not try to reinvent the wheel.<br>It will not try to be super advanced like GZDoom, ZDoom, etc. <br>It will not try to be 100% demo compatible like DSDA Doom. <br>This is just my source port for me to make Doom whatever I'd like in my favorite language.
@@ -99,7 +109,6 @@ All methods are fully written in Crystal. The only C usage is bindings to [Rayli
 Do note that this code is extremely [unsafe](https://crystal-lang.org/reference/1.21/syntax_and_semantics/unsafe.html) due to its current C-typed nature.
 
 ## Plans
-- DeHackEd support
 - Hardware OpenGL rendering
 - By extension, shader effects
 - Crystalized code (Not a null pointer in sight)

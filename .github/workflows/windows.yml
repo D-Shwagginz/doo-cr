@@ -1,8 +1,8 @@
-name: Windows Build
+name: Windows
 on: [push, pull_request]
 jobs:
-  build:
-    name: Windows Build
+  demos:
+    name: Windows Demos
     runs-on: windows-latest
     defaults:
       run:
@@ -29,3 +29,10 @@ jobs:
             git
       - name: Build project
         run: make
+      - name: Run Demos
+        run: |
+          mv ./DOOM1.WAD ./bin/
+          cd bin
+          ./doo-cr.exe -timedemo demo1 -headless
+          ./doo-cr.exe -timedemo demo2 -headless
+          ./doo-cr.exe -timedemo demo3 -headless

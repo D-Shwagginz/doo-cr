@@ -1,8 +1,8 @@
-name: Macos Build
+name: Macos
 on: [push, pull_request]
 jobs:
-  build:
-    name: Macos Build
+  demos:
+    name: Macos Demos
     runs-on: macos-latest
     steps:
       - name: Download source
@@ -15,3 +15,10 @@ jobs:
         run: shards install
       - name: Build project
         run: make
+      - name: Run Demos
+        run: |
+          mv ./DOOM1.WAD ./bin/
+          cd bin
+          ./doo-cr -timedemo demo1 -headless
+          ./doo-cr -timedemo demo2 -headless
+          ./doo-cr -timedemo demo3 -headless

@@ -15,10 +15,12 @@
 #
 # ==> The "C" side of Doo-cr. Hope to get rid of this someday.
 
+# Abs macroo
 macro doom_abs(x)
   (({{x}}) < 0 ? -({{x}}) : ({{x}}))
 end
 
+# Cheat Scrambler
 macro scramble(a)
   (((({{a}})&1)<<7) + ((({{a}})&2)<<5) + (({{a}})&4) + ((({{a}})&8)<<1) \
  + ((({{a}})&16)>>1) + (({{a}})&32) + ((({{a}})&64)>>5) + ((({{a}})&128)>>7))
@@ -59,6 +61,7 @@ macro cymtof(y)
   (CDoom.f_y + (CDoom.f_h - mtof({{y}}-CDoom.m_y)))
 end
 
+# Macros for filling C StaticArrays
 macro c_array(array, *objs)
   {% for elm, i in objs %}
     {{array}}[{{i}}] = {{elm}}
@@ -89,14 +92,12 @@ macro c_array_animinfo(array, *objs)
   {% end %}
 end
 
+# Was a define in C
 macro ng_statsx
   (32 + CDoom.star.value.width//2 + 32*(CDoom.dofrags == 0).to_unsafe)
 end
 
-macro padsavep
-  CDoom.save_p += (4 - (CDoom.save_p.address & 3)) & 3
-end
-
+# The C Library
 @[Link(ldflags: "-L#{__DIR__}/../.. -lcvars")]
 lib CDoom
   # Sample rate of sound samples from doom
@@ -122,20 +123,6 @@ lib CDoom
     DOOM_SEEK_END = 2
     DOOM_SEEK_SET = 0
   end
-
-  alias DoomPrintFn = Proc(LibC::Char*, Nil)
-  alias DoomMallocFn = Proc(LibC::Int, Void*)
-  alias DoomFreeFn = Proc(Void*, Nil)
-  alias DoomOpenFn = Proc(LibC::Char*, LibC::Char*, Void*)
-  alias DoomCloseFn = Proc(Void*, Nil)
-  alias DoomReadFn = Proc(Void*, Void*, LibC::Int, LibC::Int)
-  alias DoomWriteFn = Proc(Void*, Void*, LibC::Int, LibC::Int)
-  alias DoomSeekFn = Proc(Void*, LibC::Int, DoomSeek, LibC::Int)
-  alias DoomTellFn = Proc(Void*, LibC::Int)
-  alias DoomEofFn = Proc(Void*, LibC::Int)
-  alias DoomGettimeFn = Proc(LibC::Int*, LibC::Int*, Nil)
-  alias DoomExitFn = Proc(LibC::Int, Nil)
-  alias DoomGetenvFn = Proc(LibC::Char*, LibC::Char*)
 
   # Doom key mapping
   enum DoomKey
@@ -220,343 +207,24 @@ lib CDoom
     MIDDLE = 2
   end
 
-  # set callbacks
-  fun doom_set_print(print_fn : DoomPrintFn)
-  fun doom_set_malloc(malloc_fn : DoomMallocFn, free_fn : DoomFreeFn)
-  fun doom_set_file_io(open_fn : DoomOpenFn,
-                       close_fn : DoomCloseFn,
-                       read_fn : DoomReadFn,
-                       write_fn : DoomWriteFn,
-                       seek_fn : DoomSeekFn,
-                       tell_fn : DoomTellFn,
-                       eof_fn : DoomEofFn)
-  fun doom_set_gettime(gettime_fn : DoomGettimeFn)
-  fun doom_set_exit(exit_fn : DoomExitFn)
-  fun doom_set_getenv(getenv_fn : DoomGetenvFn)
-
-  # Initializes DOOM and start things up. Call only call one
-  fun doom_init(argc : LibC::Int, argv : LibC::Char**, flags : LibC::Int)
-
-  # Call this every frame
-  fun doom_update       # This will update at 35 FPS
-  fun doom_force_update # This will run a frame everytime it's called, regardless of FPS.
-
-  # Channels : 1 = indexed, 3 = RGB, 4 = RGBA
-  fun doom_get_framebuffer(channels : LibC::Int) : LibC::UChar*
-
-  # It is always 2048 bytes in size
-  fun doom_get_sound_buffer : LibC::Short*
-
-  # Call this 140 times per second. Or about every 7ms.
-  # Returns midi message. Keep calling it until it returns 0.
-  fun doom_tick_midi : LibC::ULongLong
-
-  # Events
-  fun doom_key_down(key : DoomKey)
-  fun doom_key_up(key : DoomKey)
-  fun doom_button_down(button : DoomButton)
-  fun doom_button_up(button : DoomButton)
-  fun doom_mouse_move(delta_x : LibC::Int, delta_y : LibC::Int)
-
-  # __D__ENGLSH__
-
-  #
-  # Printed strings for translation
-  #
-
-  #
-  # D_Main.C
-  #
-  D_DEVSTR = "Development mode ON.\n"
-  D_CDROM  = "CD-ROM Version: default.cfg from c:\\doomdata\n"
-
-  #
-  #        M_Menu.C
-  #
-  PRESSKEY  = "press a key."
-  PRESSYN   = "press y or n."
-  QUITMSG   = "are you sure you want to\nquit this great game?"
-  LOADNET   = "you can't do load while in a net game!\n\n" + PRESSKEY
-  QLOADNET  = "you can't quickload during a netgame!\n\n" + PRESSKEY
-  QSAVESPOT = "you haven't picked a quicksave slot yet!\n\n" + PRESSKEY
-  SAVEDEAD  = "you can't save if you aren't playing!\n\n" + PRESSKEY
-
-  QSPROMPT_1 = "quicksave over your game named\n\n'"
-  QSPROMPT_2 = "'?\n\n" + PRESSYN
-  QLPROMPT_1 = "do you want to quickload the game named\n\n'"
-  QLPROMPT_2 = "'?\n\n" + PRESSYN
-
-  NEWGAME = \
-     "you can't start a new game\n" \
-     "while in a network game.\n\n" + PRESSKEY
-
-  NIGHTMARE = \
-     "are you sure? this skill level\n" \
-     "isn't even remotely fair.\n\n" + PRESSYN
-
-  SWSTRING = \
-     "this is the shareware version of doom.\n\n" \
-     "you need to order the entire trilogy.\n\n" + PRESSKEY
-
-  MSGOFF       = "Messages OFF"
-  MSGON        = "Messages ON"
-  CROSSOFF     = "Crosshair OFF"
-  CROSSON      = "Crosshair ON"
-  ALWAYSRUNOFF = "Always run OFF"
-  ALWAYSRUNON  = "Always run ON"
-  NETEND       = "you can't end a netgame!\n\n" + PRESSKEY
-  ENDGAME      = "are you sure you want to end the game?\n\n" + PRESSYN
-
-  DOSY = "(press y to quit)"
-
-  DETAILHI    = "High detail"
-  DETAILLO    = "Low detail"
-  GAMMALVL0   = "Gamma correction OFF"
-  GAMMALVL1   = "Gamma correction level 1"
-  GAMMALVL2   = "Gamma correction level 2"
-  GAMMALVL3   = "Gamma correction level 3"
-  GAMMALVL4   = "Gamma correction level 4"
-  EMPTYSTRING = "empty slot"
-
   #
   # P_inter.C
   #
-  GOTARMOR    = "Picked up the armor."
-  GOTMEGA     = "Picked up the MegaArmor!"
-  GOTHTHBONUS = "Picked up a health bonus."
-  GOTARMBONUS = "Picked up an armor bonus."
-  GOTSTIM     = "Picked up a stimpack."
-  GOTMEDINEED = "Picked up a medikit that you REALLY need!"
-  GOTMEDIKIT  = "Picked up a medikit."
-  GOTSUPER    = "Supercharge!"
-
-  GOTBLUECARD = "Picked up a blue keycard."
-  GOTYELWCARD = "Picked up a yellow keycard."
-  GOTREDCARD  = "Picked up a red keycard."
-  GOTBLUESKUL = "Picked up a blue skull key."
-  GOTYELWSKUL = "Picked up a yellow skull key."
-  GOTREDSKULL = "Picked up a red skull key."
-
-  GOTINVUL   = "Invulnerability!"
-  GOTBERSERK = "Berserk!"
-  GOTINVIS   = "Partial Invisibility"
-  GOTSUIT    = "Radiation Shielding Suit"
-  GOTMAP     = "Computer Area Map"
-  GOTVISOR   = "Light Amplification Visor"
-  GOTMSPHERE = "MegaSphere!"
-
-  GOTCLIP     = "Picked up a clip."
-  GOTCLIPBOX  = "Picked up a box of bullets."
-  GOTROCKET   = "Picked up a rocket."
-  GOTROCKBOX  = "Picked up a box of rockets."
-  GOTCELL     = "Picked up an energy cell."
-  GOTCELLBOX  = "Picked up an energy cell pack."
-  GOTSHELLS   = "Picked up 4 shotgun shells."
-  GOTSHELLBOX = "Picked up a box of shotgun shells."
-  GOTBACKPACK = "Picked up a backpack full of ammo!"
-
-  GOTBFG9000  = "You got the BFG9000!  Oh, yes."
-  GOTCHAINGUN = "You got the chaingun!"
-  GOTCHAINSAW = "A chainsaw!  Find some meat!"
-  GOTLAUNCHER = "You got the rocket launcher!"
-  GOTPLASMA   = "You got the plasma gun!"
-  GOTSHOTGUN  = "You got the shotgun!"
-  GOTSHOTGUN2 = "You got the super shotgun!"
 
   #
   # P_Doors.C
   #
-  PD_BLUEO   = "You need a blue key to activate this object"
-  PD_REDO    = "You need a red key to activate this object"
-  PD_YELLOWO = "You need a yellow key to activate this object"
-  PD_BLUEK   = "You need a blue key to open this door"
-  PD_REDK    = "You need a red key to open this door"
-  PD_YELLOWK = "You need a yellow key to open this door"
 
   #
   # G_game.C
   #
-  GGSAVED = "game saved."
 
   #
   # HU_stuff.C
   #
-  HUSTR_MSGU = "[Message unsent]"
-
-  HUSTR_E1M1 = "E1M1: Hangar"
-  HUSTR_E1M2 = "E1M2: Nuclear Plant"
-  HUSTR_E1M3 = "E1M3: Toxin Refinery"
-  HUSTR_E1M4 = "E1M4: Command Control"
-  HUSTR_E1M5 = "E1M5: Phobos Lab"
-  HUSTR_E1M6 = "E1M6: Central Processing"
-  HUSTR_E1M7 = "E1M7: Computer Station"
-  HUSTR_E1M8 = "E1M8: Phobos Anomaly"
-  HUSTR_E1M9 = "E1M9: Military Base"
-
-  HUSTR_E2M1 = "E2M1: Deimos Anomaly"
-  HUSTR_E2M2 = "E2M2: Containment Area"
-  HUSTR_E2M3 = "E2M3: Refinery"
-  HUSTR_E2M4 = "E2M4: Deimos Lab"
-  HUSTR_E2M5 = "E2M5: Command Center"
-  HUSTR_E2M6 = "E2M6: Halls of the Damned"
-  HUSTR_E2M7 = "E2M7: Spawning Vats"
-  HUSTR_E2M8 = "E2M8: Tower of Babel"
-  HUSTR_E2M9 = "E2M9: Fortress of Mystery"
-
-  HUSTR_E3M1 = "E3M1: Hell Keep"
-  HUSTR_E3M2 = "E3M2: Slough of Despair"
-  HUSTR_E3M3 = "E3M3: Pandemonium"
-  HUSTR_E3M4 = "E3M4: House of Pain"
-  HUSTR_E3M5 = "E3M5: Unholy Cathedral"
-  HUSTR_E3M6 = "E3M6: Mt. Erebus"
-  HUSTR_E3M7 = "E3M7: Limbo"
-  HUSTR_E3M8 = "E3M8: Dis"
-  HUSTR_E3M9 = "E3M9: Warrens"
-
-  HUSTR_E4M1 = "E4M1: Hell Beneath"
-  HUSTR_E4M2 = "E4M2: Perfect Hatred"
-  HUSTR_E4M3 = "E4M3: Sever The Wicked"
-  HUSTR_E4M4 = "E4M4: Unruly Evil"
-  HUSTR_E4M5 = "E4M5: They Will Repent"
-  HUSTR_E4M6 = "E4M6: Against Thee Wickedly"
-  HUSTR_E4M7 = "E4M7: And Hell Followed"
-  HUSTR_E4M8 = "E4M8: Unto The Cruel"
-  HUSTR_E4M9 = "E4M9: Fear"
-
-  HUSTR_1  = "level 1: entryway"
-  HUSTR_2  = "level 2: underhalls"
-  HUSTR_3  = "level 3: the gantlet"
-  HUSTR_4  = "level 4: the focus"
-  HUSTR_5  = "level 5: the waste tunnels"
-  HUSTR_6  = "level 6: the crusher"
-  HUSTR_7  = "level 7: dead simple"
-  HUSTR_8  = "level 8: tricks and traps"
-  HUSTR_9  = "level 9: the pit"
-  HUSTR_10 = "level 10: refueling base"
-  HUSTR_11 = "level 11: 'o' of destruction!"
-
-  HUSTR_12 = "level 12: the factory"
-  HUSTR_13 = "level 13: downtown"
-  HUSTR_14 = "level 14: the inmost dens"
-  HUSTR_15 = "level 15: industrial zone"
-  HUSTR_16 = "level 16: suburbs"
-  HUSTR_17 = "level 17: tenements"
-  HUSTR_18 = "level 18: the courtyard"
-  HUSTR_19 = "level 19: the citadel"
-  HUSTR_20 = "level 20: gotcha!"
-
-  HUSTR_21 = "level 21: nirvana"
-  HUSTR_22 = "level 22: the catacombs"
-  HUSTR_23 = "level 23: barrels o' fun"
-  HUSTR_24 = "level 24: the chasm"
-  HUSTR_25 = "level 25: bloodfalls"
-  HUSTR_26 = "level 26: the abandoned mines"
-  HUSTR_27 = "level 27: monster condo"
-  HUSTR_28 = "level 28: the spirit world"
-  HUSTR_29 = "level 29: the living end"
-  HUSTR_30 = "level 30: icon of sin"
-
-  HUSTR_31 = "level 31: wolfenstein"
-  HUSTR_32 = "level 32: grosse"
-
-  PHUSTR_1  = "level 1: congo"
-  PHUSTR_2  = "level 2: well of souls"
-  PHUSTR_3  = "level 3: aztec"
-  PHUSTR_4  = "level 4: caged"
-  PHUSTR_5  = "level 5: ghost town"
-  PHUSTR_6  = "level 6: baron's lair"
-  PHUSTR_7  = "level 7: caughtyard"
-  PHUSTR_8  = "level 8: realm"
-  PHUSTR_9  = "level 9: abattoire"
-  PHUSTR_10 = "level 10: onslaught"
-  PHUSTR_11 = "level 11: hunted"
-
-  PHUSTR_12 = "level 12: speed"
-  PHUSTR_13 = "level 13: the crypt"
-  PHUSTR_14 = "level 14: genesis"
-  PHUSTR_15 = "level 15: the twilight"
-  PHUSTR_16 = "level 16: the omen"
-  PHUSTR_17 = "level 17: compound"
-  PHUSTR_18 = "level 18: neurosphere"
-  PHUSTR_19 = "level 19: nme"
-  PHUSTR_20 = "level 20: the death domain"
-
-  PHUSTR_21 = "level 21: slayer"
-  PHUSTR_22 = "level 22: impossible mission"
-  PHUSTR_23 = "level 23: tombstone"
-  PHUSTR_24 = "level 24: the final frontier"
-  PHUSTR_25 = "level 25: the temple of darkness"
-  PHUSTR_26 = "level 26: bunker"
-  PHUSTR_27 = "level 27: anti-christ"
-  PHUSTR_28 = "level 28: the sewers"
-  PHUSTR_29 = "level 29: odyssey of noises"
-  PHUSTR_30 = "level 30: the gateway of hell"
-
-  PHUSTR_31 = "level 31: cyberden"
-  PHUSTR_32 = "level 32: go 2 it"
-
-  THUSTR_1  = "level 1: system control"
-  THUSTR_2  = "level 2: human bbq"
-  THUSTR_3  = "level 3: power control"
-  THUSTR_4  = "level 4: wormhole"
-  THUSTR_5  = "level 5: hanger"
-  THUSTR_6  = "level 6: open season"
-  THUSTR_7  = "level 7: prison"
-  THUSTR_8  = "level 8: metal"
-  THUSTR_9  = "level 9: stronghold"
-  THUSTR_10 = "level 10: redemption"
-  THUSTR_11 = "level 11: storage facility"
-
-  THUSTR_12 = "level 12: crater"
-  THUSTR_13 = "level 13: nukage processing"
-  THUSTR_14 = "level 14: steel works"
-  THUSTR_15 = "level 15: dead zone"
-  THUSTR_16 = "level 16: deepest reaches"
-  THUSTR_17 = "level 17: processing area"
-  THUSTR_18 = "level 18: mill"
-  THUSTR_19 = "level 19: shipping/respawning"
-  THUSTR_20 = "level 20: central processing"
-
-  THUSTR_21 = "level 21: administration center"
-  THUSTR_22 = "level 22: habitat"
-  THUSTR_23 = "level 23: lunar mining project"
-  THUSTR_24 = "level 24: quarry"
-  THUSTR_25 = "level 25: baron's den"
-  THUSTR_26 = "level 26: ballistyx"
-  THUSTR_27 = "level 27: mount pain"
-  THUSTR_28 = "level 28: heck"
-  THUSTR_29 = "level 29: river styx"
-  THUSTR_30 = "level 30: last call"
-
-  THUSTR_31 = "level 31: pharaoh"
-  THUSTR_32 = "level 32: caribbean"
-
-  HUSTR_CHATMACRO1 = "I'm ready to kick butt!"
-  HUSTR_CHATMACRO2 = "I'm OK."
-  HUSTR_CHATMACRO3 = "I'm not looking too good!"
-  HUSTR_CHATMACRO4 = "Help!"
-  HUSTR_CHATMACRO5 = "You suck!"
-  HUSTR_CHATMACRO6 = "Next time, scumbag..."
-  HUSTR_CHATMACRO7 = "Come here!"
-  HUSTR_CHATMACRO8 = "I'll take care of it."
-  HUSTR_CHATMACRO9 = "Yes"
-  HUSTR_CHATMACRO0 = "No"
-
-  HUSTR_TALKTOSELF1 = "You mumble to yourself"
-  HUSTR_TALKTOSELF2 = "Who's there?"
-  HUSTR_TALKTOSELF3 = "You scare yourself"
-  HUSTR_TALKTOSELF4 = "You start to rave"
-  HUSTR_TALKTOSELF5 = "You've lost it..."
-
-  HUSTR_MESSAGESENT = "[Message Sent]"
 
   # The following should NOT be changed unless it seems
   # just AWFULLY necessary
-
-  HUSTR_PLRGREEN  = "Green: "
-  HUSTR_PLRINDIGO = "Indigo: "
-  HUSTR_PLRBROWN  = "Brown: "
-  HUSTR_PLRRED    = "Red: "
 
   HUSTR_KEYGREEN  = 'g'
   HUSTR_KEYINDIGO = 'i'
@@ -567,343 +235,41 @@ lib CDoom
   # AM_map.C
   #
 
-  AMSTR_FOLLOWON  = "Follow Mode ON"
-  AMSTR_FOLLOWOFF = "Follow Mode OFF"
-
-  AMSTR_GRIDON  = "Grid ON"
-  AMSTR_GRIDOFF = "Grid OFF"
-
-  AMSTR_MARKEDSPOT   = "Marked Spot"
-  AMSTR_MARKSCLEARED = "All Marks Cleared"
-
   #
   # ST_stuff.C
   #
 
-  STSTR_MUS    = "Music Change"
-  STSTR_NOMUS  = "IMPOSSIBLE SELECTION"
-  STSTR_DQDON  = "Degreelessness Mode On"
-  STSTR_DQDOFF = "Degreelessness Mode Off"
-
-  STSTR_KFAADDED = "Very Happy Ammo Added"
-  STSTR_FAADDED  = "Ammo (no keys) Added"
-
-  STSTR_NCON  = "No Clipping Mode ON"
-  STSTR_NCOFF = "No Clipping Mode OFF"
-
-  STSTR_BEHOLD  = "inVuln, Str, Inviso, Rad, Allmap, or Lite-amp"
-  STSTR_BEHOLDX = "Power-up Toggled"
-
-  STSTR_CHOPPERS = "... doesn't suck - GM"
-  STSTR_CLEV     = "Changing Level..."
-
   #
   # F_Finale.C
   #
-  E1TEXT = \
-     "Once you beat the big badasses and\n" \
-     "clean out the moon base you're supposed\n" \
-     "to win, aren't you? Aren't you? Where's\n" \
-     "your fat reward and ticket home? What\n" \
-     "the hell is this? It's not supposed to\n" \
-     "end this way!\n" \
-     "\n" \
-     "It stinks like rotten meat, but looks\n" \
-     "like the lost Deimos base.  Looks like\n" \
-     "you're stuck on The Shores of Hell.\n" \
-     "The only way out is through.\n" \
-     "\n" \
-     "To continue the DOOM experience, play\n" \
-     "The Shores of Hell and its amazing\n" \
-     "sequel, Inferno!\n"
-
-  E2TEXT = \
-     "You've done it! The hideous cyber-\n" \
-     "demon lord that ruled the lost Deimos\n" \
-     "moon base has been slain and you\n" \
-     "are triumphant! But ... where are\n" \
-     "you? You clamber to the edge of the\n" \
-     "moon and look down to see the awful\n" \
-     "truth.\n" \
-     "\n" \
-     "Deimos floats above Hell itself!\n" \
-     "You've never heard of anyone escaping\n" \
-     "from Hell, but you'll make the bastards\n" \
-     "sorry they ever heard of you! Quickly,\n" \
-     "you rappel down to  the surface of\n" \
-     "Hell.\n" \
-     "\n" \
-     "Now, it's on to the final chapter of\n" \
-     "DOOM! -- Inferno."
-
-  E3TEXT = \
-     "The loathsome spiderdemon that\n" \
-     "masterminded the invasion of the moon\n" \
-     "bases and caused so much death has had\n" \
-     "its ass kicked for all time.\n" \
-     "\n" \
-     "A hidden doorway opens and you enter.\n" \
-     "You've proven too tough for Hell to\n" \
-     "contain, and now Hell at last plays\n" \
-     "fair -- for you emerge from the door\n" \
-     "to see the green fields of Earth!\n" \
-     "Home at last.\n" \
-     "\n" \
-     "You wonder what's been happening on\n" \
-     "Earth while you were battling evil\n" \
-     "unleashed. It's good that no Hell-\n" \
-     "spawn could have come through that\n" \
-     "door with you ..."
-
-  E4TEXT = \
-     "the spider mastermind must have sent forth\n" \
-     "its legions of hellspawn before your\n" \
-     "final confrontation with that terrible\n" \
-     "beast from hell.  but you stepped forward\n" \
-     "and brought forth eternal damnation and\n" \
-     "suffering upon the horde as a true hero\n" \
-     "would in the face of something so evil.\n" \
-     "\n" \
-     "besides, someone was gonna pay for what\n" \
-     "happened to daisy, your pet rabbit.\n" \
-     "\n" \
-     "but now, you see spread before you more\n" \
-     "potential pain and gibbitude as a nation\n" \
-     "of demons run amok among our cities.\n" \
-     "\n" \
-     "next stop, hell on earth!"
 
   # after level 6, put this:
-  C1TEXT = \
-     "YOU HAVE ENTERED DEEPLY INTO THE INFESTED\n" \
-     "STARPORT. BUT SOMETHING IS WRONG. THE\n" \
-     "MONSTERS HAVE BROUGHT THEIR OWN REALITY\n" \
-     "WITH THEM, AND THE STARPORT'S TECHNOLOGY\n" \
-     "IS BEING SUBVERTED BY THEIR PRESENCE.\n" \
-     "\n" \
-     "AHEAD, YOU SEE AN OUTPOST OF HELL, A\n" \
-     "FORTIFIED ZONE. IF YOU CAN GET PAST IT,\n" \
-     "YOU CAN PENETRATE INTO THE HAUNTED HEART\n" \
-     "OF THE STARBASE AND FIND THE CONTROLLING\n" \
-     "SWITCH WHICH HOLDS EARTH'S POPULATION\n" \
-     "HOSTAGE."
 
   # After level 11, put this:
-  C2TEXT = \
-     "YOU HAVE WON! YOUR VICTORY HAS ENABLED\n" \
-     "HUMANKIND TO EVACUATE EARTH AND ESCAPE\n" \
-     "THE NIGHTMARE.  NOW YOU ARE THE ONLY\n" \
-     "HUMAN LEFT ON THE FACE OF THE PLANET.\n" \
-     "CANNIBAL MUTATIONS, CARNIVOROUS ALIENS,\n" \
-     "AND EVIL SPIRITS ARE YOUR ONLY NEIGHBORS.\n" \
-     "YOU SIT BACK AND WAIT FOR DEATH, CONTENT\n" \
-     "THAT YOU HAVE SAVED YOUR SPECIES.\n" \
-     "\n" \
-     "BUT THEN, EARTH CONTROL BEAMS DOWN A\n" \
-     "MESSAGE FROM SPACE: \"SENSORS HAVE LOCATED\n" \
-     "THE SOURCE OF THE ALIEN INVASION. IF YOU\n" \
-     "GO THERE, YOU MAY BE ABLE TO BLOCK THEIR\n" \
-     "ENTRY.  THE ALIEN BASE IS IN THE HEART OF\n" \
-     "YOUR OWN HOME CITY, NOT FAR FROM THE\n" \
-     "STARPORT.\" SLOWLY AND PAINFULLY YOU GET\n" \
-     "UP AND RETURN TO THE FRAY."
 
   # After level 20, put this:
-  C3TEXT = \
-     "YOU ARE AT THE CORRUPT HEART OF THE CITY,\n" \
-     "SURROUNDED BY THE CORPSES OF YOUR ENEMIES.\n" \
-     "YOU SEE NO WAY TO DESTROY THE CREATURES'\n" \
-     "ENTRYWAY ON THIS SIDE, SO YOU CLENCH YOUR\n" \
-     "TEETH AND PLUNGE THROUGH IT.\n" \
-     "\n" \
-     "THERE MUST BE A WAY TO CLOSE IT ON THE\n" \
-     "OTHER SIDE. WHAT DO YOU CARE IF YOU'VE\n" \
-     "GOT TO GO THROUGH HELL TO GET TO IT?"
 
   # After level 29, put this:
-  C4TEXT = \
-     "THE HORRENDOUS VISAGE OF THE BIGGEST\n" \
-     "DEMON YOU'VE EVER SEEN CRUMBLES BEFORE\n" \
-     "YOU, AFTER YOU PUMP YOUR ROCKETS INTO\n" \
-     "HIS EXPOSED BRAIN. THE MONSTER SHRIVELS\n" \
-     "UP AND DIES, ITS THRASHING LIMBS\n" \
-     "DEVASTATING UNTOLD MILES OF HELL'S\n" \
-     "SURFACE.\n" \
-     "\n" \
-     "YOU'VE DONE IT. THE INVASION IS OVER.\n" \
-     "EARTH IS SAVED. HELL IS A WRECK. YOU\n" \
-     "WONDER WHERE BAD FOLKS WILL GO WHEN THEY\n" \
-     "DIE, NOW. WIPING THE SWEAT FROM YOUR\n" \
-     "FOREHEAD YOU BEGIN THE LONG TREK BACK\n" \
-     "HOME. REBUILDING EARTH OUGHT TO BE A\n" \
-     "LOT MORE FUN THAN RUINING IT WAS.\n"
 
   # Before level 31, put this:
-  C5TEXT = \
-     "CONGRATULATIONS, YOU'VE FOUND THE SECRET\n" \
-     "LEVEL! LOOKS LIKE IT'S BEEN BUILT BY\n" \
-     "HUMANS, RATHER THAN DEMONS. YOU WONDER\n" \
-     "WHO THE INMATES OF THIS CORNER OF HELL\n" \
-     "WILL BE."
 
   # Before level 32, put this:
-  C6TEXT = \
-     "CONGRATULATIONS, YOU'VE FOUND THE\n" \
-     "SUPER SECRET LEVEL!  YOU'D BETTER\n" \
-     "BLAZE THROUGH THIS ONE!\n"
 
   # after map 06
-  P1TEXT = \
-     "You gloat over the steaming carcass of the\n" \
-     "Guardian.  With its death, you've wrested\n" \
-     "the Accelerator from the stinking claws\n" \
-     "of Hell.  You relax and glance around the\n" \
-     "room.  Damn!  There was supposed to be at\n" \
-     "least one working prototype, but you can't\n" \
-     "see it. The demons must have taken it.\n" \
-     "\n" \
-     "You must find the prototype, or all your\n" \
-     "struggles will have been wasted. Keep\n" \
-     "moving, keep fighting, keep killing.\n" \
-     "Oh yes, keep living, too."
 
   # after map 11
-  P2TEXT = \
-     "Even the deadly Arch-Vile labyrinth could\n" \
-     "not stop you, and you've gotten to the\n" \
-     "prototype Accelerator which is soon\n" \
-     "efficiently and permanently deactivated.\n" \
-     "\n" \
-     "You're good at that kind of thing."
 
   # after map 20
-  P3TEXT = \
-     "You've bashed and battered your way into\n" \
-     "the heart of the devil-hive.  Time for a\n" \
-     "Search-and-Destroy mission, aimed at the\n" \
-     "Gatekeeper, whose foul offspring is\n" \
-     "cascading to Earth.  Yeah, he's bad. But\n" \
-     "you know who's worse!\n" \
-     "\n" \
-     "Grinning evilly, you check your gear, and\n" \
-     "get ready to give the bastard a little Hell\n" \
-     "of your own making!"
 
   # after map 30
-  P4TEXT = \
-     "The Gatekeeper's evil face is splattered\n" \
-     "all over the place.  As its tattered corpse\n" \
-     "collapses, an inverted Gate forms and\n" \
-     "sucks down the shards of the last\n" \
-     "prototype Accelerator, not to mention the\n" \
-     "few remaining demons.  You're done. Hell\n" \
-     "has gone back to pounding bad dead folks \n" \
-     "instead of good live ones.  Remember to\n" \
-     "tell your grandkids to put a rocket\n" \
-     "launcher in your coffin. If you go to Hell\n" \
-     "when you die, you'll need it for some\n" \
-     "final cleaning-up ..."
 
   # before map 31
-  P5TEXT = \
-     "You've found the second-hardest level we\n" \
-     "got. Hope you have a saved game a level or\n" \
-     "two previous.  If not, be prepared to die\n" \
-     "aplenty. For master marines only."
 
   # before map 32
-  P6TEXT = \
-     "Betcha wondered just what WAS the hardest\n" \
-     "level we had ready for ya?  Now you know.\n" \
-     "No one gets out alive."
-
-  T1TEXT = \
-     "You've fought your way out of the infested\n" \
-     "experimental labs.   It seems that UAC has\n" \
-     "once again gulped it down.  With their\n" \
-     "high turnover, it must be hard for poor\n" \
-     "old UAC to buy corporate health insurance\n" \
-     "nowadays..\n" \
-     "\n" \
-     "Ahead lies the military complex, now\n" \
-     "swarming with diseased horrors hot to get\n" \
-     "their teeth into you. With luck, the\n" \
-     "complex still has some warlike ordnance\n" \
-     "laying around."
-
-  T2TEXT = \
-     "You hear the grinding of heavy machinery\n" \
-     "ahead.  You sure hope they're not stamping\n" \
-     "out new hellspawn, but you're ready to\n" \
-     "ream out a whole herd if you have to.\n" \
-     "They might be planning a blood feast, but\n" \
-     "you feel about as mean as two thousand\n" \
-     "maniacs packed into one mad killer.\n" \
-     "\n" \
-     "You don't plan to go down easy."
-
-  T3TEXT = \
-     "The vista opening ahead looks real damn\n" \
-     "familiar. Smells familiar, too -- like\n" \
-     "fried excrement. You didn't like this\n" \
-     "place before, and you sure as hell ain't\n" \
-     "planning to like it now. The more you\n" \
-     "brood on it, the madder you get.\n" \
-     "Hefting your gun, an evil grin trickles\n" \
-     "onto your face. Time to take some names."
-
-  T4TEXT = \
-     "Suddenly, all is silent, from one horizon\n" \
-     "to the other. The agonizing echo of Hell\n" \
-     "fades away, the nightmare sky turns to\n" \
-     "blue, the heaps of monster corpses start \n" \
-     "to evaporate along with the evil stench \n" \
-     "that filled the air. Jeeze, maybe you've\n" \
-     "done it. Have you really won?\n" \
-     "\n" \
-     "Something rumbles in the distance.\n" \
-     "A blue light begins to glow inside the\n" \
-     "ruined skull of the demon-spitter."
-
-  T5TEXT = \
-     "What now? Looks totally different. Kind\n" \
-     "of like King Tut's condo. Well,\n" \
-     "whatever's here can't be any worse\n" \
-     "than usual. Can it?  Or maybe it's best\n" \
-     "to let sleeping gods lie.."
-
-  T6TEXT = \
-     "Time for a vacation. You've burst the\n" \
-     "bowels of hell and by golly you're ready\n" \
-     "for a break. You mutter to yourself,\n" \
-     "Maybe someone else can kick Hell's ass\n" \
-     "next time around. Ahead lies a quiet town,\n" \
-     "with peaceful flowing water, quaint\n" \
-     "buildings, and presumably no Hellspawn.\n" \
-     "\n" \
-     "As you step off the transport, you hear\n" \
-     "the stomp of a cyberdemon's iron shoe."
 
   #
   # Character cast strings F_FINALE.C
   #
-  CC_ZOMBIE  = "ZOMBIEMAN"
-  CC_SHOTGUN = "SHOTGUN GUY"
-  CC_HEAVY   = "HEAVY WEAPON DUDE"
-  CC_IMP     = "IMP"
-  CC_DEMON   = "DEMON"
-  CC_LOST    = "LOST SOUL"
-  CC_CACO    = "CACODEMON"
-  CC_HELL    = "HELL KNIGHT"
-  CC_BARON   = "BARON OF HELL"
-  CC_ARACH   = "ARACHNOTRON"
-  CC_PAIN    = "PAIN ELEMENTAL"
-  CC_REVEN   = "REVENANT"
-  CC_MANCU   = "MANCUBUS"
-  CC_ARCH    = "ARCH-VILE"
-  CC_SPIDER  = "THE SPIDER MASTERMIND"
-  CC_CYBER   = "THE CYBERDEMON"
-  CC_HERO    = "OUR HERO"
 
   # __D_THINK__
 
@@ -949,19 +315,6 @@ lib CDoom
   {% else %}
     DOOM_LINUX = true
   {% end %}
-
-  $doom_malloc : DoomMallocFn
-  $doom_free : DoomFreeFn
-  $doom_open : DoomOpenFn
-  $doom_close : DoomCloseFn
-  $doom_read : DoomReadFn
-  $doom_write : DoomWriteFn
-  $doom_seek : DoomSeekFn
-  $doom_tell : DoomTellFn
-  $doom_eof : DoomEofFn
-  $doom_gettime_fn : DoomGettimeFn
-  $doom_exit : DoomExitFn
-  $doom_getenv : DoomGetenvFn
 
   fun doom_itoa(i : LibC::Int, radix : LibC::Int) : LibC::Char*
   fun doom_ctoa(c : LibC::Char) : LibC::Char*
@@ -1115,8 +468,9 @@ lib CDoom
     Shell # Shotgun / double barreled shotgun.
     Cell  # Plasma rifle, BFG.
     Misl  # Missile launcher.
-    NUMAMMO
+    OG_NumAmmo
     Noammo # Unlimited for chainsaw / fist.
+    NUMAMMO
   end
 
   # Power up artifacts.
@@ -1302,14 +656,6 @@ lib CDoom
   $wadfiles : LibC::Char*[MAXWADFILES]
 
   fun d_add_file = D_AddFile(file : LibC::Char*)
-
-  #
-  # D_DoomMain()
-  # Not a globally visible function, just included for source reference,
-  # calls all startup code, parses command line options.
-  # If not overrided by user input, calls N_AdvanceDemo.
-  #
-  fun d_doom_main = D_DoomMain
 
   # Called by IO functions when input is detected.
   fun d_post_event = D_PostEvent(ev : Event*)
@@ -1517,7 +863,6 @@ lib CDoom
   {% end %}
 
   # Misc. other strings.
-  SAVEGAMENAME = "doomsav"
 
   #
   # File locations,
@@ -1531,9 +876,6 @@ lib CDoom
 
   # QuitDOOM messages
   NUM_QUITMESSAGES = 22
-
-  $doom1_endmsg : LibC::Char*[8]
-  $doom2_endmsg : LibC::Char*[8]
 
   # __F_FINALE__
 
@@ -1865,6 +1207,8 @@ lib CDoom
     SPR_TLMP
     SPR_TLP2
     NUMSPRITES
+
+    SPR_TNT = 138
   end
 
   enum Statenum
@@ -3023,16 +2367,6 @@ lib CDoom
 
   # __M__ARGV__
 
-  #
-  # MISC
-  #
-  $myargc : LibC::Int
-  $myargv : LibC::Char**
-
-  # Returns the position of the given parameter
-  # in the arg list (0 if not found).
-  fun m_check_parm = M_CheckParm(check : LibC::Char*) : LibC::Int
-
   # __M_CHEAT__
 
   #
@@ -3079,23 +2413,12 @@ lib CDoom
   #
 
   # Called by main loop,
-  # saves config file and calls I_Quit when user exits.
-  # Even when the menu is not displayed,
-  # this can resize the view and change game parameters.
-  # Does all the real work of the menu interaction.
-  fun m_responder = M_Responder(ev : Event*) : DoomBool
-
-  # Called by main loop,
   # only used for menu (skull cursor) animation.
   fun m_ticker = M_Ticker
 
   # Called by main loop,
   # draws the menus directly into the screen buffer.
   fun m_drawer = M_Drawer
-
-  # Called by D_DoomMain,
-  # loads the config file.
-  fun m_init = M_Init
 
   # Called by intro code to force menu up upon a keypress,
   # does nothing if menu is already up.
@@ -3227,7 +2550,6 @@ lib CDoom
   fun s_update_sounds = S_UpdateSounds(listener_p : Void*)
 
   fun s_set_music_volume = S_SetMusicVolume(volume : LibC::Int)
-  fun s_set_sfx_volume = S_SetSfxVolume(volume : LibC::Int)
 
   # __SOUNDS__
 
@@ -4123,7 +3445,6 @@ lib CDoom
   # Sound FX volume has default, 0 - 15
   # Music volume has default, 0 - 15
   # These are multiplied by 8.
-  $snd_sfx_volume = snd_SfxVolume : LibC::Int     # maximum volume for sound
   $snd_music_volume = snd_MusicVolume : LibC::Int # maximum volume for music
 
   # -------------------------
@@ -5352,9 +4673,6 @@ lib CDoom
   # Segs count?
   $sscount : LibC::Int
 
-  $floorplane : Visplane*
-  $ceilingplane : Visplane*
-
   # __R_DATA__
 
   # Retrieve column data for span blitting.
@@ -5481,8 +4799,6 @@ lib CDoom
   fun r_map_plane = R_MapPlane(y : LibC::Int, x1 : LibC::Int, x2 : LibC::Int)
   fun r_make_spans = R_MakeSpans(x : LibC::Int, t1 : LibC::Int, b1 : LibC::Int, t2 : LibC::Int, b2 : LibC::Int)
   fun r_draw_planes = R_DrawPlanes
-  fun r_find_plane = R_FindPlane(height : Fixed, picnum : LibC::Int, lightlevel : LibC::Int) : Visplane*
-  fun r_check_plane = R_CheckPlane(pl : Visplane*, start : LibC::Int, stop : LibC::Int) : Visplane*
 
   # __R_THINGS__
 
@@ -5935,7 +5251,6 @@ lib CDoom
   end
 
   $lumpcache : Void**
-  $lumpinfo : Lumpinfo*
   $numlumps : LibC::Int
 
   fun w_init_multiple_files = W_InitMultipleFiles(filenames : LibC::Char**)
@@ -6014,19 +5329,6 @@ lib CDoom
   $last_update_time : LibC::Int
   $button_states : LibC::Int[3]
   $itoa_buf : LibC::Char[20]
-
-  $doom_malloc : DoomMallocFn
-  $doom_free : DoomFreeFn
-  $doom_open : DoomOpenFn
-  $doom_close : DoomCloseFn
-  $doom_read : DoomReadFn
-  $doom_write : DoomWriteFn
-  $doom_seek : DoomSeekFn
-  $doom_tell : DoomTellFn
-  $doom_eof : DoomEofFn
-  $doom_gettime : DoomGettimeFn
-  $doom_exit : DoomExitFn
-  $doom_getenv : DoomGetenvFn
 
   $setsizeneeded : DoomBool
   $setblocks : LibC::Int
@@ -6396,8 +5698,6 @@ lib CDoom
 
   fun find_response_file = FindResponseFile
 
-  fun d_doom_main = D_DoomMain
-
   $doomcom : Doomcom*
   $netbuffer : Doomdata* # points inside doomcom
 
@@ -6477,33 +5777,6 @@ lib CDoom
   $finalestage : LibC::Int
 
   $finalecount : LibC::Int
-
-  $e1text : LibC::Char*
-  $e2text : LibC::Char*
-  $e3text : LibC::Char*
-  $e4text : LibC::Char*
-
-  $c1text : LibC::Char*
-  $c2text : LibC::Char*
-  $c3text : LibC::Char*
-  $c4text : LibC::Char*
-  $c5text : LibC::Char*
-  $c6text : LibC::Char*
-
-  $p1text : LibC::Char*
-  $p2text : LibC::Char*
-  $p3text : LibC::Char*
-  $p4text : LibC::Char*
-  $p5text : LibC::Char*
-  $p6text : LibC::Char*
-
-  $t1text : LibC::Char*
-  $t2text : LibC::Char*
-  $t3text : LibC::Char*
-  $t4text : LibC::Char*
-  $t5text : LibC::Char*
-  $t6text : LibC::Char*
-
   $finaletext : LibC::Char*
   $finaleflat : LibC::Char*
 
@@ -6902,7 +6175,6 @@ lib CDoom
   fun getsfx(sfxname : LibC::Char*, len : LibC::Int*) : Void*
   fun addsfx(sfxid : LibC::Int, volume : LibC::Int, step : LibC::Int, seperation : LibC::Int) : LibC::Int
 
-  fun i_set_sfx_volume = I_SetSfxVolume(volume : LibC::Int)
   fun i_set_music_volume = I_SetMusicVolume(volume : LibC::Int)
 
   fun reset_all_channels
@@ -6998,46 +6270,6 @@ lib CDoom
   #
   # MENU TYPEDEFS
   #
-  struct Menuitem
-    # 0 = no cursor here, 1 = ok, 2 = arrows ok
-    status : LibC::Short
-
-    name : LibC::Char*
-    text : LibC::Char*
-    bool : Int32*
-    num : Int32*
-
-    # choice = menu item #.
-    # if status = 2,
-    #   choice=0:leftarrow,1:rightarrow
-    routine : Proc(LibC::Int, Nil)
-
-    # hotkey in menu
-    alpha_key : LibC::Char
-  end
-
-  struct Menu
-    numitems : LibC::Short # # of menu items
-    prev_menu : Menu*      # previous menu
-    menuitems : Menuitem*  # menu items
-    routine : Proc(Nil)    # draw routine
-    x : LibC::Short
-    y : LibC::Short       # x,y of menu
-    last_on : LibC::Short # last item user was on in menu
-  end
-
-  struct MenuCustomTextSeg
-    lump : LibC::Char*
-    x : LibC::Int
-    w : LibC::Int
-    offx : LibC::Int
-    offy : LibC::Int
-  end
-
-  struct MenuCustomText
-    name : LibC::Char*
-    segs : MenuCustomTextSeg[16]
-  end
 
   # Blocky mode, has default, 0 = high, 1 = normal
   $detail_level = detailLevel : LibC::Int
@@ -7068,12 +6300,7 @@ lib CDoom
 
   # we are going to be entering a savegame string
   $save_string_enter = saveStringEnter : LibC::Int
-  $save_slot = saveSlot : LibC::Int            # which slot to save in
-  $save_char_index = saveCharIndex : LibC::Int # which char we're editing
-  # old save description before edit
-  $save_old_string = saveOldString : LibC::Char[SAVESTRINGSIZE]
-
-  $savegamestrings : LibC::Char[SAVESTRINGSIZE][10]
+  $save_slot = saveSlot : LibC::Int # which slot to save in
 
   $endstring : LibC::Char[160]
 
@@ -7086,11 +6313,9 @@ lib CDoom
   $skull_name = skullName : LibC::Char*[2]
 
   # current menudef
-  $current_menu = currentMenu : Menu*
 
   # We create new menu text by cutting into existing graphics and pasting them to create the new text.
   # This way we don't ship code with embeded graphics that come from WAD files.
-  $menu_custom_texts : MenuCustomText[4]
 
   $custom_texts_count : LibC::Int
 
@@ -7103,62 +6328,6 @@ lib CDoom
 
   $quitsounds2 : LibC::Int[8]
 
-  fun m_new_game = M_NewGame(choice : LibC::Int)
-  fun m_episode = M_Episode(choice : LibC::Int)
-  fun m_choose_skill = M_ChooseSkill(choice : LibC::Int)
-  fun m_load_game = M_LoadGame(choice : LibC::Int)
-  fun m_save_game = M_SaveGame(choice : LibC::Int)
-  fun m_options = M_Options(choice : LibC::Int)
-  fun m_endgame = M_EndGame(choice : LibC::Int)
-  fun m_readthis = M_ReadThis(choice : LibC::Int)
-  fun m_readthis2 = M_ReadThis2(choice : LibC::Int)
-  fun m_quitdoom = M_QuitDOOM(choice : LibC::Int)
-
-  fun m_change_messages = M_ChangeMessages(choice : LibC::Int)
-  fun m_sfxvol = M_SfxVol(choice : LibC::Int)
-  fun m_musicvol = M_MusicVol(choice : LibC::Int)
-  fun m_mouse_options = M_MouseOptions(choice : LibC::Int)
-  fun m_size_display = M_SizeDisplay(choice : LibC::Int)
-  fun m_startgame = M_StartGame(choice : LibC::Int)
-  fun m_sound = M_Sound(choice : LibC::Int)
-  fun m_change_crosshair = M_ChangeCrosshair(choice : LibC::Int)
-  fun m_change_alwaysrun = M_ChangeAlwaysRun(choice : LibC::Int)
-
-  fun m_mouse_move = M_MouseMove(choice : LibC::Int)
-  fun m_change_sensitivity = M_ChangeSensitivity(choice : LibC::Int)
-
-  fun m_finish_readthis = M_FinishReadThis(choice : LibC::Int)
-  fun m_load_select = M_LoadSelect(choice : LibC::Int)
-  fun m_save_select = M_SaveSelect(choice : LibC::Int)
-  fun m_read_save_strings = M_ReadSaveStrings
-  fun m_quicksave = M_QuickSave
-  fun m_quickload = M_QuickLoad
-
-  fun m_draw_mainmenu = M_DrawMainMenu
-  fun m_draw_readthis1 = M_DrawReadThis1
-  fun m_draw_readthis2 = M_DrawReadThis2
-  fun m_draw_newgame = M_DrawNewGame
-  fun m_draw_episode = M_DrawEpisode
-  fun m_draw_options = M_DrawOptions
-  fun m_draw_sound = M_DrawSound
-  fun m_draw_load = M_DrawLoad
-  fun m_draw_save = M_DrawSave
-
-  fun m_draw_save_load_border = M_DrawSaveLoadBorder(x : LibC::Int, y : LibC::Int)
-  fun m_setup_next_menu = M_SetupNextMenu(menudef : Menu*)
-  fun m_draw_thermo = M_DrawThermo(x : LibC::Int, y : LibC::Int, therm_width : LibC::Int, therm_dot : LibC::Int)
-  fun m_draw_empty_cell = M_DrawEmptyCell(menu : Menu*, item : LibC::Int)
-  fun m_draw_selcell = M_DrawSelCell(menu : Menu*, item : LibC::Int)
-  fun m_write_text = M_WriteText(x : LibC::Int, y : LibC::Int, string : LibC::Char*)
-  fun m_string_width = M_StringWidth(string : LibC::Char*) : LibC::Int
-  fun m_string_height = M_StringHeight(string : LibC::Char*) : LibC::Int
-  fun m_start_control_panel = M_StartControlPanel
-  fun m_start_message = M_StartMessage(string : LibC::Char*, routine : Proc(Int32, Nil), input : DoomBool)
-  fun m_stop_message = M_StopMessage
-  fun m_clear_menus = M_ClearMenus
-  fun m_draw_mouse_options = M_DrawMouseOptions
-
-  #
   # DOOM MENU
   #
   enum Mainenum
@@ -7171,10 +6340,6 @@ lib CDoom
     MainEnd
   end
 
-  $mainmenu = MainMenu : Menuitem[6]
-
-  $maindef = MainDef : Menu
-
   #
   # EPISODE SELECT
   #
@@ -7185,10 +6350,6 @@ lib CDoom
     Ep4
     EpEnd
   end
-
-  $episodemenu = EpisodeMenu : Menuitem[4]
-
-  $epidef = EpiDef : Menu
 
   #
   # NEW GAME
@@ -7201,10 +6362,6 @@ lib CDoom
     Nightmare
     NewgEnd
   end
-
-  $newgame_menu = NewGameMenu : Menuitem[5]
-
-  $newdef = NewDef : Menu
 
   #
   # OPTIONS MENU
@@ -7221,10 +6378,6 @@ lib CDoom
     OptEnd
   end
 
-  $options_menu = OptionsMenuFull : Menuitem[8]
-
-  $optionsdef = OptionsDef : Menu
-
   #
   # MOUSE OPTIONS
   #
@@ -7235,10 +6388,6 @@ lib CDoom
     MouseOptEnd
   end
 
-  $mouse_options_menu = MouseOptionsMenu : Menuitem[3]
-
-  $mouseoptionsdef = MouseOptionsDef : Menu
-
   #
   # Read This! MENU 1 & 2
   #
@@ -7247,18 +6396,10 @@ lib CDoom
     Read1End
   end
 
-  $readmenu1 = ReadMenu1 : Menuitem[1]
-
-  $readdef1 = ReadDef1 : Menu
-
   enum Read2enum
     Rdthsempty2
     Read2End
   end
-
-  $readmenu2 = ReadMenu2 : Menuitem[1]
-
-  $readdef2 = ReadDef2 : Menu
 
   #
   # SOUND VOLUME MENU
@@ -7270,10 +6411,6 @@ lib CDoom
     Sfxempty2
     SoundEnd
   end
-
-  $soundmenu = SoundMenuFull : Menuitem[4]
-
-  $sounddef = SoundDef : Menu
 
   #
   # LOAD GAME MENU
@@ -7288,19 +6425,6 @@ lib CDoom
     LoadEnd
   end
 
-  $loadmenu = DOOM_LoadMenu : Menuitem[6]
-
-  $loaddef = LoadDef : Menu
-
-  #
-  # SAVE GAME MENU
-  #
-  $savemenu = SaveMenu : Menuitem[6]
-
-  $savedef = SaveDef : Menu
-
-  fun m_draw_custom_menu_text = M_DrawCustomMenuText(name : LibC::Char*, x : LibC::Int, y : LibC::Int)
-
   fun m_do_save = M_DoSave(slot : LibC::Int)
 
   fun m_quicksave_response = M_QuickSaveResponse(ch : LibC::Int)
@@ -7312,8 +6436,6 @@ lib CDoom
   fun m_endgame_response = M_EndGameResponse(ch : LibC::Int)
 
   fun m_quit_response = M_QuitResponse(ch : LibC::Int)
-
-  fun m_responder = M_Responder(ev : Event*) : DoomBool
 
   STRING_VALUE = 0xffff
 
@@ -7777,7 +6899,6 @@ lib CDoom
   #
 
   # Here comes the obnoxious "visplane".
-  $lastvisplane : Visplane*
 
   $openings : LibC::Short[MAXOPENINGS]
 
