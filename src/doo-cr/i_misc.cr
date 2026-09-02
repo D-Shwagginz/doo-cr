@@ -292,24 +292,22 @@ module Doocr
     CDoom.screens[0].clear(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
 
     unless @@headless
+      Raylib.set_config_flags(Raylib::ConfigFlags::WindowResizable)
+      Raylib.init_window(1024, 768, "DOO-CR")
+      Raylib.set_exit_key(Raylib::KeyboardKey::Null)
+      @@was_focused = false
+      Raylib.toggle_borderless_windowed if @@rlfullscreen != 0
+      # Raylib.set_target_fps(35)
 
-    Raylib.set_config_flags(Raylib::ConfigFlags::WindowResizable)
-    Raylib.init_window(1024, 768, "DOO-CR")
-    Raylib.set_exit_key(Raylib::KeyboardKey::Null)
-    @@was_focused = false
-    Raylib.toggle_borderless_windowed if @@rlfullscreen != 0
-    # Raylib.set_target_fps(35)
+      image = Raylib.gen_image_color(CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT, Raylib::BLACK)
+      @@screen_texture = Raylib.load_texture_from_image(image)
+      @@viewport_target = Raylib.load_render_texture(CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT)
+      @@render_target = Raylib.load_render_texture(@@sres_x, @@sres_y)
 
-    image = Raylib.gen_image_color(CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT, Raylib::BLACK)
-    @@screen_texture = Raylib.load_texture_from_image(image)
-    @@viewport_target = Raylib.load_render_texture(CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT)
-    @@render_target = Raylib.load_render_texture(@@sres_x, @@sres_y)
-
-    Raylib.unload_image(image)
-    Raylib.set_texture_filter(@@screen_texture.not_nil!, Raylib::TextureFilter::Point)
-    Raylib.set_texture_filter(@@viewport_target.not_nil!.texture, Raylib::TextureFilter::Point)
-    Raylib.set_texture_filter(@@render_target.not_nil!.texture, Raylib::TextureFilter::Point)
-
+      Raylib.unload_image(image)
+      Raylib.set_texture_filter(@@screen_texture.not_nil!, Raylib::TextureFilter::Point)
+      Raylib.set_texture_filter(@@viewport_target.not_nil!.texture, Raylib::TextureFilter::Point)
+      Raylib.set_texture_filter(@@render_target.not_nil!.texture, Raylib::TextureFilter::Point)
     end
 
     CDoom.i_set_palette(CDoom.w_cache_lump_name("PLAYPAL", CDoom::PU_CACHE).as(UInt8*))

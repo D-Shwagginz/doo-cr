@@ -54,42 +54,42 @@ module Doocr
   def self.d_display_load
     if !@@loading_patch.null?
       x = CDoom::SCREENWIDTH - @@loading_patch.value.width
-        y = CDoom::SCREENHEIGHT - @@loading_patch.value.height
-        v_copy_rect(x, y, 0, 
+      y = CDoom::SCREENHEIGHT - @@loading_patch.value.height
+      v_copy_rect(x, y, 0,
         @@loading_patch.value.width, @@loading_patch.value.height,
         x, y, 4)
 
-        CDoom.v_draw_patch(x, y, 0, @@loading_patch)
-        @@loading_disk_shown = true
+      CDoom.v_draw_patch(x, y, 0, @@loading_patch)
+      @@loading_disk_shown = true
     end
-        @@do_loading_disk = false
+    @@do_loading_disk = false
   end
 
   def self.d_display_clear_load
-if !@@loading_patch.null?
-  x = CDoom::SCREENWIDTH - @@loading_patch.value.width
-        y = CDoom::SCREENHEIGHT - @@loading_patch.value.height
-        v_copy_rect(x, y, 4, 
+    if !@@loading_patch.null?
+      x = CDoom::SCREENWIDTH - @@loading_patch.value.width
+      y = CDoom::SCREENHEIGHT - @@loading_patch.value.height
+      v_copy_rect(x, y, 4,
         @@loading_patch.value.width, @@loading_patch.value.height,
         x, y, 0)
-end
- @@loading_disk_shown = false
-end
+    end
+    @@loading_disk_shown = false
+  end
 
   #
   # d_display
   #  draw current display, possibly wiping it from the previous
   #
   def self.d_display
-     unless @@headless
-    if @@was_focused != Raylib.window_focused?
-      if (@@was_focused = Raylib.window_focused?)
-        Raylib.disable_cursor
-      else
-        Raylib.enable_cursor
+    unless @@headless
+      if @@was_focused != Raylib.window_focused?
+        if (@@was_focused = Raylib.window_focused?)
+          Raylib.disable_cursor
+        else
+          Raylib.enable_cursor
+        end
       end
     end
-  end
 
     return if CDoom.nodrawers != 0 # for comparative timing / profiling
 

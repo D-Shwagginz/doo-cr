@@ -78,7 +78,7 @@ module Doocr
       if x < 0 ||
          x + patch.value.width - 1 > CDoom::SCREENWIDTH ||
          y < 0 ||
-         y + patch.value.height - 1> CDoom::SCREENHEIGHT ||
+         y + patch.value.height - 1 > CDoom::SCREENHEIGHT ||
          scrn.to_u32! > 4
         # No i_error abort - what is up with TNT.WAD?
         puts "Patch at #{x},#{y}, exceeds LFB"

@@ -316,7 +316,7 @@ module Doocr
     CDoom.doom_memset(CDoom.lumpcache, 0, size)
 
     if w_check_num_for_name("STDISK".to_unsafe) != -1
-        @@loading_patch = w_cache_lump_name("STDISK".to_unsafe, CDoom::PU_STATIC).as(CDoom::Patch*)
+      @@loading_patch = w_cache_lump_name("STDISK".to_unsafe, CDoom::PU_STATIC).as(CDoom::Patch*)
     end
   end
 
@@ -433,7 +433,7 @@ module Doocr
 
     if CDoom.lumpcache[lump].null?
       # read the lump in
-        @@do_loading_disk = true
+      @@do_loading_disk = true
 
       ptr = CDoom.z_malloc(CDoom.w_lump_length(lump), tag, CDoom.lumpcache + lump).as(CDoom::Byte*)
       CDoom.w_read_lump(lump, CDoom.lumpcache[lump])

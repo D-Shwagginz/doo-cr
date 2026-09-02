@@ -55,11 +55,11 @@ module Doocr
       if res == CDoom::Result::Pastdest
         case ceiling.value.type
         when CDoom::Ceilingenum::RaiseToHighest
-          CDoom.p_remove_active_ceiling(ceiling)         
+          CDoom.p_remove_active_ceiling(ceiling)
         when CDoom::Ceilingenum::SilentCrushAndRaise, CDoom::Ceilingenum::FastCrushAndRaise, CDoom::Ceilingenum::CrushAndRaise
-          if ceiling.value.type == CDoom::Ceilingenum::SilentCrushAndRaise 
-          CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
-            CDoom::Sfxenum::SFX_pstop)
+          if ceiling.value.type == CDoom::Ceilingenum::SilentCrushAndRaise
+            CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
+              CDoom::Sfxenum::SFX_pstop)
           end
 
           ceiling.value.direction = -1
@@ -83,16 +83,16 @@ module Doocr
 
       if res == CDoom::Result::Pastdest
         case ceiling.value.type
-        when  CDoom::Ceilingenum::SilentCrushAndRaise, CDoom::Ceilingenum::CrushAndRaise, CDoom::Ceilingenum::FastCrushAndRaise
+        when CDoom::Ceilingenum::SilentCrushAndRaise, CDoom::Ceilingenum::CrushAndRaise, CDoom::Ceilingenum::FastCrushAndRaise
           if ceiling.value.type == CDoom::Ceilingenum::SilentCrushAndRaise
-          CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
-            CDoom::Sfxenum::SFX_pstop)
+            CDoom.s_start_sound(pointerof(ceiling.value.sector.value.@soundorg),
+              CDoom::Sfxenum::SFX_pstop)
           end
 
-            if ceiling.value.type == CDoom::Ceilingenum::CrushAndRaise || 
-              ceiling.value.type == CDoom::Ceilingenum::SilentCrushAndRaise
-          ceiling.value.speed = CDoom::CEILSPEED
-            end
+          if ceiling.value.type == CDoom::Ceilingenum::CrushAndRaise ||
+             ceiling.value.type == CDoom::Ceilingenum::SilentCrushAndRaise
+            ceiling.value.speed = CDoom::CEILSPEED
+          end
 
           ceiling.value.direction = 1
         when CDoom::Ceilingenum::LowerAndCrush, CDoom::Ceilingenum::LowerToFloor
@@ -2302,11 +2302,10 @@ module Doocr
     when CDoom::Ammotype::Shell
       if player.value.readyweapon == CDoom::Weapontype::Fist ||
          player.value.readyweapon == CDoom::Weapontype::Pistol
-         if CDoom.gamemode == CDoom::GameMode::Commercial &&
-          player.value.weaponowned[CDoom::Weapontype::Supershotgun.value] != 0
+        if CDoom.gamemode == CDoom::GameMode::Commercial &&
+           player.value.weaponowned[CDoom::Weapontype::Supershotgun.value] != 0
           player.value.pendingweapon = CDoom::Weapontype::Supershotgun
-
-         elsif player.value.weaponowned[CDoom::Weapontype::Shotgun.value] != 0
+        elsif player.value.weaponowned[CDoom::Weapontype::Shotgun.value] != 0
           player.value.pendingweapon = CDoom::Weapontype::Shotgun
         end
       end
