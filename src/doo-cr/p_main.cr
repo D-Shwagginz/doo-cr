@@ -2670,7 +2670,7 @@ module Doocr
     end
 
     if !target.value.player.null?
-      if source.null? || source.value.player.null? &&                         # Player was not killed by player
+      if (source.null? || source.value.player.null?) &&                         # Player was not killed by player
          target.value.player - CDoom.players.to_unsafe != CDoom.consoleplayer # Isn't self. They know they died
         (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message =
           @@died_strings.sample(Random.new(CDoom.m_random)).gsub(
@@ -7036,7 +7036,7 @@ module Doocr
       CDoom.lastanim.value.numpics = CDoom.lastanim.value.picnum - CDoom.lastanim.value.basepic + 1
 
       if CDoom.lastanim.value.numpics < 2
-        CDoom.i_error("Error: p_init_pic_anims: bad cycle from #{CDoom.animdefs[i].startname} to #{CDoom.animdefs[i].endname}")
+        CDoom.i_error("Error: p_init_pic_anims: bad cycle from #{String.new(CDoom.animdefs[i].startname)} to #{String.new(CDoom.animdefs[i].endname)}")
       end
 
       CDoom.lastanim.value.speed = CDoom.animdefs[i].speed

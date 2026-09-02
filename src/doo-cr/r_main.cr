@@ -735,19 +735,19 @@ module Doocr
       end
     end
 
-    lumps = [] of CDoom::Lumpinfo
-    lumps << CDoom::Lumpinfo.new
-    doom_strcpy(lumps.to_unsafe.value.name.to_unsafe, starts[0].to_unsafe)
+    lumps = [] of Array(CDoom::Lumpinfo)
     # Reverse so deleting doesn't mess with alignment
     sections.reverse.each do |section|
-      lumps.concat(@@lumpinfo[(section[0] + 1)...section[1]]) # Respect s_start/end lumps
+      lumps << @@lumpinfo[(section[0] + 1)...section[1]] # Respect s_start/end lumps
       @@lumpinfo.delete_at(section[0]..section[1])
     end
-    lumps << CDoom::Lumpinfo.new
-    doom_strcpy((lumps.to_unsafe + lumps.size - 1).value.name.to_unsafe, ends[0].to_unsafe)
 
     # Now all are in order, add back onto end with start and end lumps
-    @@lumpinfo.concat(lumps)
+    @@lumpinfo << CDoom::Lumpinfo.new
+    doom_strcpy((@@lumpinfo.to_unsafe + @@lumpinfo.size - 1).value.name.to_unsafe, starts[0].to_unsafe)
+    lumps.reverse.each { |section| @@lumpinfo.concat(section) }
+    @@lumpinfo << CDoom::Lumpinfo.new
+    doom_strcpy((@@lumpinfo.to_unsafe + @@lumpinfo.size - 1).value.name.to_unsafe, ends[0].to_unsafe)
   end
 
   #
