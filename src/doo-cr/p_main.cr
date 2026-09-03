@@ -1171,8 +1171,8 @@ module Doocr
   def self.a_bruis_attack(actor : CDoom::Mobj*)
     return if actor.value.target.null?
 
-    CDoom.a_face_target(actor)
     if CDoom.p_check_melee_range(actor) != 0
+      CDoom.s_start_sound(actor, CDoom::Sfxenum::SFX_claw.value)
       damage = (CDoom.p_random % 8 + 1) * 10
       CDoom.p_damage_mobj(actor.value.target, actor, actor, damage)
       return
