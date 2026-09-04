@@ -1436,6 +1436,7 @@ module Doocr
   end
 
   def self.a_fat_attack1(actor : CDoom::Mobj*)
+    return unless actor.value.target
     CDoom.a_face_target(actor)
     # Change direction  to ...
     actor.value.angle = actor.value.angle &+ CDoom::FATSPREAD
@@ -1449,6 +1450,7 @@ module Doocr
   end
 
   def self.a_fat_attack2(actor : CDoom::Mobj*)
+    return unless actor.value.target
     CDoom.a_face_target(actor)
     # Now here choose opposite deviation.
     actor.value.angle = actor.value.angle &- CDoom::FATSPREAD
@@ -1462,6 +1464,7 @@ module Doocr
   end
 
   def self.a_fat_attack3(actor : CDoom::Mobj*)
+    return unless actor.value.target
     CDoom.a_face_target(actor)
 
     mo = CDoom.p_spawn_missile(actor, actor.value.target, CDoom::Mobjtype::MT_FATSHOT)
