@@ -7682,7 +7682,7 @@ module Doocr
       case line.value.special
       when 48
         # EFFECT FIRSTCOL SCROLL +
-        (CDoom.sides + line.value.sidenum[0]).value.textureoffset = CDoom.sides[line.value.sidenum[0]].textureoffset + FRACUNIT
+        (CDoom.sides + line.value.sidenum[0]).value.textureoffset = CDoom.sides[line.value.sidenum[0]].textureoffset &+ FRACUNIT
       end
     end
 

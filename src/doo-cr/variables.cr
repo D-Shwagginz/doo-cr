@@ -368,7 +368,7 @@ module Doocr
     flashstate: CDoom::Statenum::S_NULL
   )
   CDoom.weaponinfo[8] = CDoom::Weaponinfo.new(
-    # fist
+    # Super Shotgun
     ammo: CDoom::Ammotype::Shell,
     upstate: CDoom::Statenum::S_DSGUNUP,
     downstate: CDoom::Statenum::S_DSGUNDOWN,
