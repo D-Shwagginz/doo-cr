@@ -905,8 +905,8 @@ module Doocr
     end
 
     # Precache sprites.
-    spritepresent = GC.malloc(CDoom.numsprites).as(UInt8*)
-    CDoom.doom_memset(spritepresent, 0, CDoom.numsprites)
+    spritepresent = GC.malloc(@@sprnames.size).as(UInt8*)
+    CDoom.doom_memset(spritepresent, 0, @@sprnames.size)
 
     th = CDoom.thinkercap.next
     while th != pointerof(CDoom.thinkercap)
@@ -918,7 +918,7 @@ module Doocr
     end
 
     CDoom.spritememory = 0
-    CDoom.numsprites.times do |i|
+    @@sprnames.size.times do |i|
       next if spritepresent[i] == 0
 
       CDoom.sprites[i].numframes.times do |j|
@@ -2700,19 +2700,10 @@ module Doocr
   #  letter/number appended.
   # The rotation character can be 0 to signify no rotations.
   #
-  def self.r_init_sprite_defs(namelist : LibC::Char**)
-    # count the number of sprite names
-    check = namelist
+  def self.r_init_sprite_defs(namelist : Array(String))
+    return if @@sprnames.size == 0
 
-    while !check.value.null?
-      check += 1
-    end
-
-    CDoom.numsprites = check - namelist
-
-    return if CDoom.numsprites == 0
-
-    CDoom.sprites = CDoom.z_malloc(CDoom.numsprites * sizeof(CDoom::Spritedef), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Spritedef*)
+    CDoom.sprites = CDoom.z_malloc(@@sprnames.size * sizeof(CDoom::Spritedef), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Spritedef*)
 
     start = CDoom.firstspritelump - 1
     endl = CDoom.lastspritelump + 1
@@ -2720,11 +2711,11 @@ module Doocr
     # scan all the lump names for each of the names,
     #  noting the highest frame letter.
     # Just compare 4 characters as ints
-    CDoom.numsprites.times do |i|
+    @@sprnames.size.times do |i|
       CDoom.spritename = namelist[i]
       CDoom.doom_memset(CDoom.sprtemp, -1, sizeof(typeof(CDoom.sprtemp)))
       CDoom.maxframe = -1
-      intname = namelist[i].as(Int32*).value
+      intname = namelist[i].to_unsafe.as(Int32*).value
 
       # scan the lumps,
       #  filling in the frames for whatever is found
@@ -2763,14 +2754,14 @@ module Doocr
       CDoom.maxframe.times do |frame|
         case CDoom.sprtemp[frame].rotate
         when -1
-          CDoom.i_error("Error: r_init_sprite_defs: No patches found for #{String.new(namelist[i])} frame #{'A' + frame}")
+          CDoom.i_error("Error: r_init_sprite_defs: No patches found for #{namelist[i]} frame #{'A' + frame}")
         when 0
           # only the first rotation is needed
         when 1
           # must have all 8 frames
           8.times do |rotation|
             if CDoom.sprtemp[frame].lump[rotation] == -1
-              CDoom.i_error("Error: r_init_sprite_defs: Sprite #{String.new(namelist[i])} frame #{'A' + frame} is missing rotations")
+              CDoom.i_error("Error: r_init_sprite_defs: Sprite #{namelist[i]} frame #{'A' + frame} is missing rotations")
             end
           end
         end
@@ -2791,9 +2782,9 @@ module Doocr
   #
   # Called at program start.
   #
-  def self.r_init_sprites(namelist : LibC::Char**)
+  def self.r_init_sprites(namelist : Array(String))
     CDoom::SCREENWIDTH.times { |i| CDoom.negonearray[i] = -1 }
-    CDoom.r_init_sprite_defs(namelist)
+    r_init_sprite_defs(namelist)
   end
 
   #
@@ -2911,7 +2902,7 @@ module Doocr
 
     # decide which patch to use for sprite relative to player
     {% if flag?("RANGECHECK") %}
-      if thing.value.sprite.to_u32! >= CDoom.numsprites.to_u32!
+      if thing.value.sprite.to_u32! >= @@sprnames.size.to_u32!
         CDoom.i_error("Error: r_project_sprite: invalid sprite number #{thing.value.sprite.value} ")
       end
     {% end %}
@@ -3030,7 +3021,7 @@ module Doocr
 
     # decide which patch to use
     {% if flag?("RANGECHECK") %}
-      if psp.value.state.value.sprite.value >= CDoom.numsprites
+      if psp.value.state.value.sprite.value >= @@sprnames.size
         CDoom.i_error("Error: r_draw_psprite: invalid sprite number #{psp.value.state.value.sprite.value} ")
       end
     {% end %}

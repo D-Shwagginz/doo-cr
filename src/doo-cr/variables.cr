@@ -135,6 +135,9 @@ module Doocr
 
   @@headless : Bool = false
 
+  @@current_thinking_player : Pointer(CDoom::Player) = Pointer(CDoom::Player).null
+  @@current_thinking_mobj : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+
   @@software_screen = Bytes.new(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
 
   @@loading_patch : CDoom::Patch* = Pointer(CDoom::Patch).null
@@ -1063,24 +1066,20 @@ module Doocr
 
   CDoom.mb_used = 12
 
-  @@sprnames = ["TROO".to_unsafe, "SHTG".to_unsafe, "PUNG".to_unsafe, "PISG".to_unsafe, "PISF".to_unsafe, "SHTF".to_unsafe, "SHT2".to_unsafe, "CHGG".to_unsafe, "CHGF".to_unsafe, "MISG".to_unsafe,
-                "MISF".to_unsafe, "SAWG".to_unsafe, "PLSG".to_unsafe, "PLSF".to_unsafe, "BFGG".to_unsafe, "BFGF".to_unsafe, "BLUD".to_unsafe, "PUFF".to_unsafe, "BAL1".to_unsafe, "BAL2".to_unsafe,
-                "PLSS".to_unsafe, "PLSE".to_unsafe, "MISL".to_unsafe, "BFS1".to_unsafe, "BFE1".to_unsafe, "BFE2".to_unsafe, "TFOG".to_unsafe, "IFOG".to_unsafe, "PLAY".to_unsafe, "POSS".to_unsafe,
-                "SPOS".to_unsafe, "VILE".to_unsafe, "FIRE".to_unsafe, "FATB".to_unsafe, "FBXP".to_unsafe, "SKEL".to_unsafe, "MANF".to_unsafe, "FATT".to_unsafe, "CPOS".to_unsafe, "SARG".to_unsafe,
-                "HEAD".to_unsafe, "BAL7".to_unsafe, "BOSS".to_unsafe, "BOS2".to_unsafe, "SKUL".to_unsafe, "SPID".to_unsafe, "BSPI".to_unsafe, "APLS".to_unsafe, "APBX".to_unsafe, "CYBR".to_unsafe,
-                "PAIN".to_unsafe, "SSWV".to_unsafe, "KEEN".to_unsafe, "BBRN".to_unsafe, "BOSF".to_unsafe, "ARM1".to_unsafe, "ARM2".to_unsafe, "BAR1".to_unsafe, "BEXP".to_unsafe, "FCAN".to_unsafe,
-                "BON1".to_unsafe, "BON2".to_unsafe, "BKEY".to_unsafe, "RKEY".to_unsafe, "YKEY".to_unsafe, "BSKU".to_unsafe, "RSKU".to_unsafe, "YSKU".to_unsafe, "STIM".to_unsafe, "MEDI".to_unsafe,
-                "SOUL".to_unsafe, "PINV".to_unsafe, "PSTR".to_unsafe, "PINS".to_unsafe, "MEGA".to_unsafe, "SUIT".to_unsafe, "PMAP".to_unsafe, "PVIS".to_unsafe, "CLIP".to_unsafe, "AMMO".to_unsafe,
-                "ROCK".to_unsafe, "BROK".to_unsafe, "CELL".to_unsafe, "CELP".to_unsafe, "SHEL".to_unsafe, "SBOX".to_unsafe, "BPAK".to_unsafe, "BFUG".to_unsafe, "MGUN".to_unsafe, "CSAW".to_unsafe,
-                "LAUN".to_unsafe, "PLAS".to_unsafe, "SHOT".to_unsafe, "SGN2".to_unsafe, "COLU".to_unsafe, "SMT2".to_unsafe, "GOR1".to_unsafe, "POL2".to_unsafe, "POL5".to_unsafe, "POL4".to_unsafe,
-                "POL3".to_unsafe, "POL1".to_unsafe, "POL6".to_unsafe, "GOR2".to_unsafe, "GOR3".to_unsafe, "GOR4".to_unsafe, "GOR5".to_unsafe, "SMIT".to_unsafe, "COL1".to_unsafe, "COL2".to_unsafe,
-                "COL3".to_unsafe, "COL4".to_unsafe, "CAND".to_unsafe, "CBRA".to_unsafe, "COL6".to_unsafe, "TRE1".to_unsafe, "TRE2".to_unsafe, "ELEC".to_unsafe, "CEYE".to_unsafe, "FSKU".to_unsafe,
-                "COL5".to_unsafe, "TBLU".to_unsafe, "TGRN".to_unsafe, "TRED".to_unsafe, "SMBT".to_unsafe, "SMGT".to_unsafe, "SMRT".to_unsafe, "HDB1".to_unsafe, "HDB2".to_unsafe, "HDB3".to_unsafe,
-                "HDB4".to_unsafe, "HDB5".to_unsafe, "HDB6".to_unsafe, "POB1".to_unsafe, "POB2".to_unsafe, "BRS1".to_unsafe, "TLMP".to_unsafe, "TLP2".to_unsafe, "\0".to_unsafe]
-
-  CDoom.sprnames = @@sprnames.to_unsafe
-
-  MINSTATES = 4000
+  class_getter sprnames = ["TROO", "SHTG", "PUNG", "PISG", "PISF", "SHTF", "SHT2", "CHGG", "CHGF", "MISG",
+                           "MISF", "SAWG", "PLSG", "PLSF", "BFGG", "BFGF", "BLUD", "PUFF", "BAL1", "BAL2",
+                           "PLSS", "PLSE", "MISL", "BFS1", "BFE1", "BFE2", "TFOG", "IFOG", "PLAY", "POSS",
+                           "SPOS", "VILE", "FIRE", "FATB", "FBXP", "SKEL", "MANF", "FATT", "CPOS", "SARG",
+                           "HEAD", "BAL7", "BOSS", "BOS2", "SKUL", "SPID", "BSPI", "APLS", "APBX", "CYBR",
+                           "PAIN", "SSWV", "KEEN", "BBRN", "BOSF", "ARM1", "ARM2", "BAR1", "BEXP", "FCAN",
+                           "BON1", "BON2", "BKEY", "RKEY", "YKEY", "BSKU", "RSKU", "YSKU", "STIM", "MEDI",
+                           "SOUL", "PINV", "PSTR", "PINS", "MEGA", "SUIT", "PMAP", "PVIS", "CLIP", "AMMO",
+                           "ROCK", "BROK", "CELL", "CELP", "SHEL", "SBOX", "BPAK", "BFUG", "MGUN", "CSAW",
+                           "LAUN", "PLAS", "SHOT", "SGN2", "COLU", "SMT2", "GOR1", "POL2", "POL5", "POL4",
+                           "POL3", "POL1", "POL6", "GOR2", "GOR3", "GOR4", "GOR5", "SMIT", "COL1", "COL2",
+                           "COL3", "COL4", "CAND", "CBRA", "COL6", "TRE1", "TRE2", "ELEC", "CEYE", "FSKU",
+                           "COL5", "TBLU", "TGRN", "TRED", "SMBT", "SMGT", "SMRT", "HDB1", "HDB2", "HDB3",
+                           "HDB4", "HDB5", "HDB6", "POB1", "POB2", "BRS1", "TLMP", "TLP2"]
 
   @@statedata : Array(Tuple(CDoom::Spritenum, Int32, Int32, Void*, CDoom::Statenum, Int32, Int32)) = [
     {CDoom::Spritenum::SPR_TROO, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_NULL
@@ -2051,7 +2050,7 @@ module Doocr
     {CDoom::Spritenum::SPR_TLP2, 32770, 4, Pointer(Void).null, CDoom::Statenum::S_TECH2LAMP4, 0, 0},               # S_TECH2LAMP3
     {CDoom::Spritenum::SPR_TLP2, 32771, 4, Pointer(Void).null, CDoom::Statenum::S_TECH2LAMP, 0, 0},                # S_TECH2LAMP4
   ]
-  @@states : Array(CDoom::State) = Array.new(CDoom::Statenum::NUMSTATES.value, CDoom::State.new)
+  class_getter states : Array(CDoom::State) = Array.new(CDoom::Statenum::NUMSTATES.value, CDoom::State.new)
   @@statedata.each_with_index do |elm, i|
     (@@states.to_unsafe + i).value.sprite = elm[0]
     (@@states.to_unsafe + i).value.frame = elm[1]
@@ -2061,12 +2060,6 @@ module Doocr
     (@@states.to_unsafe + i).value.misc1 = elm[5]
     (@@states.to_unsafe + i).value.misc2 = elm[6]
   end
-
-  while @@states.size < MINSTATES
-    i = @@states.size
-    @@states << CDoom::State.new(sprite: CDoom::Spritenum::SPR_TNT, tics: -1, nextstate: CDoom::Statenum.new(i))
-  end
-  CDoom.states = @@states.to_unsafe
 
   @@mobjinfo_data : Array(Tuple(
     LibC::Int,
@@ -6330,7 +6323,7 @@ module Doocr
   CDoom.cheat_mypos.p = Pointer(UInt8).null
 
   {% if flag?("PRECOMPUTED") %}
-    @@finetangent = [
+    class_getter finetangent = [
       -170910304, -56965752, -34178904, -24413316, -18988036, -15535599, -13145455, -11392683,
       -10052327, -8994149, -8137527, -7429880, -6835455, -6329090, -5892567, -5512368,
       -5178251, -4882318, -4618375, -4381502, -4167737, -3973855, -3797206, -3635590,
@@ -6844,7 +6837,7 @@ module Doocr
       5512368, 5892567, 6329090, 6835455, 7429880, 8137527, 8994149, 10052327,
       11392683, 13145455, 15535599, 18988036, 24413316, 34178904, 56965752, 170910304,
     ]
-    @@finesine = [
+    class_getter finesine = [
       25, 75, 125, 175, 226, 276, 326, 376,
       427, 477, 527, 578, 628, 678, 728, 779,
       829, 879, 929, 980, 1030, 1080, 1130, 1181,
@@ -8126,7 +8119,7 @@ module Doocr
       65531, 65531, 65532, 65532, 65533, 65533, 65534, 65534,
       65534, 65535, 65535, 65535, 65535, 65535, 65535, 65535,
     ]
-    @@tantoangle : Array(UInt32) = [
+    class_getter tantoangle : Array(UInt32) = [
       0_u32, 333772_u32, 667544_u32, 1001315_u32, 1335086_u32, 1668857_u32, 2002626_u32, 2336395_u32,
       2670163_u32, 3003929_u32, 3337694_u32, 3671457_u32, 4005219_u32, 4338979_u32, 4672736_u32, 5006492_u32,
       5340245_u32, 5673995_u32, 6007743_u32, 6341488_u32, 6675230_u32, 7008968_u32, 7342704_u32, 7676435_u32,
@@ -8386,11 +8379,11 @@ module Doocr
       536870912_u32,
     ]
   {% else %}
-    @@finetangent = [] of CDoom::Fixed
-    @@finesine = [] of CDoom::Fixed
-    @@tantoangle : Array(UInt32) = [] of UInt32
+    class_getter finetangent = [] of CDoom::Fixed
+    class_getter finesine = [] of CDoom::Fixed
+    class_getter tantoangle : Array(UInt32) = [] of UInt32
   {% end %}
-  @@finecosine : Array(CDoom::Fixed) = [] of CDoom::Fixed
+  class_getter finecosine : Array(CDoom::Fixed) = [] of CDoom::Fixed
 
   # Now where did these came from?
   c_array((CDoom.gammatable.to_unsafe).value,

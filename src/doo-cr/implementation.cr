@@ -2301,14 +2301,6 @@ fun r_install_sprite_lump = R_InstallSpriteLump(lump : LibC::Int, frame : LibC::
   Doocr.r_install_sprite_lump(lump, frame, rotation, flipped)
 end
 
-fun r_init_sprite_defs = R_InitSpriteDefs(namelist : LibC::Char**)
-  Doocr.r_init_sprite_defs(namelist)
-end
-
-fun r_init_sprites = R_InitSprites(namelist : LibC::Char**)
-  Doocr.r_init_sprites(namelist)
-end
-
 fun r_clear_sprites = R_ClearSprites
   Doocr.r_clear_sprites
 end

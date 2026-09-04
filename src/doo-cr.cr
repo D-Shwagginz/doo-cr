@@ -216,8 +216,5 @@ at_exit do
   end
 end
 
-Doocr.make_mod do |mod|
-end
-
 # Make it happen!
 Doocr.doom_init

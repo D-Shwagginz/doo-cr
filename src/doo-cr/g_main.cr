@@ -1028,7 +1028,7 @@ module Doocr
     if CDoom.fastparm != 0 || (skill == CDoom::Skill::Nightmare && CDoom.gameskill != CDoom::Skill::Nightmare)
       i = CDoom::Statenum::S_SARG_RUN1.value
       while i <= CDoom::Statenum::S_SARG_PAIN2.value
-        (CDoom.states + i).value.tics = CDoom.states[i].tics >> 1
+        (@@states.to_unsafe + i).value.tics = @@states[i].tics >> 1
         i += 1
       end
       (CDoom.mobjinfo + CDoom::Mobjtype::MT_BRUISERSHOT.value).value.speed = 20 * FRACUNIT
@@ -1037,7 +1037,7 @@ module Doocr
     elsif skill != CDoom::Skill::Nightmare && CDoom.gameskill == CDoom::Skill::Nightmare
       i = CDoom::Statenum::S_SARG_RUN1.value
       while i <= CDoom::Statenum::S_SARG_PAIN2.value
-        (CDoom.states + i).value.tics = CDoom.states[i].tics << 1
+        (@@states.to_unsafe + i).value.tics = @@states[i].tics << 1
         i += 1
       end
       (CDoom.mobjinfo + CDoom::Mobjtype::MT_BRUISERSHOT.value).value.speed = 15 * FRACUNIT

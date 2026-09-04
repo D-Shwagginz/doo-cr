@@ -2875,7 +2875,7 @@ module Doocr
       # chase after this one
       target.value.target = source
       target.value.threshold = CDoom::BASETHRESHOLD
-      if target.value.state == CDoom.states + target.value.info.value.spawnstate &&
+      if target.value.state == @@states.to_unsafe + target.value.info.value.spawnstate &&
          target.value.info.value.seestate != CDoom::Statenum::S_NULL.value
         CDoom.p_set_mobj_state(target, CDoom::Statenum.new(target.value.info.value.seestate))
       end
@@ -4534,7 +4534,7 @@ module Doocr
         return 0
       end
 
-      st = CDoom.states + state.value
+      st = @@states.to_unsafe + state.value
       mobj.value.state = st
       mobj.value.tics = st.value.tics
       mobj.value.sprite = st.value.sprite
@@ -4672,7 +4672,7 @@ module Doocr
          player.value.cmd.sidemove == 0
        ))
       # if in a walking frame, stop moving
-      if !player.null? && ((player.value.mo.value.state - CDoom.states) - CDoom::Statenum::S_PLAY_RUN1.value).to_u32! < 4
+      if !player.null? && ((player.value.mo.value.state - @@states.to_unsafe) - CDoom::Statenum::S_PLAY_RUN1.value).to_u32! < 4
         CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY)
       end
 
@@ -4819,6 +4819,7 @@ module Doocr
 
   def self.p_mobj_thinker(mobj : CDoom::Mobj*)
     mobj = mobj.as(CDoom::Mobj*)
+    @@current_thinking_mobj = mobj
     # momentum movement
     if mobj.value.momx != 0 ||
        mobj.value.momy != 0 ||
@@ -4883,7 +4884,7 @@ module Doocr
     mobj.value.lastlook = CDoom.p_random % CDoom::MAXPLAYERS
     # do not set the state with p_set_mobj_state,
     # because action routines can not be called yet
-    st = CDoom.states + info.value.spawnstate
+    st = @@states.to_unsafe + info.value.spawnstate
 
     mobj.value.state = st
     mobj.value.tics = st.value.tics
@@ -5451,7 +5452,7 @@ module Doocr
         break
       end
 
-      state = CDoom.states + stnum.value
+      state = @@states.to_unsafe + stnum.value
       psp.value.state = state
       psp.value.tics = state.value.tics # could be 0
 
@@ -5590,13 +5591,13 @@ module Doocr
   #
   def self.a_weapon_ready(player : CDoom::Player*, psp : CDoom::Pspdef*)
     # get out of attack state
-    if player.value.mo.value.state == CDoom.states + CDoom::Statenum::S_PLAY_ATK1.value ||
-       player.value.mo.value.state == CDoom.states + CDoom::Statenum::S_PLAY_ATK2.value
+    if player.value.mo.value.state == @@states.to_unsafe + CDoom::Statenum::S_PLAY_ATK1.value ||
+       player.value.mo.value.state == @@states.to_unsafe + CDoom::Statenum::S_PLAY_ATK2.value
       CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY)
     end
 
     if player.value.readyweapon == CDoom::Weapontype::Chainsaw &&
-       psp.value.state == CDoom.states + CDoom::Statenum::S_SAW.value
+       psp.value.state == @@states.to_unsafe + CDoom::Statenum::S_SAW.value
       CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_sawidl.value)
     end
 
@@ -5882,7 +5883,7 @@ module Doocr
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Flash,
       CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate +
-                          (psp.value.state - (CDoom.states + CDoom::Statenum::S_CHAIN1.value)).to_i32!))
+                          (psp.value.state - (@@states.to_unsafe + CDoom::Statenum::S_CHAIN1.value)).to_i32!))
 
     CDoom.p_bullet_slope(player.value.mo)
 
@@ -5978,7 +5979,7 @@ module Doocr
       CDoom::Psprnum::NUMPSPRITES.value.times do |j|
         if !player.psprites[j].state.null?
           (player.psprites.to_unsafe + j).value.state =
-            Pointer(CDoom::State).new((player.psprites[j].state - CDoom.states).to_u64!)
+            Pointer(CDoom::State).new((player.psprites[j].state - @@states.to_unsafe).to_u64!)
         end
       end
       file.write(pointerof(player).as(UInt8*).to_slice(sizeof(CDoom::Player)))
@@ -6000,7 +6001,7 @@ module Doocr
       CDoom::Psprnum::NUMPSPRITES.value.times do |j|
         if !CDoom.players[i].psprites[j].state.null?
           ((CDoom.players.to_unsafe + i).value.psprites.to_unsafe + j).value.state =
-            CDoom.states + CDoom.players[i].psprites[j].state.address
+            @@states.to_unsafe + CDoom.players[i].psprites[j].state.address
         end
       end
     end
@@ -6086,7 +6087,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.p_mobj_thinker).pointer
         file.write_byte(CDoom::Thinkerclass::Mobj.value)
         mobj = th.as(CDoom::Mobj*).value
-        mobj.state = Pointer(CDoom::State).new((mobj.state - CDoom.states).to_u64!)
+        mobj.state = Pointer(CDoom::State).new((mobj.state - @@states.to_unsafe).to_u64!)
 
         mobj.player = Pointer(CDoom::Player).new(((mobj.player - CDoom.players.to_unsafe) + 1).to_u64!) if !mobj.player.null?
 
@@ -6125,7 +6126,7 @@ module Doocr
         mobj = CDoom.z_malloc(sizeof(CDoom::Mobj), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Mobj*)
         mjslice = Slice.new(mobj.as(UInt8*), sizeof(CDoom::Mobj))
         file.read_fully(mjslice)
-        mobj.value.state = CDoom.states + mobj.value.state.address
+        mobj.value.state = @@states.to_unsafe + mobj.value.state.address
         mobj.value.target = Pointer(CDoom::Mobj).null
         if !mobj.value.player.null?
           mobj.value.player = CDoom.players.to_unsafe + (mobj.value.player.address - 1)
@@ -6795,7 +6796,7 @@ module Doocr
   def self.p_init
     CDoom.p_init_switch_list
     CDoom.p_init_pic_anims
-    CDoom.r_init_sprites(CDoom.sprnames)
+    r_init_sprites(@@sprnames)
   end
 
   #
@@ -8398,7 +8399,13 @@ module Doocr
        CDoom.players[CDoom.consoleplayer].viewz != 1
       return
     end
-    CDoom::MAXPLAYERS.times { |i| CDoom.p_player_think(CDoom.players.to_unsafe + i) if CDoom.playeringame[i] != 0 }
+    CDoom::MAXPLAYERS.times do |i|
+      if CDoom.playeringame[i] != 0
+        @@current_thinking_player = CDoom.players.to_unsafe + i
+        CDoom.p_player_think(@@current_thinking_player)
+      end
+    end
+    @@current_thinking_player = Pointer(CDoom::Player).null
 
     CDoom.p_run_thinkers
     CDoom.p_update_specials
@@ -8495,7 +8502,7 @@ module Doocr
     CDoom.p_thrust(player, player.value.mo.value.angle &- ANG90, cmd.value.sidemove.to_i32 * 2048) if cmd.value.sidemove != 0 && CDoom.onground != 0
 
     if (cmd.value.forwardmove != 0 || cmd.value.sidemove != 0) &&
-       player.value.mo.value.state == CDoom.states + CDoom::Statenum::S_PLAY.value
+       player.value.mo.value.state == @@states.to_unsafe + CDoom::Statenum::S_PLAY.value
       CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_RUN1)
     end
   end

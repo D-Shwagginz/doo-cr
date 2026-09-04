@@ -851,6 +851,8 @@ module Doocr
 
     sync_deh_strings
 
+    Mod.parse
+
     confirm_version()
 
     case CDoom.gamemode

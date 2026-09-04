@@ -1196,11 +1196,11 @@ module Doocr
     end
 
     @@sprnames.each_with_index do |n, i|
-      if String.new(n) == old[0]
+      if n == old[0]
         if new[0]?
-          @@sprnames[i] = new[0].to_unsafe
+          @@sprnames[i] = new[0]
         else
-          @@sprnames[i] = "\0".to_unsafe
+          @@sprnames[i] = ""
         end
       end
     end
@@ -1258,7 +1258,12 @@ module Doocr
     frame = parts[0].to_i?(strict: false)
     return unless frame # reject unparsable frame numbers instead of defaulting to 0
 
-    return if frame < 0 || frame >= @@states.size
+    return if frame < 0
+
+    while frame >= @@states.size
+      i = @@states.size
+      @@states << CDoom::State.new(sprite: CDoom::Spritenum::SPR_TNT, tics: -1, nextstate: CDoom::Statenum.new(i))
+    end
 
     name = parts[1]
 

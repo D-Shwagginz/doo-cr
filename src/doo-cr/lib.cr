@@ -1068,6 +1068,7 @@ lib CDoom
   # __INFO__
 
   enum Spritenum
+    SPR_TNT    = -1
     SPR_TROO
     SPR_SHTG
     SPR_PUNG
@@ -1207,8 +1208,6 @@ lib CDoom
     SPR_TLMP
     SPR_TLP2
     NUMSPRITES
-
-    SPR_TNT = 138
   end
 
   enum Statenum
@@ -2191,10 +2190,6 @@ lib CDoom
     misc1 : LibC::LongLong
     misc2 : LibC::LongLong
   end
-
-  $states : State*
-  NUMSPRITES_PLUS_1 = Spritenum::NUMSPRITES + 1 # Weird Crystal moment
-  $sprnames : LibC::Char**
 
   enum Mobjtype
     MT_PLAYER
@@ -4622,7 +4617,6 @@ lib CDoom
   #
   # Lookup tables for map data.
   #
-  $numsprites : LibC::Int
   $sprites : Spritedef*
 
   $numvertexes : LibC::Int
@@ -4825,7 +4819,6 @@ lib CDoom
   fun r_draw_masked_column = R_DrawMaskedColumn(column : Column*)
   fun r_sort_vis_sprites = R_SortVisSprites
   fun r_add_sprites = R_AddSprites(sec : Sector*)
-  fun r_init_sprites = R_InitSprites(namelist : LibC::Char**)
   fun r_clear_sprites = R_ClearSprites
   fun r_draw_masked = R_DrawMasked
 
@@ -6186,9 +6179,6 @@ lib CDoom
 
   fun i_get_heap_size = I_GetHeapSize : LibC::Int
 
-  SPRNAMES_SIZE = Spritenum::NUMSPRITES + 1
-  $sprnames : LibC::Char**
-
   fun a_light0 = A_Light0(player : Player*, psp : Pspdef*)
   fun a_weapon_ready = A_WeaponReady(player : Player*, psp : Pspdef*)
   fun a_lower = A_Lower(player : Player*, psp : Pspdef*)
@@ -6988,7 +6978,6 @@ lib CDoom
   $newvissprite : LibC::Int
 
   fun r_install_sprite_lump = R_InstallSpriteLump(lump : LibC::Int, frame : LibC::UInt, rotation : LibC::UInt, flipped : DoomBool)
-  fun r_init_sprite_defs = R_InitSpriteDefs(namelist : LibC::Char**)
 
   $overflowsprite : Vissprite
 
