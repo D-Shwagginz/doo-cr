@@ -62,12 +62,18 @@ module Doocr
       src = Bytes.new(src_len)
       src.copy_from(sfx + 8 + 16, src_len)
       size = 8 + 16 + out_len + 16
+      last = 0_u8
       out_len.times do |i|
         avg = 0
         resample_div.times do |res|
           avg += src[i * resample_div + res].to_u16!
         end
         sfx[i + 8 + 16] = (avg // resample_div).to_u8!
+        last = (avg // resample_div).to_u8!
+      end
+      # pad bytes
+      16.times do |pad|
+        sfx[size - 16 + pad] = last
       end
     end
 
