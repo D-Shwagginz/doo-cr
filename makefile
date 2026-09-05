@@ -31,7 +31,7 @@ ifeq ($(DETECTED_OS),Windows)
 	RLOUT := libraylib.dll
 	AMOUT := libADLMIDI.dll
 	CHANGE_LIB_NAMES := 
-	CRYSTAL_LIBS := libiconv-2.dll libgc-1.dll libwinpthread-1.dll libpcre2-8-0.dll
+	CRYSTAL_LIBS := libiconv-2.dll libgc-1.dll libwinpthread-1.dll libpcre2-8-0.dll libpcre-2-8-0.dll
 else ifeq ($(DETECTED_OS),Linux)
 	LIB_EXT := so
 	RLMAKE := make -Bj4 SHARED_RAYLIB=YES PLATFORM=PLATFORM_DESKTOP
@@ -73,7 +73,7 @@ clean:
 define COPY_LIB
 $(OUTDIR)/$(1): $(CRYSTAL_LIBRARY_PATH)/$(2)
 	test -d $(OUTDIR) || mkdir $(OUTDIR)
-	cp -f "$(CRYSTAL_LIBRARY_PATH)/$(1)" "$(OUTDIR)/$(1)"
+	-cp -f "$(CRYSTAL_LIBRARY_PATH)/$(1)" "$(OUTDIR)/$(1)"
 endef
 
 $(foreach lib,$(CRYSTAL_LIBS),$(eval $(call COPY_LIB,$(lib)))) 
