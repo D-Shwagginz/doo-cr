@@ -58,9 +58,18 @@ module Doocr
   module Mod
     @@weapons = [] of Weapon
     class_getter lines = [] of Line
+    class_getter sectors = [] of Sector
+
+    class_property name = ""
+    class_getter wad_names = [] of String
 
     protected def self.parse
       @@weapons.each &.parse
+    end
+
+    # Adds a wad to check for auto loading
+    def self.check_wad(wad : String)
+      @@wad_names << wad
     end
 
     # Adds a weapon into the mod at the given slot.
@@ -80,6 +89,15 @@ module Doocr
       @@lines << line
     end
 
+    # Adds a custom sector tag into the mod given its doombuilder name,
+    # when it will happen, and the block that will be performed when this occurs.
+    #
+    # The blocks parms are the line that the tag happened on, the side it happened, and the thing that triggered it
+    def self.add_sector(db_name : String, &action : Proc(CDoom::Sector*, CDoom::Player*, Nil))
+      sector = Sector.new(db_name, action)
+      @@sectors << sector
+    end
+
     # Gets the current player that the state is being called from.
     #  Can be null if the state isn't being called from a player (a mobj state)
     def self.get_player : CDoom::Player*
@@ -92,14 +110,21 @@ module Doocr
       Doocr.current_thinking_mobj
     end
 
+    class_getter update_player_action : Proc(CDoom::Player*, Nil) = ->(player : CDoom::Player*) { nil }
+
+    # Sets what will happen when a player is updated
+    def self.update_player(&action : CDoom::Player* -> Nil)
+      @@update_player_action = action
+    end
+
     class_getter player_vars = [] of Hash(String, String | Int32 | Bool)
 
     # Gets a variable assigned to a player number
     def self.player_var(player : CDoom::Player*)
-      puts player - Doocr.players
       @@player_vars[player - Doocr.players]
     end
 
+    # Creates a player var with a default value
     def self.make_player_var(var : String, value : String | Int32 | Bool)
       @@player_vars.each { |hash| hash[var] = value }
     end

@@ -217,7 +217,16 @@ at_exit do
 end
 
 Doocr.make_mod do |mod|
+  mod.name = "Bonk Doom"
+  mod.check_wad "bonk"
   mod.make_player_var "can_dash?", false
+
+  mod.update_player do |player|
+    mo = player.value.mo
+    if mo.value.z == mo.value.floorz
+      mod.player_var(player)["can_dash?"] = true
+    end
+  end
 
   mod.add_weapon Doocr::Mod::Weapon::WeaponSlot::Fist do |weapon|
     weapon.ammo_type = Doocr::Mod::Weapon::AmmoType::Noammo
@@ -239,8 +248,7 @@ Doocr.make_mod do |mod|
         if mo.value.z == mo.value.floorz
           Doocr.s_start_sound(mo.as(Void*), CDoom::Sfxenum::SFX_metal.value)
           mo.value.momz = Doocr::FRACUNIT * 20
-          mod.player_var(player)["can_dash?"] = true
-          elsif mod.player_var(player)["can_dash?"]
+        elsif mod.player_var(player)["can_dash?"]
           Doocr.s_start_sound(mo.as(Void*), CDoom::Sfxenum::SFX_stnmov.value)
           mo.value.momx = 0
           mo.value.momy = 0
@@ -254,6 +262,39 @@ Doocr.make_mod do |mod|
       atk.add "PUNG", 'B', 3
       atk.goto ready
     end
+  end
+
+  mod.add_line "Air launch", Doocr::Mod::Line::When::Crossed do |line, side, thing|
+    if thing.value.z == thing.value.floorz
+      Doocr.s_start_sound(thing.as(Void*), CDoom::Sfxenum::SFX_rlaunc.value)
+      thing.value.momz = Doocr::FRACUNIT * 30
+    end
+  end
+
+  mod.add_sector "Insta kill" do |sector, player|
+    mo = player.value.mo
+    if mo.value.z < sector.value.floorheight + Doocr::FRACUNIT * 200
+      Doocr.p_damage_mobj(player.value.mo, Pointer(CDoom::Mobj).null, Pointer(CDoom::Mobj).null, 10000)
+    end
+  end
+
+  mod.add_line "Switch change floor and move sector up amount", Doocr::Mod::Line::When::Used do |line, side, thing|
+    Doocr.p_change_switch_texture(line, 0)
+
+    sector = Doocr.p_find_sector_from_line_tag(line, -1)
+    sector = CDoom.sectors + sector
+    floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
+    CDoom.p_add_thinker(pointerof(floor.value.@thinker))
+    sector.value.specialdata = floor
+    sector.value.special = 0
+    sector.value.floorpic = Doocr.r_flat_num_for_name("FLAT1".to_unsafe)
+    pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+    floor.value.type = CDoom::Floorenum::RaiseFloor
+    floor.value.crush = 0
+    floor.value.direction = 1
+    floor.value.sector = sector
+    floor.value.speed = CDoom::FLOORSPEED * 20
+    floor.value.floordestheight = Doocr::FRACUNIT * 350
   end
 end
 

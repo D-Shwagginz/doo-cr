@@ -570,6 +570,18 @@ module Doocr
       return
     end
 
+    added = false
+    Mod.wad_names.each do |wad|
+      wad = wad.downcase
+      wad += ".wad" unless wad.ends_with?(".wad")
+      if File.exists?(wad)
+        CDoom.d_add_file(wad)
+        added = true
+      end
+    end
+
+    return if added
+
     puts "Game mode indeterminate."
     CDoom.gamemode = CDoom::GameMode::Indetermined
   end
@@ -858,24 +870,28 @@ module Doocr
 
     confirm_version()
 
-    case CDoom.gamemode
-    when CDoom::GameMode::Retail
-      @@title = "The Ultimate DOOM Startup"
-    when CDoom::GameMode::Shareware
-      @@title = "DOOM Shareware Startup"
-    when CDoom::GameMode::Registered
-      @@title = "DOOM Registered Startup"
-    when CDoom::GameMode::Commercial
-      case CDoom.gamemission
-      when CDoom::GameMission::PackPlut
-        @@title = "Final Doom: The Plutonia Experiment"
-      when CDoom::GameMission::PackTnt
-        @@title = "Final Doom: TNT: Evilution"
-      else
-        @@title = "DOOM 2: Hell on Earth"
-      end
+    if Mod.name != ""
+      @@title = Mod.name
     else
-      @@title = "Public DOOM"
+      case CDoom.gamemode
+      when CDoom::GameMode::Retail
+        @@title = "The Ultimate DOOM Startup"
+      when CDoom::GameMode::Shareware
+        @@title = "DOOM Shareware Startup"
+      when CDoom::GameMode::Registered
+        @@title = "DOOM Registered Startup"
+      when CDoom::GameMode::Commercial
+        case CDoom.gamemission
+        when CDoom::GameMission::PackPlut
+          @@title = "Final Doom: The Plutonia Experiment"
+        when CDoom::GameMission::PackTnt
+          @@title = "Final Doom: TNT: Evilution"
+        else
+          @@title = "DOOM 2: Hell on Earth"
+        end
+      else
+        @@title = "Public DOOM"
+      end
     end
 
     puts @@title.center(77)

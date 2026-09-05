@@ -4730,6 +4730,7 @@ module Doocr
 
       if mo.value.momz < 0
         if !mo.value.player.null? &&
+           mo.value.player.value.health > 0 &&
            mo.value.momz < -CDoom::GRAVITY * 8
           # Squat down.
           # Decrease viewheight for a moment
@@ -7625,6 +7626,12 @@ module Doocr
   def self.p_player_in_special_sector(player : CDoom::Player*)
     sector = player.value.mo.value.subsector.value.sector
 
+    Mod.sectors.each do |mod_sector|
+      if sector.value.special == mod_sector.number
+        mod_sector.action.call(sector, player)
+      end
+    end
+
     # Falling, not all the way down yet?
     return if player.value.mo.value.z != sector.value.floorheight
 
@@ -8426,6 +8433,7 @@ module Doocr
     CDoom::MAXPLAYERS.times do |i|
       if CDoom.playeringame[i] != 0
         @@current_thinking_player = @@players.to_unsafe + i
+        Mod.update_player_action.call(@@current_thinking_player)
         CDoom.p_player_think(@@current_thinking_player)
       end
     end

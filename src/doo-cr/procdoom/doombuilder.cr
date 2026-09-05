@@ -57,8 +57,7 @@ dehacked
   include(\"Includes\\\\Dehacked_Doom.cfg\");
 }"
 
-      cfg.puts "" \
-               "linedeftypes
+      cfg.puts "linedeftypes
 	{
     mod
     {
@@ -66,14 +65,20 @@ dehacked
 	"
 
       @@lines.each do |line|
-        cfg.puts "" \
-                 "#{line.number}
+        cfg.puts "#{line.number}
       {
         title = \"#{line.db_name}\";
       }"
       end
-
       cfg.puts "}}"
+
+      cfg.puts "" \
+               "sectortypes
+      {"
+      @@sectors.each do |sector|
+        cfg.puts "#{sector.number} = \"#{sector.db_name}\";"
+      end
+      cfg.puts "}"
     end
   end
 end

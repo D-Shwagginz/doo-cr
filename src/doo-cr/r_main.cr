@@ -359,6 +359,22 @@ module Doocr
       @@ceilingplane = -1
     end
 
+    # Ceiling and Floor fix for f_sky1
+    if @@ceilingplane == @@floorplane && @@ceilingplane != -1
+      @@visplanes << CDoom::Visplane.new if @@lastvisplane == @@visplanes.size - 1
+      new_index = @@lastvisplane
+      @@lastvisplane += 1
+      dst = @@visplanes.to_unsafe + new_index
+      src = @@visplanes.to_unsafe + @@floorplane
+      dst.value.height = src.value.height
+      dst.value.picnum = src.value.picnum
+      dst.value.lightlevel = src.value.lightlevel
+      dst.value.minx = CDoom::SCREENWIDTH
+      dst.value.maxx = -1
+      CDoom.doom_memset(dst.value.top, 0xff, sizeof(typeof(dst.value.top)))
+      @@ceilingplane = new_index
+    end
+
     CDoom.r_add_sprites(CDoom.frontsector)
 
     while count != 0
