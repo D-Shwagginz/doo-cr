@@ -822,7 +822,7 @@ module Doocr
         return 0
       end
 
-      player = CDoom.players.to_unsafe + actor.value.lastlook
+      player = @@players.to_unsafe + actor.value.lastlook
 
       if player.value.health <= 0
         actor.value.lastlook = (actor.value.lastlook + 1) & 3
@@ -1640,7 +1640,7 @@ module Doocr
     # make sure there is a player alive for victory
     i = 0
     while i < CDoom::MAXPLAYERS
-      break if CDoom.playeringame[i] != 0 && CDoom.players[i].health > 0
+      break if CDoom.playeringame[i] != 0 && @@players[i].health > 0
       i += 1
     end
 
@@ -2352,7 +2352,7 @@ module Doocr
       end
       player.value.pendingweapon = weapon
 
-      if player == CDoom.players.to_unsafe + CDoom.consoleplayer
+      if player == @@players.to_unsafe + CDoom.consoleplayer
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_wpnup)
       end
       return 0
@@ -2653,7 +2653,7 @@ module Doocr
     player.value.itemcount = player.value.itemcount + 1 if special.value.flags & CDoom::Mobjflag::MF_COUNTITEM.value != 0
     CDoom.p_remove_mobj(special)
     player.value.bonuscount = player.value.bonuscount + CDoom::BONUSADD
-    CDoom.s_start_sound(Pointer(Void).null, sound.value) if player == CDoom.players.to_unsafe + CDoom.consoleplayer
+    CDoom.s_start_sound(Pointer(Void).null, sound.value) if player == @@players.to_unsafe + CDoom.consoleplayer
   end
 
   def self.p_kill_mobj(source : CDoom::Mobj*, target : CDoom::Mobj*)
@@ -2670,8 +2670,8 @@ module Doocr
 
       if !target.value.player.null?
         unless CDoom.netgame == 0
-          srcplr = source.value.player - CDoom.players.to_unsafe
-          trgtplr = target.value.player - CDoom.players.to_unsafe
+          srcplr = source.value.player - @@players.to_unsafe
+          trgtplr = target.value.player - @@players.to_unsafe
           source.value.player.value.frags[trgtplr] =
             source.value.player.value.frags[trgtplr] + 1
 
@@ -2688,7 +2688,7 @@ module Doocr
             )
           end
 
-          (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message =
+          (@@players.to_unsafe + CDoom.consoleplayer).value.message =
             strings.sample(Random.new(CDoom.m_random)).gsub(
               '1', String.new(CDoom.player_names[srcplr])[...-2]).gsub(
               '2', String.new(CDoom.player_names[trgtplr])[...-2])
@@ -2697,26 +2697,26 @@ module Doocr
     elsif CDoom.netgame == 0 && target.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0
       # count all monster deaths,
       # even those caused by other monsters
-      CDoom.players.to_unsafe.value.killcount = CDoom.players[0].killcount + 1
+      @@players.to_unsafe.value.killcount = @@players[0].killcount + 1
     end
 
     if !target.value.player.null?
-      if (source.null? || source.value.player.null?) &&                       # Player was not killed by player
-         target.value.player - CDoom.players.to_unsafe != CDoom.consoleplayer # Isn't self. They know they died
-        (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message =
+      if (source.null? || source.value.player.null?) &&                   # Player was not killed by player
+         target.value.player - @@players.to_unsafe != CDoom.consoleplayer # Isn't self. They know they died
+        (@@players.to_unsafe + CDoom.consoleplayer).value.message =
           @@died_strings.sample(Random.new(CDoom.m_random)).gsub(
-            '1', String.new(CDoom.player_names[target.value.player - CDoom.players.to_unsafe])[...-2])
+            '1', String.new(CDoom.player_names[target.value.player - @@players.to_unsafe])[...-2])
       end
 
       # count environment kills against you
-      target.value.player.value.frags[target.value.player - CDoom.players.to_unsafe] =
-        target.value.player.value.frags[target.value.player - CDoom.players.to_unsafe] + 1 if source.null?
+      target.value.player.value.frags[target.value.player - @@players.to_unsafe] =
+        target.value.player.value.frags[target.value.player - @@players.to_unsafe] + 1 if source.null?
 
       target.value.flags = target.value.flags & ~CDoom::Mobjflag::MF_SOLID.value
       target.value.player.value.playerstate = CDoom::Playerstate::PST_DEAD
       CDoom.p_drop_weapon(target.value.player)
 
-      if target.value.player == CDoom.players.to_unsafe + CDoom.consoleplayer &&
+      if target.value.player == @@players.to_unsafe + CDoom.consoleplayer &&
          CDoom.automapactive != 0
         # don't die in automap,
         # siwtch view prior to dying
@@ -2851,7 +2851,7 @@ module Doocr
 
       temp = damage < 100 ? damage : 100
 
-      if player == CDoom.players.to_unsafe + CDoom.consoleplayer
+      if player == @@players.to_unsafe + CDoom.consoleplayer
         CDoom.i_tactile(40, 10, 40 + temp*2)
       end
     end
@@ -4990,7 +4990,7 @@ module Doocr
     # not playing?
     return if CDoom.playeringame[mthing.value.type - 1] == 0
 
-    p = CDoom.players.to_unsafe + mthing.value.type - 1
+    p = @@players.to_unsafe + mthing.value.type - 1
 
     if p.value.playerstate == CDoom::Playerstate::PST_REBORN
       CDoom.g_player_reborn(mthing.value.type - 1)
@@ -5978,7 +5978,7 @@ module Doocr
     CDoom::MAXPLAYERS.times do |i|
       next if CDoom.playeringame[i] == 0
 
-      player = CDoom.players[i]
+      player = @@players[i]
       CDoom::Psprnum::NUMPSPRITES.value.times do |j|
         if !player.psprites[j].state.null?
           (player.psprites.to_unsafe + j).value.state =
@@ -5993,18 +5993,18 @@ module Doocr
     CDoom::MAXPLAYERS.times do |i|
       next if CDoom.playeringame[i] == 0
 
-      player = Slice.new((CDoom.players.to_unsafe + i).as(UInt8*), sizeof(CDoom::Player))
+      player = Slice.new((@@players.to_unsafe + i).as(UInt8*), sizeof(CDoom::Player))
       file.read_fully(player)
 
       # will be set when unarc thinker
-      (CDoom.players.to_unsafe + i).value.mo = Pointer(CDoom::Mobj).null
-      (CDoom.players.to_unsafe + i).value.message = Pointer(UInt8).null
-      (CDoom.players.to_unsafe + i).value.attacker = Pointer(CDoom::Mobj).null
+      (@@players.to_unsafe + i).value.mo = Pointer(CDoom::Mobj).null
+      (@@players.to_unsafe + i).value.message = Pointer(UInt8).null
+      (@@players.to_unsafe + i).value.attacker = Pointer(CDoom::Mobj).null
 
       CDoom::Psprnum::NUMPSPRITES.value.times do |j|
-        if !CDoom.players[i].psprites[j].state.null?
-          ((CDoom.players.to_unsafe + i).value.psprites.to_unsafe + j).value.state =
-            @@states.to_unsafe + CDoom.players[i].psprites[j].state.address
+        if !@@players[i].psprites[j].state.null?
+          ((@@players.to_unsafe + i).value.psprites.to_unsafe + j).value.state =
+            @@states.to_unsafe + @@players[i].psprites[j].state.address
         end
       end
     end
@@ -6092,7 +6092,7 @@ module Doocr
         mobj = th.as(CDoom::Mobj*).value
         mobj.state = Pointer(CDoom::State).new((mobj.state - @@states.to_unsafe).to_u64!)
 
-        mobj.player = Pointer(CDoom::Player).new(((mobj.player - CDoom.players.to_unsafe) + 1).to_u64!) if !mobj.player.null?
+        mobj.player = Pointer(CDoom::Player).new(((mobj.player - @@players.to_unsafe) + 1).to_u64!) if !mobj.player.null?
 
         file.write(pointerof(mobj).as(UInt8*).to_slice(sizeof(CDoom::Mobj)))
       end
@@ -6132,7 +6132,7 @@ module Doocr
         mobj.value.state = @@states.to_unsafe + mobj.value.state.address
         mobj.value.target = Pointer(CDoom::Mobj).null
         if !mobj.value.player.null?
-          mobj.value.player = CDoom.players.to_unsafe + (mobj.value.player.address - 1)
+          mobj.value.player = @@players.to_unsafe + (mobj.value.player.address - 1)
           mobj.value.player.value.mo = mobj
         end
         CDoom.p_set_thing_position(mobj)
@@ -6717,14 +6717,14 @@ module Doocr
     CDoom.wminfo.maxfrags = 0
     CDoom.wminfo.partime = 180
     CDoom::MAXPLAYERS.times do |i|
-      (CDoom.players.to_unsafe + i).value.killcount = 0
-      (CDoom.players.to_unsafe + i).value.secretcount = 0
-      (CDoom.players.to_unsafe + i).value.itemcount = 0
+      (@@players.to_unsafe + i).value.killcount = 0
+      (@@players.to_unsafe + i).value.secretcount = 0
+      (@@players.to_unsafe + i).value.itemcount = 0
     end
 
     # Initial height of PointOfView
     # will be set by player think.
-    (CDoom.players.to_unsafe + CDoom.consoleplayer).value.viewz = 1
+    (@@players.to_unsafe + CDoom.consoleplayer).value.viewz = 1
 
     # Make sure all sounds are stopped before Z_FreeTags.
     CDoom.s_start
@@ -6779,7 +6779,7 @@ module Doocr
     if CDoom.deathmatch != 0
       CDoom::MAXPLAYERS.times do |i|
         if CDoom.playeringame[i] != 0
-          (CDoom.players.to_unsafe + i).value.mo = Pointer(CDoom::Mobj).null
+          (@@players.to_unsafe + i).value.mo = Pointer(CDoom::Mobj).null
           CDoom.g_deathmatch_spawn_player(i)
         end
       end
@@ -8420,12 +8420,12 @@ module Doocr
     if CDoom.netgame == 0 &&
        CDoom.menuactive != 0 &&
        CDoom.demoplayback == 0 &&
-       CDoom.players[CDoom.consoleplayer].viewz != 1
+       @@players[CDoom.consoleplayer].viewz != 1
       return
     end
     CDoom::MAXPLAYERS.times do |i|
       if CDoom.playeringame[i] != 0
-        @@current_thinking_player = CDoom.players.to_unsafe + i
+        @@current_thinking_player = @@players.to_unsafe + i
         CDoom.p_player_think(@@current_thinking_player)
       end
     end

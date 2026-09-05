@@ -406,11 +406,11 @@ module Doocr
           # 'mypos' for player position
         elsif CDoom.cht_check_cheat(pointerof(CDoom.cheat_mypos), ev.value.data1) != 0
           CDoom.doom_strcpy(@@buf, "ang=0x")
-          CDoom.doom_concat(@@buf, CDoom.doom_itoa(CDoom.players[CDoom.consoleplayer].mo.value.angle, 16))
+          CDoom.doom_concat(@@buf, CDoom.doom_itoa(@@players[CDoom.consoleplayer].mo.value.angle, 16))
           CDoom.doom_concat(@@buf, ";x,y=(0x")
-          CDoom.doom_concat(@@buf, CDoom.doom_itoa(CDoom.players[CDoom.consoleplayer].mo.value.x, 16))
+          CDoom.doom_concat(@@buf, CDoom.doom_itoa(@@players[CDoom.consoleplayer].mo.value.x, 16))
           CDoom.doom_concat(@@buf, ",0x")
-          CDoom.doom_concat(@@buf, CDoom.doom_itoa(CDoom.players[CDoom.consoleplayer].mo.value.y, 16))
+          CDoom.doom_concat(@@buf, CDoom.doom_itoa(@@players[CDoom.consoleplayer].mo.value.y, 16))
           CDoom.doom_concat(@@buf, ")")
           CDoom.plyr.value.message = @@buf
         end
@@ -840,7 +840,7 @@ module Doocr
 
   def self.st_init_data
     CDoom.st_firsttime = 1
-    CDoom.plyr = CDoom.players.to_unsafe + CDoom.consoleplayer
+    CDoom.plyr = @@players.to_unsafe + CDoom.consoleplayer
 
     CDoom.st_clock = 0
     CDoom.st_chatstate = CDoom::ST_Chatstateenum::StartChatState

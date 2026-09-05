@@ -79,23 +79,35 @@ module Doocr
       line = Line.new(db_name, when, action)
       @@lines << line
     end
+
+    # Gets the current player that the state is being called from.
+    #  Can be null if the state isn't being called from a player (a mobj state)
+    def self.get_player : CDoom::Player*
+      Doocr.current_thinking_player
+    end
+
+    # Gets the current mobj that the state is being called from.
+    #  Can be null if the state isn't being called from a mobj (a weapon state)
+    def self.get_mobj : CDoom::Mobj*
+      Doocr.current_thinking_mobj
+    end
+
+    class_getter player_vars = [] of Hash(String, String | Int32 | Bool)
+
+    # Gets a variable assigned to a player number
+    def self.player_var(player : CDoom::Player*)
+      puts player - Doocr.players
+      @@player_vars[player - Doocr.players]
+    end
+
+    def self.make_player_var(var : String, value : String | Int32 | Bool)
+      @@player_vars.each { |hash| hash[var] = value }
+    end
   end
 
   # Yields the mod module for block style code
   def self.make_mod(&)
+    CDoom::MAXPLAYERS.times { |i| Mod.player_vars << {} of String => String | Int32 | Bool }
     yield Mod
   end
-
-  # Gets the current player that the state is being called from.
-  #  Can be null if the state isn't being called from a player (a mobj state)
-  def self.get_player : CDoom::Player*
-    @@current_thinking_player
-  end
-
-  # Gets the current mobj that the state is being called from.
-  #  Can be null if the state isn't being called from a mobj (a weapon state)
-  def self.get_mobj : CDoom::Mobj*
-    @@current_thinking_mobj
-  end
-
 end

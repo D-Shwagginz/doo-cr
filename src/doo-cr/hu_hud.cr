@@ -276,7 +276,7 @@ module Doocr
   def self.hu_start
     CDoom.hu_stop if CDoom.headsupactive != 0
 
-    CDoom.plr = CDoom.players.to_unsafe + CDoom.consoleplayer
+    CDoom.plr = @@players.to_unsafe + CDoom.consoleplayer
     CDoom.message_on = 0
     CDoom.message_dontfuckwithme = 0
     CDoom.message_nottobefuckedwith = 0
@@ -360,7 +360,7 @@ module Doocr
     if CDoom.netgame != 0
       CDoom::MAXPLAYERS.times do |i|
         next if CDoom.playeringame[i] == 0
-        if i != CDoom.consoleplayer && (c = CDoom.players[i].cmd.chatchar) != 0
+        if i != CDoom.consoleplayer && (c = @@players[i].cmd.chatchar) != 0
           if c <= CDoom::HU_BROADCAST
             CDoom.chat_dest[i] = c
           else
@@ -388,7 +388,7 @@ module Doocr
               CDoom.hulib_reset_i_text(CDoom.w_inputbuffer.to_unsafe + i)
             end
           end
-          pointerof((CDoom.players.to_unsafe + i).value.@cmd).value.chatchar = 0
+          pointerof((@@players.to_unsafe + i).value.@cmd).value.chatchar = 0
         end
       end
     end

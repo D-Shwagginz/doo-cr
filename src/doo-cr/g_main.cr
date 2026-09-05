@@ -319,10 +319,10 @@ module Doocr
     CDoom.gamestate = CDoom::Gamestate::Level
 
     CDoom::MAXPLAYERS.times do |i|
-      if CDoom.playeringame[i] != 0 && CDoom.players[i].playerstate == CDoom::Playerstate::PST_DEAD
-        (CDoom.players.to_unsafe + i).value.playerstate = CDoom::Playerstate::PST_REBORN
+      if CDoom.playeringame[i] != 0 && @@players[i].playerstate == CDoom::Playerstate::PST_DEAD
+        (@@players.to_unsafe + i).value.playerstate = CDoom::Playerstate::PST_REBORN
       end
-      CDoom.doom_memset(CDoom.players[i].frags, 0, sizeof(typeof(CDoom.players[i].frags)))
+      CDoom.doom_memset(@@players[i].frags, 0, sizeof(typeof(@@players[i].frags)))
     end
 
     CDoom.p_setup_level(CDoom.gameepisode, CDoom.gamemap, 0, CDoom.gameskill)
@@ -432,7 +432,7 @@ module Doocr
   def self.g_ticker
     # do player reborns if needed
     CDoom::MAXPLAYERS.times do |i|
-      CDoom.g_do_reborn(i) if CDoom.playeringame[i] != 0 && CDoom.players[i].playerstate == CDoom::Playerstate::PST_REBORN
+      CDoom.g_do_reborn(i) if CDoom.playeringame[i] != 0 && @@players[i].playerstate == CDoom::Playerstate::PST_REBORN
     end
 
     # do things to change the game state
@@ -467,7 +467,7 @@ module Doocr
 
     CDoom::MAXPLAYERS.times do |i|
       if CDoom.playeringame[i] != 0
-        cmd = (pointerof((CDoom.players.to_unsafe + i).value.@cmd)) # THERE WAS A BETTER WAY TO DO THIS
+        cmd = (pointerof((@@players.to_unsafe + i).value.@cmd)) # THERE WAS A BETTER WAY TO DO THIS
 
         CDoom.doom_memcpy(cmd, (CDoom.netcmds.to_unsafe + i).value.to_unsafe + buf, sizeof(CDoom::Ticcmd))
 
@@ -479,7 +479,7 @@ module Doocr
            (CDoom.gametic & 31) == 0 && (CDoom.gametic >> 5) & 3 == i
           CDoom.doom_strcpy(@@turbomessage, CDoom.player_names[i])
           CDoom.doom_concat(@@turbomessage, " is turbo!")
-          (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = @@turbomessage
+          (@@players.to_unsafe + CDoom.consoleplayer).value.message = @@turbomessage
         end
 
         if CDoom.netgame != 0 && CDoom.netdemo == 0 && (CDoom.gametic % CDoom.ticdup) == 0
@@ -487,8 +487,8 @@ module Doocr
              CDoom.consistancy[i][buf] != cmd.value.consistancy
             CDoom.i_error("Error: consistency failure (#{cmd.value.consistancy} should be #{CDoom.consistancy[i][buf]})")
           end
-          if !CDoom.players[i].mo.null?
-            CDoom.consistancy[i][buf] = CDoom.players[i].mo.value.x.to_i16!
+          if !@@players[i].mo.null?
+            CDoom.consistancy[i][buf] = @@players[i].mo.value.x.to_i16!
           else
             CDoom.consistancy[i][buf] = CDoom.rndindex.to_i16!
           end
@@ -499,8 +499,8 @@ module Doocr
     # check for special buttons
     CDoom::MAXPLAYERS.times do |i|
       if CDoom.playeringame[i] != 0
-        if CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BT_SPECIAL.value != 0
-          case CDoom::Buttoncode.new(CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BT_SPECIALMASK.value)
+        if @@players[i].cmd.buttons & CDoom::Buttoncode::BT_SPECIAL.value != 0
+          case CDoom::Buttoncode.new(@@players[i].cmd.buttons & CDoom::Buttoncode::BT_SPECIALMASK.value)
           when CDoom::Buttoncode::BTS_PAUSE
             CDoom.paused ^= 1
             if CDoom.paused != 0
@@ -514,7 +514,7 @@ module Doocr
               CDoom.doom_strcpy(CDoom.savedescription, "NET GAME")
             end
             CDoom.savegameslot =
-              (CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BTS_SAVEMASK.value) >> CDoom::Buttoncode::BTS_SAVESHIFT.value
+              (@@players[i].cmd.buttons & CDoom::Buttoncode::BTS_SAVEMASK.value) >> CDoom::Buttoncode::BTS_SAVESHIFT.value
             CDoom.gameaction = CDoom::Gameaction::Savegame
           end
         end
@@ -544,7 +544,7 @@ module Doocr
   #
   def self.g_init_player(player : Int32)
     # set up the saved info
-    p = CDoom.players.to_unsafe + player
+    p = @@players.to_unsafe + player
 
     # clear everything else to defaults
     CDoom.g_player_reborn(player)
@@ -555,7 +555,7 @@ module Doocr
   # Can when a player completes a level.
   #
   def self.g_player_finish_level(player : Int32)
-    p = CDoom.players.to_unsafe + player
+    p = @@players.to_unsafe + player
 
     CDoom.doom_memset(p.value.powers.to_unsafe, 0, sizeof(typeof(p.value.powers)))
     CDoom.doom_memset(p.value.cards.to_unsafe, 0, sizeof(typeof(p.value.cards)))
@@ -574,18 +574,18 @@ module Doocr
   def self.g_player_reborn(player : Int32)
     frags = uninitialized StaticArray(Int32, CDoom::MAXPLAYERS)
 
-    CDoom.doom_memcpy(frags.to_unsafe, CDoom.players[player].frags.to_unsafe, sizeof(typeof(frags)))
-    killcount = CDoom.players[player].killcount
-    itemcount = CDoom.players[player].itemcount
-    secretcount = CDoom.players[player].secretcount
+    CDoom.doom_memcpy(frags.to_unsafe, @@players[player].frags.to_unsafe, sizeof(typeof(frags)))
+    killcount = @@players[player].killcount
+    itemcount = @@players[player].itemcount
+    secretcount = @@players[player].secretcount
 
-    p = CDoom.players.to_unsafe + player
+    p = @@players.to_unsafe + player
     CDoom.doom_memset(p, 0, sizeof(typeof(p.value)))
 
-    CDoom.doom_memcpy(p.value.frags.to_unsafe, frags.to_unsafe, sizeof(typeof(CDoom.players[player].frags)))
-    (CDoom.players.to_unsafe + player).value.killcount = killcount
-    (CDoom.players.to_unsafe + player).value.itemcount = itemcount
-    (CDoom.players.to_unsafe + player).value.secretcount = secretcount
+    CDoom.doom_memcpy(p.value.frags.to_unsafe, frags.to_unsafe, sizeof(typeof(@@players[player].frags)))
+    (@@players.to_unsafe + player).value.killcount = killcount
+    (@@players.to_unsafe + player).value.itemcount = itemcount
+    (@@players.to_unsafe + player).value.secretcount = secretcount
 
     p.value.usedown = 0 # don't do anything immediately
     p.value.attackdown = 0
@@ -603,11 +603,11 @@ module Doocr
   end
 
   def self.g_check_spot(playernum : Int32, mthing : CDoom::Mapthing*) : CDoom::DoomBool
-    if CDoom.players[playernum].mo.null?
+    if @@players[playernum].mo.null?
       # first spawn of level, before corpses
       playernum.times do |i|
-        return 0 if (CDoom.players[i].mo.value.x == mthing.value.x.to_i32! << FRACBITS &&
-                    CDoom.players[i].mo.value.y == mthing.value.y.to_i32! << FRACBITS)
+        return 0 if (@@players[i].mo.value.x == mthing.value.x.to_i32! << FRACBITS &&
+                    @@players[i].mo.value.y == mthing.value.y.to_i32! << FRACBITS)
       end
       return 1
     end
@@ -615,13 +615,13 @@ module Doocr
     x = mthing.value.x.to_i32! << FRACBITS
     y = mthing.value.y.to_i32! << FRACBITS
 
-    return 0 if CDoom.p_check_position(CDoom.players[playernum].mo, x, y) == 0
+    return 0 if CDoom.p_check_position(@@players[playernum].mo, x, y) == 0
 
     # flush an old corpse if needed
     if CDoom.bodyqueslot >= CDoom::BODYQUESIZE
       CDoom.p_remove_mobj(CDoom.bodyque[CDoom.bodyqueslot % CDoom::BODYQUESIZE])
     end
-    CDoom.bodyque[CDoom.bodyqueslot % CDoom::BODYQUESIZE] = CDoom.players[playernum].mo
+    CDoom.bodyque[CDoom.bodyqueslot % CDoom::BODYQUESIZE] = @@players[playernum].mo
     CDoom.bodyqueslot += 1
 
     # spawn a teleport fog
@@ -631,7 +631,7 @@ module Doocr
     mo = CDoom.p_spawn_mobj(x + 20 * @@finecosine[an], y + 20 * @@finesine[an],
       ss.value.sector.value.floorheight, CDoom::Mobjtype::MT_TFOG)
 
-    CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept) if CDoom.players[CDoom.consoleplayer].viewz != 1 # don't start sound on first frame
+    CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept) if @@players[CDoom.consoleplayer].viewz != 1 # don't start sound on first frame
 
     return 1
   end
@@ -656,7 +656,7 @@ module Doocr
   end
 
   def self.g_despawn_player(playernum : Int32)
-    pmo = CDoom.players[playernum].mo
+    pmo = @@players[playernum].mo
 
     x = pmo.value.x.to_i32!
     y = pmo.value.y.to_i32!
@@ -668,11 +668,11 @@ module Doocr
     mo = CDoom.p_spawn_mobj(x + 20 * @@finecosine[an], y + 20 * @@finesine[an],
       ss.value.sector.value.floorheight, CDoom::Mobjtype::MT_TFOG)
 
-    CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept) if CDoom.players[CDoom.consoleplayer].viewz != 1 # don't start sound on first frame
+    CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept) if @@players[CDoom.consoleplayer].viewz != 1 # don't start sound on first frame
 
     # Despawn player mobj
     p_remove_mobj(pmo)
-    (CDoom.players.to_unsafe + playernum).value.mo = Pointer(CDoom::Mobj).null
+    (@@players.to_unsafe + playernum).value.mo = Pointer(CDoom::Mobj).null
   end
 
   #
@@ -686,7 +686,7 @@ module Doocr
       # respawn at the start
 
       # first dissasociate the corpse
-      CDoom.players[playernum].mo.value.player = Pointer(CDoom::Player).null
+      @@players[playernum].mo.value.player = Pointer(CDoom::Player).null
 
       # spawn at random spot if in death match
       if CDoom.deathmatch != 0
@@ -751,12 +751,12 @@ module Doocr
       when 9
         # exit secret level
         CDoom::MAXPLAYERS.times do |i|
-          (CDoom.players.to_unsafe + i).value.didsecret = 1
+          (@@players.to_unsafe + i).value.didsecret = 1
         end
       end
     end
 
-    CDoom.wminfo.didsecret = (CDoom.players.to_unsafe + CDoom.consoleplayer).value.didsecret
+    CDoom.wminfo.didsecret = (@@players.to_unsafe + CDoom.consoleplayer).value.didsecret
     CDoom.wminfo.epsd = CDoom.gameepisode - 1
     CDoom.wminfo.last = CDoom.gamemap - 1
 
@@ -809,11 +809,11 @@ module Doocr
 
     CDoom::MAXPLAYERS.times do |i|
       (CDoom.wminfo.plyr.to_unsafe + i).value.in = CDoom.playeringame[i]
-      (CDoom.wminfo.plyr.to_unsafe + i).value.skills = CDoom.players[i].killcount
-      (CDoom.wminfo.plyr.to_unsafe + i).value.sitems = CDoom.players[i].itemcount
-      (CDoom.wminfo.plyr.to_unsafe + i).value.ssecret = CDoom.players[i].secretcount
+      (CDoom.wminfo.plyr.to_unsafe + i).value.skills = @@players[i].killcount
+      (CDoom.wminfo.plyr.to_unsafe + i).value.sitems = @@players[i].itemcount
+      (CDoom.wminfo.plyr.to_unsafe + i).value.ssecret = @@players[i].secretcount
       (CDoom.wminfo.plyr.to_unsafe + i).value.stime = CDoom.leveltime
-      CDoom.doom_memcpy((CDoom.wminfo.plyr.to_unsafe + i).value.frags, CDoom.players[i].frags,
+      CDoom.doom_memcpy((CDoom.wminfo.plyr.to_unsafe + i).value.frags, @@players[i].frags,
         sizeof(typeof(CDoom.wminfo.plyr[i].frags)))
     end
 
@@ -834,7 +834,7 @@ module Doocr
   def self.g_world_done
     CDoom.gameaction = CDoom::Gameaction::Worlddone
 
-    (CDoom.players.to_unsafe + CDoom.consoleplayer).value.didsecret = 1 if CDoom.secretexit != 0
+    (@@players.to_unsafe + CDoom.consoleplayer).value.didsecret = 1 if CDoom.secretexit != 0
 
     if CDoom.gamemode == CDoom::GameMode::Commercial
       case CDoom.gamemap
@@ -958,7 +958,7 @@ module Doocr
     CDoom.gameaction = CDoom::Gameaction::Nothing
     CDoom.savedescription[0] = 0
 
-    (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = @@deh_ggsaved
+    (@@players.to_unsafe + CDoom.consoleplayer).value.message = @@deh_ggsaved
 
     # draw the pattern into the back screen
     CDoom.r_fill_back_screen
@@ -1046,7 +1046,7 @@ module Doocr
     end
 
     # force players to be initialized upon first level load
-    CDoom::MAXPLAYERS.times { |i| (CDoom.players.to_unsafe + i).value.playerstate = CDoom::Playerstate::PST_REBORN }
+    CDoom::MAXPLAYERS.times { |i| (@@players.to_unsafe + i).value.playerstate = CDoom::Playerstate::PST_REBORN }
 
     CDoom.usergame = 1 # will be set false if a demo
     CDoom.paused = 0
@@ -1103,7 +1103,7 @@ module Doocr
   @@prevstate : CDoom::Playerstate = CDoom::Playerstate::PST_LIVE
 
   def self.g_write_demo_ticcmd(cmd : CDoom::Ticcmd*)
-    pstate = CDoom.players[CDoom.consoleplayer].playerstate
+    pstate = @@players[CDoom.consoleplayer].playerstate
     CDoom.g_check_demo_status if CDoom.gamekeydown['q'.ord] != 0 # ||                                                         # press q to end demo recording
     # (@@prevstate == CDoom::Playerstate::PST_DEAD && pstate == CDoom::Playerstate::PST_LIVE) || # or if player is respawning
     # CDoom.gamestate != CDoom::Gamestate::Level                                                 # or if we are no longer on a level

@@ -102,7 +102,7 @@ module Doocr
       # go on to the next level
       i = 0
       CDoom::MAXPLAYERS.times do |j|
-        break if CDoom.players[i].cmd.buttons != 0
+        break if @@players[i].cmd.buttons != 0
         i += 1
       end
 

@@ -141,11 +141,11 @@ module Doocr
     if CDoom.gamestate == CDoom::Gamestate::Level && CDoom.gametic != 0
       if CDoom.automapactive != 0
         if @@amactivedraw != 0
-          CDoom.r_render_player_view(CDoom.players.to_unsafe + CDoom.displayplayer)
+          CDoom.r_render_player_view(@@players.to_unsafe + CDoom.displayplayer)
           CDoom.am_drawer
         end
       else
-        CDoom.r_render_player_view(CDoom.players.to_unsafe + CDoom.displayplayer)
+        CDoom.r_render_player_view(@@players.to_unsafe + CDoom.displayplayer)
       end
     end
 
@@ -254,7 +254,7 @@ module Doocr
         CDoom.try_run_tics # will run at least one tic
       end
 
-      CDoom.s_update_sounds(CDoom.players[CDoom.consoleplayer].mo) # move positional sounds
+      CDoom.s_update_sounds(@@players[CDoom.consoleplayer].mo) # move positional sounds
       # Update display, next frame, with current state.
       CDoom.d_display
     end
@@ -288,7 +288,7 @@ module Doocr
   # Todo: FIXME - version dependend demo numbers?
   #
   def self.d_do_advance_demo
-    (CDoom.players.to_unsafe + CDoom.consoleplayer).value.playerstate = CDoom::Playerstate::PST_LIVE # not reborn
+    (@@players.to_unsafe + CDoom.consoleplayer).value.playerstate = CDoom::Playerstate::PST_LIVE # not reborn
     CDoom.advancedemo = 0
     CDoom.usergame = 0 # no save / end game here
     CDoom.paused = 0

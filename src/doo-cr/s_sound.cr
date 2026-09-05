@@ -313,15 +313,15 @@ module Doocr
     # Check to see if it is audible,
     #  and if not, modify the params
     sep = CDoom::NORM_SEP
-    if !origin.null? && origin != CDoom.players[CDoom.consoleplayer].mo
-      rc = CDoom.s_adjust_sound_params(CDoom.players[CDoom.consoleplayer].mo,
+    if !origin.null? && origin != @@players[CDoom.consoleplayer].mo
+      rc = CDoom.s_adjust_sound_params(@@players[CDoom.consoleplayer].mo,
         origin,
         pointerof(volume),
         pointerof(sep),
         pointerof(pitch))
 
-      if origin.value.x == CDoom.players[CDoom.consoleplayer].mo.value.x &&
-         origin.value.y == CDoom.players[CDoom.consoleplayer].mo.value.y
+      if origin.value.x == @@players[CDoom.consoleplayer].mo.value.x &&
+         origin.value.y == @@players[CDoom.consoleplayer].mo.value.y
         sep = CDoom::NORM_SEP
       end
 

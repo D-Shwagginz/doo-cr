@@ -3511,7 +3511,6 @@ lib CDoom
   $gametic : LibC::Int
 
   # Bookkeeping on players - state.
-  $players : Player[MAXPLAYERS]
 
   # Alive? Disconnected?
   $playeringame : DoomBool[MAXPLAYERS]

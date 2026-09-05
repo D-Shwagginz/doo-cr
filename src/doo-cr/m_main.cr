@@ -376,9 +376,9 @@ module Doocr
     CDoom.show_messages = 1 - CDoom.show_messages
 
     if CDoom.show_messages == 0
-      (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = @@deh_msgoff
+      (@@players.to_unsafe + CDoom.consoleplayer).value.message = @@deh_msgoff
     else
-      (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = @@deh_msgon
+      (@@players.to_unsafe + CDoom.consoleplayer).value.message = @@deh_msgon
     end
 
     CDoom.message_dontfuckwithme = 1
@@ -985,7 +985,7 @@ module Doocr
       when CDoom::KEY_F11 # gamma toggle
         CDoom.usegamma += 1
         CDoom.usegamma = 0 if CDoom.usegamma > 4
-        (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = CDoom.gammamsg[CDoom.usegamma]
+        (@@players.to_unsafe + CDoom.consoleplayer).value.message = CDoom.gammamsg[CDoom.usegamma]
         CDoom.i_set_palette(CDoom.w_cache_lump_name("PLAYPAL", CDoom::PU_CACHE).as(UInt8*))
         return 1
       end
@@ -1458,6 +1458,6 @@ module Doocr
       CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT,
       CDoom.w_cache_lump_name("PLAYPAL", CDoom::PU_CACHE).as(UInt8*))
 
-    (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = "screen shot"
+    (@@players.to_unsafe + CDoom.consoleplayer).value.message = "screen shot"
   end
 end

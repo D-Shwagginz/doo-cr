@@ -150,7 +150,7 @@ module Doocr
       end
     end
 
-    CDoom.plr = CDoom.players.to_unsafe.as(CDoom::Player*) + pnum
+    CDoom.plr = @@players.to_unsafe.as(CDoom::Player*) + pnum
     CDoom.m_x = CDoom.plr.value.mo.value.x - CDoom.m_w // 2
     CDoom.m_y = CDoom.plr.value.mo.value.y - CDoom.m_h // 2
     CDoom.am_change_window_loc
@@ -786,7 +786,7 @@ module Doocr
 
     CDoom::MAXPLAYERS.times do |i|
       their_color += 1
-      p = CDoom.players.to_unsafe + i
+      p = @@players.to_unsafe + i
 
       next if (CDoom.deathmatch != 0 && CDoom.singledemo == 0) && p != CDoom.plr
       next if CDoom.playeringame[i] == 0

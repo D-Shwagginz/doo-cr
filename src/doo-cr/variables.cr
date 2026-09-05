@@ -135,8 +135,14 @@ module Doocr
 
   @@headless : Bool = false
 
-  @@current_thinking_player : Pointer(CDoom::Player) = Pointer(CDoom::Player).null
-  @@current_thinking_mobj : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+  class_getter current_thinking_player : Pointer(CDoom::Player) = Pointer(CDoom::Player).null
+  class_getter current_thinking_mobj : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+
+  @@players = StaticArray(CDoom::Player, CDoom::MAXPLAYERS).new(CDoom::Player.new)
+
+  def self.players
+    @@players.to_unsafe
+  end
 
   @@software_screen = Bytes.new(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
 

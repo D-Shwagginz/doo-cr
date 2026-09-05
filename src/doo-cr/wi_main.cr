@@ -802,7 +802,7 @@ module Doocr
 
   def self.wi_check_for_accelerate
     # check for button presses to skip delays
-    player = CDoom.players.to_unsafe
+    player = @@players.to_unsafe
     CDoom::MAXPLAYERS.times do |i|
       if CDoom.playeringame[i] != 0
         if player.value.cmd.buttons & CDoom::Buttoncode::BT_ATTACK.value != 0
