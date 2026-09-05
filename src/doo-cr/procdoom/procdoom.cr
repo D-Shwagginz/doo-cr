@@ -2,6 +2,8 @@ module Doocr
   # The module which houses all the methods to provide you hooks
   # to insert custom weapons, things, states and more!
   #
+  # You can use doo-cr -dbcfg to create a doom builder config file which
+  # will show all your custom stuff in doom builder
   #
   # Here's an example of how to recreate the pistol as a modded weapon
   #
