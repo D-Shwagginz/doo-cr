@@ -7274,6 +7274,13 @@ module Doocr
   def self.p_cross_special_line(linenum : LibC::Int, side : LibC::Int, thing : CDoom::Mobj*)
     line = CDoom.lines + linenum
 
+    Mod.lines.each do |mod_line|
+      next if mod_line.when != Mod::Line::When::Crossed ||
+              mod_line.number != line.value.special
+      mod_line.action.call(line, side, thing)
+      return
+    end
+
     #        Triggers that other things can activate
     if thing.value.player.null?
       # Things that should NOT trigger specials...
@@ -7577,6 +7584,13 @@ module Doocr
   # Called when a thing shoots a special line.
   #
   def self.p_shoot_special_line(thing : CDoom::Mobj*, line : CDoom::Line*)
+    Mod.lines.each do |mod_line|
+      next if mod_line.when != Mod::Line::When::Shot ||
+              mod_line.number != line.value.special
+      mod_line.action.call(line, 0, thing)
+      return
+    end
+
     # Impacts that other things can activate.
     if thing.value.player.null?
       ok = 0 # [ds] Pointless ok again?
@@ -7978,6 +7992,13 @@ module Doocr
   # Only the front sides of lines are usable.
   #
   def self.p_use_special_line(thing : CDoom::Mobj*, line : CDoom::Line*, side : LibC::Int) : CDoom::DoomBool
+    Mod.lines.each do |mod_line|
+      next if mod_line.when != Mod::Line::When::Used ||
+              mod_line.number != line.value.special
+      mod_line.action.call(line, side, thing)
+      return 1
+    end
+
     # Err...
     # Use the back sides of VERY SPECIAL lines...
     if side != 0

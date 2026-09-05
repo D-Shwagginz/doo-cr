@@ -659,6 +659,9 @@ module Doocr
       puts "DOO-CR v#{VERSION_STR} - DEMO v#{DEMOVERSION} | SAVE v#{SAVEVERSION} | NET v#{NETVERSION}"
       puts "Built #{BUILD_TIME}"
       exit(0)
+    elsif ARGV.includes?("-dbcfg")
+      Mod.build_doombuilder_cfg
+      exit(0)
     end
 
     CDoom.find_response_file
