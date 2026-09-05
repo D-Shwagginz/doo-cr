@@ -97,4 +97,5 @@ module Doocr
   def self.get_mobj : CDoom::Mobj*
     @@current_thinking_mobj
   end
+
 end
