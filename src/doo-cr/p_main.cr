@@ -6130,7 +6130,11 @@ module Doocr
         mobj = CDoom.z_malloc(sizeof(CDoom::Mobj), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Mobj*)
         mjslice = Slice.new(mobj.as(UInt8*), sizeof(CDoom::Mobj))
         file.read_fully(mjslice)
-        mobj.value.state = @@states.to_unsafe + mobj.value.state.address
+        begin
+          mobj.value.state = @@states.to_unsafe + mobj.value.state.address
+        rescue
+          mobj.value.state = @@states.to_unsafe
+        end
         mobj.value.target = Pointer(CDoom::Mobj).null
         if !mobj.value.player.null?
           mobj.value.player = @@players.to_unsafe + (mobj.value.player.address - 1)
