@@ -216,5 +216,33 @@ at_exit do
   end
 end
 
+Doocr.make_mod do |mod|
+  mod.add_weapon Doocr::Mod::Weapon::WeaponSlot::Fist do |weapon|
+    weapon.ammo_type = Doocr::Mod::Weapon::AmmoType::Noammo
+    weapon.states do |up, down, ready, atk, flash|
+      ready.add "PUNG", 'A', 1, (->CDoom.a_weapon_ready).pointer
+      ready.loop
+
+      down.add "PUNG", 'A', 1, (->CDoom.a_lower).pointer
+      down.loop
+
+      up.add "PUNG", 'A', 1, (->CDoom.a_raise).pointer
+      up.loop
+
+      atk.add "PUNG", 'B', 3
+      atk.add "PUNG", 'C', 3
+      atk.add "PUNG", 'D', 2 do 
+        player = Doocr.get_player
+        mo = player.value.mo
+        Doocr.s_start_sound(mo.as(Void*), CDoom::Sfxenum::SFX_metal.value)
+        mo.value.momz = Doocr::FRACUNIT * 20
+      end
+      atk.add "PUNG", 'C', 3
+      atk.add "PUNG", 'B', 3
+      atk.goto ready
+    end
+  end
+end
+
 # Make it happen!
 Doocr.doom_init
