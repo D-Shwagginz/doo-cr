@@ -566,7 +566,7 @@ module Doocr
     ady = doom_abs(listener.value.y - source.value.y)
 
     # From _GG1_ p.428. Appox. eucledian distance fast.
-    approx_dist = adx + ady - ((adx < ady ? adx : ady) >> 1)
+    approx_dist = adx &+ ady &- ((adx < ady ? adx : ady) >> 1)
 
     return 0 if CDoom.gamemap != 8 &&
                 approx_dist > CDoom::S_CLIPPING_DIST
