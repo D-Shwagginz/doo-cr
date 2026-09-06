@@ -117,6 +117,12 @@ module Doocr
       @@update_player_action = action
     end
 
+    macro make_var(var)
+      module Doocr::Mod
+        property {{var}}
+      end
+    end
+
     class_getter player_vars = [] of Hash(String, String | Int32 | Bool)
 
     # Gets a variable assigned to a player number
