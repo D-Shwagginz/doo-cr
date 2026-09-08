@@ -216,40 +216,5 @@ at_exit do
   end
 end
 
-Doocr.make_mod do |mod|
-  mod.add_thing "My Health potion" do |thing|
-    thing.health = 1000
-    thing.radius = 20.0
-    thing.height = 16.0
-    thing.reaction_time = 8
-    thing.mass = 100
-
-    thing.states do |spawn, walk, pain, melee, attack, death, explode, raise|
-      spawn.add "BON1", 'A', 6
-      spawn.add "BON1", 'B', 6
-      spawn.add "BON1", 'C', 6
-      spawn.add "BON1", 'D', 6
-      spawn.add "BON1", 'C', 6
-      spawn.add "BON1", 'B', 6
-      spawn.loop
-    end
-
-    thing.on_touch do |special, toucher|
-      if toucher.value.health > 0
-        player = toucher.value.player
-        player.value.health = player.value.health + 1 # can go over 100%
-        player.value.health = 200 if player.value.health > 200
-        player.value.mo.value.health = player.value.health
-        player.value.message = "Got my modded health!"
-
-        player.value.itemcount = player.value.itemcount + 1
-        CDoom.p_remove_mobj(special)
-        player.value.bonuscount = player.value.bonuscount + CDoom::BONUSADD
-        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_itemup.value) if mod.get_player_num(player) == CDoom.consoleplayer
-      end
-    end
-  end
-end
-
 # Make it happen!
 Doocr.doom_init
