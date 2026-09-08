@@ -13,23 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-# ==> A custom linedef tag
+# ==> Doocr's nodebuilder
 
-module Doocr::Mod
-  class Line
-    enum When
-      Crossed
-      Used
-      Shot
-    end
+module Doocr::Nodebuilder
 
-    getter db_name : String
-    getter when : When
-    getter action : Proc(CDoom::Line*, Int32, CDoom::Mobj*, Nil)
-    property number : Int32 = 200 # I believe 141 is the last special line number in Doom. 200 to be safe and round
 
-    def initialize(@db_name, @when, @action)
-      @number += Mod.lines.size
-    end
-  end
 end

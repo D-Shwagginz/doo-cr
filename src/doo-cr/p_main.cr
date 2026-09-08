@@ -6619,11 +6619,6 @@ module Doocr
   def self.p_load_blockmap(lump : LibC::Int)
     CDoom.blockmaplump = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(Int16*)
     CDoom.blockmap = CDoom.blockmaplump + 4
-    count = CDoom.w_lump_length(lump) // 2
-
-    count.times do |i|
-      CDoom.blockmaplump[i] = CDoom.blockmaplump[i] # [ds] pointless?
-    end
 
     CDoom.bmaporgx = CDoom.blockmaplump[0].to_i32 << FRACBITS
     CDoom.bmaporgy = CDoom.blockmaplump[1].to_i32 << FRACBITS
@@ -6763,12 +6758,14 @@ module Doocr
     CDoom.leveltime = 0
 
     # note: most of this ordering is important
-    CDoom.p_load_blockmap(lumpnum + CDoom::ML_BLOCKMAP)
+    CDoom.p_load_blockmap(lumpnum + CDoom::ML_BLOCKMAP) unless ARGV.includes?("-blockmap")
     CDoom.p_load_vertexes(lumpnum + CDoom::ML_VERTEXES)
     CDoom.p_load_sectors(lumpnum + CDoom::ML_SECTORS)
     CDoom.p_load_sidedefs(lumpnum + CDoom::ML_SIDEDEFS)
 
     CDoom.p_load_linedefs(lumpnum + CDoom::ML_LINEDEFS)
+
+    Nodebuilder.build_blockmap if ARGV.includes?("-blockmap")
     CDoom.p_load_subsectors(lumpnum + CDoom::ML_SSECTORS)
     CDoom.p_load_nodes(lumpnum + CDoom::ML_NODES)
     CDoom.p_load_segs(lumpnum + CDoom::ML_SEGS)

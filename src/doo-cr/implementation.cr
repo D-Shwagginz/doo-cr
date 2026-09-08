@@ -1917,10 +1917,6 @@ fun p_load_sidedefs = P_LoadSideDefs(lump : LibC::Int)
   Doocr.p_load_sidedefs(lump)
 end
 
-fun p_load_blockmap = P_LoadBlockMap(lump : LibC::Int)
-  Doocr.p_load_blockmap(lump)
-end
-
 fun p_group_lines = P_GroupLines
   Doocr.p_group_lines
 end

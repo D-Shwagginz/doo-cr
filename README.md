@@ -83,6 +83,9 @@ Common command line arguments are:
 - -timedemo \<name> -nodraw \
   Same as -timedemo but without drawing the video
 
+- -blockmap \
+  Generates blockmaps for maps as they are loaded instead of loading the blockmap from the wad
+
 
 ## How to build
 Use a unix shell, on Windows I use msys2 with UCRT64, with make, cmake and tools, Crystal, and Shards all installed and run `make`.

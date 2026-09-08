@@ -1,9 +1,26 @@
+# Copyright (C) 2026 Devin Shwagginz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+# ==> The main code for the custom modding/engine generation stuff
+
 module Doocr
   # The module which houses all the methods to provide you hooks
   # to insert custom weapons, things, states and more!
   #
   # You can use doo-cr -dbcfg to create a doom builder config file which
-  # will show all your custom stuff in doom builder
+  # will show all your custom tags in doom builder
   #
   # Here's an example of how to recreate the pistol as a modded weapon
   #
@@ -52,6 +69,15 @@ module Doocr
   #       th.value.momx = Doocr.fixed_mul(Doocr::FRACUNIT * 8, Doocr.finecosine[an >> CDoom::ANGLETOFINESHIFT])
   #       th.value.momy = Doocr.fixed_mul(Doocr::FRACUNIT * 8, Doocr.finesine[an >> CDoom::ANGLETOFINESHIFT])
   #     end
+  #   end
+  # end
+  # ```
+  #
+  # Here's an example to make a custom sector tag
+  # ```
+  # Doocr.make_mod do |mod|
+  #   mod.add_sector "My Custom Sector" do |sector, player|
+  #     player.value.message = "You entered my sector!"
   #   end
   # end
   # ```
