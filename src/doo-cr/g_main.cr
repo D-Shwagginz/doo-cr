@@ -1031,18 +1031,18 @@ module Doocr
         (@@states.to_unsafe + i).value.tics = @@states[i].tics >> 1
         i += 1
       end
-      (CDoom.mobjinfo + CDoom::Mobjtype::MT_BRUISERSHOT.value).value.speed = 20 * FRACUNIT
-      (CDoom.mobjinfo + CDoom::Mobjtype::MT_HEADSHOT.value).value.speed = 20 * FRACUNIT
-      (CDoom.mobjinfo + CDoom::Mobjtype::MT_TROOPSHOT.value).value.speed = 20 * FRACUNIT
+      (Doocr.mobjinfo.to_unsafe + CDoom::Mobjtype::MT_BRUISERSHOT.value).value.speed = 20 * FRACUNIT
+      (Doocr.mobjinfo.to_unsafe + CDoom::Mobjtype::MT_HEADSHOT.value).value.speed = 20 * FRACUNIT
+      (Doocr.mobjinfo.to_unsafe + CDoom::Mobjtype::MT_TROOPSHOT.value).value.speed = 20 * FRACUNIT
     elsif skill != CDoom::Skill::Nightmare && CDoom.gameskill == CDoom::Skill::Nightmare
       i = CDoom::Statenum::S_SARG_RUN1.value
       while i <= CDoom::Statenum::S_SARG_PAIN2.value
         (@@states.to_unsafe + i).value.tics = @@states[i].tics << 1
         i += 1
       end
-      (CDoom.mobjinfo + CDoom::Mobjtype::MT_BRUISERSHOT.value).value.speed = 15 * FRACUNIT
-      (CDoom.mobjinfo + CDoom::Mobjtype::MT_HEADSHOT.value).value.speed = 10 * FRACUNIT
-      (CDoom.mobjinfo + CDoom::Mobjtype::MT_TROOPSHOT.value).value.speed = 10 * FRACUNIT
+      (Doocr.mobjinfo.to_unsafe + CDoom::Mobjtype::MT_BRUISERSHOT.value).value.speed = 15 * FRACUNIT
+      (Doocr.mobjinfo.to_unsafe + CDoom::Mobjtype::MT_HEADSHOT.value).value.speed = 10 * FRACUNIT
+      (Doocr.mobjinfo.to_unsafe + CDoom::Mobjtype::MT_TROOPSHOT.value).value.speed = 10 * FRACUNIT
     end
 
     # force players to be initialized upon first level load

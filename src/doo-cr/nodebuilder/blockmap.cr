@@ -26,10 +26,10 @@ module Doocr::Nodebuilder
 
     # Clip against each of the 4 box edges (slab method)
     {
-      {-dx, v1.x - bmin.x},  # left edge
-      { dx, bmax.x - v1.x},  # right edge
-      {-dy, v1.y - bmin.y},  # bottom edge
-      { dy, bmax.y - v1.y},  # top edge
+      {-dx, v1.x - bmin.x}, # left edge
+      {dx, bmax.x - v1.x},  # right edge
+      {-dy, v1.y - bmin.y}, # bottom edge
+      {dy, bmax.y - v1.y},  # top edge
     }.each do |(p, q)|
       if p == 0
         # Line is parallel to this edge; if outside, no intersection at all
@@ -53,7 +53,6 @@ module Doocr::Nodebuilder
     blockmap = IO::Memory.new
     offsets = IO::Memory.new
 
-
     # Find map bounds
     left = Int32::MAX
     bottom = Int32::MAX
@@ -72,14 +71,14 @@ module Doocr::Nodebuilder
     CDoom.bmaporgx = left << FRACBITS
     CDoom.bmaporgy = bottom << FRACBITS
 
-    CDoom.bmapwidth  = ((right - left) // 128) + 1
+    CDoom.bmapwidth = ((right - left) // 128) + 1
     CDoom.bmapheight = ((top - bottom) // 128) + 1
 
     # Build the blockmap starting from the bottom left
     CDoom.bmapheight.times do |y|
       CDoom.bmapwidth.times do |x|
         offsets.write_bytes (blockmap.pos // 2).to_i16!
-bstart = Raylib::Vector2.new(x: left + x * 128, y: bottom + y * 128)
+        bstart = Raylib::Vector2.new(x: left + x * 128, y: bottom + y * 128)
         bend = Raylib::Vector2.new(x: bstart.x + 128, y: bstart.y + 128)
 
         CDoom.numlines.times do |lin|
@@ -101,7 +100,6 @@ bstart = Raylib::Vector2.new(x: left + x * 128, y: bottom + y * 128)
         blockmap.write_bytes -1_i16
       end
     end
-
 
     # Load blockmap normally
     CDoom.blockmaplump = blockmap.to_slice.to_unsafe.as(Int16*)

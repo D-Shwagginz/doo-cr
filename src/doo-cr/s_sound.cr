@@ -162,9 +162,9 @@ module Doocr
       # Okay, in the less recent channel,
       #  we will handle the new SFX.
       # Set pointer to raw data.
-      CDoom.channels[slot] = (CDoom.s_sfx + sfxid).value.data.as(UInt8*)
+      CDoom.channels[slot] = (@@s_sfx.to_unsafe + sfxid).value.data.as(UInt8*)
       # Set pointer to end of raw data.
-      CDoom.channelsend[slot] = CDoom.channels[slot] + CDoom.lengths[sfxid]
+      CDoom.channelsend[slot] = CDoom.channels[slot] + @@lengths[sfxid]
 
       # Reset current handle number, limited to 0..100.
       @@handlenums = 100 if @@handlenums == 0
@@ -241,9 +241,9 @@ module Doocr
 
     # Note that sounds have not been cached (yet)
     i = 1
-    while i < CDoom::Sfxenum::NUMSFX.value
-      (CDoom.s_sfx + i).value.lumpnum = -1
-      (CDoom.s_sfx + i).value.usefulness = -1
+    while i < @@s_sfx.size
+      (@@s_sfx.to_unsafe + i).value.lumpnum = -1
+      (@@s_sfx.to_unsafe + i).value.usefulness = -1
       i += 1
     end
   end
@@ -296,11 +296,11 @@ module Doocr
     origin = origin_p.as(CDoom::Mobj*)
 
     # check for bogus sound #
-    if sfx_id < 1 || sfx_id > CDoom::Sfxenum::NUMSFX.value
+    if sfx_id < 1 || sfx_id > @@s_sfx.size
       CDoom.i_error("Error: Bad sfx #: #{sfx_id}")
     end
 
-    sfx = CDoom.s_sfx + sfx_id
+    sfx = @@s_sfx.to_unsafe + sfx_id
 
     # Initialize sound parameters
     unless sfx.value.link.null?

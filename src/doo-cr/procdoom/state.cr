@@ -23,7 +23,7 @@ module Doocr::Mod
     @goto_num = 0
     getter state_index = -1
 
-    @states : Array(CDoom::State) = [] of CDoom::State
+    getter states : Array(CDoom::State) = [] of CDoom::State
 
     # Adds a state into this handler given the name of the sprite,
     # the frame letter or number, the tics/length of the state, and the action it performs.
@@ -35,7 +35,10 @@ module Doocr::Mod
     #
     # The action is given as a do-end block
     def add(name : String, frame : Char | Int, tics : Int32, &action)
-      Doocr.sprnames << name unless Doocr.sprnames.includes?(name)
+      unless Doocr.sprnames.includes?(name)
+        Doocr.sprnames << "TNT1" if Doocr.sprnames.size == 138
+        Doocr.sprnames << name
+      end
       next_state = @states.size + 1
       @state_index = @states.size if @state_index == -1
       @states << CDoom::State.new(
@@ -58,7 +61,10 @@ module Doocr::Mod
     #
     # The action is given as a Proc
     def add(name : String, frame : Char | Int, tics : Int32, action : Proc(Nil))
-      Doocr.sprnames << name unless Doocr.sprnames.includes?(name)
+      unless Doocr.sprnames.includes?(name)
+        Doocr.sprnames << "TNT1" if Doocr.sprnames.size == 138
+        Doocr.sprnames << name
+      end
       next_state = @states.size + 1
       @state_index = @states.size if @state_index == -1
       @states << CDoom::State.new(
@@ -81,7 +87,10 @@ module Doocr::Mod
     #
     # The action is given as a raw function pointer
     def add(name : String, frame : Char | Int, tics : Int32, action : Void*)
-      Doocr.sprnames << name unless Doocr.sprnames.includes?(name)
+      unless Doocr.sprnames.includes?(name)
+        Doocr.sprnames << "TNT1" if Doocr.sprnames.size == 138
+        Doocr.sprnames << name
+      end
       next_state = @states.size + 1
       @state_index = @states.size if @state_index == -1
       @states << CDoom::State.new(
@@ -104,7 +113,10 @@ module Doocr::Mod
     #
     # The action is null
     def add(name : String, frame : Char | Int, tics : Int32)
-      Doocr.sprnames << name unless Doocr.sprnames.includes?(name)
+      unless Doocr.sprnames.includes?(name)
+        Doocr.sprnames << "TNT1" if Doocr.sprnames.size == 138
+        Doocr.sprnames << name
+      end
       next_state = @states.size + 1
       @state_index = @states.size if @state_index == -1
       @states << CDoom::State.new(

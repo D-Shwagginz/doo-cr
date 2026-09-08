@@ -85,12 +85,14 @@ module Doocr
     @@weapons = [] of Weapon
     class_getter lines = [] of Line
     class_getter sectors = [] of Sector
+    class_getter things = [] of Thing
 
     class_property name = ""
     class_getter wad_names = [] of String
 
     protected def self.parse
       @@weapons.each &.parse
+      @@things.each &.parse
     end
 
     # Adds a wad to check for auto loading
@@ -104,6 +106,33 @@ module Doocr
       weapon = Weapon.new(slot)
       yield weapon
       @@weapons << weapon
+    end
+
+    # Adds a thing into the mod
+    # Takes a block which yields the thing for setup
+    # Returns the index of the mobj for spawning inside of your methods
+    def self.add_thing(db_name : String, db_spawnable : Bool = true, &) : Int32
+      thing = Thing.new(db_name, db_spawnable)
+      yield thing
+      @@things << thing
+      return @@things.size - 1
+    end
+
+    # Adds a sound into the mod
+    # name is up to 6 chars
+    # singularity - only one at a time
+    # priority - Sfx priority for when channels get full
+    # Returns the index that sound is at
+    def self.add_sound(name : String, singularity : Bool = false, priority : Int32 = 64) : Int32
+      Doocr.s_sfx << CDoom::Sfxinfo.new(
+        name: name[0..5].downcase,
+        singularity: singularity.to_unsafe,
+        priority: priority,
+        link: Pointer(CDoom::Sfxinfo).null, pitch: -1, volume: -1,
+        data: Pointer(Void).null
+      )
+      Doocr.lengths << 0
+      return Doocr.s_sfx.size - 1
     end
 
     # Adds a custom line tag into the mod given its doombuilder name,
@@ -122,6 +151,11 @@ module Doocr
     def self.add_sector(db_name : String, &action : Proc(CDoom::Sector*, CDoom::Player*, Nil))
       sector = Sector.new(db_name, action)
       @@sectors << sector
+    end
+
+    # Gets which player number a player pointer is
+    def self.get_player_num(player : CDoom::Player*) : Int64
+      return player - Doocr.players
     end
 
     # Gets the current player that the state is being called from.

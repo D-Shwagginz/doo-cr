@@ -350,15 +350,15 @@ module Doocr
     print "i_init_sound: "
 
     i = 1
-    while i < CDoom::Sfxenum::NUMSFX.value
+    while i < @@s_sfx.size
       # Alias? Example is the chaingun sound linked to pistol.
-      if (CDoom.s_sfx + i).value.link.null?
+      if (@@s_sfx.to_unsafe + i).value.link.null?
         # Load data from WAD file.
-        (CDoom.s_sfx + i).value.data = CDoom.getsfx((CDoom.s_sfx + i).value.name, CDoom.lengths.to_unsafe + i)
+        (@@s_sfx.to_unsafe + i).value.data = CDoom.getsfx((@@s_sfx.to_unsafe + i).value.name, @@lengths.to_unsafe + i)
       else
         # Previously loaded already?
-        (CDoom.s_sfx + i).value.data = (CDoom.s_sfx + i).value.link.value.data
-        CDoom.lengths[i] = CDoom.lengths[((CDoom.s_sfx + i).value.link - CDoom.s_sfx) // sizeof(CDoom::Sfxinfo)]
+        (@@s_sfx.to_unsafe + i).value.data = (@@s_sfx.to_unsafe + i).value.link.value.data
+        @@lengths[i] = @@lengths[((@@s_sfx.to_unsafe + i).value.link - @@s_sfx.to_unsafe) // sizeof(CDoom::Sfxinfo)]
       end
 
       i += 1

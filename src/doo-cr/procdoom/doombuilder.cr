@@ -89,13 +89,37 @@ dehacked
       end
       cfg.puts "}}"
 
-      cfg.puts "" \
-               "sectortypes
+      cfg.puts "sectortypes
       {"
       @@sectors.each do |sector|
         cfg.puts "#{sector.number} = \"#{sector.db_name}\";"
       end
       cfg.puts "}"
+
+      cfg.puts "thingtypes
+      {
+      mod
+      {
+      color = 0;
+      arrow = 1;
+      title = \"Mod\";
+      width = 16;
+      sort = 1;
+      height = 56;
+      error = 2;"
+      @@things.each do |thing|
+        next if thing.doomednum == -1
+        cfg.puts "#{thing.doomednum}
+        {
+        title = \"#{thing.db_name}\";
+        width = #{thing.radius.round.to_i32};
+        height = #{thing.height.round.to_i32};"
+        cfg.puts "sprite = \"#{thing.db_sprite.upcase}\";" unless thing.db_sprite.empty?
+        cfg.puts "hangs = #{thing.flags.spawn_ceiling?.to_unsafe};"
+        cfg.puts "blocking = #{thing.flags.solid?.to_unsafe};"
+        cfg.puts "}"
+      end
+      cfg.puts "}}"
     end
   end
 end

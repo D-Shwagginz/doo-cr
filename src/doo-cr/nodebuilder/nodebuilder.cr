@@ -16,6 +16,4 @@
 # ==> Doocr's nodebuilder
 
 module Doocr::Nodebuilder
-
-
 end

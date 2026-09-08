@@ -198,7 +198,7 @@ module Doocr
 
     CDoom.wipegamestate = CDoom::Gamestate::Needwipe # force a screen wipe
     CDoom.castnum = 0
-    CDoom.caststate = @@states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
+    CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
     CDoom.casttics = CDoom.caststate.value.tics
     CDoom.castdeath = 0
     CDoom.finalestage = 2
@@ -220,10 +220,10 @@ module Doocr
       CDoom.castnum += 1
       CDoom.castdeath = 0
       CDoom.castnum = 0 if CDoom.castorder[CDoom.castnum].name.null?
-      if CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seesound != 0
-        CDoom.s_start_sound(Pointer(Void).null, CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seesound)
+      if Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seesound != 0
+        CDoom.s_start_sound(Pointer(Void).null, Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seesound)
       end
-      CDoom.caststate = @@states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
+      CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
       CDoom.castframes = 0
     else
       # just advance to next state in amnimation
@@ -231,7 +231,7 @@ module Doocr
         # Yes, it is a gross hack!
         CDoom.castattacking = 0
         CDoom.castframes = 0
-        CDoom.caststate = @@states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
+        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
         CDoom.casttics = CDoom.caststate.value.tics
         CDoom.casttics = 15 if CDoom.casttics == -1
         return
@@ -286,26 +286,26 @@ module Doocr
       # go into attack frame
       CDoom.castattacking = 1
       if CDoom.castonmelee != 0
-        CDoom.caststate = @@states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].meleestate
+        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].meleestate
       else
-        CDoom.caststate = @@states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].missilestate
+        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].missilestate
       end
       CDoom.castonmelee ^= 1
       if CDoom.caststate == @@states.to_unsafe + CDoom::Statenum::S_NULL.value
         if CDoom.castonmelee != 0
-          CDoom.caststate = @@states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].meleestate
+          CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].meleestate
         else
-          CDoom.caststate = @@states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].missilestate
+          CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].missilestate
         end
       end
     end
 
     if CDoom.castattacking != 0
       if CDoom.castframes == 24 ||
-         CDoom.caststate == @@states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
+         CDoom.caststate == @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
         CDoom.castattacking = 0
         CDoom.castframes = 0
-        CDoom.caststate = @@states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
+        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
       end
     end
 
@@ -321,12 +321,12 @@ module Doocr
 
     # go into death frame
     CDoom.castdeath = 1
-    CDoom.caststate = @@states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].deathstate
+    CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].deathstate
     CDoom.casttics = CDoom.caststate.value.tics
     CDoom.castframes = 0
     CDoom.castattacking = 0
-    if CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].deathsound != 0
-      CDoom.s_start_sound(Pointer(Void).null, CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].deathsound)
+    if Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].deathsound != 0
+      CDoom.s_start_sound(Pointer(Void).null, Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].deathsound)
     end
 
     return 1

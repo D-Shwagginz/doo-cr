@@ -1068,7 +1068,6 @@ lib CDoom
   # __INFO__
 
   enum Spritenum
-    SPR_TNT    = -1
     SPR_TROO
     SPR_SHTG
     SPR_PUNG
@@ -1208,6 +1207,8 @@ lib CDoom
     SPR_TLMP
     SPR_TLP2
     NUMSPRITES
+
+    SPR_TNT = 138
   end
 
   enum Statenum
@@ -2358,8 +2359,6 @@ lib CDoom
     raisestate : LibC::Int
   end
 
-  $mobjinfo : Mobjinfo*
-
   # __M__ARGV__
 
   # __M_CHEAT__
@@ -2598,9 +2597,6 @@ lib CDoom
     # music handle once registered
     handle : LibC::Int
   end
-
-  # the complete set of sound effects
-  $s_sfx = S_sfx : Sfxinfo*
 
   # the complete set of music
   $s_music = S_music : Musicinfo*
@@ -6113,9 +6109,6 @@ lib CDoom
   #  the size of the 16bit, 2 hardware channel (stereo)
   #  mixing buffer, and the samplerate of the raw data.
 
-  # The actual lengths of all sound effects.
-  $lengths : LibC::Int[Sfxenum::NUMSFX]
-
   # The global mixing buffer.
   # Basically, samples from all active internal channels
   #  are modifed and added, and stored in the buffer
@@ -6659,7 +6652,6 @@ lib CDoom
   fun p_load_things = P_LoadThings(lump : LibC::Int)
   fun p_load_linedefs = P_LoadLineDefs(lump : LibC::Int)
   fun p_load_sidedefs = P_LoadSideDefs(lump : LibC::Int)
-  fun p_load_blockmap = P_LoadBlockMap(lump : LibC::Int)
   fun p_group_lines = P_GroupLines
 
   $sightzstart : Fixed # eye z of looker

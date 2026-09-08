@@ -285,6 +285,10 @@ module Doocr
     end
   end
 
+  def self.float_to_fixed(f : Float64) : CDoom::Fixed
+    (f * FRACUNIT).round.to_i32
+  end
+
   @@was_focused = false
 
   def self.i_init_graphics

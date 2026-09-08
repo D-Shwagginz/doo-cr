@@ -1279,7 +1279,7 @@ module Doocr
 
     return 1 if thing.value.info.value.raisestate == CDoom::Statenum::S_NULL.value # monster doesn't have a raise state
 
-    maxdist = thing.value.info.value.radius + CDoom.mobjinfo[CDoom::Mobjtype::MT_VILE.value].radius
+    maxdist = thing.value.info.value.radius + Doocr.mobjinfo[CDoom::Mobjtype::MT_VILE.value].radius
 
     return 1 if doom_abs(thing.value.x - CDoom.viletryx) > maxdist ||
                 doom_abs(thing.value.y - CDoom.viletryy) > maxdist # not actually touching
@@ -1522,7 +1522,7 @@ module Doocr
     an = angle >> CDoom::ANGLETOFINESHIFT
 
     prestep = 4 * FRACUNIT +
-              3 * (actor.value.info.value.radius + CDoom.mobjinfo[CDoom::Mobjtype::MT_SKULL.value].radius) // 2
+              3 * (actor.value.info.value.radius + Doocr.mobjinfo[CDoom::Mobjtype::MT_SKULL.value].radius) // 2
 
     x = actor.value.x + CDoom.fixed_mul(prestep, @@finecosine[an])
     y = actor.value.y + CDoom.fixed_mul(prestep, @@finesine[an])
@@ -2455,6 +2455,13 @@ module Doocr
        delta < -8*FRACUNIT
       # out of reach
       return
+    end
+
+    Mod.things.each do |thing|
+      if thing.mobjtype == special.value.type.value
+        thing.on_touch.call(special, toucher)
+        return
+      end
     end
 
     sound = CDoom::Sfxenum::SFX_itemup
@@ -4561,7 +4568,7 @@ module Doocr
     mo.value.momy = 0
     mo.value.momz = 0
 
-    CDoom.p_set_mobj_state(mo, CDoom::Statenum.new(CDoom.mobjinfo[mo.value.type.value].deathstate))
+    CDoom.p_set_mobj_state(mo, CDoom::Statenum.new(Doocr.mobjinfo[mo.value.type.value].deathstate))
 
     mo.value.tics = mo.value.tics - (CDoom.p_random & 3)
 
@@ -4872,7 +4879,7 @@ module Doocr
     CDoom.doom_memset(mobj, 0, sizeof(CDoom::Mobj))
     type = CDoom::Mobjtype::MT_SERGEANT if ARGV.includes?("-nospectre") && type == CDoom::Mobjtype::MT_SHADOWS
 
-    info = CDoom.mobjinfo + type.value
+    info = Doocr.mobjinfo.to_unsafe + type.value
 
     mobj.value.type = type
     mobj.value.info = info
@@ -4962,13 +4969,13 @@ module Doocr
 
     # find which type to spawn
     i = 0
-    while i < CDoom::Mobjtype::NUMMOBJTYPES.value
-      break if mthing.value.type == CDoom.mobjinfo[i].doomednum
+    while i < Doocr.mobjinfo.size
+      break if mthing.value.type == Doocr.mobjinfo[i].doomednum
       i += 1
     end
 
     # spawn it
-    if CDoom.mobjinfo[i].flags & CDoom::Mobjflag::MF_SPAWNCEILING.value != 0
+    if Doocr.mobjinfo[i].flags & CDoom::Mobjflag::MF_SPAWNCEILING.value != 0
       z = CDoom::ONCEILINGZ
     else
       z = CDoom::ONFLOORZ
@@ -5077,22 +5084,22 @@ module Doocr
 
     # find which type to spawn
     i = 0
-    while i < CDoom::Mobjtype::NUMMOBJTYPES.value
-      break if mthing.value.type == CDoom.mobjinfo[i].doomednum
+    while i < Doocr.mobjinfo.size
+      break if mthing.value.type == Doocr.mobjinfo[i].doomednum
       i += 1
     end
 
-    if i == CDoom::Mobjtype::NUMMOBJTYPES.value
+    if i == Doocr.mobjinfo.size
       CDoom.i_error("Error: p_spawn_map_thing: Unknown type #{mthing.value.type} at (#{mthing.value.x},#{mthing.value.y})")
     end
 
     # don't spawn keycards and players in deathmatch
-    return if CDoom.deathmatch != 0 && CDoom.mobjinfo[i].flags & CDoom::Mobjflag::MF_NOTDMATCH.value != 0
+    return if CDoom.deathmatch != 0 && Doocr.mobjinfo[i].flags & CDoom::Mobjflag::MF_NOTDMATCH.value != 0
 
     # don't spawn any monsters if -nomonsters
     if CDoom.nomonsters != 0 &&
        (i == CDoom::Mobjtype::MT_SKULL.value ||
-       (CDoom.mobjinfo[i].flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0))
+       (Doocr.mobjinfo[i].flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0))
       return
     end
 
@@ -5100,7 +5107,7 @@ module Doocr
     x = mthing.value.x.to_i32 << FRACBITS
     y = mthing.value.y.to_i32 << FRACBITS
 
-    if CDoom.mobjinfo[i].flags & CDoom::Mobjflag::MF_SPAWNCEILING.value != 0
+    if Doocr.mobjinfo[i].flags & CDoom::Mobjflag::MF_SPAWNCEILING.value != 0
       z = CDoom::ONCEILINGZ
     else
       z = CDoom::ONFLOORZ
@@ -6141,7 +6148,7 @@ module Doocr
           mobj.value.player.value.mo = mobj
         end
         CDoom.p_set_thing_position(mobj)
-        mobj.value.info = CDoom.mobjinfo + mobj.value.type.value
+        mobj.value.info = Doocr.mobjinfo.to_unsafe + mobj.value.type.value
         mobj.value.floorz = mobj.value.subsector.value.sector.value.floorheight
         mobj.value.ceilingz = mobj.value.subsector.value.sector.value.ceilingheight
         pointerof(mobj.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.p_mobj_thinker).pointer, Pointer(Void).null)
@@ -6758,7 +6765,7 @@ module Doocr
     CDoom.leveltime = 0
 
     # note: most of this ordering is important
-    CDoom.p_load_blockmap(lumpnum + CDoom::ML_BLOCKMAP) unless ARGV.includes?("-blockmap")
+    p_load_blockmap(lumpnum + CDoom::ML_BLOCKMAP) unless ARGV.includes?("-blockmap")
     CDoom.p_load_vertexes(lumpnum + CDoom::ML_VERTEXES)
     CDoom.p_load_sectors(lumpnum + CDoom::ML_SECTORS)
     CDoom.p_load_sidedefs(lumpnum + CDoom::ML_SIDEDEFS)

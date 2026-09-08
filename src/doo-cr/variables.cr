@@ -140,7 +140,7 @@ module Doocr
 
   @@players = StaticArray(CDoom::Player, CDoom::MAXPLAYERS).new(CDoom::Player.new)
 
-  def self.players
+  protected def self.players
     @@players.to_unsafe
   end
 
@@ -5518,7 +5518,7 @@ module Doocr
       CDoom::Statenum::S_NULL.value,        # raisestate
     },
   ]
-  @@mobjinfo : Array(CDoom::Mobjinfo) = Array.new(CDoom::Mobjtype::NUMMOBJTYPES.value, CDoom::Mobjinfo.new)
+  class_getter mobjinfo : Array(CDoom::Mobjinfo) = Array.new(CDoom::Mobjtype::NUMMOBJTYPES.value, CDoom::Mobjinfo.new)
   @@mobjinfo_data.each_with_index do |elm, i|
     (@@mobjinfo.to_unsafe + i).value.doomednum = elm[0]
     (@@mobjinfo.to_unsafe + i).value.spawnstate = elm[1]
@@ -5544,7 +5544,6 @@ module Doocr
     (@@mobjinfo.to_unsafe + i).value.flags = elm[21]
     (@@mobjinfo.to_unsafe + i).value.raisestate = elm[22]
   end
-  CDoom.mobjinfo = @@mobjinfo.to_unsafe
 
   c_array_strings(CDoom.gammamsg,
     @@deh_gammalvl0,
@@ -6220,7 +6219,7 @@ module Doocr
     {"skeatk", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
     {"radio", false, 60, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
   ]
-  @@s_sfx : Array(CDoom::Sfxinfo) = Array(CDoom::Sfxinfo).new(109, CDoom::Sfxinfo.new)
+  class_getter s_sfx : Array(CDoom::Sfxinfo) = Array(CDoom::Sfxinfo).new(109, CDoom::Sfxinfo.new)
   @@s_sfx_data.each_with_index do |elm, i|
     (@@s_sfx.to_unsafe + i).value.name = elm[0].to_unsafe
     (@@s_sfx.to_unsafe + i).value.singularity = elm[1].to_unsafe
@@ -6230,7 +6229,7 @@ module Doocr
     (@@s_sfx.to_unsafe + i).value.volume = elm[5]
     (@@s_sfx.to_unsafe + i).value.data = Pointer(Void).new(elm[6].to_u64!)
   end
-  CDoom.s_sfx = @@s_sfx.to_unsafe
+  class_getter lengths : Array(Int32) = Array(Int32).new(@@s_sfx.size, 0)
 
   CDoom.veryfirsttime = 1
   CDoom.st_msgcounter = 0
