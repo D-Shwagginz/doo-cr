@@ -17,11 +17,11 @@
 
 module Doocr
   def self.i_get_heap_size : LibC::Int
-    return CDoom.mb_used * 1024 * 1024
+    return Doocr.mb_used * 1024 * 1024
   end
 
   def self.i_zone_base(size : LibC::Int*) : CDoom::Byte*
-    size.value = CDoom.mb_used * 1024 * 1024
+    size.value = Doocr.mb_used * 1024 * 1024
     return GC.malloc(size.value).as(CDoom::Byte*)
   end
 
@@ -87,7 +87,7 @@ module Doocr
     STDERR.puts error
 
     # Shutdown. Here might be other errors.
-    CDoom.g_check_demo_status if CDoom.demorecording != 0
+    CDoom.g_check_demo_status if Doocr.demorecording != 0
 
     CDoom.d_quit_net_game
     CDoom.i_shutdown_sound
@@ -201,7 +201,7 @@ module Doocr
 
   def self.i_finish_update
     # draws little dots on the bottom of the screen
-    if CDoom.devparm != 0
+    if Doocr.devparm != 0
       i = CDoom.i_get_time
       tics = i - @@lasttic
       @@lasttic = i
@@ -272,11 +272,11 @@ module Doocr
 
   def self.i_set_palette(palette : CDoom::Byte*)
     256.times do |i|
-      r = CDoom.gammatable[CDoom.usegamma][palette.value] & ~3
+      r = Doocr.gammatable[Doocr.usegamma][palette.value] & ~3
       palette += 1
-      g = CDoom.gammatable[CDoom.usegamma][palette.value] & ~3
+      g = Doocr.gammatable[Doocr.usegamma][palette.value] & ~3
       palette += 1
-      b = CDoom.gammatable[CDoom.usegamma][palette.value] & ~3
+      b = Doocr.gammatable[Doocr.usegamma][palette.value] & ~3
       palette += 1
       CDoom.screen_palette[i*3] = r
       CDoom.screen_palette[i*3 + 1] = g

@@ -42,23 +42,23 @@ end
 
 # translates between frame-buffer and map distances
 macro ftom(x)
-  (CDoom.fixed_mul(({{x}}<<16), CDoom.scale_ftom))
+  (CDoom.fixed_mul(({{x}}<<16), Doocr.scale_ftom))
 end
 
 # define MTOF(x) (FixedMul((x),scale_mtof)>>16)
 macro mtof(x)
-  (CDoom.fixed_mul({{x}}, CDoom.scale_mtof)>>16)
+  (CDoom.fixed_mul({{x}}, Doocr.scale_mtof)>>16)
 end
 
 # translates between frame-buffer and map coordinates
 # define CXMTOF(x)  (f_x + MTOF((x)-m_x))
 # define CYMTOF(y)  (f_y + (f_h - MTOF((y)-m_y)))
 macro cxmtof(x)
-  (CDoom.f_x + mtof({{x}}-CDoom.m_x))
+  (Doocr.f_x + mtof({{x}}-CDoom.m_x))
 end
 
 macro cymtof(y)
-  (CDoom.f_y + (CDoom.f_h - mtof({{y}}-CDoom.m_y)))
+  (Doocr.f_y + (Doocr.f_h - mtof({{y}}-CDoom.m_y)))
 end
 
 # Macros for filling C StaticArrays
@@ -94,118 +94,24 @@ end
 
 # Was a define in C
 macro ng_statsx
-  (32 + CDoom.star.value.width//2 + 32*(CDoom.dofrags == 0).to_unsafe)
+  (32 + CDoom.star.value.width//2 + 32*(Doocr.dofrags == 0).to_unsafe)
 end
 
 # The C Library
 @[Link(ldflags: "-L#{__DIR__}/../.. -lcvars")]
 lib CDoom
-  # Sample rate of sound samples from doom
-  DOOM_SAMPLERATE = 11025
-
-  # MIDI tick needs to be called 140 times per seconds
-  DOOM_MIDI_RATE = 140
-
-  # Hide menu options. If for say your platform doesn't support mouse or
-  # MIDI playback, you can hide these settings from the menu.
-  DOOM_FLAG_HIDE_MOUSE_OPTIONS = 1 # Remove mouse options from menu
-  DOOM_FLAG_HIDE_SOUND_OPTIONS = 2 # Remove sound options from menu
-  DOOM_FLAG_HIDE_MUSIC_OPTIONS = 4 # Remove music options from menu
-
-  # Darken background when menu is open, making it more readable. This
-  # uses a bit more CPU and redraws the HUD every frame
-  DOOM_FLAG_MENU_DARKEN_BG = 8
+  DOOM_SAMPLERATE = Doocr::DOOM_SAMPLERATE
+  DOOM_MIDI_RATE = Doocr::DOOM_MIDI_RATE
+  DOOM_FLAG_HIDE_MOUSE_OPTIONS = Doocr::DOOM_FLAG_HIDE_MOUSE_OPTIONS
+  DOOM_FLAG_HIDE_SOUND_OPTIONS = Doocr::DOOM_FLAG_HIDE_SOUND_OPTIONS
+  DOOM_FLAG_HIDE_MUSIC_OPTIONS = Doocr::DOOM_FLAG_HIDE_MUSIC_OPTIONS
+  DOOM_FLAG_MENU_DARKEN_BG = Doocr::DOOM_FLAG_MENU_DARKEN_BG
 
   alias DoomBool = LibC::Int
+  alias Default = Doocr::Default
 
-  enum DoomSeek
-    DOOM_SEEK_CUR = 1
-    DOOM_SEEK_END = 2
-    DOOM_SEEK_SET = 0
-  end
-
-  # Doom key mapping
-  enum DoomKey
-    UNKNOWN       =   -1
-    TAB           =    9
-    ENTER         =   13
-    ESCAPE        =   27
-    SPACE         =   32
-    APOSTROPHE    =   39
-    MULTIPLY      =   42
-    COMMA         =   44
-    MINUS         = 0x2d
-    PERIOD        =   46
-    SLASH         =   47
-    ZERO          =   48
-    ONE           =   49
-    TWO           =   50
-    THREE         =   51
-    FOUR          =   52
-    FIVE          =   53
-    SIX           =   54
-    SEVEN         =   55
-    EIGHT         =   56
-    NINE          =   57
-    SEMICOLON     =   58
-    EQUALS        = 0x3d
-    LEFT_BRACKET  =   91
-    RIGHT_BRACKET =   93
-    A             =   97
-    B             =   98
-    C             =   99
-    D             =  100
-    E             =  101
-    F             =  102
-    G             =  103
-    H             =  104
-    I             =  105
-    J             =  106
-    K             =  107
-    L             =  108
-    M             =  109
-    N             =  110
-    O             =  111
-    P             =  112
-    Q             =  113
-    R             =  114
-    S             =  115
-    T             =  116
-    U             =  117
-    V             =  118
-    W             =  119
-    X             =  120
-    Y             =  121
-    Z             =  122
-    BACKSPACE     =  127
-    CTRL          = (0x80 + 0x1d) # Both left and right
-    LEFT_ARROW    = 0xac
-    UP_ARROW      = 0xad
-    RIGHT_ARROW   = 0xae
-    DOWN_ARROW    = 0xaf
-    SHIFT         = (0x80 + 0x36) # Both left and right
-    ALT           = (0x80 + 0x38) # Both left and right
-    F1            = (0x80 + 0x3b)
-    F2            = (0x80 + 0x3c)
-    F3            = (0x80 + 0x3d)
-    F4            = (0x80 + 0x3e)
-    F5            = (0x80 + 0x3f)
-    F6            = (0x80 + 0x40)
-    F7            = (0x80 + 0x41)
-    F8            = (0x80 + 0x42)
-    F9            = (0x80 + 0x43)
-    F10           = (0x80 + 0x44)
-    F11           = (0x80 + 0x57)
-    F12           = (0x80 + 0x58)
-    PAUSE         = 0xff
-  end
-
-  # Mouse button mapping
-  enum DoomButton
-    LEFT   = 0
-    RIGHT  = 1
-    MIDDLE = 2
-  end
+  alias DoomKey = Doocr::DoomKey
+  alias DoomButton = Doocr::DoomButton
 
   #
   # P_inter.C
@@ -340,57 +246,39 @@ lib CDoom
   # Global parameters/defines.
   #
   # DOOM version
-  VERSION = 110
+  VERSION = Doocr::VERSION
 
   # Game mode handling - identify IWAD version
   #  to handle IWAD dependend animations etc.
-  enum GameMode
-    Shareware  # DOOM 1 shareware, E1, M9
-    Registered # DOOM 1 registered, E3, M27
-    Commercial # DOOM 2 retail, E1 M34
-    # DOOM 2 german edition not handled
-    Retail       # DOOM 1 retail, E4, M36
-    Indetermined # Well, no IWAD found.
-  end
+  alias GameMode = Doocr::GameMode
 
   # Mission packs - might be useful for TC stuff?
-  enum GameMission
-    Doom     # DOOM 1
-    Doom2    # DOOM 2
-    PackTnt  # TNT mission pack
-    PackPlut # Plutonia pack
-    None
-  end
+  alias GameMission = Doocr::GameMission
 
   # Identify language to use, software localization.
-  enum Language
-    English
-    French
-    German
-    Unknown
-  end
+  alias Language = Doocr::Language
 
   #
   # For resize of screen, at start of game.
   # It will not work dynamically, see visplanes.
   #
-  BASE_WIDTH = 320
+  BASE_WIDTH = Doocr::BASE_WIDTH
 
   # It is educational but futile to change this
   #  scaling e.g. to 2. Drawing of status bar,
   #  menues etc. is tied to the scale implied
   #  by the graphics.
-  SCREEN_MUL       =     1
-  INV_ASPECT_RATIO = 0.625 # 0.75, ideally
+  SCREEN_MUL       = Doocr::SCREEN_MUL
+  INV_ASPECT_RATIO = Doocr::INV_ASPECT_RATIO
 
   # Constants suck. Crystal sucks.
   # Ruby might sucks for OOP, but it sure is a better Crystal.
   # So there.
-  SCREENWIDTH  = 320
-  SCREENHEIGHT = 200
+  SCREENWIDTH  = Doocr::SCREENWIDTH
+  SCREENHEIGHT = Doocr::SCREENHEIGHT
 
   # The maximum number of players, multiplayer/networking.
-  MAXPLAYERS = 4
+  MAXPLAYERS = Doocr::MAXPLAYERS
 
   # State updates, number of tics / second.
   {% if flag?("DOOM_FAST_TICK") %}
@@ -403,98 +291,44 @@ lib CDoom
   # The current state of the game: whether we are
   # playing, gazing at the intermission screen,
   # the game final animation, or a demo.
-  enum Gamestate
-    Needwipe     = -1
-    Level
-    Intermission
-    Finale
-    Demoscreen
-  end
+  alias Gamestate = Doocr::Gamestate
 
   #
   # Difficulty/skill settings/filters.
   #
 
   # Skill flags.
-  MTF_EASY   = 1
-  MTF_NORMAL = 2
-  MTF_HARD   = 4
+  MTF_EASY   = Doocr::MTF_EASY
+  MTF_NORMAL = Doocr::MTF_NORMAL
+  MTF_HARD   = Doocr::MTF_HARD
 
   # Deaf monsters/do not react to sound.
-  MTF_AMBUSH = 8
+  MTF_AMBUSH = Doocr::MTF_AMBUSH
 
-  enum Skill
-    Baby
-    Easy
-    Medium
-    Hard
-    Nightmare
-  end
+  alias Skill = Doocr::Skill
 
   #
   # Key card.
   #
-  enum Card
-    Bluecard
-    Yellowcard
-    Redcard
-    Blueskull
-    Yellowskull
-    Redskull
-    NUMCARDS
-  end
+  alias Card = Doocr::Card
 
   # The defined weapons,
   # including a marker indicating
   # user has not changed weapon.
-  enum Weapontype
-    Fist
-    Pistol
-    Shotgun
-    Chaingun
-    Missile
-    Plasma
-    Bfg
-    Chainsaw
-    Supershotgun
-    NUMWEAPONS
-    # No pending weapon change.
-    Nochange
-  end
+  alias Weapontype = Doocr::Weapontype
 
   # Ammunition types defined.
-  enum Ammotype
-    Clip  # Pistol / chaingun ammo.
-    Shell # Shotgun / double barreled shotgun.
-    Cell  # Plasma rifle, BFG.
-    Misl  # Missile launcher.
-    OG_NumAmmo
-    Noammo # Unlimited for chainsaw / fist.
-    NUMAMMO
-  end
+  alias Ammotype = Doocr::Ammotype
 
   # Power up artifacts.
-  enum Powertype
-    Invulnerability
-    Strength
-    Invisibility
-    Ironfeet
-    Allmap
-    Infrared
-    NUMPOWERS
-  end
+  alias Powertype = Doocr::Powertype
 
   #
   # Power up durations,
   #  how many seconds till expiration,
   #  assuming TICRATE is 35 ticks/second.
   #
-  enum Powerduration
-    INVULNTICS = (30 * TICRATE)
-    INVISTICS  = (60 * TICRATE)
-    INFRATICS  = (120 * TICRATE)
-    IRONTICS   = (60 * TICRATE)
-  end
+  alias Powerduration = Doocr::Powerduration
 
   #
   # DOOM keyboard definition.
@@ -559,12 +393,7 @@ lib CDoom
   #
 
   # Input event types.
-  enum Evtype
-    Keydown
-    Keyup
-    Mouse
-    Joystick
-  end
+  alias Evtype = Doocr::Evtype
 
   # Event structure.
   struct Event
@@ -574,18 +403,7 @@ lib CDoom
     data3 : LibC::Int # mouse/joystick y move
   end
 
-  enum Gameaction
-    Nothing
-    Loadlevel
-    Newgame
-    Loadgame
-    Savegame
-    Playdemo
-    Completed
-    Victory
-    Worlddone
-    Screenshot
-  end
+  alias Gameaction = Doocr::Gameaction
 
   #
   # Button/action code definitions.
@@ -623,31 +441,12 @@ lib CDoom
   MAXEVENTS = (64 * 64) # [pd] Crank up the number because we pump them faster
 
   $events : Event[MAXEVENTS]
-  $eventhead : LibC::Int
-  $eventtail : LibC::Int
-
-  $gameaction : Gameaction
-
   # __AMMAP_H__
 
   # Used by ST StatusBar stuff.
   AM_MSGHEADER  = (('a'.ord << 24) + ('m'.ord << 16))
   AM_MSGENTERED = (AM_MSGHEADER | ('e'.ord << 8))
   AM_MSGEXITED  = (AM_MSGHEADER | ('x'.ord << 8))
-
-  # Called by main loop.
-  fun am_responder = AM_Responder(ev : Event*) : DoomBool
-
-  # Called by main loop.
-  fun am_ticker = AM_Ticker
-
-  # Called by main loop,
-  # called instead of view drawer if automap active.
-  fun am_drawer = AM_Drawer
-
-  # Called to force the automap to quit
-  # if the level is completed while it is up.
-  fun am_stop = AM_Stop
 
   # __D_MAIN__
 
@@ -723,33 +522,26 @@ lib CDoom
     y : LibC::Short
   end
 
-  # A SideDef, defining the visual appearance of a wall,
-  # by setting textures and offsets.
   struct Mapsidedef
     textureoffset : LibC::Short
     rowoffset : LibC::Short
     toptexture : LibC::Char[8]
     bottomtexture : LibC::Char[8]
     midtexture : LibC::Char[8]
-    # Front sector, towards viewer.
     sector : LibC::Short
   end
 
-  # A LineDef, as used for editing, and as input
-  # to the BSP builder.
   struct Maplinedef
     v1 : LibC::Short
     v2 : LibC::Short
     flags : LibC::Short
     special : LibC::Short
     tag : LibC::Short
-    # sidenum[1] will be -1 if one sided
     sidenum : LibC::Short[2]
   end
 
-  #
-  # LineDef attributes.
-  #
+  # A SideDef, defining the visual appearance of a wall,
+  # by setting textures and offsets.
 
   # Solid, is an obstacle.
   ML_BLOCKING = 1
@@ -2423,16 +2215,6 @@ lib CDoom
   #
   # MISC
   #
-  struct Default
-    name : LibC::Char*
-    location : LibC::Int*
-    defaultvalue : LibC::Int
-    scantranslate : LibC::Int        # PC scan code hack
-    untranslated : LibC::Int         # lousy hack
-    text_location : LibC::Char**     # [pd] int* location was used to store text pointer. Can't change to intptr_t unless we change all settings type
-    default_text_value : LibC::Char* # [pd] So we don't change defaultvalue behavior for int to intptr_t
-  end
-
   fun m_write_file = M_WriteFile(name : LibC::Char*, source : Void*, length : LibC::Int) : DoomBool
   fun m_read_file = M_ReadFile(name : LibC::Char*, buffer : Byte**) : LibC::Int
   fun m_screenshot = M_ScreenShot
@@ -2489,9 +2271,6 @@ lib CDoom
 
   # The sky map is 256*128*4 maps.
   ANGLETOSKYSHIFT = 22
-
-  $skytexture : LibC::Int
-  $skytexturemid : LibC::Int
 
   # Called whenever the view size changes.
   fun r_init_sky_map = R_InitSkyMap
@@ -2551,56 +2330,18 @@ lib CDoom
   # SoundFX struct.
   #
   struct Sfxinfo
-    # up to 6-character name
     name : LibC::Char*
-
-    # Sfx singularity (only one at a time)
     singularity : LibC::Int
-
-    # Sfx priority
     priority : LibC::Int
-
-    # referenced sound if a link
     link : Sfxinfo*
-
-    # pitch if a link
     pitch : LibC::Int
-
-    # volume if a link
     volume : LibC::Int
-
-    # sound data
     data : Void*
-
-    # this is checked every second to see if sound
-    # can be thrown out (if 0, then decrement, if -1,
-    # then throw out, if > 0, then it is in use)
     usefulness : LibC::Int
-
-    # lump number of sfx
     lumpnum : LibC::Int
   end
 
   #
-  # MusicInfo struct.
-  #
-  struct Musicinfo
-    # up to 6-character name
-    name : LibC::Char*
-
-    # lump number of music
-    lumpnum : LibC::Int
-
-    # music data
-    data : Void*
-
-    # music handle once registered
-    handle : LibC::Int
-  end
-
-  # the complete set of music
-  $s_music = S_music : Musicinfo*
-
   #
   # Identifiers for all music in game.
   #
@@ -3234,46 +2975,6 @@ lib CDoom
     didsecret : DoomBool
   end
 
-  #
-  # INTERMISSION
-  # Structure passed e.g. to WI_Start(wb)
-  #
-  struct Wbplayerstruct
-    in : DoomBool # whether the player is in game
-
-    # Player stats, kills, collected items etc.
-    skills : LibC::Int
-    sitems : LibC::Int
-    ssecret : LibC::Int
-    stime : LibC::Int
-    frags : LibC::Int[4]
-    score : LibC::Int # current score on entry, modified on return
-  end
-
-  struct Wbstartstruct
-    epsd : LibC::Int # episode # (0-2)
-
-    # if true, splash the secret level
-    didsecret : DoomBool
-
-    # previous and next levels, origin 0
-    last : LibC::Int
-    next : LibC::Int
-
-    maxkills : LibC::Int
-    maxitems : LibC::Int
-    maxsecret : LibC::Int
-    maxfrags : LibC::Int
-
-    # the par time
-    partime : LibC::Int
-
-    # index of this player in game
-    pnum : LibC::Int
-
-    plyr : Wbplayerstruct[MAXPLAYERS]
-  end
-
   # __D_NET__
 
   #
@@ -3381,50 +3082,22 @@ lib CDoom
   # ------------------------
   # Command line parameters.
   #
-  $nomonsters : DoomBool  # checkparm of -nomonsters
-  $respawnparm : DoomBool # checkparm of -respawn
-  $fastparm : DoomBool    # checkparm of -fast
-  $devparm : DoomBool     # DEBUG: launched with -devparm
-
   # -----------------------------------------------------
   # Game Mode - identify IWAD as shareware, retail etc.
   #
-  $gamemode : GameMode
-  $gamemission : GameMission
-
   # Set if homebrew PWAD stuff has been added.
-  $modifiedgame : DoomBool
-
   # -------------------------------------------
   # Language.
-  $language : Language
-
   # -------------------------------------------
   # Selected skill type, map etc.
   #
 
   # Defaults for menu, methinks.
-  $startskill : Skill
-  $startepisode : LibC::Int
-  $startmap : LibC::Int
-
-  $autostart : DoomBool
-
   # Selected by user.
-  $gameskill : Skill
-  $gameepisode : LibC::Int
-  $gamemap : LibC::Int
-
   # Nightmare mode flag, single player.
-  $respawnmonsters : DoomBool
-
   # Netgame? Only true if >1 player.
-  $netgame : DoomBool
-
   # Flag: true only if started as net deathmatch.
   # An enum might handle altdeath/cooperative better.
-  $deathmatch : DoomBool
-
   # -------------------------
   # Internal parameters for sound rendering.
   # These have been taken from the DOS version,
@@ -3436,7 +3109,6 @@ lib CDoom
   # Sound FX volume has default, 0 - 15
   # Music volume has default, 0 - 15
   # These are multiplied by 8.
-  $snd_music_volume = snd_MusicVolume : LibC::Int # maximum volume for music
 
   # -------------------------
   # Status flags for refresh.
@@ -3445,71 +3117,33 @@ lib CDoom
   # Depending on view size - no status bar?
   # Note that there is no way to disable the
   #  status bar explicitely.
-  $statusbaractive : DoomBool
-
-  $automapactive : DoomBool # In AutoMap mode?
-  $menuactive : DoomBool    # Menu overlayed?
-  $paused : DoomBool        # Game Pause?
-
-  $viewactive : DoomBool
-
-  $nodrawers : DoomBool
-  $noblit : DoomBool
-
-  $viewwindowx : LibC::Int
-  $viewwindowy : LibC::Int
-  $viewheight : LibC::Int
-  $viewwidth : LibC::Int
-  $scaledviewwidth : LibC::Int
 
   # This one is related to the 3-screen display mode.
   # Doocr::ANG90 = left side, ANG270 = right
-  $viewangleoffset : LibC::Int
 
   # Player taking events, and displaying.
-  $consoleplayer : LibC::Int
-  $displayplayer : LibC::Int
 
   # -------------------------------------
   # Scores, rating.
   # Statistics on a given map, for intermission.
   #
-  $totalkills : LibC::Int
-  $totalitems : LibC::Int
-  $totalsecret : LibC::Int
-
   # Timer, for scores.
-  $levelstarttic : LibC::Int # gametic at level start
-  $leveltime : LibC::Int     # tics in game play for par
-
   # --------------------------------------
   # DEMO playback/recording related stuff.
   # No demo, there is a human player in charge?
   # Disable save/end game?
-  $usergame : DoomBool
-
   # ?
-  $demoplayback : DoomBool
-  $demorecording : DoomBool
-
   # Quit after playing a demo from cmdline.
-  $singledemo : DoomBool
-
   # ?
-  $gamestate : Gamestate
-
   # -----------------------------
   # Internal parameters, fixed.
   # These are set by the engine, and not changed
   # according to user inputs. Partly load from
   # WAD, partly set at startup time.
 
-  $gametic : LibC::Int
-
   # Bookkeeping on players - state.
 
   # Alive? Disconnected?
-  $playeringame : DoomBool[MAXPLAYERS]
 
   # Player spawn spots for deathmatch.
   MAX_DM_STARTS = 10
@@ -3521,11 +3155,8 @@ lib CDoom
 
   # Intermission stats.
   # Parameters for world map / intermission.
-  $wminfo : Wbstartstruct
-
   # LUT of ammunition limits for each kind.
   # This doubles with BackPack powerup item.
-  $maxammo : LibC::Int[Ammotype::NUMAMMO]
 
   # -----------------------------------------
   # Internal parameters, used for engine.
@@ -3536,23 +3167,17 @@ lib CDoom
   $debugfile : Void*
 
   # if true, load all graphics at level load
-  $precache : DoomBool
 
   # wipegamestate can be set to -1
   # to force a wipe on the next draw
-  $wipegamestate : Gamestate
 
-  $mouse_sensitivity = mouseSensitivity : LibC::Int
   # ?
   # debug flag to cancel adaptiveness
-  $singletics : DoomBool
 
-  $bodyqueslot : LibC::Int
 
   # Needed to store the number of the dummy sky flat.
   # Used for rendering,
   #  as well as tracking projectiles etc.
-  $skyflatnum : LibC::Int
 
   # Netgame stuff (buffers and pointers, i.e. indices).
 
@@ -3563,13 +3188,9 @@ lib CDoom
   $netbuffer : Doomdata*
 
   $localcmds : Ticcmd[BACKUPTICS]
-  $rndindex : LibC::Int
 
-  $maketic : LibC::Int
-  $nettics : LibC::Int[MAXNETNODES]
 
   $netcmds : Ticcmd[BACKUPTICS][MAXPLAYERS]
-  $ticdup : LibC::Int
 
   # __I_SOUND__
 
@@ -4242,24 +3863,10 @@ lib CDoom
   #
   # P_SWITCH
   #
-  struct Switchlist
-    name1 : LibC::Char*
-    name2 : LibC::Char*
-    episode : LibC::Short
-  end
-
   enum Bwhere
     Top
     Middle
     Bottom
-  end
-
-  struct Button
-    line : Line*
-    where : Bwhere
-    btexture : LibC::Int
-    btimer : LibC::Int
-    soundorg : Mobj*
   end
 
   # max # of wall switches in a level
@@ -4270,8 +3877,6 @@ lib CDoom
 
   # 1 second, in ticks.
   BUTTONTIME = 35
-
-  $buttonlist : Button[MAXBUTTONS]
 
   fun p_change_switch_texture = P_ChangeSwitchTexture(line : Line*, use_again : LibC::Int)
   fun p_init_switch_list = P_InitSwitchList
@@ -4484,21 +4089,11 @@ lib CDoom
   $frontsector : Sector*
   $backsector : Sector*
 
-  $rw_w : LibC::Int
-  $rw_stopx : LibC::Int
 
-  $segtextured : DoomBool
 
   # false if the back side is the same plane
-  $markfloor : DoomBool
-  $markceiling : DoomBool
 
-  $maskedtexture : DoomBool
-  $toptexture : LibC::Int
-  $bottomtexture : LibC::Int
-  $midtexture : LibC::Int
 
-  $skymap : DoomBool
 
   $drawsegs : Drawseg[MAXDRAWSEGS]
   $ds_p : Drawseg*
@@ -4517,11 +4112,6 @@ lib CDoom
   # __R_DRAW__
 
   $dc_colormap : Lighttable*
-  $dc_x : LibC::Int
-  $dc_yl : LibC::Int
-  $dc_yh : LibC::Int
-  $dc_iscale : Fixed
-  $dc_texturemid : Fixed
 
   # first pixel in a column
   $dc_source : Byte*
@@ -4541,16 +4131,9 @@ lib CDoom
 
   fun r_video_erase = R_VideoErase(ofs : LibC::UInt, count : LibC::Int)
 
-  $ds_y : LibC::Int
-  $ds_x1 : LibC::Int
-  $ds_x2 : LibC::Int
 
   $ds_colormap : Lighttable*
 
-  $ds_xfrac : Fixed
-  $ds_yfrac : Fixed
-  $ds_xstep : Fixed
-  $ds_ystep : Fixed
 
   # start of a 64*64 tile image
   $ds_source : Byte*
@@ -4584,7 +4167,6 @@ lib CDoom
   # __R_STATE__
 
   # needed for texture pegging
-  $textureheight : Fixed*
 
   # needed for pre rendering (fracs)
   $spritewidth : Fixed*
@@ -4594,73 +4176,47 @@ lib CDoom
 
   $colormaps : Lighttable*
 
-  $viewwidth : LibC::Int
-  $scaledviewwidth : LibC::Int
-  $viewheight : LibC::Int
 
-  $firstflat : LibC::Int
 
   # for global animation
-  $flattranslation : LibC::Int*
-  $texturetranslation : LibC::Int*
 
   # Sprite....
-  $firstspritelump : LibC::Int
-  $lastspritelump : LibC::Int
-  $numspritelumps : LibC::Int
 
   #
   # Lookup tables for map data.
   #
   $sprites : Spritedef*
 
-  $numvertexes : LibC::Int
   $vertexes : Vertex*
 
-  $numsegs : LibC::Int
   $segs : Seg*
 
-  $numsectors : LibC::Int
   $sectors : Sector*
 
-  $numsubsectors : LibC::Int
   $subsectors : Subsector*
 
-  $numnodes : LibC::Int
   $nodes : Node*
 
-  $numlines : LibC::Int
   $lines : Line*
 
-  $numsides : LibC::Int
   $sides : Side*
 
   #
   # POV data.
   #
-  $viewx : Fixed
-  $viewy : Fixed
-  $viewz : Fixed
 
-  $viewangle : Angle
   $viewplayer : Player*
 
   # ?
-  $clipangle : Angle
 
   VIEWANGLETOX_SIZE = FINEANGLES//2
-  $viewangletox : LibC::Int[VIEWANGLETOX_SIZE]
   XTOVIEWANGLE_SIZE = SCREENWIDTH + 1
   $xtoviewangle : Angle[XTOVIEWANGLE_SIZE]
 
-  $rw_distance : Fixed
-  $rw_normalangle : Angle
 
   # angle to line origin
-  $rw_angle1 : LibC::Int
 
   # Segs count?
-  $sscount : LibC::Int
 
   # __R_DATA__
 
@@ -4686,25 +4242,11 @@ lib CDoom
   #
   # POV related.
   #
-  $viewcos : Fixed
-  $viewsin : Fixed
 
-  $viewwidth : LibC::Int
-  $viewheight : LibC::Int
-  $viewwindowx : LibC::Int
-  $viewwindowy : LibC::Int
 
-  $centerx : LibC::Int
-  $centery : LibC::Int
 
-  $centerxfrac : Fixed
-  $centeryfrac : Fixed
-  $projection : Fixed
 
-  $validcount : LibC::Int
 
-  $linecount : LibC::Int
-  $loopcount : LibC::Int
 
   #
   # Lighting LUT.
@@ -4726,7 +4268,6 @@ lib CDoom
   $scalelightfixed : Lighttable*[MAXLIGHTSCALE]
   $zlight : Lighttable*[MAXLIGHTZ][LIGHTLEVELS]
 
-  $extralight : LibC::Int
   $fixedcolormap : Lighttable*
 
   # Number of diminishing brightness levels.
@@ -4736,7 +4277,6 @@ lib CDoom
   # Blocky/low detail mode.
   # B remove this?
   #  0 = high, 1 = low
-  $detailshift : LibC::Int
 
   #
   # Function pointers to switch refresh/drawing functions.
@@ -4775,13 +4315,8 @@ lib CDoom
   # __R_PLANE__
 
   # Visplane related.
-  $lastopening : LibC::Short*
 
-  $floorclip : LibC::Short[SCREENWIDTH]
-  $ceilingclip : LibC::Short[SCREENWIDTH]
 
-  $yslope : Fixed[SCREENHEIGHT]
-  $distscale : Fixed[SCREENWIDTH]
 
   fun r_init_planes = R_InitPlanes
   fun r_clear_planes = R_ClearPlanes
@@ -4799,17 +4334,11 @@ lib CDoom
 
   # Constant arrays used for psprite clipping
   # and initializing clipping.
-  $negonearray : LibC::Short[SCREENWIDTH]
-  $screenheightarray : LibC::Short[SCREENWIDTH]
 
   # vars for R_DrawMaskedColumn
   $mfloorclip : LibC::Short*
   $mceilingclip : LibC::Short*
-  $spryscale : Fixed
-  $sprtopscreen : Fixed
 
-  $pspritescale : Fixed
-  $pspriteiscale : Fixed
 
   fun r_draw_masked_column = R_DrawMaskedColumn(column : Column*)
   fun r_sort_vis_sprites = R_SortVisSprites
@@ -4883,9 +4412,6 @@ lib CDoom
   ITEMQUESIZE = 128
 
   $itemrespawnque : Mapthing[ITEMQUESIZE]
-  $itemrespawntime : LibC::Int[ITEMQUESIZE]
-  $iquehead : LibC::Int
-  $iquetail : LibC::Int
 
   fun p_respawn_specials = P_RespawnSpecials
   fun p_spawn_mobj = P_SpawnMobj(x : Fixed, y : Fixed, z : Fixed, type : Mobjtype) : Mobj*
@@ -4962,7 +4488,6 @@ lib CDoom
 
   # If "floatok" true, move would be ok
   # if within "tmfloorz - tmceilingz".
-  $floatok : DoomBool
   $tmfloorz : Fixed
   $tmceilingz : Fixed
 
@@ -4988,20 +4513,11 @@ lib CDoom
   #
   # P_SETUP
   #
-  $rejectmatrix : Byte*        # for fast sight rejection
-  $blockmaplump : LibC::Short* # offsets in blockmap are from here
-  $blockmap : LibC::Short*
-  $bmapwidth : LibC::Int
-  $bmapheight : LibC::Int # in mapblocks
-  $bmaporgx : Fixed
-  $bmaporgy : Fixed    # origin of block map
   $blocklinks : Mobj** # for thing chains
 
   #
   # P_INTER
   #
-  $maxammo : LibC::Int[Ammotype::NUMAMMO]
-  $clipammo : LibC::Int[Ammotype::NUMAMMO]
 
   fun p_touch_special_thing = P_TouchSpecialThing(special : Mobj*, toucher : Mobj*)
   fun p_damage_mobj = P_DamageMobj(target : Mobj*, inflictor : Mobj*, source : Mobj*, damage : LibC::Int)
@@ -5161,9 +4677,6 @@ lib CDoom
   # Screen 0 is the screen updated by I_Update screen.
   # Screen 1 is an extra buffer.
   $screens : Byte*[5]
-  $dirtybox : LibC::Int[4]
-  $gammatable : Byte[256][5]
-  $usegamma : LibC::Int
 
   # Allocates buffer screens, call before R_Init.
   fun v_init = V_Init
@@ -5215,13 +4728,6 @@ lib CDoom
   #
   # TYPES
   #
-  struct Wadinfo
-    # Should be "IWAD" or "PWAD".
-    identification : LibC::Char[4]
-    numlumps : LibC::Int
-    infotableofs : LibC::Int
-  end
-
   struct Filelump
     filepos : LibC::Int
     size : LibC::Int
@@ -5231,15 +4737,7 @@ lib CDoom
   #
   # WADFILE I/O related stuff.
   #
-  struct Lumpinfo
-    name : LibC::Char[8]
-    handle : Void*
-    position : LibC::Int
-    size : LibC::Int
-  end
-
   $lumpcache : Void**
-  $numlumps : LibC::Int
 
   fun w_init_multiple_files = W_InitMultipleFiles(filenames : LibC::Char**)
   fun w_reload = W_Reload
@@ -5270,8 +4768,6 @@ lib CDoom
   fun wi_drawer = WI_Drawer
 
   # Setup for an intermission screen.
-  fun wi_start = WI_Start(wbstartstruct : Wbstartstruct*)
-
   # __Z_ZONE__
 
   #
@@ -5309,23 +4805,11 @@ lib CDoom
   $screens : Byte*[5]
   SCREEN_PALETTE_SIZE = 256 * 3
   $screen_palette : LibC::UChar[SCREEN_PALETTE_SIZE]
-  $is_wiping_screen : DoomBool
-  $mixbuffer : LibC::Short[2048]
 
   $screen_buffer : LibC::UChar*
   $final_screen_buffer : LibC::UChar*
-  $last_update_time : LibC::Int
-  $button_states : LibC::Int[3]
   $itoa_buf : LibC::Char[20]
 
-  $setsizeneeded : DoomBool
-  $setblocks : LibC::Int
-  $setdetail : LibC::Int
-
-  $usemouse : LibC::Int
-  $usejoystick : LibC::Int
-  $crosshair : LibC::Int
-  $always_run : LibC::Int
 
   fun d_doom_loop = D_DoomLoop
   fun d_update_wipe = D_UpdateWipe
@@ -5399,31 +4883,6 @@ lib CDoom
   # the following is crap
   LINE_NEVERSEE = ML_DONTDRAW
 
-  struct Fpoint
-    x : LibC::Int
-    y : LibC::Int
-  end
-
-  struct Fline
-    a : Fpoint
-    b : Fpoint
-  end
-
-  struct Mpoint
-    x : Fixed
-    y : Fixed
-  end
-
-  struct Mline
-    a : Mpoint
-    b : Mpoint
-  end
-
-  struct Islope
-    slp : Fixed
-    islp : Fixed
-  end
-
   #
   # The vector graphics for the automap.
   # A line drawing of the player pointing right,
@@ -5431,36 +4890,20 @@ lib CDoom
   #
   R                 = ((8*PLAYERRADIUS)//7)
   NUMPLYRLINES      = 7
-  $player_arrow : Mline[NUMPLYRLINES]
   NUMCHEATPLYRLINES = 16
-  $cheat_player_arrow : Mline[NUMCHEATPLYRLINES]
 
   NUMTRIANGLEGUYLINES     = 3
-  $triangle_guy : Mline[NUMTRIANGLEGUYLINES]
   NUMTHINTRIANGLEGUYLINES = 3
-  $thintriangle_guy : Mline[NUMTHINTRIANGLEGUYLINES]
 
-  $cheating : LibC::Int
-  $grid : LibC::Int
 
-  $leveljuststarted : LibC::Int # kluge until AM_LevelInit() is called
 
-  $finit_width : LibC::Int
-  $finit_height : LibC::Int
 
   # location of window on screen
-  $f_x : LibC::Int
-  $f_y : LibC::Int
 
   # size of window on screen
-  $f_w : LibC::Int
-  $f_h : LibC::Int
 
-  $lightlev : LibC::Int # used for funky strobing effect
   $fb : Byte*           # psuedo-frame buffer
-  $amclock : LibC::Int
 
-  $m_paninc : Mpoint    # how far the window pans each tic (map coords)
   $mtof_zoommul : Fixed # how far the window zooms in each tic (map coords)
   $ftom_zoommul : Fixed #  how far the window zooms in each tic (fb coords)
 
@@ -5500,8 +4943,6 @@ lib CDoom
   $old_m_y : Fixed
 
   # old location used by the Follower routine
-  $f_oldloc : Mpoint
-
   # used by MTOF to scale from map-to-frame-buffer coords
   $scale_mtof : Fixed
   # used by FTOM to scale from frame-buffer-to-map coords (=1/scale_mtof)
@@ -5510,91 +4951,9 @@ lib CDoom
   $plr : Player* # the player represented by an arrow
 
   $marknums : Patch*[10]                 # numbers used for marking by the automap
-  $markpoints : Mpoint[AM_NUMMARKPOINTS] # where the points are
-  $markpointnum : LibC::Int              # next point to be assigned
 
-  $followplayer : LibC::Int # specifies whether to follow the player around
 
-  $cheat_amap_seq : LibC::Char[5]
-  $cheat_amap : Cheatseq
 
-  $stopped : DoomBool
-
-  $automapactive : DoomBool
-
-  $viewactive : DoomBool
-
-  fun am_activate_new_scale = AM_activateNewScale
-
-  fun am_save_scale_and_loc = AM_saveScaleAndLoc
-
-  fun am_restore_scale_and_loc = AM_restoreScaleAndLoc
-
-  fun am_add_mark = AM_addMark
-
-  fun am_find_min_max_boundaries = AM_findMinMaxBoundaries
-
-  fun am_change_window_loc = AM_changeWindowLoc
-
-  fun am_init_variables = AM_initVariables
-
-  fun am_load_pics = AM_loadPics
-
-  fun am_unload_pics = AM_unloadPics
-
-  fun am_clear_marks = AM_clearMarks
-
-  fun am_level_init = AM_LevelInit
-
-  fun am_stop = AM_Stop
-
-  fun am_start = AM_Start
-
-  fun am_min_out_window_scale = AM_minOutWindowScale
-
-  fun am_max_out_window_scale = AM_maxOutWindowScale
-
-  fun am_responder = AM_Responder(ev : Event*) : DoomBool
-
-  fun am_change_window_scale = AM_changeWindowScale
-
-  fun am_do_follow_player = AM_doFollowPlayer
-
-  fun am_update_light_lev = AM_updateLightLev
-
-  fun am_ticker = AM_Ticker
-
-  fun am_clear_fb = AM_clearFB(color : LibC::Int)
-
-  fun am_clip_mline = AM_clipMline(ml : Mline*, fl : Fline*) : DoomBool
-
-  fun am_draw_fline = AM_drawFline(fl : Fline*, color : LibC::Int)
-
-  fun am_draw_mline = AM_drawMline(ml : Mline*, color : LibC::Int)
-
-  fun am_draw_grid = AM_drawGrid(color : LibC::Int)
-
-  fun am_draw_walls = AM_drawWalls
-
-  fun am_rotate = AM_rotate(x : Fixed*, y : Fixed*, a : Angle)
-
-  fun am_draw_line_character = AM_drawLineCharacter(lineguy : Mline*,
-                                                    lineguylines : LibC::Int,
-                                                    scale : Fixed,
-                                                    angle : Angle,
-                                                    color : LibC::Int,
-                                                    x : Fixed,
-                                                    y : Fixed)
-
-  fun am_draw_players = AM_drawPlayers
-
-  fun am_draw_things = AM_drawThings(colors : LibC::Int, colorrange : LibC::Int)
-
-  fun am_draw_marks = AM_drawMarks
-
-  fun am_draw_crosshair = AM_drawCrosshair(color : LibC::Int)
-
-  fun am_drawer = AM_Drawer
 
   $weaponinfo : Weaponinfo[Weapontype::NUMWEAPONS]
 
@@ -5602,25 +4961,13 @@ lib CDoom
 
   $wadfiles : LibC::Char*[MAXWADFILES]
 
-  $devparm : DoomBool     # started game with -devparm
-  $nomonsters : DoomBool  # checkparm of -nomonsters
-  $respawnparm : DoomBool # checkparm of -respawn
-  $fastparm : DoomBool    # checkparm of -fast
-
   $drone : DoomBool
 
-  $singletics : DoomBool # debug flag to cancel adaptiveness
 
   $is_wiping_screen : DoomBool
 
-  $startskill : Skill
-  $startepisode : LibC::Int
-  $startmap : LibC::Int
-  $autostart : DoomBool
-
   $debugfile : Void*
 
-  $advancedemo : DoomBool
 
   $wadfile : LibC::Char[1024]     # primary wad file
   $mapdir : LibC::Char[1024]      # directory of development maps
@@ -5633,20 +4980,13 @@ lib CDoom
   # Events can be discarded if no responder claims them
   #
   $events : Event[MAXEVENTS]
-  $eventhead : LibC::Int
-  $eventtail : LibC::Int
-
   # wipegamestate can be set to -1 to force a wipe on the next draw
   $wipegamestate : Gamestate
   fun r_execute_set_view_size = R_ExecuteSetViewSize
 
   # print title for every printed line
 
-  $inhelpscreens : DoomBool
-  $setsizeneeded : DoomBool
   $showmessages = showMessages : LibC::Int
-  $demorecording : DoomBool
-
   fun d_doom_loop = D_DoomLoop
   fun d_check_net_game = D_CheckNetGame
   fun d_process_events = D_ProcessEvents
@@ -5666,8 +5006,6 @@ lib CDoom
   #
   # DEMO LOOP
   #
-  $demosequence : LibC::Int
-  $pagetic : LibC::Int
   $pagename : LibC::Char*
 
   fun d_page_ticker = D_PageTicker
@@ -5692,32 +5030,11 @@ lib CDoom
   $localcmds : Ticcmd[BACKUPTICS]
 
   $netcmds : Ticcmd[BACKUPTICS][MAXPLAYERS]
-  $nettics : LibC::Int[MAXNETNODES]
-  $nodeingame : DoomBool[MAXNETNODES]   # set false as nodes leave game
-  $remoteresend : DoomBool[MAXNETNODES] # set when local needs tics
-  $resendto : LibC::Int[MAXNETNODES]    # set when remote needs tics
-  $resendcount : LibC::Int[MAXNETNODES]
 
-  $nodeforplayer : LibC::Int[MAXPLAYERS]
-
-  $maketic : LibC::Int
-  $lastnettic : LibC::Int
-  $skiptics : LibC::Int
-  $ticdup : LibC::Int
-  $maxsend : LibC::Int # BACKUPTICS//(2*ticdup)-1
-
-  $reboundpacket : DoomBool
   $reboundstore : Doomdata
 
   $exitmsg : LibC::Char[80]
-  $gametime : LibC::Int
-  $frametics : LibC::Int[4]
-  $frameon : LibC::Int
-  $frameskip : LibC::Int[4]
-  $oldnettics : LibC::Int
 
-  $viewangleoffset : LibC::Int
-  $advancedemo : DoomBool
 
   fun d_process_events = D_ProcessEvents
   fun g_build_ticcmd = G_BuildTiccmd(cmd : Ticcmd*)
@@ -5747,36 +5064,14 @@ lib CDoom
 
   fun try_run_tics = TryRunTics
 
-  $gamemode : GameMode
-  $gamemission : GameMission
-
-  $language : Language
-
-  $modifiedgame : DoomBool
-
   TEXTSPEED =   3
   TEXTWAIT  = 250
 
-  struct Castinfo
-    name : LibC::Char*
-    type : Mobjtype
-  end
 
-  $finalestage : LibC::Int
-
-  $finalecount : LibC::Int
   $finaletext : LibC::Char*
   $finaleflat : LibC::Char*
 
-  $castorder : Castinfo[18]
-
-  $castnum : LibC::Int
-  $casttics : LibC::Int
   $caststate : State*
-  $castdeath : DoomBool
-  $castframes : LibC::Int
-  $castonmelee : LibC::Int
-  $castattacking : DoomBool
 
   #
   # f_start_cast
@@ -5814,7 +5109,6 @@ lib CDoom
 
   fun f_drawer = F_Drawer
 
-  $go : DoomBool
 
   $wipe_scr_start : Byte*
   $wipe_scr_end : Byte*
@@ -5868,29 +5162,8 @@ lib CDoom
   fun p_spawn_player = P_SpawnPlayer(mthing : Mapthing*)
   fun r_execute_set_view_size = R_ExecuteSetViewSize
 
-  $gameaction : Gameaction
-  $gamestate : Gamestate
-  $gameskill : Skill
-  $respawnmonsters : DoomBool
-  $gameepisode : LibC::Int
-  $gamemap : LibC::Int
-
-  $paused : DoomBool
-  $sendpause : DoomBool # send a pause event next tic
-  $sendsave : DoomBool  # send a save event next tic
-  $usergame : DoomBool  # ok to save / end game
-
-  $timingdemo : DoomBool # if true, exit with report on completion
-  $nodrawers : DoomBool  # for comparative timing purposes
-  $noblit : DoomBool     # for comparative timing purposes
-  $starttime : LibC::Int # for comparative timing purposes
-
-  $viewactive : DoomBool
-
-  $deathmatch : DoomBool # only if started as net death
 
   $demoname : LibC::Char[32]
-  $netdemo : DoomBool
   $demobuffer : Byte*
   $demo_p : Byte*
   $demoend : Byte*
@@ -5902,70 +5175,24 @@ lib CDoom
   #
   # controls (have defaults)
   #
-  $key_right : LibC::Int
-  $key_left : LibC::Int
 
-  $key_up : LibC::Int
-  $key_down : LibC::Int
-  $key_strafeleft : LibC::Int
-  $key_straferight : LibC::Int
-  $key_fire : LibC::Int
-  $key_use : LibC::Int
-  $key_strafe : LibC::Int
-  $key_speed : LibC::Int
 
-  $mousebfire : LibC::Int
-  $mousebstrafe : LibC::Int
-  $mousebforward : LibC::Int
-  $mousemove : LibC::Int
 
-  $joybfire : LibC::Int
-  $joybstrafe : LibC::Int
-  $joybuse : LibC::Int
-  $joybspeed : LibC::Int
-
-  $forwardmove : Fixed[2]
-  $sidemove : Fixed[2]
-  $angleturn : Fixed[3] # + slow turn
-
-  $gamekeydown : DoomBool[NUMKEYS]
-  $turnheld : LibC::Int # for accelerative turning
-
-  $mousearray : DoomBool[4]
-  $mousebuttons : DoomBool* # allow [-1]
-
-  $dclicktime : LibC::Int
-  $dclickstate : LibC::Int
-  $dclicks : LibC::Int
-  $dclicktime2 : LibC::Int
-  $dclickstate2 : LibC::Int
-  $dclicks2 : LibC::Int
 
   # joystick values are repeated
-  $joyxmove : LibC::Int
-  $joyymove : LibC::Int
-  $joyarray : DoomBool[5]
-  $joybuttons : DoomBool* # allow [-1]
 
-  $savegameslot : LibC::Int
-  $savedescription : LibC::Char[32]
 
   $bodyque : Mobj*[BODYQUESIZE]
 
   $statcopy : Void* # for statistics driver
 
   # DOOM Par Times
-  $pars : LibC::Int[10][4]
 
-  $cpars : LibC::Int[32]
 
-  $secretexit : DoomBool
 
   $savename : LibC::Char[256]
 
   $d_skill : Skill
-  $d_episode : LibC::Int
-  $d_map : LibC::Int
 
   $defdemoname : LibC::Char*
 
@@ -5991,21 +5218,13 @@ lib CDoom
 
   $w_title : HU_Textline
   $w_chat : HU_Itext
-  $always_off : DoomBool
   $chat_dest : LibC::Char[MAXPLAYERS]
   $w_inputbuffer : HU_Itext[MAXPLAYERS]
-  $message_on : DoomBool
-  $message_nottobefuckedwith : DoomBool
   $w_message : HU_Stext
-  $message_counter : LibC::Int
-  $headsupactive : DoomBool
   $chatchars : LibC::Char[QUEUESIZE]
-  $head : LibC::Int
-  $tail : LibC::Int
 
   $chat_macros : LibC::Char*[10]
 
-  $player_names : LibC::Char*[MAXPLAYERS]
 
   $shiftxform : LibC::Char*
 
@@ -6016,10 +5235,7 @@ lib CDoom
   $french_key_map = frenchKeyMap : LibC::Char[128]
 
   $chat_char : LibC::Char # remove later.
-  $chat_on : DoomBool
-  $message_dontfuckwithme : DoomBool
 
-  $show_messages = showMessages : LibC::Int
 
   # DOOM shareware/registered/retail (Ultimate) names.
   $mapnames : LibC::Char*[45]
@@ -6077,32 +5293,11 @@ lib CDoom
   CONTROLLER_SUSTAIN           = 8
   CONTROLLER_SOFT              = 9
 
-  struct MusHeader
-    id : LibC::Char[4]
-    score_len : LibC::UShort
-    score_start : LibC::UShort
-    channels : LibC::UShort
-    sec_channels : LibC::UShort
-    instr_cnt : LibC::UShort
-    dummy : LibC::UShort
-  end
-
   # A quick hack to establish a protocol between
   # synchronous mix buffer updates and asynchronous
   # audio writes. Probably redundant with gametic.
-  $flag : LibC::Int
 
-  $mus_data : LibC::Char*
-  $mus_header : MusHeader
-  $mus_offset : LibC::Int
-  $mus_delay : LibC::Int
-  $mus_loop : DoomBool
-  $mus_playing : DoomBool
-  $mus_volume : LibC::Int
-  $mus_channel_volumes : LibC::Int[16]
 
-  $looping : LibC::Int
-  $musicdies : LibC::Int
 
   # The number of internal mixing channels,
   #  the samples calculated for each mixing step,
@@ -6113,47 +5308,34 @@ lib CDoom
   # Basically, samples from all active internal channels
   #  are modifed and added, and stored in the buffer
   #  that is submitted to the audio device.
-  $mixbuffer : LibC::Short[MIXBUFFERSIZE]
 
   # The channel step amount...
-  $channelstep : LibC::UInt[NUM_CHANNELS]
   # ... and a 0.16 bit remainder of last step.
-  $channelstepremainder : LibC::UInt[NUM_CHANNELS]
 
   # The channel data pointers, start and end.
   $channels : LibC::UChar*[NUM_CHANNELS]
-  $channelsend : LibC::UChar*[NUM_CHANNELS]
 
   # Time/gametic that the channel started playing,
   #  used to determine oldest, which automatically
   #  has lowest priority.
   # In case number of active sounds exceeds
   #  available channels.
-  $channelstart : LibC::Int[NUM_CHANNELS]
 
   # The sound in channel handles,
   #  determined on registration,
   #  might be used to unregister/stop/modify,
   #  currently unused.
-  $channelhandles : LibC::Int[NUM_CHANNELS]
 
   # SFX id of the playing sound effect.
   # Used to catch duplicates (like chainsaw).
-  $channelids : LibC::Int[NUM_CHANNELS]
 
   # Pitch to stepping lookup, unused.
-  $steptable : LibC::Int[256]
 
   # Volume lookups.
-  $vol_lookup : LibC::Int[32768]
 
   # Hardware left and right channel volume lookup.
-  $channelleftvol_lookup : LibC::Int*[NUM_CHANNELS]
-  $channelrightvol_lookup : LibC::Int*[NUM_CHANNELS]
 
   $queued_midi_msgs : LibC::ULongLong[MAX_QUEUED_MIDI_MSGS]
-  $queue_midi_head : LibC::Int
-  $queue_midi_tail : LibC::Int
 
   fun tick_song = TickSong
 
@@ -6166,7 +5348,6 @@ lib CDoom
 
   fun i_qry_song_playing = I_QrySongPlaying(handle : LibC::Int) : LibC::Int
 
-  $mb_used : LibC::Int
   $emptycmd : Ticcmd
 
   fun i_get_heap_size = I_GetHeapSize : LibC::Int
@@ -6254,45 +5435,27 @@ lib CDoom
   #
 
   # Blocky mode, has default, 0 = high, 1 = normal
-  $detail_level = detailLevel : LibC::Int
-  $screenblocks : LibC::Int # has default
 
   # temp for screenblocks (0-9)
-  $screen_size = screenSize : LibC::Int
 
   # -1 = no quicksave slot picked!
-  $quick_save_slot = quickSaveSlot : LibC::Int
 
   # 1 = message to be printed
-  $message_to_print = messageToPrint : LibC::Int
   # ...and here is the message string!
-  $message_string = messageString : LibC::Char*
 
   # message x & y
-  $messx : LibC::Int
-  $messy : LibC::Int
-  $message_last_menu_active = messageLastMenuActive : LibC::Int
 
   # timed message = no input from user
-  $message_needs_input = messageNeedsInput : DoomBool
 
-  $message_routine = messageRoutine : Proc(LibC::Int, Nil)
 
-  $gammamsg : LibC::Char*[5]
 
   # we are going to be entering a savegame string
-  $save_string_enter = saveStringEnter : LibC::Int
-  $save_slot = saveSlot : LibC::Int # which slot to save in
 
   $endstring : LibC::Char[160]
 
-  $item_on = itemOn : LibC::Short                      # menu item skull is on
-  $skull_anim_counter = skullAnimCounter : LibC::Short # skull animation counter
-  $which_skull = whichSkull : LibC::Short              # which skull to draw
 
   # graphic name of skulls
   # warning: initializer-string for array of chars is too long
-  $skull_name = skullName : LibC::Char*[2]
 
   # current menudef
 
@@ -6303,12 +5466,8 @@ lib CDoom
 
   $tempstring : LibC::Char[80]
   $epi : LibC::Int
-  $detail_names = detailNames : LibC::Char*[2]
-  $msg_names = msgNames : LibC::Char*[2]
 
-  $quitsounds : LibC::Int[8]
 
-  $quitsounds2 : LibC::Int[8]
 
   # DOOM MENU
   #
@@ -6424,43 +5583,14 @@ lib CDoom
   #
   # SCREEN SHOTS
   #
-  struct PCX
-    manufacturer : LibC::Char
-    version : LibC::Char
-    encoding : LibC::Char
-    bits_per_pixel : LibC::Char
-
-    xmin : LibC::UShort
-    ymin : LibC::UShort
-    xmax : LibC::UShort
-    ymax : LibC::UShort
-
-    hres : LibC::UShort
-    vres : LibC::UShort
-
-    palette : LibC::Char[48]
-
-    reserved : LibC::Char
-    color_planes : LibC::Char
-    bytes_per_line : LibC::UShort
-    palette_type : LibC::UShort
-
-    filler : LibC::Char[58]
-    data : LibC::Char # unbounded
-  end
-
   $num_channels = numChannels : LibC::Int
   $scantokey : Byte[128]
 
   $numdefaults : LibC::Int
   $defaultfile : LibC::Char*
 
-  fun write_pcx_file = WritePCXfile(filename : LibC::Char*, data : Byte*, width : LibC::Int, height : LibC::Int, palette : Byte*)
 
-  $rndtable : LibC::Char[256]
 
-  $rndindex : LibC::Int
-  $prndindex : LibC::Int
 
   fun p_random = P_Random : LibC::Int
 
@@ -6481,12 +5611,8 @@ lib CDoom
     NUMDIRS
   end
 
-  $opposite : Dirtype[9]
-  $diags : Dirtype[4]
 
   $soundtarget : Mobj*
-  $xspeed : Fixed[8]
-  $yspeed : Fixed[8]
   $traceangle = TRACEANGLE : LibC::Int
   $corpsehit : Mobj*
   $vileobj : Mobj*
@@ -6533,7 +5659,6 @@ lib CDoom
 
   $tmbbox : Fixed[4]
   $tmthing : Mobj*
-  $tmflags : LibC::Int
   $tmx : Fixed
   $tmy : Fixed
   $tmdropoffz : Fixed
@@ -6542,13 +5667,10 @@ lib CDoom
   # ???: use slope for monsters?
   $shootz : Fixed
 
-  $la_damage : LibC::Int
   $attackrange : Fixed
 
   $aimslope : Fixed
   $usething : Mobj*
-  $crushchange : DoomBool
-  $nofit : DoomBool
 
   # slopes to top and bottom of target
   $topslope : Fixed
@@ -6579,12 +5701,9 @@ lib CDoom
 
   $bombsource : Mobj*
   $bombspot : Mobj*
-  $bombdamage : LibC::Int
   fun pit_radius_attack = PIT_RadiusAttack(thing : Mobj*) : DoomBool
   fun pit_change_sector = PIT_ChangeSector(thing : Mobj*) : DoomBool
 
-  $earlyout : DoomBool
-  $ptflags : LibC::Int
 
   fun pit_add_line_intercepts = PIT_AddLineIntercepts(ld : Line*) : DoomBool
   fun pit_add_thing_intercepts = PIT_AddThingIntercepts(thing : Mobj*) : DoomBool
@@ -6684,30 +5803,13 @@ lib CDoom
     speed : LibC::Int
   end
 
-  #
-  # source animation definition
-  #
-  struct Animdef
-    istexture : DoomBool # if false, it is a flat
-    endname : LibC::Char*
-    startname : LibC::Char*
-    speed : LibC::Int
-  end
-
-  $numlinespecials : LibC::Short
   $linespeciallist : Line*[MAXLINEANIMS]
 
   $anims : Anim[MAXANIMS]
   $lastanim : Anim*
 
-  $animdefs : Animdef*
-
-  $alph_switch_list = alphSwitchList : Switchlist*
-
   SWITCHLIST_SIZE = MAXSWITCHES * 2
   $switchlist : LibC::Int[SWITCHLIST_SIZE]
-  $numswitches : LibC::Int
-  $buttonlist : Button[MAXBUTTONS]
 
   fun p_start_button = P_StartButton(line : Line*, w : Bwhere, texture : LibC::Int, time : LibC::Int)
   fun p_run_thinkers = P_RunThinkers
@@ -6718,7 +5820,6 @@ lib CDoom
 
   ANG5 = Doocr::ANG90//18
 
-  $onground : DoomBool
 
   fun p_thrust = P_Thrust(player : Player*, angle : Angle, move : Fixed)
   fun p_calc_height = P_CalcHeight(player : Player*)
@@ -6740,7 +5841,6 @@ lib CDoom
   $newend : Cliprange*
   $solidsegs : Cliprange[MAXSEGS]
 
-  $checkcoord : LibC::Int[4][12]
 
   fun r_store_wall_range = R_StoreWallRange(start : LibC::Int, stop : LibC::Int)
   fun r_clip_solid_wall_segment = R_ClipSolidWallSegment(first : LibC::Int, last : LibC::Int)
@@ -6807,25 +5907,14 @@ lib CDoom
     patches : Texpatch[1]
   end
 
-  $lastflat : LibC::Int
-  $numflats : LibC::Int
 
   $firstpatch : LibC::Int
   $lastpatch : LibC::Int
   $numpatches : LibC::Int
 
-  $numtextures : LibC::Int
   $textures : Texture**
 
-  $texturewidthmask : LibC::Int*
-  $texturecompositesize : LibC::Int*
-  $texturecolumnlump : LibC::Short**
-  $texturecolumnofs : LibC::UShort**
-  $texturecomposite : Byte**
 
-  $flatmemory : LibC::Int
-  $texturememory : LibC::Int
-  $spritememory : LibC::Int
 
   fun r_draw_column_in_cache = R_DrawColumnInCache(patch : Column*, cache : Byte*, originy : LibC::Int, cacheheight : LibC::Int)
   fun r_generate_composite = R_GenerateComposite(texnum : LibC::Int)
@@ -6845,25 +5934,17 @@ lib CDoom
   FUZZOFF   = SCREENWIDTH
 
   $viewimage : Byte*
-  $ylookup : Byte*[MAXHEIGHT]
-  $columnofs : LibC::Int[MAXWIDTH]
 
   # just for profiling
-  $dccount : LibC::Int
 
-  $fuzzoffset : LibC::Int[FUZZTABLE]
-  $fuzzpos : LibC::Int
 
   # just for profiling
-  $dscount : LibC::Int
 
   FIELDOFVIEW = 2048 # Fineangles in the SCREENWIDTH wide window.
   DISTMAP     =    2
 
   # just for profiling purposes
-  $framecount : LibC::Int
 
-  $walllights : Lighttable**
 
   fun r_init_tables = R_InitTables
   fun r_init_texture_mapping = R_InitTextureMapping
@@ -6875,34 +5956,26 @@ lib CDoom
   MAXVISPLANES = 128
   MAXOPENINGS  = SCREENWIDTH*64
 
+
   #
   # opening
   #
 
   # Here comes the obnoxious "visplane".
 
-  $openings : LibC::Short[MAXOPENINGS]
 
   #
   # spanstart holds the start of a plane span
   # initialized to 0 at start
   #
-  $spanstart : LibC::Int[SCREENHEIGHT]
-  $spanstop : LibC::Int[SCREENHEIGHT]
 
   #
   # texture mapping
   #
   $planezlight : Lighttable**
-  $planeheight : Fixed
 
-  $basexscale : Fixed
-  $baseyscale : Fixed
+  
 
-  $cachedheight : Fixed[SCREENHEIGHT]
-  $cacheddistance : Fixed[SCREENHEIGHT]
-  $cachedxstep : Fixed[SCREENHEIGHT]
-  $cachedystep : Fixed[SCREENHEIGHT]
 
   $visplanes : Visplane[MAXVISPLANES]
 
@@ -6912,30 +5985,10 @@ lib CDoom
   # OPTIMIZE: closed two sided lines as single sided
 
   $masekdtexture : DoomBool
-  $rw_x : LibC::Int
-  $rw_centerangle : Angle
-  $rw_offset : Fixed
-  $rw_scale : Fixed
-  $rw_scalestep : Fixed
-  $rw_midtexturemid : Fixed
-  $rw_toptexturemid : Fixed
-  $rw_bottomtexturemid : Fixed
 
-  $worldtop : LibC::Int
-  $worldbottom : LibC::Int
-  $worldhigh : LibC::Int
-  $worldlow : LibC::Int
 
-  $pixhigh : Fixed
-  $pixlow : Fixed
-  $pixhighstep : Fixed
-  $pixlowstep : Fixed
 
-  $topfrac : Fixed
-  $topstep : Fixed
 
-  $bottomfrac : Fixed
-  $bottomstep : Fixed
 
   $maskedtexturecol : LibC::Short*
 
@@ -6961,12 +6014,8 @@ lib CDoom
   # There was a lot of stuff grabbed wrong, so I changed it...
   #
 
-  $spritelights : Lighttable**
 
-  $sprtemp : Spriteframe[29]
-  $maxframe : LibC::Int
   $spritename : LibC::Char*
-  $newvissprite : LibC::Int
 
   fun r_install_sprite_lump = R_InstallSpriteLump(lump : LibC::Int, frame : LibC::UInt, rotation : LibC::UInt, flipped : DoomBool)
 
@@ -7021,12 +6070,8 @@ lib CDoom
   $channels_s_sound : Channel*
 
   # whether songs are mus_paused
-  $mus_paused : DoomBool
 
   # music currently being played
-  $mus_playing_s_sound : Musicinfo*
-
-  $nextcleanup : LibC::Int
 
   fun s_get_channel = S_getChannel(origin : Void*, sfxinfo : Sfxinfo*) : LibC::Int
   fun s_adjust_sound_params = S_AdjustSoundParams(listener : Mobj*, source : Mobj*, vol : LibC::Int*, sep : LibC::Int*, pitch : LibC::Int*) : LibC::Int
@@ -7160,20 +6205,6 @@ lib CDoom
   ST_MSGWIDTH = 52
 
   $plyr : Player*                                            # main player in game
-  $st_firsttime : DoomBool                                   # ST_Start() has just been called
-  $veryfirsttime : LibC::Int                                 # used to execute ST_Init() only once
-  $lu_palette : LibC::Int                                    # lump number for PLAYPAL
-  $st_clock : LibC::UInt                                     # used for timing
-  $st_msgcounter : LibC::Int                                 # used for making messages go away
-  $st_chatstate : ST_Chatstateenum                           # used when in chat
-  $st_gamestate : ST_Statenum                                # whether in automap or first-person
-  $st_statusbaron : DoomBool                                 # whether left-side main status bar is active
-  $st_chat : DoomBool                                        # whether status bar chat is active
-  $st_oldchat : DoomBool                                     # value of st_chat before message popped up
-  $st_cursoron : DoomBool                                    # whether chat window has the cursor on
-  $st_notdeathmatch : DoomBool                               # !deathmatch
-  $st_armson : DoomBool                                      # !deathmatch && st_statusbaron
-  $st_fragson : DoomBool                                     # !deathmatch
   $sbar : Patch*                                             # main bar left
   $tallnum : Patch*[10]                                      # 0-9, tall numbers
   $tallpercent : Patch*                                      # tall % sign
@@ -7193,49 +6224,22 @@ lib CDoom
   $w_armor : ST_Percent                                      # armor widget
   $w_ammo : ST_Number[4]                                     # ammo widgets
   $w_maxammo : ST_Number[4]                                  # max ammo widgets
-  $st_fragscount : LibC::Int                                 # number of frags so far in deathmatch
-  $st_oldhealth : LibC::Int                                  # used to use appopriately pained face
   $oldweaponsowned : DoomBool[CDoom::Weapontype::NUMWEAPONS] # used for evil grin
-  $st_facecount : LibC::Int                                  # count until face changes
-  $st_faceindex : LibC::Int                                  # current face index, used by w_faces
   $keyboxes : LibC::Int[3]                                   # holds key-type for each key box on bar
-  $st_randomnumber : LibC::Int                               # a random number per tick
-  $st_palette : LibC::Int
-  $st_stopped : DoomBool
 
   # Massive bunches of cheat shit
   #  to keep it from being easy to figure them out.
   # Yeah, right...
-  $cheat_mus_seq : LibC::UChar[9]
-  $cheat_choppers_seq : LibC::UChar[11]
-  $cheat_god_seq : LibC::UChar[6]
-  $cheat_ammo_seq : LibC::UChar[6]
-  $cheat_ammonokey_seq : LibC::UChar[5]
 
   # Smashing Pumpkins Into Samml Piles Of Putried Debris.
-  $cheat_noclip_seq : LibC::UChar[11]
 
-  $cheat_commercial_noclip_seq : LibC::UChar[7]
-  $cheat_powerup_seq : LibC::UChar[10][7]
 
-  $cheat_clev_seq : LibC::UChar[10]
 
   # my position cheat
-  $cheat_mypos_seq : LibC::UChar[8]
 
   # Now what?
-  $cheat_mus : Cheatseq
-  $cheat_god : Cheatseq
-  $cheat_ammo : Cheatseq
-  $cheat_ammonokey : Cheatseq
-  $cheat_noclip : Cheatseq
-  $cheat_commercial_noclip : Cheatseq
 
-  $cheat_powerup : Cheatseq[7]
 
-  $cheat_choppers : Cheatseq
-  $cheat_clev : Cheatseq
-  $cheat_mypos : Cheatseq
 
   fun st_stop = ST_Stop
 
@@ -7255,8 +6259,6 @@ lib CDoom
   fun st_init_data = ST_initData
   fun st_create_widgets = ST_createWidgets
 
-  $reloadlump : LibC::Int
-  $reloadname : LibC::Char*
   $info : LibC::Int[10][2500]
   $profilecount : LibC::Int
 
@@ -7265,11 +6267,6 @@ lib CDoom
   fun extract_file_base = ExtractFileBase(path : LibC::Char*, dest : LibC::Char*)
 
   fun w_add_file = W_AddFile(filename : LibC::Char*)
-
-  union Name8
-    s : LibC::Char[9]
-    x : LibC::Int[2]
-  end
 
   NUMEPISODES = 4
   NUMMAPS     = 9
@@ -7322,64 +6319,10 @@ lib CDoom
     Level
   end
 
-  struct Point
+  struct AnimPoint
     x : LibC::Int
     y : LibC::Int
   end
-
-  #
-  # Animation.
-  # There is another anim_t used in p_spec.
-  #
-  struct AnimWIStuff
-    type : Animenum
-
-    # period in tics between animations
-    period : LibC::Int
-
-    # number of animation frames
-    nanims : LibC::Int
-
-    # location of animation
-    loc : Point
-
-    # ALWAYS: n/a,
-    # RANDOM: period deviation (<256),
-    # LEVEL: level
-    data1 : LibC::Int
-
-    # ALWAYS: n/a,
-    # RANDOM: random base period,
-    # LEVEL: n/a
-    data2 : LibC::Int
-
-    # actual graphics for frames of animations
-    p : Patch*[3]
-
-    # following must be initialized to zero before use!
-
-    # next value of bcnt (used in conjunction with period)
-    nexttic : LibC::Int
-
-    # last drawn animation frame
-    lastdrawn : LibC::Int
-
-    # next frame number to animate
-    ctr : LibC::Int
-
-    # used by RANDOM and LEVEL when animating
-    state : LibC::Int
-  end
-
-  $lnodes : Point*[NUMEPISODES]
-
-  $epsd0animinfo : AnimWIStuff[10]
-  $epsd1animinfo : AnimWIStuff[9]
-  $epsd2animinfo : AnimWIStuff[6]
-
-  $numanims = NUMANIMS : LibC::Int[NUMEPISODES]
-
-  $anims_wi_stuff : AnimWIStuff*[NUMEPISODES]
 
   #
   # GENERAL DATA
@@ -7390,34 +6333,19 @@ lib CDoom
   #
 
   # used to accelerate or skip a stage
-  $acceleratestage : LibC::Int
 
   # wbs->pnum
-  $me : LibC::Int
 
   # specifies current state
   $state : Stateenum
 
   # contains information passed into intermission
-  $wbs : Wbstartstruct*
-
-  $plrs : Wbplayerstruct* # wbs->plyr[]
-
   # used for general timing
-  $cnt : LibC::Int
 
   # used for timing of background animation
-  $bcnt : LibC::Int
 
   # signals to refresh everything for one frame
-  $firstrefresh : LibC::Int
 
-  $cnt_kills : LibC::Int[MAXPLAYERS]
-  $cnt_items : LibC::Int[MAXPLAYERS]
-  $cnt_secret : LibC::Int[MAXPLAYERS]
-  $cnt_time : LibC::Int
-  $cnt_par : LibC::Int
-  $cnt_pause : LibC::Int
 
   # # of commercial levels
   $numcmaps = NUMCMAPS : LibC::Int
@@ -7483,14 +6411,6 @@ lib CDoom
   # Name graphics of each level (centered)
   $lnames : Patch**
 
-  $snl_pointeron : DoomBool
-  $dm_state : LibC::Int
-  $dm_frags : LibC::Int[MAXPLAYERS][MAXPLAYERS]
-  $dm_totals : LibC::Int[MAXPLAYERS]
-  $cnt_frags : LibC::Int[MAXPLAYERS]
-  $dofrags : LibC::Int
-  $ng_state : LibC::Int
-  $sp_state : LibC::Int
 
   #
   # CODE
@@ -7529,8 +6449,6 @@ lib CDoom
   fun wi_draw_stats = WI_drawStats
   fun wi_check_for_accelerate = WI_checkForAccelerate
   fun wi_load_data = WI_loadData
-  fun wi_init_variables = WI_initVariables(wbstartstruct : Wbstartstruct*)
-
   ZONEID      = 0x1d4a11
   MINFRAGMENT =       64
   MEM_ALIGN   = sizeof(Void*)

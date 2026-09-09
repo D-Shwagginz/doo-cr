@@ -90,7 +90,7 @@ module Doocr
     end
   end
 
-  CDoom.precache = 1
+  Doocr.precache = 1
 
   class_getter keystates = Array(Bool).new(CDoom::NUMKEYS, false)
 
@@ -159,89 +159,73 @@ module Doocr
 
   CDoom.screen_buffer = Pointer(UInt8).null
   CDoom.final_screen_buffer = Pointer(UInt8).null
-  CDoom.last_update_time = 0
-  CDoom.button_states = StaticArray(Int32, 3).new(0)
+  Doocr.last_update_time = 0
+  Doocr.button_states.fill(0)
 
   @@visplanes : Array(CDoom::Visplane) = [] of CDoom::Visplane
   @@ceilingplane : Int32 = -1
   @@floorplane : Int32 = -1
   @@lastvisplane : Int32 = -1
 
-  CDoom.player_arrow[0] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: CDoom::Mpoint.new(x: CDoom::R, y: 0)) # -----
-  CDoom.player_arrow[1] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: CDoom::R, y: 0), b: CDoom::Mpoint.new(x: CDoom::R - CDoom::R // 2, y: CDoom::R // 4)) # ----->
-  CDoom.player_arrow[2] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: CDoom::R, y: 0), b: CDoom::Mpoint.new(x: CDoom::R - CDoom::R // 2, y: -CDoom::R // 4))
-  CDoom.player_arrow[3] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: CDoom::Mpoint.new(x: -CDoom::R - CDoom::R // 8, y: CDoom::R // 4)) # >---->
-  CDoom.player_arrow[4] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: CDoom::Mpoint.new(x: -CDoom::R - CDoom::R // 8, y: -CDoom::R // 4))
-  CDoom.player_arrow[5] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R + 3 * CDoom::R // 8, y: 0), b: CDoom::Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: CDoom::R // 4)) # >>--->
-  CDoom.player_arrow[6] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R + 3 * CDoom::R // 8, y: 0), b: CDoom::Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: -CDoom::R // 4))
+  @@player_arrow[0] = Mline.new(
+    a: Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: Mpoint.new(x: CDoom::R, y: 0)) # -----
+  @@player_arrow[1] = Mline.new(
+    a: Mpoint.new(x: CDoom::R, y: 0), b: Mpoint.new(x: CDoom::R - CDoom::R // 2, y: CDoom::R // 4)) # ----->
+  @@player_arrow[2] = Mline.new(
+    a: Mpoint.new(x: CDoom::R, y: 0), b: Mpoint.new(x: CDoom::R - CDoom::R // 2, y: -CDoom::R // 4))
+  @@player_arrow[3] = Mline.new(
+    a: Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: Mpoint.new(x: -CDoom::R - CDoom::R // 8, y: CDoom::R // 4)) # >---->
+  @@player_arrow[4] = Mline.new(
+    a: Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: Mpoint.new(x: -CDoom::R - CDoom::R // 8, y: -CDoom::R // 4))
+  @@player_arrow[5] = Mline.new(
+    a: Mpoint.new(x: -CDoom::R + 3 * CDoom::R // 8, y: 0), b: Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: CDoom::R // 4)) # >>--->
+  @@player_arrow[6] = Mline.new(
+    a: Mpoint.new(x: -CDoom::R + 3 * CDoom::R // 8, y: 0), b: Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: -CDoom::R // 4))
 
-  CDoom.cheat_player_arrow[0] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: CDoom::Mpoint.new(x: CDoom::R, y: 0)) # -----
-  CDoom.cheat_player_arrow[1] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: CDoom::R, y: 0), b: CDoom::Mpoint.new(x: CDoom::R - CDoom::R // 2, y: CDoom::R // 6)) # ----->
-  CDoom.cheat_player_arrow[2] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: CDoom::R, y: 0), b: CDoom::Mpoint.new(x: CDoom::R - CDoom::R // 2, y: -CDoom::R // 6))
-  CDoom.cheat_player_arrow[3] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: CDoom::Mpoint.new(x: -CDoom::R - CDoom::R // 8, y: CDoom::R // 6)) # >----->
-  CDoom.cheat_player_arrow[4] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: CDoom::Mpoint.new(x: -CDoom::R - CDoom::R // 8, y: -CDoom::R // 6))
-  CDoom.cheat_player_arrow[5] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R + 3 * CDoom::R // 8, y: 0), b: CDoom::Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: CDoom::R // 6)) # >>----->
-  CDoom.cheat_player_arrow[6] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R + 3 * CDoom::R // 8, y: 0), b: CDoom::Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: -CDoom::R // 6))
-  CDoom.cheat_player_arrow[7] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R // 2, y: 0), b: CDoom::Mpoint.new(x: -CDoom::R // 2, y: -CDoom::R // 6)) # >>-d--->
-  CDoom.cheat_player_arrow[8] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R // 2, y: -CDoom::R // 6), b: CDoom::Mpoint.new(x: -CDoom::R // 2 + CDoom::R // 6, y: -CDoom::R // 6))
-  CDoom.cheat_player_arrow[9] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R // 2 + CDoom::R // 6, y: -CDoom::R // 6), b: CDoom::Mpoint.new(x: -CDoom::R // 2 + CDoom::R // 6, y: CDoom::R // 4))
-  CDoom.cheat_player_arrow[10] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R // 6, y: 0), b: CDoom::Mpoint.new(x: -CDoom::R // 6, y: -CDoom::R // 6)) # >>-dd-->
-  CDoom.cheat_player_arrow[11] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: -CDoom::R // 6, y: -CDoom::R // 6), b: CDoom::Mpoint.new(x: 0, y: -CDoom::R // 6))
-  CDoom.cheat_player_arrow[12] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: 0, y: -CDoom::R // 6), b: CDoom::Mpoint.new(x: 0, y: CDoom::R // 4))
-  CDoom.cheat_player_arrow[13] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: CDoom::R // 6, y: CDoom::R // 4), b: CDoom::Mpoint.new(x: CDoom::R // 6, y: -CDoom::R // 7)) # >>-ddt->
-  CDoom.cheat_player_arrow[14] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: CDoom::R // 6, y: -CDoom::R // 7), b: CDoom::Mpoint.new(x: CDoom::R // 6 + CDoom::R // 32, y: -CDoom::R // 7 - CDoom::R // 32))
-  CDoom.cheat_player_arrow[15] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: CDoom::R // 6 + CDoom::R // 32, y: -CDoom::R // 7 - CDoom::R // 32), b: CDoom::Mpoint.new(x: CDoom::R // 6 + CDoom::R // 10, y: -CDoom::R // 7))
+  @@cheat_player_arrow[0] = Mline.new(a: Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: Mpoint.new(x: CDoom::R, y: 0))
+  @@cheat_player_arrow[1] = Mline.new(a: Mpoint.new(x: CDoom::R, y: 0), b: Mpoint.new(x: CDoom::R - CDoom::R // 2, y: CDoom::R // 6))
+  @@cheat_player_arrow[2] = Mline.new(a: Mpoint.new(x: CDoom::R, y: 0), b: Mpoint.new(x: CDoom::R - CDoom::R // 2, y: -CDoom::R // 6))
+  @@cheat_player_arrow[3] = Mline.new(a: Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: Mpoint.new(x: -CDoom::R - CDoom::R // 8, y: CDoom::R // 6))
+  @@cheat_player_arrow[4] = Mline.new(a: Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: 0), b: Mpoint.new(x: -CDoom::R - CDoom::R // 8, y: -CDoom::R // 6))
+  @@cheat_player_arrow[5] = Mline.new(a: Mpoint.new(x: -CDoom::R + 3 * CDoom::R // 8, y: 0), b: Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: CDoom::R // 6))
+  @@cheat_player_arrow[6] = Mline.new(a: Mpoint.new(x: -CDoom::R + 3 * CDoom::R // 8, y: 0), b: Mpoint.new(x: -CDoom::R + CDoom::R // 8, y: -CDoom::R // 6))
+  @@cheat_player_arrow[7] = Mline.new(a: Mpoint.new(x: -CDoom::R // 2, y: 0), b: Mpoint.new(x: -CDoom::R // 2, y: -CDoom::R // 6))
+  @@cheat_player_arrow[8] = Mline.new(a: Mpoint.new(x: -CDoom::R // 2, y: -CDoom::R // 6), b: Mpoint.new(x: -CDoom::R // 2 + CDoom::R // 6, y: -CDoom::R // 6))
+  @@cheat_player_arrow[9] = Mline.new(a: Mpoint.new(x: -CDoom::R // 2 + CDoom::R // 6, y: -CDoom::R // 6), b: Mpoint.new(x: -CDoom::R // 2 + CDoom::R // 6, y: CDoom::R // 4))
+  @@cheat_player_arrow[10] = Mline.new(a: Mpoint.new(x: -CDoom::R // 6, y: 0), b: Mpoint.new(x: -CDoom::R // 6, y: -CDoom::R // 6))
+  @@cheat_player_arrow[11] = Mline.new(a: Mpoint.new(x: -CDoom::R // 6, y: -CDoom::R // 6), b: Mpoint.new(x: 0, y: -CDoom::R // 6))
+  @@cheat_player_arrow[12] = Mline.new(a: Mpoint.new(x: 0, y: -CDoom::R // 6), b: Mpoint.new(x: 0, y: CDoom::R // 4))
+  @@cheat_player_arrow[13] = Mline.new(a: Mpoint.new(x: CDoom::R // 6, y: CDoom::R // 4), b: Mpoint.new(x: CDoom::R // 6, y: -CDoom::R // 7))
+  @@cheat_player_arrow[14] = Mline.new(a: Mpoint.new(x: CDoom::R // 6, y: -CDoom::R // 7), b: Mpoint.new(x: CDoom::R // 6 + CDoom::R // 32, y: -CDoom::R // 7 - CDoom::R // 32))
+  @@cheat_player_arrow[15] = Mline.new(a: Mpoint.new(x: CDoom::R // 6 + CDoom::R // 32, y: -CDoom::R // 7 - CDoom::R // 32), b: Mpoint.new(x: CDoom::R // 6 + CDoom::R // 10, y: -CDoom::R // 7))
 
-  CDoom.triangle_guy[0] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: (-0.867 * FRACUNIT).to_i32!, y: (-0.5 * FRACUNIT).to_i32!), b: CDoom::Mpoint.new(x: (0.867 * FRACUNIT).to_i32!, y: (-0.5 * FRACUNIT).to_i32!))
-  CDoom.triangle_guy[1] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: (0.867 * FRACUNIT).to_i32!, y: (-0.5 * FRACUNIT).to_i32!), b: CDoom::Mpoint.new(x: 0, y: FRACUNIT))
-  CDoom.triangle_guy[2] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: 0, y: FRACUNIT), b: CDoom::Mpoint.new(x: (-0.867 * FRACUNIT).to_i32!, y: (-0.5 * FRACUNIT).to_i32!))
+  @@triangle_guy[0] = Mline.new(
+    a: Mpoint.new(x: (-0.867 * FRACUNIT).to_i32!, y: (-0.5 * FRACUNIT).to_i32!), b: Mpoint.new(x: (0.867 * FRACUNIT).to_i32!, y: (-0.5 * FRACUNIT).to_i32!))
+  @@triangle_guy[1] = Mline.new(
+    a: Mpoint.new(x: (0.867 * FRACUNIT).to_i32!, y: (-0.5 * FRACUNIT).to_i32!), b: Mpoint.new(x: 0, y: FRACUNIT))
+  @@triangle_guy[2] = Mline.new(
+    a: Mpoint.new(x: 0, y: FRACUNIT), b: Mpoint.new(x: (-0.867 * FRACUNIT).to_i32!, y: (-0.5 * FRACUNIT).to_i32!))
 
-  CDoom.thintriangle_guy[0] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: (-0.5 * FRACUNIT).to_i32!, y: (-0.7 * FRACUNIT).to_i32!), b: CDoom::Mpoint.new(x: FRACUNIT, y: 0))
-  CDoom.thintriangle_guy[1] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: FRACUNIT, y: 0), b: CDoom::Mpoint.new(x: (-0.5 * FRACUNIT).to_i32!, y: (0.7 * FRACUNIT).to_i32!))
-  CDoom.thintriangle_guy[2] = CDoom::Mline.new(
-    a: CDoom::Mpoint.new(x: (-0.5 * FRACUNIT).to_i32!, y: (0.7 * FRACUNIT).to_i32!), b: CDoom::Mpoint.new(x: (-0.5 * FRACUNIT).to_i32, y: (-0.7 * FRACUNIT).to_i32!))
+  @@thintriangle_guy[0] = Mline.new(
+    a: Mpoint.new(x: (-0.5 * FRACUNIT).to_i32!, y: (-0.7 * FRACUNIT).to_i32!), b: Mpoint.new(x: FRACUNIT, y: 0))
+  @@thintriangle_guy[1] = Mline.new(
+    a: Mpoint.new(x: FRACUNIT, y: 0), b: Mpoint.new(x: (-0.5 * FRACUNIT).to_i32!, y: (0.7 * FRACUNIT).to_i32!))
+  @@thintriangle_guy[2] = Mline.new(
+    a: Mpoint.new(x: (-0.5 * FRACUNIT).to_i32!, y: (0.7 * FRACUNIT).to_i32!), b: Mpoint.new(x: (-0.5 * FRACUNIT).to_i32, y: (-0.7 * FRACUNIT).to_i32!))
 
-  CDoom.cheating = 0
-  CDoom.grid = 0
+  Doocr.cheating = 0
+  Doocr.grid = 0
 
-  CDoom.leveljuststarted = 1
+  Doocr.leveljuststarted = 1
 
-  CDoom.finit_width = CDoom::SCREENWIDTH
-  CDoom.finit_height = CDoom::SCREENHEIGHT - 32
+  Doocr.finit_width = CDoom::SCREENWIDTH
+  Doocr.finit_height = CDoom::SCREENHEIGHT - 32
 
-  CDoom.scale_mtof = CDoom::INITSCALEMTOF.to_i32!
+  Doocr.scale_mtof = CDoom::INITSCALEMTOF.to_i32!
 
-  CDoom.markpointnum = 0
+  Doocr.markpointnum = 0
 
-  CDoom.followplayer = 1
+  Doocr.followplayer = 1
 
   @@died_strings = [
     "1 has died",
@@ -300,9 +284,9 @@ module Doocr
     "1 and 2 have a new rivalry",
   ]
 
-  CDoom.stopped = 1
+  Doocr.stopped = 1
 
-  CDoom.automapactive = 0
+  Doocr.automapactive = 0
 
   CDoom.weaponinfo[0] = CDoom::Weaponinfo.new(
     # fist
@@ -386,30 +370,30 @@ module Doocr
     flashstate: CDoom::Statenum::S_DSGUNFLASH1
   )
 
-  CDoom.singletics = 0
+  Doocr.singletics = 0
 
-  CDoom.is_wiping_screen = 0
+  Doocr.is_wiping_screen = 0
 
   CDoom.debugfile = Pointer(Void).null
 
-  CDoom.wipegamestate = CDoom::Gamestate::Demoscreen
+  Doocr.wipegamestate = CDoom::Gamestate::Demoscreen
 
-  CDoom.forwardmove[0] = 0x19
-  CDoom.forwardmove[1] = 0x32
-  CDoom.sidemove[0] = 0x18
-  CDoom.sidemove[1] = 0x28
-  CDoom.angleturn[0] = 640
-  CDoom.angleturn[1] = 1280
-  CDoom.angleturn[2] = 320
+  Doocr.forwardmove[0] = 0x19
+  Doocr.forwardmove[1] = 0x32
+  Doocr.sidemove[0] = 0x18
+  Doocr.sidemove[1] = 0x28
+  Doocr.angleturn[0] = 640
+  Doocr.angleturn[1] = 1280
+  Doocr.angleturn[2] = 320
 
-  CDoom.gamemode = CDoom::GameMode::Indetermined
-  CDoom.gamemission = CDoom::GameMission::Doom
+  Doocr.gamemode = CDoom::GameMode::Indetermined
+  Doocr.gamemission = CDoom::GameMission::Doom
 
   # Language.
-  CDoom.language = CDoom::Language::English
+  Doocr.language = CDoom::Language::English
 
   # Set if homebrew PWAD stuff has been added.
-  CDoom.modifiedgame
+  Doocr.modifiedgame
   # DOOM1
   @@doom1_endmsg = [@@deh_quit_msg,
                     "please don't leave, there's more\ndemons to toast!",
@@ -433,57 +417,53 @@ module Doocr
   # Stage of animation:
   #  0 = text, 1 = art screen, 2 = character cast
   # CDoom.finalstage
-  CDoom.castorder[0] = CDoom::Castinfo.new(name: @@deh_cc_zombie, type: CDoom::Mobjtype::MT_POSSESSED)
-  CDoom.castorder[1] = CDoom::Castinfo.new(name: @@deh_cc_shotgun, type: CDoom::Mobjtype::MT_SHOTGUY)
-  CDoom.castorder[2] = CDoom::Castinfo.new(name: @@deh_cc_heavy, type: CDoom::Mobjtype::MT_CHAINGUY)
-  CDoom.castorder[3] = CDoom::Castinfo.new(name: @@deh_cc_imp, type: CDoom::Mobjtype::MT_TROOP)
-  CDoom.castorder[4] = CDoom::Castinfo.new(name: @@deh_cc_demon, type: CDoom::Mobjtype::MT_SERGEANT)
-  CDoom.castorder[5] = CDoom::Castinfo.new(name: @@deh_cc_lost, type: CDoom::Mobjtype::MT_SKULL)
-  CDoom.castorder[6] = CDoom::Castinfo.new(name: @@deh_cc_caco, type: CDoom::Mobjtype::MT_HEAD)
-  CDoom.castorder[7] = CDoom::Castinfo.new(name: @@deh_cc_hell, type: CDoom::Mobjtype::MT_KNIGHT)
-  CDoom.castorder[8] = CDoom::Castinfo.new(name: @@deh_cc_baron, type: CDoom::Mobjtype::MT_BRUISER)
-  CDoom.castorder[9] = CDoom::Castinfo.new(name: @@deh_cc_arach, type: CDoom::Mobjtype::MT_BABY)
-  CDoom.castorder[10] = CDoom::Castinfo.new(name: @@deh_cc_pain, type: CDoom::Mobjtype::MT_PAIN)
-  CDoom.castorder[11] = CDoom::Castinfo.new(name: @@deh_cc_reven, type: CDoom::Mobjtype::MT_UNDEAD)
-  CDoom.castorder[12] = CDoom::Castinfo.new(name: @@deh_cc_mancu, type: CDoom::Mobjtype::MT_FATSO)
-  CDoom.castorder[13] = CDoom::Castinfo.new(name: @@deh_cc_arch, type: CDoom::Mobjtype::MT_VILE)
-  CDoom.castorder[14] = CDoom::Castinfo.new(name: @@deh_cc_spider, type: CDoom::Mobjtype::MT_SPIDER)
-  CDoom.castorder[15] = CDoom::Castinfo.new(name: @@deh_cc_cyber, type: CDoom::Mobjtype::MT_CYBORG)
-  CDoom.castorder[16] = CDoom::Castinfo.new(name: @@deh_cc_hero, type: CDoom::Mobjtype::MT_PLAYER)
+  @@castorder[0] = Castinfo.new(name: @@deh_cc_zombie, type: CDoom::Mobjtype::MT_POSSESSED)
+  @@castorder[1] = Castinfo.new(name: @@deh_cc_shotgun, type: CDoom::Mobjtype::MT_SHOTGUY)
+  @@castorder[2] = Castinfo.new(name: @@deh_cc_heavy, type: CDoom::Mobjtype::MT_CHAINGUY)
+  @@castorder[3] = Castinfo.new(name: @@deh_cc_imp, type: CDoom::Mobjtype::MT_TROOP)
+  @@castorder[4] = Castinfo.new(name: @@deh_cc_demon, type: CDoom::Mobjtype::MT_SERGEANT)
+  @@castorder[5] = Castinfo.new(name: @@deh_cc_lost, type: CDoom::Mobjtype::MT_SKULL)
+  @@castorder[6] = Castinfo.new(name: @@deh_cc_caco, type: CDoom::Mobjtype::MT_HEAD)
+  @@castorder[7] = Castinfo.new(name: @@deh_cc_hell, type: CDoom::Mobjtype::MT_KNIGHT)
+  @@castorder[8] = Castinfo.new(name: @@deh_cc_baron, type: CDoom::Mobjtype::MT_BRUISER)
+  @@castorder[9] = Castinfo.new(name: @@deh_cc_arach, type: CDoom::Mobjtype::MT_BABY)
+  @@castorder[10] = Castinfo.new(name: @@deh_cc_pain, type: CDoom::Mobjtype::MT_PAIN)
+  @@castorder[11] = Castinfo.new(name: @@deh_cc_reven, type: CDoom::Mobjtype::MT_UNDEAD)
+  @@castorder[12] = Castinfo.new(name: @@deh_cc_mancu, type: CDoom::Mobjtype::MT_FATSO)
+  @@castorder[13] = Castinfo.new(name: @@deh_cc_arch, type: CDoom::Mobjtype::MT_VILE)
+  @@castorder[14] = Castinfo.new(name: @@deh_cc_spider, type: CDoom::Mobjtype::MT_SPIDER)
+  @@castorder[15] = Castinfo.new(name: @@deh_cc_cyber, type: CDoom::Mobjtype::MT_CYBORG)
+  @@castorder[16] = Castinfo.new(name: @@deh_cc_hero, type: CDoom::Mobjtype::MT_PLAYER)
 
-  CDoom.castorder[17] = CDoom::Castinfo.new
+  @@castorder[17] = Castinfo.new
 
-  CDoom.go = 0
-
-  CDoom.mousebuttons = CDoom.mousearray.to_unsafe + 1
-
-  CDoom.joybuttons = CDoom.joyarray.to_unsafe + 1
+  Doocr.go = 0
 
   # DOOM Par Times
-  c_array((CDoom.pars.to_unsafe).value,
+  c_array(Doocr.pars[0],
     30, 75, 120, 90, 165, 180, 180, 165, 165
   )
-  c_array((CDoom.pars.to_unsafe + 1).value,
+  c_array(Doocr.pars[1],
     90, 90, 90, 120, 90, 360, 240, 135, 170
   )
-  c_array((CDoom.pars.to_unsafe + 2).value,
+  c_array(Doocr.pars[2],
     90, 45, 90, 150, 90, 90, 165, 105, 135
   )
-  c_array((CDoom.pars.to_unsafe + 3).value,
+  c_array(Doocr.pars[3],
     165, 255, 135, 150, 180, 390, 135, 360, 180 # Pulled from Doom Classic
   )
 
-  c_array(CDoom.cpars,
+  c_array(Doocr.cpars,
     30, 90, 120, 120, 90, 150, 120, 120, 270, 90,     #  1-10
     210, 150, 150, 150, 210, 150, 420, 150, 210, 150, # 11-20
     240, 150, 180, 150, 150, 300, 330, 420, 300, 180, # 21-30
     120, 30                                           # 31-32
   )
 
-  CDoom.always_off = 0
-  CDoom.headsupactive = 0
-  CDoom.head = 0
-  CDoom.tail = 0
+  Doocr.always_off = 0
+  Doocr.headsupactive = 0
+  Doocr.head = 0
+  Doocr.tail = 0
 
   CDoom.chat_macros[0] = @@deh_hustr_chatmacro0.to_unsafe
   CDoom.chat_macros[1] = @@deh_hustr_chatmacro1.to_unsafe
@@ -496,11 +476,10 @@ module Doocr
   CDoom.chat_macros[8] = @@deh_hustr_chatmacro8.to_unsafe
   CDoom.chat_macros[9] = @@deh_hustr_chatmacro9.to_unsafe
 
-  c_array(CDoom.player_names,
-    @@deh_hustr_plrgreen.to_unsafe,
-    @@deh_hustr_plrindigo.to_unsafe,
-    @@deh_hustr_plrbrown.to_unsafe,
-    @@deh_hustr_plrred.to_unsafe)
+  Doocr.player_names[0] = @@deh_hustr_plrgreen
+  Doocr.player_names[1] = @@deh_hustr_plrindigo
+  Doocr.player_names[2] = @@deh_hustr_plrbrown
+  Doocr.player_names[3] = @@deh_hustr_plrred
 
   CDoom.french_shiftxform[0] = 0_u8
   CDoom.french_shiftxform[1] = 1
@@ -1053,24 +1032,24 @@ module Doocr
   CDoom.mapnamest[30] = @@deh_thustr_31.to_unsafe
   CDoom.mapnamest[31] = @@deh_thustr_32.to_unsafe
 
-  CDoom.flag = 0
+  Doocr.audio_flag = 0
 
-  CDoom.mus_data = Pointer(UInt8).null
-  CDoom.mus_offset = 0
-  CDoom.mus_delay = 0
-  CDoom.mus_loop = 0
-  CDoom.mus_playing = 0
-  CDoom.mus_volume = 127
-  c_array(CDoom.mus_channel_volumes, 127, 127, 127, 127,
+  Doocr.mus_data = Pointer(UInt8).null
+  Doocr.mus_offset = 0
+  Doocr.mus_delay = 0
+  Doocr.mus_loop = 0
+  Doocr.mus_playing = 0
+  Doocr.mus_volume = 127
+  c_array(Doocr.mus_channel_volumes, 127, 127, 127, 127,
     127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127)
 
-  CDoom.looping = 0
-  CDoom.musicdies = -1
+  Doocr.looping = 0
+  Doocr.musicdies = -1
 
-  CDoom.queue_midi_head = 0
-  CDoom.queue_midi_tail = 0
+  Doocr.queue_midi_head = 0
+  Doocr.queue_midi_tail = 0
 
-  CDoom.mb_used = 12
+  Doocr.mb_used = 12
 
   class_getter sprnames = ["TROO", "SHTG", "PUNG", "PISG", "PISF", "SHTF", "SHT2", "CHGG", "CHGF", "MISG",
                            "MISF", "SAWG", "PLSG", "PLSF", "BFGG", "BFGF", "BLUD", "PUFF", "BAL1", "BAL2",
@@ -5545,23 +5524,14 @@ module Doocr
     (@@mobjinfo.to_unsafe + i).value.raisestate = elm[22]
   end
 
-  c_array_strings(CDoom.gammamsg,
-    @@deh_gammalvl0,
-    @@deh_gammalvl1,
-    @@deh_gammalvl2,
-    @@deh_gammalvl3,
-    @@deh_gammalvl4)
+  Doocr.gammamsg[0] = @@deh_gammalvl0
+  Doocr.gammamsg[1] = @@deh_gammalvl1
+  Doocr.gammamsg[2] = @@deh_gammalvl2
+  Doocr.gammamsg[3] = @@deh_gammalvl3
+  Doocr.gammamsg[4] = @@deh_gammalvl4
 
-  c_array_strings(CDoom.skull_name,
-    "M_SKULL1",
-    "M_SKULL2")
 
-  c_array_strings(CDoom.detail_names,
-    "M_GDHIGH", "M_GDLOW")
-  c_array_strings(CDoom.msg_names,
-    "M_MSGOFF", "M_MSGON")
-
-  c_array(CDoom.quitsounds,
+  c_array(Doocr.quitsounds,
     CDoom::Sfxenum::SFX_pldeth.value,
     CDoom::Sfxenum::SFX_dmpain.value,
     CDoom::Sfxenum::SFX_popain.value,
@@ -5571,7 +5541,7 @@ module Doocr
     CDoom::Sfxenum::SFX_posit3.value,
     CDoom::Sfxenum::SFX_sgtatk.value)
 
-  c_array(CDoom.quitsounds2,
+  c_array(Doocr.quitsounds2,
     CDoom::Sfxenum::SFX_vilact.value,
     CDoom::Sfxenum::SFX_getpow.value,
     CDoom::Sfxenum::SFX_boscub.value,
@@ -5659,7 +5629,7 @@ module Doocr
     Menuitem.new(status: 2, text: "page ", num: pointerof(@@current_options_menu), routine: ->m_change_options_menu(Int32), alpha_key: 'e'),
     Menuitem.new(status: 1, text: "edit controls ->", routine: ->m_edit_controls(Int32), alpha_key: 'e'),
     Menuitem.new(status: 1, text: "toggle fullscreen", routine: ->m_toggle_fullscreen(Int32), alpha_key: 't'),
-    Menuitem.new(status: 1, text: "always run: ", bool: pointerof(CDoom.always_run), routine: ->m_change_alwaysrun(Int32), alpha_key: 'a'),
+    Menuitem.new(status: 1, text: "always run: ", bool: pointerof(@@always_run), routine: ->m_change_alwaysrun(Int32), alpha_key: 'a'),
     Menuitem.new(status: 1, text: "smooth midi panning: ", bool: pointerof(@@midismoothpan), routine: ->m_toggle_smoothpan(Int32), alpha_key: 's'),
     Menuitem.new(status: 2, text: "midi bank: ", num: pointerof(@@midibank), routine: ->m_change_midibank(Int32), alpha_key: 'm'),
     Menuitem.new(status: 1, text: "random audio pitch: ", bool: pointerof(@@randompitch), routine: ->m_toggle_pitching(Int32), alpha_key: 'r'),
@@ -5667,9 +5637,9 @@ module Doocr
   ],
                          [
                            Menuitem.new(status: 2, text: "page ", num: pointerof(@@current_options_menu), routine: ->m_change_options_menu(Int32), alpha_key: 'e'),
-                           Menuitem.new(status: 1, text: "Mouse Y movement: ", bool: pointerof(CDoom.mousemove), routine: ->m_mouse_move(Int32), alpha_key: 'm'),
+                           Menuitem.new(status: 1, text: "Mouse Y movement: ", bool: pointerof(@@mousemove), routine: ->m_mouse_move(Int32), alpha_key: 'm'),
                            Menuitem.new(status: 1, text: "Fire weapon centered: ", bool: pointerof(@@weaponfirecentered), routine: ->m_toggle_weaponfirecentered(Int32), alpha_key: 'f'),
-                           Menuitem.new(status: 1, text: "crosshair: ", bool: pointerof(CDoom.crosshair), routine: ->m_change_crosshair(Int32), alpha_key: 'c'),
+                           Menuitem.new(status: 1, text: "crosshair: ", bool: pointerof(@@crosshair), routine: ->m_change_crosshair(Int32), alpha_key: 'c'),
                          ],
   ]
 
@@ -5683,15 +5653,15 @@ module Doocr
   @@moreoptions_def
 
   @@editcontrols_menu = [
-    Menuitem.new(status: 1, text: "Forward =", num: pointerof(CDoom.key_up), routine: ->m_edit_forward(Int32), alpha_key: 'f'),
-    Menuitem.new(status: 1, text: "Backward =", num: pointerof(CDoom.key_down), routine: ->m_edit_backward(Int32), alpha_key: 'b'),
-    Menuitem.new(status: 1, text: "Strafe Left =", num: pointerof(CDoom.key_strafeleft), routine: ->m_edit_sleft(Int32), alpha_key: 's'),
-    Menuitem.new(status: 1, text: "Strafe Right =", num: pointerof(CDoom.key_straferight), routine: ->m_edit_sright(Int32), alpha_key: 's'),
-    Menuitem.new(status: 1, text: "Turn Left =", num: pointerof(CDoom.key_left), routine: ->m_edit_tleft(Int32), alpha_key: 't'),
-    Menuitem.new(status: 1, text: "Turn Right =", num: pointerof(CDoom.key_right), routine: ->m_edit_tright(Int32), alpha_key: 't'),
-    Menuitem.new(status: 1, text: "Sprint =", num: pointerof(CDoom.key_speed), routine: ->m_edit_sprint(Int32), alpha_key: 's'),
-    Menuitem.new(status: 1, text: "Shoot =", num: pointerof(CDoom.key_fire), routine: ->m_edit_shoot(Int32), alpha_key: 's'),
-    Menuitem.new(status: 1, text: "Use =", num: pointerof(CDoom.key_use), routine: ->m_edit_use(Int32), alpha_key: 'u'),
+    Menuitem.new(status: 1, text: "Forward =", num: pointerof(@@key_up), routine: ->m_edit_forward(Int32), alpha_key: 'f'),
+    Menuitem.new(status: 1, text: "Backward =", num: pointerof(@@key_down), routine: ->m_edit_backward(Int32), alpha_key: 'b'),
+    Menuitem.new(status: 1, text: "Strafe Left =", num: pointerof(@@key_strafeleft), routine: ->m_edit_sleft(Int32), alpha_key: 's'),
+    Menuitem.new(status: 1, text: "Strafe Right =", num: pointerof(@@key_straferight), routine: ->m_edit_sright(Int32), alpha_key: 's'),
+    Menuitem.new(status: 1, text: "Turn Left =", num: pointerof(@@key_left), routine: ->m_edit_tleft(Int32), alpha_key: 't'),
+    Menuitem.new(status: 1, text: "Turn Right =", num: pointerof(@@key_right), routine: ->m_edit_tright(Int32), alpha_key: 't'),
+    Menuitem.new(status: 1, text: "Sprint =", num: pointerof(@@key_speed), routine: ->m_edit_sprint(Int32), alpha_key: 's'),
+    Menuitem.new(status: 1, text: "Shoot =", num: pointerof(@@key_fire), routine: ->m_edit_shoot(Int32), alpha_key: 's'),
+    Menuitem.new(status: 1, text: "Use =", num: pointerof(@@key_use), routine: ->m_edit_use(Int32), alpha_key: 'u'),
   ]
 
   @@editcontrols_def = Menu.new(
@@ -5791,43 +5761,43 @@ module Doocr
   @@savegamestrings : Array(String) = Array(String).new(10, "")
   @@save_old_string = ""
 
-  @@defaults = [CDoom::Default.new(name: "mouse_sensitivity", location: pointerof(CDoom.mouse_sensitivity), defaultvalue: 5),
+  @@defaults = [CDoom::Default.new(name: "mouse_sensitivity", location: pointerof(@@mouse_sensitivity), defaultvalue: 5),
                 CDoom::Default.new(name: "sfx_volume", location: pointerof(@@snd_sfx_volume), defaultvalue: 8),
-                CDoom::Default.new(name: "music_volume", location: pointerof(CDoom.snd_music_volume), defaultvalue: 8),
-                CDoom::Default.new(name: "show_messages", location: pointerof(CDoom.show_messages), defaultvalue: 1),
+                CDoom::Default.new(name: "music_volume", location: Doocr.snd_music_volume_ptr, defaultvalue: 8),
+                CDoom::Default.new(name: "show_messages", location: Doocr.show_messages_ptr, defaultvalue: 1),
 
-                CDoom::Default.new(name: "key_right", location: pointerof(CDoom.key_right), defaultvalue: CDoom::KEY_RIGHTARROW),
-                CDoom::Default.new(name: "key_left", location: pointerof(CDoom.key_left), defaultvalue: CDoom::KEY_LEFTARROW),
-                CDoom::Default.new(name: "key_up", location: pointerof(CDoom.key_up), defaultvalue: CDoom::DoomKey::W),
-                CDoom::Default.new(name: "key_down", location: pointerof(CDoom.key_down), defaultvalue: CDoom::DoomKey::S),
-                CDoom::Default.new(name: "key_strafeleft", location: pointerof(CDoom.key_strafeleft), defaultvalue: CDoom::DoomKey::A),
-                CDoom::Default.new(name: "key_straferight", location: pointerof(CDoom.key_straferight), defaultvalue: CDoom::DoomKey::D),
+                CDoom::Default.new(name: "key_right", location: pointerof(@@key_right), defaultvalue: CDoom::KEY_RIGHTARROW),
+                CDoom::Default.new(name: "key_left", location: pointerof(@@key_left), defaultvalue: CDoom::KEY_LEFTARROW),
+                CDoom::Default.new(name: "key_up", location: pointerof(@@key_up), defaultvalue: CDoom::DoomKey::W.value),
+                CDoom::Default.new(name: "key_down", location: pointerof(@@key_down), defaultvalue: CDoom::DoomKey::S.value),
+                CDoom::Default.new(name: "key_strafeleft", location: pointerof(@@key_strafeleft), defaultvalue: CDoom::DoomKey::A.value),
+                CDoom::Default.new(name: "key_straferight", location: pointerof(@@key_straferight), defaultvalue: CDoom::DoomKey::D.value),
 
-                CDoom::Default.new(name: "key_fire", location: pointerof(CDoom.key_fire), defaultvalue: CDoom::KEY_RCTRL),
-                CDoom::Default.new(name: "key_use", location: pointerof(CDoom.key_use), defaultvalue: ' '.ord),
-                CDoom::Default.new(name: "key_strafe", location: pointerof(CDoom.key_strafe), defaultvalue: CDoom::KEY_RALT),
-                CDoom::Default.new(name: "key_speed", location: pointerof(CDoom.key_speed), defaultvalue: CDoom::KEY_RSHIFT),
+                CDoom::Default.new(name: "key_fire", location: pointerof(@@key_fire), defaultvalue: CDoom::KEY_RCTRL),
+                CDoom::Default.new(name: "key_use", location: pointerof(@@key_use), defaultvalue: ' '.ord),
+                CDoom::Default.new(name: "key_strafe", location: pointerof(@@key_strafe), defaultvalue: CDoom::KEY_RALT),
+                CDoom::Default.new(name: "key_speed", location: pointerof(@@key_speed), defaultvalue: CDoom::KEY_RSHIFT),
 
-                CDoom::Default.new(name: "use_mouse", location: pointerof(CDoom.usemouse), defaultvalue: 1),
-                CDoom::Default.new(name: "mouseb_fire", location: pointerof(CDoom.mousebfire), defaultvalue: 0),
-                CDoom::Default.new(name: "mouseb_strafe", location: pointerof(CDoom.mousebstrafe), defaultvalue: 1),
-                CDoom::Default.new(name: "mouseb_forward", location: pointerof(CDoom.mousebforward), defaultvalue: 2),
-                CDoom::Default.new(name: "mouse_move", location: pointerof(CDoom.mousemove), defaultvalue: 0),
+                CDoom::Default.new(name: "use_mouse", location: pointerof(@@usemouse), defaultvalue: 1),
+                CDoom::Default.new(name: "mouseb_fire", location: pointerof(@@mousebfire), defaultvalue: 0),
+                CDoom::Default.new(name: "mouseb_strafe", location: pointerof(@@mousebstrafe), defaultvalue: 1),
+                CDoom::Default.new(name: "mouseb_forward", location: pointerof(@@mousebforward), defaultvalue: 2),
+                CDoom::Default.new(name: "mouse_move", location: pointerof(@@mousemove), defaultvalue: 0),
 
-                CDoom::Default.new(name: "use_joystick", location: pointerof(CDoom.usejoystick), defaultvalue: 0),
-                CDoom::Default.new(name: "joyb_fire", location: pointerof(CDoom.joybfire), defaultvalue: 0),
-                CDoom::Default.new(name: "joyb_strafe", location: pointerof(CDoom.joybstrafe), defaultvalue: 1),
-                CDoom::Default.new(name: "joyb_use", location: pointerof(CDoom.joybuse), defaultvalue: 3),
-                CDoom::Default.new(name: "joyb_speed", location: pointerof(CDoom.joybspeed), defaultvalue: 2),
+                CDoom::Default.new(name: "use_joystick", location: pointerof(@@usejoystick), defaultvalue: 0),
+                CDoom::Default.new(name: "joyb_fire", location: pointerof(@@joybfire), defaultvalue: 0),
+                CDoom::Default.new(name: "joyb_strafe", location: pointerof(@@joybstrafe), defaultvalue: 1),
+                CDoom::Default.new(name: "joyb_use", location: pointerof(@@joybuse), defaultvalue: 3),
+                CDoom::Default.new(name: "joyb_speed", location: pointerof(@@joybspeed), defaultvalue: 2),
 
-                CDoom::Default.new(name: "screenblocks", location: pointerof(CDoom.screenblocks), defaultvalue: 9),
-                CDoom::Default.new(name: "detaillevel", location: pointerof(CDoom.detail_level), defaultvalue: 0),
-                CDoom::Default.new(name: "crosshair", location: pointerof(CDoom.crosshair), defaultvalue: 0),
-                CDoom::Default.new(name: "always_run", location: pointerof(CDoom.always_run), defaultvalue: 0),
+                CDoom::Default.new(name: "screenblocks", location: pointerof(@@screenblocks), defaultvalue: 9),
+                CDoom::Default.new(name: "detaillevel", location: pointerof(@@detail_level), defaultvalue: 0),
+                CDoom::Default.new(name: "crosshair", location: pointerof(@@crosshair), defaultvalue: 0),
+                CDoom::Default.new(name: "always_run", location: pointerof(@@always_run), defaultvalue: 0),
 
                 CDoom::Default.new(name: "snd_channels", location: pointerof(CDoom.num_channels), defaultvalue: 16),
 
-                CDoom::Default.new(name: "usegamma", location: pointerof(CDoom.usegamma), defaultvalue: 0),
+                CDoom::Default.new(name: "usegamma", location: pointerof(@@usegamma), defaultvalue: 0),
 
                 CDoom::Default.new(name: "chatmacro0", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe, default_text_value: @@deh_hustr_chatmacro0),
                 CDoom::Default.new(name: "chatmacro1", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 1, default_text_value: @@deh_hustr_chatmacro1),
@@ -5847,7 +5817,8 @@ module Doocr
                 CDoom::Default.new(name: "midibank", location: pointerof(@@midibank), defaultvalue: 16),
   ]
 
-  c_array(CDoom.rndtable,
+  # Crystal-owned random table remains the existing lookup data.
+  c_array(Doocr.rndtable,
     0, 8, 109, 220, 222, 241, 149, 107, 75, 248, 254, 140, 16, 66,
     74, 21, 211, 47, 80, 242, 154, 27, 205, 128, 161, 89, 77, 36,
     95, 110, 85, 48, 212, 140, 211, 249, 22, 79, 200, 50, 28, 188,
@@ -5869,30 +5840,30 @@ module Doocr
     120, 163, 236, 249
   )
 
-  CDoom.rndindex = 0
-  CDoom.prndindex = 0
+  Doocr.rndindex = 0
+  Doocr.prndindex = 0
 
   # a weapon is found with two clip loads,
   # a big item has five clip loads
-  c_array(CDoom.maxammo, 200, 50, 300, 50)
-  c_array(CDoom.clipammo, 10, 4, 20, 1)
+  {200, 50, 300, 50}.each_with_index { |value, i| Doocr.maxammo[i] = value }
+  {10, 4, 20, 1}.each_with_index { |value, i| Doocr.clipammo[i] = value }
 
   #
   # p_new_chase_dire related LUT.
   #
-  c_array(CDoom.opposite,
+  c_array(Doocr.opposite,
     CDoom::Dirtype::West, CDoom::Dirtype::SouthWest, CDoom::Dirtype::South, CDoom::Dirtype::SouthEast,
     CDoom::Dirtype::East, CDoom::Dirtype::NorthEast, CDoom::Dirtype::North, CDoom::Dirtype::NorthWest, CDoom::Dirtype::NoDir)
 
-  c_array(CDoom.diags,
+  c_array(Doocr.diags,
     CDoom::Dirtype::NorthWest, CDoom::Dirtype::NorthEast, CDoom::Dirtype::SouthWest, CDoom::Dirtype::SouthEast)
 
-  c_array(CDoom.xspeed, FRACUNIT, 47000, 0, -47000, -FRACUNIT, -47000, 0, 47000)
-  c_array(CDoom.yspeed, 0, 47000, FRACUNIT, 47000, 0, -47000, -FRACUNIT, -47000)
-  CDoom.traceangle = 0xc000000
+  c_array(Doocr.xspeed, FRACUNIT, 47000, 0, -47000, -FRACUNIT, -47000, 0, 47000)
+  c_array(Doocr.yspeed, 0, 47000, FRACUNIT, 47000, 0, -47000, -FRACUNIT, -47000)
+  Doocr.traceangle = 0xc000000
 
   @@merge_files : Array(String) = [] of String
-  @@lumpinfo : Array(CDoom::Lumpinfo) = [] of CDoom::Lumpinfo
+  @@lumpinfo : Array(Lumpinfo) = [] of Lumpinfo
 
   # Floor/ceiling animation sequences,
   #  defined by first and last frame,
@@ -5933,14 +5904,9 @@ module Doocr
 
     {-1, "", "", -1},
   ]
-  @@animdefs : Array(CDoom::Animdef) = Array.new(@@animdef_data.size, CDoom::Animdef.new)
-  @@animdef_data.each_with_index do |elm, i|
-    (@@animdefs.to_unsafe + i).value.istexture = elm[0]
-    (@@animdefs.to_unsafe + i).value.endname = elm[1].to_unsafe
-    (@@animdefs.to_unsafe + i).value.startname = elm[2].to_unsafe
-    (@@animdefs.to_unsafe + i).value.speed = elm[3]
+  @@animdefs : Array(Animdef) = @@animdef_data.map do |elm|
+    Animdef.new(elm[0].to_i32, elm[1], elm[2], elm[3])
   end
-  CDoom.animdefs = @@animdefs.to_unsafe
 
   @@alph_switch_list_data : Array(Tuple(String, String, Int32)) = [
     # Doom shareware episode 1 switches
@@ -5991,28 +5957,19 @@ module Doocr
 
     {"\0", "\0", 0},
   ]
-  @@alph_switch_list : Array(CDoom::Switchlist) = Array.new(@@alph_switch_list_data.size, CDoom::Switchlist.new)
-  @@alph_switch_list_data.each_with_index do |elm, i|
-    (@@alph_switch_list.to_unsafe + i).value.name1 = elm[0].to_unsafe
-    (@@alph_switch_list.to_unsafe + i).value.name2 = elm[1].to_unsafe
-    (@@alph_switch_list.to_unsafe + i).value.episode = elm[2]
+  @@alph_switch_list = @@alph_switch_list_data.map do |elm|
+    Switchlist.new(elm[0], elm[1], elm[2])
   end
-  CDoom.alph_switch_list = @@alph_switch_list.to_unsafe
 
-  c_array((CDoom.checkcoord.to_unsafe).value, 3, 0, 2, 1)
-  c_array((CDoom.checkcoord.to_unsafe + 1).value, 3, 0, 2, 0)
-  c_array((CDoom.checkcoord.to_unsafe + 2).value, 3, 1, 2, 0)
-  c_array((CDoom.checkcoord.to_unsafe + 3).value, 0, 0, 0, 0)
-  c_array((CDoom.checkcoord.to_unsafe + 4).value, 2, 0, 2, 1)
-  c_array((CDoom.checkcoord.to_unsafe + 5).value, 0, 0, 0, 0)
-  c_array((CDoom.checkcoord.to_unsafe + 6).value, 3, 1, 3, 0)
-  c_array((CDoom.checkcoord.to_unsafe + 7).value, 0, 0, 0, 0)
-  c_array((CDoom.checkcoord.to_unsafe + 8).value, 2, 0, 3, 1)
-  c_array((CDoom.checkcoord.to_unsafe + 9).value, 2, 1, 3, 1)
-  c_array((CDoom.checkcoord.to_unsafe + 10).value, 2, 1, 3, 0)
-  c_array((CDoom.checkcoord.to_unsafe + 11).value, 0, 0, 0, 0)
+  {
+    {3, 0, 2, 1}, {3, 0, 2, 0}, {3, 1, 2, 0}, {0, 0, 0, 0},
+    {2, 0, 2, 1}, {0, 0, 0, 0}, {3, 1, 3, 0}, {0, 0, 0, 0},
+    {2, 0, 3, 1}, {2, 1, 3, 1}, {2, 1, 3, 0}, {0, 0, 0, 0},
+  }.each_with_index do |row, i|
+    4.times { |j| Doocr.checkcoord[i][j] = row[j] }
+  end
 
-  c_array(CDoom.fuzzoffset,
+  c_array(Doocr.fuzzoffset,
     CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF,
     CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF,
     CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF, -CDoom::FUZZOFF, -CDoom::FUZZOFF, -CDoom::FUZZOFF,
@@ -6022,13 +5979,11 @@ module Doocr
     CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF
   )
 
-  CDoom.fuzzpos = 0
+  Doocr.fuzzpos = 0
 
-  CDoom.validcount = 1
+  Doocr.validcount = 1
 
-  CDoom.mus_playing_s_sound = Pointer(CDoom::Musicinfo).null
-
-  CDoom.snd_music_volume = 15
+  Doocr.snd_music_volume = 15
 
   @@s_music_data : Array(Tuple(String, Int32)) = [
     {"\0", 0},
@@ -6100,12 +6055,7 @@ module Doocr
     {"dm2ttl", 0},
     {"dm2int", 0},
   ]
-  @@s_music : Array(CDoom::Musicinfo) = Array(CDoom::Musicinfo).new(68, CDoom::Musicinfo.new)
-  @@s_music_data.each_with_index do |elm, i|
-    (@@s_music.to_unsafe + i).value.name = elm[0].to_unsafe
-    (@@s_music.to_unsafe + i).value.lumpnum = elm[1]
-  end
-  CDoom.s_music = @@s_music.to_unsafe
+  @@s_music = @@s_music_data.map { |elm| Musicinfo.new(elm[0], elm[1]) }
 
   @@s_sfx_data : Array(Tuple(String, Bool, Int32, Pointer(CDoom::Sfxinfo), Int32, Int32, Int32)) = [
     # S_sfx[0] needs to be a dummy for odd reasons.
@@ -6231,13 +6181,13 @@ module Doocr
   end
   class_getter lengths : Array(Int32) = Array(Int32).new(@@s_sfx.size, 0)
 
-  CDoom.veryfirsttime = 1
-  CDoom.st_msgcounter = 0
-  CDoom.st_oldhealth = -1
-  CDoom.st_facecount = 0
-  CDoom.st_faceindex = 0
-  CDoom.st_palette = 0
-  CDoom.st_stopped = 1
+  Doocr.veryfirsttime = 1
+  Doocr.st_msgcounter = 0
+  Doocr.st_oldhealth = -1
+  Doocr.st_facecount = 0
+  Doocr.st_faceindex = 0
+  Doocr.st_palette = 0
+  Doocr.st_stopped = 1
 
   @@cheat_mus_seq = [
     0xb2, 0x26, 0xb6, 0xae, 0xea, 1, 0, 0, 0xff,
@@ -6292,40 +6242,39 @@ module Doocr
 
   @@cheat_me_seq = [0x26, 0xA2, 0xEA, 0x32, 0xEE, 0xA2, 0xE6, 0xFF] of UInt8
 
-  CDoom.cheat_mus.sequence = @@cheat_mus_seq.to_unsafe
-  CDoom.cheat_mus.p = Pointer(UInt8).null
-  CDoom.cheat_god.sequence = @@cheat_god_seq.to_unsafe
-  CDoom.cheat_god.p = Pointer(UInt8).null
-  CDoom.cheat_ammo.sequence = @@cheat_ammo_seq.to_unsafe
-  CDoom.cheat_ammo.p = Pointer(UInt8).null
-  CDoom.cheat_ammonokey.sequence = @@cheat_ammonokey_seq.to_unsafe
-  CDoom.cheat_ammonokey.p = Pointer(UInt8).null
-  CDoom.cheat_noclip.sequence = @@cheat_noclip_seq.to_unsafe
-  CDoom.cheat_noclip.p = Pointer(UInt8).null
-  CDoom.cheat_commercial_noclip.sequence = @@cheat_commercial_noclip_seq.to_unsafe
-  CDoom.cheat_commercial_noclip.p = Pointer(UInt8).null
-  CDoom.cheat_amap.sequence = @@cheat_amap_seq.to_unsafe
-  CDoom.cheat_amap.p = Pointer(UInt8).null
-  @@cheat_me = CDoom::Cheatseq.new(sequence: @@cheat_me_seq.to_unsafe, p: Pointer(UInt8).null)
-  @@cheat_me
+  Doocr.cheat_mus.sequence = @@cheat_mus_seq.to_unsafe
+  Doocr.cheat_mus.p = Pointer(UInt8).null
+  Doocr.cheat_god.sequence = @@cheat_god_seq.to_unsafe
+  Doocr.cheat_god.p = Pointer(UInt8).null
+  Doocr.cheat_ammo.sequence = @@cheat_ammo_seq.to_unsafe
+  Doocr.cheat_ammo.p = Pointer(UInt8).null
+  Doocr.cheat_ammonokey.sequence = @@cheat_ammonokey_seq.to_unsafe
+  Doocr.cheat_ammonokey.p = Pointer(UInt8).null
+  Doocr.cheat_noclip.sequence = @@cheat_noclip_seq.to_unsafe
+  Doocr.cheat_noclip.p = Pointer(UInt8).null
+  Doocr.cheat_commercial_noclip.sequence = @@cheat_commercial_noclip_seq.to_unsafe
+  Doocr.cheat_commercial_noclip.p = Pointer(UInt8).null
+  Doocr.cheat_amap.sequence = @@cheat_amap_seq.to_unsafe
+  Doocr.cheat_amap.p = Pointer(UInt8).null
+  Doocr.cheat_me.sequence = @@cheat_me_seq.to_unsafe
+  Doocr.cheat_me.p = Pointer(UInt8).null
 
-  CDoom.cheat_powerup
-  c_array_cheat(CDoom.cheat_powerup,
-    {CDoom.cheat_powerup_seq[0].to_unsafe, Pointer(UInt8).null},
-    {CDoom.cheat_powerup_seq[1].to_unsafe, Pointer(UInt8).null},
-    {CDoom.cheat_powerup_seq[2].to_unsafe, Pointer(UInt8).null},
-    {CDoom.cheat_powerup_seq[3].to_unsafe, Pointer(UInt8).null},
-    {CDoom.cheat_powerup_seq[4].to_unsafe, Pointer(UInt8).null},
-    {CDoom.cheat_powerup_seq[5].to_unsafe, Pointer(UInt8).null},
-    {CDoom.cheat_powerup_seq[6].to_unsafe, Pointer(UInt8).null}
+  c_array_cheat(Doocr.cheat_powerup,
+    {@@cheat_powerup_seq[0].to_unsafe, Pointer(UInt8).null},
+    {@@cheat_powerup_seq[1].to_unsafe, Pointer(UInt8).null},
+    {@@cheat_powerup_seq[2].to_unsafe, Pointer(UInt8).null},
+    {@@cheat_powerup_seq[3].to_unsafe, Pointer(UInt8).null},
+    {@@cheat_powerup_seq[4].to_unsafe, Pointer(UInt8).null},
+    {@@cheat_powerup_seq[5].to_unsafe, Pointer(UInt8).null},
+    {@@cheat_powerup_seq[6].to_unsafe, Pointer(UInt8).null}
   )
 
-  CDoom.cheat_choppers.sequence = @@cheat_choppers_seq.to_unsafe
-  CDoom.cheat_choppers.p = Pointer(UInt8).null
-  CDoom.cheat_clev.sequence = @@cheat_clev_seq.to_unsafe
-  CDoom.cheat_clev.p = Pointer(UInt8).null
-  CDoom.cheat_mypos.sequence = @@cheat_mypos_seq.to_unsafe
-  CDoom.cheat_mypos.p = Pointer(UInt8).null
+  Doocr.cheat_choppers.sequence = @@cheat_choppers_seq.to_unsafe
+  Doocr.cheat_choppers.p = Pointer(UInt8).null
+  Doocr.cheat_clev.sequence = @@cheat_clev_seq.to_unsafe
+  Doocr.cheat_clev.p = Pointer(UInt8).null
+  Doocr.cheat_mypos.sequence = @@cheat_mypos_seq.to_unsafe
+  Doocr.cheat_mypos.p = Pointer(UInt8).null
 
   {% if flag?("PRECOMPUTED") %}
     class_getter finetangent = [
@@ -8391,7 +8340,7 @@ module Doocr
   class_getter finecosine : Array(CDoom::Fixed) = [] of CDoom::Fixed
 
   # Now where did these came from?
-  c_array((CDoom.gammatable.to_unsafe).value,
+  c_array(Doocr.gammatable[0],
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
     17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
     33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
@@ -8409,7 +8358,7 @@ module Doocr
     224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
     240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255
   )
-  c_array((CDoom.gammatable.to_unsafe + 1).value,
+  c_array(Doocr.gammatable[1],
     2, 4, 5, 7, 8, 10, 11, 12, 14, 15, 16, 18, 19, 20, 21, 23, 24, 25, 26, 27, 29, 30, 31,
     32, 33, 34, 36, 37, 38, 39, 40, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 54, 55,
     56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 69, 70, 71, 72, 73, 74, 75, 76, 77,
@@ -8426,7 +8375,7 @@ module Doocr
     233, 234, 235, 236, 237, 237, 238, 239, 240, 241, 242, 243, 244, 245, 245, 246,
     247, 248, 249, 250, 251, 252, 252, 253, 254, 255
   )
-  c_array((CDoom.gammatable.to_unsafe + 2).value,
+  c_array(Doocr.gammatable[2],
     4, 7, 9, 11, 13, 15, 17, 19, 21, 22, 24, 26, 27, 29, 30, 32, 33, 35, 36, 38, 39, 40, 42,
     43, 45, 46, 47, 48, 50, 51, 52, 54, 55, 56, 57, 59, 60, 61, 62, 63, 65, 66, 67, 68, 69,
     70, 72, 73, 74, 75, 76, 77, 78, 79, 80, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93,
@@ -8443,7 +8392,7 @@ module Doocr
     242, 243, 244, 244, 245, 246, 247, 247, 248, 249, 250, 251, 251, 252, 253, 254, 254,
     255
   )
-  c_array((CDoom.gammatable.to_unsafe + 3).value,
+  c_array(Doocr.gammatable[3],
     8, 12, 16, 19, 22, 24, 27, 29, 31, 34, 36, 38, 40, 41, 43, 45, 47, 49, 50, 52, 53, 55,
     57, 58, 60, 61, 63, 64, 65, 67, 68, 70, 71, 72, 74, 75, 76, 77, 79, 80, 81, 82, 84, 85,
     86, 87, 88, 90, 91, 92, 93, 94, 95, 96, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107,
@@ -8460,7 +8409,7 @@ module Doocr
     242, 242, 243, 244, 244, 245, 246, 246, 247, 247, 248, 249, 249, 250, 251, 251, 252,
     253, 253, 254, 254, 255
   )
-  c_array((CDoom.gammatable.to_unsafe + 4).value,
+  c_array(Doocr.gammatable[4],
     16, 23, 28, 32, 36, 39, 42, 45, 48, 50, 53, 55, 57, 60, 62, 64, 66, 68, 69, 71, 73, 75, 76,
     78, 80, 81, 83, 84, 86, 87, 89, 90, 92, 93, 94, 96, 97, 98, 100, 101, 102, 103, 105, 106,
     107, 108, 109, 110, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124,
@@ -8480,96 +8429,74 @@ module Doocr
 
   # Episode 0 World Map
   @@lnodes0 = [
-    CDoom::Point.new(x: 185, y: 164), # location of level 0 (CJ)
-    CDoom::Point.new(x: 148, y: 143), # location of level 1 (CJ)
-    CDoom::Point.new(x: 69, y: 122),  # location of level 2 (CJ)
-    CDoom::Point.new(x: 209, y: 102), # location of level 3 (CJ)
-    CDoom::Point.new(x: 116, y: 89),  # location of level 4 (CJ)
-    CDoom::Point.new(x: 166, y: 55),  # location of level 5 (CJ)
-    CDoom::Point.new(x: 71, y: 56),   # location of level 6 (CJ)
-    CDoom::Point.new(x: 135, y: 29),  # location of level 7 (CJ)
-    CDoom::Point.new(x: 71, y: 24),   # location of level 8 (CJ)
+    Point.new(x: 185, y: 164), # location of level 0 (CJ)
+    Point.new(x: 148, y: 143), # location of level 1 (CJ)
+    Point.new(x: 69, y: 122),  # location of level 2 (CJ)
+    Point.new(x: 209, y: 102), # location of level 3 (CJ)
+    Point.new(x: 116, y: 89),  # location of level 4 (CJ)
+    Point.new(x: 166, y: 55),  # location of level 5 (CJ)
+    Point.new(x: 71, y: 56),   # location of level 6 (CJ)
+    Point.new(x: 135, y: 29),  # location of level 7 (CJ)
+    Point.new(x: 71, y: 24),   # location of level 8 (CJ)
   ]
 
   # Episode 1 World Map should go here
   @@lnodes1 = [
-    CDoom::Point.new(x: 254, y: 25),  # location of level 0 (CJ)
-    CDoom::Point.new(x: 97, y: 50),   # location of level 1 (CJ)
-    CDoom::Point.new(x: 188, y: 64),  # location of level 2 (CJ)
-    CDoom::Point.new(x: 128, y: 78),  # location of level 3 (CJ)
-    CDoom::Point.new(x: 214, y: 92),  # location of level 4 (CJ)
-    CDoom::Point.new(x: 133, y: 130), # location of level 5 (CJ)
-    CDoom::Point.new(x: 208, y: 136), # location of level 6 (CJ)
-    CDoom::Point.new(x: 148, y: 140), # location of level 7 (CJ)
-    CDoom::Point.new(x: 235, y: 158), # location of level 8 (CJ)
+    Point.new(x: 254, y: 25),  # location of level 0 (CJ)
+    Point.new(x: 97, y: 50),   # location of level 1 (CJ)
+    Point.new(x: 188, y: 64),  # location of level 2 (CJ)
+    Point.new(x: 128, y: 78),  # location of level 3 (CJ)
+    Point.new(x: 214, y: 92),  # location of level 4 (CJ)
+    Point.new(x: 133, y: 130), # location of level 5 (CJ)
+    Point.new(x: 208, y: 136), # location of level 6 (CJ)
+    Point.new(x: 148, y: 140), # location of level 7 (CJ)
+    Point.new(x: 235, y: 158), # location of level 8 (CJ)
   ]
 
   # Episode 2 World Map should go here
   @@lnodes2 = [
-    CDoom::Point.new(x: 156, y: 168), # location of level 0 (CJ)
-    CDoom::Point.new(x: 48, y: 154),  # location of level 1 (CJ)
-    CDoom::Point.new(x: 174, y: 95),  # location of level 2 (CJ)
-    CDoom::Point.new(x: 265, y: 75),  # location of level 3 (CJ)
-    CDoom::Point.new(x: 130, y: 48),  # location of level 4 (CJ)
-    CDoom::Point.new(x: 279, y: 23),  # location of level 5 (CJ)
-    CDoom::Point.new(x: 198, y: 48),  # location of level 6 (CJ)
-    CDoom::Point.new(x: 140, y: 25),  # location of level 7 (CJ)
-    CDoom::Point.new(x: 281, y: 136), # location of level 8 (CJ)
+    Point.new(x: 156, y: 168), # location of level 0 (CJ)
+    Point.new(x: 48, y: 154),  # location of level 1 (CJ)
+    Point.new(x: 174, y: 95),  # location of level 2 (CJ)
+    Point.new(x: 265, y: 75),  # location of level 3 (CJ)
+    Point.new(x: 130, y: 48),  # location of level 4 (CJ)
+    Point.new(x: 279, y: 23),  # location of level 5 (CJ)
+    Point.new(x: 198, y: 48),  # location of level 6 (CJ)
+    Point.new(x: 140, y: 25),  # location of level 7 (CJ)
+    Point.new(x: 281, y: 136), # location of level 8 (CJ)
   ]
 
-  c_array(CDoom.lnodes,
-    @@lnodes0.to_unsafe,
-    @@lnodes1.to_unsafe,
-    @@lnodes2.to_unsafe
-  )
+  @@lnodes = [@@lnodes0, @@lnodes1, @@lnodes2]
 
-  c_array_animinfo(CDoom.epsd0animinfo,
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {224, 104}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {184, 160}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {112, 136}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {72, 112}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {88, 96}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {64, 48}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {192, 40}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {136, 16}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {80, 16}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {64, 24}, 0}
-  )
+  @@anims_wi_stuff = [
+    [
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(224, 104)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(184, 160)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(112, 136)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(72, 112)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(88, 96)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(64, 48)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(192, 40)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(136, 16)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(80, 16)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(64, 24)),
+    ],
+    (1..9).map do |level|
+      AnimWIStuff.new(CDoom::Animenum::Level, CDoom::TICRATE // 3, level == 8 ? 3 : 1,
+        level == 8 ? Point.new(192, 144) : Point.new(128, 136), level == 9 ? 8 : level)
+    end,
+    [
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(104, 168)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(40, 136)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(160, 96)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(104, 80)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(120, 32)),
+      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 4, 3, Point.new(40, 0)),
+    ],
+  ]
+  @@numanims = @@anims_wi_stuff.map(&.size)
 
-  c_array_animinfo(CDoom.epsd1animinfo,
-    {CDoom::Animenum::Level, CDoom::TICRATE // 3, 1, {128, 136}, 1},
-    {CDoom::Animenum::Level, CDoom::TICRATE // 3, 1, {128, 136}, 2},
-    {CDoom::Animenum::Level, CDoom::TICRATE // 3, 1, {128, 136}, 3},
-    {CDoom::Animenum::Level, CDoom::TICRATE // 3, 1, {128, 136}, 4},
-    {CDoom::Animenum::Level, CDoom::TICRATE // 3, 1, {128, 136}, 5},
-    {CDoom::Animenum::Level, CDoom::TICRATE // 3, 1, {128, 136}, 6},
-    {CDoom::Animenum::Level, CDoom::TICRATE // 3, 1, {128, 136}, 7},
-    {CDoom::Animenum::Level, CDoom::TICRATE // 3, 3, {192, 144}, 8},
-    {CDoom::Animenum::Level, CDoom::TICRATE // 3, 1, {128, 136}, 8}
-  )
-
-  c_array_animinfo(CDoom.epsd2animinfo,
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {104, 168}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {40, 136}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {160, 96}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {104, 80}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, {120, 32}, 0},
-    {CDoom::Animenum::Always, CDoom::TICRATE // 4, 3, {40, 0}, 0}
-  )
-
-  c_array(CDoom.numanims,
-    sizeof(typeof(CDoom.epsd0animinfo)) // sizeof(CDoom::AnimWIStuff),
-    sizeof(typeof(CDoom.epsd1animinfo)) // sizeof(CDoom::AnimWIStuff),
-    sizeof(typeof(CDoom.epsd2animinfo)) // sizeof(CDoom::AnimWIStuff),
-  )
-
-  c_array(CDoom.anims_wi_stuff,
-    CDoom.epsd0animinfo.to_unsafe,
-    CDoom.epsd1animinfo.to_unsafe,
-    CDoom.epsd2animinfo.to_unsafe
-  )
-
-  CDoom.snl_pointeron = 0
+  Doocr.snl_pointeron = 0
 
   def self.sync_deh_strings
     # DOOM1
@@ -8589,11 +8516,10 @@ module Doocr
     CDoom.chat_macros[8] = @@deh_hustr_chatmacro8.to_unsafe
     CDoom.chat_macros[9] = @@deh_hustr_chatmacro9.to_unsafe
 
-    c_array(CDoom.player_names,
-      @@deh_hustr_plrgreen.to_unsafe,
-      @@deh_hustr_plrindigo.to_unsafe,
-      @@deh_hustr_plrbrown.to_unsafe,
-      @@deh_hustr_plrred.to_unsafe)
+    Doocr.player_names[0] = @@deh_hustr_plrgreen
+    Doocr.player_names[1] = @@deh_hustr_plrindigo
+    Doocr.player_names[2] = @@deh_hustr_plrbrown
+    Doocr.player_names[3] = @@deh_hustr_plrred
 
     #
     # Builtin map names.

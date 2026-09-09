@@ -85,16 +85,16 @@ module Doocr
     # and the text must either need updating or refreshing
     # (because of a recent change back from the automap)
 
-    if CDoom.automapactive == 0 && CDoom.viewwindowx != 0 && l.value.needsupdate != 0
+    if Doocr.automapactive == 0 && Doocr.viewwindowx != 0 && l.value.needsupdate != 0
       lh = l.value.f[0].value.height.to_i16! + 1
       y = l.value.y
       yoffset = y * CDoom::SCREENWIDTH
       while y < l.value.y + lh
-        if y < CDoom.viewwindowy || y >= CDoom.viewwindowy + CDoom.viewheight
+        if y < Doocr.viewwindowy || y >= Doocr.viewwindowy + Doocr.viewheight
           CDoom.r_video_erase(yoffset, CDoom::SCREENWIDTH) # erase entire line
         else
-          CDoom.r_video_erase(yoffset, CDoom.viewwindowx)                                       # erase left border
-          CDoom.r_video_erase(yoffset + CDoom.viewwindowx + CDoom.viewwidth, CDoom.viewwindowx) # erase right border
+          CDoom.r_video_erase(yoffset, Doocr.viewwindowx)                                       # erase left border
+          CDoom.r_video_erase(yoffset + Doocr.viewwindowx + Doocr.viewwidth, Doocr.viewwindowx) # erase right border
         end
 
         y += 1
@@ -102,7 +102,7 @@ module Doocr
       end
     end
 
-    @@lastautomapactive = CDoom.automapactive
+    @@lastautomapactive = Doocr.automapactive
     l.value.needsupdate = l.value.needsupdate - 1 if l.value.needsupdate != 0
   end
 
@@ -251,7 +251,7 @@ module Doocr
   def self.hu_init
     buffer = uninitialized StaticArray(UInt8, 9)
 
-    if CDoom.language == CDoom::Language::French
+    if Doocr.language == CDoom::Language::French
       CDoom.shiftxform = CDoom.french_shiftxform
     else
       CDoom.shiftxform = CDoom.english_shiftxform
@@ -270,22 +270,22 @@ module Doocr
   end
 
   def self.hu_stop
-    CDoom.headsupactive = 0
+    Doocr.headsupactive = 0
   end
 
   def self.hu_start
-    CDoom.hu_stop if CDoom.headsupactive != 0
+    CDoom.hu_stop if Doocr.headsupactive != 0
 
-    CDoom.plr = @@players.to_unsafe + CDoom.consoleplayer
-    CDoom.message_on = 0
-    CDoom.message_dontfuckwithme = 0
-    CDoom.message_nottobefuckedwith = 0
-    CDoom.chat_on = 0
+    CDoom.plr = @@players.to_unsafe + Doocr.consoleplayer
+    Doocr.message_on = 0
+    Doocr.message_dontfuckwithme = 0
+    Doocr.message_nottobefuckedwith = 0
+    Doocr.chat_on = 0
 
     # create the message widget
     CDoom.hulib_init_s_text(pointerof(CDoom.w_message),
       CDoom::HU_MSGX, CDoom::HU_MSGY, CDoom::HU_MSGHEIGHT,
-      CDoom.hu_font, CDoom::HU_FONTSTART, pointerof(CDoom.message_on))
+      CDoom.hu_font, CDoom::HU_FONTSTART, pointerof(@@message_on))
 
     # # create the map title widget
     CDoom.hulib_init_text_line(pointerof(CDoom.w_title),
@@ -293,17 +293,17 @@ module Doocr
       CDoom.hu_font, CDoom::HU_FONTSTART)
 
     s = "".to_unsafe
-    case CDoom.gamemode
+    case Doocr.gamemode
     when CDoom::GameMode::Shareware, CDoom::GameMode::Registered, CDoom::GameMode::Retail
-      s = CDoom.mapnames[(CDoom.gameepisode - 1)*9 + CDoom.gamemap - 1]
+      s = CDoom.mapnames[(Doocr.gameepisode - 1)*9 + Doocr.gamemap - 1]
     when CDoom::GameMode::Commercial
-      case CDoom.gamemission
+      case Doocr.gamemission
       when CDoom::GameMission::PackTnt
-        s = CDoom.mapnamest[CDoom.gamemap - 1]
+        s = CDoom.mapnamest[Doocr.gamemap - 1]
       when CDoom::GameMission::PackPlut
-        s = CDoom.mapnamesp[CDoom.gamemap - 1]
+        s = CDoom.mapnamesp[Doocr.gamemap - 1]
       else
-        s = CDoom.mapnames2[CDoom.gamemap - 1]
+        s = CDoom.mapnames2[Doocr.gamemap - 1]
       end
     end
 
@@ -314,20 +314,20 @@ module Doocr
 
     # create the chat widget
     CDoom.hulib_init_i_text(pointerof(CDoom.w_chat), CDoom::HU_MSGX, CDoom::HU_MSGY + CDoom::HU_MSGHEIGHT*(CDoom.hu_font[0].value.height.to_i16! + 1),
-      CDoom.hu_font, CDoom::HU_FONTSTART, pointerof(CDoom.chat_on))
+      CDoom.hu_font, CDoom::HU_FONTSTART, Doocr.chat_on_ptr)
 
     # create the inputbuffer widgets
     CDoom::MAXPLAYERS.times do |i|
-      CDoom.hulib_init_i_text(CDoom.w_inputbuffer.to_unsafe + i, 0, 0, Pointer(Pointer(CDoom::Patch)).null, 0, pointerof(CDoom.always_off))
+      CDoom.hulib_init_i_text(CDoom.w_inputbuffer.to_unsafe + i, 0, 0, Pointer(Pointer(CDoom::Patch)).null, 0, Doocr.always_off_ptr)
     end
 
-    CDoom.headsupactive = 1
+    Doocr.headsupactive = 1
   end
 
   def self.hu_drawer
     CDoom.hulib_draw_s_text(pointerof(CDoom.w_message))
     CDoom.hulib_draw_i_text(pointerof(CDoom.w_chat))
-    CDoom.hulib_draw_text_line(pointerof(CDoom.w_title), 0) if CDoom.automapactive != 0
+    CDoom.hulib_draw_text_line(pointerof(CDoom.w_title), 0) if Doocr.automapactive != 0
   end
 
   def self.hu_erase
@@ -338,29 +338,29 @@ module Doocr
 
   def self.hu_ticker
     # tick down message counter if message is up
-    if CDoom.message_counter != 0 && (CDoom.message_counter -= 1) == 0
-      CDoom.message_on = 0
-      CDoom.message_nottobefuckedwith = 0
+    if Doocr.message_counter != 0 && (Doocr.message_counter -= 1) == 0
+      Doocr.message_on = 0
+      Doocr.message_nottobefuckedwith = 0
     end
 
-    if CDoom.show_messages != 0 || CDoom.message_dontfuckwithme != 0
+    if Doocr.show_messages != 0 || Doocr.message_dontfuckwithme != 0
       # display message if necessary
-      if (!CDoom.plr.value.message.null? && CDoom.message_nottobefuckedwith == 0) ||
-         (!CDoom.plr.value.message.null? && CDoom.message_dontfuckwithme != 0)
+      if (!CDoom.plr.value.message.null? && Doocr.message_nottobefuckedwith == 0) ||
+         (!CDoom.plr.value.message.null? && Doocr.message_dontfuckwithme != 0)
         CDoom.hulib_add_message_to_s_text(pointerof(CDoom.w_message), Pointer(UInt8).null, CDoom.plr.value.message)
         CDoom.plr.value.message = Pointer(UInt8).null
-        CDoom.message_on = 1
-        CDoom.message_counter = CDoom::HU_MSGTIMEOUT
-        CDoom.message_nottobefuckedwith = CDoom.message_dontfuckwithme
-        CDoom.message_dontfuckwithme = 0
+        Doocr.message_on = 1
+        Doocr.message_counter = CDoom::HU_MSGTIMEOUT
+        Doocr.message_nottobefuckedwith = Doocr.message_dontfuckwithme
+        Doocr.message_dontfuckwithme = 0
       end
     end
 
     # check for incoming chat characters
-    if CDoom.netgame != 0
+    if Doocr.netgame != 0
       CDoom::MAXPLAYERS.times do |i|
-        next if CDoom.playeringame[i] == 0
-        if i != CDoom.consoleplayer && (c = @@players[i].cmd.chatchar) != 0
+        next if Doocr.playeringame[i] == 0
+        if i != Doocr.consoleplayer && (c = @@players[i].cmd.chatchar) != 0
           if c <= CDoom::HU_BROADCAST
             CDoom.chat_dest[i] = c
           else
@@ -370,16 +370,16 @@ module Doocr
             rc = CDoom.hulib_key_in_i_text(CDoom.w_inputbuffer.to_unsafe + i, c)
             if rc != 0 && c == CDoom::KEY_ENTER
               if CDoom.w_inputbuffer[i].l.len != 0 &&
-                 (CDoom.chat_dest[i] == CDoom.consoleplayer + 1 ||
+                 (CDoom.chat_dest[i] == Doocr.consoleplayer + 1 ||
                  CDoom.chat_dest[i] == CDoom::HU_BROADCAST)
                 CDoom.hulib_add_message_to_s_text(pointerof(CDoom.w_message),
-                  CDoom.player_names[i],
+                  Doocr.player_names[i].to_unsafe,
                   CDoom.w_inputbuffer[i].l.l)
 
-                CDoom.message_nottobefuckedwith = 1
-                CDoom.message_on = 1
-                CDoom.message_counter = CDoom::HU_MSGTIMEOUT
-                if CDoom.gamemode == CDoom::GameMode::Commercial
+                Doocr.message_nottobefuckedwith = 1
+                Doocr.message_on = 1
+                Doocr.message_counter = CDoom::HU_MSGTIMEOUT
+                if Doocr.gamemode == CDoom::GameMode::Commercial
                   CDoom.s_start_sound(Pointer(CDoom::Mobj).null, CDoom::Sfxenum::SFX_radio)
                 else
                   CDoom.s_start_sound(Pointer(CDoom::Mobj).null, CDoom::Sfxenum::SFX_tink)
@@ -395,19 +395,19 @@ module Doocr
   end
 
   def self.hu_queue_chat_char(c : UInt8)
-    if ((CDoom.head + 1) & (CDoom::QUEUESIZE - 1)) == CDoom.tail
+    if ((Doocr.head + 1) & (CDoom::QUEUESIZE - 1)) == Doocr.tail
       CDoom.plr.value.message = @@deh_hustr_msgu
     else
-      CDoom.chatchars[CDoom.head] = c
-      CDoom.head = (CDoom.head + 1) & (CDoom::QUEUESIZE - 1)
+      CDoom.chatchars[Doocr.head] = c
+      Doocr.head = (Doocr.head + 1) & (CDoom::QUEUESIZE - 1)
     end
   end
 
   def self.hu_dequeue_chat_char : UInt8
     c = 0_u8
-    if CDoom.head != CDoom.tail
-      c = CDoom.chatchars[CDoom.tail]
-      CDoom.tail = (CDoom.tail + 1) & (CDoom::QUEUESIZE - 1)
+    if Doocr.head != Doocr.tail
+      c = CDoom.chatchars[Doocr.tail]
+      Doocr.tail = (Doocr.tail + 1) & (CDoom::QUEUESIZE - 1)
     end
 
     return c
@@ -428,7 +428,7 @@ module Doocr
   def self.hu_responder(ev : CDoom::Event*) : CDoom::DoomBool
     eatkey = 0
     numplayers = 0
-    CDoom::MAXPLAYERS.times { |i| numplayers += CDoom.playeringame[i] }
+    CDoom::MAXPLAYERS.times { |i| numplayers += Doocr.playeringame[i] }
 
     if ev.value.data1 == CDoom::KEY_RSHIFT
       @@shiftdown = (ev.value.type == CDoom::Evtype::Keydown).to_unsafe
@@ -440,26 +440,26 @@ module Doocr
 
     return 0 if ev.value.type != CDoom::Evtype::Keydown
 
-    if CDoom.chat_on == 0
+    if Doocr.chat_on == 0
       if ev.value.data1 == CDoom::HU_MSGREFRESH
-        CDoom.message_on = 1
-        CDoom.message_counter = CDoom::HU_MSGTIMEOUT
+        Doocr.message_on = 1
+        Doocr.message_counter = CDoom::HU_MSGTIMEOUT
         eatkey = 1
-      elsif CDoom.netgame != 0 && ev.value.data1 == CDoom::HU_INPUTTOGGLE
+      elsif Doocr.netgame != 0 && ev.value.data1 == CDoom::HU_INPUTTOGGLE
         eatkey = 1
-        CDoom.chat_on = 1
+        Doocr.chat_on = 1
         CDoom.hulib_reset_i_text(pointerof(CDoom.w_chat))
         CDoom.hu_queue_chat_char(CDoom::HU_BROADCAST)
-      elsif CDoom.netgame != 0 && numplayers > 2
+      elsif Doocr.netgame != 0 && numplayers > 2
         CDoom::MAXPLAYERS.times do |i|
           if ev.value.data1 == @@destination_keys[i]
-            if CDoom.playeringame[i] != 0 && i != CDoom.consoleplayer
+            if Doocr.playeringame[i] != 0 && i != Doocr.consoleplayer
               eatkey = 1
-              CDoom.chat_on = 1
+              Doocr.chat_on = 1
               CDoom.hulib_reset_i_text(pointerof(CDoom.w_chat))
               CDoom.hu_queue_chat_char(i + 1)
               break
-            elsif i == CDoom.consoleplayer
+            elsif i == Doocr.consoleplayer
               @@num_nobrainers += 1
               if @@num_nobrainers < 3
                 CDoom.plr.value.message = @@deh_hustr_talktoself1
@@ -495,23 +495,23 @@ module Doocr
         CDoom.hu_queue_chat_char(CDoom::KEY_ENTER)
 
         # leave chat mode and notify that it was sent
-        CDoom.chat_on = 0
+        Doocr.chat_on = 0
         CDoom.doom_strcpy(@@lastmessage, CDoom.chat_macros[c])
         CDoom.plr.value.message = @@lastmessage
         eatkey = 1
       else
-        c = CDoom.foreign_translation(c) if CDoom.language == CDoom::Language::French
+        c = CDoom.foreign_translation(c) if Doocr.language == CDoom::Language::French
         c = CDoom.shiftxform[c] if @@shiftdown != 0 || (c >= 'a'.ord && c <= 'z'.ord)
         eatkey = CDoom.hulib_key_in_i_text(pointerof(CDoom.w_chat), c)
         CDoom.hu_queue_chat_char(c) if eatkey != 0
         if c == CDoom::KEY_ENTER
-          CDoom.chat_on = 0
+          Doocr.chat_on = 0
           if CDoom.w_chat.l.len != 0
             CDoom.doom_strcpy(@@lastmessage, CDoom.w_chat.l.l)
             CDoom.plr.value.message = @@lastmessage
           end
         elsif c == CDoom::KEY_ESCAPE
-          CDoom.chat_on = 0
+          Doocr.chat_on = 0
         end
       end
     end

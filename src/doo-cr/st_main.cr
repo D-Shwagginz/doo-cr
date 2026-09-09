@@ -142,7 +142,7 @@ module Doocr
   def self.stlib_update_mult_icon(mi : CDoom::ST_Multicon*,
                                   refresh : CDoom::DoomBool)
     # Lazy ssg number hack to use whichever shotgun is active
-    if CDoom.gamemode == CDoom::GameMode::Commercial &&
+    if Doocr.gamemode == CDoom::GameMode::Commercial &&
        mi.value.inum == CDoom.plyr.value.weaponowned.to_unsafe + CDoom::Weapontype::Shotgun.value &&
        mi.value.inum.value < (ssgnum = (CDoom.plyr.value.weaponowned.to_unsafe + CDoom::Weapontype::Supershotgun.value)).value
       mi.value.inum = ssgnum
@@ -208,10 +208,10 @@ module Doocr
   #
 
   def self.st_refresh_background
-    if CDoom.st_statusbaron != 0
+    if Doocr.st_statusbaron != 0
       CDoom.v_draw_patch(CDoom::ST_X, 0, CDoom::STLIB_BG, CDoom.sbar)
 
-      CDoom.v_draw_patch(CDoom::ST_FX, 0, CDoom::STLIB_BG, CDoom.faceback) if CDoom.netgame != 0
+      CDoom.v_draw_patch(CDoom::ST_FX, 0, CDoom::STLIB_BG, CDoom.faceback) if Doocr.netgame != 0
 
       CDoom.v_copy_rect(CDoom::ST_X, 0, CDoom::STLIB_BG, CDoom::ST_WIDTH, CDoom::ST_HEIGHT, CDoom::ST_X, CDoom::ST_Y, CDoom::STLIB_FG)
     end
@@ -227,25 +227,25 @@ module Doocr
        (ev.value.data1 & 0xffff0000) == CDoom::AM_MSGHEADER
       case ev.value.data1
       when CDoom::AM_MSGENTERED
-        CDoom.st_gamestate = CDoom::ST_Statenum::AutomapState
-        CDoom.st_firsttime = 1
+        Doocr.st_gamestate = CDoom::ST_Statenum::AutomapState
+        Doocr.st_firsttime = 1
       when CDoom::AM_MSGEXITED
-        CDoom.st_gamestate = CDoom::ST_Statenum::FirstPersonState
+        Doocr.st_gamestate = CDoom::ST_Statenum::FirstPersonState
       end
 
       # if a user keypress...
     elsif ev.value.type == CDoom::Evtype::Keydown
-      if CDoom.netgame == 0
+      if Doocr.netgame == 0
         # 'clev' change-level cheat
-        if CDoom.cht_check_cheat(pointerof(CDoom.cheat_clev), ev.value.data1) != 0
+        if Doocr.cht_check_cheat(Doocr.cheat_clev, ev.value.data1.to_u8!) != 0
           buf = Pointer(UInt8).malloc(3)
 
-          CDoom.cht_get_param(pointerof(CDoom.cheat_clev), buf)
+          Doocr.cht_get_param(Doocr.cheat_clev, buf)
 
           return 0 if (buf[0] < '0'.ord || buf[0] > '9'.ord) ||
                       (buf[1] < '0'.ord || buf[1] > '9'.ord)
 
-          if CDoom.gamemode == CDoom::GameMode::Commercial
+          if Doocr.gamemode == CDoom::GameMode::Commercial
             epsd = 0
             map = (buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord
           else
@@ -254,32 +254,32 @@ module Doocr
           end
 
           # Catch invalid maps
-          return 0 if CDoom.gamemode != CDoom::GameMode::Commercial && epsd < 1
+          return 0 if Doocr.gamemode != CDoom::GameMode::Commercial && epsd < 1
 
           return 0 if map < 1
 
           # Ohmygod - this is not going to work.
-          return 0 if CDoom.gamemode == CDoom::GameMode::Retail &&
+          return 0 if Doocr.gamemode == CDoom::GameMode::Retail &&
                       (epsd > 4 || map > 9)
 
-          return 0 if CDoom.gamemode == CDoom::GameMode::Registered &&
+          return 0 if Doocr.gamemode == CDoom::GameMode::Registered &&
                       (epsd > 3 || map > 9)
 
-          return 0 if CDoom.gamemode == CDoom::GameMode::Shareware &&
+          return 0 if Doocr.gamemode == CDoom::GameMode::Shareware &&
                       (epsd > 1 || map > 9)
 
-          return 0 if CDoom.gamemode == CDoom::GameMode::Commercial &&
+          return 0 if Doocr.gamemode == CDoom::GameMode::Commercial &&
                       map > 32
 
           # So be it.
           CDoom.plyr.value.message = @@deh_ststr_clev
-          CDoom.g_defered_init_new(CDoom.gameskill, epsd, map)
+          CDoom.g_defered_init_new(Doocr.gameskill, epsd, map)
         end
 
-        return 0 if CDoom.gameskill == CDoom::Skill::Nightmare
+        return 0 if Doocr.gameskill == CDoom::Skill::Nightmare
 
         # my little cheat
-        if cht_check_cheat(pointerof(@@cheat_me), ev.value.data1.to_u8) != 0
+        if Doocr.cht_check_cheat(Doocr.cheat_me, ev.value.data1.to_u8) != 0
           CDoom.plyr.value.cheats = CDoom.plyr.value.cheats ^ CDoom::Cheat::CF_ME.value
           CDoom.plyr.value.message = "#{(CDoom.plyr.value.cheats & CDoom::Cheat::CF_ME.value != 0 ? "yea" : "no")} baby!"
           if CDoom.plyr.value.cheats & CDoom::Cheat::CF_ME.value != 0
@@ -296,7 +296,7 @@ module Doocr
         end
 
         # 'dqd' cheat of toggleable god mode
-        if CDoom.cht_check_cheat(pointerof(CDoom.cheat_god), ev.value.data1) != 0
+        if Doocr.cht_check_cheat(Doocr.cheat_god, ev.value.data1.to_u8!) != 0
           CDoom.plyr.value.cheats = CDoom.plyr.value.cheats ^ CDoom::Cheat::CF_GODMODE.value
           if CDoom.plyr.value.cheats & CDoom::Cheat::CF_GODMODE.value != 0
             CDoom.plyr.value.mo.value.health = @@deh_god_mode_health unless CDoom.plyr.value.mo.null?
@@ -308,7 +308,7 @@ module Doocr
           end
 
           # 'fa' cheat for killer fucking arsenal
-        elsif CDoom.cht_check_cheat(pointerof(CDoom.cheat_ammonokey), ev.value.data1) != 0
+        elsif Doocr.cht_check_cheat(Doocr.cheat_ammonokey, ev.value.data1.to_u8!) != 0
           CDoom.plyr.value.armorpoints = @@deh_idfa_armor
           CDoom.plyr.value.armortype = @@deh_idfa_armor_class
 
@@ -319,7 +319,7 @@ module Doocr
           CDoom.plyr.value.message = @@deh_ststr_faadded
 
           # 'kfa' cheat for key full ammo
-        elsif CDoom.cht_check_cheat(pointerof(CDoom.cheat_ammo), ev.value.data1) != 0
+        elsif Doocr.cht_check_cheat(Doocr.cheat_ammo, ev.value.data1.to_u8!) != 0
           CDoom.plyr.value.armorpoints = @@deh_idkfa_armor
           CDoom.plyr.value.armortype = @@deh_idkfa_armor_class
 
@@ -332,17 +332,17 @@ module Doocr
           CDoom.plyr.value.message = @@deh_ststr_kfaadded
 
           # 'mus' cheat for changing music
-        elsif CDoom.cht_check_cheat(pointerof(CDoom.cheat_mus), ev.value.data1) != 0
+        elsif Doocr.cht_check_cheat(Doocr.cheat_mus, ev.value.data1.to_u8!) != 0
           buf = Pointer(UInt8).malloc(3)
 
-          CDoom.cht_get_param(pointerof(CDoom.cheat_mus), buf)
+          Doocr.cht_get_param(Doocr.cheat_mus, buf)
 
           return 0 if (buf[0] < '0'.ord || buf[0] > '9'.ord) ||
                       (buf[1] < '0'.ord || buf[1] > '9'.ord)
 
           CDoom.plyr.value.message = @@deh_ststr_mus
 
-          if CDoom.gamemode == CDoom::GameMode::Commercial
+          if Doocr.gamemode == CDoom::GameMode::Commercial
             map = ((buf[0] - '0'.ord) * 10 + buf[1] - '0'.ord) &- 1
             musnum = CDoom::Musicenum::MUS_runnin.value + map
 
@@ -355,20 +355,20 @@ module Doocr
             e = (buf[0] &- '1'.ord)
             m = (buf[1] &- '1'.ord)
 
-            if m > 8 || (e > 3 && CDoom.gamemode == CDoom::GameMode::Retail) ||
-               (e > 2 && CDoom.gamemode == CDoom::GameMode::Registered) ||
-               (e > 0 && CDoom.gamemode == CDoom::GameMode::Shareware)
+            if m > 8 || (e > 3 && Doocr.gamemode == CDoom::GameMode::Retail) ||
+               (e > 2 && Doocr.gamemode == CDoom::GameMode::Registered) ||
+               (e > 0 && Doocr.gamemode == CDoom::GameMode::Shareware)
               CDoom.plyr.value.message = @@deh_ststr_nomus
             else
-              mus = CDoom.gamemode == CDoom::GameMode::Retail ? @@regmus[m].value : CDoom::Musicenum::MUS_e1m1.value + e * 9 + m
+              mus = Doocr.gamemode == CDoom::GameMode::Retail ? @@regmus[m].value : CDoom::Musicenum::MUS_e1m1.value + e * 9 + m
               CDoom.s_change_music(mus, 1)
             end
           end
 
           # Simplified, accepting both "noclip" and "idspispopd".
           # no clipping mode cheat
-        elsif CDoom.cht_check_cheat(pointerof(CDoom.cheat_noclip), ev.value.data1) != 0 ||
-              CDoom.cht_check_cheat(pointerof(CDoom.cheat_commercial_noclip), ev.value.data1) != 0
+                elsif Doocr.cht_check_cheat(Doocr.cheat_noclip, ev.value.data1.to_u8!) != 0 ||
+                  Doocr.cht_check_cheat(Doocr.cheat_commercial_noclip, ev.value.data1.to_u8!) != 0
           CDoom.plyr.value.cheats = CDoom.plyr.value.cheats ^ CDoom::Cheat::CF_NOCLIP.value
 
           if CDoom.plyr.value.cheats & CDoom::Cheat::CF_NOCLIP.value != 0
@@ -380,7 +380,7 @@ module Doocr
 
         # 'behold?' power-up cheats
         6.times do |i|
-          if CDoom.cht_check_cheat(CDoom.cheat_powerup.to_unsafe + i, ev.value.data1) != 0
+          if Doocr.cht_check_cheat(Doocr.cheat_powerup[i], ev.value.data1.to_u8!) != 0
             if CDoom.plyr.value.powers[i] == 0
               CDoom.p_give_power(CDoom.plyr, i)
             elsif i != CDoom::Powertype::Strength.value
@@ -394,23 +394,23 @@ module Doocr
         end
 
         # 'behold' power-up menu
-        if CDoom.cht_check_cheat(CDoom.cheat_powerup.to_unsafe + 6, ev.value.data1) != 0
+        if Doocr.cht_check_cheat(Doocr.cheat_powerup[6], ev.value.data1.to_u8!) != 0
           CDoom.plyr.value.message = @@deh_ststr_behold
 
           # 'choppers' invulnerability & chainsaw
-        elsif CDoom.cht_check_cheat(pointerof(CDoom.cheat_choppers), ev.value.data1) != 0
+        elsif Doocr.cht_check_cheat(Doocr.cheat_choppers, ev.value.data1.to_u8!) != 0
           CDoom.plyr.value.weaponowned[CDoom::Weapontype::Chainsaw.value] = 1
           CDoom.plyr.value.powers[CDoom::Powertype::Invulnerability.value] = 1
           CDoom.plyr.value.message = @@deh_ststr_choppers
 
           # 'mypos' for player position
-        elsif CDoom.cht_check_cheat(pointerof(CDoom.cheat_mypos), ev.value.data1) != 0
+        elsif Doocr.cht_check_cheat(Doocr.cheat_mypos, ev.value.data1.to_u8!) != 0
           CDoom.doom_strcpy(@@buf, "ang=0x")
-          CDoom.doom_concat(@@buf, CDoom.doom_itoa(@@players[CDoom.consoleplayer].mo.value.angle, 16))
+          CDoom.doom_concat(@@buf, CDoom.doom_itoa(@@players[Doocr.consoleplayer].mo.value.angle, 16))
           CDoom.doom_concat(@@buf, ";x,y=(0x")
-          CDoom.doom_concat(@@buf, CDoom.doom_itoa(@@players[CDoom.consoleplayer].mo.value.x, 16))
+          CDoom.doom_concat(@@buf, CDoom.doom_itoa(@@players[Doocr.consoleplayer].mo.value.x, 16))
           CDoom.doom_concat(@@buf, ",0x")
-          CDoom.doom_concat(@@buf, CDoom.doom_itoa(@@players[CDoom.consoleplayer].mo.value.y, 16))
+          CDoom.doom_concat(@@buf, CDoom.doom_itoa(@@players[Doocr.consoleplayer].mo.value.y, 16))
           CDoom.doom_concat(@@buf, ")")
           CDoom.plyr.value.message = @@buf
         end
@@ -446,8 +446,8 @@ module Doocr
       # dead
       if CDoom.plyr.value.health == 0
         @@priority = 9
-        CDoom.st_faceindex = CDoom::ST_DEADFACE
-        CDoom.st_facecount = 1
+        Doocr.st_faceindex = CDoom::ST_DEADFACE
+        Doocr.st_facecount = 1
       end
     end
 
@@ -465,8 +465,8 @@ module Doocr
         if doevilgrin
           # evil grin if just picked up weapon
           @@priority = 8
-          CDoom.st_facecount = CDoom::ST_EVILGRINCOUNT
-          CDoom.st_faceindex = CDoom.st_calc_pain_offset + CDoom::ST_EVILGRINOFFSET
+          Doocr.st_facecount = CDoom::ST_EVILGRINCOUNT
+          Doocr.st_faceindex = CDoom.st_calc_pain_offset + CDoom::ST_EVILGRINOFFSET
         end
       end
     end
@@ -478,9 +478,9 @@ module Doocr
         # being attacked
         @@priority = 7
 
-        if CDoom.plyr.value.health - CDoom.st_oldhealth > CDoom::ST_MUCHPAIN
-          CDoom.st_facecount = CDoom::ST_TURNCOUNT
-          CDoom.st_faceindex = CDoom.st_calc_pain_offset + CDoom::ST_OUCHOFFSET
+        if CDoom.plyr.value.health - Doocr.st_oldhealth > CDoom::ST_MUCHPAIN
+          Doocr.st_facecount = CDoom::ST_TURNCOUNT
+          Doocr.st_faceindex = CDoom.st_calc_pain_offset + CDoom::ST_OUCHOFFSET
         else
           badguyangle = CDoom.r_point_to_angle2(CDoom.plyr.value.mo.value.x,
             CDoom.plyr.value.mo.value.y,
@@ -497,18 +497,18 @@ module Doocr
             i = diffang <= ANG180
           end # confusing, aint it?
 
-          CDoom.st_facecount = CDoom::ST_TURNCOUNT
-          CDoom.st_faceindex = CDoom.st_calc_pain_offset
+          Doocr.st_facecount = CDoom::ST_TURNCOUNT
+          Doocr.st_faceindex = CDoom.st_calc_pain_offset
 
           if diffang < ANG45
             # head-on
-            CDoom.st_faceindex += CDoom::ST_RAMPAGEOFFSET
+            Doocr.st_faceindex += CDoom::ST_RAMPAGEOFFSET
           elsif i
             # turn face right
-            CDoom.st_faceindex += CDoom::ST_TURNOFFSET
+            Doocr.st_faceindex += CDoom::ST_TURNOFFSET
           else
             # turn face left
-            CDoom.st_faceindex += CDoom::ST_TURNOFFSET + 1
+            Doocr.st_faceindex += CDoom::ST_TURNOFFSET + 1
           end
         end
       end
@@ -517,14 +517,14 @@ module Doocr
     if @@priority < 7
       # getting hurt because of your own damn stupidity
       if CDoom.plyr.value.damagecount != 0
-        if CDoom.plyr.value.health - CDoom.st_oldhealth > CDoom::ST_MUCHPAIN
+        if CDoom.plyr.value.health - Doocr.st_oldhealth > CDoom::ST_MUCHPAIN
           @@priority = 7
-          CDoom.st_facecount = CDoom::ST_TURNCOUNT
-          CDoom.st_faceindex = CDoom.st_calc_pain_offset + CDoom::ST_OUCHOFFSET
+          Doocr.st_facecount = CDoom::ST_TURNCOUNT
+          Doocr.st_faceindex = CDoom.st_calc_pain_offset + CDoom::ST_OUCHOFFSET
         else
           @@priority = 6
-          CDoom.st_facecount = CDoom::ST_TURNCOUNT
-          CDoom.st_faceindex = CDoom.st_calc_pain_offset + CDoom::ST_RAMPAGEOFFSET
+          Doocr.st_facecount = CDoom::ST_TURNCOUNT
+          Doocr.st_faceindex = CDoom.st_calc_pain_offset + CDoom::ST_RAMPAGEOFFSET
         end
       end
     end
@@ -536,8 +536,8 @@ module Doocr
           @@lastattackdown = CDoom::ST_RAMPAGEDELAY
         elsif (@@lastattackdown -= 1) == 0
           @@priority = 5
-          CDoom.st_faceindex = CDoom.st_calc_pain_offset + CDoom::ST_RAMPAGEOFFSET
-          CDoom.st_facecount = 1
+          Doocr.st_faceindex = CDoom.st_calc_pain_offset + CDoom::ST_RAMPAGEOFFSET
+          Doocr.st_facecount = 1
           @@lastattackdown = 1
         end
       else
@@ -551,19 +551,19 @@ module Doocr
          CDoom.plyr.value.powers[CDoom::Powertype::Invulnerability.value] != 0
         @@priority = 4
 
-        CDoom.st_faceindex = CDoom::ST_GODFACE
-        CDoom.st_facecount = 1
+        Doocr.st_faceindex = CDoom::ST_GODFACE
+        Doocr.st_facecount = 1
       end
     end
 
     # look left or look right if the facecount has timed out
-    if CDoom.st_facecount == 0
-      CDoom.st_faceindex = CDoom.st_calc_pain_offset + (CDoom.st_randomnumber % 3)
-      CDoom.st_facecount = CDoom::ST_STRAIGHTFACECOUNT
+    if Doocr.st_facecount == 0
+      Doocr.st_faceindex = CDoom.st_calc_pain_offset + (Doocr.st_randomnumber % 3)
+      Doocr.st_facecount = CDoom::ST_STRAIGHTFACECOUNT.to_i32!
       @@priority = 0
     end
 
-    CDoom.st_facecount -= 1
+    Doocr.st_facecount -= 1
   end
 
   @@largeammo = 1994 # means "n/a"
@@ -588,32 +588,32 @@ module Doocr
     CDoom.st_update_face_widget
 
     # used by the w_armsbg widget
-    CDoom.st_notdeathmatch = (CDoom.deathmatch == 0).to_unsafe
+    Doocr.st_notdeathmatch = (Doocr.deathmatch == 0).to_unsafe
 
     # used by w_arms[] widgets
-    CDoom.st_armson = (CDoom.st_statusbaron != 0 && CDoom.deathmatch == 0).to_unsafe
+    Doocr.st_armson = (Doocr.st_statusbaron != 0 && Doocr.deathmatch == 0).to_unsafe
 
     # used by w_frags widget
-    CDoom.st_fragson = (CDoom.deathmatch != 0 && CDoom.st_statusbaron != 0).to_unsafe
-    CDoom.st_fragscount = 0
+    Doocr.st_fragson = (Doocr.deathmatch != 0 && Doocr.st_statusbaron != 0).to_unsafe
+    Doocr.st_fragscount = 0
 
     CDoom::MAXPLAYERS.times do |i|
-      if i != CDoom.consoleplayer
-        CDoom.st_fragscount += CDoom.plyr.value.frags[i]
+      if i != Doocr.consoleplayer
+        Doocr.st_fragscount += CDoom.plyr.value.frags[i]
       else
-        CDoom.st_fragscount -= CDoom.plyr.value.frags[i]
+        Doocr.st_fragscount -= CDoom.plyr.value.frags[i]
       end
     end
 
     # get rid of chat window if up because of message
-    CDoom.st_chat = CDoom.st_oldchat if (CDoom.st_msgcounter -= 1) == 0
+    Doocr.st_chat = Doocr.st_oldchat if (Doocr.st_msgcounter -= 1) == 0
   end
 
   def self.st_ticker
-    CDoom.st_clock += 1
-    CDoom.st_randomnumber = CDoom.m_random
+    Doocr.st_clock += 1
+    Doocr.st_randomnumber = CDoom.m_random
     CDoom.st_update_widgets
-    CDoom.st_oldhealth = CDoom.plyr.value.health
+    Doocr.st_oldhealth = CDoom.plyr.value.health
   end
 
   def self.st_do_palette_stuff
@@ -645,19 +645,19 @@ module Doocr
       palette = 0
     end
 
-    if palette != CDoom.st_palette
-      CDoom.st_palette = palette
-      pal = CDoom.w_cache_lump_num(CDoom.lu_palette, CDoom::PU_CACHE).as(CDoom::Byte*) + palette * 768
+    if palette != Doocr.st_palette
+      Doocr.st_palette = palette
+      pal = CDoom.w_cache_lump_num(Doocr.lu_palette, CDoom::PU_CACHE).as(CDoom::Byte*) + palette * 768
       CDoom.i_set_palette(pal)
     end
   end
 
   def self.st_draw_widgets(refresh : CDoom::DoomBool)
     # used by w_arms[] idgets
-    CDoom.st_armson = (CDoom.st_statusbaron != 0 && CDoom.deathmatch == 0).to_unsafe
+    Doocr.st_armson = (Doocr.st_statusbaron != 0 && Doocr.deathmatch == 0).to_unsafe
 
     # used by w_frags widget
-    CDoom.st_fragson = (CDoom.deathmatch != 0 && CDoom.st_statusbaron != 0).to_unsafe
+    Doocr.st_fragson = (Doocr.deathmatch != 0 && Doocr.st_statusbaron != 0).to_unsafe
 
     CDoom.stlib_update_num(pointerof(CDoom.w_ready), refresh)
 
@@ -681,7 +681,7 @@ module Doocr
   end
 
   def self.st_do_refresh
-    CDoom.st_firsttime = 0
+    Doocr.st_firsttime = 0
 
     # draw status bar background to off-screen buff
     CDoom.st_refresh_background
@@ -696,14 +696,14 @@ module Doocr
   end
 
   def self.st_drawer(fullscreen : CDoom::DoomBool, refresh : CDoom::DoomBool)
-    CDoom.st_statusbaron = (fullscreen == 0 || CDoom.automapactive != 0).to_unsafe
-    CDoom.st_firsttime = (CDoom.st_firsttime != 0 || refresh != 0).to_unsafe
+    Doocr.st_statusbaron = (fullscreen == 0 || Doocr.automapactive != 0).to_unsafe
+    Doocr.st_firsttime = (Doocr.st_firsttime != 0 || refresh != 0).to_unsafe
 
     # Do red-/gold-shifts from damage/items
     CDoom.st_do_palette_stuff
 
     # If just after st_start(), refresh all
-    if CDoom.st_firsttime != 0
+    if Doocr.st_firsttime != 0
       CDoom.st_do_refresh
       # Otherwise, update as little as possible
     else
@@ -753,7 +753,7 @@ module Doocr
 
     # face backgrounds for different color players
     CDoom.doom_strcpy(namebuf, "STFB")
-    CDoom.doom_concat(namebuf, CDoom.doom_itoa(CDoom.consoleplayer, 10))
+    CDoom.doom_concat(namebuf, CDoom.doom_itoa(Doocr.consoleplayer, 10))
     CDoom.faceback = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
 
     # status bar background bits
@@ -803,7 +803,7 @@ module Doocr
   end
 
   def self.st_load_data
-    CDoom.lu_palette = CDoom.w_get_num_for_name("PLAYPAL")
+    Doocr.lu_palette = CDoom.w_get_num_for_name("PLAYPAL")
     CDoom.st_load_graphics
   end
 
@@ -839,22 +839,22 @@ module Doocr
   end
 
   def self.st_init_data
-    CDoom.st_firsttime = 1
-    CDoom.plyr = @@players.to_unsafe + CDoom.consoleplayer
+    Doocr.st_firsttime = 1
+    CDoom.plyr = @@players.to_unsafe + Doocr.consoleplayer
 
-    CDoom.st_clock = 0
-    CDoom.st_chatstate = CDoom::ST_Chatstateenum::StartChatState
-    CDoom.st_gamestate = CDoom::ST_Statenum::FirstPersonState
+    Doocr.st_clock = 0
+    Doocr.st_chatstate = CDoom::ST_Chatstateenum::StartChatState
+    Doocr.st_gamestate = CDoom::ST_Statenum::FirstPersonState
 
-    CDoom.st_statusbaron = 1
-    CDoom.st_oldchat = 0
-    CDoom.st_chat = 0
-    CDoom.st_cursoron = 0
+    Doocr.st_statusbaron = 1
+    Doocr.st_oldchat = 0
+    Doocr.st_chat = 0
+    Doocr.st_cursoron = 0
 
-    CDoom.st_faceindex = 0
-    CDoom.st_palette = -1
+    Doocr.st_faceindex = 0
+    Doocr.st_palette = -1
 
-    CDoom.st_oldhealth = -1
+    Doocr.st_oldhealth = -1
 
     CDoom::Weapontype::NUMWEAPONS.value.times do |i|
       CDoom.oldweaponsowned[i] = CDoom.plyr.value.weaponowned[i]
@@ -872,7 +872,7 @@ module Doocr
       CDoom::ST_AMMOY,
       CDoom.tallnum,
       CDoom.plyr.value.ammo.to_unsafe + CDoom.weaponinfo[CDoom.plyr.value.readyweapon.value].ammo.value,
-      pointerof(CDoom.st_statusbaron),
+      Doocr.st_statusbaron_ptr,
       CDoom::ST_AMMOWIDTH)
 
     # the last weapon type
@@ -884,7 +884,7 @@ module Doocr
       CDoom::ST_HEALTHY,
       CDoom.tallnum,
       pointerof(CDoom.plyr.value.@health),
-      pointerof(CDoom.st_statusbaron),
+      Doocr.st_statusbaron_ptr,
       CDoom.tallpercent)
 
     # arms background
@@ -892,8 +892,8 @@ module Doocr
       CDoom::ST_ARMSBGX,
       CDoom::ST_ARMSBGY,
       CDoom.armsbg,
-      pointerof(CDoom.st_notdeathmatch),
-      pointerof(CDoom.st_statusbaron))
+      Doocr.st_notdeathmatch_ptr,
+      Doocr.st_statusbaron_ptr)
 
     # weapons owned
     6.times do |i|
@@ -902,7 +902,7 @@ module Doocr
         CDoom::ST_ARMSY + (i // 3) * CDoom::ST_ARMSYSPACE,
         (CDoom.arms.to_unsafe + i).value,
         CDoom.plyr.value.weaponowned.to_unsafe + (i + 1),
-        pointerof(CDoom.st_armson))
+        Doocr.st_armson_ptr)
     end
 
     # frags sum
@@ -910,8 +910,8 @@ module Doocr
       CDoom::ST_FRAGSX,
       CDoom::ST_FRAGSY,
       CDoom.tallnum,
-      pointerof(CDoom.st_fragscount),
-      pointerof(CDoom.st_fragson),
+      Doocr.st_fragscount_ptr,
+      Doocr.st_fragson_ptr,
       CDoom::ST_FRAGSWIDTH)
 
     # faces
@@ -919,8 +919,8 @@ module Doocr
       CDoom::ST_FACESX,
       CDoom::ST_FACESY,
       CDoom.faces,
-      pointerof(CDoom.st_faceindex),
-      pointerof(CDoom.st_statusbaron))
+      Doocr.st_faceindex_ptr,
+      Doocr.st_statusbaron_ptr)
 
     # armor percentage - should be colored later
     CDoom.stlib_init_percent(pointerof(CDoom.w_armor),
@@ -928,7 +928,7 @@ module Doocr
       CDoom::ST_ARMORY,
       CDoom.tallnum,
       pointerof(CDoom.plyr.value.@armorpoints),
-      pointerof(CDoom.st_statusbaron),
+      Doocr.st_statusbaron_ptr,
       CDoom.tallpercent)
 
     # keyboxes 0-2
@@ -937,21 +937,21 @@ module Doocr
       CDoom::ST_KEY0Y,
       CDoom.keys,
       CDoom.keyboxes.to_unsafe,
-      pointerof(CDoom.st_statusbaron))
+      Doocr.st_statusbaron_ptr)
 
     CDoom.stlib_init_mult_icon(CDoom.w_keyboxes.to_unsafe + 1,
       CDoom::ST_KEY1X,
       CDoom::ST_KEY1Y,
       CDoom.keys,
       CDoom.keyboxes.to_unsafe + 1,
-      pointerof(CDoom.st_statusbaron))
+      Doocr.st_statusbaron_ptr)
 
     CDoom.stlib_init_mult_icon(CDoom.w_keyboxes.to_unsafe + 2,
       CDoom::ST_KEY2X,
       CDoom::ST_KEY2Y,
       CDoom.keys,
       CDoom.keyboxes.to_unsafe + 2,
-      pointerof(CDoom.st_statusbaron))
+      Doocr.st_statusbaron_ptr)
 
     # ammo count (all four kinds)
     CDoom.stlib_init_num(CDoom.w_ammo.to_unsafe,
@@ -959,7 +959,7 @@ module Doocr
       CDoom::ST_AMMO0Y,
       CDoom.shortnum,
       CDoom.plyr.value.ammo.to_unsafe,
-      pointerof(CDoom.st_statusbaron),
+      Doocr.st_statusbaron_ptr,
       CDoom::ST_AMMO0WIDTH)
 
     CDoom.stlib_init_num(CDoom.w_ammo.to_unsafe + 1,
@@ -967,7 +967,7 @@ module Doocr
       CDoom::ST_AMMO1Y,
       CDoom.shortnum,
       CDoom.plyr.value.ammo.to_unsafe + 1,
-      pointerof(CDoom.st_statusbaron),
+      Doocr.st_statusbaron_ptr,
       CDoom::ST_AMMO1WIDTH)
 
     CDoom.stlib_init_num(CDoom.w_ammo.to_unsafe + 2,
@@ -975,7 +975,7 @@ module Doocr
       CDoom::ST_AMMO2Y,
       CDoom.shortnum,
       CDoom.plyr.value.ammo.to_unsafe + 2,
-      pointerof(CDoom.st_statusbaron),
+      Doocr.st_statusbaron_ptr,
       CDoom::ST_AMMO2WIDTH)
 
     CDoom.stlib_init_num(CDoom.w_ammo.to_unsafe + 3,
@@ -983,7 +983,7 @@ module Doocr
       CDoom::ST_AMMO3Y,
       CDoom.shortnum,
       CDoom.plyr.value.ammo.to_unsafe + 3,
-      pointerof(CDoom.st_statusbaron),
+      Doocr.st_statusbaron_ptr,
       CDoom::ST_AMMO3WIDTH)
 
     # max ammo count (all four kinds)
@@ -992,7 +992,7 @@ module Doocr
       CDoom::ST_MAXAMMO0Y,
       CDoom.shortnum,
       CDoom.plyr.value.maxammo.to_unsafe,
-      pointerof(CDoom.st_statusbaron),
+      Doocr.st_statusbaron_ptr,
       CDoom::ST_MAXAMMO0WIDTH)
 
     CDoom.stlib_init_num(CDoom.w_maxammo.to_unsafe + 1,
@@ -1000,7 +1000,7 @@ module Doocr
       CDoom::ST_MAXAMMO1Y,
       CDoom.shortnum,
       CDoom.plyr.value.maxammo.to_unsafe + 1,
-      pointerof(CDoom.st_statusbaron),
+      Doocr.st_statusbaron_ptr,
       CDoom::ST_MAXAMMO1WIDTH)
 
     CDoom.stlib_init_num(CDoom.w_maxammo.to_unsafe + 2,
@@ -1008,7 +1008,7 @@ module Doocr
       CDoom::ST_MAXAMMO2Y,
       CDoom.shortnum,
       CDoom.plyr.value.maxammo.to_unsafe + 2,
-      pointerof(CDoom.st_statusbaron),
+      Doocr.st_statusbaron_ptr,
       CDoom::ST_MAXAMMO2WIDTH)
 
     CDoom.stlib_init_num(CDoom.w_maxammo.to_unsafe + 3,
@@ -1016,28 +1016,28 @@ module Doocr
       CDoom::ST_MAXAMMO3Y,
       CDoom.shortnum,
       CDoom.plyr.value.maxammo.to_unsafe + 3,
-      pointerof(CDoom.st_statusbaron),
+      Doocr.st_statusbaron_ptr,
       CDoom::ST_MAXAMMO3WIDTH)
   end
 
   def self.st_start
-    CDoom.st_stop if CDoom.st_stopped == 0
+    CDoom.st_stop if Doocr.st_stopped == 0
 
     CDoom.st_init_data
     CDoom.st_create_widgets
-    CDoom.st_stopped = 0
+    Doocr.st_stopped = 0
   end
 
   def self.st_stop
-    return if CDoom.st_stopped != 0
+    return if Doocr.st_stopped != 0
 
-    CDoom.i_set_palette(CDoom.w_cache_lump_num(CDoom.lu_palette, CDoom::PU_CACHE).as(CDoom::Byte*))
+    CDoom.i_set_palette(CDoom.w_cache_lump_num(Doocr.lu_palette, CDoom::PU_CACHE).as(CDoom::Byte*))
 
-    CDoom.st_stopped = 1
+    Doocr.st_stopped = 1
   end
 
   def self.st_init
-    CDoom.veryfirsttime = 0
+    Doocr.veryfirsttime = 0
     CDoom.st_load_data
     CDoom.screens[4] = CDoom.z_malloc(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT, CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Byte*)
   end

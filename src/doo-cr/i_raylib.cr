@@ -103,12 +103,12 @@ module Doocr
             Raylib::Vector2.new, 0, Raylib::WHITE)
 
           # Draw crosshair
-          if (CDoom.crosshair != 0 &&
-             CDoom.menuactive == 0 &&
-             CDoom.gamestate == CDoom::Gamestate::Level &&
-             CDoom.automapactive == 0)
+           if (Doocr.crosshair != 0 &&
+             Doocr.menuactive == 0 &&
+             Doocr.gamestate == CDoom::Gamestate::Level &&
+             Doocr.automapactive == 0)
             y = CDoom::SCREENHEIGHT // 2
-            y += CDoom.setblocks == 11 ? 8 : -8
+            y += Doocr.setblocks == 11 ? 8 : -8
             2.times do |i|
               Raylib.draw_pixel(CDoom::SCREENWIDTH // 2 - 2 - i, y, Raylib::RAYWHITE)
               Raylib.draw_pixel(CDoom::SCREENWIDTH // 2 + 2 + i, y, Raylib::RAYWHITE)

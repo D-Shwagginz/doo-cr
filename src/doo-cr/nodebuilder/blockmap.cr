@@ -58,7 +58,7 @@ module Doocr::Nodebuilder
     bottom = Int32::MAX
     right = Int32::MIN
     top = Int32::MIN
-    CDoom.numvertexes.times do |i|
+    Doocr.numvertexes.times do |i|
       vertex = CDoom.vertexes[i]
       x = vertex.x >> FRACBITS
       y = vertex.y >> FRACBITS
@@ -68,20 +68,20 @@ module Doocr::Nodebuilder
       bottom = y if y < bottom
     end
 
-    CDoom.bmaporgx = left << FRACBITS
-    CDoom.bmaporgy = bottom << FRACBITS
+    Doocr.bmaporgx = left << FRACBITS
+    Doocr.bmaporgy = bottom << FRACBITS
 
-    CDoom.bmapwidth = ((right - left) // 128) + 1
-    CDoom.bmapheight = ((top - bottom) // 128) + 1
+    Doocr.bmapwidth = ((right - left) // 128) + 1
+    Doocr.bmapheight = ((top - bottom) // 128) + 1
 
     # Build the blockmap starting from the bottom left
-    CDoom.bmapheight.times do |y|
-      CDoom.bmapwidth.times do |x|
+    Doocr.bmapheight.times do |y|
+      Doocr.bmapwidth.times do |x|
         offsets.write_bytes (blockmap.pos // 2).to_i16!
         bstart = Raylib::Vector2.new(x: left + x * 128, y: bottom + y * 128)
         bend = Raylib::Vector2.new(x: bstart.x + 128, y: bstart.y + 128)
 
-        CDoom.numlines.times do |lin|
+        Doocr.numlines.times do |lin|
           line = CDoom.lines[lin]
           v1 = Raylib::Vector2.new(
             x: line.v1.value.x >> FRACBITS,
@@ -102,11 +102,11 @@ module Doocr::Nodebuilder
     end
 
     # Load blockmap normally
-    CDoom.blockmaplump = blockmap.to_slice.to_unsafe.as(Int16*)
-    CDoom.blockmap = offsets.to_slice.to_unsafe.as(Int16*)
+    Doocr.blockmaplump = blockmap.to_slice.to_unsafe.as(Int16*)
+    Doocr.blockmap = offsets.to_slice.to_unsafe.as(Int16*)
 
     # clear out mobj chains
-    count = sizeof(CDoom::Mobj*) * CDoom.bmapwidth * CDoom.bmapheight
+    count = sizeof(CDoom::Mobj*) * Doocr.bmapwidth * Doocr.bmapheight
     CDoom.blocklinks = CDoom.z_malloc(count, CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Mobj**)
     CDoom.doom_memset(CDoom.blocklinks, 0, count)
   end

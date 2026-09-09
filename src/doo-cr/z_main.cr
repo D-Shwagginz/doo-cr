@@ -37,7 +37,7 @@ module Doocr
     block.value.user = Pointer(Void*).null
 
     block.value.size = CDoom.mainzone.value.size - sizeof(CDoom::Memzone)
-    puts "#{CDoom.mb_used}MBs of memory allocated."
+    puts "#{Doocr.mb_used}MBs of memory allocated."
   end
 
   def self.z_free(ptr : Void*)

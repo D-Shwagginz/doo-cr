@@ -306,9 +306,9 @@ module Doocr
               value = line[start.size..].to_i(strict: false)
               case loc
               when 0 # Max ammo
-                CDoom.maxammo[cur_num] = value
+                Doocr.maxammo[cur_num] = value
               when 1 # Per ammo
-                CDoom.clipammo[cur_num] = value
+                Doocr.clipammo[cur_num] = value
               end
               # Weapon is all Int32, parse based off loc
             when DehBlocks::Weapon
@@ -323,47 +323,47 @@ module Doocr
               when 0 # IDMUS
                 value.push 1, 0, 0, 0xff
                 @@cheat_mus_seq = value
-                CDoom.cheat_mus.sequence = @@cheat_mus_seq.to_unsafe
+                Doocr.cheat_mus.sequence = @@cheat_mus_seq.to_unsafe
               when 1 # IDCHOPPERS
                 value.push 0xff
                 @@cheat_choppers_seq = value
-                CDoom.cheat_choppers.sequence = @@cheat_choppers_seq.to_unsafe
+                Doocr.cheat_choppers.sequence = @@cheat_choppers_seq.to_unsafe
               when 2 # IDDQD
                 value.push 0xff
                 @@cheat_god_seq = value
-                CDoom.cheat_god.sequence = @@cheat_god_seq.to_unsafe
+                Doocr.cheat_god.sequence = @@cheat_god_seq.to_unsafe
               when 3 # IDKFA
                 value.push 0xff
                 @@cheat_ammo_seq = value
-                CDoom.cheat_ammo.sequence = @@cheat_ammo_seq.to_unsafe
+                Doocr.cheat_ammo.sequence = @@cheat_ammo_seq.to_unsafe
               when 4 # IDFA
                 value.push 0xff
                 @@cheat_ammonokey_seq = value
-                CDoom.cheat_ammonokey.sequence = @@cheat_ammonokey_seq.to_unsafe
+                Doocr.cheat_ammonokey.sequence = @@cheat_ammonokey_seq.to_unsafe
               when 5 # IDSPISPOPD
                 value.push 0xff
                 @@cheat_noclip_seq = value
-                CDoom.cheat_noclip.sequence = @@cheat_noclip_seq.to_unsafe
+                Doocr.cheat_noclip.sequence = @@cheat_noclip_seq.to_unsafe
               when 6 # IDCLIP
                 value.push 0xff
                 @@cheat_commercial_noclip_seq = value
-                CDoom.cheat_commercial_noclip.sequence = @@cheat_commercial_noclip_seq.to_unsafe
+                Doocr.cheat_commercial_noclip.sequence = @@cheat_commercial_noclip_seq.to_unsafe
               when 7, 8, 9, 10, 11, 12, 13 # IDBEHOLDX
                 value.push 0xff
                 @@cheat_powerup_seq[loc - 7] = value
-                (CDoom.cheat_powerup.to_unsafe + loc - 7).value.sequence = @@cheat_powerup_seq[loc - 7].to_unsafe
+                Doocr.cheat_powerup[loc - 7].sequence = @@cheat_powerup_seq[loc - 7].to_unsafe
               when 14 # IDCLEV
                 value.push 1, 0, 0, 0xff
                 @@cheat_clev_seq = value
-                CDoom.cheat_clev.sequence = @@cheat_clev_seq.to_unsafe
+                Doocr.cheat_clev.sequence = @@cheat_clev_seq.to_unsafe
               when 15 # IDMYPOS
                 value.push 0xff
                 @@cheat_mypos_seq = value
-                CDoom.cheat_mypos.sequence = @@cheat_mypos_seq.to_unsafe
+                Doocr.cheat_mypos.sequence = @@cheat_mypos_seq.to_unsafe
               when 16 # IDDT
                 value.push 0xff
                 @@cheat_amap_seq = value
-                CDoom.cheat_amap.sequence = @@cheat_amap_seq.to_unsafe
+                Doocr.cheat_amap.sequence = @@cheat_amap_seq.to_unsafe
               end
               # Misc data, set all manually (maybe could use array of pointers to the variables?)
             when DehBlocks::Misc

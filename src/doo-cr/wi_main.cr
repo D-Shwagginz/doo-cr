@@ -28,11 +28,11 @@ module Doocr
     y = CDoom::WI_TITLEY
 
     # draw <LevelName>
-    CDoom.v_draw_patch((CDoom::SCREENWIDTH - CDoom.lnames[CDoom.wbs.value.last].value.width) // 2,
-      y, CDoom::FB, CDoom.lnames[CDoom.wbs.value.last])
+    CDoom.v_draw_patch((CDoom::SCREENWIDTH - CDoom.lnames[@@wbs.last].value.width) // 2,
+      y, CDoom::FB, CDoom.lnames[@@wbs.last])
 
     # draw "Finished!"
-    y += (5 * CDoom.lnames[CDoom.wbs.value.last].value.height) // 4
+    y += (5 * CDoom.lnames[@@wbs.last].value.height) // 4
 
     CDoom.v_draw_patch((CDoom::SCREENWIDTH - CDoom.finished.value.width) // 2,
       y, CDoom::FB, CDoom.finished)
@@ -49,10 +49,10 @@ module Doocr
       y, CDoom::FB, CDoom.entering)
 
     # draw level
-    y += (5 * CDoom.lnames[CDoom.wbs.value.next].value.height) // 4
+    y += (5 * CDoom.lnames[@@wbs.next].value.height) // 4
 
-    CDoom.v_draw_patch((CDoom::SCREENWIDTH - CDoom.lnames[CDoom.wbs.value.next].value.width) // 2,
-      y, CDoom::FB, CDoom.lnames[CDoom.wbs.value.next])
+    CDoom.v_draw_patch((CDoom::SCREENWIDTH - CDoom.lnames[@@wbs.next].value.width) // 2,
+      y, CDoom::FB, CDoom.lnames[@@wbs.next])
   end
 
   def self.wi_draw_on_lnode(n : LibC::Int, c : CDoom::Patch**)
@@ -60,8 +60,8 @@ module Doocr
 
     i = 0
     loop do
-      left = CDoom.lnodes[CDoom.wbs.value.epsd][n].x - c[i].value.leftoffset
-      top = CDoom.lnodes[CDoom.wbs.value.epsd][n].y - c[i].value.topoffset
+      left = @@lnodes[@@wbs.epsd][n].x - c[i].value.leftoffset
+      top = @@lnodes[@@wbs.epsd][n].y - c[i].value.topoffset
       right = left + c[i].value.width
       bottom = top + c[i].value.height
 
@@ -78,8 +78,8 @@ module Doocr
     end
 
     if fits && i < 2
-      CDoom.v_draw_patch(CDoom.lnodes[CDoom.wbs.value.epsd][n].x,
-        CDoom.lnodes[CDoom.wbs.value.epsd][n].y,
+      CDoom.v_draw_patch(@@lnodes[@@wbs.epsd][n].x,
+        @@lnodes[@@wbs.epsd][n].y,
         CDoom::FB, c[i])
     else
       # DEBUG
@@ -88,55 +88,55 @@ module Doocr
   end
 
   def self.wi_init_animated_back
-    return if CDoom.gamemode == CDoom::GameMode::Commercial
+    return if Doocr.gamemode == CDoom::GameMode::Commercial
 
-    return if CDoom.wbs.value.epsd > 2
+    return if @@wbs.epsd > 2
 
-    CDoom.numanims[CDoom.wbs.value.epsd].times do |i|
-      a = CDoom.anims_wi_stuff[CDoom.wbs.value.epsd] + i
+    @@numanims[@@wbs.epsd].times do |i|
+      a = @@anims_wi_stuff[@@wbs.epsd][i]
 
       # init variables
-      a.value.ctr = -1
+      a.ctr = -1
 
       # specify the next time to draw it
-      if a.value.type == CDoom::Animenum::Always
-        a.value.nexttic = CDoom.bcnt + 1 + (CDoom.m_random % a.value.period)
-      elsif a.value.type == CDoom::Animenum::Random
-        a.value.nexttic = CDoom.bcnt + 1 + a.value.data2 + (CDoom.m_random % a.value.data1)
-      elsif a.value.type == CDoom::Animenum::Level
-        a.value.nexttic = CDoom.bcnt + 1
+      if a.type == CDoom::Animenum::Always
+        a.nexttic = Doocr.bcnt + 1 + (CDoom.m_random % a.period)
+      elsif a.type == CDoom::Animenum::Random
+        a.nexttic = Doocr.bcnt + 1 + a.data2 + (CDoom.m_random % a.data1)
+      elsif a.type == CDoom::Animenum::Level
+        a.nexttic = Doocr.bcnt + 1
       end
     end
   end
 
   def self.wi_update_animated_back
-    return if CDoom.gamemode == CDoom::GameMode::Commercial
+    return if Doocr.gamemode == CDoom::GameMode::Commercial
 
-    return if CDoom.wbs.value.epsd > 2
+    return if @@wbs.epsd > 2
 
-    CDoom.numanims[CDoom.wbs.value.epsd].times do |i|
-      a = CDoom.anims_wi_stuff[CDoom.wbs.value.epsd] + i
+    @@numanims[@@wbs.epsd].times do |i|
+      a = @@anims_wi_stuff[@@wbs.epsd][i]
 
-      if CDoom.bcnt == a.value.nexttic
-        case a.value.type
+      if Doocr.bcnt == a.nexttic
+        case a.type
         when CDoom::Animenum::Always
-          a.value.ctr = 0 if (a.value.ctr = a.value.ctr + 1) >= a.value.nanims
-          a.value.nexttic = CDoom.bcnt + a.value.period
+          a.ctr = 0 if (a.ctr = a.ctr + 1) >= a.nanims
+          a.nexttic = Doocr.bcnt + a.period
         when CDoom::Animenum::Random
-          a.value.ctr = a.value.ctr + 1
-          if a.value.ctr == a.value.nanims
-            a.value.ctr = -1
-            a.value.nexttic = CDoom.bcnt + a.value.data2 + (CDoom.m_random % a.value.data1)
+          a.ctr = a.ctr + 1
+          if a.ctr == a.nanims
+            a.ctr = -1
+            a.nexttic = Doocr.bcnt + a.data2 + (CDoom.m_random % a.data1)
           else
-            a.value.nexttic = CDoom.bcnt + a.value.period
+            a.nexttic = Doocr.bcnt + a.period
           end
         when CDoom::Animenum::Level
           # gawd-awful hack for level anims
           if !(CDoom.state == CDoom::Stateenum::StatCount && i == 7) &&
-             CDoom.wbs.value.next == a.value.data1
-            a.value.ctr = a.value.ctr + 1
-            a.value.ctr = a.value.ctr - 1 if a.value.ctr == a.value.nanims
-            a.value.nexttic = CDoom.bcnt + a.value.period
+             @@wbs.next == a.data1
+            a.ctr = a.ctr + 1
+            a.ctr = a.ctr - 1 if a.ctr == a.nanims
+            a.nexttic = Doocr.bcnt + a.period
           end
         end
       end
@@ -144,17 +144,17 @@ module Doocr
   end
 
   def self.wi_draw_animated_back
-    return if CDoom.gamemode == CDoom::GameMode::Commercial
+    return if Doocr.gamemode == CDoom::GameMode::Commercial
 
-    return if CDoom.wbs.value.epsd > 2
+    return if @@wbs.epsd > 2
 
-    CDoom.numanims[CDoom.wbs.value.epsd].times do |i|
-      a = CDoom.anims_wi_stuff[CDoom.wbs.value.epsd] + i
+    @@numanims[@@wbs.epsd].times do |i|
+      a = @@anims_wi_stuff[@@wbs.epsd][i]
 
-      CDoom.v_draw_patch(a.value.loc.x,
-        a.value.loc.y,
+      CDoom.v_draw_patch(a.loc.x,
+        a.loc.y,
         CDoom::FB,
-        a.value.p[a.value.ctr]) if a.value.ctr >= 0
+        a.p[a.ctr]) if a.ctr >= 0
     end
   end
 
@@ -243,14 +243,14 @@ module Doocr
 
   def self.wi_init_no_state
     CDoom.state = CDoom::Stateenum::NoState
-    CDoom.acceleratestage = 0
-    CDoom.cnt = 10
+    Doocr.acceleratestage = 0
+    Doocr.cnt = 10
   end
 
   def self.wi_update_no_state
     CDoom.wi_update_animated_back
 
-    if (CDoom.cnt -= 1) == 0
+    if (Doocr.cnt -= 1) == 0
       CDoom.wi_end
       CDoom.g_world_done
     end
@@ -258,8 +258,8 @@ module Doocr
 
   def self.wi_init_show_next_loc
     CDoom.state = CDoom::Stateenum::ShowNextLoc
-    CDoom.acceleratestage = 0
-    CDoom.cnt = CDoom::SHOWNEXTLOCDELAY * CDoom::TICRATE
+    Doocr.acceleratestage = 0
+    Doocr.cnt = CDoom::SHOWNEXTLOCDELAY * CDoom::TICRATE
 
     CDoom.wi_init_animated_back
   end
@@ -267,10 +267,10 @@ module Doocr
   def self.wi_update_show_next_loc
     CDoom.wi_update_animated_back
 
-    if (CDoom.cnt -= 1) == 0 || CDoom.acceleratestage != 0
+    if (Doocr.cnt -= 1) == 0 || Doocr.acceleratestage != 0
       CDoom.wi_init_no_state
     else
-      CDoom.snl_pointeron = ((CDoom.cnt & 31) < 20).to_unsafe
+      Doocr.snl_pointeron = ((Doocr.cnt & 31) < 20).to_unsafe
     end
   end
 
@@ -280,33 +280,33 @@ module Doocr
     # draw animated background
     CDoom.wi_draw_animated_back
 
-    if CDoom.gamemode != CDoom::GameMode::Commercial
-      if CDoom.wbs.value.epsd > 2
+    if Doocr.gamemode != CDoom::GameMode::Commercial
+      if @@wbs.epsd > 2
         CDoom.wi_draw_el
         return
       end
 
-      last = (CDoom.wbs.value.last == 8) ? CDoom.wbs.value.next - 1 : CDoom.wbs.value.last
+      last = (@@wbs.last == 8) ? @@wbs.next - 1 : @@wbs.last
 
       # draw a splat on taken cities.
       (last + 1).times { |i| CDoom.wi_draw_on_lnode(i, pointerof(CDoom.splat)) }
 
       # splat the secret level?
-      CDoom.wi_draw_on_lnode(8, pointerof(CDoom.splat)) if CDoom.wbs.value.didsecret != 0
+      CDoom.wi_draw_on_lnode(8, pointerof(CDoom.splat)) if @@wbs.didsecret != 0
 
       # draw flashint ptr
-      CDoom.wi_draw_on_lnode(CDoom.wbs.value.next, CDoom.yah) if CDoom.snl_pointeron != 0
+      CDoom.wi_draw_on_lnode(@@wbs.next, CDoom.yah) if Doocr.snl_pointeron != 0
     end
 
     # draws which level yo uare entering..
-    if CDoom.gamemode != CDoom::GameMode::Commercial ||
-       CDoom.wbs.value.next != 30
+    if Doocr.gamemode != CDoom::GameMode::Commercial ||
+      @@wbs.next != 30
       CDoom.wi_draw_el
     end
   end
 
   def self.wi_draw_no_state
-    CDoom.snl_pointeron = 1
+    Doocr.snl_pointeron = 1
     CDoom.wi_draw_show_next_loc
   end
 
@@ -314,32 +314,32 @@ module Doocr
     frags = 0
 
     CDoom::MAXPLAYERS.times do |i|
-      if CDoom.playeringame[i] != 0 &&
+      if Doocr.playeringame[i] != 0 &&
          i != playernum
-        frags += CDoom.plrs[playernum].frags[i]
+        frags += @@plrs[playernum].frags[i]
       end
     end
 
     # JDC hack - negative frags.
-    frags -= CDoom.plrs[playernum].frags[playernum]
+    frags -= @@plrs[playernum].frags[playernum]
 
     return frags
   end
 
   def self.wi_init_deathmatch_stats
     CDoom.state = CDoom::Stateenum::StatCount
-    CDoom.acceleratestage = 0
-    CDoom.dm_state = 1
+    Doocr.acceleratestage = 0
+    Doocr.dm_state = 1
 
-    CDoom.cnt_pause = CDoom::TICRATE
+    Doocr.cnt_pause = CDoom::TICRATE
 
     CDoom::MAXPLAYERS.times do |i|
-      if CDoom.playeringame[i] != 0
+      if Doocr.playeringame[i] != 0
         CDoom::MAXPLAYERS.times do |j|
-          ((CDoom.dm_frags.to_unsafe + i).value.to_unsafe + j).value = 0 if CDoom.playeringame[j] != 0
+          Doocr.dm_frags[i][j] = 0 if Doocr.playeringame[j] != 0
         end
 
-        CDoom.dm_totals[i] = 0
+        Doocr.dm_totals[i] = 0
       end
     end
 
@@ -349,73 +349,73 @@ module Doocr
   def self.wi_update_deathmatch_stats
     CDoom.wi_update_animated_back
 
-    if CDoom.acceleratestage != 0 && CDoom.dm_state != 4
-      CDoom.acceleratestage = 0
+    if Doocr.acceleratestage != 0 && Doocr.dm_state != 4
+      Doocr.acceleratestage = 0
 
       CDoom::MAXPLAYERS.times do |i|
-        if CDoom.playeringame[i] != 0
+        if Doocr.playeringame[i] != 0
           CDoom::MAXPLAYERS.times do |j|
-            ((CDoom.dm_frags.to_unsafe + i).value.to_unsafe + j).value = CDoom.plrs[i].frags[j] if CDoom.playeringame[j] != 0
+            Doocr.dm_frags[i][j] = @@plrs[i].frags[j] if Doocr.playeringame[j] != 0
           end
 
-          CDoom.dm_totals[i] = CDoom.wi_frag_sum(i)
+          Doocr.dm_totals[i] = CDoom.wi_frag_sum(i)
         end
       end
 
       CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_barexp.value)
-      CDoom.dm_state = 4
+      Doocr.dm_state = 4
     end
 
-    if CDoom.dm_state == 2
-      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if CDoom.bcnt & 3 == 0
+    if Doocr.dm_state == 2
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if Doocr.bcnt & 3 == 0
 
       stillticking = false
 
       CDoom::MAXPLAYERS.times do |i|
-        if CDoom.playeringame[i] != 0
+        if Doocr.playeringame[i] != 0
           CDoom::MAXPLAYERS.times do |j|
-            if CDoom.playeringame[j] != 0 &&
-               CDoom.dm_frags[i][j] != CDoom.plrs[i].frags[j]
-              if CDoom.plrs[i].frags[j] < 0
-                ((CDoom.dm_frags.to_unsafe + i).value.to_unsafe + j).value = CDoom.dm_frags[i][j] - 1
+            if Doocr.playeringame[j] != 0 &&
+               Doocr.dm_frags[i][j] != @@plrs[i].frags[j]
+              if @@plrs[i].frags[j] < 0
+                Doocr.dm_frags[i][j] = Doocr.dm_frags[i][j] - 1
               else
-                ((CDoom.dm_frags.to_unsafe + i).value.to_unsafe + j).value = CDoom.dm_frags[i][j] + 1
+                Doocr.dm_frags[i][j] = Doocr.dm_frags[i][j] + 1
               end
 
-              if CDoom.dm_frags[i][j] > 99
-                ((CDoom.dm_frags.to_unsafe + i).value.to_unsafe + j).value = 99
+              if Doocr.dm_frags[i][j] > 99
+                Doocr.dm_frags[i][j] = 99
               end
-              if CDoom.dm_frags[i][j] < -99
-                ((CDoom.dm_frags.to_unsafe + i).value.to_unsafe + j).value = -99
+              if Doocr.dm_frags[i][j] < -99
+                Doocr.dm_frags[i][j] = -99
               end
 
               stillticking = true
             end
           end
-          CDoom.dm_totals[i] = CDoom.wi_frag_sum(i)
+          Doocr.dm_totals[i] = CDoom.wi_frag_sum(i)
 
-          CDoom.dm_totals[i] = 99 if CDoom.dm_totals[i] > 99
-          CDoom.dm_totals[i] = -99 if CDoom.dm_totals[i] < -99
+          Doocr.dm_totals[i] = 99 if Doocr.dm_totals[i] > 99
+          Doocr.dm_totals[i] = -99 if Doocr.dm_totals[i] < -99
         end
       end
       if !stillticking
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_barexp.value)
-        CDoom.dm_state += 1
+        Doocr.dm_state += 1
       end
-    elsif CDoom.dm_state == 4
-      if CDoom.acceleratestage != 0
+    elsif Doocr.dm_state == 4
+      if Doocr.acceleratestage != 0
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_slop.value)
 
-        if CDoom.gamemode == CDoom::GameMode::Commercial
+        if Doocr.gamemode == CDoom::GameMode::Commercial
           CDoom.wi_init_no_state
         else
           CDoom.wi_init_show_next_loc
         end
       end
-    elsif CDoom.dm_state & 1 != 0
-      if (CDoom.cnt_pause -= 1) == 0
-        CDoom.dm_state += 1
-        CDoom.cnt_pause = CDoom::TICRATE
+    elsif Doocr.dm_state & 1 != 0
+      if (Doocr.cnt_pause -= 1) == 0
+        Doocr.dm_state += 1
+        Doocr.cnt_pause = CDoom::TICRATE
       end
     end
   end
@@ -442,7 +442,7 @@ module Doocr
     y = CDoom::DM_MATRIXY
 
     CDoom::MAXPLAYERS.times do |i|
-      if CDoom.playeringame[i] != 0
+      if Doocr.playeringame[i] != 0
         CDoom.v_draw_patch(x - CDoom.p[i].value.width // 2,
           CDoom::DM_MATRIXY - CDoom::WI_SPACINGY,
           CDoom::FB, CDoom.p[i])
@@ -451,7 +451,7 @@ module Doocr
           y,
           CDoom::FB, CDoom.p[i])
 
-        if i == CDoom.me
+        if i == Doocr.me
           CDoom.v_draw_patch(x - CDoom.p[i].value.width // 2,
             CDoom::DM_MATRIXY - CDoom::WI_SPACINGY,
             CDoom::FB, CDoom.bstar)
@@ -472,13 +472,13 @@ module Doocr
     CDoom::MAXPLAYERS.times do |i|
       x = CDoom::DM_MATRIXX + CDoom::DM_SPACINGX
 
-      if CDoom.playeringame[i] != 0
+      if Doocr.playeringame[i] != 0
         CDoom::MAXPLAYERS.times do |j|
-          CDoom.wi_draw_num(x + w, y, CDoom.dm_frags[i][j], 2) if CDoom.playeringame[j] != 0
+          CDoom.wi_draw_num(x + w, y, Doocr.dm_frags[i][j], 2) if Doocr.playeringame[j] != 0
 
           x += CDoom::DM_SPACINGX
         end
-        CDoom.wi_draw_num(CDoom::DM_TOTALSX + w, y, CDoom.dm_totals[i], 2)
+        CDoom.wi_draw_num(CDoom::DM_TOTALSX + w, y, Doocr.dm_totals[i], 2)
       end
       y += CDoom::WI_SPACINGY
     end
@@ -486,23 +486,23 @@ module Doocr
 
   def self.wi_init_netgame_stats
     CDoom.state = CDoom::Stateenum::StatCount
-    CDoom.acceleratestage = 0
-    CDoom.ng_state = 1
+    Doocr.acceleratestage = 0
+    Doocr.ng_state = 1
 
-    CDoom.cnt_pause = CDoom::TICRATE
+    Doocr.cnt_pause = CDoom::TICRATE
 
     CDoom::MAXPLAYERS.times do |i|
-      next if CDoom.playeringame[i] == 0
+      next if Doocr.playeringame[i] == 0
 
-      CDoom.cnt_kills[i] = 0
-      CDoom.cnt_items[i] = 0
-      CDoom.cnt_secret[i] = 0
-      CDoom.cnt_frags[i] = 0
+      Doocr.cnt_kills[i] = 0
+      Doocr.cnt_items[i] = 0
+      Doocr.cnt_secret[i] = 0
+      Doocr.cnt_frags[i] = 0
 
-      CDoom.dofrags += CDoom.wi_frag_sum(i)
+      Doocr.dofrags += CDoom.wi_frag_sum(i)
     end
 
-    CDoom.dofrags = ((CDoom.dofrags == 0).to_unsafe == 0).to_unsafe
+    Doocr.dofrags = ((Doocr.dofrags == 0).to_unsafe == 0).to_unsafe
 
     CDoom.wi_init_animated_back
   end
@@ -510,34 +510,34 @@ module Doocr
   def self.wi_update_netgame_stats
     CDoom.wi_update_animated_back
 
-    if CDoom.acceleratestage != 0 && CDoom.ng_state != 10
-      CDoom.acceleratestage = 0
+    if Doocr.acceleratestage != 0 && Doocr.ng_state != 10
+      Doocr.acceleratestage = 0
 
       CDoom::MAXPLAYERS.times do |i|
-        next if CDoom.playeringame[i] == 0
+        next if Doocr.playeringame[i] == 0
 
-        CDoom.cnt_kills[i] = (CDoom.plrs[i].skills * 100) // CDoom.wbs.value.maxkills
-        CDoom.cnt_items[i] = (CDoom.plrs[i].sitems * 100) // CDoom.wbs.value.maxitems
-        CDoom.cnt_secret[i] = (CDoom.plrs[i].ssecret * 100) // CDoom.wbs.value.maxsecret
+        Doocr.cnt_kills[i] = (@@plrs[i].skills * 100) // @@wbs.maxkills
+        Doocr.cnt_items[i] = (@@plrs[i].sitems * 100) // @@wbs.maxitems
+        Doocr.cnt_secret[i] = (@@plrs[i].ssecret * 100) // @@wbs.maxsecret
 
-        CDoom.cnt_frags[i] = CDoom.wi_frag_sum(i) if CDoom.dofrags != 0
+        Doocr.cnt_frags[i] = CDoom.wi_frag_sum(i) if Doocr.dofrags != 0
       end
       CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_barexp.value)
-      CDoom.ng_state = 10
+      Doocr.ng_state = 10
     end
 
-    if CDoom.ng_state == 2
-      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if CDoom.bcnt & 3 == 0
+    if Doocr.ng_state == 2
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if Doocr.bcnt & 3 == 0
 
       stillticking = false
 
       CDoom::MAXPLAYERS.times do |i|
-        next if CDoom.playeringame[i] == 0
+        next if Doocr.playeringame[i] == 0
 
-        CDoom.cnt_kills[i] = CDoom.cnt_kills[i] + 2
+        Doocr.cnt_kills[i] = Doocr.cnt_kills[i] + 2
 
-        if CDoom.cnt_kills[i] >= (CDoom.plrs[i].skills * 100) // CDoom.wbs.value.maxkills
-          CDoom.cnt_kills[i] = (CDoom.plrs[i].skills * 100) // CDoom.wbs.value.maxkills
+        if Doocr.cnt_kills[i] >= (@@plrs[i].skills * 100) // @@wbs.maxkills
+          Doocr.cnt_kills[i] = (@@plrs[i].skills * 100) // @@wbs.maxkills
         else
           stillticking = true
         end
@@ -545,20 +545,20 @@ module Doocr
 
       if !stillticking
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_barexp.value)
-        CDoom.ng_state += 1
+        Doocr.ng_state += 1
       end
-    elsif CDoom.ng_state == 4
-      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if CDoom.bcnt & 3 == 0
+    elsif Doocr.ng_state == 4
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if Doocr.bcnt & 3 == 0
 
       stillticking = false
 
       CDoom::MAXPLAYERS.times do |i|
-        next if CDoom.playeringame[i] == 0
+        next if Doocr.playeringame[i] == 0
 
-        CDoom.cnt_items[i] = CDoom.cnt_items[i] + 2
+        Doocr.cnt_items[i] = Doocr.cnt_items[i] + 2
 
-        if CDoom.cnt_items[i] >= (CDoom.plrs[i].sitems * 100) // CDoom.wbs.value.maxitems
-          CDoom.cnt_items[i] = (CDoom.plrs[i].sitems * 100) // CDoom.wbs.value.maxitems
+        if Doocr.cnt_items[i] >= (@@plrs[i].sitems * 100) // @@wbs.maxitems
+          Doocr.cnt_items[i] = (@@plrs[i].sitems * 100) // @@wbs.maxitems
         else
           stillticking = true
         end
@@ -566,20 +566,20 @@ module Doocr
 
       if !stillticking
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_barexp.value)
-        CDoom.ng_state += 1
+        Doocr.ng_state += 1
       end
-    elsif CDoom.ng_state == 6
-      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if CDoom.bcnt & 3 == 0
+    elsif Doocr.ng_state == 6
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if Doocr.bcnt & 3 == 0
 
       stillticking = false
 
       CDoom::MAXPLAYERS.times do |i|
-        next if CDoom.playeringame[i] == 0
+        next if Doocr.playeringame[i] == 0
 
-        CDoom.cnt_secret[i] = CDoom.cnt_secret[i] + 2
+        Doocr.cnt_secret[i] = Doocr.cnt_secret[i] + 2
 
-        if CDoom.cnt_secret[i] >= (CDoom.plrs[i].ssecret * 100) // CDoom.wbs.value.maxsecret
-          CDoom.cnt_secret[i] = (CDoom.plrs[i].ssecret * 100) // CDoom.wbs.value.maxsecret
+        if Doocr.cnt_secret[i] >= (@@plrs[i].ssecret * 100) // @@wbs.maxsecret
+          Doocr.cnt_secret[i] = (@@plrs[i].ssecret * 100) // @@wbs.maxsecret
         else
           stillticking = true
         end
@@ -587,20 +587,20 @@ module Doocr
 
       if !stillticking
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_barexp.value)
-        CDoom.ng_state += 1 + 2 * (CDoom.dofrags == 0).to_unsafe
+        Doocr.ng_state += 1 + 2 * (Doocr.dofrags == 0).to_unsafe
       end
-    elsif CDoom.ng_state == 8
-      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if CDoom.bcnt & 3 == 0
+    elsif Doocr.ng_state == 8
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if Doocr.bcnt & 3 == 0
 
       stillticking = false
 
       CDoom::MAXPLAYERS.times do |i|
-        next if CDoom.playeringame[i] == 0
+        next if Doocr.playeringame[i] == 0
 
-        CDoom.cnt_frags[i] = CDoom.cnt_frags[i] + 1
+        Doocr.cnt_frags[i] = Doocr.cnt_frags[i] + 1
 
-        if CDoom.cnt_frags[i] >= (fsum = CDoom.wi_frag_sum(i))
-          CDoom.cnt_frags[i] = fsum
+        if Doocr.cnt_frags[i] >= (fsum = CDoom.wi_frag_sum(i))
+          Doocr.cnt_frags[i] = fsum
         else
           stillticking = true
         end
@@ -608,21 +608,21 @@ module Doocr
 
       if !stillticking
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pldeth.value)
-        CDoom.ng_state += 1
+        Doocr.ng_state += 1
       end
-    elsif CDoom.ng_state == 10
-      if CDoom.acceleratestage != 0
+    elsif Doocr.ng_state == 10
+      if Doocr.acceleratestage != 0
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_sgcock.value)
-        if CDoom.gamemode == CDoom::GameMode::Commercial
+        if Doocr.gamemode == CDoom::GameMode::Commercial
           CDoom.wi_init_no_state
         else
           CDoom.wi_init_show_next_loc
         end
       end
-    elsif CDoom.ng_state & 1 != 0
-      if (CDoom.cnt_pause -= 1) == 0
-        CDoom.ng_state += 1
-        CDoom.cnt_pause = CDoom::TICRATE
+    elsif Doocr.ng_state & 1 != 0
+      if (Doocr.cnt_pause -= 1) == 0
+        Doocr.ng_state += 1
+        Doocr.cnt_pause = CDoom::TICRATE
       end
     end
   end
@@ -647,7 +647,7 @@ module Doocr
     CDoom.v_draw_patch(ng_statsx + 3 * CDoom::NG_SPACINGX - CDoom.secret.value.width,
       CDoom::NG_STATSY, CDoom::FB, CDoom.secret)
 
-    if CDoom.dofrags != 0
+    if Doocr.dofrags != 0
       CDoom.v_draw_patch(ng_statsx + 4 * CDoom::NG_SPACINGX - CDoom.frags.value.width,
         CDoom::NG_STATSY, CDoom::FB, CDoom.frags)
     end
@@ -656,23 +656,23 @@ module Doocr
     y = CDoom::NG_STATSY + CDoom.kills.value.height
 
     CDoom::MAXPLAYERS.times do |i|
-      next if CDoom.playeringame[i] == 0
+      next if Doocr.playeringame[i] == 0
 
       x = ng_statsx
       CDoom.v_draw_patch(x - CDoom.p[i].value.width, y, CDoom::FB, CDoom.p[i])
 
-      CDoom.v_draw_patch(x - CDoom.p[i].value.width, y, CDoom::FB, CDoom.star) if i == CDoom.me
+      CDoom.v_draw_patch(x - CDoom.p[i].value.width, y, CDoom::FB, CDoom.star) if i == Doocr.me
 
       x += CDoom::NG_SPACINGX
-      CDoom.wi_draw_percent(x - pwidth, y + 10, CDoom.cnt_kills[i])
+      CDoom.wi_draw_percent(x - pwidth, y + 10, Doocr.cnt_kills[i])
       x += CDoom::NG_SPACINGX
-      CDoom.wi_draw_percent(x - pwidth, y + 10, CDoom.cnt_items[i])
+      CDoom.wi_draw_percent(x - pwidth, y + 10, Doocr.cnt_items[i])
       x += CDoom::NG_SPACINGX
-      CDoom.wi_draw_percent(x - pwidth, y + 10, CDoom.cnt_secret[i])
+      CDoom.wi_draw_percent(x - pwidth, y + 10, Doocr.cnt_secret[i])
       x += CDoom::NG_SPACINGX
 
-      if CDoom.dofrags != 0
-        CDoom.wi_draw_num(x, y + 10, CDoom.cnt_frags[i], -1)
+      if Doocr.dofrags != 0
+        CDoom.wi_draw_num(x, y + 10, Doocr.cnt_frags[i], -1)
       end
 
       y += CDoom::WI_SPACINGY
@@ -681,14 +681,14 @@ module Doocr
 
   def self.wi_init_stats
     CDoom.state = CDoom::Stateenum::StatCount
-    CDoom.acceleratestage = 0
-    CDoom.sp_state = 1
-    CDoom.cnt_kills[0] = -1
-    CDoom.cnt_items[0] = -1
-    CDoom.cnt_secret[0] = -1
-    CDoom.cnt_time = -1
-    CDoom.cnt_par = -1
-    CDoom.cnt_pause = CDoom::TICRATE
+    Doocr.acceleratestage = 0
+    Doocr.sp_state = 1
+    Doocr.cnt_kills[0] = -1
+    Doocr.cnt_items[0] = -1
+    Doocr.cnt_secret[0] = -1
+    Doocr.cnt_time = -1
+    Doocr.cnt_par = -1
+    Doocr.cnt_pause = CDoom::TICRATE
 
     CDoom.wi_init_animated_back
   end
@@ -696,80 +696,80 @@ module Doocr
   def self.wi_update_stats
     CDoom.wi_update_animated_back
 
-    if CDoom.acceleratestage != 0 && CDoom.sp_state != 10
-      CDoom.acceleratestage = 0
+    if Doocr.acceleratestage != 0 && Doocr.sp_state != 10
+      Doocr.acceleratestage = 0
 
-      CDoom.cnt_kills[0] = (CDoom.plrs[CDoom.me].skills * 100) // CDoom.wbs.value.maxkills
-      CDoom.cnt_items[0] = (CDoom.plrs[CDoom.me].sitems * 100) // CDoom.wbs.value.maxitems
-      CDoom.cnt_secret[0] = (CDoom.plrs[CDoom.me].ssecret * 100) // CDoom.wbs.value.maxsecret
-      CDoom.cnt_time = CDoom.plrs[CDoom.me].stime // CDoom::TICRATE
-      CDoom.cnt_par = CDoom.wbs.value.partime // CDoom::TICRATE
+      Doocr.cnt_kills[0] = (@@plrs[Doocr.me].skills * 100) // @@wbs.maxkills
+      Doocr.cnt_items[0] = (@@plrs[Doocr.me].sitems * 100) // @@wbs.maxitems
+      Doocr.cnt_secret[0] = (@@plrs[Doocr.me].ssecret * 100) // @@wbs.maxsecret
+      Doocr.cnt_time = @@plrs[Doocr.me].stime // CDoom::TICRATE
+      Doocr.cnt_par = @@wbs.partime // CDoom::TICRATE
       CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_barexp.value)
-      CDoom.sp_state = 10
+      Doocr.sp_state = 10
     end
 
-    if CDoom.sp_state == 2
-      CDoom.cnt_kills[0] = CDoom.cnt_kills[0] + 2
+    if Doocr.sp_state == 2
+      Doocr.cnt_kills[0] = Doocr.cnt_kills[0] + 2
 
-      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if CDoom.bcnt & 3 == 0
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if Doocr.bcnt & 3 == 0
 
-      if CDoom.cnt_kills[0] >= (CDoom.plrs[CDoom.me].skills * 100) // CDoom.wbs.value.maxkills
-        CDoom.cnt_kills[0] = (CDoom.plrs[CDoom.me].skills * 100) // CDoom.wbs.value.maxkills
+      if Doocr.cnt_kills[0] >= (@@plrs[Doocr.me].skills * 100) // @@wbs.maxkills
+        Doocr.cnt_kills[0] = (@@plrs[Doocr.me].skills * 100) // @@wbs.maxkills
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_barexp.value)
-        CDoom.sp_state += 1
+        Doocr.sp_state += 1
       end
-    elsif CDoom.sp_state == 4
-      CDoom.cnt_items[0] = CDoom.cnt_items[0] + 2
+    elsif Doocr.sp_state == 4
+      Doocr.cnt_items[0] = Doocr.cnt_items[0] + 2
 
-      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if CDoom.bcnt & 3 == 0
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if Doocr.bcnt & 3 == 0
 
-      if CDoom.cnt_items[0] >= (CDoom.plrs[CDoom.me].sitems * 100) // CDoom.wbs.value.maxitems
-        CDoom.cnt_items[0] = (CDoom.plrs[CDoom.me].sitems * 100) // CDoom.wbs.value.maxitems
+      if Doocr.cnt_items[0] >= (@@plrs[Doocr.me].sitems * 100) // @@wbs.maxitems
+        Doocr.cnt_items[0] = (@@plrs[Doocr.me].sitems * 100) // @@wbs.maxitems
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_barexp.value)
-        CDoom.sp_state += 1
+        Doocr.sp_state += 1
       end
-    elsif CDoom.sp_state == 6
-      CDoom.cnt_secret[0] = CDoom.cnt_secret[0] + 2
+    elsif Doocr.sp_state == 6
+      Doocr.cnt_secret[0] = Doocr.cnt_secret[0] + 2
 
-      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if CDoom.bcnt & 3 == 0
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if Doocr.bcnt & 3 == 0
 
-      if CDoom.cnt_secret[0] >= (CDoom.plrs[CDoom.me].ssecret * 100) // CDoom.wbs.value.maxsecret
-        CDoom.cnt_secret[0] = (CDoom.plrs[CDoom.me].ssecret * 100) // CDoom.wbs.value.maxsecret
+      if Doocr.cnt_secret[0] >= (@@plrs[Doocr.me].ssecret * 100) // @@wbs.maxsecret
+        Doocr.cnt_secret[0] = (@@plrs[Doocr.me].ssecret * 100) // @@wbs.maxsecret
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_barexp.value)
-        CDoom.sp_state += 1
+        Doocr.sp_state += 1
       end
-    elsif CDoom.sp_state == 8
-      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if CDoom.bcnt & 3 == 0
+    elsif Doocr.sp_state == 8
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol.value) if Doocr.bcnt & 3 == 0
 
-      CDoom.cnt_time += 3
+      Doocr.cnt_time += 3
 
-      if CDoom.cnt_time >= CDoom.plrs[CDoom.me].stime // CDoom::TICRATE
-        CDoom.cnt_time = CDoom.plrs[CDoom.me].stime // CDoom::TICRATE
+      if Doocr.cnt_time >= @@plrs[Doocr.me].stime // CDoom::TICRATE
+        Doocr.cnt_time = @@plrs[Doocr.me].stime // CDoom::TICRATE
       end
 
-      CDoom.cnt_par += 3
+      Doocr.cnt_par += 3
 
-      if CDoom.cnt_par >= CDoom.wbs.value.partime // CDoom::TICRATE
-        CDoom.cnt_par = CDoom.wbs.value.partime // CDoom::TICRATE
+      if Doocr.cnt_par >= @@wbs.partime // CDoom::TICRATE
+        Doocr.cnt_par = @@wbs.partime // CDoom::TICRATE
 
-        if CDoom.cnt_time >= CDoom.plrs[CDoom.me].stime // CDoom::TICRATE
+        if Doocr.cnt_time >= @@plrs[Doocr.me].stime // CDoom::TICRATE
           CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_barexp.value)
-          CDoom.sp_state += 1
+          Doocr.sp_state += 1
         end
       end
-    elsif CDoom.sp_state == 10
-      if CDoom.acceleratestage != 0
+    elsif Doocr.sp_state == 10
+      if Doocr.acceleratestage != 0
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_sgcock.value)
-        if CDoom.gamemode == CDoom::GameMode::Commercial
+        if Doocr.gamemode == CDoom::GameMode::Commercial
           CDoom.wi_init_no_state
         else
           CDoom.wi_init_show_next_loc
         end
       end
-    elsif CDoom.sp_state & 1 != 0
-      if (CDoom.cnt_pause -= 1) == 0
-        CDoom.sp_state += 1
-        CDoom.cnt_pause = CDoom::TICRATE
+    elsif Doocr.sp_state & 1 != 0
+      if (Doocr.cnt_pause -= 1) == 0
+        Doocr.sp_state += 1
+        Doocr.cnt_pause = CDoom::TICRATE
       end
     end
   end
@@ -785,34 +785,34 @@ module Doocr
     CDoom.wi_draw_lf
 
     CDoom.v_draw_patch(CDoom::SP_STATSX, CDoom::SP_STATSY, CDoom::FB, CDoom.kills)
-    CDoom.wi_draw_percent(CDoom::SCREENWIDTH - CDoom::SP_STATSX, CDoom::SP_STATSY, CDoom.cnt_kills[0])
+    CDoom.wi_draw_percent(CDoom::SCREENWIDTH - CDoom::SP_STATSX, CDoom::SP_STATSY, Doocr.cnt_kills[0])
 
     CDoom.v_draw_patch(CDoom::SP_STATSX, CDoom::SP_STATSY + lh, CDoom::FB, CDoom.items)
-    CDoom.wi_draw_percent(CDoom::SCREENWIDTH - CDoom::SP_STATSX, CDoom::SP_STATSY + lh, CDoom.cnt_items[0])
+    CDoom.wi_draw_percent(CDoom::SCREENWIDTH - CDoom::SP_STATSX, CDoom::SP_STATSY + lh, Doocr.cnt_items[0])
 
     CDoom.v_draw_patch(CDoom::SP_STATSX, CDoom::SP_STATSY + 2 * lh, CDoom::FB, CDoom.sp_secret)
-    CDoom.wi_draw_percent(CDoom::SCREENWIDTH - CDoom::SP_STATSX, CDoom::SP_STATSY + 2 * lh, CDoom.cnt_secret[0])
+    CDoom.wi_draw_percent(CDoom::SCREENWIDTH - CDoom::SP_STATSX, CDoom::SP_STATSY + 2 * lh, Doocr.cnt_secret[0])
 
     CDoom.v_draw_patch(CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom::FB, CDoom.time_patch)
-    CDoom.wi_draw_time(CDoom::SCREENWIDTH // 2 - CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom.cnt_time)
+    CDoom.wi_draw_time(CDoom::SCREENWIDTH // 2 - CDoom::SP_TIMEX, CDoom::SP_TIMEY, Doocr.cnt_time)
 
     CDoom.v_draw_patch(CDoom::SCREENWIDTH // 2 + CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom::FB, CDoom.par)
-    CDoom.wi_draw_time(CDoom::SCREENWIDTH - CDoom::SP_TIMEX, CDoom::SP_TIMEY, CDoom.cnt_par)
+    CDoom.wi_draw_time(CDoom::SCREENWIDTH - CDoom::SP_TIMEX, CDoom::SP_TIMEY, Doocr.cnt_par)
   end
 
   def self.wi_check_for_accelerate
     # check for button presses to skip delays
     player = @@players.to_unsafe
     CDoom::MAXPLAYERS.times do |i|
-      if CDoom.playeringame[i] != 0
+      if Doocr.playeringame[i] != 0
         if player.value.cmd.buttons & CDoom::Buttoncode::BT_ATTACK.value != 0
-          CDoom.acceleratestage = 1 if player.value.attackdown == 0
+          Doocr.acceleratestage = 1 if player.value.attackdown == 0
           player.value.attackdown = 1
         else
           player.value.attackdown = 0
         end
         if player.value.cmd.buttons & CDoom::Buttoncode::BT_USE.value != 0
-          CDoom.acceleratestage = 1 if player.value.usedown == 0
+          Doocr.acceleratestage = 1 if player.value.usedown == 0
           player.value.usedown = 1
         else
           player.value.usedown = 0
@@ -828,11 +828,11 @@ module Doocr
   #
   def self.wi_ticker
     # counter for general background animation
-    CDoom.bcnt += 1
+    Doocr.bcnt += 1
 
-    if CDoom.bcnt == 1
+    if Doocr.bcnt == 1
       # intermission music
-      if CDoom.gamemode == CDoom::GameMode::Commercial
+      if Doocr.gamemode == CDoom::GameMode::Commercial
         CDoom.s_change_music(CDoom::Musicenum::MUS_dm2int, 1)
       else
         CDoom.s_change_music(CDoom::Musicenum::MUS_inter, 1)
@@ -843,9 +843,9 @@ module Doocr
 
     case CDoom.state
     when CDoom::Stateenum::StatCount
-      if CDoom.deathmatch != 0
+      if Doocr.deathmatch != 0
         CDoom.wi_update_deathmatch_stats
-      elsif CDoom.netgame != 0
+      elsif Doocr.netgame != 0
         CDoom.wi_update_netgame_stats
       else
         CDoom.wi_update_stats
@@ -860,15 +860,15 @@ module Doocr
   def self.wi_load_data
     name = Pointer(UInt8).malloc(9)
 
-    if CDoom.gamemode == CDoom::GameMode::Commercial
+    if Doocr.gamemode == CDoom::GameMode::Commercial
       CDoom.doom_strcpy(name, "INTERPIC")
     else
       CDoom.doom_strcpy(name, "WIMAP")
-      CDoom.doom_concat(name, CDoom.doom_itoa(CDoom.wbs.value.epsd, 10))
+      CDoom.doom_concat(name, CDoom.doom_itoa(@@wbs.epsd, 10))
     end
 
-    if CDoom.gamemode == CDoom::GameMode::Retail &&
-       CDoom.wbs.value.epsd == 3
+    if Doocr.gamemode == CDoom::GameMode::Retail &&
+      @@wbs.epsd == 3
       CDoom.doom_strcpy(name, "INTERPIC")
     end
 
@@ -876,7 +876,7 @@ module Doocr
     CDoom.bg = CDoom.w_cache_lump_name(name, CDoom::PU_CACHE).as(CDoom::Patch*)
     CDoom.v_draw_patch(0, 0, 1, CDoom.bg)
 
-    if CDoom.gamemode == CDoom::GameMode::Commercial
+    if Doocr.gamemode == CDoom::GameMode::Commercial
       CDoom.numcmaps = 32
       CDoom.lnames = CDoom.z_malloc(sizeof(CDoom::Patch*) * CDoom.numcmaps,
         CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Patch**)
@@ -893,7 +893,7 @@ module Doocr
 
       CDoom::NUMMAPS.times do |i|
         CDoom.doom_strcpy(name, "WILV")
-        CDoom.doom_concat(name, CDoom.doom_itoa(CDoom.wbs.value.epsd, 10))
+        CDoom.doom_concat(name, CDoom.doom_itoa(@@wbs.epsd, 10))
         CDoom.doom_concat(name, CDoom.doom_itoa(i, 10))
         CDoom.lnames[i] = CDoom.w_cache_lump_name(name, CDoom::PU_STATIC).as(CDoom::Patch*)
       end
@@ -907,23 +907,23 @@ module Doocr
       # splat
       CDoom.splat = CDoom.w_cache_lump_name("WISPLAT", CDoom::PU_STATIC).as(CDoom::Patch*)
 
-      if CDoom.wbs.value.epsd < 3
-        CDoom.numanims[CDoom.wbs.value.epsd].times do |j|
-          a = CDoom.anims_wi_stuff[CDoom.wbs.value.epsd] + j
-          a.value.nanims.times do |i|
+      if @@wbs.epsd < 3
+        @@numanims[@@wbs.epsd].times do |j|
+          a = @@anims_wi_stuff[@@wbs.epsd][j]
+          a.nanims.times do |i|
             # MONDO HACK!
-            if CDoom.wbs.value.epsd != 1 || j != 8
+            if @@wbs.epsd != 1 || j != 8
               # animations
               CDoom.doom_strcpy(name, "WIA")
-              CDoom.doom_concat(name, CDoom.doom_itoa(CDoom.wbs.value.epsd, 10))
+              CDoom.doom_concat(name, CDoom.doom_itoa(@@wbs.epsd, 10))
               CDoom.doom_concat(name, "0") if j < 10
               CDoom.doom_concat(name, CDoom.doom_itoa(j, 10))
               CDoom.doom_concat(name, "0") if i < 10
               CDoom.doom_concat(name, CDoom.doom_itoa(i, 10))
-              a.value.p[i] = CDoom.w_cache_lump_name(name, CDoom::PU_STATIC).as(CDoom::Patch*)
+              a.p[i] = CDoom.w_cache_lump_name(name, CDoom::PU_STATIC).as(CDoom::Patch*)
             else
               # HACK ALERT!
-              a.value.p[i] = CDoom.anims_wi_stuff[1][4].p[i]
+              a.p[i] = @@anims_wi_stuff[1][4].p[i]
             end
           end
         end
@@ -958,9 +958,9 @@ module Doocr
     CDoom.sp_secret = CDoom.w_cache_lump_name("WISCRT2", CDoom::PU_STATIC).as(CDoom::Patch*)
 
     # Yuck.
-    if CDoom.language == CDoom::Language::French
+    if Doocr.language == CDoom::Language::French
       # "items"
-      if CDoom.netgame != 0 && CDoom.deathmatch == 0
+      if Doocr.netgame != 0 && Doocr.deathmatch == 0
         CDoom.items = CDoom.w_cache_lump_name("WIOBJ", CDoom::PU_STATIC).as(CDoom::Patch*)
       else
         CDoom.items = CDoom.w_cache_lump_name("WIOSTI", CDoom::PU_STATIC).as(CDoom::Patch*)
@@ -1017,7 +1017,7 @@ module Doocr
       z_change_tag(CDoom.num[i], CDoom::PU_CACHE)
     end
 
-    if CDoom.gamemode == CDoom::GameMode::Commercial
+    if Doocr.gamemode == CDoom::GameMode::Commercial
       CDoom.numcmaps.times do |i|
         z_change_tag(CDoom.lnames[i], CDoom::PU_CACHE)
       end
@@ -1031,11 +1031,11 @@ module Doocr
         z_change_tag(CDoom.lnames[i], CDoom::PU_CACHE)
       end
 
-      if CDoom.wbs.value.epsd < 3
-        CDoom.numanims[CDoom.wbs.value.epsd].times do |j|
-          if CDoom.wbs.value.epsd != 1 || j != 8
-            CDoom.anims_wi_stuff[CDoom.wbs.value.epsd][j].nanims.times do |i|
-              z_change_tag(CDoom.anims_wi_stuff[CDoom.wbs.value.epsd][j].p[i], CDoom::PU_CACHE)
+      if @@wbs.epsd < 3
+        @@numanims[@@wbs.epsd].times do |j|
+          if @@wbs.epsd != 1 || j != 8
+            @@anims_wi_stuff[@@wbs.epsd][j].nanims.times do |i|
+              z_change_tag(@@anims_wi_stuff[@@wbs.epsd][j].p[i], CDoom::PU_CACHE)
             end
           end
         end
@@ -1073,9 +1073,9 @@ module Doocr
   def self.wi_drawer
     case CDoom.state
     when CDoom::Stateenum::StatCount
-      if CDoom.deathmatch != 0
+      if Doocr.deathmatch != 0
         CDoom.wi_draw_deathmatch_stats
-      elsif CDoom.netgame != 0
+      elsif Doocr.netgame != 0
         CDoom.wi_draw_netgame_stats
       else
         CDoom.wi_draw_stats
@@ -1087,31 +1087,31 @@ module Doocr
     end
   end
 
-  def self.wi_init_variables(wbstartstruct : CDoom::Wbstartstruct*)
-    CDoom.wbs = wbstartstruct
-    CDoom.acceleratestage = 0
-    CDoom.cnt = 0
-    CDoom.bcnt = 0
-    CDoom.firstrefresh = 1
-    CDoom.me = CDoom.wbs.value.pnum
-    CDoom.plrs = CDoom.wbs.value.plyr
+  def self.wi_init_variables(wbstartstruct : Wbstart)
+    @@wbs = wbstartstruct
+    Doocr.acceleratestage = 0
+    Doocr.cnt = 0
+    Doocr.bcnt = 0
+    Doocr.firstrefresh = 1
+    Doocr.me = @@wbs.pnum
+    @@plrs = @@wbs.plyr
 
-    CDoom.wbs.value.maxkills = 1 if CDoom.wbs.value.maxkills == 0
-    CDoom.wbs.value.maxitems = 1 if CDoom.wbs.value.maxitems == 0
-    CDoom.wbs.value.maxsecret = 1 if CDoom.wbs.value.maxsecret == 0
+    @@wbs.maxkills = 1 if @@wbs.maxkills == 0
+    @@wbs.maxitems = 1 if @@wbs.maxitems == 0
+    @@wbs.maxsecret = 1 if @@wbs.maxsecret == 0
 
-    if CDoom.gamemode != CDoom::GameMode::Retail
-      CDoom.wbs.value.epsd -= 3 if CDoom.wbs.value.epsd > 2
+    if Doocr.gamemode != CDoom::GameMode::Retail
+      @@wbs.epsd -= 3 if @@wbs.epsd > 2
     end
   end
 
-  def self.wi_start(wbstartstruct : CDoom::Wbstartstruct*)
-    CDoom.wi_init_variables(wbstartstruct)
+  def self.wi_start(wbstartstruct : Wbstart)
+    wi_init_variables(wbstartstruct)
     CDoom.wi_load_data
 
-    if CDoom.deathmatch != 0
+    if Doocr.deathmatch != 0
       CDoom.wi_init_deathmatch_stats
-    elsif CDoom.netgame != 0
+    elsif Doocr.netgame != 0
       CDoom.wi_init_netgame_stats
     else
       CDoom.wi_init_stats

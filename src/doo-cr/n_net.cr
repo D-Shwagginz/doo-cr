@@ -28,19 +28,19 @@ module Doocr
   end
 
   def self.expand_tics(low : Int32) : Int32
-    delta = low - (CDoom.maketic & 0xff)
+    delta = low - (Doocr.maketic & 0xff)
 
     if delta >= -64 && delta <= 64
-      return (CDoom.maketic & ~0xff) + low
+      return (Doocr.maketic & ~0xff) + low
     end
     if delta > 64
-      return (CDoom.maketic & ~0xff) - 256 + low
+      return (Doocr.maketic & ~0xff) - 256 + low
     end
     if delta < -64
-      return (CDoom.maketic & ~0xff) + 256 + low
+      return (Doocr.maketic & ~0xff) + 256 + low
     end
 
-    CDoom.i_error("Error: expand_tics: strange value #{low} at maketic #{CDoom.maketic}")
+    CDoom.i_error("Error: expand_tics: strange value #{low} at maketic #{Doocr.maketic}")
     return 0
   end
 
@@ -49,13 +49,13 @@ module Doocr
 
     if node == 0
       CDoom.netbuffer.copy_to(pointerof(CDoom.reboundstore), 1)
-      CDoom.reboundpacket = 1
+      Doocr.reboundpacket = 1
       return
     end
 
-    return if CDoom.demoplayback != 0
+    return if Doocr.demoplayback != 0
 
-    CDoom.i_error("Error: Tried to transmit to another node") if CDoom.netgame == 0
+    CDoom.i_error("Error: Tried to transmit to another node") if Doocr.netgame == 0
 
     CDoom.doomcom.value.command = CDoom::Command::SEND
     CDoom.doomcom.value.remotenode = node
@@ -93,16 +93,16 @@ module Doocr
   # Returns false if no packet is waiting
   #
   def self.h_get_packet : CDoom::DoomBool
-    if CDoom.reboundpacket != 0
+    if Doocr.reboundpacket != 0
       CDoom.netbuffer.copy_from(pointerof(CDoom.reboundstore), 1)
       CDoom.doomcom.value.remotenode = 0
-      CDoom.reboundpacket = 0
+      Doocr.reboundpacket = 0
       return 1
     end
 
-    return 0 if CDoom.netgame == 0
+    return 0 if Doocr.netgame == 0
 
-    return 0 if CDoom.demoplayback != 0
+    return 0 if Doocr.demoplayback != 0
 
     CDoom.doomcom.value.command = CDoom::Command::GET
     CDoom.i_net_cmd
@@ -173,43 +173,43 @@ module Doocr
 
       # check for exiting the game
       if CDoom.netbuffer.value.checksum & NCMD_EXIT != 0
-        next if CDoom.nodeingame[netnode] == 0
-        CDoom.nodeingame[netnode] = 0
-        CDoom.playeringame[netconsole] = 0
+        next if Doocr.nodeingame[netnode] == 0
+        Doocr.nodeingame[netnode] = 0
+        Doocr.playeringame[netconsole] = 0
         CDoom.doom_strcpy(CDoom.exitmsg, "Player 1 left the game")
         CDoom.exitmsg[7] = CDoom.exitmsg[7] + netconsole
-        (@@players.to_unsafe + CDoom.consoleplayer).value.message = CDoom.exitmsg
-        if netconsole != CDoom.consoleplayer
+        (@@players.to_unsafe + Doocr.consoleplayer).value.message = CDoom.exitmsg
+        if netconsole != Doocr.consoleplayer
           # Despawn the player
           g_despawn_player(netconsole)
         end
-        CDoom.g_check_demo_status if CDoom.demorecording != 0
+        CDoom.g_check_demo_status if Doocr.demorecording != 0
         next
       end
 
       # check for a remote game kill
       CDoom.i_error("Error: Killed by network driver") if CDoom.netbuffer.value.checksum & NCMD_KILL != 0
 
-      CDoom.nodeforplayer[netconsole] = netnode
+      Doocr.nodeforplayer[netconsole] = netnode
 
       # check for retransmit request
-      if CDoom.resendcount[netnode] <= 0 &&
+      if Doocr.resendcount[netnode] <= 0 &&
          (CDoom.netbuffer.value.checksum & NCMD_RETRANSMIT) != 0
-        CDoom.resendto[netnode] = CDoom.expand_tics(CDoom.netbuffer.value.retransmitfrom)
+        Doocr.resendto[netnode] = CDoom.expand_tics(CDoom.netbuffer.value.retransmitfrom)
         if !CDoom.debugfile.null?
           CDoom.doom_fprint(CDoom.debugfile, "retransmit from ")
-          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.resendto[netnode], 10))
+          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(Doocr.resendto[netnode], 10))
           CDoom.doom_fprint(CDoom.debugfile, "\n")
         end
-        CDoom.resendcount[netnode] = RESENDCOUNT
+        Doocr.resendcount[netnode] = RESENDCOUNT
       else
-        CDoom.resendcount[netnode] = CDoom.resendcount[netnode] - 1
+        Doocr.resendcount[netnode] = Doocr.resendcount[netnode] - 1
       end
 
       # check for out of order / duplicated packet
-      next if realend == CDoom.nettics[netnode]
+      next if realend == Doocr.nettics[netnode]
 
-      if realend < CDoom.nettics[netnode]
+      if realend < Doocr.nettics[netnode]
         if !CDoom.debugfile.null?
           CDoom.doom_fprint(CDoom.debugfile, "out of order packet (")
           CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(realstart, 10))
@@ -221,7 +221,7 @@ module Doocr
       end
 
       # check for a missed packet
-      if realstart > CDoom.nettics[netnode]
+      if realstart > Doocr.nettics[netnode]
         # stop processing until the other system resends the missed tics
         if !CDoom.debugfile.null?
           CDoom.doom_fprint(CDoom.debugfile, "missed tics from ")
@@ -229,23 +229,23 @@ module Doocr
           CDoom.doom_fprint(CDoom.debugfile, " (")
           CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(realstart, 10))
           CDoom.doom_fprint(CDoom.debugfile, " - ")
-          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.nettics[netnode], 10))
+          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(Doocr.nettics[netnode], 10))
           CDoom.doom_fprint(CDoom.debugfile, ")\n")
         end
-        CDoom.remoteresend[netnode] = 1
+        Doocr.remoteresend[netnode] = 1
         next
       end
 
       # update command store from the packet
-      CDoom.remoteresend[netnode] = 0
+      Doocr.remoteresend[netnode] = 0
 
-      start = CDoom.nettics[netnode] - realstart
+      start = Doocr.nettics[netnode] - realstart
       src = CDoom.netbuffer.value.cmds.to_unsafe + start
 
-      while CDoom.nettics[netnode] < realend
+      while Doocr.nettics[netnode] < realend
         # puts "get_packet: Copying tics"
-        dest = (CDoom.netcmds.to_unsafe + netconsole).value.to_unsafe + (CDoom.nettics[netnode] % CDoom::BACKUPTICS)
-        CDoom.nettics[netnode] = CDoom.nettics[netnode] + 1
+        dest = (CDoom.netcmds.to_unsafe + netconsole).value.to_unsafe + (Doocr.nettics[netnode] % CDoom::BACKUPTICS)
+        Doocr.nettics[netnode] = Doocr.nettics[netnode] + 1
         dest.copy_from(src, 1)
         src += 1
       end
@@ -265,26 +265,26 @@ module Doocr
     end
 
     # check time
-    nowtime = CDoom.i_get_time // CDoom.ticdup
-    newtics = nowtime - CDoom.gametime
-    CDoom.gametime = nowtime
+    nowtime = CDoom.i_get_time // Doocr.ticdup
+    newtics = nowtime - Doocr.gametime
+    Doocr.gametime = nowtime
 
     if newtics > 0 # something new to update
-      if CDoom.skiptics <= newtics
-        newtics -= CDoom.skiptics
-        CDoom.skiptics = 0
+      if Doocr.skiptics <= newtics
+        newtics -= Doocr.skiptics
+        Doocr.skiptics = 0
       else
-        CDoom.skiptics -= newtics
+        Doocr.skiptics -= newtics
         newtics = 0
       end
 
-      CDoom.netbuffer.value.player = CDoom.consoleplayer
+      CDoom.netbuffer.value.player = Doocr.consoleplayer
 
       # build new ticcmds for console player
-      gameticdiv = CDoom.gametic // CDoom.ticdup
+      gameticdiv = Doocr.gametic // Doocr.ticdup
       newtics.times do |i|
         remaining = newtics - i
-        break if CDoom.maketic - gameticdiv >= CDoom::BACKUPTICS // 2 - 1 # can't hold any more
+        break if Doocr.maketic - gameticdiv >= CDoom::BACKUPTICS // 2 - 1 # can't hold any more
 
         mouse_step = Raylib::Vector2.new(
           x: @@mouse_queued.x // remaining,
@@ -296,32 +296,32 @@ module Doocr
         i_start_tic(mouse_step)
         CDoom.d_process_events
 
-        CDoom.g_build_ticcmd(CDoom.localcmds.to_unsafe + CDoom.maketic % CDoom::BACKUPTICS)
-        CDoom.maketic += 1
+        CDoom.g_build_ticcmd(CDoom.localcmds.to_unsafe + Doocr.maketic % CDoom::BACKUPTICS)
+        Doocr.maketic += 1
       end
 
-      return if CDoom.singletics != 0 # singletic update is syncronous
+      return if Doocr.singletics != 0 # singletic update is syncronous
 
       # send the packet to the other nodes
       CDoom.doomcom.value.numnodes.times do |i|
         # puts "net_update : Sending packets to other nodes"
-        if CDoom.nodeingame[i] != 0
-          CDoom.netbuffer.value.starttic = CDoom.resendto[i]
-          realstart = CDoom.resendto[i]
-          CDoom.netbuffer.value.numtics = CDoom.maketic - realstart
+        if Doocr.nodeingame[i] != 0
+          CDoom.netbuffer.value.starttic = Doocr.resendto[i]
+          realstart = Doocr.resendto[i]
+          CDoom.netbuffer.value.numtics = Doocr.maketic - realstart
           if CDoom.netbuffer.value.numtics > CDoom::BACKUPTICS
             CDoom.i_error("Error: net_update: netbuffer.value.numtics > BACKUPTICS")
           end
 
-          CDoom.resendto[i] = CDoom.maketic - CDoom.doomcom.value.extratics
+          Doocr.resendto[i] = Doocr.maketic - CDoom.doomcom.value.extratics
 
           CDoom.netbuffer.value.numtics.times do |j|
             (CDoom.netbuffer.value.cmds.to_unsafe + j).copy_from(
               CDoom.localcmds.to_unsafe + ((realstart + j) % CDoom::BACKUPTICS), 1)
           end
 
-          if CDoom.remoteresend[i] != 0
-            CDoom.netbuffer.value.retransmitfrom = CDoom.nettics[i]
+          if Doocr.remoteresend[i] != 0
+            CDoom.netbuffer.value.retransmitfrom = Doocr.nettics[i]
             CDoom.h_send_packet(i, NCMD_RETRANSMIT)
           else
             CDoom.netbuffer.value.retransmitfrom = 0
@@ -344,13 +344,13 @@ module Doocr
     end
 
     i_start_tic
-    while CDoom.eventtail != CDoom.eventhead
-      ev = CDoom.events.to_unsafe + CDoom.eventtail
+    while Doocr.eventtail != Doocr.eventhead
+      ev = CDoom.events.to_unsafe + Doocr.eventtail
       if ev.value.type == CDoom::Evtype::Keydown && ev.value.data1 == CDoom::KEY_ESCAPE
         CDoom.i_error("Error: Network game synchronization aborted.")
       end
-      CDoom.eventtail += 1
-      CDoom.eventtail = (CDoom.eventtail) & (CDoom::MAXEVENTS - 1)
+      Doocr.eventtail += 1
+      Doocr.eventtail = (Doocr.eventtail) & (CDoom::MAXEVENTS - 1)
     end
   end
 
@@ -359,7 +359,7 @@ module Doocr
   def self.punch_peers
     @@sendaddress.each_with_index do |addr, i|
       next unless addr
-      next if i == CDoom.consoleplayer
+      next if i == Doocr.consoleplayer
       begin
         @@insocket.try &.send(Bytes.new(1) { 0_u8 }, to: addr)
       rescue
@@ -371,7 +371,7 @@ module Doocr
   # d_arbitrate_net_start
   #
   def self.d_arbitrate_net_start
-    CDoom.autostart = 1
+    Doocr.autostart = 1
 
     if CDoom.doomcom.value.consoleplayer != 0
       i_error("Error: d_arbitrate_net_start: Host IP is not valid!") unless @@sendaddress[1]
@@ -392,12 +392,12 @@ module Doocr
           if CDoom.netbuffer.value.player != NETVERSION
             CDoom.i_error("Error: Different DOOM versions cannot play a net game!")
           end
-          CDoom.startskill = CDoom::Skill.new(CDoom.netbuffer.value.retransmitfrom & 15)
-          CDoom.deathmatch = (CDoom.netbuffer.value.retransmitfrom & 0xc0) >> 6
-          CDoom.nomonsters = (CDoom.netbuffer.value.retransmitfrom & 0x20) > 0
-          CDoom.respawnparm = (CDoom.netbuffer.value.retransmitfrom & 0x10) > 0
-          CDoom.startmap = CDoom.netbuffer.value.starttic & 0x3f
-          CDoom.startepisode = CDoom.netbuffer.value.starttic >> 6
+          Doocr.startskill = CDoom::Skill.new(CDoom.netbuffer.value.retransmitfrom & 15)
+          Doocr.deathmatch = (CDoom.netbuffer.value.retransmitfrom & 0xc0) >> 6
+          Doocr.nomonsters = ((CDoom.netbuffer.value.retransmitfrom & 0x20) > 0).to_unsafe
+          Doocr.respawnparm = ((CDoom.netbuffer.value.retransmitfrom & 0x10) > 0).to_unsafe
+          Doocr.startmap = CDoom.netbuffer.value.starttic & 0x3f
+          Doocr.startepisode = CDoom.netbuffer.value.starttic >> 6
 
           packed = CDoom.netbuffer.value.cmds.to_unsafe.as(UInt8*)
           CDoom.doomcom.value.ticdup = packed.value
@@ -428,7 +428,7 @@ module Doocr
               numips = CDoom.netbuffer.value.numtics
               ipnums = CDoom.netbuffer.value.cmds.to_unsafe.as(UInt8*)
               CDoom.doomcom.value.consoleplayer = CDoom.netbuffer.value.player
-              CDoom.consoleplayer = CDoom.doomcom.value.consoleplayer
+              Doocr.consoleplayer = CDoom.doomcom.value.consoleplayer
 
               numips.times do |i|
                 # Load other client's IP addresses
@@ -452,17 +452,17 @@ module Doocr
 
         CDoom.doomcom.value.numnodes.times do |i|
           # Send out setup until everyones loaded
-          CDoom.netbuffer.value.retransmitfrom = CDoom.startskill
-          if CDoom.deathmatch != 0
-            CDoom.netbuffer.value.retransmitfrom = CDoom.netbuffer.value.retransmitfrom | (CDoom.deathmatch << 6)
+          CDoom.netbuffer.value.retransmitfrom = Doocr.startskill
+          if Doocr.deathmatch != 0
+            CDoom.netbuffer.value.retransmitfrom = CDoom.netbuffer.value.retransmitfrom | (Doocr.deathmatch << 6)
           end
-          if CDoom.nomonsters != 0
+          if Doocr.nomonsters != 0
             CDoom.netbuffer.value.retransmitfrom = CDoom.netbuffer.value.retransmitfrom | 0x20
           end
-          if CDoom.respawnparm != 0
+          if Doocr.respawnparm != 0
             CDoom.netbuffer.value.retransmitfrom = CDoom.netbuffer.value.retransmitfrom | 0x10
           end
-          CDoom.netbuffer.value.starttic = CDoom.startepisode * 64 + CDoom.startmap
+          CDoom.netbuffer.value.starttic = Doocr.startepisode * 64 + Doocr.startmap
           CDoom.netbuffer.value.player = NETVERSION
           CDoom.netbuffer.value.numtics = 1
           packed = CDoom.netbuffer.value.cmds.to_unsafe.as(UInt8*)
@@ -537,10 +537,10 @@ module Doocr
   #
   def self.d_check_net_game
     CDoom::MAXNETNODES.times do |i|
-      CDoom.nodeingame[i] = 0
-      CDoom.nettics[i] = 0
-      CDoom.remoteresend[i] = 0 # set when local needs tics
-      CDoom.resendto[i] = 0     # which tic to start sending
+      Doocr.nodeingame[i] = 0
+      Doocr.nettics[i] = 0
+      Doocr.remoteresend[i] = 0 # set when local needs tics
+      Doocr.resendto[i] = 0     # which tic to start sending
     end
 
     # i_init_network sets doomcom and netgame
@@ -548,23 +548,23 @@ module Doocr
     CDoom.i_error("Error: Doomcom buffer invalid!") if CDoom.doomcom.value.id != CDoom::DOOMCOM_ID
 
     CDoom.netbuffer = pointerof(CDoom.doomcom.value.@data)
-    CDoom.consoleplayer = CDoom.doomcom.value.consoleplayer
-    CDoom.displayplayer = CDoom.consoleplayer
-    CDoom.d_arbitrate_net_start if CDoom.netgame != 0
-    puts "startskill: #{CDoom.startskill} | deathmatch: #{CDoom.deathmatch}" +
-         " | startmap: #{CDoom.startmap} | startepisode: #{CDoom.startepisode}"
+    Doocr.consoleplayer = CDoom.doomcom.value.consoleplayer
+    Doocr.displayplayer = Doocr.consoleplayer
+    CDoom.d_arbitrate_net_start if Doocr.netgame != 0
+    puts "startskill: #{Doocr.startskill} | deathmatch: #{Doocr.deathmatch}" +
+         " | startmap: #{Doocr.startmap} | startepisode: #{Doocr.startepisode}"
     print "ticdup: #{CDoom.doomcom.value.ticdup} | extratic: #{CDoom.doomcom.value.extratics} | "
 
     # read values out of doomcom
-    CDoom.ticdup = CDoom.doomcom.value.ticdup
-    CDoom.maxsend = CDoom::BACKUPTICS // (2 * CDoom.ticdup) - 1
-    CDoom.maxsend = 1 if CDoom.maxsend < 1
+    Doocr.ticdup = CDoom.doomcom.value.ticdup
+    Doocr.maxsend = CDoom::BACKUPTICS // (2 * Doocr.ticdup) - 1
+    Doocr.maxsend = 1 if Doocr.maxsend < 1
 
-    CDoom.doomcom.value.numplayers.times { |i| CDoom.playeringame[i] = 1 }
-    CDoom.doomcom.value.numnodes.times { |i| CDoom.nodeingame[i] = 1 }
+    CDoom.doomcom.value.numplayers.times { |i| Doocr.playeringame[i] = 1 }
+    CDoom.doomcom.value.numnodes.times { |i| Doocr.nodeingame[i] = 1 }
     @@punch_countdown = 70
 
-    puts "player #{CDoom.consoleplayer + 1} of #{CDoom.doomcom.value.numplayers}" +
+    puts "player #{Doocr.consoleplayer + 1} of #{CDoom.doomcom.value.numplayers}" +
          " (#{CDoom.doomcom.value.numnodes} nodes)"
   end
 
@@ -574,17 +574,17 @@ module Doocr
   # without hanging the other players
   #
   def self.d_quit_net_game
-    doom_close(CDoom.debugfile) if !CDoom.debugfile.null?
+    Box(File).unbox(CDoom.debugfile).close if !CDoom.debugfile.null?
 
-    return if CDoom.netgame == 0 || CDoom.usergame == 0 || CDoom.consoleplayer == -1 || CDoom.demoplayback == 1
+    return if Doocr.netgame == 0 || Doocr.usergame == 0 || Doocr.consoleplayer == -1 || Doocr.demoplayback == 1
 
     # send a bunch of packets for security
-    CDoom.netbuffer.value.player = CDoom.consoleplayer
+    CDoom.netbuffer.value.player = Doocr.consoleplayer
     CDoom.netbuffer.value.numtics = 0
     4.times do |i|
       (CDoom.doomcom.value.numnodes - 1).times do |j|
         j += 1
-        CDoom.h_send_packet(j, NCMD_EXIT) if CDoom.nodeingame[j] != 0
+        CDoom.h_send_packet(j, NCMD_EXIT) if Doocr.nodeingame[j] != 0
         CDoom.i_wait_vbl(1)
       end
     end
@@ -772,19 +772,19 @@ module Doocr
     i = ARGV.index("-net")
     unless i
       # single player game
-      CDoom.netgame = 0
+      Doocr.netgame = 0
       CDoom.doomcom.value.id = CDoom::DOOMCOM_ID
       CDoom.doomcom.value.numplayers = 1
       CDoom.doomcom.value.numnodes = 1
       CDoom.doomcom.value.consoleplayer = 0
-      CDoom.deathmatch = 0
-      CDoom.consoleplayer = 0
+      Doocr.deathmatch = 0
+      Doocr.consoleplayer = 0
       return
     end
 
     @@netsend = ->packet_send
     @@netget = ->packet_get
-    CDoom.netgame = 1
+    Doocr.netgame = 1
 
     CDoom.doomcom.value.numnodes = 1 # this node for sure
 

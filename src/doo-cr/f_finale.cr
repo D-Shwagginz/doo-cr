@@ -20,20 +20,20 @@ module Doocr
   # f_start_finale
   #
   def self.f_start_finale
-    CDoom.gameaction = CDoom::Gameaction::Nothing
-    CDoom.gamestate = CDoom::Gamestate::Finale
-    CDoom.viewactive = 0
-    CDoom.automapactive = 0
+    Doocr.gameaction = CDoom::Gameaction::Nothing
+    Doocr.gamestate = CDoom::Gamestate::Finale
+    Doocr.viewactive = 0
+    Doocr.automapactive = 0
 
     # Okay - IWAD dependend stuff.
     # This has been changed severly, and
     #  some stuff might have changed in the process.
-    case CDoom.gamemode
+    case Doocr.gamemode
     # DOOM 1 - E1, E3 or E4, but each nine missions
     when CDoom::GameMode::Shareware, CDoom::GameMode::Registered, CDoom::GameMode::Retail
       CDoom.s_change_music(CDoom::Musicenum::MUS_victor, 1)
 
-      case CDoom.gameepisode
+      case Doocr.gameepisode
       when 1
         CDoom.finaleflat = "FLOOR4_8"
         CDoom.finaletext = @@deh_e1text
@@ -53,7 +53,7 @@ module Doocr
     when CDoom::GameMode::Commercial
       CDoom.s_change_music(CDoom::Musicenum::MUS_read_m, 1)
 
-      case CDoom.gamemap
+      case Doocr.gamemap
       when 6
         CDoom.finaleflat = "SLIME16"
         CDoom.finaletext = @@deh_c1text
@@ -83,12 +83,12 @@ module Doocr
       CDoom.finaletext = @@deh_c1text # FIXME - other text, music?
     end
 
-    CDoom.finalestage = 0
-    CDoom.finalecount = 0
+    Doocr.finalestage = 0
+    Doocr.finalecount = 0
   end
 
   def self.f_responder(event : CDoom::Event*) : CDoom::DoomBool
-    return CDoom.f_cast_responder(event) if CDoom.finalestage == 2
+    return CDoom.f_cast_responder(event) if Doocr.finalestage == 2
 
     return 0
   end
@@ -98,7 +98,7 @@ module Doocr
   #
   def self.f_ticker
     # check for skipping
-    if CDoom.gamemode == CDoom::GameMode::Commercial && CDoom.finalecount > 50
+    if Doocr.gamemode == CDoom::GameMode::Commercial && Doocr.finalecount > 50
       # go on to the next level
       i = 0
       CDoom::MAXPLAYERS.times do |j|
@@ -107,29 +107,29 @@ module Doocr
       end
 
       if i < CDoom::MAXPLAYERS
-        if CDoom.gamemap == 30
+        if Doocr.gamemap == 30
           CDoom.f_start_cast
         else
-          CDoom.gameaction = CDoom::Gameaction::Worlddone
+          Doocr.gameaction = CDoom::Gameaction::Worlddone
         end
       end
     end
 
     # advance animation
-    CDoom.finalecount += 1
+    Doocr.finalecount += 1
 
-    if CDoom.finalestage == 2
+    if Doocr.finalestage == 2
       CDoom.f_cast_ticker
       return
     end
 
-    return if CDoom.gamemode == CDoom::GameMode::Commercial
+    return if Doocr.gamemode == CDoom::GameMode::Commercial
 
-    if CDoom.finalestage == 0 && CDoom.finalecount > CDoom.doom_strlen(CDoom.finaletext) * CDoom::TEXTSPEED + CDoom::TEXTWAIT
-      CDoom.finalecount = 0
-      CDoom.finalestage = 1
-      CDoom.wipegamestate = CDoom::Gamestate::Needwipe # force a wipe
-      if CDoom.gameepisode == 3
+    if Doocr.finalestage == 0 && Doocr.finalecount > CDoom.doom_strlen(CDoom.finaletext) * CDoom::TEXTSPEED + CDoom::TEXTWAIT
+      Doocr.finalecount = 0
+      Doocr.finalestage = 1
+      Doocr.wipegamestate = CDoom::Gamestate::Needwipe # force a wipe
+      if Doocr.gameepisode == 3
         CDoom.s_start_music(CDoom::Musicenum::MUS_bunny)
       end
     end
@@ -161,7 +161,7 @@ module Doocr
     cy = 10
     ch = CDoom.finaletext
 
-    count = (CDoom.finalecount - 10) // CDoom::TEXTSPEED
+    count = (Doocr.finalecount - 10) // CDoom::TEXTSPEED
     count = 0 if count < 0
     while count != 0
       c = ch.value
@@ -194,17 +194,17 @@ module Doocr
   #   in order of appearance
   #
   def self.f_start_cast
-    return if CDoom.finalestage == 2
+    return if Doocr.finalestage == 2
 
-    CDoom.wipegamestate = CDoom::Gamestate::Needwipe # force a screen wipe
-    CDoom.castnum = 0
-    CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
-    CDoom.casttics = CDoom.caststate.value.tics
-    CDoom.castdeath = 0
-    CDoom.finalestage = 2
-    CDoom.castframes = 0
-    CDoom.castonmelee = 0
-    CDoom.castattacking = 0
+    Doocr.wipegamestate = CDoom::Gamestate::Needwipe # force a screen wipe
+    Doocr.castnum = 0
+    CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
+    Doocr.casttics = CDoom.caststate.value.tics.to_i32
+    Doocr.castdeath = 0
+    Doocr.finalestage = 2
+    Doocr.castframes = 0
+    Doocr.castonmelee = 0
+    Doocr.castattacking = 0
     CDoom.s_change_music(CDoom::Musicenum::MUS_evil, 1)
   end
 
@@ -212,33 +212,33 @@ module Doocr
   # f_cast_ticker
   #
   def self.f_cast_ticker
-    CDoom.casttics -= 1
-    return if CDoom.casttics > 0 # not time to change state yet
+    Doocr.casttics -= 1
+    return if Doocr.casttics > 0 # not time to change state yet
 
     if CDoom.caststate.value.tics == -1 || CDoom.caststate.value.nextstate == CDoom::Statenum::S_NULL
       # switch from deathstate to next monster
-      CDoom.castnum += 1
-      CDoom.castdeath = 0
-      CDoom.castnum = 0 if CDoom.castorder[CDoom.castnum].name.null?
-      if Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seesound != 0
-        CDoom.s_start_sound(Pointer(Void).null, Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seesound)
+      Doocr.castnum += 1
+      Doocr.castdeath = 0
+      Doocr.castnum = 0 if @@castorder[Doocr.castnum].name.empty?
+      if Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seesound != 0
+        CDoom.s_start_sound(Pointer(Void).null, Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seesound)
       end
-      CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
-      CDoom.castframes = 0
+      CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
+      Doocr.castframes = 0
     else
       # just advance to next state in amnimation
       if CDoom.caststate == @@states.to_unsafe + CDoom::Statenum::S_PLAY_ATK1.value
         # Yes, it is a gross hack!
-        CDoom.castattacking = 0
-        CDoom.castframes = 0
-        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
-        CDoom.casttics = CDoom.caststate.value.tics
-        CDoom.casttics = 15 if CDoom.casttics == -1
+        Doocr.castattacking = 0
+        Doocr.castframes = 0
+        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
+        Doocr.casttics = CDoom.caststate.value.tics.to_i32
+        Doocr.casttics = 15 if Doocr.casttics == -1
         return
       end
       st = CDoom.caststate.value.nextstate
       CDoom.caststate = @@states.to_unsafe + st.value
-      CDoom.castframes += 1
+      Doocr.castframes += 1
 
       sfx = 0
       # sound hacks....
@@ -282,51 +282,51 @@ module Doocr
       CDoom.s_start_sound(Pointer(Void).null, sfx) if sfx != 0
     end
 
-    if CDoom.castframes == 12
+    if Doocr.castframes == 12
       # go into attack frame
-      CDoom.castattacking = 1
-      if CDoom.castonmelee != 0
-        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].meleestate
+      Doocr.castattacking = 1
+      if Doocr.castonmelee != 0
+        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].meleestate
       else
-        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].missilestate
+        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].missilestate
       end
-      CDoom.castonmelee ^= 1
+      Doocr.castonmelee ^= 1
       if CDoom.caststate == @@states.to_unsafe + CDoom::Statenum::S_NULL.value
-        if CDoom.castonmelee != 0
-          CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].meleestate
+        if Doocr.castonmelee != 0
+          CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].meleestate
         else
-          CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].missilestate
+          CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].missilestate
         end
       end
     end
 
-    if CDoom.castattacking != 0
-      if CDoom.castframes == 24 ||
-         CDoom.caststate == @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
-        CDoom.castattacking = 0
-        CDoom.castframes = 0
-        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
+    if Doocr.castattacking != 0
+      if Doocr.castframes == 24 ||
+         CDoom.caststate == @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
+        Doocr.castattacking = 0
+        Doocr.castframes = 0
+        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
       end
     end
 
-    CDoom.casttics = CDoom.caststate.value.tics
-    CDoom.casttics = 15 if CDoom.casttics == -1
+    Doocr.casttics = CDoom.caststate.value.tics.to_i32
+    Doocr.casttics = 15 if Doocr.casttics == -1
   end
 
   def self.f_cast_responder(ev : CDoom::Event*) : CDoom::DoomBool
     return 0 if ev.value.type != CDoom::Evtype::Keydown &&
                 (ev.value.type != CDoom::Evtype::Mouse || ev.value.data1 == 0)
 
-    return 1 if CDoom.castdeath != 0 # already in dying frames
+    return 1 if Doocr.castdeath != 0 # already in dying frames
 
     # go into death frame
-    CDoom.castdeath = 1
-    CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].deathstate
-    CDoom.casttics = CDoom.caststate.value.tics
-    CDoom.castframes = 0
-    CDoom.castattacking = 0
-    if Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].deathsound != 0
-      CDoom.s_start_sound(Pointer(Void).null, Doocr.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].deathsound)
+    Doocr.castdeath = 1
+    CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].deathstate
+    Doocr.casttics = CDoom.caststate.value.tics.to_i32
+    Doocr.castframes = 0
+    Doocr.castattacking = 0
+    if Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].deathsound != 0
+      CDoom.s_start_sound(Pointer(Void).null, Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].deathsound)
     end
 
     return 1
@@ -377,7 +377,7 @@ module Doocr
     # erase the entire screen to a background
     CDoom.v_draw_patch(0, 0, 0, CDoom.w_cache_lump_name("BOSSBACK", CDoom::PU_CACHE).as(CDoom::Patch*))
 
-    CDoom.f_cast_print(CDoom.castorder[CDoom.castnum].name)
+    CDoom.f_cast_print(@@castorder[Doocr.castnum].name.to_unsafe)
 
     # draw the current frame in the middle of the screen
     sprdef = CDoom.sprites + CDoom.caststate.value.sprite.value
@@ -385,7 +385,7 @@ module Doocr
     lump = sprframe.value.lump[0]
     flip = sprframe.value.flip[0]
 
-    patch = CDoom.w_cache_lump_num(lump + CDoom.firstspritelump, CDoom::PU_CACHE).as(CDoom::Patch*)
+    patch = CDoom.w_cache_lump_num(lump + Doocr.firstspritelump, CDoom::PU_CACHE).as(CDoom::Patch*)
     if flip != 0
       CDoom.v_draw_patch_flipped(160, 170, 0, patch)
     else
@@ -427,7 +427,7 @@ module Doocr
 
     CDoom.v_mark_rect(0, 0, CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT)
 
-    scrolled = 320 - (CDoom.finalecount - 230) // 2
+    scrolled = 320 - (Doocr.finalecount - 230) // 2
     scrolled = 320 if scrolled > 320
     scrolled = 0 if scrolled < 0
 
@@ -439,15 +439,15 @@ module Doocr
       end
     end
 
-    return if CDoom.finalecount < 1130
-    if CDoom.finalecount < 1180
+    return if Doocr.finalecount < 1130
+    if Doocr.finalecount < 1180
       CDoom.v_draw_patch((CDoom::SCREENWIDTH - 13 * 8) // 2,
         (CDoom::SCREENHEIGHT - 8 * 8) // 2, 0, CDoom.w_cache_lump_name("END0", CDoom::PU_CACHE).as(CDoom::Patch*))
       @@laststage = 0
       return
     end
 
-    stage = (CDoom.finalecount - 1180) // 5
+    stage = (Doocr.finalecount - 1180) // 5
     stage = 6 if stage > 6
     if stage > @@laststage
       CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol)
@@ -462,17 +462,17 @@ module Doocr
   end
 
   def self.f_drawer
-    if CDoom.finalestage == 2
+    if Doocr.finalestage == 2
       CDoom.f_cast_drawer
       return
     end
 
-    if CDoom.finalestage == 0
+    if Doocr.finalestage == 0
       CDoom.f_text_write
     else
-      case CDoom.gameepisode
+      case Doocr.gameepisode
       when 1
-        if CDoom.gamemode == CDoom::GameMode::Retail
+        if Doocr.gamemode == CDoom::GameMode::Retail
           CDoom.v_draw_patch(0, 0, 0,
             CDoom.w_cache_lump_name("CREDIT", CDoom::PU_CACHE).as(CDoom::Patch*))
         else

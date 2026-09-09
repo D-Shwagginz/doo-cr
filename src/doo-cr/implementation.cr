@@ -112,163 +112,7 @@ fun doom_mouse_move(delta_x : Int32, delta_y : Int32)
   Doocr.doom_mouse_move(delta_x, delta_y)
 end
 
-fun am_activate_new_scale = AM_activateNewScale
-  Doocr.am_activate_new_scale
-end
-
-fun am_save_scale_and_loc = AM_saveScaleAndLoc
-  Doocr.am_save_scale_and_loc
-end
-
-fun am_restore_scale_and_loc = AM_restoreScaleAndLoc
-  Doocr.am_restore_scale_and_loc
-end
-
-#
-# adds a marker at the current location
-#
-fun am_add_mark = AM_addMark
-  Doocr.am_add_mark
-end
-
-#
-# Determines bounding box of all vertices,
-# sets global variables controlling zoom range.
-#
-fun am_find_min_max_boundaries = AM_findMinMaxBoundaries
-  Doocr.am_find_min_max_boundaries
-end
-
-fun am_change_window_loc = AM_changeWindowLoc
-  Doocr.am_change_window_loc
-end
-
-fun am_init_variables = AM_initVariables
-  Doocr.am_init_variables
-end
-
-fun am_load_pics = AM_loadPics
-  Doocr.am_load_pics
-end
-
-fun am_unload_pics = AM_unloadPics
-  Doocr.am_unload_pics
-end
-
-fun am_clear_marks = AM_clearMarks
-  Doocr.am_clear_marks
-end
-
-#
-# should be called at the start of every level
-# right now, i figure it out myself
-#
-fun am_level_init = AM_LevelInit
-  Doocr.am_level_init
-end
-
-fun am_stop = AM_Stop
-  Doocr.am_stop
-end
-
-fun am_start = AM_Start
-  Doocr.am_start
-end
-
-#
-# set the window scale to the maximum size
-#
-fun am_min_out_window_scale = AM_minOutWindowScale
-  Doocr.am_min_out_window_scale
-end
-
-fun am_max_out_window_scale = AM_maxOutWindowScale
-  Doocr.am_max_out_window_scale
-end
-
-fun am_responder = AM_Responder(ev : CDoom::Event*) : CDoom::DoomBool
-  Doocr.am_responder(ev)
-end
-
-fun am_change_window_scale = AM_changeWindowScale
-  Doocr.am_change_window_scale
-end
-
-fun am_do_follow_player = AM_doFollowPlayer
-  Doocr.am_do_follow_player
-end
-
-fun am_update_light_lev = AM_updateLightLev
-  Doocr.am_update_light_lev
-end
-
-fun am_ticker = AM_Ticker
-  Doocr.am_ticker
-end
-
-fun am_clear_fb = AM_clearFB(color : LibC::Int)
-  Doocr.am_clear_fb(color)
-end
-
-fun am_clip_mline = AM_clipMline(ml : CDoom::Mline*, fl : CDoom::Fline*) : CDoom::DoomBool
-  Doocr.am_clip_mline(ml, fl)
-end
-
-fun am_draw_fline = AM_drawFline(fl : CDoom::Fline*, color : LibC::Int)
-  Doocr.am_draw_fline(fl, color)
-end
-
-fun am_draw_mline = AM_drawMline(ml : CDoom::Mline*, color : LibC::Int)
-  Doocr.am_draw_mline(ml, color)
-end
-
-fun am_draw_grid = AM_drawGrid(color : Int32)
-  Doocr.am_draw_grid(color)
-end
-
-fun am_draw_walls = AM_drawWalls
-  Doocr.am_draw_walls
-end
-
-fun am_rotate = AM_rotate(x : CDoom::Fixed*, y : CDoom::Fixed*, a : CDoom::Angle)
-  Doocr.am_rotate(x, y, a)
-end
-
-fun am_draw_line_character = AM_drawLineCharacter(lineguy : CDoom::Mline*,
-                                                  lineguylines : LibC::Int,
-                                                  scale : CDoom::Fixed,
-                                                  angle : CDoom::Angle,
-                                                  color : LibC::Int,
-                                                  x : CDoom::Fixed,
-                                                  y : CDoom::Fixed)
-  Doocr.am_draw_line_character(lineguy,
-    lineguylines,
-    scale,
-    angle,
-    color,
-    x,
-    y)
-end
-
-fun am_draw_players = AM_drawPlayers
-  Doocr.am_draw_players
-end
-
-fun am_draw_things = AM_drawThings(colors : LibC::Int, colorrange : LibC::Int)
-  Doocr.am_draw_things(colors, colorrange)
-end
-
-fun am_draw_marks = AM_drawMarks
-  Doocr.am_draw_marks
-end
-
-fun am_draw_crosshair = AM_drawCrosshair(color : LibC::Int)
-  Doocr.am_draw_crosshair(color)
-end
-
-fun am_drawer = AM_Drawer
-  Doocr.am_drawer
-end
+ 
 
 fun d_post_event = D_PostEvent(ev : CDoom::Event*)
   Doocr.d_post_event(ev)
@@ -564,6 +408,10 @@ end
 
 fun g_defered_play_demo = G_DeferedPlayDemo(demo : LibC::Char*)
   Doocr.g_defered_play_demo(demo)
+end
+
+fun p_give_power = P_GivePower(player : CDoom::Player*, power : LibC::Int) : CDoom::DoomBool
+  Doocr.p_give_power(player, power)
 end
 
 fun g_do_play_demo = G_DoPlayDemo
@@ -894,11 +742,11 @@ fun m_add_to_box = M_AddToBox(box : CDoom::Fixed*, x : CDoom::Fixed, y : CDoom::
 end
 
 fun cht_check_cheat = cht_CheckCheat(cht : CDoom::Cheatseq*, key : LibC::Char) : LibC::Int
-  Doocr.cht_check_cheat(cht, key)
+  Doocr.cht_check_cheat(Doocr.cheat_me, key.to_u8!)
 end
 
 fun cht_get_param = cht_GetParam(cht : CDoom::Cheatseq*, buffer : LibC::Char*)
-  Doocr.cht_get_param(cht, buffer)
+  Doocr.cht_get_param(Doocr.cheat_me, buffer)
 end
 
 fun fixed_mul = FixedMul(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
@@ -1109,10 +957,6 @@ fun m_write_file = M_WriteFile(name : LibC::Char*, source : Void*, length : LibC
   Doocr.m_write_file(name, source, length)
 end
 
-fun m_read_file = M_ReadFile(name : LibC::Char*, buffer : CDoom::Byte**) : LibC::Int
-  Doocr.m_read_file(name, buffer)
-end
-
 fun m_save_defaults = M_SaveDefaults
   Doocr.m_save_defaults
 end
@@ -1121,9 +965,6 @@ fun m_load_defaults = M_LoadDefaults
   Doocr.m_load_defaults
 end
 
-fun write_pcx_file = WritePCXfile(filename : LibC::Char*, data : CDoom::Byte*, width : LibC::Int, height : LibC::Int, palette : CDoom::Byte*)
-  Doocr.write_pcx_file(filename, data, width, height, palette)
-end
 
 fun m_screenshot = M_ScreenShot
   Doocr.m_screenshot
@@ -1479,10 +1320,6 @@ end
 
 fun p_give_card = P_GiveCard(player : CDoom::Player*, card : CDoom::Card)
   Doocr.p_give_card(player, card)
-end
-
-fun p_give_power = P_GivePower(player : CDoom::Player*, power : LibC::Int) : CDoom::DoomBool
-  Doocr.p_give_power(player, power)
 end
 
 fun p_touch_special_thing = P_TouchSpecialThing(special : CDoom::Mobj*, toucher : CDoom::Mobj*)
@@ -2789,14 +2626,6 @@ end
 
 fun wi_drawer = WI_Drawer
   Doocr.wi_drawer
-end
-
-fun wi_init_variables = WI_initVariables(wbstartstruct : CDoom::Wbstartstruct*)
-  Doocr.wi_init_variables(wbstartstruct)
-end
-
-fun wi_start = WI_Start(wbstartstruct : CDoom::Wbstartstruct*)
-  Doocr.wi_start(wbstartstruct)
 end
 
 fun z_init = Z_Init

@@ -163,8 +163,8 @@ module Doocr
 
   def self.wipe_screen_wipe(wipeno : Int32, x : Int32, y : Int32, width : Int32, height : Int32, ticks : Int32) : Int32
     # initial stuff
-    if CDoom.go == 0
-      CDoom.go = 1
+    if Doocr.go == 0
+      Doocr.go = 1
       CDoom.wipe_scr = CDoom.screens[0]
       @@wipes[wipeno * 3].call(width, height, ticks)
     end
@@ -175,10 +175,10 @@ module Doocr
 
     # final stuff
     if rc != 0
-      CDoom.go = 0
+      Doocr.go = 0
       @@wipes[wipeno * 3 + 2].call(width, height, ticks)
     end
 
-    return (CDoom.go == 0).to_unsafe
+    return (Doocr.go == 0).to_unsafe
   end
 end

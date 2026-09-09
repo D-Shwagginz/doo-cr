@@ -28,8 +28,8 @@ module Doocr
                        y : LibC::Int,
                        width : LibC::Int,
                        height : LibC::Int)
-    CDoom.m_add_to_box(CDoom.dirtybox, x, y)
-    CDoom.m_add_to_box(CDoom.dirtybox, x + width - 1, y + height - 1)
+    CDoom.m_add_to_box(Doocr.dirtybox.to_unsafe, x, y)
+    CDoom.m_add_to_box(Doocr.dirtybox.to_unsafe, x + width - 1, y + height - 1)
   end
 
   def self.v_copy_rect(srcx : LibC::Int,
