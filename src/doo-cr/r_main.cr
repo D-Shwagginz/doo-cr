@@ -28,48 +28,49 @@ module Doocr
   def self.r_clip_solid_wall_segment(first : LibC::Int, last : LibC::Int)
     # Find the first range that touches the range
     #  (adjacent pixels are touching).
-    start = CDoom.solidsegs.to_unsafe
-    while start.value.last < first - 1
+    start = 0
+    while Doocr.solidsegs[start].last < first - 1
       start += 1
     end
 
-    if first < start.value.first
-      if last < start.value.first - 1
+    if first < Doocr.solidsegs[start].first
+      if last < Doocr.solidsegs[start].first - 1
         # Post is entirely visible (above start),
         #  so insert a new clippost.
         CDoom.r_store_wall_range(first, last)
-        nextc = CDoom.newend
-        CDoom.newend += 1
+        nextc = Doocr.newend
+        Doocr.newend += 1
 
         while nextc != start
-          nextc.value = (nextc - 1).value
+          Doocr.solidsegs[nextc].first = Doocr.solidsegs[nextc - 1].first
+          Doocr.solidsegs[nextc].last = Doocr.solidsegs[nextc - 1].last
           nextc -= 1
         end
-        nextc.value.first = first
-        nextc.value.last = last
+        Doocr.solidsegs[nextc].first = first
+        Doocr.solidsegs[nextc].last = last
         return
       end
 
       # There is a fragment above start.value.
-      CDoom.r_store_wall_range(first, start.value.first - 1)
+      CDoom.r_store_wall_range(first, Doocr.solidsegs[start].first - 1)
       # Now adjust the clip size.
-      start.value.first = first
+      Doocr.solidsegs[start].first = first
     end
 
     # Bottom contained in start?
-    return if last <= start.value.last
+    return if last <= Doocr.solidsegs[start].last
 
     nextc = start
     crunch = false
-    while last >= (nextc + 1).value.first - 1
+    while last >= Doocr.solidsegs[nextc + 1].first - 1
       # There is a fragment between two posts.
-      CDoom.r_store_wall_range(nextc.value.last + 1, (nextc + 1).value.first - 1)
+      CDoom.r_store_wall_range(Doocr.solidsegs[nextc].last + 1, Doocr.solidsegs[nextc + 1].first - 1)
       nextc += 1
 
-      if last <= nextc.value.last
+      if last <= Doocr.solidsegs[nextc].last
         # Bottom is contained in next.
         # Adjust the clip size.
-        start.value.last = nextc.value.last
+        Doocr.solidsegs[start].last = Doocr.solidsegs[nextc].last
         crunch = true
         break
       end
@@ -77,9 +78,9 @@ module Doocr
 
     unless crunch
       # There is a fragment after nextc.value.
-      CDoom.r_store_wall_range(nextc.value.last + 1, last)
+      CDoom.r_store_wall_range(Doocr.solidsegs[nextc].last + 1, last)
       # Adjust the clip size.
-      start.value.last = last
+      Doocr.solidsegs[start].last = last
     end
 
     # Remove start+1 to next from the clip list,
@@ -89,14 +90,15 @@ module Doocr
       return
     end
 
-    while nextc != CDoom.newend
+    while nextc != Doocr.newend - 1
       nextc += 1
       # Remove a post
       start += 1
-      start.value = nextc.value
+      Doocr.solidsegs[start].first = Doocr.solidsegs[nextc].first
+      Doocr.solidsegs[start].last = Doocr.solidsegs[nextc].last
     end
 
-    CDoom.newend = start + 1
+    Doocr.newend = start + 1
   end
 
   #
@@ -108,43 +110,43 @@ module Doocr
   def self.r_clip_pass_wall_segment(first : LibC::Int, last : LibC::Int)
     # Find the first range that touches the range
     #  (adjacent pixels are touching).
-    start = CDoom.solidsegs.to_unsafe
-    while start.value.last < first - 1
+    start = 0
+    while Doocr.solidsegs[start].last < first - 1
       start += 1
     end
 
-    if first < start.value.first
-      if last < start.value.first - 1
+    if first < Doocr.solidsegs[start].first
+      if last < Doocr.solidsegs[start].first - 1
         # Post is entirely visible (above start).
         CDoom.r_store_wall_range(first, last)
         return
       end
 
       # There is a fragment above start.value.
-      CDoom.r_store_wall_range(first, start.value.first - 1)
+      CDoom.r_store_wall_range(first, Doocr.solidsegs[start].first - 1)
     end
 
     # Bottom contained in start?
-    return if last <= start.value.last
+    return if last <= Doocr.solidsegs[start].last
 
-    while last >= (start + 1).value.first - 1
+    while last >= Doocr.solidsegs[start + 1].first - 1
       # There is a fragment between two posts.
-      CDoom.r_store_wall_range(start.value.last + 1, (start + 1).value.first - 1)
+      CDoom.r_store_wall_range(Doocr.solidsegs[start].last + 1, Doocr.solidsegs[start + 1].first - 1)
       start += 1
 
-      return if last <= start.value.last
+      return if last <= Doocr.solidsegs[start].last
     end
 
     # There is a fragment after next.value.
-    CDoom.r_store_wall_range(start.value.last + 1, last)
+    CDoom.r_store_wall_range(Doocr.solidsegs[start].last + 1, last)
   end
 
   def self.r_clear_clip_segs
-    (CDoom.solidsegs.to_unsafe).value.first = -0x7fffffff
-    (CDoom.solidsegs.to_unsafe).value.last = -1
-    (CDoom.solidsegs.to_unsafe + 1).value.first = Doocr.viewwidth
-    (CDoom.solidsegs.to_unsafe + 1).value.last = 0x7fffffff
-    CDoom.newend = CDoom.solidsegs.to_unsafe + 2
+    Doocr.solidsegs[0].first = -0x7fffffff
+    Doocr.solidsegs[0].last = -1
+    Doocr.solidsegs[1].first = Doocr.viewwidth
+    Doocr.solidsegs[1].last = 0x7fffffff
+    Doocr.newend = 2
   end
 
   #
@@ -310,13 +312,13 @@ module Doocr
     return 0 if sx1 == sx2
     sx2 -= 1
 
-    start = CDoom.solidsegs.to_unsafe
-    while start.value.last < sx2
+    start = 0
+    while Doocr.solidsegs[start].last < sx2
       start += 1
     end
 
-    if sx1 >= start.value.first &&
-       sx2 <= start.value.last
+    if sx1 >= Doocr.solidsegs[start].first &&
+       sx2 <= Doocr.solidsegs[start].last
       # The clippost contains the new span.
       return 0
     end
@@ -2674,11 +2676,11 @@ module Doocr
     if rotation == 0
       # the lump should be used for all rotations
       if Doocr.sprtemp[frame].rotate == 0
-        STDERR.puts "Warning: r_install_sprite_lump: Sprite  #{String.new(CDoom.spritename)} frame #{'A' + frame} has multip rot=0 lump, using lump #{lump}"
+        STDERR.puts "Warning: r_install_sprite_lump: Sprite  #{Doocr.spritename} frame #{'A' + frame} has multip rot=0 lump, using lump #{lump}"
       end
 
       if Doocr.sprtemp[frame].rotate == 1
-        STDERR.puts "Warning: r_install_sprite_lump: Sprite  #{String.new(CDoom.spritename)} frame #{'A' + frame} has rotations, overriding with rot=0 lump #{lump}"
+        STDERR.puts "Warning: r_install_sprite_lump: Sprite  #{Doocr.spritename} frame #{'A' + frame} has rotations, overriding with rot=0 lump #{lump}"
       end
 
       Doocr.sprtemp[frame].rotate = 0
@@ -2691,7 +2693,7 @@ module Doocr
 
     # the lump is only used for one rotation
     if Doocr.sprtemp[frame].rotate == 0
-      STDERR.puts "Warning: r_install_sprite_lump: Sprite  #{String.new(CDoom.spritename)} frame #{'A' + frame} has rotations, but a rot=0 lump was already set; discarding it"
+      STDERR.puts "Warning: r_install_sprite_lump: Sprite  #{Doocr.spritename} frame #{'A' + frame} has rotations, but a rot=0 lump was already set; discarding it"
       # Reset to the -1 "unset" sentinel (matches sprtemp's initial memset) so
       # partial per-rotation data can take over cleanly instead of leaving
       # stale rot=0 lump indices (which could otherwise look like valid,
@@ -2706,7 +2708,7 @@ module Doocr
     # make - based
     rotation -= 1
     if Doocr.sprtemp[frame].lump[rotation] != -1
-      STDERR.puts "Warning: r_install_sprite_lump: Sprite #{String.new(CDoom.spritename)} : #{'A' + frame} : #{'1' + rotation} has two lumps mapped to it, using lump #{lump}"
+      STDERR.puts "Warning: r_install_sprite_lump: Sprite #{Doocr.spritename} : #{'A' + frame} : #{'1' + rotation} has two lumps mapped to it, using lump #{lump}"
     end
 
     Doocr.sprtemp[frame].lump[rotation] = (lump - Doocr.firstspritelump).to_i16!
@@ -2739,7 +2741,7 @@ module Doocr
     #  noting the highest frame letter.
     # Just compare 4 characters as ints
     @@sprnames.size.times do |i|
-      CDoom.spritename = namelist[i]
+      Doocr.spritename = namelist[i]
       29.times do |frame_index|
         Doocr.sprtemp[frame_index].rotate = -1
         8.times do |rotation_index|

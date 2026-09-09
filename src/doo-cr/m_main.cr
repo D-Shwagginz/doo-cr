@@ -313,7 +313,7 @@ module Doocr
   def self.m_verify_nightmare(ch : Int32)
     return if ch != 'y'.ord
 
-    CDoom.g_defered_init_new(CDoom::Skill::Nightmare, CDoom.epi + 1, 1)
+    CDoom.g_defered_init_new(CDoom::Skill::Nightmare, Doocr.epi + 1, 1)
     m_clear_menus
   end
 
@@ -323,7 +323,7 @@ module Doocr
       return
     end
 
-    CDoom.g_defered_init_new(CDoom::Skill.new(choice), CDoom.epi + 1, 1)
+    CDoom.g_defered_init_new(CDoom::Skill.new(choice), Doocr.epi + 1, 1)
     m_clear_menus
   end
 
@@ -340,7 +340,7 @@ module Doocr
       choice = 0
     end
 
-    CDoom.epi = choice
+    Doocr.epi = choice
     m_setup_next_menu(@@newdef)
   end
 
@@ -1253,7 +1253,7 @@ module Doocr
 
   def self.m_save_defaults
     begin
-      File.open(String.new(CDoom.defaultfile), "w") do |file|
+      File.open(Doocr.defaultfile, "w") do |file|
         @@defaults.size.times do |i|
           if @@defaults[i].defaultvalue > -0xfff && @@defaults[i].defaultvalue < 0xfff
             file << "#{@@defaults[i].name}\t\t#{@@defaults[i].location.not_nil!.value}\n"
@@ -1282,14 +1282,14 @@ module Doocr
     # check for a custom default file
     i = ARGV.index("-config")
     if i && i < ARGV.size - 1
-      CDoom.defaultfile = ARGV[i + 1]
-      puts "        default file: #{String.new(CDoom.defaultfile)}"
+      Doocr.defaultfile = ARGV[i + 1]
+      puts "        default file: #{Doocr.defaultfile}"
     else
-      CDoom.defaultfile = CDoom.basedefault
+      Doocr.defaultfile = String.new(CDoom.basedefault.to_unsafe)
     end
 
     begin
-      File.each_line(String.new(CDoom.defaultfile)) do |line|
+      File.each_line(Doocr.defaultfile) do |line|
         parts = line.split('\t', 2)
         next unless parts.size == 2
         name = parts[0].strip

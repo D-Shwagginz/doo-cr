@@ -35,17 +35,17 @@ module Doocr
 
       case Doocr.gameepisode
       when 1
-        CDoom.finaleflat = "FLOOR4_8"
-        CDoom.finaletext = @@deh_e1text
+        Doocr.finaleflat = "FLOOR4_8"
+        Doocr.finaletext = @@deh_e1text
       when 2
-        CDoom.finaleflat = "SFLR6_1"
-        CDoom.finaletext = @@deh_e2text
+        Doocr.finaleflat = "SFLR6_1"
+        Doocr.finaletext = @@deh_e2text
       when 3
-        CDoom.finaleflat = "MFLR8_4"
-        CDoom.finaletext = @@deh_e3text
+        Doocr.finaleflat = "MFLR8_4"
+        Doocr.finaletext = @@deh_e3text
       when 4
-        CDoom.finaleflat = "MFLR8_3"
-        CDoom.finaletext = @@deh_e4text
+        Doocr.finaleflat = "MFLR8_3"
+        Doocr.finaletext = @@deh_e4text
       else
         # Ouch.
       end
@@ -55,23 +55,23 @@ module Doocr
 
       case Doocr.gamemap
       when 6
-        CDoom.finaleflat = "SLIME16"
-        CDoom.finaletext = @@deh_c1text
+        Doocr.finaleflat = "SLIME16"
+        Doocr.finaletext = @@deh_c1text
       when 11
-        CDoom.finaleflat = "RROCK14"
-        CDoom.finaletext = @@deh_c2text
+        Doocr.finaleflat = "RROCK14"
+        Doocr.finaletext = @@deh_c2text
       when 20
-        CDoom.finaleflat = "RROCK07"
-        CDoom.finaletext = @@deh_c3text
+        Doocr.finaleflat = "RROCK07"
+        Doocr.finaletext = @@deh_c3text
       when 30
-        CDoom.finaleflat = "RROCK17"
-        CDoom.finaletext = @@deh_c4text
+        Doocr.finaleflat = "RROCK17"
+        Doocr.finaletext = @@deh_c4text
       when 15
-        CDoom.finaleflat = "RROCK13"
-        CDoom.finaletext = @@deh_c5text
+        Doocr.finaleflat = "RROCK13"
+        Doocr.finaletext = @@deh_c5text
       when 31
-        CDoom.finaleflat = "RROCK19"
-        CDoom.finaletext = @@deh_c6text
+        Doocr.finaleflat = "RROCK19"
+        Doocr.finaletext = @@deh_c6text
       else
         # Ouch
       end
@@ -79,8 +79,8 @@ module Doocr
       # Indeterminate.
     else
       CDoom.s_change_music(CDoom::Musicenum::MUS_read_m, 1)
-      CDoom.finaleflat = "F_SKY1"     # Not used anywhere else.
-      CDoom.finaletext = @@deh_c1text # FIXME - other text, music?
+      Doocr.finaleflat = "F_SKY1"     # Not used anywhere else.
+      Doocr.finaletext = @@deh_c1text # FIXME - other text, music?
     end
 
     Doocr.finalestage = 0
@@ -125,7 +125,7 @@ module Doocr
 
     return if Doocr.gamemode == CDoom::GameMode::Commercial
 
-    if Doocr.finalestage == 0 && Doocr.finalecount > CDoom.doom_strlen(CDoom.finaletext) * CDoom::TEXTSPEED + CDoom::TEXTWAIT
+    if Doocr.finalestage == 0 && Doocr.finalecount > CDoom.doom_strlen(Doocr.finaletext.to_unsafe) * CDoom::TEXTSPEED + CDoom::TEXTWAIT
       Doocr.finalecount = 0
       Doocr.finalestage = 1
       Doocr.wipegamestate = CDoom::Gamestate::Needwipe # force a wipe
@@ -140,7 +140,7 @@ module Doocr
   #
   def self.f_text_write
     # erase the entire screen to a tiled background
-    src = CDoom.w_cache_lump_name(CDoom.finaleflat, CDoom::PU_CACHE)
+    src = CDoom.w_cache_lump_name(Doocr.finaleflat.to_unsafe, CDoom::PU_CACHE)
     dest = CDoom.screens[0]
 
     CDoom::SCREENHEIGHT.times do |y|
@@ -159,7 +159,7 @@ module Doocr
     # draw some of the text onto the screen
     cx = 10
     cy = 10
-    ch = CDoom.finaletext
+    ch = Doocr.finaletext.to_unsafe
 
     count = (Doocr.finalecount - 10) // CDoom::TEXTSPEED
     count = 0 if count < 0

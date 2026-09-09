@@ -17,38 +17,38 @@
 
 module Doocr
   def self.am_activate_new_scale
-    CDoom.m_x += CDoom.m_w // 2
-    CDoom.m_y += CDoom.m_h // 2
-    CDoom.m_w = ftom(Doocr.f_w)
-    CDoom.m_h = ftom(Doocr.f_h)
-    CDoom.m_x -= CDoom.m_w // 2
-    CDoom.m_y -= CDoom.m_h // 2
-    CDoom.m_x2 = CDoom.m_x + CDoom.m_w
-    CDoom.m_y2 = CDoom.m_y + CDoom.m_h
+    Doocr.m_x += Doocr.m_w // 2
+    Doocr.m_y += Doocr.m_h // 2
+    Doocr.m_w = ftom(Doocr.f_w)
+    Doocr.m_h = ftom(Doocr.f_h)
+    Doocr.m_x -= Doocr.m_w // 2
+    Doocr.m_y -= Doocr.m_h // 2
+    Doocr.m_x2 = Doocr.m_x + Doocr.m_w
+    Doocr.m_y2 = Doocr.m_y + Doocr.m_h
   end
 
   def self.am_save_scale_and_loc
-    CDoom.old_m_x = CDoom.m_x
-    CDoom.old_m_y = CDoom.m_y
-    CDoom.old_m_w = CDoom.m_w
-    CDoom.old_m_h = CDoom.m_h
+    Doocr.old_m_x = Doocr.m_x
+    Doocr.old_m_y = Doocr.m_y
+    Doocr.old_m_w = Doocr.m_w
+    Doocr.old_m_h = Doocr.m_h
   end
 
   def self.am_restore_scale_and_loc
-    CDoom.m_w = CDoom.old_m_w
-    CDoom.m_h = CDoom.old_m_h
+    Doocr.m_w = Doocr.old_m_w
+    Doocr.m_h = Doocr.old_m_h
     if Doocr.followplayer == 0
-      CDoom.m_x = CDoom.old_m_x
-      CDoom.m_y = CDoom.old_m_y
+      Doocr.m_x = Doocr.old_m_x
+      Doocr.m_y = Doocr.old_m_y
     else
-      CDoom.m_x = CDoom.plr.value.mo.value.x - CDoom.m_w // 2
-      CDoom.m_y = CDoom.plr.value.mo.value.y - CDoom.m_h // 2
+      Doocr.m_x = CDoom.plr.value.mo.value.x - Doocr.m_w // 2
+      Doocr.m_y = CDoom.plr.value.mo.value.y - Doocr.m_h // 2
     end
-    CDoom.m_x2 = CDoom.m_x + CDoom.m_w
-    CDoom.m_y2 = CDoom.m_y + CDoom.m_h
+    Doocr.m_x2 = Doocr.m_x + Doocr.m_w
+    Doocr.m_y2 = Doocr.m_y + Doocr.m_h
 
     # Change the scaling multipliers
-    Doocr.scale_mtof = CDoom.fixed_div(Doocr.f_w << FRACBITS, CDoom.m_w)
+    Doocr.scale_mtof = CDoom.fixed_div(Doocr.f_w << FRACBITS, Doocr.m_w)
     Doocr.scale_ftom = CDoom.fixed_div(FRACUNIT, Doocr.scale_mtof)
   end
 
@@ -56,8 +56,8 @@ module Doocr
   # adds a marker at the current location
   #
   def self.am_add_mark
-    @@markpoints[Doocr.markpointnum].x = CDoom.m_x + CDoom.m_w // 2
-    @@markpoints[Doocr.markpointnum].y = CDoom.m_y + CDoom.m_h // 2
+    @@markpoints[Doocr.markpointnum].x = Doocr.m_x + Doocr.m_w // 2
+    @@markpoints[Doocr.markpointnum].y = Doocr.m_y + Doocr.m_h // 2
     Doocr.markpointnum = (Doocr.markpointnum + 1) % CDoom::AM_NUMMARKPOINTS
   end
 
@@ -66,36 +66,36 @@ module Doocr
   # sets global variables controlling zoom range.
   #
   def self.am_find_min_max_boundaries
-    CDoom.min_x = Int32::MAX
-    CDoom.min_y = Int32::MAX
-    CDoom.max_x = -Int32::MAX
-    CDoom.max_y = -Int32::MAX
+    Doocr.min_x = Int32::MAX
+    Doocr.min_y = Int32::MAX
+    Doocr.max_x = -Int32::MAX
+    Doocr.max_y = -Int32::MAX
 
     Doocr.numvertexes.times do |i|
-      if CDoom.vertexes[i].x < CDoom.min_x
-        CDoom.min_x = CDoom.vertexes[i].x
-      elsif CDoom.vertexes[i].x > CDoom.max_x
-        CDoom.max_x = CDoom.vertexes[i].x
+      if CDoom.vertexes[i].x < Doocr.min_x
+        Doocr.min_x = CDoom.vertexes[i].x
+      elsif CDoom.vertexes[i].x > Doocr.max_x
+        Doocr.max_x = CDoom.vertexes[i].x
       end
 
-      if CDoom.vertexes[i].y < CDoom.min_y
-        CDoom.min_y = CDoom.vertexes[i].y
-      elsif CDoom.vertexes[i].y > CDoom.max_y
-        CDoom.max_y = CDoom.vertexes[i].y
+      if CDoom.vertexes[i].y < Doocr.min_y
+        Doocr.min_y = CDoom.vertexes[i].y
+      elsif CDoom.vertexes[i].y > Doocr.max_y
+        Doocr.max_y = CDoom.vertexes[i].y
       end
     end
 
-    CDoom.max_w = CDoom.max_x - CDoom.min_x
-    CDoom.max_h = CDoom.max_y - CDoom.min_y
+    Doocr.max_w = Doocr.max_x - Doocr.min_x
+    Doocr.max_h = Doocr.max_y - Doocr.min_y
 
-    CDoom.min_w = 2 * CDoom::PLAYERRADIUS # const? never changed?
-    CDoom.min_h = 2 * CDoom::PLAYERRADIUS
+    Doocr.min_w = 2 * CDoom::PLAYERRADIUS # const? never changed?
+    Doocr.min_h = 2 * CDoom::PLAYERRADIUS
 
-    a = CDoom.fixed_div(Doocr.f_w << FRACBITS, CDoom.max_w)
-    b = CDoom.fixed_div(Doocr.f_h << FRACBITS, CDoom.max_h)
+    a = CDoom.fixed_div(Doocr.f_w << FRACBITS, Doocr.max_w)
+    b = CDoom.fixed_div(Doocr.f_h << FRACBITS, Doocr.max_h)
 
-    CDoom.min_scale_mtof = a < b ? a : b
-    CDoom.max_scale_mtof = CDoom.fixed_div(Doocr.f_h << FRACBITS, 2 * CDoom::PLAYERRADIUS)
+    Doocr.min_scale_mtof = a < b ? a : b
+    Doocr.max_scale_mtof = CDoom.fixed_div(Doocr.f_h << FRACBITS, 2 * CDoom::PLAYERRADIUS)
   end
 
   def self.am_change_window_loc
@@ -104,23 +104,23 @@ module Doocr
       @@f_oldloc.x = Int32::MAX
     end
 
-    CDoom.m_x += @@m_paninc.x
-    CDoom.m_y += @@m_paninc.y
+    Doocr.m_x += @@m_paninc.x
+    Doocr.m_y += @@m_paninc.y
 
-    if CDoom.m_x + CDoom.m_w // 2 > CDoom.max_x
-      CDoom.m_x = CDoom.max_x - CDoom.m_w // 2
-    elsif CDoom.m_x + CDoom.m_w // 2 < CDoom.min_x
-      CDoom.m_x = CDoom.min_x - CDoom.m_w // 2
+    if Doocr.m_x + Doocr.m_w // 2 > Doocr.max_x
+      Doocr.m_x = Doocr.max_x - Doocr.m_w // 2
+    elsif Doocr.m_x + Doocr.m_w // 2 < Doocr.min_x
+      Doocr.m_x = Doocr.min_x - Doocr.m_w // 2
     end
 
-    if CDoom.m_y + CDoom.m_h // 2 > CDoom.max_y
-      CDoom.m_y = CDoom.max_y - CDoom.m_h // 2
-    elsif CDoom.m_y + CDoom.m_h // 2 < CDoom.min_y
-      CDoom.m_y = CDoom.min_y - CDoom.m_h // 2
+    if Doocr.m_y + Doocr.m_h // 2 > Doocr.max_y
+      Doocr.m_y = Doocr.max_y - Doocr.m_h // 2
+    elsif Doocr.m_y + Doocr.m_h // 2 < Doocr.min_y
+      Doocr.m_y = Doocr.min_y - Doocr.m_h // 2
     end
 
-    CDoom.m_x2 = CDoom.m_x + CDoom.m_w
-    CDoom.m_y2 = CDoom.m_y + CDoom.m_h
+    Doocr.m_x2 = Doocr.m_x + Doocr.m_w
+    Doocr.m_y2 = Doocr.m_y + Doocr.m_h
   end
 
   def self.am_init_variables
@@ -135,11 +135,11 @@ module Doocr
 
     @@m_paninc.x = 0
     @@m_paninc.y = 0
-    CDoom.ftom_zoommul = FRACUNIT
-    CDoom.mtof_zoommul = FRACUNIT
+    Doocr.ftom_zoommul = FRACUNIT
+    Doocr.mtof_zoommul = FRACUNIT
 
-    CDoom.m_w = ftom(Doocr.f_w)
-    CDoom.m_h = ftom(Doocr.f_h)
+    Doocr.m_w = ftom(Doocr.f_w)
+    Doocr.m_h = ftom(Doocr.f_h)
 
     pnum = Doocr.consoleplayer
     # find player to center on initially
@@ -151,15 +151,15 @@ module Doocr
     end
 
     CDoom.plr = @@players.to_unsafe.as(CDoom::Player*) + pnum
-    CDoom.m_x = CDoom.plr.value.mo.value.x - CDoom.m_w // 2
-    CDoom.m_y = CDoom.plr.value.mo.value.y - CDoom.m_h // 2
+    Doocr.m_x = CDoom.plr.value.mo.value.x - Doocr.m_w // 2
+    Doocr.m_y = CDoom.plr.value.mo.value.y - Doocr.m_h // 2
     am_change_window_loc
 
     # for saving & restoring
-    CDoom.old_m_x = CDoom.m_x
-    CDoom.old_m_y = CDoom.m_y
-    CDoom.old_m_w = CDoom.m_w
-    CDoom.old_m_h = CDoom.m_h
+    Doocr.old_m_x = Doocr.m_x
+    Doocr.old_m_y = Doocr.m_y
+    Doocr.old_m_w = Doocr.m_w
+    Doocr.old_m_h = Doocr.m_h
 
     # inform the status bar of the change
     CDoom.st_responder(pointerof(@@st_notify))
@@ -199,8 +199,8 @@ module Doocr
     am_clear_marks
 
     am_find_min_max_boundaries
-    Doocr.scale_mtof = CDoom.fixed_div(CDoom.min_scale_mtof, (0.7 * FRACUNIT).to_i32!)
-    Doocr.scale_mtof = CDoom.min_scale_mtof if Doocr.scale_mtof > CDoom.max_scale_mtof
+    Doocr.scale_mtof = CDoom.fixed_div(Doocr.min_scale_mtof, (0.7 * FRACUNIT).to_i32!)
+    Doocr.scale_mtof = Doocr.min_scale_mtof if Doocr.scale_mtof > Doocr.max_scale_mtof
     Doocr.scale_ftom = CDoom.fixed_div(FRACUNIT, Doocr.scale_mtof)
   end
 
@@ -231,7 +231,7 @@ module Doocr
   # set the window scale to the maximum size
   #
   def self.am_min_out_window_scale
-    Doocr.scale_mtof = CDoom.min_scale_mtof
+    Doocr.scale_mtof = Doocr.min_scale_mtof
     Doocr.scale_ftom = CDoom.fixed_div(FRACUNIT, Doocr.scale_mtof)
     am_activate_new_scale
   end
@@ -240,7 +240,7 @@ module Doocr
   # set the window scale to the minimum size
   #
   def self.am_max_out_window_scale
-    Doocr.scale_mtof = CDoom.max_scale_mtof
+    Doocr.scale_mtof = Doocr.max_scale_mtof
     Doocr.scale_ftom = CDoom.fixed_div(FRACUNIT, Doocr.scale_mtof)
     am_activate_new_scale
   end
@@ -285,11 +285,11 @@ module Doocr
           rc = 0
         end
       when CDoom::AM_ZOOMOUTKEY # zoom out
-        CDoom.mtof_zoommul = CDoom::M_ZOOMOUT
-        CDoom.ftom_zoommul = CDoom::M_ZOOMIN
+        Doocr.mtof_zoommul = CDoom::M_ZOOMOUT
+        Doocr.ftom_zoommul = CDoom::M_ZOOMIN
       when CDoom::AM_ZOOMINKEY # zoom in
-        CDoom.mtof_zoommul = CDoom::M_ZOOMIN
-        CDoom.ftom_zoommul = CDoom::M_ZOOMOUT
+        Doocr.mtof_zoommul = CDoom::M_ZOOMIN
+        Doocr.ftom_zoommul = CDoom::M_ZOOMOUT
       when CDoom::AM_ENDKEY
         @@bigstate = 0
         Doocr.viewactive = 1
@@ -339,8 +339,8 @@ module Doocr
       when CDoom::AM_PANDOWNKEY
         @@m_paninc.y = 0 if Doocr.followplayer == 0
       when CDoom::AM_ZOOMOUTKEY, CDoom::AM_ZOOMINKEY
-        CDoom.mtof_zoommul = FRACUNIT
-        CDoom.ftom_zoommul = FRACUNIT
+        Doocr.mtof_zoommul = FRACUNIT
+        Doocr.ftom_zoommul = FRACUNIT
       end
     end
 
@@ -352,12 +352,12 @@ module Doocr
   #
   def self.am_change_window_scale
     # Change the scaling multipliers
-    Doocr.scale_mtof = CDoom.fixed_mul(Doocr.scale_mtof, CDoom.mtof_zoommul)
+    Doocr.scale_mtof = CDoom.fixed_mul(Doocr.scale_mtof, Doocr.mtof_zoommul)
     Doocr.scale_ftom = CDoom.fixed_div(FRACUNIT, Doocr.scale_mtof)
 
-    if Doocr.scale_mtof < CDoom.min_scale_mtof
+    if Doocr.scale_mtof < Doocr.min_scale_mtof
       am_min_out_window_scale
-    elsif Doocr.scale_mtof > CDoom.max_scale_mtof
+    elsif Doocr.scale_mtof > Doocr.max_scale_mtof
       am_max_out_window_scale
     else
       am_activate_new_scale
@@ -366,10 +366,10 @@ module Doocr
 
   def self.am_do_follow_player
     if @@f_oldloc.x != CDoom.plr.value.mo.value.x || @@f_oldloc.y != CDoom.plr.value.mo.value.y
-      CDoom.m_x = ftom(mtof(CDoom.plr.value.mo.value.x)) - CDoom.m_w // 2
-      CDoom.m_y = ftom(mtof(CDoom.plr.value.mo.value.y)) - CDoom.m_h // 2
-      CDoom.m_x2 = CDoom.m_x + CDoom.m_w
-      CDoom.m_y2 = CDoom.m_y + CDoom.m_h
+      Doocr.m_x = ftom(mtof(CDoom.plr.value.mo.value.x)) - Doocr.m_w // 2
+      Doocr.m_y = ftom(mtof(CDoom.plr.value.mo.value.y)) - Doocr.m_h // 2
+      Doocr.m_x2 = Doocr.m_x + Doocr.m_w
+      Doocr.m_y2 = Doocr.m_y + Doocr.m_h
       @@f_oldloc.x = CDoom.plr.value.mo.value.x
       @@f_oldloc.y = CDoom.plr.value.mo.value.y
     end
@@ -396,7 +396,7 @@ module Doocr
     am_do_follow_player if Doocr.followplayer != 0
 
     # Change the zoom if necessary
-    am_change_window_scale if CDoom.ftom_zoommul != FRACUNIT
+    am_change_window_scale if Doocr.ftom_zoommul != FRACUNIT
 
     # Change x,y location
     am_change_window_loc if @@m_paninc.x != 0 || @@m_paninc.y != 0
@@ -452,29 +452,29 @@ module Doocr
     dy = 0
 
     # do trivial rejects and outcodes
-    if ma.y > CDoom.m_y2
+    if ma.y > Doocr.m_y2
       outcode1 = TOP
-    elsif ma.y < CDoom.m_y
+    elsif ma.y < Doocr.m_y
       outcode1 = BOTTOM
     end
 
-    if mb.y > CDoom.m_y2
+    if mb.y > Doocr.m_y2
       outcode2 = TOP
-    elsif mb.y < CDoom.m_y
+    elsif mb.y < Doocr.m_y
       outcode2 = BOTTOM
     end
 
     return 0 if (outcode1 & outcode2) != 0 # trivially outside
 
-    if ma.x < CDoom.m_x
+    if ma.x < Doocr.m_x
       outcode1 |= LEFT
-    elsif ma.x > CDoom.m_x2
+    elsif ma.x > Doocr.m_x2
       outcode1 |= RIGHT
     end
 
-    if mb.x < CDoom.m_x
+    if mb.x < Doocr.m_x
       outcode2 |= LEFT
-    elsif mb.x > CDoom.m_x2
+    elsif mb.x > Doocr.m_x2
       outcode2 |= RIGHT
     end
 
@@ -628,18 +628,18 @@ module Doocr
   #
   def self.am_draw_grid(color : Int32)
     # Figure out start of vertical gridlines
-    start = CDoom.m_x
+    start = Doocr.m_x
     ml = Mline.new(Mpoint.new, Mpoint.new)
 
     if (start - Doocr.bmaporgx).remainder(CDoom::MAPBLOCKUNITS << FRACBITS) != 0
       start += (CDoom::MAPBLOCKUNITS << FRACBITS) -
                (start - Doocr.bmaporgx).remainder(CDoom::MAPBLOCKUNITS << FRACBITS)
     end
-    en = CDoom.m_x + CDoom.m_w
+    en = Doocr.m_x + Doocr.m_w
 
     # draw vertical gridlines
-    ml.a.not_nil!.y = CDoom.m_y
-    ml.b.not_nil!.y = CDoom.m_y + CDoom.m_h
+    ml.a.not_nil!.y = Doocr.m_y
+    ml.b.not_nil!.y = Doocr.m_y + Doocr.m_h
     x = start
     while x < en
       ml.a.not_nil!.x = x
@@ -649,16 +649,16 @@ module Doocr
     end
 
     # Figure out start of horizontal gridlines
-    start = CDoom.m_y
+    start = Doocr.m_y
     if (start - Doocr.bmaporgy) % (CDoom::MAPBLOCKUNITS << FRACBITS)
       start += (CDoom::MAPBLOCKUNITS << FRACBITS) -
                ((start - Doocr.bmaporgy) % (CDoom::MAPBLOCKUNITS << FRACBITS))
     end
-    en = CDoom.m_y + CDoom.m_h
+    en = Doocr.m_y + Doocr.m_h
 
     # draw horizontal gridlines
-    ml.a.not_nil!.x = CDoom.m_x
-    ml.b.not_nil!.x = CDoom.m_x + CDoom.m_w
+    ml.a.not_nil!.x = Doocr.m_x
+    ml.b.not_nil!.x = Doocr.m_x + Doocr.m_w
     y = start
     while y < en
       ml.a.not_nil!.y = y

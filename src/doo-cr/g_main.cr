@@ -619,9 +619,9 @@ module Doocr
 
     # flush an old corpse if needed
     if Doocr.bodyqueslot >= CDoom::BODYQUESIZE
-      CDoom.p_remove_mobj(CDoom.bodyque[Doocr.bodyqueslot % CDoom::BODYQUESIZE])
+      CDoom.p_remove_mobj(Doocr.bodyque[Doocr.bodyqueslot % CDoom::BODYQUESIZE])
     end
-    CDoom.bodyque[Doocr.bodyqueslot % CDoom::BODYQUESIZE] = @@players[playernum].mo
+    Doocr.bodyque[Doocr.bodyqueslot % CDoom::BODYQUESIZE] = @@players[playernum].mo
     Doocr.bodyqueslot += 1
 
     # spawn a teleport fog
@@ -857,7 +857,7 @@ module Doocr
   # Can be called by the startup code or the menu task.
   #
   def self.g_load_game(name : UInt8*)
-    CDoom.doom_strcpy(CDoom.savename, name)
+    Doocr.savename = String.new(name)
     Doocr.gameaction = CDoom::Gameaction::Loadgame
   end
 
@@ -867,7 +867,7 @@ module Doocr
     Doocr.gameaction = CDoom::Gameaction::Nothing
 
     response = Channel({Bytes, Bool}).new
-    @@io_jobs.send({String.new(CDoom.savename.to_unsafe), "rb", nil, response})
+    @@io_jobs.send({Doocr.savename, "rb", nil, response})
     data, ok = response.receive
     return unless ok
 
@@ -965,7 +965,7 @@ module Doocr
   # consoleplayer, displayplayer, playeringame[] should be set.
   #
   def self.g_defered_init_new(skill : CDoom::Skill, episode : Int32, map : Int32)
-    CDoom.d_skill = skill
+    Doocr.d_skill = skill
     Doocr.d_episode = episode
     Doocr.d_map = map
     Doocr.gameaction = CDoom::Gameaction::Newgame
@@ -983,7 +983,7 @@ module Doocr
     Doocr.fastparm = 0
     Doocr.nomonsters = 0
     Doocr.consoleplayer = 0
-    CDoom.g_init_new(CDoom.d_skill, Doocr.d_episode, Doocr.d_map)
+    CDoom.g_init_new(Doocr.d_skill, Doocr.d_episode, Doocr.d_map)
     Doocr.gameaction = CDoom::Gameaction::Nothing
   end
 
@@ -1126,8 +1126,7 @@ module Doocr
   #
   def self.g_record_demo(name : UInt8*)
     Doocr.usergame = 0
-    CDoom.doom_strcpy(CDoom.demoname, name)
-    CDoom.doom_concat(CDoom.demoname, ".lmp")
+    Doocr.demoname = String.new(name) + ".lmp"
     maxsize = 0x20000
     i = ARGV.index("-maxdemo")
     maxsize = ARGV[i + 1].to_i * 1024 if i && i < ARGV.size - 1
@@ -1172,13 +1171,13 @@ module Doocr
   #
 
   def self.g_defered_play_demo(name : UInt8*)
-    CDoom.defdemoname = name
+    Doocr.defdemoname = String.new(name)
     Doocr.gameaction = CDoom::Gameaction::Playdemo
   end
 
   def self.g_do_play_demo
     Doocr.gameaction = CDoom::Gameaction::Nothing
-    CDoom.demobuffer = CDoom.w_cache_lump_name(CDoom.defdemoname, CDoom::PU_STATIC).as(UInt8*)
+    CDoom.demobuffer = CDoom.w_cache_lump_name(Doocr.defdemoname.to_unsafe, CDoom::PU_STATIC).as(UInt8*)
     CDoom.demo_p = CDoom.demobuffer
     demo_version = CDoom.demo_p.value
     CDoom.demo_p += 1
@@ -1232,7 +1231,7 @@ module Doocr
     Doocr.timingdemo = 1
     Doocr.singletics = 1
 
-    CDoom.defdemoname = name
+    Doocr.defdemoname = String.new(name)
     Doocr.gameaction = CDoom::Gameaction::Playdemo
   end
 
@@ -1273,11 +1272,11 @@ module Doocr
     if Doocr.demorecording != 0
       CDoom.demo_p.value = CDoom::DEMOMARKER.to_u8
       CDoom.demo_p += 1
-      CDoom.m_write_file(CDoom.demoname, CDoom.demobuffer, (CDoom.demo_p - CDoom.demobuffer).to_i32!)
+      CDoom.m_write_file(Doocr.demoname.to_unsafe, CDoom.demobuffer, (CDoom.demo_p - CDoom.demobuffer).to_i32!)
       CDoom.z_free(CDoom.demobuffer)
       Doocr.demorecording = 0
 
-      puts " Demo #{String.new(CDoom.demoname.to_unsafe)} recorded"
+      puts " Demo #{Doocr.demoname} recorded"
       i_quit
     end
 

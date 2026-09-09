@@ -245,16 +245,16 @@ module Doocr
   end
 
   def self.foreign_translation(ch : UInt8) : UInt8
-    return ch < 128 ? CDoom.french_key_map[ch] : ch
+    return ch < 128 ? Doocr.french_key_map[ch] : ch
   end
 
   def self.hu_init
     buffer = uninitialized StaticArray(UInt8, 9)
 
     if Doocr.language == CDoom::Language::French
-      CDoom.shiftxform = CDoom.french_shiftxform
+      Doocr.shiftxform = Doocr.french_shiftxform
     else
-      CDoom.shiftxform = CDoom.english_shiftxform
+      Doocr.shiftxform = Doocr.english_shiftxform
     end
 
     # load the heads-up font
@@ -292,24 +292,23 @@ module Doocr
       0, 167 - CDoom.hu_font[0].value.height.to_i16!,
       CDoom.hu_font, CDoom::HU_FONTSTART)
 
-    s = "".to_unsafe
+    s = ""
     case Doocr.gamemode
     when CDoom::GameMode::Shareware, CDoom::GameMode::Registered, CDoom::GameMode::Retail
-      s = CDoom.mapnames[(Doocr.gameepisode - 1)*9 + Doocr.gamemap - 1]
+      s = Doocr.mapnames[(Doocr.gameepisode - 1)*9 + Doocr.gamemap - 1]
     when CDoom::GameMode::Commercial
       case Doocr.gamemission
       when CDoom::GameMission::PackTnt
-        s = CDoom.mapnamest[Doocr.gamemap - 1]
+        s = Doocr.mapnamest[Doocr.gamemap - 1]
       when CDoom::GameMission::PackPlut
-        s = CDoom.mapnamesp[Doocr.gamemap - 1]
+        s = Doocr.mapnamesp[Doocr.gamemap - 1]
       else
-        s = CDoom.mapnames2[Doocr.gamemap - 1]
+        s = Doocr.mapnames2[Doocr.gamemap - 1]
       end
     end
 
-    while s.value != 0
-      CDoom.hulib_add_char_to_text_line(pointerof(CDoom.w_title), s.value)
-      s += 1
+    s.each_byte do |char|
+      CDoom.hulib_add_char_to_text_line(pointerof(CDoom.w_title), char)
     end
 
     # create the chat widget
@@ -362,16 +361,16 @@ module Doocr
         next if Doocr.playeringame[i] == 0
         if i != Doocr.consoleplayer && (c = @@players[i].cmd.chatchar) != 0
           if c <= CDoom::HU_BROADCAST
-            CDoom.chat_dest[i] = c
+            Doocr.chat_dest[i] = c.to_u8!
           else
             if c >= 'a'.ord && c <= 'z'.ord
-              c = CDoom.shiftxform[c]
+              c = Doocr.shiftxform[c]
             end
             rc = CDoom.hulib_key_in_i_text(CDoom.w_inputbuffer.to_unsafe + i, c)
             if rc != 0 && c == CDoom::KEY_ENTER
               if CDoom.w_inputbuffer[i].l.len != 0 &&
-                 (CDoom.chat_dest[i] == Doocr.consoleplayer + 1 ||
-                 CDoom.chat_dest[i] == CDoom::HU_BROADCAST)
+                 (Doocr.chat_dest[i] == (Doocr.consoleplayer + 1).to_u8! ||
+                 Doocr.chat_dest[i] == CDoom::HU_BROADCAST.to_u8!)
                 CDoom.hulib_add_message_to_s_text(pointerof(CDoom.w_message),
                   Doocr.player_names[i].to_unsafe,
                   CDoom.w_inputbuffer[i].l.l)
@@ -398,7 +397,7 @@ module Doocr
     if ((Doocr.head + 1) & (CDoom::QUEUESIZE - 1)) == Doocr.tail
       CDoom.plr.value.message = @@deh_hustr_msgu
     else
-      CDoom.chatchars[Doocr.head] = c
+      Doocr.chatchars[Doocr.head] = c.to_u8!
       Doocr.head = (Doocr.head + 1) & (CDoom::QUEUESIZE - 1)
     end
   end
@@ -406,7 +405,7 @@ module Doocr
   def self.hu_dequeue_chat_char : UInt8
     c = 0_u8
     if Doocr.head != Doocr.tail
-      c = CDoom.chatchars[Doocr.tail]
+      c = Doocr.chatchars[Doocr.tail]
       Doocr.tail = (Doocr.tail + 1) & (CDoom::QUEUESIZE - 1)
     end
 
@@ -501,7 +500,7 @@ module Doocr
         eatkey = 1
       else
         c = CDoom.foreign_translation(c) if Doocr.language == CDoom::Language::French
-        c = CDoom.shiftxform[c] if @@shiftdown != 0 || (c >= 'a'.ord && c <= 'z'.ord)
+        c = Doocr.shiftxform[c] if @@shiftdown != 0 || (c >= 'a'.ord && c <= 'z'.ord)
         eatkey = CDoom.hulib_key_in_i_text(pointerof(CDoom.w_chat), c)
         CDoom.hu_queue_chat_char(c) if eatkey != 0
         if c == CDoom::KEY_ENTER

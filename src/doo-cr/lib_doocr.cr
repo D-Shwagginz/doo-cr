@@ -479,6 +479,8 @@ module Doocr
 	class_property inhelpscreens : Int32 = 0
 	class_property go : Int32 = 0
 	class_property traceangle : UInt32 = 0
+	class_property t2x : Int32 = 0
+	class_property t2y : Int32 = 0
 	class_property usergame : Int32 = 0
 	class_property demoplayback : Int32 = 0
 	class_property demorecording : Int32 = 0
@@ -763,11 +765,74 @@ module Doocr
 	class_getter forwardmove : Array(Int32) = [0x19, 0x32]
 	class_getter sidemove : Array(Int32) = [0x18, 0x28]
 	class_getter angleturn : Array(Int32) = [640, 1280, 320]
+	class_property opentop : Int32 = 0
+	class_property openbottom : Int32 = 0
+	class_property openrange : Int32 = 0
+	class_property lowfloor : Int32 = 0
+	class_property tmfloorz : Int32 = 0
+	class_property tmceilingz : Int32 = 0
+	class_property tmx : Int32 = 0
+	class_property tmy : Int32 = 0
+	class_property tmdropoffz : Int32 = 0
+	class_property shootz : Int32 = 0
+	class_property attackrange : Int32 = 0
+	class_property aimslope : Int32 = 0
+	class_property topslope : Int32 = 0
+	class_property bottomslope : Int32 = 0
+	class_property tmxmove : Int32 = 0
+	class_property tmymove : Int32 = 0
+	class_property swingx : Int32 = 0
+	class_property swingy : Int32 = 0
+	class_property bulletslope : Int32 = 0
+	class_property sightzstart : Int32 = 0
+	class_property bestslidefrac : Int32 = 0
+	class_property secondslidefrac : Int32 = 0
+	class_property bestslideline : Pointer(CDoom::Line) = Pointer(CDoom::Line).null
+	class_property secondslideline : Pointer(CDoom::Line) = Pointer(CDoom::Line).null
+	class_property slidemo : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+	class_property bombsource : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+	class_property bombspot : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+	class_property ceilingline : Pointer(CDoom::Line) = Pointer(CDoom::Line).null
+	class_property linetarget : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+	class_property shootthing : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+	class_property tmthing : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+	class_getter tmbbox : Array(Int32) = Array.new(4, 0)
+	class_property soundtarget : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+	class_property corpsehit : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+	class_property vileobj : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+	class_property viletryx : Int32 = 0
+	class_property viletryy : Int32 = 0
+	class_getter braintargets : Array(Pointer(CDoom::Mobj)) = Array.new(32, Pointer(CDoom::Mobj).null)
+	class_property usething : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+	class_getter spechit : Array(Pointer(CDoom::Line)) = Array.new(CDoom::MAXSPECIALCROSS, Pointer(CDoom::Line).null)
+	class_property level_timer : Int32 = 0
+	class_property level_time_count : Int32 = 0
+	class_property defaultfile : String = "default.cfg"
+	class_property d_skill : CDoom::Skill = CDoom::Skill::Medium
+	class_property epi : Int32 = 1
+	class_property pagename : String = "TITLEPIC"
+	class_property finaletext : String = ""
+	class_property finaleflat : String = "F_SKY1"
+	class_property spritename : String = ""
+	class_property demoname : String = ""
+	class_property savename : String = ""
+	class_property defdemoname : String = ""
+	class_property exitmsg : String = ""
 	class_getter pars : Array(Array(Int32)) = Array.new(4) { Array.new(9, 0) }
 	class_getter cpars : Array(Int32) = Array.new(32, 0)
 	class_getter detail_names : Array(String) = ["M_GDHIGH", "M_GDLOW"]
 	class_getter msg_names : Array(String) = ["M_MSGOFF", "M_MSGON"]
 	class_getter player_names : Array(String) = Array.new(4, "")
+	class_getter mapnames : Array(String) = Array.new(45, "")
+	class_getter mapnames2 : Array(String) = Array.new(32, "")
+	class_getter mapnamesp : Array(String) = Array.new(32, "")
+	class_getter mapnamest : Array(String) = Array.new(32, "")
+	class_getter chat_dest : Array(UInt8) = Array.new(4, 0_u8)
+	class_getter chatchars : Array(UInt8) = Array.new(128, 0_u8)
+	class_getter french_shiftxform : Array(UInt8) = Array.new(128, 0_u8)
+	class_getter english_shiftxform : Array(UInt8) = Array.new(128, 0_u8)
+	class_getter french_key_map : Array(UInt8) = Array.new(128, 0_u8)
+	class_property shiftxform : Array(UInt8) = english_shiftxform
 	class_getter gammamsg : Array(String) = Array.new(5, "")
 	class_getter skull_name : Array(String) = ["M_SKULL1", "M_SKULL2"]
 	class_getter openings : Array(Int16) = Array.new(20480, 0_i16)
@@ -800,6 +865,10 @@ module Doocr
 	class_getter dm_frags : Array(Array(Int32)) = Array.new(CDoom::MAXPLAYERS) { Array.new(CDoom::MAXPLAYERS, 0) }
 	class_getter dm_totals : Array(Int32) = Array.new(CDoom::MAXPLAYERS, 0)
 	class_property dofrags : Int32 = 0
+	class_property numbraintargets : Int32 = 0
+	class_property braintargeton : Int32 = 0
+	class_property numspechit : Int32 = 0
+	class_getter sightcounts : Array(Int32) = Array.new(2, 0)
 	class_property reboundpacket : Int32 = 0
 	class_getter frametics : Array(Int32) = Array.new(4, 0)
 	class_getter frameskip : Array(Int32) = Array.new(4, 0)
@@ -837,6 +906,61 @@ module Doocr
 	class_getter cnt_frags : Array(Int32) = Array(Int32).new(4, 0)
 	class_property scale_mtof : Int32 = 0
 	class_property scale_ftom : Int32 = 0
+	class_property mtof_zoommul : Int32 = 0
+	class_property ftom_zoommul : Int32 = 0
+	class_property m_x : Int32 = 0
+	class_property m_y : Int32 = 0
+	class_property m_x2 : Int32 = 0
+	class_property m_y2 : Int32 = 0
+	class_property m_w : Int32 = 0
+	class_property m_h : Int32 = 0
+	class_property min_x : Int32 = 0
+	class_property min_y : Int32 = 0
+	class_property max_x : Int32 = 0
+	class_property max_y : Int32 = 0
+	class_property max_w : Int32 = 0
+	class_property max_h : Int32 = 0
+	class_property min_w : Int32 = 0
+	class_property min_h : Int32 = 0
+	class_property min_scale_mtof : Int32 = 0
+	class_property max_scale_mtof : Int32 = 0
+	class_property old_m_w : Int32 = 0
+	class_property old_m_h : Int32 = 0
+	class_property old_m_x : Int32 = 0
+	class_property old_m_y : Int32 = 0
+
+	class Anim
+		property istexture : Int32
+		property picnum : Int32
+		property basepic : Int32
+		property numpics : Int32
+		property speed : Int32
+
+		def initialize
+			@istexture = 0
+			@picnum = 0
+			@basepic = 0
+			@numpics = 0
+			@speed = 0
+		end
+	end
+
+	class_getter anims : Array(Anim) = Array.new(CDoom::MAXANIMS) { Anim.new }
+	class_property lastanim : Int32 = 0
+
+	class Cliprange
+		property first : Int32
+		property last : Int32
+
+		def initialize(@first : Int32 = 0, @last : Int32 = 0)
+		end
+	end
+
+	class_getter solidsegs : Array(Cliprange) = Array.new(CDoom::MAXSEGS) { Cliprange.new }
+	class_property newend : Int32 = 0
+	class_getter linespeciallist : Array(Pointer(CDoom::Line)) = Array.new(CDoom::MAXLINEANIMS, Pointer(CDoom::Line).null)
+	class_getter switchlist : Array(Int32) = Array.new(CDoom::SWITCHLIST_SIZE, -1)
+	class_getter bodyque : Array(Pointer(CDoom::Mobj)) = Array.new(CDoom::BODYQUESIZE, Pointer(CDoom::Mobj).null)
 	class_property precache : Int32 = 1
 	class_property singletics : Int32 = 0
 	class_property bodyqueslot : Int32 = 0

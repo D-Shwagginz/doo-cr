@@ -272,7 +272,7 @@ module Doocr
   end
 
   def self.d_page_drawer
-    CDoom.v_draw_patch(0, 0, 0, CDoom.w_cache_lump_name(CDoom.pagename, CDoom::PU_CACHE).as(CDoom::Patch*))
+    CDoom.v_draw_patch(0, 0, 0, CDoom.w_cache_lump_name(Doocr.pagename.to_unsafe, CDoom::PU_CACHE).as(CDoom::Patch*))
   end
 
   #
@@ -308,7 +308,7 @@ module Doocr
         Doocr.pagetic = 170
       end
       Doocr.gamestate = CDoom::Gamestate::Demoscreen
-      CDoom.pagename = "TITLEPIC"
+      Doocr.pagename = "TITLEPIC"
       if Doocr.gamemode == CDoom::GameMode::Commercial
         CDoom.s_start_music(CDoom::Musicenum::MUS_dm2ttl)
       else
@@ -319,22 +319,22 @@ module Doocr
     when 2
       Doocr.pagetic = 200
       Doocr.gamestate = CDoom::Gamestate::Demoscreen
-      CDoom.pagename = "CREDIT"
+      Doocr.pagename = "CREDIT"
     when 3
       CDoom.g_defered_play_demo("demo2")
     when 4
       Doocr.gamestate = CDoom::Gamestate::Demoscreen
       if Doocr.gamemode == CDoom::GameMode::Commercial
         Doocr.pagetic = 35 * 11
-        CDoom.pagename = "TITLEPIC"
+        Doocr.pagename = "TITLEPIC"
         CDoom.s_start_music(CDoom::Musicenum::MUS_dm2ttl)
       else
         Doocr.pagetic = 200
 
         if Doocr.gamemode == CDoom::GameMode::Retail
-          CDoom.pagename = "CREDIT"
+          Doocr.pagename = "CREDIT"
         else
-          CDoom.pagename = "HELP2"
+          Doocr.pagename = "HELP2"
         end
       end
     when 5

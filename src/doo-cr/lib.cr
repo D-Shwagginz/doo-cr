@@ -54,11 +54,11 @@ end
 # define CXMTOF(x)  (f_x + MTOF((x)-m_x))
 # define CYMTOF(y)  (f_y + (f_h - MTOF((y)-m_y)))
 macro cxmtof(x)
-  (Doocr.f_x + mtof({{x}}-CDoom.m_x))
+  (Doocr.f_x + mtof({{x}}-Doocr.m_x))
 end
 
 macro cymtof(y)
-  (Doocr.f_y + (Doocr.f_h - mtof({{y}}-CDoom.m_y)))
+  (Doocr.f_y + (Doocr.f_h - mtof({{y}}-Doocr.m_y)))
 end
 
 # Macros for filling C StaticArrays
@@ -3764,8 +3764,6 @@ lib CDoom
   #
   # End-level timer (-TIMER option)
   #
-  $level_timer = levelTimer : DoomBool
-  $level_time_count = levelTimeCount : LibC::Int
 
   # Define values for map objects
   MO_TELEPORTMAN = 14
@@ -4462,10 +4460,6 @@ lib CDoom
   fun p_intercept_vector = P_InterceptVector(v2 : Divline*, v1 : Divline*) : Fixed
   fun p_box_on_line_side = P_BoxOnLineSide(tmbox : Fixed*, ld : Line*) : LibC::Int
 
-  $opentop : Fixed
-  $openbottom : Fixed
-  $openrange : Fixed
-  $lowfloor : Fixed
 
   fun p_line_opening = P_LineOpening(linedef : Line*)
 
@@ -4488,12 +4482,9 @@ lib CDoom
 
   # If "floatok" true, move would be ok
   # if within "tmfloorz - tmceilingz".
-  $tmfloorz : Fixed
-  $tmceilingz : Fixed
 
   # keep track of the line that lowers the ceiling,
   # so missiles don't explode against sky hack walls
-  $ceilingline : Line*
 
   fun p_check_position = P_CheckPosition(thing : Mobj*, x : Fixed, y : Fixed) : DoomBool
   fun p_try_move = P_TryMove(thing : Mobj*, x : Fixed, y : Fixed) : DoomBool
@@ -4503,8 +4494,6 @@ lib CDoom
   fun p_use_lines = P_UseLines(player : Player*)
   fun p_change_sector = P_ChangeSector(sector : Sector*, crunch : DoomBool) : DoomBool
 
-  $linetarget : Mobj* # who got hit (or 0)
-  $shootthing : Mobj*
 
   fun p_aim_line_attack = P_AimLineAttack(t1 : Mobj*, angle : Angle, distance : Fixed) : Fixed
   fun p_line_attack = P_LineAttack(t1 : Mobj*, angle : Angle, distance : Fixed, slope : Fixed, damage : LibC::Int)
@@ -4904,49 +4893,25 @@ lib CDoom
 
   $fb : Byte*           # psuedo-frame buffer
 
-  $mtof_zoommul : Fixed # how far the window zooms in each tic (map coords)
-  $ftom_zoommul : Fixed #  how far the window zooms in each tic (fb coords)
 
   # LL x,y where the window is on the map (map coords)
-  $m_x : Fixed
-  $m_y : Fixed
   # UR x,y where the window is on the map (map coords)
-  $m_x2 : Fixed
-  $m_y2 : Fixed
 
   #
   # width/height of window on map (map coords)
   #
-  $m_w : Fixed
-  $m_h : Fixed
 
   # based on level size
-  $min_x : Fixed
-  $min_y : Fixed
-  $max_x : Fixed
-  $max_y : Fixed
 
-  $max_w : Fixed # max_x-min_x,
-  $max_h : Fixed # max_y-min_y
 
   # based on player size
-  $min_w : Fixed
-  $min_h : Fixed
 
-  $min_scale_mtof : Fixed # used to tell when to stop zooming out
-  $max_scale_mtof : Fixed # used to tell when to stop zooming in
 
   # old stuff for recovery later
-  $old_m_w : Fixed
-  $old_m_h : Fixed
-  $old_m_x : Fixed
-  $old_m_y : Fixed
 
   # old location used by the Follower routine
   # used by MTOF to scale from map-to-frame-buffer coords
-  $scale_mtof : Fixed
   # used by FTOM to scale from frame-buffer-to-map coords (=1/scale_mtof)
-  $scale_ftom : Fixed
 
   $plr : Player* # the player represented by an arrow
 
@@ -5006,7 +4971,6 @@ lib CDoom
   #
   # DEMO LOOP
   #
-  $pagename : LibC::Char*
 
   fun d_page_ticker = D_PageTicker
 
@@ -5033,7 +4997,6 @@ lib CDoom
 
   $reboundstore : Doomdata
 
-  $exitmsg : LibC::Char[80]
 
 
   fun d_process_events = D_ProcessEvents
@@ -5068,8 +5031,6 @@ lib CDoom
   TEXTWAIT  = 250
 
 
-  $finaletext : LibC::Char*
-  $finaleflat : LibC::Char*
 
   $caststate : State*
 
@@ -5163,7 +5124,6 @@ lib CDoom
   fun r_execute_set_view_size = R_ExecuteSetViewSize
 
 
-  $demoname : LibC::Char[32]
   $demobuffer : Byte*
   $demo_p : Byte*
   $demoend : Byte*
@@ -5182,7 +5142,6 @@ lib CDoom
   # joystick values are repeated
 
 
-  $bodyque : Mobj*[BODYQUESIZE]
 
   $statcopy : Void* # for statistics driver
 
@@ -5190,11 +5149,8 @@ lib CDoom
 
 
 
-  $savename : LibC::Char[256]
 
-  $d_skill : Skill
 
-  $defdemoname : LibC::Char*
 
   fun g_build_ticcmd = G_BuildTiccmd(cmd : Ticcmd*)
 
@@ -5218,34 +5174,24 @@ lib CDoom
 
   $w_title : HU_Textline
   $w_chat : HU_Itext
-  $chat_dest : LibC::Char[MAXPLAYERS]
   $w_inputbuffer : HU_Itext[MAXPLAYERS]
   $w_message : HU_Stext
-  $chatchars : LibC::Char[QUEUESIZE]
 
   $chat_macros : LibC::Char*[10]
 
 
-  $shiftxform : LibC::Char*
 
-  $french_shiftxform : LibC::Char[128]
 
-  $english_shiftxform : LibC::Char[128]
 
-  $french_key_map = frenchKeyMap : LibC::Char[128]
 
   $chat_char : LibC::Char # remove later.
 
 
   # DOOM shareware/registered/retail (Ultimate) names.
-  $mapnames : LibC::Char*[45]
 
   # DOOM 2 map names.
-  $mapnames2 : LibC::Char*[32]
 
-  $mapnamesp : LibC::Char*[32]
 
-  $mapnamest : LibC::Char*[32]
 
   fun foreign_translation = ForeignTranslation(ch : LibC::Char) : LibC::Char
 
@@ -5465,7 +5411,6 @@ lib CDoom
   $custom_texts_count : LibC::Int
 
   $tempstring : LibC::Char[80]
-  $epi : LibC::Int
 
 
 
@@ -5584,10 +5529,8 @@ lib CDoom
   # SCREEN SHOTS
   #
   $num_channels = numChannels : LibC::Int
-  $scantokey : Byte[128]
 
   $numdefaults : LibC::Int
-  $defaultfile : LibC::Char*
 
 
 
@@ -5612,20 +5555,9 @@ lib CDoom
   end
 
 
-  $soundtarget : Mobj*
-  $traceangle = TRACEANGLE : LibC::Int
-  $corpsehit : Mobj*
-  $vileobj : Mobj*
-  $viletryx : Fixed
-  $viletryy : Fixed
-  $braintargets : Mobj*[32]
-  $numbraintargets : LibC::Int
-  $braintargeton : LibC::Int
 
   # keep track of special lines as they are hit,
   # but don't process them until the move is proven valid
-  $spechit : Line*[MAXSPECIALCROSS]
-  $numspechit : LibC::Int
 
   fun p_recursive_sound = P_RecursiveSound(sec : Sector*, soundblocks : LibC::Int)
 
@@ -5657,24 +5589,13 @@ lib CDoom
 
   fun t_fire_flicker = T_FireFlicker(flick : Fireflicker*)
 
-  $tmbbox : Fixed[4]
-  $tmthing : Mobj*
-  $tmx : Fixed
-  $tmy : Fixed
-  $tmdropoffz : Fixed
 
   # Height if not aiming up or down
   # ???: use slope for monsters?
-  $shootz : Fixed
 
-  $attackrange : Fixed
 
-  $aimslope : Fixed
-  $usething : Mobj*
 
   # slopes to top and bottom of target
-  $topslope : Fixed
-  $bottomslope : Fixed
 
   fun pit_stomp_thing = PIT_StompThing(thing : Mobj*) : DoomBool
   fun pit_check_line = PIT_CheckLine(ld : Line*) : DoomBool
@@ -5682,16 +5603,9 @@ lib CDoom
   fun pit_check_thing = PIT_CheckThing(thing : Mobj*) : DoomBool
   fun p_thing_height_clip = P_ThingHeightClip(thing : Mobj*) : DoomBool
 
-  $bestslidefrac : Fixed
-  $secondslidefrac : Fixed
 
-  $bestslideline : Line*
-  $secondslideline : Line*
 
-  $slidemo : Mobj*
 
-  $tmxmove : Fixed
-  $tmymove : Fixed
 
   fun p_hit_slide_line = P_HitSlideLine(ld : Line*)
   fun ptr_slide_traverse = PTR_SlideTraverse(int : Intercept*) : DoomBool
@@ -5699,8 +5613,6 @@ lib CDoom
   fun ptr_shoot_traverse = PTR_ShootTraverse(int : Intercept*) : DoomBool
   fun ptr_use_traverse = PTR_UseTraverse(int : Intercept*) : DoomBool
 
-  $bombsource : Mobj*
-  $bombspot : Mobj*
   fun pit_radius_attack = PIT_RadiusAttack(thing : Mobj*) : DoomBool
   fun pit_change_sector = PIT_ChangeSector(thing : Mobj*) : DoomBool
 
@@ -5732,9 +5644,6 @@ lib CDoom
   # plasma cells for a bfg attack
   BFGCELLS = 40
 
-  $swingx : Fixed
-  $swingy : Fixed
-  $bulletslope : Fixed
 
   fun p_set_psprite = P_SetPsprite(player : Player*, position : LibC::Int, stnum : Statenum)
   fun p_bring_up_weapon = P_BringUpWeapon(player : Player*)
@@ -5773,12 +5682,8 @@ lib CDoom
   fun p_load_sidedefs = P_LoadSideDefs(lump : LibC::Int)
   fun p_group_lines = P_GroupLines
 
-  $sightzstart : Fixed # eye z of looker
   $strace : Divline    # from t1 to t2
-  $t2x : Fixed
-  $t2y : Fixed
 
-  $sightcounts : LibC::Int[2]
 
   fun p_divline_side = P_DivlineSide(x : Fixed, y : Fixed, node : Divline*) : LibC::Int
   fun p_intercept_vector2 = P_InterceptVector2(v2 : Divline*, v1 : Divline*) : Fixed
@@ -5795,21 +5700,7 @@ lib CDoom
   # Animating textures and planes
   # There is another anim_t used in wi_stuff, unrelated.
   #
-  struct Anim
-    istexture : DoomBool
-    picnum : LibC::Int
-    basepic : LibC::Int
-    numpics : LibC::Int
-    speed : LibC::Int
-  end
-
-  $linespeciallist : Line*[MAXLINEANIMS]
-
-  $anims : Anim[MAXANIMS]
-  $lastanim : Anim*
-
   SWITCHLIST_SIZE = MAXSWITCHES * 2
-  $switchlist : LibC::Int[SWITCHLIST_SIZE]
 
   fun p_start_button = P_StartButton(line : Line*, w : Bwhere, texture : LibC::Int, time : LibC::Int)
   fun p_run_thinkers = P_RunThinkers
@@ -5832,16 +5723,6 @@ lib CDoom
   # Clips the given range of columns
   # and includes it in the new clip list.
   #
-  struct Cliprange
-    first : LibC::Int
-    last : LibC::Int
-  end
-
-  # newend is one past the last valid seg
-  $newend : Cliprange*
-  $solidsegs : Cliprange[MAXSEGS]
-
-
   fun r_store_wall_range = R_StoreWallRange(start : LibC::Int, stop : LibC::Int)
   fun r_clip_solid_wall_segment = R_ClipSolidWallSegment(first : LibC::Int, last : LibC::Int)
   fun r_clip_pass_wall_segment = R_ClipPassWallSegment(first : LibC::Int, last : LibC::Int)
@@ -5908,9 +5789,6 @@ lib CDoom
   end
 
 
-  $firstpatch : LibC::Int
-  $lastpatch : LibC::Int
-  $numpatches : LibC::Int
 
   $textures : Texture**
 
@@ -6015,7 +5893,6 @@ lib CDoom
   #
 
 
-  $spritename : LibC::Char*
 
   fun r_install_sprite_lump = R_InstallSpriteLump(lump : LibC::Int, frame : LibC::UInt, rotation : LibC::UInt, flipped : DoomBool)
 

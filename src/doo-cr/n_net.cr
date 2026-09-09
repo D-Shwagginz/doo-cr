@@ -176,9 +176,8 @@ module Doocr
         next if Doocr.nodeingame[netnode] == 0
         Doocr.nodeingame[netnode] = 0
         Doocr.playeringame[netconsole] = 0
-        CDoom.doom_strcpy(CDoom.exitmsg, "Player 1 left the game")
-        CDoom.exitmsg[7] = CDoom.exitmsg[7] + netconsole
-        (@@players.to_unsafe + Doocr.consoleplayer).value.message = CDoom.exitmsg
+        Doocr.exitmsg = "Player #{netconsole + 1} left the game"
+        (@@players.to_unsafe + Doocr.consoleplayer).value.message = Doocr.exitmsg.to_unsafe
         if netconsole != Doocr.consoleplayer
           # Despawn the player
           g_despawn_player(netconsole)
