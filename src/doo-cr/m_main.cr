@@ -1378,7 +1378,7 @@ module Doocr
     lbmname = uninitialized StaticArray(UInt8, 12)
 
     # munge planar buffer to linear
-    linear = CDoom.screens[2]
+    linear = Doocr.screens[2]
     CDoom.i_read_screen(linear)
 
     # find a file name to save it to

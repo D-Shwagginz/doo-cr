@@ -32,7 +32,7 @@ module Doocr
 
     lowtic = Int32::MAX
     numplaying = 0
-    CDoom.doomcom.value.numnodes.times do |i|
+    Doocr.doomcom.value.numnodes.times do |i|
       if Doocr.nodeingame[i] != 0
         numplaying += 1
         lowtic = Doocr.nettics[i] if Doocr.nettics[i] < lowtic
@@ -88,7 +88,7 @@ module Doocr
       CDoom.net_update
       lowtic = Int32::MAX
 
-      CDoom.doomcom.value.numnodes.times do |i|
+      Doocr.doomcom.value.numnodes.times do |i|
         lowtic = Doocr.nettics[i] if Doocr.nodeingame[i] != 0 && Doocr.nettics[i] < lowtic
       end
 
@@ -114,7 +114,7 @@ module Doocr
         if i != Doocr.ticdup - 1
           buf = (Doocr.gametic // Doocr.ticdup) % CDoom::BACKUPTICS
           CDoom::MAXPLAYERS.times do |j|
-            cmd = (CDoom.netcmds.to_unsafe + j).value.to_unsafe + buf
+            cmd = (Doocr.netcmds.to_unsafe + j).value.to_unsafe + buf
             cmd.value.chatchar = 0
             cmd.value.buttons = 0 if cmd.value.buttons & CDoom::Buttoncode::BT_SPECIAL.value != 0
           end
@@ -469,7 +469,7 @@ module Doocr
       if Doocr.playeringame[i] != 0
         cmd = (pointerof((@@players.to_unsafe + i).value.@cmd)) # THERE WAS A BETTER WAY TO DO THIS
 
-        CDoom.doom_memcpy(cmd, (CDoom.netcmds.to_unsafe + i).value.to_unsafe + buf, sizeof(CDoom::Ticcmd))
+        CDoom.doom_memcpy(cmd, (Doocr.netcmds.to_unsafe + i).value.to_unsafe + buf, sizeof(CDoom::Ticcmd))
 
         CDoom.g_read_demo_ticcmd(cmd) if Doocr.demoplayback != 0
         CDoom.g_write_demo_ticcmd(cmd) if Doocr.demorecording != 0
@@ -644,15 +644,15 @@ module Doocr
 
     selections.times do |j|
       i = CDoom.p_random % selections
-      if CDoom.g_check_spot(playernum, CDoom.deathmatchstarts.to_unsafe + i) != 0
-        (CDoom.deathmatchstarts.to_unsafe + i).value.type = playernum + 1
-        CDoom.p_spawn_player(CDoom.deathmatchstarts.to_unsafe + i)
+      if CDoom.g_check_spot(playernum, Doocr.deathmatchstarts.to_unsafe + i) != 0
+        (Doocr.deathmatchstarts.to_unsafe + i).value.type = playernum + 1
+        CDoom.p_spawn_player(Doocr.deathmatchstarts.to_unsafe + i)
         return
       end
     end
 
     # no good spot, so the player will probably get stuck
-    CDoom.p_spawn_player(CDoom.playerstarts.to_unsafe + playernum)
+    CDoom.p_spawn_player(Doocr.playerstarts.to_unsafe + playernum)
   end
 
   def self.g_despawn_player(playernum : Int32)
@@ -694,21 +694,21 @@ module Doocr
         return
       end
 
-      if CDoom.g_check_spot(playernum, CDoom.playerstarts.to_unsafe + playernum) != 0
-        CDoom.p_spawn_player(CDoom.playerstarts.to_unsafe + playernum)
+      if CDoom.g_check_spot(playernum, Doocr.playerstarts.to_unsafe + playernum) != 0
+        CDoom.p_spawn_player(Doocr.playerstarts.to_unsafe + playernum)
         return
       end
 
       # try to spawn at one of the other players spots
       CDoom::MAXPLAYERS.times do |i|
-        if CDoom.g_check_spot(playernum, CDoom.playerstarts.to_unsafe + i) != 0
-          (CDoom.playerstarts.to_unsafe + i).value.type = playernum + 1 # fake as other player
-          CDoom.p_spawn_player(CDoom.playerstarts.to_unsafe + i)        # restore
+        if CDoom.g_check_spot(playernum, Doocr.playerstarts.to_unsafe + i) != 0
+          (Doocr.playerstarts.to_unsafe + i).value.type = playernum + 1 # fake as other player
+          CDoom.p_spawn_player(Doocr.playerstarts.to_unsafe + i)        # restore
           return
         end
         # he's going to be inside something. Too bad.
       end
-      CDoom.p_spawn_player(CDoom.playerstarts.to_unsafe + playernum)
+      CDoom.p_spawn_player(Doocr.playerstarts.to_unsafe + playernum)
     end
   end
 
@@ -1080,19 +1080,19 @@ module Doocr
   # DEMO RECORDING
   #
   def self.g_read_demo_ticcmd(cmd : CDoom::Ticcmd*)
-    if CDoom.demo_p.value == CDoom::DEMOMARKER
+    if Doocr.demo_p.value == CDoom::DEMOMARKER
       # end of demo data stream
       CDoom.g_check_demo_status
       return
     end
-    cmd.value.forwardmove = CDoom.demo_p.value.to_i8!
-    CDoom.demo_p += 1
-    cmd.value.sidemove = CDoom.demo_p.value.to_i8!
-    CDoom.demo_p += 1
-    cmd.value.angleturn = (CDoom.demo_p.value.to_u8!).to_i32 << 8
-    CDoom.demo_p += 1
-    cmd.value.buttons = CDoom.demo_p.value.to_u8!
-    CDoom.demo_p += 1
+    cmd.value.forwardmove = Doocr.demo_p.value.to_i8!
+    Doocr.demo_p += 1
+    cmd.value.sidemove = Doocr.demo_p.value.to_i8!
+    Doocr.demo_p += 1
+    cmd.value.angleturn = (Doocr.demo_p.value.to_u8!).to_i32 << 8
+    Doocr.demo_p += 1
+    cmd.value.buttons = Doocr.demo_p.value.to_u8!
+    Doocr.demo_p += 1
   end
 
   @@prevstate : CDoom::Playerstate = CDoom::Playerstate::PST_LIVE
@@ -1103,16 +1103,16 @@ module Doocr
     # (@@prevstate == CDoom::Playerstate::PST_DEAD && pstate == CDoom::Playerstate::PST_LIVE) || # or if player is respawning
     # Doocr.gamestate != CDoom::Gamestate::Level                                                 # or if we are no longer on a level
     @@prevstate = pstate
-    CDoom.demo_p.value = cmd.value.forwardmove.to_u8!
-    CDoom.demo_p += 1
-    CDoom.demo_p.value = cmd.value.sidemove.to_u8!
-    CDoom.demo_p += 1
-    CDoom.demo_p.value = ((cmd.value.angleturn.to_i32 + 128) >> 8).to_u8!
-    CDoom.demo_p += 1
-    CDoom.demo_p.value = cmd.value.buttons.to_u8!
-    CDoom.demo_p += 1
-    CDoom.demo_p -= 4
-    if CDoom.demo_p > CDoom.demoend - 16
+    Doocr.demo_p.value = cmd.value.forwardmove.to_u8!
+    Doocr.demo_p += 1
+    Doocr.demo_p.value = cmd.value.sidemove.to_u8!
+    Doocr.demo_p += 1
+    Doocr.demo_p.value = ((cmd.value.angleturn.to_i32 + 128) >> 8).to_u8!
+    Doocr.demo_p += 1
+    Doocr.demo_p.value = cmd.value.buttons.to_u8!
+    Doocr.demo_p += 1
+    Doocr.demo_p -= 4
+    if Doocr.demo_p > Doocr.demoend - 16
       # no more space
       CDoom.g_check_demo_status
       return
@@ -1130,8 +1130,8 @@ module Doocr
     maxsize = 0x20000
     i = ARGV.index("-maxdemo")
     maxsize = ARGV[i + 1].to_i * 1024 if i && i < ARGV.size - 1
-    CDoom.demobuffer = CDoom.z_malloc(maxsize, CDoom::PU_STATIC, Pointer(Void).null).as(UInt8*)
-    CDoom.demoend = CDoom.demobuffer + maxsize
+    Doocr.demobuffer = CDoom.z_malloc(maxsize, CDoom::PU_STATIC, Pointer(Void).null).as(UInt8*)
+    Doocr.demoend = Doocr.demobuffer + maxsize
 
     Doocr.demorecording = 1
   end
@@ -1139,30 +1139,30 @@ module Doocr
   def self.g_begin_recording
     @@prevstate = CDoom::Playerstate::PST_LIVE
 
-    CDoom.demo_p = CDoom.demobuffer
+    Doocr.demo_p = Doocr.demobuffer
 
-    CDoom.demo_p.value = DEMOVERSION.to_u8
-    CDoom.demo_p += 1
-    CDoom.demo_p.value = Doocr.gameskill.value.to_u8
-    CDoom.demo_p += 1
-    CDoom.demo_p.value = Doocr.gameepisode.to_u8
-    CDoom.demo_p += 1
-    CDoom.demo_p.value = Doocr.gamemap.to_u8
-    CDoom.demo_p += 1
-    CDoom.demo_p.value = Doocr.deathmatch.to_u8
-    CDoom.demo_p += 1
-    CDoom.demo_p.value = Doocr.respawnparm.to_u8
-    CDoom.demo_p += 1
-    CDoom.demo_p.value = Doocr.fastparm.to_u8
-    CDoom.demo_p += 1
-    CDoom.demo_p.value = Doocr.nomonsters.to_u8
-    CDoom.demo_p += 1
-    CDoom.demo_p.value = Doocr.consoleplayer.to_u8
-    CDoom.demo_p += 1
+    Doocr.demo_p.value = DEMOVERSION.to_u8
+    Doocr.demo_p += 1
+    Doocr.demo_p.value = Doocr.gameskill.value.to_u8
+    Doocr.demo_p += 1
+    Doocr.demo_p.value = Doocr.gameepisode.to_u8
+    Doocr.demo_p += 1
+    Doocr.demo_p.value = Doocr.gamemap.to_u8
+    Doocr.demo_p += 1
+    Doocr.demo_p.value = Doocr.deathmatch.to_u8
+    Doocr.demo_p += 1
+    Doocr.demo_p.value = Doocr.respawnparm.to_u8
+    Doocr.demo_p += 1
+    Doocr.demo_p.value = Doocr.fastparm.to_u8
+    Doocr.demo_p += 1
+    Doocr.demo_p.value = Doocr.nomonsters.to_u8
+    Doocr.demo_p += 1
+    Doocr.demo_p.value = Doocr.consoleplayer.to_u8
+    Doocr.demo_p += 1
 
     CDoom::MAXPLAYERS.times do |i|
-      CDoom.demo_p.value = Doocr.playeringame[i].to_u8
-      CDoom.demo_p += 1
+      Doocr.demo_p.value = Doocr.playeringame[i].to_u8
+      Doocr.demo_p += 1
     end
   end
 
@@ -1177,36 +1177,36 @@ module Doocr
 
   def self.g_do_play_demo
     Doocr.gameaction = CDoom::Gameaction::Nothing
-    CDoom.demobuffer = CDoom.w_cache_lump_name(Doocr.defdemoname.to_unsafe, CDoom::PU_STATIC).as(UInt8*)
-    CDoom.demo_p = CDoom.demobuffer
-    demo_version = CDoom.demo_p.value
-    CDoom.demo_p += 1
+    Doocr.demobuffer = CDoom.w_cache_lump_name(Doocr.defdemoname.to_unsafe, CDoom::PU_STATIC).as(UInt8*)
+    Doocr.demo_p = Doocr.demobuffer
+    demo_version = Doocr.demo_p.value
+    Doocr.demo_p += 1
     if demo_version != DEMOVERSION && demo_version != 109 # Demos seem to run fine with version 109
       puts "Demo is from a different game version! Demo Verson = #{demo_version}, this version = #{DEMOVERSION}"
       Doocr.gameaction = CDoom::Gameaction::Nothing
       return
     end
 
-    skill = CDoom::Skill.new(CDoom.demo_p.value)
-    CDoom.demo_p += 1
-    episode = CDoom.demo_p.value
-    CDoom.demo_p += 1
-    map = CDoom.demo_p.value
-    CDoom.demo_p += 1
-    Doocr.deathmatch = CDoom.demo_p.value
-    CDoom.demo_p += 1
-    Doocr.respawnparm = CDoom.demo_p.value
-    CDoom.demo_p += 1
-    Doocr.fastparm = CDoom.demo_p.value
-    CDoom.demo_p += 1
-    Doocr.nomonsters = CDoom.demo_p.value
-    CDoom.demo_p += 1
-    Doocr.consoleplayer = CDoom.demo_p.value
-    CDoom.demo_p += 1
+    skill = CDoom::Skill.new(Doocr.demo_p.value)
+    Doocr.demo_p += 1
+    episode = Doocr.demo_p.value
+    Doocr.demo_p += 1
+    map = Doocr.demo_p.value
+    Doocr.demo_p += 1
+    Doocr.deathmatch = Doocr.demo_p.value
+    Doocr.demo_p += 1
+    Doocr.respawnparm = Doocr.demo_p.value
+    Doocr.demo_p += 1
+    Doocr.fastparm = Doocr.demo_p.value
+    Doocr.demo_p += 1
+    Doocr.nomonsters = Doocr.demo_p.value
+    Doocr.demo_p += 1
+    Doocr.consoleplayer = Doocr.demo_p.value
+    Doocr.demo_p += 1
 
     CDoom::MAXPLAYERS.times do |i|
-      Doocr.playeringame[i] = CDoom.demo_p.value
-      CDoom.demo_p += 1
+      Doocr.playeringame[i] = Doocr.demo_p.value
+      Doocr.demo_p += 1
     end
     if Doocr.playeringame[1] != 0
       Doocr.netgame = 1
@@ -1253,7 +1253,7 @@ module Doocr
     if Doocr.demoplayback != 0
       CDoom.i_quit if Doocr.singledemo != 0
 
-      z_change_tag(CDoom.demobuffer, CDoom::PU_CACHE)
+      z_change_tag(Doocr.demobuffer, CDoom::PU_CACHE)
       Doocr.demoplayback = 0
       Doocr.netdemo = 0
       Doocr.netgame = 0
@@ -1270,10 +1270,10 @@ module Doocr
     end
 
     if Doocr.demorecording != 0
-      CDoom.demo_p.value = CDoom::DEMOMARKER.to_u8
-      CDoom.demo_p += 1
-      CDoom.m_write_file(Doocr.demoname.to_unsafe, CDoom.demobuffer, (CDoom.demo_p - CDoom.demobuffer).to_i32!)
-      CDoom.z_free(CDoom.demobuffer)
+      Doocr.demo_p.value = CDoom::DEMOMARKER.to_u8
+      Doocr.demo_p += 1
+      CDoom.m_write_file(Doocr.demoname.to_unsafe, Doocr.demobuffer, (Doocr.demo_p - Doocr.demobuffer).to_i32!)
+      CDoom.z_free(Doocr.demobuffer)
       Doocr.demorecording = 0
 
       puts " Demo #{Doocr.demoname} recorded"

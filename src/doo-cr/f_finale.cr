@@ -141,7 +141,7 @@ module Doocr
   def self.f_text_write
     # erase the entire screen to a tiled background
     src = CDoom.w_cache_lump_name(Doocr.finaleflat.to_unsafe, CDoom::PU_CACHE)
-    dest = CDoom.screens[0]
+    dest = Doocr.screens[0]
 
     CDoom::SCREENHEIGHT.times do |y|
       (CDoom::SCREENWIDTH // 64).times do |x|
@@ -198,8 +198,8 @@ module Doocr
 
     Doocr.wipegamestate = CDoom::Gamestate::Needwipe # force a screen wipe
     Doocr.castnum = 0
-    CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
-    Doocr.casttics = CDoom.caststate.value.tics.to_i32
+    Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
+    Doocr.casttics = Doocr.caststate.value.tics.to_i32
     Doocr.castdeath = 0
     Doocr.finalestage = 2
     Doocr.castframes = 0
@@ -215,7 +215,7 @@ module Doocr
     Doocr.casttics -= 1
     return if Doocr.casttics > 0 # not time to change state yet
 
-    if CDoom.caststate.value.tics == -1 || CDoom.caststate.value.nextstate == CDoom::Statenum::S_NULL
+    if Doocr.caststate.value.tics == -1 || Doocr.caststate.value.nextstate == CDoom::Statenum::S_NULL
       # switch from deathstate to next monster
       Doocr.castnum += 1
       Doocr.castdeath = 0
@@ -223,21 +223,21 @@ module Doocr
       if Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seesound != 0
         CDoom.s_start_sound(Pointer(Void).null, Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seesound)
       end
-      CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
+      Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
       Doocr.castframes = 0
     else
       # just advance to next state in amnimation
-      if CDoom.caststate == @@states.to_unsafe + CDoom::Statenum::S_PLAY_ATK1.value
+      if Doocr.caststate == @@states.to_unsafe + CDoom::Statenum::S_PLAY_ATK1.value
         # Yes, it is a gross hack!
         Doocr.castattacking = 0
         Doocr.castframes = 0
-        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
-        Doocr.casttics = CDoom.caststate.value.tics.to_i32
+        Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
+        Doocr.casttics = Doocr.caststate.value.tics.to_i32
         Doocr.casttics = 15 if Doocr.casttics == -1
         return
       end
-      st = CDoom.caststate.value.nextstate
-      CDoom.caststate = @@states.to_unsafe + st.value
+      st = Doocr.caststate.value.nextstate
+      Doocr.caststate = @@states.to_unsafe + st.value
       Doocr.castframes += 1
 
       sfx = 0
@@ -286,30 +286,30 @@ module Doocr
       # go into attack frame
       Doocr.castattacking = 1
       if Doocr.castonmelee != 0
-        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].meleestate
+        Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].meleestate
       else
-        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].missilestate
+        Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].missilestate
       end
       Doocr.castonmelee ^= 1
-      if CDoom.caststate == @@states.to_unsafe + CDoom::Statenum::S_NULL.value
+      if Doocr.caststate == @@states.to_unsafe + CDoom::Statenum::S_NULL.value
         if Doocr.castonmelee != 0
-          CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].meleestate
+          Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].meleestate
         else
-          CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].missilestate
+          Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].missilestate
         end
       end
     end
 
     if Doocr.castattacking != 0
       if Doocr.castframes == 24 ||
-         CDoom.caststate == @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
+         Doocr.caststate == @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
         Doocr.castattacking = 0
         Doocr.castframes = 0
-        CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
+        Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
       end
     end
 
-    Doocr.casttics = CDoom.caststate.value.tics.to_i32
+    Doocr.casttics = Doocr.caststate.value.tics.to_i32
     Doocr.casttics = 15 if Doocr.casttics == -1
   end
 
@@ -321,8 +321,8 @@ module Doocr
 
     # go into death frame
     Doocr.castdeath = 1
-    CDoom.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].deathstate
-    Doocr.casttics = CDoom.caststate.value.tics.to_i32
+    Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].deathstate
+    Doocr.casttics = Doocr.caststate.value.tics.to_i32
     Doocr.castframes = 0
     Doocr.castattacking = 0
     if Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].deathsound != 0
@@ -380,8 +380,8 @@ module Doocr
     CDoom.f_cast_print(@@castorder[Doocr.castnum].name.to_unsafe)
 
     # draw the current frame in the middle of the screen
-    sprdef = CDoom.sprites + CDoom.caststate.value.sprite.value
-    sprframe = sprdef.value.spriteframes + (CDoom.caststate.value.frame & CDoom::FF_FRAMEMASK)
+    sprdef = Doocr.sprites + Doocr.caststate.value.sprite.value
+    sprframe = sprdef.value.spriteframes + (Doocr.caststate.value.frame & CDoom::FF_FRAMEMASK)
     lump = sprframe.value.lump[0]
     flip = sprframe.value.flip[0]
 
@@ -398,7 +398,7 @@ module Doocr
   #
   def self.f_draw_patch_col(x : Int32, patch : CDoom::Patch*, col : Int32)
     column = (patch.as(UInt8*) + (patch.value.columnofs.to_unsafe + col).value.to_i32!).as(CDoom::Column*)
-    desttop = CDoom.screens[0] + x
+    desttop = Doocr.screens[0] + x
 
     # step through the posts in a column
     while column.value.topdelta != 0xff

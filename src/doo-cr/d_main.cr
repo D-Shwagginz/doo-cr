@@ -21,7 +21,7 @@ module Doocr
   # Called by the I/O functions when input is detected
   #
   def self.d_post_event(ev : CDoom::Event*)
-    CDoom.events[Doocr.eventhead] = ev.value
+    Doocr.events[Doocr.eventhead] = ev.value
     Doocr.eventhead += 1
     Doocr.eventhead = (Doocr.eventhead) & (CDoom::MAXEVENTS - 1)
   end
@@ -36,7 +36,7 @@ module Doocr
               CDoom.w_check_num_for_name("map01") < 0
 
     while Doocr.eventtail != Doocr.eventhead
-      ev = CDoom.events.to_unsafe + Doocr.eventtail
+      ev = Doocr.events.to_unsafe + Doocr.eventtail
       CDoom.g_responder(ev) if m_responder(ev) == 0
       # else menu ate the event
       Doocr.eventtail += 1
@@ -110,7 +110,7 @@ module Doocr
       i_finish_update
       CDoom.wipe_start_screen(0, 0, CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT)
     end
-    CDoom.screens[0].fill(CDoom::SCREENHEIGHT * CDoom::SCREENWIDTH, 255) unless @@software_rendering
+    Doocr.screens[0].fill(CDoom::SCREENHEIGHT * CDoom::SCREENWIDTH, 255) unless @@software_rendering
 
     d_display_clear_load if @@loading_disk_shown
 
@@ -244,7 +244,7 @@ module Doocr
       if Doocr.singletics != 0
         i_start_tic
         CDoom.d_process_events
-        CDoom.g_build_ticcmd((CDoom.netcmds.to_unsafe + Doocr.consoleplayer).value.to_unsafe + Doocr.maketic % CDoom::BACKUPTICS)
+        CDoom.g_build_ticcmd((Doocr.netcmds.to_unsafe + Doocr.consoleplayer).value.to_unsafe + Doocr.maketic % CDoom::BACKUPTICS)
         CDoom.d_do_advance_demo if Doocr.advancedemo != 0
         CDoom.m_ticker
         CDoom.g_ticker

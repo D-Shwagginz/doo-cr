@@ -118,22 +118,22 @@ module Doocr
 
   def self.doom_itoa(k : Int32, radix : Int32) : UInt8*
     a = k.to_s(radix)
-    a.to_slice.copy_to(CDoom.itoa_buf.to_unsafe, a.bytesize)
-    CDoom.itoa_buf[a.bytesize] = 0
-    return CDoom.itoa_buf.to_unsafe
+      a.to_slice.copy_to(Doocr.itoa_buf.to_unsafe, a.bytesize)
+      Doocr.itoa_buf[a.bytesize] = 0
+      return Doocr.itoa_buf.to_unsafe
   end
 
   def self.doom_ctoa(c : UInt8) : UInt8*
-    CDoom.itoa_buf[0] = c
-    CDoom.itoa_buf[1] = 0
-    return CDoom.itoa_buf.to_unsafe
+    Doocr.itoa_buf[0] = c
+    Doocr.itoa_buf[1] = 0
+    return Doocr.itoa_buf.to_unsafe
   end
 
   def self.doom_ptoa(p : Void*) : UInt8*
     a = "0x" + p.address.to_s(16).upcase
-    a.to_slice.copy_to(CDoom.itoa_buf.to_unsafe, a.bytesize)
-    CDoom.itoa_buf[a.bytesize] = 0
-    return CDoom.itoa_buf.to_unsafe
+      a.to_slice.copy_to(Doocr.itoa_buf.to_unsafe, a.bytesize)
+      Doocr.itoa_buf[a.bytesize] = 0
+      return Doocr.itoa_buf.to_unsafe
   end
 
   def self.doom_fprint(handle : Void*, str : UInt8*) : Int32

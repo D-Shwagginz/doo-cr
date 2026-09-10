@@ -41,8 +41,8 @@ module Doocr
       Doocr.m_x = Doocr.old_m_x
       Doocr.m_y = Doocr.old_m_y
     else
-      Doocr.m_x = CDoom.plr.value.mo.value.x - Doocr.m_w // 2
-      Doocr.m_y = CDoom.plr.value.mo.value.y - Doocr.m_h // 2
+      Doocr.m_x = Doocr.plr.value.mo.value.x - Doocr.m_w // 2
+      Doocr.m_y = Doocr.plr.value.mo.value.y - Doocr.m_h // 2
     end
     Doocr.m_x2 = Doocr.m_x + Doocr.m_w
     Doocr.m_y2 = Doocr.m_y + Doocr.m_h
@@ -72,16 +72,16 @@ module Doocr
     Doocr.max_y = -Int32::MAX
 
     Doocr.numvertexes.times do |i|
-      if CDoom.vertexes[i].x < Doocr.min_x
-        Doocr.min_x = CDoom.vertexes[i].x
-      elsif CDoom.vertexes[i].x > Doocr.max_x
-        Doocr.max_x = CDoom.vertexes[i].x
+      if Doocr.vertexes[i].x < Doocr.min_x
+        Doocr.min_x = Doocr.vertexes[i].x
+      elsif Doocr.vertexes[i].x > Doocr.max_x
+        Doocr.max_x = Doocr.vertexes[i].x
       end
 
-      if CDoom.vertexes[i].y < Doocr.min_y
-        Doocr.min_y = CDoom.vertexes[i].y
-      elsif CDoom.vertexes[i].y > Doocr.max_y
-        Doocr.max_y = CDoom.vertexes[i].y
+      if Doocr.vertexes[i].y < Doocr.min_y
+        Doocr.min_y = Doocr.vertexes[i].y
+      elsif Doocr.vertexes[i].y > Doocr.max_y
+        Doocr.max_y = Doocr.vertexes[i].y
       end
     end
 
@@ -128,7 +128,7 @@ module Doocr
     @@st_notify.data1 = CDoom::AM_MSGENTERED
 
     Doocr.automapactive = 1
-    CDoom.fb = CDoom.screens[0]
+    Doocr.fb = Doocr.screens[0]
     @@f_oldloc.x = Int32::MAX
     Doocr.amclock = 0
     Doocr.lightlev = 0
@@ -150,9 +150,9 @@ module Doocr
       end
     end
 
-    CDoom.plr = @@players.to_unsafe.as(CDoom::Player*) + pnum
-    Doocr.m_x = CDoom.plr.value.mo.value.x - Doocr.m_w // 2
-    Doocr.m_y = CDoom.plr.value.mo.value.y - Doocr.m_h // 2
+    Doocr.plr = @@players.to_unsafe.as(CDoom::Player*) + pnum
+    Doocr.m_x = Doocr.plr.value.mo.value.x - Doocr.m_w // 2
+    Doocr.m_y = Doocr.plr.value.mo.value.y - Doocr.m_h // 2
     am_change_window_loc
 
     # for saving & restoring
@@ -309,16 +309,16 @@ module Doocr
           @@m_paninc.y = 0
         end
         @@f_oldloc.x = Int32::MAX
-        CDoom.plr.value.message = Doocr.followplayer != 0 ? @@deh_amstr_followon : @@deh_amstr_followoff
+        Doocr.plr.value.message = Doocr.followplayer != 0 ? @@deh_amstr_followon : @@deh_amstr_followoff
       when CDoom::AM_GRIDKEY
         Doocr.grid = Doocr.grid != 0 ? 0 : 1
-        CDoom.plr.value.message = Doocr.grid != 0 ? @@deh_amstr_gridon : @@deh_amstr_gridoff
+        Doocr.plr.value.message = Doocr.grid != 0 ? @@deh_amstr_gridon : @@deh_amstr_gridoff
       when CDoom::AM_MARKKEY
-        CDoom.plr.value.message = "#{@@deh_amstr_markedspot} #{Doocr.markpointnum}"
+        Doocr.plr.value.message = "#{@@deh_amstr_markedspot} #{Doocr.markpointnum}"
         am_add_mark
       when CDoom::AM_CLEARMARKKEY
         am_clear_marks
-        CDoom.plr.value.message = @@deh_amstr_markscleared
+        Doocr.plr.value.message = @@deh_amstr_markscleared
       else
         @@cheatstate = 0
         rc = 0
@@ -365,13 +365,13 @@ module Doocr
   end
 
   def self.am_do_follow_player
-    if @@f_oldloc.x != CDoom.plr.value.mo.value.x || @@f_oldloc.y != CDoom.plr.value.mo.value.y
-      Doocr.m_x = ftom(mtof(CDoom.plr.value.mo.value.x)) - Doocr.m_w // 2
-      Doocr.m_y = ftom(mtof(CDoom.plr.value.mo.value.y)) - Doocr.m_h // 2
+    if @@f_oldloc.x != Doocr.plr.value.mo.value.x || @@f_oldloc.y != Doocr.plr.value.mo.value.y
+      Doocr.m_x = ftom(mtof(Doocr.plr.value.mo.value.x)) - Doocr.m_w // 2
+      Doocr.m_y = ftom(mtof(Doocr.plr.value.mo.value.y)) - Doocr.m_h // 2
       Doocr.m_x2 = Doocr.m_x + Doocr.m_w
       Doocr.m_y2 = Doocr.m_y + Doocr.m_h
-      @@f_oldloc.x = CDoom.plr.value.mo.value.x
-      @@f_oldloc.y = CDoom.plr.value.mo.value.y
+      @@f_oldloc.x = Doocr.plr.value.mo.value.x
+      @@f_oldloc.y = Doocr.plr.value.mo.value.y
     end
   end
 
@@ -409,7 +409,7 @@ module Doocr
   # Clear automap frame buffer.
   #
   def self.am_clear_fb(color : Int32)
-    CDoom.doom_memset(CDoom.fb, color, Doocr.f_w * Doocr.f_h)
+    CDoom.doom_memset(Doocr.fb, color, Doocr.f_w * Doocr.f_h)
   end
 
   LEFT   = 1
@@ -540,7 +540,7 @@ module Doocr
   end
 
   macro putdot(xx, yy, cc)
-    CDoom.fb[{{yy}}*Doocr.f_w+{{xx}}]={{cc}}
+    Doocr.fb[{{yy}}*Doocr.f_w+{{xx}}]={{cc}}
   end
 
   @@fuck = 0
@@ -677,34 +677,34 @@ module Doocr
   #
   def self.am_draw_walls
     Doocr.numlines.times do |i|
-      @@l.a.not_nil!.x = CDoom.lines[i].v1.value.x
-      @@l.a.not_nil!.y = CDoom.lines[i].v1.value.y
-      @@l.b.not_nil!.x = CDoom.lines[i].v2.value.x
-      @@l.b.not_nil!.y = CDoom.lines[i].v2.value.y
-      if Doocr.cheating != 0 || (CDoom.lines[i].flags & CDoom::ML_MAPPED) != 0
-        next if (CDoom.lines[i].flags & CDoom::LINE_NEVERSEE) != 0 && Doocr.cheating == 0
-        if CDoom.lines[i].backsector.null?
+      @@l.a.not_nil!.x = Doocr.lines[i].v1.value.x
+      @@l.a.not_nil!.y = Doocr.lines[i].v1.value.y
+      @@l.b.not_nil!.x = Doocr.lines[i].v2.value.x
+      @@l.b.not_nil!.y = Doocr.lines[i].v2.value.y
+      if Doocr.cheating != 0 || (Doocr.lines[i].flags & CDoom::ML_MAPPED) != 0
+        next if (Doocr.lines[i].flags & CDoom::LINE_NEVERSEE) != 0 && Doocr.cheating == 0
+        if Doocr.lines[i].backsector.null?
           am_draw_mline(@@l, CDoom::WALLCOLORS + Doocr.lightlev)
         else
-          if CDoom.lines[i].special == 39
+          if Doocr.lines[i].special == 39
             # teleporters
             am_draw_mline(@@l, CDoom::WALLCOLORS + CDoom::WALLRANGE // 2)
-          elsif CDoom.lines[i].flags & CDoom::ML_SECRET != 0 # secret door
+          elsif Doocr.lines[i].flags & CDoom::ML_SECRET != 0 # secret door
             if Doocr.cheating != 0
               am_draw_mline(@@l, CDoom::SECRETWALLCOLORS + Doocr.lightlev)
             else
               am_draw_mline(@@l, CDoom::WALLCOLORS + Doocr.lightlev)
             end
-          elsif CDoom.lines[i].backsector.value.floorheight != CDoom.lines[i].frontsector.value.floorheight
+          elsif Doocr.lines[i].backsector.value.floorheight != Doocr.lines[i].frontsector.value.floorheight
             am_draw_mline(@@l, CDoom::FDWALLCOLORS + Doocr.lightlev) # floor level change
-          elsif CDoom.lines[i].backsector.value.ceilingheight != CDoom.lines[i].frontsector.value.ceilingheight
+          elsif Doocr.lines[i].backsector.value.ceilingheight != Doocr.lines[i].frontsector.value.ceilingheight
             am_draw_mline(@@l, CDoom::CDWALLCOLORS + Doocr.lightlev) # ceiling level change
           elsif Doocr.cheating != 0
             am_draw_mline(@@l, CDoom::TSWALLCOLORS + Doocr.lightlev)
           end
         end
-      elsif CDoom.plr.value.powers[CDoom::Powertype::Allmap.value] != 0
-        am_draw_mline(@@l, CDoom::GRAYS + 3) if CDoom.lines[i].flags & CDoom::LINE_NEVERSEE == 0
+      elsif Doocr.plr.value.powers[CDoom::Powertype::Allmap.value] != 0
+        am_draw_mline(@@l, CDoom::GRAYS + 3) if Doocr.lines[i].flags & CDoom::LINE_NEVERSEE == 0
       end
     end
   end
@@ -770,13 +770,13 @@ module Doocr
       if Doocr.cheating != 0
         am_draw_line_character(
           @@cheat_player_arrow, @@cheat_player_arrow.size, 0,
-          CDoom.plr.value.mo.value.angle, CDoom::WHITE,
-          CDoom.plr.value.mo.value.x, CDoom.plr.value.mo.value.y
+          Doocr.plr.value.mo.value.angle, CDoom::WHITE,
+          Doocr.plr.value.mo.value.x, Doocr.plr.value.mo.value.y
         )
       else
         am_draw_line_character(
-          @@player_arrow, @@player_arrow.size, 0, CDoom.plr.value.mo.value.angle,
-          CDoom::WHITE, CDoom.plr.value.mo.value.x, CDoom.plr.value.mo.value.y
+          @@player_arrow, @@player_arrow.size, 0, Doocr.plr.value.mo.value.angle,
+          CDoom::WHITE, Doocr.plr.value.mo.value.x, Doocr.plr.value.mo.value.y
         )
       end
       return
@@ -786,7 +786,7 @@ module Doocr
       their_color += 1
       p = @@players.to_unsafe + i
 
-      next if (Doocr.deathmatch != 0 && Doocr.singledemo == 0) && p != CDoom.plr
+      next if (Doocr.deathmatch != 0 && Doocr.singledemo == 0) && p != Doocr.plr
       next if Doocr.playeringame[i] == 0
 
       if p.value.powers[CDoom::Powertype::Invisibility.value] != 0
@@ -804,7 +804,7 @@ module Doocr
 
   def self.am_draw_things(colors : Int32, colorrange : Int32)
     Doocr.numsectors.times do |i|
-      t = CDoom.sectors[i].thinglist
+      t = Doocr.sectors[i].thinglist
       until t.null?
         am_draw_line_character(
           @@thintriangle_guy, @@thintriangle_guy.size,
@@ -833,7 +833,7 @@ module Doocr
   end
 
   def self.am_draw_crosshair(color : Int32)
-    CDoom.fb[(Doocr.f_w * (Doocr.f_h + 1)) // 2] = color.to_u8! # single point for now
+    Doocr.fb[(Doocr.f_w * (Doocr.f_h + 1)) // 2] = color.to_u8! # single point for now
   end
 
   def self.am_drawer

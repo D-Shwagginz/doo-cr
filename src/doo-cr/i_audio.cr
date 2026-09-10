@@ -73,8 +73,8 @@ module Doocr
   def self.i_stop_sound(handle : Int32)
     @@sound_mutex.synchronize do
       CDoom::NUM_CHANNELS.times do |chan|
-        if Doocr.channelhandles[chan] == handle && !CDoom.channels[chan].null?
-          CDoom.channels[chan] = Pointer(UInt8).null
+        if Doocr.channelhandles[chan] == handle && !Doocr.channels[chan].null?
+          Doocr.channels[chan] = Pointer(UInt8).null
           break
         end
       end
@@ -84,7 +84,7 @@ module Doocr
   def self.i_sound_is_playing(handle : Int32) : Int32
     @@sound_mutex.synchronize do
       CDoom::NUM_CHANNELS.times do |chan|
-        return (!CDoom.channels[chan].null?).to_unsafe if Doocr.channelhandles[chan] == handle
+        return (!Doocr.channels[chan].null?).to_unsafe if Doocr.channelhandles[chan] == handle
       end
     end
 
@@ -130,9 +130,9 @@ module Doocr
         #  as well. Thus loop those  channels.
         CDoom::NUM_CHANNELS.times do |chan|
           # Check channel, if active.
-          if !CDoom.channels[chan].null?
+          if !Doocr.channels[chan].null?
             # Get the raw data from the channel.
-            sample = CDoom.channels[chan].value
+            sample = Doocr.channels[chan].value
             # Add left and right part
             #  for this channel (sound)
             #  to the current data.
@@ -142,11 +142,11 @@ module Doocr
             # Increment index ???
             Doocr.channelstepremainder[chan] = Doocr.channelstepremainder[chan] + Doocr.channelstep[chan]
             # MSB is next sample???
-            CDoom.channels[chan] = CDoom.channels[chan] + (Doocr.channelstepremainder[chan] >> 16)
+            Doocr.channels[chan] = Doocr.channels[chan] + (Doocr.channelstepremainder[chan] >> 16)
             # Limit to LSB???
             Doocr.channelstepremainder[chan] = Doocr.channelstepremainder[chan] & (65536 - 1)
             # Check whether we are done.
-            CDoom.channels[chan] = Pointer(UInt8).null if CDoom.channels[chan] >= Doocr.channelsend[chan]
+            Doocr.channels[chan] = Pointer(UInt8).null if Doocr.channels[chan] >= Doocr.channelsend[chan]
           end
         end
 
@@ -222,7 +222,7 @@ module Doocr
     #   done = true
 
     #   Doocr.num_channels.times do |i|
-    #     next if CDoom.channels[i].null?
+    #     next if Doocr.channels[i].null?
     #     done = false
     #   end
 

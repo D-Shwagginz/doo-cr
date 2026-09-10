@@ -108,9 +108,10 @@ end
   end
 
   def self.i_base_ticcmd : CDoom::Ticcmd*
-    return pointerof(CDoom.emptycmd)
+    return pointerof(@@emptycmd)
   end
 
+  @@emptycmd = CDoom::Ticcmd.new
   @@mouse_queued = Raylib::Vector2.new
 
   def self.i_poll_mouse

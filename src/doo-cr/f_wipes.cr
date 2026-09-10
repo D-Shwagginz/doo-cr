@@ -31,14 +31,14 @@ module Doocr
   end
 
   def self.wipe_init_color_x_form(width : Int32, height : Int32, ticks : Int32) : Int32
-    CDoom.doom_memcpy(CDoom.wipe_scr, CDoom.wipe_scr_start, width * height)
+    CDoom.doom_memcpy(Doocr.wipe_scr, Doocr.wipe_scr_start, width * height)
     return 0
   end
 
   def self.wipe_do_color_x_form(width : Int32, height : Int32, ticks : Int32) : Int32
     changed = 0
-    w = CDoom.wipe_scr
-    e = CDoom.wipe_scr_end
+    w = Doocr.wipe_scr
+    e = Doocr.wipe_scr_end
     stop = w + width * height
 
     while w != stop
@@ -67,12 +67,12 @@ module Doocr
 
   def self.wipe_init_melt(width : Int32, height : Int32, ticks : Int32) : Int32
     # copy start screen to main screen
-    CDoom.doom_memcpy(CDoom.wipe_scr, CDoom.wipe_scr_start, width * height)
+    CDoom.doom_memcpy(Doocr.wipe_scr, Doocr.wipe_scr_start, width * height)
 
     # makes this wipe faster (in theory)
     # to have stuff in column-major format
-    CDoom.wipe_shitty_col_major_x_form(CDoom.wipe_scr_start.as(Int16*), width // 2, height)
-    CDoom.wipe_shitty_col_major_x_form(CDoom.wipe_scr_end.as(Int16*), width // 2, height)
+    CDoom.wipe_shitty_col_major_x_form(Doocr.wipe_scr_start.as(Int16*), width // 2, height)
+    CDoom.wipe_shitty_col_major_x_form(Doocr.wipe_scr_end.as(Int16*), width // 2, height)
 
     # setup initial column positions
     # (y<0 => not ready to scroll yet)
@@ -107,8 +107,8 @@ module Doocr
         elsif Doocr.wipe_y[i] < height
           dy = (Doocr.wipe_y[i] < 16) ? Doocr.wipe_y[i] + 1 : 8
           dy = height - Doocr.wipe_y[i] if Doocr.wipe_y[i] + dy >= height
-          s = CDoom.wipe_scr_end.as(Int16*) + (i * height + Doocr.wipe_y[i])
-          d = CDoom.wipe_scr.as(Int16*) + (Doocr.wipe_y[i] * width + i)
+          s = Doocr.wipe_scr_end.as(Int16*) + (i * height + Doocr.wipe_y[i])
+          d = Doocr.wipe_scr.as(Int16*) + (Doocr.wipe_y[i] * width + i)
           idx = 0
           j = dy
           while j != 0
@@ -118,8 +118,8 @@ module Doocr
             j -= 1
           end
           Doocr.wipe_y[i] = Doocr.wipe_y[i] + dy
-          s = CDoom.wipe_scr_start.as(Int16*) + (i * height)
-          d = CDoom.wipe_scr.as(Int16*) + (Doocr.wipe_y[i] * width + i)
+          s = Doocr.wipe_scr_start.as(Int16*) + (i * height)
+          d = Doocr.wipe_scr.as(Int16*) + (Doocr.wipe_y[i] * width + i)
           idx = 0
           j = height - Doocr.wipe_y[i]
           while j != 0
@@ -144,15 +144,15 @@ module Doocr
   end
 
   def self.wipe_start_screen(x : Int32, y : Int32, width : Int32, height : Int32) : Int32
-    CDoom.wipe_scr_start = CDoom.screens[2]
-    CDoom.i_read_screen(CDoom.wipe_scr_start)
+    Doocr.wipe_scr_start = Doocr.screens[2]
+    CDoom.i_read_screen(Doocr.wipe_scr_start)
     return 0
   end
 
   def self.wipe_end_screen(x : Int32, y : Int32, width : Int32, height : Int32) : Int32
-    CDoom.wipe_scr_end = CDoom.screens[3]
-    CDoom.i_read_screen(CDoom.wipe_scr_end)
-    CDoom.v_draw_block(x, y, 0, width, height, CDoom.wipe_scr_start) # restore start scr
+    Doocr.wipe_scr_end = Doocr.screens[3]
+    CDoom.i_read_screen(Doocr.wipe_scr_end)
+    CDoom.v_draw_block(x, y, 0, width, height, Doocr.wipe_scr_start) # restore start scr
     return 0
   end
 
@@ -166,7 +166,7 @@ module Doocr
     # initial stuff
     if Doocr.go == 0
       Doocr.go = 1
-      CDoom.wipe_scr = CDoom.screens[0]
+      Doocr.wipe_scr = Doocr.screens[0]
       @@wipes[wipeno * 3].call(width, height, ticks)
     end
 

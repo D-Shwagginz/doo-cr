@@ -17,7 +17,7 @@
 
 module Doocr
   def self.wi_slam_background
-    CDoom.doom_memcpy(CDoom.screens[0], CDoom.screens[1], CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
+    CDoom.doom_memcpy(Doocr.screens[0], Doocr.screens[1], CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
     CDoom.v_mark_rect(0, 0, CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT)
   end
 

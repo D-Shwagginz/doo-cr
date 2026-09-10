@@ -123,7 +123,7 @@ module Doocr
     end
 
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      sec = CDoom.sectors + secnum
+      sec = Doocr.sectors + secnum
       next unless sec.value.specialdata.null?
 
       # new door thinker
@@ -172,8 +172,8 @@ module Doocr
   #
   def self.p_add_active_ceiling(c : CDoom::Ceiling*)
     CDoom::MAXCEILINGS.times do |i|
-      if CDoom.activeceilings[i].null?
-        CDoom.activeceilings[i] = c
+      if Doocr.activeceilings[i].null?
+        Doocr.activeceilings[i] = c
         return
       end
     end
@@ -184,10 +184,10 @@ module Doocr
   #
   def self.p_remove_active_ceiling(c : CDoom::Ceiling*)
     CDoom::MAXCEILINGS.times do |i|
-      if CDoom.activeceilings[i] == c
-        CDoom.activeceilings[i].value.sector.value.specialdata = Pointer(Void).null
-        CDoom.p_remove_thinker(pointerof(CDoom.activeceilings[i].value.@thinker))
-        CDoom.activeceilings[i] = Pointer(CDoom::Ceiling).null
+      if Doocr.activeceilings[i] == c
+        Doocr.activeceilings[i].value.sector.value.specialdata = Pointer(Void).null
+        CDoom.p_remove_thinker(pointerof(Doocr.activeceilings[i].value.@thinker))
+        Doocr.activeceilings[i] = Pointer(CDoom::Ceiling).null
         break
       end
     end
@@ -198,11 +198,11 @@ module Doocr
   #
   def self.p_activate_in_stasis_ceiling(line : CDoom::Line*)
     CDoom::MAXCEILINGS.times do |i|
-      if !CDoom.activeceilings[i].null? &&
-         (CDoom.activeceilings[i].value.tag == line.value.tag) &&
-         (CDoom.activeceilings[i].value.direction == 0)
-        CDoom.activeceilings[i].value.direction = CDoom.activeceilings[i].value.olddirection
-        pointerof(CDoom.activeceilings[i].value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
+      if !Doocr.activeceilings[i].null? &&
+         (Doocr.activeceilings[i].value.tag == line.value.tag) &&
+         (Doocr.activeceilings[i].value.direction == 0)
+        Doocr.activeceilings[i].value.direction = Doocr.activeceilings[i].value.olddirection
+        pointerof(Doocr.activeceilings[i].value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
       end
     end
   end
@@ -213,12 +213,12 @@ module Doocr
   def self.ev_ceiling_crush_stop(line : CDoom::Line*) : LibC::Int
     rtn = 0
     CDoom::MAXCEILINGS.times do |i|
-      if !CDoom.activeceilings[i].null? &&
-         CDoom.activeceilings[i].value.tag == line.value.tag &&
-         CDoom.activeceilings[i].value.direction != 0
-        CDoom.activeceilings[i].value.olddirection = CDoom.activeceilings[i].value.direction
-        pointerof(CDoom.activeceilings[i].value.@thinker.@function).as(CDoom::ActionfV*).value = NULL_PROC
-        CDoom.activeceilings[i].value.direction = 0 # in-stasis
+      if !Doocr.activeceilings[i].null? &&
+         Doocr.activeceilings[i].value.tag == line.value.tag &&
+         Doocr.activeceilings[i].value.direction != 0
+        Doocr.activeceilings[i].value.olddirection = Doocr.activeceilings[i].value.direction
+        pointerof(Doocr.activeceilings[i].value.@thinker.@function).as(CDoom::ActionfV*).value = NULL_PROC
+        Doocr.activeceilings[i].value.direction = 0 # in-stasis
         rtn = 1
       end
     end
@@ -349,7 +349,7 @@ module Doocr
     rtn = 0
 
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      sec = CDoom.sectors + secnum
+      sec = Doocr.sectors + secnum
       next unless sec.value.specialdata.null?
 
       # new door thinker
@@ -436,8 +436,8 @@ module Doocr
     end
 
     # if the sector has an active thinker, use it
-    sec = CDoom.sides[line.value.sidenum[side ^ 1]].sector
-    secnum = (sec - CDoom.sectors).to_i32!
+    sec = Doocr.sides[line.value.sidenum[side ^ 1]].sector
+    secnum = (sec - Doocr.sectors).to_i32!
 
     unless sec.value.specialdata.null?
       door = sec.value.specialdata.as(CDoom::Vldoor*)
@@ -570,9 +570,9 @@ module Doocr
 
       next if Doocr.openrange <= 0 # closed door
 
-      other = CDoom.sides[check.value.sidenum[0]].sector
-      if CDoom.sides[check.value.sidenum[0]].sector == sec
-        other = CDoom.sides[check.value.sidenum[1]].sector
+      other = Doocr.sides[check.value.sidenum[0]].sector
+      if Doocr.sides[check.value.sidenum[0]].sector == sec
+        other = Doocr.sides[check.value.sidenum[1]].sector
       end
 
       if check.value.flags & CDoom::ML_SOUNDBLOCK != 0
@@ -863,8 +863,8 @@ module Doocr
 
     # scan the remaining thinkers
     # to see if all Keens are dead
-    th = CDoom.thinkercap.next
-    while th != pointerof(CDoom.thinkercap)
+    th = Doocr.thinkercap.to_unsafe.value.next
+    while th != Doocr.thinkercap.to_unsafe
       if th.value.function.acp1.pointer != (->CDoom.p_mobj_thinker).pointer
         th = th.value.next
         next
@@ -1505,8 +1505,8 @@ module Doocr
     # count total number of skull currently on the level
     count = 0
 
-    currentthinker = CDoom.thinkercap.next
-    while currentthinker != pointerof(CDoom.thinkercap)
+    currentthinker = Doocr.thinkercap.to_unsafe.value.next
+    while currentthinker != Doocr.thinkercap.to_unsafe
       if (currentthinker.value.function.acp1.pointer == (->CDoom.p_mobj_thinker).pointer) &&
          currentthinker.as(CDoom::Mobj*).value.type == CDoom::Mobjtype::MT_SKULL
         count += 1
@@ -1648,8 +1648,8 @@ module Doocr
 
     # scan the remaining thinkers to see
     # if all bosses are dead
-    th = CDoom.thinkercap.next
-    while th != pointerof(CDoom.thinkercap)
+    th = Doocr.thinkercap.to_unsafe.value.next
+    while th != Doocr.thinkercap.to_unsafe
       if th.value.function.acp1.pointer != (->CDoom.p_mobj_thinker).pointer
         th = th.value.next
         next
@@ -1738,8 +1738,8 @@ module Doocr
     Doocr.numbraintargets = 0
     Doocr.braintargeton = 0
 
-    thinker = CDoom.thinkercap.next
-    while thinker != pointerof(CDoom.thinkercap)
+    thinker = Doocr.thinkercap.to_unsafe.value.next
+    while thinker != Doocr.thinkercap.to_unsafe
       if thinker.value.function.acp1.pointer != (->CDoom.p_mobj_thinker).pointer
         thinker = thinker.value.next
         next # not a mobj
@@ -2033,7 +2033,7 @@ module Doocr
     secnum = -1
     rtn = 0
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      sec = CDoom.sectors + secnum
+      sec = Doocr.sectors + secnum
 
       # ALREADY MOVING?  IF SO, KEEP GOING...
       next unless sec.value.specialdata.null?
@@ -2146,7 +2146,7 @@ module Doocr
 
         sec.value.linecount.times do |i|
           if CDoom.two_sided(secnum, i) != 0
-            if CDoom.get_side(secnum, i, 0).value.sector - CDoom.sectors == secnum
+            if CDoom.get_side(secnum, i, 0).value.sector - Doocr.sectors == secnum
               sec = CDoom.get_sector(secnum, i, 1)
 
               if sec.value.floorheight == floor.value.floordestheight
@@ -2178,7 +2178,7 @@ module Doocr
     secnum = -1
     rtn = 0
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      sec = CDoom.sectors + secnum
+      sec = Doocr.sectors + secnum
 
       # ALREADY MOVING?  IF SO, KEEP GOING...
       next unless sec.value.specialdata.null?
@@ -2215,12 +2215,12 @@ module Doocr
           next if ((sec.value.lines[i]).value.flags & CDoom::ML_TWOSIDED) == 0
 
           tsec = (sec.value.lines[i]).value.frontsector
-          newsecnum = (tsec - CDoom.sectors).to_i32!
+          newsecnum = (tsec - Doocr.sectors).to_i32!
 
           next if secnum != newsecnum
 
           tsec = (sec.value.lines[i]).value.backsector
-          newsecnum = (tsec - CDoom.sectors).to_i32!
+          newsecnum = (tsec - Doocr.sectors).to_i32!
 
           next if tsec.value.floorpic != texture
 
@@ -3016,7 +3016,7 @@ module Doocr
   def self.ev_start_light_strobing(line : CDoom::Line*)
     secnum = -1
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      sec = CDoom.sectors + secnum
+      sec = Doocr.sectors + secnum
       next if !sec.value.specialdata.null?
 
       CDoom.p_spawn_strobe_flash(sec, CDoom::SLOWDARK, 0)
@@ -3027,7 +3027,7 @@ module Doocr
   # TURN LINE'S TAG LIGHTS OFF
   #
   def self.ev_turn_tag_lights_off(line : CDoom::Line*)
-    sector = CDoom.sectors
+    sector = Doocr.sectors
 
     Doocr.numsectors.times do |j|
       if sector.value.tag == line.value.tag
@@ -3045,7 +3045,7 @@ module Doocr
   end
 
   def self.ev_light_turn_on(line : CDoom::Line*, bright : LibC::Int)
-    sector = CDoom.sectors
+    sector = Doocr.sectors
 
     Doocr.numsectors.times do |j|
       if sector.value.tag == line.value.tag
@@ -3462,7 +3462,7 @@ module Doocr
         side = CDoom.p_point_on_line_side(thing.value.x, thing.value.y, ld)
         oldside = CDoom.p_point_on_line_side(oldx, oldy, ld)
         if side != oldside
-          CDoom.p_cross_special_line((ld - CDoom.lines).to_i32!, oldside, thing) if ld.value.special != 0
+          CDoom.p_cross_special_line((ld - Doocr.lines).to_i32!, oldside, thing) if ld.value.special != 0
         end
       end
     end
@@ -3756,8 +3756,8 @@ module Doocr
       # hit line
       # position a bit closer
       frac = int.value.frac - CDoom.fixed_div(4 * FRACUNIT, Doocr.attackrange)
-      x = CDoom.trace.x + CDoom.fixed_mul(CDoom.trace.dx, frac)
-      y = CDoom.trace.y + CDoom.fixed_mul(CDoom.trace.dy, frac)
+      x = Doocr.trace[0].x + CDoom.fixed_mul(Doocr.trace[0].dx, frac)
+      y = Doocr.trace[0].y + CDoom.fixed_mul(Doocr.trace[0].dy, frac)
       z = Doocr.shootz + CDoom.fixed_mul(Doocr.aimslope, CDoom.fixed_mul(frac, Doocr.attackrange))
 
       if li.value.frontsector.value.ceilingpic == Doocr.skyflatnum
@@ -3795,8 +3795,8 @@ module Doocr
     # position a bit closer
     frac = int.value.frac - CDoom.fixed_div(10 * FRACUNIT, Doocr.attackrange)
 
-    x = CDoom.trace.x + CDoom.fixed_mul(CDoom.trace.dx, frac)
-    y = CDoom.trace.y + CDoom.fixed_mul(CDoom.trace.dy, frac)
+    x = Doocr.trace[0].x + CDoom.fixed_mul(Doocr.trace[0].dx, frac)
+    y = Doocr.trace[0].y + CDoom.fixed_mul(Doocr.trace[0].dy, frac)
     z = Doocr.shootz + CDoom.fixed_mul(Doocr.aimslope, CDoom.fixed_mul(frac, Doocr.attackrange))
 
     # Spawn bullet puffs or blod spots,
@@ -4211,7 +4211,7 @@ module Doocr
 
         if blockx >= 0 && blockx < Doocr.bmapwidth &&
            blocky >= 0 && blocky < Doocr.bmapheight
-          CDoom.blocklinks[blocky * Doocr.bmapwidth + blockx] = thing.value.bnext
+          Doocr.blocklinks[blocky * Doocr.bmapwidth + blockx] = thing.value.bnext
         end
       end
     end
@@ -4242,7 +4242,7 @@ module Doocr
 
       if blockx >= 0 && blockx < Doocr.bmapwidth &&
          blocky >= 0 && blocky < Doocr.bmapheight
-        link = CDoom.blocklinks + (blocky * Doocr.bmapwidth + blockx)
+        link = Doocr.blocklinks.to_unsafe + (blocky * Doocr.bmapwidth + blockx)
         thing.value.bprev = Pointer(CDoom::Mobj).null
         thing.value.bnext = link.value
         link.value.value.bprev = thing unless link.value.null?
@@ -4280,7 +4280,7 @@ module Doocr
 
     list = Doocr.blockmaplump + offset
     while list.value != -1
-      ld = CDoom.lines + list.value
+      ld = Doocr.lines + list.value
 
       if ld.value.validcount == Doocr.validcount
         list += 1
@@ -4300,7 +4300,7 @@ module Doocr
   def self.p_block_things_iterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Mobj*, CDoom::DoomBool)) : CDoom::DoomBool
     return 1 if x < 0 || y < 0 || x >= Doocr.bmapwidth || y >= Doocr.bmapheight
 
-    mobj = CDoom.blocklinks[y * Doocr.bmapwidth + x]
+    mobj = Doocr.blocklinks[y * Doocr.bmapwidth + x]
     while !mobj.null?
       return 0 if func.call(mobj) == 0
 
@@ -4328,22 +4328,22 @@ module Doocr
     s2 = 0
     dl = CDoom::Divline.new
     # avoid precision problems with two routines
-    if CDoom.trace.dx > FRACUNIT * 16 ||
-       CDoom.trace.dy > FRACUNIT * 16 ||
-       CDoom.trace.dx < -FRACUNIT * 16 ||
-       CDoom.trace.dy < -FRACUNIT * 16
-      s1 = CDoom.p_point_on_divline_side(ld.value.v1.value.x, ld.value.v1.value.y, pointerof(CDoom.trace))
-      s2 = CDoom.p_point_on_divline_side(ld.value.v2.value.x, ld.value.v2.value.y, pointerof(CDoom.trace))
+    if Doocr.trace[0].dx > FRACUNIT * 16 ||
+       Doocr.trace[0].dy > FRACUNIT * 16 ||
+       Doocr.trace[0].dx < -FRACUNIT * 16 ||
+       Doocr.trace[0].dy < -FRACUNIT * 16
+      s1 = CDoom.p_point_on_divline_side(ld.value.v1.value.x, ld.value.v1.value.y, Doocr.trace.to_unsafe)
+      s2 = CDoom.p_point_on_divline_side(ld.value.v2.value.x, ld.value.v2.value.y, Doocr.trace.to_unsafe)
     else
-      s1 = CDoom.p_point_on_line_side(CDoom.trace.x, CDoom.trace.y, ld)
-      s2 = CDoom.p_point_on_line_side(CDoom.trace.x + CDoom.trace.dx, CDoom.trace.y + CDoom.trace.dy, ld)
+      s1 = CDoom.p_point_on_line_side(Doocr.trace[0].x, Doocr.trace[0].y, ld)
+      s2 = CDoom.p_point_on_line_side(Doocr.trace[0].x + Doocr.trace[0].dx, Doocr.trace[0].y + Doocr.trace[0].dy, ld)
     end
 
     return 1 if s1 == s2 # line isn't crossed
 
     # hit the line
     CDoom.p_make_divline(ld, pointerof(dl))
-    frac = CDoom.p_intercept_vector(pointerof(CDoom.trace), pointerof(dl))
+    frac = CDoom.p_intercept_vector(Doocr.trace.to_unsafe, pointerof(dl))
 
     return 1 if frac < 0 # behind source
 
@@ -4354,17 +4354,17 @@ module Doocr
       return 0 # stop checking
     end
 
-    CDoom.intercept_p.value.frac = frac
-    CDoom.intercept_p.value.isaline = 1
-    CDoom.intercept_p.value.d.line = ld
+    Doocr.intercept_p.value.frac = frac
+    Doocr.intercept_p.value.isaline = 1
+    Doocr.intercept_p.value.d.line = ld
 
-    CDoom.intercept_p += 1
+    Doocr.intercept_p += 1
 
     return 1 # continue
   end
 
   def self.pit_add_thing_intercepts(thing : CDoom::Mobj*) : CDoom::DoomBool
-    tracepositive = ((CDoom.trace.dx ^ CDoom.trace.dy) > 0).to_unsafe
+    tracepositive = ((Doocr.trace[0].dx ^ Doocr.trace[0].dy) > 0).to_unsafe
 
     # check a corner to corner crossection for hit
     if tracepositive != 0
@@ -4381,8 +4381,8 @@ module Doocr
       y2 = thing.value.y + thing.value.radius
     end
 
-    s1 = CDoom.p_point_on_divline_side(x1, y1, pointerof(CDoom.trace))
-    s2 = CDoom.p_point_on_divline_side(x2, y2, pointerof(CDoom.trace))
+    s1 = CDoom.p_point_on_divline_side(x1, y1, Doocr.trace.to_unsafe)
+    s2 = CDoom.p_point_on_divline_side(x2, y2, Doocr.trace.to_unsafe)
 
     return 1 if s1 == s2 # line isn't crossed
 
@@ -4393,15 +4393,15 @@ module Doocr
       dy: y2 - y1
     )
 
-    frac = CDoom.p_intercept_vector(pointerof(CDoom.trace), pointerof(dl))
+    frac = CDoom.p_intercept_vector(Doocr.trace.to_unsafe, pointerof(dl))
 
     return 1 if frac < 0 # behind source
 
-    CDoom.intercept_p.value.frac = frac
-    CDoom.intercept_p.value.isaline = 0
-    CDoom.intercept_p.value.d.thing = thing
+    Doocr.intercept_p.value.frac = frac
+    Doocr.intercept_p.value.isaline = 0
+    Doocr.intercept_p.value.d.thing = thing
 
-    CDoom.intercept_p += 1
+    Doocr.intercept_p += 1
 
     return 1 # keep going
   end
@@ -4411,15 +4411,15 @@ module Doocr
   # for all lines.
   #
   def self.p_traverse_intercepts(func : CDoom::Traverser, maxfrac : CDoom::Fixed) : CDoom::DoomBool
-    count = (CDoom.intercept_p - CDoom.intercepts.to_unsafe).to_i32!
+    count = (Doocr.intercept_p - Doocr.intercepts.to_unsafe).to_i32!
 
     int = Pointer(CDoom::Intercept).null # shut up compiler warning
 
     while count != 0
       count -= 1
       dist = Int32::MAX
-      scan = CDoom.intercepts.to_unsafe
-      while scan < CDoom.intercept_p
+      scan = Doocr.intercepts.to_unsafe
+      while scan < Doocr.intercept_p
         if scan.value.frac < dist
           dist = scan.value.frac
           int = scan
@@ -4449,16 +4449,16 @@ module Doocr
     Doocr.earlyout = (flags & CDoom::PT_EARLYOUT != 0).to_unsafe
 
     Doocr.validcount += 1
-    CDoom.intercept_p = CDoom.intercepts.to_unsafe
+    Doocr.intercept_p = Doocr.intercepts.to_unsafe
 
     x1 += FRACUNIT if (x1 - Doocr.bmaporgx) & (CDoom::MAPBLOCKSIZE - 1) == 0 # don't side exactly on a line
 
     y1 += FRACUNIT if (y1 - Doocr.bmaporgy) & (CDoom::MAPBLOCKSIZE - 1) == 0 # don't side exactly on a line
 
-    CDoom.trace.x = x1
-    CDoom.trace.y = y1
-    CDoom.trace.dx = x2 - x1
-    CDoom.trace.dy = y2 - y1
+    Doocr.trace.to_unsafe.value.x = x1
+    Doocr.trace.to_unsafe.value.y = y1
+    Doocr.trace.to_unsafe.value.dx = x2 - x1
+    Doocr.trace.to_unsafe.value.dy = y2 - y1
 
     x1 -= Doocr.bmaporgx
     y1 -= Doocr.bmaporgy
@@ -4928,7 +4928,7 @@ module Doocr
        mobj.value.flags & CDoom::Mobjflag::MF_DROPPED.value == 0 &&
        mobj.value.type != CDoom::Mobjtype::MT_INV &&
        mobj.value.type != CDoom::Mobjtype::MT_INS
-      CDoom.itemrespawnque[Doocr.iquehead] = mobj.value.spawnpoint
+      Doocr.itemrespawnque[Doocr.iquehead] = mobj.value.spawnpoint
       Doocr.itemrespawntime[Doocr.iquehead] = Doocr.leveltime
       Doocr.iquehead = (Doocr.iquehead + 1) & (CDoom::ITEMQUESIZE - 1)
 
@@ -4956,7 +4956,7 @@ module Doocr
     # wait at least 30 seconds
     return if Doocr.leveltime - Doocr.itemrespawntime[Doocr.iquetail] < 30 * 35
 
-    mthing = CDoom.itemrespawnque.to_unsafe + Doocr.iquetail
+    mthing = Doocr.itemrespawnque.to_unsafe + Doocr.iquetail
 
     x = mthing.value.x.to_i32 << FRACBITS
     y = mthing.value.y.to_i32 << FRACBITS
@@ -5054,7 +5054,7 @@ module Doocr
     # count deathmatch start positions
     if mthing.value.type == 11
       if Doocr.deathmatch_p < 10
-        CDoom.doom_memcpy(CDoom.deathmatchstarts.to_unsafe + Doocr.deathmatch_p, mthing, sizeof(CDoom::Mapthing))
+        CDoom.doom_memcpy(Doocr.deathmatchstarts.to_unsafe + Doocr.deathmatch_p, mthing, sizeof(CDoom::Mapthing))
         Doocr.deathmatch_p += 1
       end
       return
@@ -5063,7 +5063,7 @@ module Doocr
     # check for players specially
     if mthing.value.type <= 4
       # save spots for respawning in network games
-      (CDoom.playerstarts.to_unsafe + (mthing.value.type - 1)).value = mthing.value
+      (Doocr.playerstarts.to_unsafe + (mthing.value.type - 1)).value = mthing.value
       CDoom.p_spawn_player(mthing) if Doocr.deathmatch == 0
 
       return
@@ -5328,7 +5328,7 @@ module Doocr
     end
 
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      sec = CDoom.sectors + secnum
+      sec = Doocr.sectors + secnum
 
       next if !sec.value.specialdata.null?
 
@@ -5347,7 +5347,7 @@ module Doocr
       case type
       when CDoom::Plattype::RaiseToNearestAndChange
         plat.value.speed = CDoom::PLATSPEED // 2
-        sec.value.floorpic = CDoom.sides[line.value.sidenum[0]].sector.value.floorpic
+        sec.value.floorpic = Doocr.sides[line.value.sidenum[0]].sector.value.floorpic
         plat.value.high = CDoom.p_find_next_highest_floor(sec, sec.value.floorheight)
         plat.value.wait = 0
         plat.value.status = CDoom::Platenum::Up
@@ -5357,7 +5357,7 @@ module Doocr
           CDoom::Sfxenum::SFX_stnmov)
       when CDoom::Plattype::RaiseAndChange
         plat.value.speed = CDoom::PLATSPEED // 2
-        sec.value.floorpic = CDoom.sides[line.value.sidenum[0]].sector.value.floorpic
+        sec.value.floorpic = Doocr.sides[line.value.sidenum[0]].sector.value.floorpic
         plat.value.high = sec.value.floorheight + amount * FRACUNIT
         plat.value.wait = 0
         plat.value.status = CDoom::Platenum::Up
@@ -5409,31 +5409,31 @@ module Doocr
 
   def self.p_activate_in_stasis(tag : LibC::Int)
     CDoom::MAXPLATS.times do |i|
-      if !CDoom.activeplats[i].null? &&
-         CDoom.activeplats[i].value.tag == tag &&
-         CDoom.activeplats[i].value.status == CDoom::Platenum::InStasis
-        CDoom.activeplats[i].value.status = CDoom.activeplats[i].value.oldstatus
-        pointerof(CDoom.activeplats[i].value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
+      if !Doocr.activeplats[i].null? &&
+         Doocr.activeplats[i].value.tag == tag &&
+         Doocr.activeplats[i].value.status == CDoom::Platenum::InStasis
+        Doocr.activeplats[i].value.status = Doocr.activeplats[i].value.oldstatus
+        pointerof(Doocr.activeplats[i].value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
       end
     end
   end
 
   def self.ev_stop_plat(line : CDoom::Line*)
     CDoom::MAXPLATS.times do |i|
-      if !CDoom.activeplats[i].null? &&
-         CDoom.activeplats[i].value.status != CDoom::Platenum::InStasis &&
-         CDoom.activeplats[i].value.tag == line.value.tag
-        CDoom.activeplats[i].value.oldstatus = CDoom.activeplats[i].value.status
-        CDoom.activeplats[i].value.status = CDoom::Platenum::InStasis
-        pointerof(CDoom.activeplats[i].value.@thinker.@function).as(CDoom::ActionfV*).value = NULL_PROC
+      if !Doocr.activeplats[i].null? &&
+         Doocr.activeplats[i].value.status != CDoom::Platenum::InStasis &&
+         Doocr.activeplats[i].value.tag == line.value.tag
+        Doocr.activeplats[i].value.oldstatus = Doocr.activeplats[i].value.status
+        Doocr.activeplats[i].value.status = CDoom::Platenum::InStasis
+        pointerof(Doocr.activeplats[i].value.@thinker.@function).as(CDoom::ActionfV*).value = NULL_PROC
       end
     end
   end
 
   def self.p_add_active_plat(plat : CDoom::Plat*)
     CDoom::MAXPLATS.times do |i|
-      if CDoom.activeplats[i].null?
-        CDoom.activeplats[i] = plat
+      if Doocr.activeplats[i].null?
+        Doocr.activeplats[i] = plat
         return
       end
     end
@@ -5442,10 +5442,10 @@ module Doocr
 
   def self.p_remove_active_plat(plat : CDoom::Plat*)
     CDoom::MAXPLATS.times do |i|
-      if plat == CDoom.activeplats[i]
-        CDoom.activeplats[i].value.sector.value.specialdata = Pointer(Void).null
-        CDoom.p_remove_thinker(pointerof(CDoom.activeplats[i].value.@thinker))
-        CDoom.activeplats[i] = Pointer(CDoom::Plat).null
+      if plat == Doocr.activeplats[i]
+        Doocr.activeplats[i].value.sector.value.specialdata = Pointer(Void).null
+        CDoom.p_remove_thinker(pointerof(Doocr.activeplats[i].value.@thinker))
+        Doocr.activeplats[i] = Pointer(CDoom::Plat).null
 
         return
       end
@@ -6019,7 +6019,7 @@ module Doocr
   end
 
   def self.p_archive_world(file : IO)
-    sec = CDoom.sectors
+    sec = Doocr.sectors
     # do sectors
     Doocr.numsectors.times do |i|
       file.write_bytes((sec.value.floorheight >> FRACBITS).to_i16!)
@@ -6033,7 +6033,7 @@ module Doocr
       sec += 1
     end
 
-    li = CDoom.lines
+    li = Doocr.lines
     # do lines
     Doocr.numlines.times do |i|
       file.write_bytes(li.value.flags)
@@ -6042,7 +6042,7 @@ module Doocr
       2.times do |j|
         next if li.value.sidenum[j] == -1
 
-        si = CDoom.sides + li.value.sidenum[j]
+        si = Doocr.sides + li.value.sidenum[j]
 
         file.write_bytes((si.value.textureoffset >> FRACBITS).to_i16!)
         file.write_bytes((si.value.rowoffset >> FRACBITS).to_i16!)
@@ -6055,7 +6055,7 @@ module Doocr
   end
 
   def self.p_unarchive_world(file : IO)
-    sec = CDoom.sectors
+    sec = Doocr.sectors
     # do sectors
     Doocr.numsectors.times do |i|
       sec.value.floorheight = file.read_bytes(Int16).to_i32 << FRACBITS
@@ -6071,7 +6071,7 @@ module Doocr
       sec += 1
     end
 
-    li = CDoom.lines
+    li = Doocr.lines
     # do lines
     Doocr.numlines.times do |i|
       li.value.flags = file.read_bytes(Int16)
@@ -6079,7 +6079,7 @@ module Doocr
       li.value.tag = file.read_bytes(Int16)
       2.times do |j|
         next if li.value.sidenum[j] == -1
-        si = CDoom.sides + li.value.sidenum[j]
+        si = Doocr.sides + li.value.sidenum[j]
         si.value.textureoffset = file.read_bytes(Int16).to_i32 << FRACBITS
         si.value.rowoffset = file.read_bytes(Int16).to_i32 << FRACBITS
         si.value.toptexture = file.read_bytes(Int16)
@@ -6093,8 +6093,8 @@ module Doocr
 
   def self.p_archive_thinkers(file : IO)
     # save off the current thinkers
-    th = CDoom.thinkercap.next
-    while th != pointerof(CDoom.thinkercap)
+    th = Doocr.thinkercap.to_unsafe.value.next
+    while th != Doocr.thinkercap.to_unsafe
       if th.value.function.acp1.pointer == (->CDoom.p_mobj_thinker).pointer
         file.write_byte(CDoom::Thinkerclass::Mobj.value)
         mobj = th.as(CDoom::Mobj*).value
@@ -6114,8 +6114,8 @@ module Doocr
 
   def self.p_unarchive_thinkers(file : IO)
     # remove all the current thinkers
-    currentthinker = CDoom.thinkercap.next
-    while currentthinker != pointerof(CDoom.thinkercap)
+    currentthinker = Doocr.thinkercap.to_unsafe.value.next
+    while currentthinker != Doocr.thinkercap.to_unsafe
       nextt = currentthinker.value.next
 
       if currentthinker.value.function.acp1.pointer == (->CDoom.p_mobj_thinker).pointer
@@ -6172,19 +6172,19 @@ module Doocr
   #
   def self.p_archive_specials(file : IO)
     # save off the current thinkers
-    th = CDoom.thinkercap.next
-    while th != pointerof(CDoom.thinkercap)
+    th = Doocr.thinkercap.to_unsafe.value.next
+    while th != Doocr.thinkercap.to_unsafe
       if th.value.function.acv.pointer.null?
         i = 0
         while i < CDoom::MAXCEILINGS
-          break if CDoom.activeceilings[i] == th.as(CDoom::Ceiling*)
+          break if Doocr.activeceilings[i] == th.as(CDoom::Ceiling*)
           i += 1
         end
 
         if i < CDoom::MAXCEILINGS
           file.write_byte(CDoom::Specials::Ceiling.value)
           ceiling = th.as(CDoom::Ceiling*).value
-          ceiling.sector = Pointer(CDoom::Sector).new((ceiling.sector - CDoom.sectors).to_u64!)
+          ceiling.sector = Pointer(CDoom::Sector).new((ceiling.sector - Doocr.sectors).to_u64!)
           file.write(pointerof(ceiling).as(UInt8*).to_slice(sizeof(CDoom::Ceiling)))
         end
         th = th.value.next
@@ -6194,7 +6194,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_move_ceiling).pointer
         file.write_byte(CDoom::Specials::Ceiling.value)
         ceiling = th.as(CDoom::Ceiling*).value
-        ceiling.sector = Pointer(CDoom::Sector).new((ceiling.sector - CDoom.sectors).to_u64!)
+        ceiling.sector = Pointer(CDoom::Sector).new((ceiling.sector - Doocr.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(ceiling).as(UInt8*).to_slice(sizeof(CDoom::Ceiling)))
         next
@@ -6203,7 +6203,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_vertical_door).pointer
         file.write_byte(CDoom::Specials::Door.value)
         door = th.as(CDoom::Vldoor*).value
-        door.sector = Pointer(CDoom::Sector).new((door.sector - CDoom.sectors).to_u64!)
+        door.sector = Pointer(CDoom::Sector).new((door.sector - Doocr.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(door).as(UInt8*).to_slice(sizeof(CDoom::Vldoor)))
         next
@@ -6212,7 +6212,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_move_floor).pointer
         file.write_byte(CDoom::Specials::Floor.value)
         floor = th.as(CDoom::Floormove*).value
-        floor.sector = Pointer(CDoom::Sector).new((floor.sector - CDoom.sectors).to_u64!)
+        floor.sector = Pointer(CDoom::Sector).new((floor.sector - Doocr.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(floor).as(UInt8*).to_slice(sizeof(CDoom::Floormove)))
 
@@ -6222,7 +6222,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_plat_raise).pointer
         file.write_byte(CDoom::Specials::Plat.value)
         plat = th.as(CDoom::Plat*).value
-        plat.sector = Pointer(CDoom::Sector).new((plat.sector - CDoom.sectors).to_u64!)
+        plat.sector = Pointer(CDoom::Sector).new((plat.sector - Doocr.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(plat).as(UInt8*).to_slice(sizeof(CDoom::Plat)))
         next
@@ -6231,7 +6231,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_light_flash).pointer
         file.write_byte(CDoom::Specials::Flash.value)
         flash = th.as(CDoom::Lightflash*).value
-        flash.sector = Pointer(CDoom::Sector).new((flash.sector - CDoom.sectors).to_u64!)
+        flash.sector = Pointer(CDoom::Sector).new((flash.sector - Doocr.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(flash).as(UInt8*).to_slice(sizeof(CDoom::Lightflash)))
         next
@@ -6240,7 +6240,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_strobe_flash).pointer
         file.write_byte(CDoom::Specials::Strobe.value)
         strobe = th.as(CDoom::Strobe*).value
-        strobe.sector = Pointer(CDoom::Sector).new((strobe.sector - CDoom.sectors).to_u64!)
+        strobe.sector = Pointer(CDoom::Sector).new((strobe.sector - Doocr.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(strobe).as(UInt8*).to_slice(sizeof(CDoom::Strobe)))
 
@@ -6250,7 +6250,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_glow).pointer
         file.write_byte(CDoom::Specials::Glow.value)
         glow = th.as(CDoom::Glow*).value
-        glow.sector = Pointer(CDoom::Sector).new((glow.sector - CDoom.sectors).to_u64!)
+        glow.sector = Pointer(CDoom::Sector).new((glow.sector - Doocr.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(glow).as(UInt8*).to_slice(sizeof(CDoom::Glow)))
         next
@@ -6275,7 +6275,7 @@ module Doocr
         slice = Slice.new(ceiling.as(UInt8*), sizeof(CDoom::Ceiling))
         file.read_fully(slice)
 
-        ceiling.value.sector = CDoom.sectors + ceiling.value.sector.address
+        ceiling.value.sector = Doocr.sectors + ceiling.value.sector.address
 
         ceiling.value.sector.value.specialdata = ceiling
 
@@ -6289,7 +6289,7 @@ module Doocr
         door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Vldoor*)
         slice = Slice.new(door.as(UInt8*), sizeof(CDoom::Vldoor))
         file.read_fully(slice)
-        door.value.sector = CDoom.sectors + door.value.sector.address
+        door.value.sector = Doocr.sectors + door.value.sector.address
         door.value.sector.value.specialdata = door
         pointerof(door.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
 
@@ -6298,7 +6298,7 @@ module Doocr
         floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Floormove*)
         slice = Slice.new(floor.as(UInt8*), sizeof(CDoom::Floormove))
         file.read_fully(slice)
-        floor.value.sector = CDoom.sectors + floor.value.sector.address
+        floor.value.sector = Doocr.sectors + floor.value.sector.address
         floor.value.sector.value.specialdata = floor
         pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
 
@@ -6307,7 +6307,7 @@ module Doocr
         plat = CDoom.z_malloc(sizeof(CDoom::Plat), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Plat*)
         slice = Slice.new(plat.as(UInt8*), sizeof(CDoom::Plat))
         file.read_fully(slice)
-        plat.value.sector = CDoom.sectors + plat.value.sector.address
+        plat.value.sector = Doocr.sectors + plat.value.sector.address
         plat.value.sector.value.specialdata = plat
         if !plat.value.thinker.function.acp1.pointer.null?
           pointerof(plat.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
@@ -6319,7 +6319,7 @@ module Doocr
         flash = CDoom.z_malloc(sizeof(CDoom::Lightflash), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Lightflash*)
         slice = Slice.new(flash.as(UInt8*), sizeof(CDoom::Lightflash))
         file.read_fully(slice)
-        flash.value.sector = CDoom.sectors + flash.value.sector.address
+        flash.value.sector = Doocr.sectors + flash.value.sector.address
         pointerof(flash.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_light_flash).pointer, Pointer(Void).null)
 
         CDoom.p_add_thinker(pointerof(flash.value.@thinker))
@@ -6327,7 +6327,7 @@ module Doocr
         strobe = CDoom.z_malloc(sizeof(CDoom::Strobe), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Strobe*)
         slice = Slice.new(strobe.as(UInt8*), sizeof(CDoom::Strobe))
         file.read_fully(slice)
-        strobe.value.sector = CDoom.sectors + strobe.value.sector.address
+        strobe.value.sector = Doocr.sectors + strobe.value.sector.address
         pointerof(strobe.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_strobe_flash).pointer, Pointer(Void).null)
 
         CDoom.p_add_thinker(pointerof(strobe.value.@thinker))
@@ -6335,7 +6335,7 @@ module Doocr
         glow = CDoom.z_malloc(sizeof(CDoom::Glow), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Glow*)
         slice = Slice.new(glow.as(UInt8*), sizeof(CDoom::Glow))
         file.read_fully(slice)
-        glow.value.sector = CDoom.sectors + glow.value.sector.address
+        glow.value.sector = Doocr.sectors + glow.value.sector.address
         pointerof(glow.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_glow).pointer, Pointer(Void).null)
 
         CDoom.p_add_thinker(pointerof(glow.value.@thinker))
@@ -6351,13 +6351,13 @@ module Doocr
     Doocr.numvertexes = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapvertex)
 
     # Allocate zone memory for buffer.
-    CDoom.vertexes = CDoom.z_malloc(Doocr.numvertexes * sizeof(CDoom::Vertex), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Vertex*)
+    Doocr.vertexes = CDoom.z_malloc(Doocr.numvertexes * sizeof(CDoom::Vertex), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Vertex*)
 
     # Load data into cache.
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     ml = data.as(CDoom::Mapvertex*)
-    li = CDoom.vertexes
+    li = Doocr.vertexes
 
     # Copy and convert vertex coordinates,
     # internal representation as fixed.
@@ -6375,26 +6375,26 @@ module Doocr
 
   def self.p_load_segs(lump : LibC::Int)
     Doocr.numsegs = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapseg)
-    CDoom.segs = CDoom.z_malloc(Doocr.numsegs * sizeof(CDoom::Seg), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Seg*)
-    CDoom.doom_memset(CDoom.segs, 0, Doocr.numsegs * sizeof(CDoom::Seg))
+    Doocr.segs = CDoom.z_malloc(Doocr.numsegs * sizeof(CDoom::Seg), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Seg*)
+    CDoom.doom_memset(Doocr.segs, 0, Doocr.numsegs * sizeof(CDoom::Seg))
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     ml = data.as(CDoom::Mapseg*)
-    li = CDoom.segs
+    li = Doocr.segs
     Doocr.numsegs.times do |i|
-      li.value.v1 = CDoom.vertexes + ml.value.v1
-      li.value.v2 = CDoom.vertexes + ml.value.v2
+      li.value.v1 = Doocr.vertexes + ml.value.v1
+      li.value.v2 = Doocr.vertexes + ml.value.v2
 
       li.value.angle = ml.value.angle.to_i32 << 16
       li.value.offset = ml.value.offset.to_i32 << 16
       linedef = ml.value.linedef
-      ldef = CDoom.lines + linedef
+      ldef = Doocr.lines + linedef
       li.value.linedef = ldef
       side = ml.value.side
-      li.value.sidedef = CDoom.sides + ldef.value.sidenum[side]
-      li.value.frontsector = CDoom.sides[ldef.value.sidenum[side]].sector
+      li.value.sidedef = Doocr.sides + ldef.value.sidenum[side]
+      li.value.frontsector = Doocr.sides[ldef.value.sidenum[side]].sector
       if ldef.value.flags & CDoom::ML_TWOSIDED != 0
-        li.value.backsector = CDoom.sides[ldef.value.sidenum[side ^ 1]].sector
+        li.value.backsector = Doocr.sides[ldef.value.sidenum[side ^ 1]].sector
       else
         li.value.backsector = Pointer(CDoom::Sector).null
       end
@@ -6408,12 +6408,12 @@ module Doocr
 
   def self.p_load_subsectors(lump : LibC::Int)
     Doocr.numsubsectors = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapsubsector)
-    CDoom.subsectors = CDoom.z_malloc(Doocr.numsubsectors * sizeof(CDoom::Subsector), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Subsector*)
+    Doocr.subsectors = CDoom.z_malloc(Doocr.numsubsectors * sizeof(CDoom::Subsector), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Subsector*)
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     ms = data.as(CDoom::Mapsubsector*)
-    CDoom.doom_memset(CDoom.subsectors, 0, Doocr.numsubsectors * sizeof(CDoom::Subsector))
-    ss = CDoom.subsectors
+    CDoom.doom_memset(Doocr.subsectors, 0, Doocr.numsubsectors * sizeof(CDoom::Subsector))
+    ss = Doocr.subsectors
 
     Doocr.numsubsectors.times do |i|
       ss.value.numlines = ms.value.numsegs
@@ -6428,12 +6428,12 @@ module Doocr
 
   def self.p_load_sectors(lump : LibC::Int)
     Doocr.numsectors = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapsector)
-    CDoom.sectors = CDoom.z_malloc(Doocr.numsectors * sizeof(CDoom::Sector), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Sector*)
-    CDoom.doom_memset(CDoom.sectors, 0, Doocr.numsectors * sizeof(CDoom::Sector))
+    Doocr.sectors = CDoom.z_malloc(Doocr.numsectors * sizeof(CDoom::Sector), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Sector*)
+    CDoom.doom_memset(Doocr.sectors, 0, Doocr.numsectors * sizeof(CDoom::Sector))
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     ms = data.as(CDoom::Mapsector*)
-    ss = CDoom.sectors
+    ss = Doocr.sectors
 
     Doocr.numsectors.times do |i|
       ss.value.floorheight = ms.value.floorheight.to_i32 << FRACBITS
@@ -6454,11 +6454,11 @@ module Doocr
 
   def self.p_load_nodes(lump : LibC::Int)
     Doocr.numnodes = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapnode)
-    CDoom.nodes = CDoom.z_malloc(Doocr.numnodes * sizeof(CDoom::Node), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Node*)
+    Doocr.nodes = CDoom.z_malloc(Doocr.numnodes * sizeof(CDoom::Node), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Node*)
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     mn = data.as(CDoom::Mapnode*)
-    no = CDoom.nodes
+    no = Doocr.nodes
 
     Doocr.numnodes.times do |i|
       no.value.x = mn.value.x.to_i32 << FRACBITS
@@ -6531,20 +6531,20 @@ module Doocr
   #
   def self.p_load_linedefs(lump : LibC::Int)
     Doocr.numlines = CDoom.w_lump_length(lump) // sizeof(CDoom::Maplinedef)
-    CDoom.lines = CDoom.z_malloc(Doocr.numlines * sizeof(CDoom::Line), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Line*)
-    CDoom.doom_memset(CDoom.lines, 0, Doocr.numlines * sizeof(CDoom::Line))
+    Doocr.lines = CDoom.z_malloc(Doocr.numlines * sizeof(CDoom::Line), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Line*)
+    CDoom.doom_memset(Doocr.lines, 0, Doocr.numlines * sizeof(CDoom::Line))
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     mld = data.as(CDoom::Maplinedef*)
-    ld = CDoom.lines
+    ld = Doocr.lines
 
     Doocr.numlines.times do |i|
       ld.value.flags = mld.value.flags
       ld.value.special = mld.value.special
       ld.value.tag = mld.value.tag
-      v1 = CDoom.vertexes + mld.value.v1
+      v1 = Doocr.vertexes + mld.value.v1
       ld.value.v1 = v1
-      v2 = CDoom.vertexes + mld.value.v2
+      v2 = Doocr.vertexes + mld.value.v2
       ld.value.v2 = v2
       ld.value.dx = v2.value.x - v1.value.x
       ld.value.dy = v2.value.y - v1.value.y
@@ -6581,13 +6581,13 @@ module Doocr
       ld.value.sidenum[1] = mld.value.sidenum[1]
 
       if ld.value.sidenum[0] != -1
-        ld.value.frontsector = CDoom.sides[ld.value.sidenum[0]].sector
+        ld.value.frontsector = Doocr.sides[ld.value.sidenum[0]].sector
       else
         ld.value.frontsector = Pointer(CDoom::Sector).null
       end
 
       if ld.value.sidenum[1] != -1
-        ld.value.backsector = CDoom.sides[ld.value.sidenum[1]].sector
+        ld.value.backsector = Doocr.sides[ld.value.sidenum[1]].sector
       else
         ld.value.backsector = Pointer(CDoom::Sector).null
       end
@@ -6601,12 +6601,12 @@ module Doocr
 
   def self.p_load_sidedefs(lump : LibC::Int)
     Doocr.numsides = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapsidedef)
-    CDoom.sides = CDoom.z_malloc(Doocr.numsides * sizeof(CDoom::Side), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Side*)
-    CDoom.doom_memset(CDoom.sides, 0, Doocr.numsides * sizeof(CDoom::Side))
+    Doocr.sides = CDoom.z_malloc(Doocr.numsides * sizeof(CDoom::Side), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Side*)
+    CDoom.doom_memset(Doocr.sides, 0, Doocr.numsides * sizeof(CDoom::Side))
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     msd = data.as(CDoom::Mapsidedef*)
-    sd = CDoom.sides
+    sd = Doocr.sides
 
     Doocr.numsides.times do |i|
       sd.value.textureoffset = msd.value.textureoffset.to_i32 << FRACBITS
@@ -6614,7 +6614,7 @@ module Doocr
       sd.value.toptexture = CDoom.r_texture_num_for_name(msd.value.toptexture)
       sd.value.bottomtexture = CDoom.r_texture_num_for_name(msd.value.bottomtexture)
       sd.value.midtexture = CDoom.r_texture_num_for_name(msd.value.midtexture)
-      sd.value.sector = CDoom.sectors + msd.value.sector
+      sd.value.sector = Doocr.sectors + msd.value.sector
 
       msd += 1
       sd += 1
@@ -6634,8 +6634,8 @@ module Doocr
 
     # clear out mobj chains
     count = sizeof(CDoom::Mobj*) * Doocr.bmapwidth * Doocr.bmapheight
-    CDoom.blocklinks = CDoom.z_malloc(count, CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Mobj**)
-    CDoom.doom_memset(CDoom.blocklinks, 0, count)
+    Doocr.blocklinks.clear
+    (Doocr.bmapwidth * Doocr.bmapheight).times { Doocr.blocklinks << Pointer(CDoom::Mobj).null }
   end
 
   #
@@ -6644,16 +6644,16 @@ module Doocr
   #
   def self.p_group_lines
     # look up sector number for each subsector
-    ss = CDoom.subsectors
+    ss = Doocr.subsectors
     Doocr.numsubsectors.times do |i|
-      seg = CDoom.segs + ss.value.firstline
+      seg = Doocr.segs + ss.value.firstline
       ss.value.sector = seg.value.sidedef.value.sector
 
       ss += 1
     end
 
     # count number of lines in each sector
-    li = CDoom.lines
+    li = Doocr.lines
     total = 0
     Doocr.numlines.times do |i|
       total += 1
@@ -6669,12 +6669,12 @@ module Doocr
 
     # build line tables for each sector
     linebuffer = CDoom.z_malloc(total * sizeof(CDoom::Line*), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Line**)
-    sector = CDoom.sectors
+    sector = Doocr.sectors
     bbox = Pointer(CDoom::Fixed).malloc(4)
     Doocr.numsectors.times do |i|
       CDoom.m_clear_box(bbox)
       sector.value.lines = linebuffer
-      li = CDoom.lines
+      li = Doocr.lines
       Doocr.numlines.times do |j|
         if li.value.frontsector == sector || li.value.backsector == sector
           linebuffer.value = li
@@ -6871,11 +6871,11 @@ module Doocr
       end
     {% end %}
 
-    sub = CDoom.subsectors + num
+    sub = Doocr.subsectors + num
 
     # check lines
     count = sub.value.numlines
-    seg = CDoom.segs + sub.value.firstline
+    seg = Doocr.segs + sub.value.firstline
 
     divl = CDoom::Divline.new
 
@@ -6893,8 +6893,8 @@ module Doocr
 
       v1 = line.value.v1
       v2 = line.value.v2
-      s1 = CDoom.p_divline_side(v1.value.x, v1.value.y, pointerof(CDoom.strace))
-      s2 = CDoom.p_divline_side(v2.value.x, v2.value.y, pointerof(CDoom.strace))
+      s1 = CDoom.p_divline_side(v1.value.x, v1.value.y, Doocr.strace.to_unsafe)
+      s2 = CDoom.p_divline_side(v2.value.x, v2.value.y, Doocr.strace.to_unsafe)
 
       # line isn't crossed?
       if s1 == s2
@@ -6907,7 +6907,7 @@ module Doocr
       divl.y = v1.value.y
       divl.dx = v2.value.x - v1.value.x
       divl.dy = v2.value.y - v1.value.y
-      s1 = CDoom.p_divline_side(CDoom.strace.x, CDoom.strace.y, pointerof(divl))
+      s1 = CDoom.p_divline_side(Doocr.strace[0].x, Doocr.strace[0].y, pointerof(divl))
       s2 = CDoom.p_divline_side(Doocr.t2x, Doocr.t2y, pointerof(divl))
 
       # line isn't crossed?
@@ -6951,7 +6951,7 @@ module Doocr
       # quick test for totally closed doors
       return 0 if openbottom >= opentop # stop
 
-      frac = CDoom.p_intercept_vector2(pointerof(CDoom.strace), pointerof(divl))
+      frac = CDoom.p_intercept_vector2(Doocr.strace.to_unsafe, pointerof(divl))
 
       if front.value.floorheight != back.value.floorheight
         slope = CDoom.fixed_div(openbottom - Doocr.sightzstart, frac)
@@ -6986,10 +6986,10 @@ module Doocr
       end
     end
 
-    bsp = CDoom.nodes + bspnum
+    bsp = Doocr.nodes + bspnum
 
     # decide which side the start point is on
-    side = CDoom.p_divline_side(CDoom.strace.x, CDoom.strace.y, bsp.as(CDoom::Divline*))
+    side = CDoom.p_divline_side(Doocr.strace[0].x, Doocr.strace[0].y, bsp.as(CDoom::Divline*))
     side = 0 if side == 2 # an "on" should cross both sides
 
     # cross the starting side
@@ -7014,8 +7014,8 @@ module Doocr
     # First check for trivial rejection.
 
     # Determine subsector entries in REJECT table.
-    s1 = t1.value.subsector.value.sector - CDoom.sectors
-    s2 = t2.value.subsector.value.sector - CDoom.sectors
+    s1 = t1.value.subsector.value.sector - Doocr.sectors
+    s2 = t2.value.subsector.value.sector - Doocr.sectors
     pnum = s1 * Doocr.numsectors + s2
     bytenum = pnum >> 3
     bitnum = 1 << (pnum & 7)
@@ -7038,12 +7038,12 @@ module Doocr
     Doocr.topslope = (t2.value.z + t2.value.height) - Doocr.sightzstart
     Doocr.bottomslope = (t2.value.z) - Doocr.sightzstart
 
-    CDoom.strace.x = t1.value.x
-    CDoom.strace.y = t1.value.y
+    Doocr.strace.to_unsafe.value.x = t1.value.x
+    Doocr.strace.to_unsafe.value.y = t1.value.y
     Doocr.t2x = t2.value.x
     Doocr.t2y = t2.value.y
-    CDoom.strace.dx = t2.value.x - t1.value.x
-    CDoom.strace.dy = t2.value.y - t1.value.y
+    Doocr.strace.to_unsafe.value.dx = t2.value.x - t1.value.x
+    Doocr.strace.to_unsafe.value.dy = t2.value.y - t1.value.y
 
     # the head node is the last node output
     return CDoom.p_cross_bsp_node(Doocr.numnodes - 1)
@@ -7095,7 +7095,7 @@ module Doocr
   #  the line number, and the side (0/1) that you want.
   #
   def self.get_side(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : CDoom::Side*
-    return CDoom.sides + CDoom.sectors[current_sector].lines[line].value.sidenum[side]
+    return Doocr.sides + Doocr.sectors[current_sector].lines[line].value.sidenum[side]
   end
 
   #
@@ -7104,7 +7104,7 @@ module Doocr
   #  the line number and the side (0/1) that you want.
   #
   def self.get_sector(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : CDoom::Sector*
-    return CDoom.sides[CDoom.sectors[current_sector].lines[line].value.sidenum[side]].sector
+    return Doocr.sides[Doocr.sectors[current_sector].lines[line].value.sidenum[side]].sector
   end
 
   #
@@ -7112,7 +7112,7 @@ module Doocr
   #  it will tell you whether the line is two-sided or not.
   #
   def self.two_sided(sector : LibC::Int, line : LibC::Int) : LibC::Int
-    return CDoom.sectors[sector].lines[line].value.flags.to_i32 & CDoom::ML_TWOSIDED
+    return Doocr.sectors[sector].lines[line].value.flags.to_i32 & CDoom::ML_TWOSIDED
   end
 
   #
@@ -7248,7 +7248,7 @@ module Doocr
   def self.p_find_sector_from_line_tag(line : CDoom::Line*, start : LibC::Int) : LibC::Int
     i = start + 1
     while i < Doocr.numsectors
-      return i if CDoom.sectors[i].tag == line.value.tag
+      return i if Doocr.sectors[i].tag == line.value.tag
       i += 1
     end
 
@@ -7283,7 +7283,7 @@ module Doocr
   #  to cross a line with a non 0 special.
   #
   def self.p_cross_special_line(linenum : LibC::Int, side : LibC::Int, thing : CDoom::Mobj*)
-    line = CDoom.lines + linenum
+    line = Doocr.lines + linenum
 
     Mod.lines.each do |mod_line|
       next if mod_line.when != Mod::Line::When::Crossed ||
@@ -7718,7 +7718,7 @@ module Doocr
       case line.value.special
       when 48
         # EFFECT FIRSTCOL SCROLL +
-        (CDoom.sides + line.value.sidenum[0]).value.textureoffset = CDoom.sides[line.value.sidenum[0]].textureoffset &+ FRACUNIT
+        (Doocr.sides + line.value.sidenum[0]).value.textureoffset = Doocr.sides[line.value.sidenum[0]].textureoffset &+ FRACUNIT
       end
     end
 
@@ -7731,13 +7731,13 @@ module Doocr
           case button.where
           when CDoom::Bwhere::Top
             line = button.line.not_nil!
-            (CDoom.sides + line.value.sidenum[0]).value.toptexture = button.btexture
+            (Doocr.sides + line.value.sidenum[0]).value.toptexture = button.btexture
           when CDoom::Bwhere::Middle
             line = button.line.not_nil!
-            (CDoom.sides + line.value.sidenum[0]).value.midtexture = button.btexture
+            (Doocr.sides + line.value.sidenum[0]).value.midtexture = button.btexture
           when CDoom::Bwhere::Bottom
             line = button.line.not_nil!
-            (CDoom.sides + line.value.sidenum[0]).value.bottomtexture = button.btexture
+            (Doocr.sides + line.value.sidenum[0]).value.bottomtexture = button.btexture
           end
           CDoom.s_start_sound(button.soundorg.not_nil!,
             CDoom::Sfxenum::SFX_swtchn.value)
@@ -7754,7 +7754,7 @@ module Doocr
     secnum = -1
     rtn = 0
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      s1 = CDoom.sectors + secnum
+      s1 = Doocr.sectors + secnum
 
       # ALREADY MOVING?  IF SO, KEEP GOING...
       next if !s1.value.specialdata.null?
@@ -7831,7 +7831,7 @@ module Doocr
     end
 
     #        Init special SECTORs.
-    sector = CDoom.sectors
+    sector = Doocr.sectors
     Doocr.numsectors.times do |i|
       if sector.value.special == 0
         sector += 1
@@ -7879,18 +7879,18 @@ module Doocr
     # Init line EFFECTs
     Doocr.numlinespecials = 0
     Doocr.numlines.times do |i|
-      case CDoom.lines[i].special
+      case Doocr.lines[i].special
       when 48
         # EFFECT FIRSTCOL SCROLL+
-        Doocr.linespeciallist[Doocr.numlinespecials] = CDoom.lines + i
+        Doocr.linespeciallist[Doocr.numlinespecials] = Doocr.lines + i
         Doocr.numlinespecials += 1
       end
     end
 
     # Init other misc stuff
-    CDoom::MAXCEILINGS.times { |i| CDoom.activeceilings[i] = Pointer(CDoom::Ceiling).null }
+    CDoom::MAXCEILINGS.times { |i| Doocr.activeceilings[i] = Pointer(CDoom::Ceiling).null }
 
-    CDoom::MAXPLATS.times { |i| CDoom.activeplats[i] = Pointer(CDoom::Plat).null }
+    CDoom::MAXPLATS.times { |i| Doocr.activeplats[i] = Pointer(CDoom::Plat).null }
 
     CDoom::MAXBUTTONS.times { |i| @@buttonlist[i].reset }
   end
@@ -7958,9 +7958,9 @@ module Doocr
   def self.p_change_switch_texture(line : CDoom::Line*, use_again : LibC::Int)
     line.value.special = 0 if use_again == 0
 
-    tex_top = CDoom.sides[line.value.sidenum[0]].toptexture
-    tex_mid = CDoom.sides[line.value.sidenum[0]].midtexture
-    tex_bot = CDoom.sides[line.value.sidenum[0]].bottomtexture
+    tex_top = Doocr.sides[line.value.sidenum[0]].toptexture
+    tex_mid = Doocr.sides[line.value.sidenum[0]].midtexture
+    tex_bot = Doocr.sides[line.value.sidenum[0]].bottomtexture
     sound = CDoom::Sfxenum::SFX_swtchn.value
 
     # EXIT SWITCH?
@@ -7975,7 +7975,7 @@ module Doocr
         origin.value.y = (line.value.v1.value.y &+ line.value.v2.value.y) // 2
 
         CDoom.s_start_sound(origin.as(CDoom::Mobj*), sound)
-        (CDoom.sides + line.value.sidenum[0]).value.toptexture = Doocr.switchlist[i ^ 1]
+        (Doocr.sides + line.value.sidenum[0]).value.toptexture = Doocr.switchlist[i ^ 1]
 
         p_start_button(line, CDoom::Bwhere::Top, origin, Doocr.switchlist[i], CDoom::BUTTONTIME) if use_again != 0
 
@@ -7986,7 +7986,7 @@ module Doocr
         origin.value.y = (line.value.v1.value.y &+ line.value.v2.value.y) // 2
 
         CDoom.s_start_sound(origin.as(CDoom::Mobj*), sound)
-        (CDoom.sides + line.value.sidenum[0]).value.midtexture = Doocr.switchlist[i ^ 1]
+        (Doocr.sides + line.value.sidenum[0]).value.midtexture = Doocr.switchlist[i ^ 1]
 
         p_start_button(line, CDoom::Bwhere::Middle, origin, Doocr.switchlist[i], CDoom::BUTTONTIME) if use_again != 0
 
@@ -7997,7 +7997,7 @@ module Doocr
         origin.value.y = (line.value.v1.value.y &+ line.value.v2.value.y) // 2
 
         CDoom.s_start_sound(origin.as(CDoom::Mobj*), sound)
-        (CDoom.sides + line.value.sidenum[0]).value.bottomtexture = Doocr.switchlist[i ^ 1]
+        (Doocr.sides + line.value.sidenum[0]).value.bottomtexture = Doocr.switchlist[i ^ 1]
 
         p_start_button(line, CDoom::Bwhere::Bottom, origin, Doocr.switchlist[i], CDoom::BUTTONTIME) if use_again != 0
 
@@ -8324,9 +8324,9 @@ module Doocr
 
     tag = line.value.tag
     Doocr.numsectors.times do |i|
-      if CDoom.sectors[i].tag == tag
-        thinker = CDoom.thinkercap.next
-        while thinker != pointerof(CDoom.thinkercap)
+      if Doocr.sectors[i].tag == tag
+        thinker = Doocr.thinkercap.to_unsafe.value.next
+        while thinker != Doocr.thinkercap.to_unsafe
           # not a mobj
           if thinker.value.function.acp1.pointer != (->CDoom.p_mobj_thinker).pointer
             thinker = thinker.value.next
@@ -8343,7 +8343,7 @@ module Doocr
 
           sector = m.value.subsector.value.sector
           # wrong sector
-          if sector - CDoom.sectors != i
+          if sector - Doocr.sectors != i
             thinker = thinker.value.next
             next
           end
@@ -8393,18 +8393,18 @@ module Doocr
   #
 
   def self.p_init_thinkers
-    CDoom.thinkercap.prev = pointerof(CDoom.thinkercap)
-    CDoom.thinkercap.next = pointerof(CDoom.thinkercap)
+    Doocr.thinkercap.to_unsafe.value.prev = Doocr.thinkercap.to_unsafe
+    Doocr.thinkercap.to_unsafe.value.next = Doocr.thinkercap.to_unsafe
   end
 
   #
   # Adds a new thinker at the end of the list.
   #
   def self.p_add_thinker(thinker : CDoom::Thinker*)
-    CDoom.thinkercap.prev.value.next = thinker
-    thinker.value.next = pointerof(CDoom.thinkercap)
-    thinker.value.prev = CDoom.thinkercap.prev
-    CDoom.thinkercap.prev = thinker
+    Doocr.thinkercap.to_unsafe.value.prev.value.next = thinker
+    thinker.value.next = Doocr.thinkercap.to_unsafe
+    thinker.value.prev = Doocr.thinkercap.to_unsafe.value.prev
+    Doocr.thinkercap.to_unsafe.value.prev = thinker
     thinker.value.remove = 0
   end
 
@@ -8417,8 +8417,8 @@ module Doocr
   end
 
   def self.p_run_thinkers
-    currentthinker = CDoom.thinkercap.next
-    while currentthinker != pointerof(CDoom.thinkercap)
+    currentthinker = Doocr.thinkercap.to_unsafe.value.next
+    while currentthinker != Doocr.thinkercap.to_unsafe
       if currentthinker.value.remove != 0
         # time to remove it
         currentthinker.value.next.value.prev = currentthinker.value.prev

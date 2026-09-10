@@ -209,11 +209,11 @@ module Doocr
 
       i = 0
       while i < tics * 2
-        CDoom.screens[0][(CDoom::SCREENHEIGHT - 1) * CDoom::SCREENWIDTH + i] = 0xff
+        Doocr.screens[0][(CDoom::SCREENHEIGHT - 1) * CDoom::SCREENWIDTH + i] = 0xff
         i += 2
       end
       while i < 20 * 2
-        CDoom.screens[0][(CDoom::SCREENHEIGHT - 1) * CDoom::SCREENWIDTH + i] = 0x0
+        Doocr.screens[0][(CDoom::SCREENHEIGHT - 1) * CDoom::SCREENWIDTH + i] = 0x0
         i += 2
       end
     end
@@ -246,10 +246,10 @@ module Doocr
 
   def self.i_read_screen(scr : CDoom::Byte*)
     if @@software_rendering
-      CDoom.doom_memcpy(scr, CDoom.screens[0], CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
+      CDoom.doom_memcpy(scr, Doocr.screens[0], CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
     else
       @@viewport_target.try do |vt|
-        hud_ptr = CDoom.screens[0]
+        hud_ptr = Doocr.screens[0]
 
         vpimage = Raylib.load_image_from_texture(vt.texture)
 
@@ -292,8 +292,8 @@ module Doocr
   @@was_focused = false
 
   def self.i_init_graphics
-    CDoom.screens[0] = GC.malloc(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT).as(UInt8*)
-    CDoom.screens[0].clear(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
+    Doocr.screens[0] = GC.malloc(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT).as(UInt8*)
+    Doocr.screens[0].clear(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
 
     unless @@headless
       Raylib.set_config_flags(Raylib::ConfigFlags::WindowResizable)

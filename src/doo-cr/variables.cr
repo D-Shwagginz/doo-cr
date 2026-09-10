@@ -6239,22 +6239,22 @@ module Doocr
 
   @@cheat_me_seq = [0x26, 0xA2, 0xEA, 0x32, 0xEE, 0xA2, 0xE6, 0xFF] of UInt8
 
-  Doocr.cheat_mus.sequence = @@cheat_mus_seq.to_unsafe
-  Doocr.cheat_mus.p = Pointer(UInt8).null
-  Doocr.cheat_god.sequence = @@cheat_god_seq.to_unsafe
-  Doocr.cheat_god.p = Pointer(UInt8).null
-  Doocr.cheat_ammo.sequence = @@cheat_ammo_seq.to_unsafe
-  Doocr.cheat_ammo.p = Pointer(UInt8).null
-  Doocr.cheat_ammonokey.sequence = @@cheat_ammonokey_seq.to_unsafe
-  Doocr.cheat_ammonokey.p = Pointer(UInt8).null
-  Doocr.cheat_noclip.sequence = @@cheat_noclip_seq.to_unsafe
-  Doocr.cheat_noclip.p = Pointer(UInt8).null
-  Doocr.cheat_commercial_noclip.sequence = @@cheat_commercial_noclip_seq.to_unsafe
-  Doocr.cheat_commercial_noclip.p = Pointer(UInt8).null
-  Doocr.cheat_amap.sequence = @@cheat_amap_seq.to_unsafe
-  Doocr.cheat_amap.p = Pointer(UInt8).null
-  Doocr.cheat_me.sequence = @@cheat_me_seq.to_unsafe
-  Doocr.cheat_me.p = Pointer(UInt8).null
+  Doocr.cheat_mus.value.sequence = @@cheat_mus_seq.to_unsafe
+  Doocr.cheat_mus.value.p = Pointer(UInt8).null
+  Doocr.cheat_god.value.sequence = @@cheat_god_seq.to_unsafe
+  Doocr.cheat_god.value.p = Pointer(UInt8).null
+  Doocr.cheat_ammo.value.sequence = @@cheat_ammo_seq.to_unsafe
+  Doocr.cheat_ammo.value.p = Pointer(UInt8).null
+  Doocr.cheat_ammonokey.value.sequence = @@cheat_ammonokey_seq.to_unsafe
+  Doocr.cheat_ammonokey.value.p = Pointer(UInt8).null
+  Doocr.cheat_noclip.value.sequence = @@cheat_noclip_seq.to_unsafe
+  Doocr.cheat_noclip.value.p = Pointer(UInt8).null
+  Doocr.cheat_commercial_noclip.value.sequence = @@cheat_commercial_noclip_seq.to_unsafe
+  Doocr.cheat_commercial_noclip.value.p = Pointer(UInt8).null
+  Doocr.cheat_amap.value.sequence = @@cheat_amap_seq.to_unsafe
+  Doocr.cheat_amap.value.p = Pointer(UInt8).null
+  Doocr.cheat_me.value.sequence = @@cheat_me_seq.to_unsafe
+  Doocr.cheat_me.value.p = Pointer(UInt8).null
 
   c_array_cheat(Doocr.cheat_powerup,
     {@@cheat_powerup_seq[0].to_unsafe, Pointer(UInt8).null},
@@ -6266,12 +6266,12 @@ module Doocr
     {@@cheat_powerup_seq[6].to_unsafe, Pointer(UInt8).null}
   )
 
-  Doocr.cheat_choppers.sequence = @@cheat_choppers_seq.to_unsafe
-  Doocr.cheat_choppers.p = Pointer(UInt8).null
-  Doocr.cheat_clev.sequence = @@cheat_clev_seq.to_unsafe
-  Doocr.cheat_clev.p = Pointer(UInt8).null
-  Doocr.cheat_mypos.sequence = @@cheat_mypos_seq.to_unsafe
-  Doocr.cheat_mypos.p = Pointer(UInt8).null
+  Doocr.cheat_choppers.value.sequence = @@cheat_choppers_seq.to_unsafe
+  Doocr.cheat_choppers.value.p = Pointer(UInt8).null
+  Doocr.cheat_clev.value.sequence = @@cheat_clev_seq.to_unsafe
+  Doocr.cheat_clev.value.p = Pointer(UInt8).null
+  Doocr.cheat_mypos.value.sequence = @@cheat_mypos_seq.to_unsafe
+  Doocr.cheat_mypos.value.p = Pointer(UInt8).null
 
   {% if flag?("PRECOMPUTED") %}
     class_getter finetangent = [

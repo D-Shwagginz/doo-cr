@@ -59,7 +59,7 @@ module Doocr::Nodebuilder
     right = Int32::MIN
     top = Int32::MIN
     Doocr.numvertexes.times do |i|
-      vertex = CDoom.vertexes[i]
+      vertex = Doocr.vertexes[i]
       x = vertex.x >> FRACBITS
       y = vertex.y >> FRACBITS
       right = x if x > right
@@ -82,7 +82,7 @@ module Doocr::Nodebuilder
         bend = Raylib::Vector2.new(x: bstart.x + 128, y: bstart.y + 128)
 
         Doocr.numlines.times do |lin|
-          line = CDoom.lines[lin]
+          line = Doocr.lines[lin]
           v1 = Raylib::Vector2.new(
             x: line.v1.value.x >> FRACBITS,
             y: line.v1.value.y >> FRACBITS
@@ -107,7 +107,7 @@ module Doocr::Nodebuilder
 
     # clear out mobj chains
     count = sizeof(CDoom::Mobj*) * Doocr.bmapwidth * Doocr.bmapheight
-    CDoom.blocklinks = CDoom.z_malloc(count, CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Mobj**)
-    CDoom.doom_memset(CDoom.blocklinks, 0, count)
+    Doocr.blocklinks.clear
+    (Doocr.bmapwidth * Doocr.bmapheight).times { Doocr.blocklinks << Pointer(CDoom::Mobj).null }
   end
 end

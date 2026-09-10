@@ -48,7 +48,7 @@ module Doocr
 
     return unless Raylib.window_ready? || @@headless
     # Pointers for speed. "Oh! But it's oop!". I don't see you having a source port of Doom.
-    screen_ptr = CDoom.screens[0]
+    screen_ptr = Doocr.screens[0]
     buf_ptr = @@raylibbuffer.to_unsafe.as(UInt32*)
     palette_ptr = @@palette_rgba.to_unsafe
     p255 = @@palette_rgba[255]

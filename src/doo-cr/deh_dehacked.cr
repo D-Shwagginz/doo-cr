@@ -331,47 +331,47 @@ module Doocr
               when 0 # IDMUS
                 value.push 1, 0, 0, 0xff
                 @@cheat_mus_seq = value
-                Doocr.cheat_mus.sequence = @@cheat_mus_seq.to_unsafe
+                Doocr.cheat_mus.value.sequence = @@cheat_mus_seq.to_unsafe
               when 1 # IDCHOPPERS
                 value.push 0xff
                 @@cheat_choppers_seq = value
-                Doocr.cheat_choppers.sequence = @@cheat_choppers_seq.to_unsafe
+                Doocr.cheat_choppers.value.sequence = @@cheat_choppers_seq.to_unsafe
               when 2 # IDDQD
                 value.push 0xff
                 @@cheat_god_seq = value
-                Doocr.cheat_god.sequence = @@cheat_god_seq.to_unsafe
+                Doocr.cheat_god.value.sequence = @@cheat_god_seq.to_unsafe
               when 3 # IDKFA
                 value.push 0xff
                 @@cheat_ammo_seq = value
-                Doocr.cheat_ammo.sequence = @@cheat_ammo_seq.to_unsafe
+                Doocr.cheat_ammo.value.sequence = @@cheat_ammo_seq.to_unsafe
               when 4 # IDFA
                 value.push 0xff
                 @@cheat_ammonokey_seq = value
-                Doocr.cheat_ammonokey.sequence = @@cheat_ammonokey_seq.to_unsafe
+                Doocr.cheat_ammonokey.value.sequence = @@cheat_ammonokey_seq.to_unsafe
               when 5 # IDSPISPOPD
                 value.push 0xff
                 @@cheat_noclip_seq = value
-                Doocr.cheat_noclip.sequence = @@cheat_noclip_seq.to_unsafe
+                Doocr.cheat_noclip.value.sequence = @@cheat_noclip_seq.to_unsafe
               when 6 # IDCLIP
                 value.push 0xff
                 @@cheat_commercial_noclip_seq = value
-                Doocr.cheat_commercial_noclip.sequence = @@cheat_commercial_noclip_seq.to_unsafe
+                Doocr.cheat_commercial_noclip.value.sequence = @@cheat_commercial_noclip_seq.to_unsafe
               when 7, 8, 9, 10, 11, 12, 13 # IDBEHOLDX
                 value.push 0xff
                 @@cheat_powerup_seq[loc - 7] = value
-                Doocr.cheat_powerup[loc - 7].sequence = @@cheat_powerup_seq[loc - 7].to_unsafe
+                (Doocr.cheat_powerup.to_unsafe + (loc - 7)).value.sequence = @@cheat_powerup_seq[loc - 7].to_unsafe
               when 14 # IDCLEV
                 value.push 1, 0, 0, 0xff
                 @@cheat_clev_seq = value
-                Doocr.cheat_clev.sequence = @@cheat_clev_seq.to_unsafe
+                Doocr.cheat_clev.value.sequence = @@cheat_clev_seq.to_unsafe
               when 15 # IDMYPOS
                 value.push 0xff
                 @@cheat_mypos_seq = value
-                Doocr.cheat_mypos.sequence = @@cheat_mypos_seq.to_unsafe
+                Doocr.cheat_mypos.value.sequence = @@cheat_mypos_seq.to_unsafe
               when 16 # IDDT
                 value.push 0xff
                 @@cheat_amap_seq = value
-                Doocr.cheat_amap.sequence = @@cheat_amap_seq.to_unsafe
+                Doocr.cheat_amap.value.sequence = @@cheat_amap_seq.to_unsafe
               end
               # Misc data, set all manually (maybe could use array of pointers to the variables?)
             when DehBlocks::Misc

@@ -132,9 +132,9 @@ module Doocr
         # Loop all channels, check.
         CDoom::NUM_CHANNELS.times do |i|
           # Active, and using the same SFX?
-          if !CDoom.channels[i].null? && Doocr.channelids[i] == sfxid
+          if !Doocr.channels[i].null? && Doocr.channelids[i] == sfxid
             # Reset.
-            CDoom.channels[i] = Pointer(UInt8).null
+            Doocr.channels[i] = Pointer(UInt8).null
             # We are sure that iff,
             #  there will only be one
             break
@@ -144,7 +144,7 @@ module Doocr
 
       i = 0
       # Loop all channels to find oldest SFX.
-      while i < CDoom::NUM_CHANNELS && !CDoom.channels[i].null?
+      while i < CDoom::NUM_CHANNELS && !Doocr.channels[i].null?
         if Doocr.channelstart[i] < oldest
           oldestnum = i
           oldest = Doocr.channelstart[i]
@@ -162,9 +162,9 @@ module Doocr
       # Okay, in the less recent channel,
       #  we will handle the new SFX.
       # Set pointer to raw data.
-      CDoom.channels[slot] = (@@s_sfx.to_unsafe + sfxid).value.data.as(UInt8*)
+      Doocr.channels[slot] = (@@s_sfx.to_unsafe + sfxid).value.data.as(UInt8*)
       # Set pointer to end of raw data.
-      Doocr.channelsend[slot] = CDoom.channels[slot] + @@lengths[sfxid]
+      Doocr.channelsend[slot] = Doocr.channels[slot] + @@lengths[sfxid]
 
       # Reset current handle number, limited to 0..100.
       @@handlenums = 100 if @@handlenums == 0
@@ -228,12 +228,12 @@ module Doocr
     # Allocating the internal channels for mixing
     # (the maximum numer of sounds rendered
     # simultaneously) within zone memory.
-    CDoom.channels_s_sound =
-      CDoom.z_malloc(Doocr.num_channels * sizeof(CDoom::Channel), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Channel*)
+    Doocr.channels_s_sound.clear
+    Doocr.num_channels.times { Doocr.channels_s_sound << CDoom::Channel.new }
 
     # Free all channels for use
     Doocr.num_channels.times do |i|
-      (CDoom.channels_s_sound + i).value.sfxinfo = Pointer(CDoom::Sfxinfo).null
+      (Doocr.channels_s_sound.to_unsafe + i).value.sfxinfo = Pointer(CDoom::Sfxinfo).null
     end
 
     # no sounds are playing, and they are not mus_paused
@@ -271,7 +271,7 @@ module Doocr
     # kill all playing sounds at start of level
     #  (trust me - a good idea)
     Doocr.num_channels.times do |cnum|
-      CDoom.s_stop_channel(cnum) unless CDoom.channels_s_sound[cnum].sfxinfo.null?
+      CDoom.s_stop_channel(cnum) unless Doocr.channels_s_sound[cnum].sfxinfo.null?
     end
 
     # start new music for the level
@@ -381,7 +381,7 @@ module Doocr
 
     # Assigns the handle to one of the channels in the
     #  mix/output buffer.
-    (CDoom.channels_s_sound + cnum).value.handle = CDoom.i_start_sound(sfx_id,
+    (Doocr.channels_s_sound.to_unsafe + cnum).value.handle = CDoom.i_start_sound(sfx_id,
       volume,
       sep,
       pitch,
@@ -394,7 +394,7 @@ module Doocr
 
   def self.s_stop_sound(origin : Void*)
     Doocr.num_channels.times do |cnum|
-      if !CDoom.channels_s_sound[cnum].sfxinfo.null? && CDoom.channels_s_sound[cnum].origin == origin
+      if !Doocr.channels_s_sound[cnum].sfxinfo.null? && Doocr.channels_s_sound[cnum].origin == origin
         CDoom.s_stop_channel(cnum)
         break
       end
@@ -429,7 +429,7 @@ module Doocr
     listener = listener_p.as(CDoom::Mobj*)
 
     Doocr.num_channels.times do |cnum|
-      c = CDoom.channels_s_sound + cnum
+      c = Doocr.channels_s_sound.to_unsafe + cnum
       sfx = c.value.sfxinfo
 
       unless c.value.sfxinfo.null?
@@ -531,7 +531,7 @@ module Doocr
   end
 
   def self.s_stop_channel(cnum : LibC::Int)
-    c = CDoom.channels_s_sound + cnum
+    c = Doocr.channels_s_sound.to_unsafe + cnum
 
     unless c.value.sfxinfo.null?
       # stop the sound playing
@@ -542,7 +542,7 @@ module Doocr
       i = 0
       while i < Doocr.num_channels
         if cnum != i &&
-           c.value.sfxinfo == CDoom.channels_s_sound[i].sfxinfo
+           c.value.sfxinfo == Doocr.channels_s_sound[i].sfxinfo
           break
         end
 
@@ -614,9 +614,9 @@ module Doocr
 
     # Find an open channel
     while cnum < Doocr.num_channels
-      if CDoom.channels_s_sound[cnum].sfxinfo.null?
+      if Doocr.channels_s_sound[cnum].sfxinfo.null?
         break
-      elsif !origin.null? && CDoom.channels_s_sound[cnum].origin == origin
+      elsif !origin.null? && Doocr.channels_s_sound[cnum].origin == origin
         CDoom.s_stop_channel(cnum)
         break
       end
@@ -629,7 +629,7 @@ module Doocr
       # Look for lower priority
       cnum = 0
       while cnum < Doocr.num_channels
-        if CDoom.channels_s_sound[cnum].sfxinfo.value.priority >= sfxinfo.value.priority
+        if Doocr.channels_s_sound[cnum].sfxinfo.value.priority >= sfxinfo.value.priority
           break
         end
 
@@ -645,7 +645,7 @@ module Doocr
       end
     end
 
-    c = CDoom.channels_s_sound + cnum
+    c = Doocr.channels_s_sound.to_unsafe + cnum
 
     # channel is decided to be cnum.
     c.value.sfxinfo = sfxinfo
