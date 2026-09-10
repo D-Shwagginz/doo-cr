@@ -232,9 +232,9 @@ module Doocr
     best_idx = 0
     best_dist = Int32::MAX
     256.times do |i|
-      pr = CDoom.screen_palette[i * 3].to_i32
-      pg = CDoom.screen_palette[i * 3 + 1].to_i32
-      pb = CDoom.screen_palette[i * 3 + 2].to_i32
+      pr = Doocr.screen_palette[i * 3].to_i32
+      pg = Doocr.screen_palette[i * 3 + 1].to_i32
+      pb = Doocr.screen_palette[i * 3 + 2].to_i32
       d = color_distance(r, g, b, pr, pg, pb)
       if d < best_dist
         best_dist = d
@@ -278,9 +278,9 @@ module Doocr
       palette += 1
       b = Doocr.gammatable[Doocr.usegamma][palette.value] & ~3
       palette += 1
-      CDoom.screen_palette[i*3] = r
-      CDoom.screen_palette[i*3 + 1] = g
-      CDoom.screen_palette[i*3 + 2] = b
+      Doocr.screen_palette[i*3] = r
+      Doocr.screen_palette[i*3 + 1] = g
+      Doocr.screen_palette[i*3 + 2] = b
       @@palette_rgba[i] = (255_u32 << 24) | (b.to_u32 << 16) | (g.to_u32 << 8) | r.to_u32
     end
   end

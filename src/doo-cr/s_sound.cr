@@ -229,10 +229,10 @@ module Doocr
     # (the maximum numer of sounds rendered
     # simultaneously) within zone memory.
     CDoom.channels_s_sound =
-      CDoom.z_malloc(CDoom.num_channels * sizeof(CDoom::Channel), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Channel*)
+      CDoom.z_malloc(Doocr.num_channels * sizeof(CDoom::Channel), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Channel*)
 
     # Free all channels for use
-    CDoom.num_channels.times do |i|
+    Doocr.num_channels.times do |i|
       (CDoom.channels_s_sound + i).value.sfxinfo = Pointer(CDoom::Sfxinfo).null
     end
 
@@ -270,7 +270,7 @@ module Doocr
   def self.s_start
     # kill all playing sounds at start of level
     #  (trust me - a good idea)
-    CDoom.num_channels.times do |cnum|
+    Doocr.num_channels.times do |cnum|
       CDoom.s_stop_channel(cnum) unless CDoom.channels_s_sound[cnum].sfxinfo.null?
     end
 
@@ -393,7 +393,7 @@ module Doocr
   end
 
   def self.s_stop_sound(origin : Void*)
-    CDoom.num_channels.times do |cnum|
+    Doocr.num_channels.times do |cnum|
       if !CDoom.channels_s_sound[cnum].sfxinfo.null? && CDoom.channels_s_sound[cnum].origin == origin
         CDoom.s_stop_channel(cnum)
         break
@@ -428,7 +428,7 @@ module Doocr
   def self.s_update_sounds(listener_p : Void*)
     listener = listener_p.as(CDoom::Mobj*)
 
-    CDoom.num_channels.times do |cnum|
+    Doocr.num_channels.times do |cnum|
       c = CDoom.channels_s_sound + cnum
       sfx = c.value.sfxinfo
 
@@ -540,7 +540,7 @@ module Doocr
       # check to see
       #  if other channels are playing the sound
       i = 0
-      while i < CDoom.num_channels
+      while i < Doocr.num_channels
         if cnum != i &&
            c.value.sfxinfo == CDoom.channels_s_sound[i].sfxinfo
           break
@@ -613,7 +613,7 @@ module Doocr
     cnum = 0
 
     # Find an open channel
-    while cnum < CDoom.num_channels
+    while cnum < Doocr.num_channels
       if CDoom.channels_s_sound[cnum].sfxinfo.null?
         break
       elsif !origin.null? && CDoom.channels_s_sound[cnum].origin == origin
@@ -625,10 +625,10 @@ module Doocr
     end
 
     # None available
-    if cnum == CDoom.num_channels
+    if cnum == Doocr.num_channels
       # Look for lower priority
       cnum = 0
-      while cnum < CDoom.num_channels
+      while cnum < Doocr.num_channels
         if CDoom.channels_s_sound[cnum].sfxinfo.value.priority >= sfxinfo.value.priority
           break
         end
@@ -636,7 +636,7 @@ module Doocr
         cnum += 1
       end
 
-      if cnum == CDoom.num_channels
+      if cnum == Doocr.num_channels
         # FUCK!  No lower priority.  Sorry, Charlie.
         return -1
       else

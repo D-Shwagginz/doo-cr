@@ -157,8 +157,6 @@ module Doocr
 
   @@switch_origins : Array(CDoom::Degenmobj) = [] of CDoom::Degenmobj
 
-  CDoom.screen_buffer = Pointer(UInt8).null
-  CDoom.final_screen_buffer = Pointer(UInt8).null
   Doocr.last_update_time = 0
   Doocr.button_states.fill(0)
 
@@ -374,7 +372,6 @@ module Doocr
 
   Doocr.is_wiping_screen = 0
 
-  CDoom.debugfile = Pointer(Void).null
 
   Doocr.wipegamestate = CDoom::Gamestate::Demoscreen
 
@@ -5795,7 +5792,7 @@ module Doocr
                 CDoom::Default.new(name: "crosshair", location: pointerof(@@crosshair), defaultvalue: 0),
                 CDoom::Default.new(name: "always_run", location: pointerof(@@always_run), defaultvalue: 0),
 
-                CDoom::Default.new(name: "snd_channels", location: pointerof(CDoom.num_channels), defaultvalue: 16),
+                CDoom::Default.new(name: "snd_channels", defaultvalue: 16),
 
                 CDoom::Default.new(name: "usegamma", location: pointerof(@@usegamma), defaultvalue: 0),
 

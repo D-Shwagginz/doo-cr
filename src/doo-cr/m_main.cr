@@ -359,7 +359,7 @@ module Doocr
       10, Doocr.mouse_sensitivity)
 
     m_write_text(@@optionsdef.x, @@optionsdef.y +
-                                 CDoom::LINEHEIGHT * CDoom::OptionsEnum::More.value + CDoom.hu_font[0].value.height // 2,
+                                 CDoom::LINEHEIGHT * CDoom::OptionsEnum::More.value + Doocr.hu_font[0].value.height // 2,
       "more options")
   end
 
@@ -393,7 +393,7 @@ module Doocr
 
     @@moreoptions_menus[@@current_options_menu].each_with_index do |item, i|
       m_write_text(@@moreoptions_def.x, @@moreoptions_def.y +
-                                        CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
+                                        CDoom::LINEHEIGHT * i + Doocr.hu_font[0].value.height // 2,
         item.text + (
           (item.bool.null? ? "" : (item.bool.value != 0 ? "on" : "off")) +
           (item.num.null? ? "" : "#{item.num.value + 1}")
@@ -486,12 +486,12 @@ module Doocr
 
   def self.m_draw_edit_controls
     m_write_text(CDoom::SCREENWIDTH // 2 - "Controls".size // 2, @@editcontrols_def.y +
-                                                                 -CDoom::LINEHEIGHT + CDoom.hu_font[0].value.height // 2,
+                                                                 -CDoom::LINEHEIGHT + Doocr.hu_font[0].value.height // 2,
       "Controls")
 
     @@editcontrols_menu.each_with_index do |item, i|
       m_write_text(@@editcontrols_def.x, @@editcontrols_def.y +
-                                         CDoom::LINEHEIGHT * i + CDoom.hu_font[0].value.height // 2,
+                                         CDoom::LINEHEIGHT * i + Doocr.hu_font[0].value.height // 2,
         item.text + (item.num.null? ? "" : m_draw_key(item.num)))
     end
   end
@@ -732,7 +732,7 @@ module Doocr
       if c < 0 || c >= CDoom::HU_FONTSIZE
         w += 4
       else
-        w += CDoom.hu_font[c].value.width.to_i16!
+        w += Doocr.hu_font[c].value.width.to_i16!
       end
     end
 
@@ -743,7 +743,7 @@ module Doocr
   # Find string height from hu_font chars
   #
   def self.m_string_height(string : UInt8*) : Int32
-    height = CDoom.hu_font[0].value.height.to_i16!.to_i32
+    height = Doocr.hu_font[0].value.height.to_i16!.to_i32
 
     h = height
     CDoom.doom_strlen(string).times do |i|
@@ -774,9 +774,9 @@ module Doocr
         next
       end
 
-      w = CDoom.hu_font[c].value.width.to_i16!
+      w = Doocr.hu_font[c].value.width.to_i16!
       break if cx + w > CDoom::SCREENWIDTH
-      CDoom.v_draw_patch_direct(cx, cy, 0, CDoom.hu_font[c])
+      CDoom.v_draw_patch_direct(cx, cy, 0, Doocr.hu_font[c])
       cx += w
     end
   end
@@ -1123,7 +1123,7 @@ module Doocr
 
         @@x = 160 - m_string_width(string) // 2
         m_write_text(@@x, @@y, string)
-        @@y += CDoom.hu_font[0].value.height.to_i16!
+        @@y += Doocr.hu_font[0].value.height.to_i16!
       end
       return
     end
@@ -1215,12 +1215,12 @@ module Doocr
         next
       end
 
-      w = CDoom.hu_font[c].value.width.to_i16!.to_i32
+      w = Doocr.hu_font[c].value.width.to_i16!.to_i32
       break if x + w > CDoom::SCREENWIDTH
       if direct != 0
-        CDoom.v_draw_patch_direct(x, y, 0, CDoom.hu_font[c])
+        CDoom.v_draw_patch_direct(x, y, 0, Doocr.hu_font[c])
       else
-        CDoom.v_draw_patch(x, y, 0, CDoom.hu_font[c])
+        CDoom.v_draw_patch(x, y, 0, Doocr.hu_font[c])
       end
       x += w
     end
@@ -1256,7 +1256,8 @@ module Doocr
       File.open(Doocr.defaultfile, "w") do |file|
         @@defaults.size.times do |i|
           if @@defaults[i].defaultvalue > -0xfff && @@defaults[i].defaultvalue < 0xfff
-            file << "#{@@defaults[i].name}\t\t#{@@defaults[i].location.not_nil!.value}\n"
+            value = @@defaults[i].name == "snd_channels" ? Doocr.num_channels : @@defaults[i].location.not_nil!.value
+            file << "#{@@defaults[i].name}\t\t#{value}\n"
           else
             text = @@defaults[i].name.starts_with?("chatmacro") ? Doocr.chat_macros[@@defaults[i].name[9].to_i] : String.new(@@defaults[i].text_location.not_nil!.value)
             file << "#{@@defaults[i].name}\t\t\"#{text}\"\n"
@@ -1279,7 +1280,11 @@ module Doocr
           @@defaults[i].text_location.not_nil!.value = @@defaults[i].default_text_value.to_unsafe
         end
       else
-        @@defaults[i].location.not_nil!.value = @@defaults[i].defaultvalue.to_i32!
+        if @@defaults[i].name == "snd_channels"
+          Doocr.num_channels = @@defaults[i].defaultvalue
+        else
+          @@defaults[i].location.not_nil!.value = @@defaults[i].defaultvalue.to_i32!
+        end
       end
     end
 
@@ -1308,9 +1313,19 @@ module Doocr
               @@defaults[i].text_location.not_nil!.value = text
             end
           elsif value.starts_with?("0x")
-            @@defaults[i].location.not_nil!.value = CDoom.doom_atox(value.to_unsafe)
+            parsed = CDoom.doom_atox(value.to_unsafe)
+            if name == "snd_channels"
+              Doocr.num_channels = parsed
+            else
+              @@defaults[i].location.not_nil!.value = parsed
+            end
           else
-            @@defaults[i].location.not_nil!.value = CDoom.doom_atoi(value.to_unsafe)
+            parsed = CDoom.doom_atoi(value.to_unsafe)
+            if name == "snd_channels"
+              Doocr.num_channels = parsed
+            else
+              @@defaults[i].location.not_nil!.value = parsed
+            end
           end
           break
         end

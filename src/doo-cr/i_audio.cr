@@ -221,7 +221,7 @@ module Doocr
     # loop do
     #   done = true
 
-    #   CDoom.num_channels.times do |i|
+    #   Doocr.num_channels.times do |i|
     #     next if CDoom.channels[i].null?
     #     done = false
     #   end

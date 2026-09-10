@@ -17,7 +17,7 @@
 
 module Doocr
   def self.stlib_init
-    CDoom.sttminus = CDoom.w_cache_lump_name("STTMINUS", CDoom::PU_STATIC).as(CDoom::Patch*)
+    Doocr.sttminus = CDoom.w_cache_lump_name("STTMINUS", CDoom::PU_STATIC).as(CDoom::Patch*)
   end
 
   # ?
@@ -93,7 +93,7 @@ module Doocr
 
     # draw a minus sign if necessary
     if neg
-      CDoom.v_draw_patch(x - 8, n.value.y, CDoom::STLIB_FG, CDoom.sttminus)
+      CDoom.v_draw_patch(x - 8, n.value.y, CDoom::STLIB_FG, Doocr.sttminus)
     end
   end
 
@@ -209,9 +209,9 @@ module Doocr
 
   def self.st_refresh_background
     if Doocr.st_statusbaron != 0
-      CDoom.v_draw_patch(CDoom::ST_X, 0, CDoom::STLIB_BG, CDoom.sbar)
+      CDoom.v_draw_patch(CDoom::ST_X, 0, CDoom::STLIB_BG, Doocr.sbar)
 
-      CDoom.v_draw_patch(CDoom::ST_FX, 0, CDoom::STLIB_BG, CDoom.faceback) if Doocr.netgame != 0
+      CDoom.v_draw_patch(CDoom::ST_FX, 0, CDoom::STLIB_BG, Doocr.faceback) if Doocr.netgame != 0
 
       CDoom.v_copy_rect(CDoom::ST_X, 0, CDoom::STLIB_BG, CDoom::ST_WIDTH, CDoom::ST_HEIGHT, CDoom::ST_X, CDoom::ST_Y, CDoom::STLIB_FG)
     end
@@ -718,26 +718,26 @@ module Doocr
     10.times do |i|
       CDoom.doom_strcpy(namebuf, "STTNUM")
       CDoom.doom_concat(namebuf, CDoom.doom_itoa(i, 10))
-      CDoom.tallnum[i] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
+      Doocr.tallnum[i] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
 
       CDoom.doom_strcpy(namebuf, "STYSNUM")
       CDoom.doom_concat(namebuf, CDoom.doom_itoa(i, 10))
-      CDoom.shortnum[i] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
+      Doocr.shortnum[i] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
     end
 
     # Load percent key.
     # Note: why not load STMINUS here, too?
-    CDoom.tallpercent = CDoom.w_cache_lump_name("STTPRCNT", CDoom::PU_STATIC).as(CDoom::Patch*)
+    Doocr.tallpercent = CDoom.w_cache_lump_name("STTPRCNT", CDoom::PU_STATIC).as(CDoom::Patch*)
 
     # key card
     CDoom::Card::NUMCARDS.value.times do |i|
       CDoom.doom_strcpy(namebuf, "STKEYS")
       CDoom.doom_concat(namebuf, CDoom.doom_itoa(i, 10))
-      CDoom.keys[i] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
+      Doocr.keys[i] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
     end
 
     # arms background
-    CDoom.armsbg = CDoom.w_cache_lump_name("STARMS", CDoom::PU_STATIC).as(CDoom::Patch*)
+    Doocr.armsbg = CDoom.w_cache_lump_name("STARMS", CDoom::PU_STATIC).as(CDoom::Patch*)
 
     # arms ownership widgets
     6.times do |i|
@@ -745,19 +745,19 @@ module Doocr
       CDoom.doom_concat(namebuf, CDoom.doom_itoa(i + 2, 10))
 
       # gray #
-      ((CDoom.arms.to_unsafe + i).value.to_unsafe + 0).value = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
+      Doocr.arms[i][0] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
 
       # yellow #
-      ((CDoom.arms.to_unsafe + i).value.to_unsafe + 1).value = CDoom.shortnum[i + 2]
+      Doocr.arms[i][1] = Doocr.shortnum[i + 2]
     end
 
     # face backgrounds for different color players
     CDoom.doom_strcpy(namebuf, "STFB")
     CDoom.doom_concat(namebuf, CDoom.doom_itoa(Doocr.consoleplayer, 10))
-    CDoom.faceback = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
+    Doocr.faceback = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
 
     # status bar background bits
-    CDoom.sbar = CDoom.w_cache_lump_name("STBAR", CDoom::PU_STATIC).as(CDoom::Patch*)
+    Doocr.sbar = CDoom.w_cache_lump_name("STBAR", CDoom::PU_STATIC).as(CDoom::Patch*)
 
     # face states
     facenum = 0
@@ -766,39 +766,39 @@ module Doocr
         CDoom.doom_strcpy(namebuf, "STFST")
         CDoom.doom_concat(namebuf, CDoom.doom_itoa(i, 10))
         CDoom.doom_concat(namebuf, CDoom.doom_itoa(j, 10))
-        CDoom.faces[facenum] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
+        Doocr.faces[facenum] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
         facenum += 1
       end
       CDoom.doom_strcpy(namebuf, "STFTR")
       CDoom.doom_concat(namebuf, CDoom.doom_itoa(i, 10))
       CDoom.doom_concat(namebuf, "0")
-      CDoom.faces[facenum] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
+      Doocr.faces[facenum] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
       facenum += 1
 
       CDoom.doom_strcpy(namebuf, "STFTL")
       CDoom.doom_concat(namebuf, CDoom.doom_itoa(i, 10))
       CDoom.doom_concat(namebuf, "0")
-      CDoom.faces[facenum] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
+      Doocr.faces[facenum] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
       facenum += 1
 
       CDoom.doom_strcpy(namebuf, "STFOUCH")
       CDoom.doom_concat(namebuf, CDoom.doom_itoa(i, 10))
-      CDoom.faces[facenum] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
+      Doocr.faces[facenum] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
       facenum += 1
 
       CDoom.doom_strcpy(namebuf, "STFEVL")
       CDoom.doom_concat(namebuf, CDoom.doom_itoa(i, 10))
-      CDoom.faces[facenum] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
+      Doocr.faces[facenum] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
       facenum += 1
 
       CDoom.doom_strcpy(namebuf, "STFKILL")
       CDoom.doom_concat(namebuf, CDoom.doom_itoa(i, 10))
-      CDoom.faces[facenum] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
+      Doocr.faces[facenum] = CDoom.w_cache_lump_name(namebuf, CDoom::PU_STATIC).as(CDoom::Patch*)
       facenum += 1
     end
-    CDoom.faces[facenum] = CDoom.w_cache_lump_name("STFGOD0", CDoom::PU_STATIC).as(CDoom::Patch*)
+    Doocr.faces[facenum] = CDoom.w_cache_lump_name("STFGOD0", CDoom::PU_STATIC).as(CDoom::Patch*)
     facenum += 1
-    CDoom.faces[facenum] = CDoom.w_cache_lump_name("STFDEAD0", CDoom::PU_STATIC).as(CDoom::Patch*)
+    Doocr.faces[facenum] = CDoom.w_cache_lump_name("STFDEAD0", CDoom::PU_STATIC).as(CDoom::Patch*)
     facenum += 1
   end
 
@@ -810,25 +810,25 @@ module Doocr
   def self.st_unload_graphics
     # unload the numbers, tall and short
     10.times do |i|
-      z_change_tag(CDoom.tallnum[i], CDoom::PU_CACHE)
-      z_change_tag(CDoom.shortnum[i], CDoom::PU_CACHE)
+      z_change_tag(Doocr.tallnum[i], CDoom::PU_CACHE)
+      z_change_tag(Doocr.shortnum[i], CDoom::PU_CACHE)
     end
     # unload tall percent
-    z_change_tag(CDoom.tallpercent, CDoom::PU_CACHE)
+    z_change_tag(Doocr.tallpercent, CDoom::PU_CACHE)
 
     # unload arms background
-    z_change_tag(CDoom.armsbg, CDoom::PU_CACHE)
+    z_change_tag(Doocr.armsbg, CDoom::PU_CACHE)
 
     # unload gray #'s
-    6.times { |i| z_change_tag(CDoom.arms[i][0], CDoom::PU_CACHE) }
+    6.times { |i| z_change_tag(Doocr.arms[i][0], CDoom::PU_CACHE) }
 
     # unload the key cards
-    CDoom::Card::NUMCARDS.value.times { |i| z_change_tag(CDoom.keys[i], CDoom::PU_CACHE) }
+    CDoom::Card::NUMCARDS.value.times { |i| z_change_tag(Doocr.keys[i], CDoom::PU_CACHE) }
 
-    z_change_tag(CDoom.sbar, CDoom::PU_CACHE)
-    z_change_tag(CDoom.faceback, CDoom::PU_CACHE)
+    z_change_tag(Doocr.sbar, CDoom::PU_CACHE)
+    z_change_tag(Doocr.faceback, CDoom::PU_CACHE)
 
-    CDoom::ST_NUMFACES.times { |i| z_change_tag(CDoom.faces[i], CDoom::PU_CACHE) }
+    CDoom::ST_NUMFACES.times { |i| z_change_tag(Doocr.faces[i], CDoom::PU_CACHE) }
 
     # Note: nobody ain't seen no unloading
     #   of stminus yet. Dude.
@@ -870,7 +870,7 @@ module Doocr
     CDoom.stlib_init_num(pointerof(CDoom.w_ready),
       CDoom::ST_AMMOX,
       CDoom::ST_AMMOY,
-      CDoom.tallnum,
+      Doocr.tallnum.to_unsafe.as(CDoom::Patch**),
       CDoom.plyr.value.ammo.to_unsafe + Doocr.weaponinfo[CDoom.plyr.value.readyweapon.value].ammo.value,
       Doocr.st_statusbaron_ptr,
       CDoom::ST_AMMOWIDTH)
@@ -882,16 +882,16 @@ module Doocr
     CDoom.stlib_init_percent(pointerof(CDoom.w_health),
       CDoom::ST_HEALTHX,
       CDoom::ST_HEALTHY,
-      CDoom.tallnum,
+      Doocr.tallnum.to_unsafe.as(CDoom::Patch**),
       pointerof(CDoom.plyr.value.@health),
       Doocr.st_statusbaron_ptr,
-      CDoom.tallpercent)
+      Doocr.tallpercent)
 
     # arms background
     CDoom.stlib_init_bin_icon(pointerof(CDoom.w_armsbg),
       CDoom::ST_ARMSBGX,
       CDoom::ST_ARMSBGY,
-      CDoom.armsbg,
+      Doocr.armsbg,
       Doocr.st_notdeathmatch_ptr,
       Doocr.st_statusbaron_ptr)
 
@@ -900,7 +900,7 @@ module Doocr
       CDoom.stlib_init_mult_icon(CDoom.w_arms.to_unsafe + i,
         CDoom::ST_ARMSX + (i % 3) * CDoom::ST_ARMSXSPACE,
         CDoom::ST_ARMSY + (i // 3) * CDoom::ST_ARMSYSPACE,
-        (CDoom.arms.to_unsafe + i).value,
+        Doocr.arms[i].to_unsafe,
         CDoom.plyr.value.weaponowned.to_unsafe + (i + 1),
         Doocr.st_armson_ptr)
     end
@@ -909,7 +909,7 @@ module Doocr
     CDoom.stlib_init_num(pointerof(CDoom.w_frags),
       CDoom::ST_FRAGSX,
       CDoom::ST_FRAGSY,
-      CDoom.tallnum,
+      Doocr.tallnum.to_unsafe.as(CDoom::Patch**),
       Doocr.st_fragscount_ptr,
       Doocr.st_fragson_ptr,
       CDoom::ST_FRAGSWIDTH)
@@ -918,7 +918,7 @@ module Doocr
     CDoom.stlib_init_mult_icon(pointerof(CDoom.w_faces),
       CDoom::ST_FACESX,
       CDoom::ST_FACESY,
-      CDoom.faces,
+      Doocr.faces.to_unsafe.as(CDoom::Patch**),
       Doocr.st_faceindex_ptr,
       Doocr.st_statusbaron_ptr)
 
@@ -926,30 +926,30 @@ module Doocr
     CDoom.stlib_init_percent(pointerof(CDoom.w_armor),
       CDoom::ST_ARMORX,
       CDoom::ST_ARMORY,
-      CDoom.tallnum,
+      Doocr.tallnum.to_unsafe.as(CDoom::Patch**),
       pointerof(CDoom.plyr.value.@armorpoints),
       Doocr.st_statusbaron_ptr,
-      CDoom.tallpercent)
+      Doocr.tallpercent)
 
     # keyboxes 0-2
     CDoom.stlib_init_mult_icon(CDoom.w_keyboxes.to_unsafe,
       CDoom::ST_KEY0X,
       CDoom::ST_KEY0Y,
-      CDoom.keys,
+      Doocr.keys.to_unsafe.as(CDoom::Patch**),
       Doocr.keyboxes.to_unsafe,
       Doocr.st_statusbaron_ptr)
 
     CDoom.stlib_init_mult_icon(CDoom.w_keyboxes.to_unsafe + 1,
       CDoom::ST_KEY1X,
       CDoom::ST_KEY1Y,
-      CDoom.keys,
+      Doocr.keys.to_unsafe.as(CDoom::Patch**),
       Doocr.keyboxes.to_unsafe + 1,
       Doocr.st_statusbaron_ptr)
 
     CDoom.stlib_init_mult_icon(CDoom.w_keyboxes.to_unsafe + 2,
       CDoom::ST_KEY2X,
       CDoom::ST_KEY2Y,
-      CDoom.keys,
+      Doocr.keys.to_unsafe.as(CDoom::Patch**),
       Doocr.keyboxes.to_unsafe + 2,
       Doocr.st_statusbaron_ptr)
 
@@ -957,7 +957,7 @@ module Doocr
     CDoom.stlib_init_num(CDoom.w_ammo.to_unsafe,
       CDoom::ST_AMMO0X,
       CDoom::ST_AMMO0Y,
-      CDoom.shortnum,
+      Doocr.shortnum.to_unsafe.as(CDoom::Patch**),
       CDoom.plyr.value.ammo.to_unsafe,
       Doocr.st_statusbaron_ptr,
       CDoom::ST_AMMO0WIDTH)
@@ -965,7 +965,7 @@ module Doocr
     CDoom.stlib_init_num(CDoom.w_ammo.to_unsafe + 1,
       CDoom::ST_AMMO1X,
       CDoom::ST_AMMO1Y,
-      CDoom.shortnum,
+      Doocr.shortnum.to_unsafe.as(CDoom::Patch**),
       CDoom.plyr.value.ammo.to_unsafe + 1,
       Doocr.st_statusbaron_ptr,
       CDoom::ST_AMMO1WIDTH)
@@ -973,7 +973,7 @@ module Doocr
     CDoom.stlib_init_num(CDoom.w_ammo.to_unsafe + 2,
       CDoom::ST_AMMO2X,
       CDoom::ST_AMMO2Y,
-      CDoom.shortnum,
+      Doocr.shortnum.to_unsafe.as(CDoom::Patch**),
       CDoom.plyr.value.ammo.to_unsafe + 2,
       Doocr.st_statusbaron_ptr,
       CDoom::ST_AMMO2WIDTH)
@@ -981,7 +981,7 @@ module Doocr
     CDoom.stlib_init_num(CDoom.w_ammo.to_unsafe + 3,
       CDoom::ST_AMMO3X,
       CDoom::ST_AMMO3Y,
-      CDoom.shortnum,
+      Doocr.shortnum.to_unsafe.as(CDoom::Patch**),
       CDoom.plyr.value.ammo.to_unsafe + 3,
       Doocr.st_statusbaron_ptr,
       CDoom::ST_AMMO3WIDTH)
@@ -990,7 +990,7 @@ module Doocr
     CDoom.stlib_init_num(CDoom.w_maxammo.to_unsafe,
       CDoom::ST_MAXAMMO0X,
       CDoom::ST_MAXAMMO0Y,
-      CDoom.shortnum,
+      Doocr.shortnum.to_unsafe.as(CDoom::Patch**),
       CDoom.plyr.value.maxammo.to_unsafe,
       Doocr.st_statusbaron_ptr,
       CDoom::ST_MAXAMMO0WIDTH)
@@ -998,7 +998,7 @@ module Doocr
     CDoom.stlib_init_num(CDoom.w_maxammo.to_unsafe + 1,
       CDoom::ST_MAXAMMO1X,
       CDoom::ST_MAXAMMO1Y,
-      CDoom.shortnum,
+      Doocr.shortnum.to_unsafe.as(CDoom::Patch**),
       CDoom.plyr.value.maxammo.to_unsafe + 1,
       Doocr.st_statusbaron_ptr,
       CDoom::ST_MAXAMMO1WIDTH)
@@ -1006,7 +1006,7 @@ module Doocr
     CDoom.stlib_init_num(CDoom.w_maxammo.to_unsafe + 2,
       CDoom::ST_MAXAMMO2X,
       CDoom::ST_MAXAMMO2Y,
-      CDoom.shortnum,
+      Doocr.shortnum.to_unsafe.as(CDoom::Patch**),
       CDoom.plyr.value.maxammo.to_unsafe + 2,
       Doocr.st_statusbaron_ptr,
       CDoom::ST_MAXAMMO2WIDTH)
@@ -1014,7 +1014,7 @@ module Doocr
     CDoom.stlib_init_num(CDoom.w_maxammo.to_unsafe + 3,
       CDoom::ST_MAXAMMO3X,
       CDoom::ST_MAXAMMO3Y,
-      CDoom.shortnum,
+      Doocr.shortnum.to_unsafe.as(CDoom::Patch**),
       CDoom.plyr.value.maxammo.to_unsafe + 3,
       Doocr.st_statusbaron_ptr,
       CDoom::ST_MAXAMMO3WIDTH)

@@ -144,8 +144,6 @@ module Doocr
   end
 
   def self.doom_init
-    CDoom.screen_buffer = GC.malloc(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT).as(UInt8*)
-    CDoom.final_screen_buffer = GC.malloc(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT * 4).as(UInt8*)
     Doocr.last_update_time = CDoom.i_get_time
 
     d_doom_main

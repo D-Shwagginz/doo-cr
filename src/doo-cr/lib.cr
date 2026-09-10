@@ -94,7 +94,7 @@ end
 
 # Was a define in C
 macro ng_statsx
-  (32 + CDoom.star.value.width//2 + 32*(Doocr.dofrags == 0).to_unsafe)
+  (32 + Doocr.star.value.width//2 + 32*(Doocr.dofrags == 0).to_unsafe)
 end
 
 # The C Library
@@ -2234,7 +2234,6 @@ lib CDoom
   fun p_archive_specials = P_ArchiveSpecials
   fun p_unarchive_specials = P_UnArchiveSpecials
 
-  $save_p : Byte*
 
   # __P_SETUP__
 
@@ -3149,7 +3148,6 @@ lib CDoom
   #
 
   # File handling stuff.
-  $debugfile : Void*
 
   # if true, load all graphics at level load
 
@@ -4066,11 +4064,6 @@ lib CDoom
   fun ev_teleport = EV_Teleport(line : Line*, side : LibC::Int, thing : Mobj*) : LibC::Int
 
   # __R_BSP__
-  $curline : Seg*
-  $sidedef : Side*
-  $linedef : Line*
-  $frontsector : Sector*
-  $backsector : Sector*
 
 
 
@@ -4081,9 +4074,6 @@ lib CDoom
   $drawsegs : Drawseg[MAXDRAWSEGS]
   $ds_p : Drawseg*
 
-  $hscalelight : Lighttable**
-  $vscalelight : Lighttable**
-  $dscalelight : Lighttable**
 
   alias Drawfunc = Proc(LibC::Int, LibC::Int, Nil)
 
@@ -4094,10 +4084,8 @@ lib CDoom
 
   # __R_DRAW__
 
-  $dc_colormap : Lighttable*
 
   # first pixel in a column
-  $dc_source : Byte*
 
   # The span blitting interface.
   # Hook in assembler or system specific BLT
@@ -4115,14 +4103,10 @@ lib CDoom
   fun r_video_erase = R_VideoErase(ofs : LibC::UInt, count : LibC::Int)
 
 
-  $ds_colormap : Lighttable*
 
 
   # start of a 64*64 tile image
-  $ds_source : Byte*
 
-  $translationtables : Byte*
-  $dc_translation : Byte*
 
   # Span blitting for rows, floor/ceiling.
   # No Sepctre effect needed.
@@ -4152,12 +4136,8 @@ lib CDoom
   # needed for texture pegging
 
   # needed for pre rendering (fracs)
-  $spritewidth : Fixed*
 
-  $spriteoffset : Fixed*
-  $spritetopoffset : Fixed*
 
-  $colormaps : Lighttable*
 
 
 
@@ -4188,13 +4168,11 @@ lib CDoom
   # POV data.
   #
 
-  $viewplayer : Player*
 
   # ?
 
   VIEWANGLETOX_SIZE = FINEANGLES//2
   XTOVIEWANGLE_SIZE = SCREENWIDTH + 1
-  $xtoviewangle : Angle[XTOVIEWANGLE_SIZE]
 
 
   # angle to line origin
@@ -4251,7 +4229,6 @@ lib CDoom
   $scalelightfixed : Lighttable*[MAXLIGHTSCALE]
   $zlight : Lighttable*[MAXLIGHTZ][LIGHTLEVELS]
 
-  $fixedcolormap : Lighttable*
 
   # Number of diminishing brightness levels.
   # There a 0-31, i.e. 32 LUT in the COLORMAP lump.
@@ -4319,8 +4296,6 @@ lib CDoom
   # and initializing clipping.
 
   # vars for R_DrawMaskedColumn
-  $mfloorclip : LibC::Short*
-  $mceilingclip : LibC::Short*
 
 
   fun r_draw_masked_column = R_DrawMaskedColumn(column : Column*)
@@ -4711,7 +4686,6 @@ lib CDoom
   #
   # WADFILE I/O related stuff.
   #
-  $lumpcache : Void**
 
   fun w_init_multiple_files = W_InitMultipleFiles(filenames : LibC::Char**)
   fun w_reload = W_Reload
@@ -4778,10 +4752,7 @@ lib CDoom
 
   $screens : Byte*[5]
   SCREEN_PALETTE_SIZE = 256 * 3
-  $screen_palette : LibC::UChar[SCREEN_PALETTE_SIZE]
 
-  $screen_buffer : LibC::UChar*
-  $final_screen_buffer : LibC::UChar*
   $itoa_buf : LibC::Char[20]
 
 
@@ -4910,9 +4881,7 @@ lib CDoom
 
 
 
-  $is_wiping_screen : DoomBool
 
-  $debugfile : Void*
 
 
 
@@ -4924,7 +4893,6 @@ lib CDoom
   #
   $events : Event[MAXEVENTS]
   # wipegamestate can be set to -1 to force a wipe on the next draw
-  $wipegamestate : Gamestate
   fun r_execute_set_view_size = R_ExecuteSetViewSize
 
   # print title for every printed line
@@ -5014,8 +4982,6 @@ lib CDoom
   #
   # f_start_cast
   #
-  $wipegamestate : Gamestate
-  $hu_font : Patch*[HU_FONTSIZE]
 
   fun f_start_cast = F_StartCast
   fun f_cast_ticker = F_CastTicker
@@ -5052,7 +5018,6 @@ lib CDoom
   $wipe_scr_end : Byte*
   $wipe_scr : Byte*
 
-  $y : LibC::Int*
 
   fun wipe_shitty_col_major_x_form = wipe_shittyColMajorXform(array : LibC::Short*, width : LibC::Int, height : LibC::Int)
 
@@ -5158,7 +5123,6 @@ lib CDoom
 
 
 
-  $chat_char : LibC::Char # remove later.
 
 
   # DOOM shareware/registered/retail (Ultimate) names.
@@ -5498,7 +5462,6 @@ lib CDoom
   #
   # SCREEN SHOTS
   #
-  $num_channels = numChannels : LibC::Int
 
 
 
@@ -5621,7 +5584,6 @@ lib CDoom
   fun p_bullet_slope = P_BulletSlope(mo : Mobj*)
   fun p_gunshot = P_GunShot(mo : Mobj*, accurate : DoomBool)
 
-  $save_p : Byte*
 
   enum Thinkerclass : Byte
     End
@@ -5780,7 +5742,6 @@ lib CDoom
   FUZZTABLE = 50
   FUZZOFF   = SCREENWIDTH
 
-  $viewimage : Byte*
 
   # just for profiling
 
@@ -5819,7 +5780,6 @@ lib CDoom
   #
   # texture mapping
   #
-  $planezlight : Lighttable**
 
   
 
@@ -5836,7 +5796,6 @@ lib CDoom
 
 
 
-  $maskedtexturecol : LibC::Short*
 
   fun r_render_seg_loop = R_RenderSegLoop
 
@@ -5926,7 +5885,6 @@ lib CDoom
   # Hack display negative frags.
   #  Loads and store the stminus lump.
   #
-  $sttminus : Patch*
 
   fun stlib_draw_num = STlib_drawNum(n : ST_Number*, refresh : DoomBool)
 
@@ -6050,15 +6008,6 @@ lib CDoom
   ST_MSGWIDTH = 52
 
   $plyr : Player*                                            # main player in game
-  $sbar : Patch*                                             # main bar left
-  $tallnum : Patch*[10]                                      # 0-9, tall numbers
-  $tallpercent : Patch*                                      # tall % sign
-  $shortnum : Patch*[10]                                     # 0-9, short, yellow (,different!) numbers
-  $keys : Patch*[CDoom::Card::NUMCARDS]                      # 3 key-cards, 3 skulls
-  $faces : Patch*[ST_NUMFACES]                               # face status patches
-  $faceback : Patch*                                         # face background
-  $armsbg : Patch*                                           # main bar right
-  $arms : Patch*[2][6]                                       # weapon ownership patches
   $w_ready : ST_Number                                       # ready-weapon widget
   $w_frags : ST_Number                                       # in deathmatch only, summary of frags stats
   $w_health : ST_Percent                                     # health widget
@@ -6102,8 +6051,6 @@ lib CDoom
   fun st_init_data = ST_initData
   fun st_create_widgets = ST_createWidgets
 
-  $info : LibC::Int[10][2500]
-  $profilecount : LibC::Int
 
   fun doom_strupr(s : LibC::Char*)
 
@@ -6180,7 +6127,6 @@ lib CDoom
   # wbs->pnum
 
   # specifies current state
-  $state : Stateenum
 
   # contains information passed into intermission
   # used for general timing
@@ -6191,68 +6137,42 @@ lib CDoom
 
 
   # # of commercial levels
-  $numcmaps = NUMCMAPS : LibC::Int
 
   #
   # GRAPHICS
   #
 
   # background (map of levels).
-  $bg : Patch*
 
   # You Are Here graphic
-  $yah : Patch*[2]
 
   # splat
-  $splat : Patch*
 
   # %, : graphics
-  $percent : Patch*
-  $colon : Patch*
 
   # 0-9 graphic
-  $num : Patch*[10]
 
   # minus sign
-  $wiminus : Patch*
 
   # "Finished!" graphics
-  $finished : Patch*
 
   # "Entering" graphic
-  $entering : Patch*
 
   # "secret"
-  $sp_secret : Patch*
 
   # "Kills", "Scrt", "Items", "Frags"
-  $kills : Patch*
-  $secret : Patch*
-  $items : Patch*
-  $frags : Patch*
 
   # Time sucks.
-  $time_patch : Patch*
-  $par : Patch*
-  $sucks : Patch*
 
   # "killers", "victims"
-  $killers : Patch*
-  $victims : Patch*
 
   # "Total", your face, your dead face
-  $total : Patch*
-  $star : Patch*
-  $bstar : Patch*
 
   # "red P[1..MAXPLAYERS]"
-  $p : Patch*[MAXPLAYERS]
 
   # "gray P[1..MAXPLAYERS]"
-  $bp : Patch*[MAXPLAYERS]
 
   # Name graphics of each level (centered)
-  $lnames : Patch**
 
 
   #

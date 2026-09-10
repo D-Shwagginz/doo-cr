@@ -179,9 +179,9 @@ module Doocr
         next
       end
 
-      w = CDoom.hu_font[c].value.width.to_i16!
+      w = Doocr.hu_font[c].value.width.to_i16!
       break if cx + w > CDoom::SCREENWIDTH
-      CDoom.v_draw_patch(cx, cy, 0, CDoom.hu_font[c])
+      CDoom.v_draw_patch(cx, cy, 0, Doocr.hu_font[c])
       cx += w
 
       count -= 1
@@ -347,7 +347,7 @@ module Doocr
         next
       end
 
-      w = CDoom.hu_font[c].value.width.to_i16!
+      w = Doocr.hu_font[c].value.width.to_i16!
       width += w
     end
 
@@ -364,8 +364,8 @@ module Doocr
         next
       end
 
-      w = CDoom.hu_font[c].value.width.to_i16!
-      CDoom.v_draw_patch(cx, 180, 0, CDoom.hu_font[c])
+      w = Doocr.hu_font[c].value.width.to_i16!
+      CDoom.v_draw_patch(cx, 180, 0, Doocr.hu_font[c])
       cx += w
     end
   end

@@ -61,28 +61,28 @@ module Doocr
     CDoom.doomcom.value.remotenode = node
     CDoom.doomcom.value.datalength = CDoom.net_buffer_size
 
-    if !CDoom.debugfile.null?
+    if Doocr.debugfile
       realretrans = -1
       if CDoom.netbuffer.value.checksum & NCMD_RETRANSMIT != 0
         realretrans = CDoom.expand_tics(CDoom.netbuffer.value.retransmitfrom)
       end
 
-      CDoom.doom_fprint(CDoom.debugfile, "send (")
-      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.expand_tics(CDoom.netbuffer.value.starttic), 10))
-      CDoom.doom_fprint(CDoom.debugfile, " + ")
-      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.netbuffer.value.numtics, 10))
-      CDoom.doom_fprint(CDoom.debugfile, ", R ")
-      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(realretrans, 10))
-      CDoom.doom_fprint(CDoom.debugfile, ") [")
-      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.doomcom.value.datalength, 10))
-      CDoom.doom_fprint(CDoom.debugfile, "] ")
+      Doocr.debug_fprint("send (")
+      Doocr.debug_fprint(CDoom.doom_itoa(CDoom.expand_tics(CDoom.netbuffer.value.starttic), 10))
+      Doocr.debug_fprint(" + ")
+      Doocr.debug_fprint(CDoom.doom_itoa(CDoom.netbuffer.value.numtics, 10))
+      Doocr.debug_fprint(", R ")
+      Doocr.debug_fprint(CDoom.doom_itoa(realretrans, 10))
+      Doocr.debug_fprint(") [")
+      Doocr.debug_fprint(CDoom.doom_itoa(CDoom.doomcom.value.datalength, 10))
+      Doocr.debug_fprint("] ")
 
       CDoom.doomcom.value.datalength.times do |i|
-        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.netbuffer.as(UInt8*)[i], 10))
-        CDoom.doom_fprint(CDoom.debugfile, " ")
+        Doocr.debug_fprint(CDoom.doom_itoa(CDoom.netbuffer.as(UInt8*)[i], 10))
+        Doocr.debug_fprint(" ")
       end
 
-      CDoom.doom_fprint(CDoom.debugfile, "\n")
+      Doocr.debug_fprint("\n")
     end
 
     CDoom.i_net_cmd
@@ -109,47 +109,47 @@ module Doocr
 
     return 0 if CDoom.doomcom.value.remotenode == -1
     if CDoom.doomcom.value.datalength != CDoom.net_buffer_size
-      if !CDoom.debugfile.null?
-        CDoom.doom_fprint(CDoom.debugfile, "bad packet length ")
-        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.doomcom.value.datalength, 10))
-        CDoom.doom_fprint(CDoom.debugfile, "\n")
+      if Doocr.debugfile
+        Doocr.debug_fprint("bad packet length ")
+        Doocr.debug_fprint(CDoom.doom_itoa(CDoom.doomcom.value.datalength, 10))
+        Doocr.debug_fprint("\n")
       end
       return 0
     end
 
     if CDoom.net_buffer_checksum != CDoom.netbuffer.value.checksum & NCMD_CHECKSUM
-      if !CDoom.debugfile.null?
-        CDoom.doom_fprint(CDoom.debugfile, "bad packet checksum\n")
+      if Doocr.debugfile
+        Doocr.debug_fprint("bad packet checksum\n")
       end
       return 0
     end
 
-    if !CDoom.debugfile.null?
+    if Doocr.debugfile
       if CDoom.netbuffer.value.checksum & NCMD_SETUP != 0
-        CDoom.doom_fprint(CDoom.debugfile, "setup packet\n")
+        Doocr.debug_fprint("setup packet\n")
       else
         realretrans = -1
         if CDoom.netbuffer.value.checksum & NCMD_RETRANSMIT != 0
           realretrans = CDoom.expand_tics(CDoom.netbuffer.value.retransmitfrom)
         end
 
-        CDoom.doom_fprint(CDoom.debugfile, "get ")
-        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.doomcom.value.remotenode, 10))
-        CDoom.doom_fprint(CDoom.debugfile, " = (")
-        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.expand_tics(CDoom.netbuffer.value.starttic), 10))
-        CDoom.doom_fprint(CDoom.debugfile, " + ")
-        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.netbuffer.value.numtics, 10))
-        CDoom.doom_fprint(CDoom.debugfile, ", R ")
-        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(realretrans, 10))
-        CDoom.doom_fprint(CDoom.debugfile, ")[")
-        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.doomcom.value.datalength, 10))
-        CDoom.doom_fprint(CDoom.debugfile, "]")
+        Doocr.debug_fprint("get ")
+        Doocr.debug_fprint(CDoom.doom_itoa(CDoom.doomcom.value.remotenode, 10))
+        Doocr.debug_fprint(" = (")
+        Doocr.debug_fprint(CDoom.doom_itoa(CDoom.expand_tics(CDoom.netbuffer.value.starttic), 10))
+        Doocr.debug_fprint(" + ")
+        Doocr.debug_fprint(CDoom.doom_itoa(CDoom.netbuffer.value.numtics, 10))
+        Doocr.debug_fprint(", R ")
+        Doocr.debug_fprint(CDoom.doom_itoa(realretrans, 10))
+        Doocr.debug_fprint(")[")
+        Doocr.debug_fprint(CDoom.doom_itoa(CDoom.doomcom.value.datalength, 10))
+        Doocr.debug_fprint("]")
 
         CDoom.doomcom.value.datalength.times do |i|
-          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.netbuffer.as(UInt8*)[i], 10))
-          CDoom.doom_fprint(CDoom.debugfile, " ")
+          Doocr.debug_fprint(CDoom.doom_itoa(CDoom.netbuffer.as(UInt8*)[i], 10))
+          Doocr.debug_fprint(" ")
         end
-        CDoom.doom_fprint(CDoom.debugfile, "\n")
+        Doocr.debug_fprint("\n")
       end
     end
     return 1
@@ -195,10 +195,10 @@ module Doocr
       if Doocr.resendcount[netnode] <= 0 &&
          (CDoom.netbuffer.value.checksum & NCMD_RETRANSMIT) != 0
         Doocr.resendto[netnode] = CDoom.expand_tics(CDoom.netbuffer.value.retransmitfrom)
-        if !CDoom.debugfile.null?
-          CDoom.doom_fprint(CDoom.debugfile, "retransmit from ")
-          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(Doocr.resendto[netnode], 10))
-          CDoom.doom_fprint(CDoom.debugfile, "\n")
+        if Doocr.debugfile
+          Doocr.debug_fprint("retransmit from ")
+          Doocr.debug_fprint(CDoom.doom_itoa(Doocr.resendto[netnode], 10))
+          Doocr.debug_fprint("\n")
         end
         Doocr.resendcount[netnode] = RESENDCOUNT
       else
@@ -209,12 +209,12 @@ module Doocr
       next if realend == Doocr.nettics[netnode]
 
       if realend < Doocr.nettics[netnode]
-        if !CDoom.debugfile.null?
-          CDoom.doom_fprint(CDoom.debugfile, "out of order packet (")
-          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(realstart, 10))
-          CDoom.doom_fprint(CDoom.debugfile, " + ")
-          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.netbuffer.value.numtics, 10))
-          CDoom.doom_fprint(CDoom.debugfile, ")\n")
+        if Doocr.debugfile
+          Doocr.debug_fprint("out of order packet (")
+          Doocr.debug_fprint(CDoom.doom_itoa(realstart, 10))
+          Doocr.debug_fprint(" + ")
+          Doocr.debug_fprint(CDoom.doom_itoa(CDoom.netbuffer.value.numtics, 10))
+          Doocr.debug_fprint(")\n")
         end
         next
       end
@@ -222,14 +222,14 @@ module Doocr
       # check for a missed packet
       if realstart > Doocr.nettics[netnode]
         # stop processing until the other system resends the missed tics
-        if !CDoom.debugfile.null?
-          CDoom.doom_fprint(CDoom.debugfile, "missed tics from ")
-          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(netnode, 10))
-          CDoom.doom_fprint(CDoom.debugfile, " (")
-          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(realstart, 10))
-          CDoom.doom_fprint(CDoom.debugfile, " - ")
-          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(Doocr.nettics[netnode], 10))
-          CDoom.doom_fprint(CDoom.debugfile, ")\n")
+        if Doocr.debugfile
+          Doocr.debug_fprint("missed tics from ")
+          Doocr.debug_fprint(CDoom.doom_itoa(netnode, 10))
+          Doocr.debug_fprint(" (")
+          Doocr.debug_fprint(CDoom.doom_itoa(realstart, 10))
+          Doocr.debug_fprint(" - ")
+          Doocr.debug_fprint(CDoom.doom_itoa(Doocr.nettics[netnode], 10))
+          Doocr.debug_fprint(")\n")
         end
         Doocr.remoteresend[netnode] = 1
         next
@@ -573,7 +573,7 @@ module Doocr
   # without hanging the other players
   #
   def self.d_quit_net_game
-    Box(File).unbox(CDoom.debugfile).close if !CDoom.debugfile.null?
+    Doocr.debugfile.try(&.close)
 
     return if Doocr.netgame == 0 || Doocr.usergame == 0 || Doocr.consoleplayer == -1 || Doocr.demoplayback == 1
 

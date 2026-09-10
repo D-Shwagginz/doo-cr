@@ -52,14 +52,14 @@ module Doocr
 
     Doocr.frameon += 1
 
-    if !CDoom.debugfile.null?
-      CDoom.doom_fprint(CDoom.debugfile, "=======real: ")
-      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(realtics, 10))
-      CDoom.doom_fprint(CDoom.debugfile, "  avail: ")
-      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(availabletics, 10))
-      CDoom.doom_fprint(CDoom.debugfile, "  game: ")
-      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(counts, 10))
-      CDoom.doom_fprint(CDoom.debugfile, "\n")
+    if Doocr.debugfile
+      Doocr.debug_fprint("=======real: ")
+      Doocr.debug_fprint(CDoom.doom_itoa(realtics, 10))
+      Doocr.debug_fprint("  avail: ")
+      Doocr.debug_fprint(CDoom.doom_itoa(availabletics, 10))
+      Doocr.debug_fprint("  game: ")
+      Doocr.debug_fprint(CDoom.doom_itoa(counts, 10))
+      Doocr.debug_fprint("\n")
     end
 
     if Doocr.demoplayback == 0

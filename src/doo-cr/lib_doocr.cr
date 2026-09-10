@@ -651,6 +651,7 @@ module Doocr
 	class_property reloadlump : Int32 = 0
 	class_property reloadname : String = ""
 	class_property numlumps : Int32 = 0
+	class_getter lumpcache : Array(Pointer(Void)) = [] of Pointer(Void)
 	class_property rejectmatrix : Pointer(UInt8) = Pointer(UInt8).null
 	class_property blockmaplump : Pointer(Int16) = Pointer(Int16).null
 	class_property blockmap : Pointer(Int16) = Pointer(Int16).null
@@ -809,8 +810,11 @@ module Doocr
 	class_property level_time_count : Int32 = 0
 	class_property defaultfile : String = "default.cfg"
 	class_property basedefault : String = "./config.cfg"
+	class_property num_channels : Int32 = 16
 	class_getter wadfiles : Array(String) = [] of String
 	class_property deathmatch_p : Int32 = 0
+	class_property numcmaps : Int32 = 0
+	class_property state : CDoom::Stateenum = CDoom::Stateenum::NoState
 	class_property d_skill : CDoom::Skill = CDoom::Skill::Medium
 	class_property epi : Int32 = 1
 	class_property pagename : String = "TITLEPIC"
@@ -848,6 +852,76 @@ module Doocr
 	class_property firstspritelump : Int32 = 0
 	class_property lastspritelump : Int32 = 0
 	class_property numspritelumps : Int32 = 0
+	class_getter xtoviewangle : Array(UInt32) = Array.new(CDoom::XTOVIEWANGLE_SIZE, 0_u32)
+	class_getter spritewidth : Array(Int32) = [] of Int32
+	class_getter spriteoffset : Array(Int32) = [] of Int32
+	class_getter spritetopoffset : Array(Int32) = [] of Int32
+	class_getter translationtables : Array(UInt8) = Array.new(768, 0_u8)
+	class_getter screen_palette : Array(UInt8) = Array.new(CDoom::SCREEN_PALETTE_SIZE, 0_u8)
+	class_getter yah : Array(Pointer(CDoom::Patch)) = Array.new(2, Pointer(CDoom::Patch).null)
+	class_getter tallnum : Array(Pointer(CDoom::Patch)) = Array.new(10, Pointer(CDoom::Patch).null)
+	class_getter shortnum : Array(Pointer(CDoom::Patch)) = Array.new(10, Pointer(CDoom::Patch).null)
+	class_getter keys : Array(Pointer(CDoom::Patch)) = Array.new(CDoom::Card::NUMCARDS.value, Pointer(CDoom::Patch).null)
+	class_getter faces : Array(Pointer(CDoom::Patch)) = Array.new(CDoom::ST_NUMFACES, Pointer(CDoom::Patch).null)
+	class_property tallpercent : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property armsbg : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property sbar : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property faceback : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_getter arms : Array(Array(Pointer(CDoom::Patch))) = Array.new(6) { Array.new(2, Pointer(CDoom::Patch).null) }
+	class_property bg : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property splat : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_getter splat_pair : Array(Pointer(CDoom::Patch)) = Array.new(2, Pointer(CDoom::Patch).null)
+	class_property percent : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property colon : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_getter num : Array(Pointer(CDoom::Patch)) = Array.new(10, Pointer(CDoom::Patch).null)
+	class_property wiminus : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property finished : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property entering : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property sp_secret : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property kills : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property secret : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property items : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property frags : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property time_patch : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property par : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property sucks : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property killers : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property victims : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property total : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property star : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property bstar : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_getter p : Array(Pointer(CDoom::Patch)) = Array.new(CDoom::MAXPLAYERS, Pointer(CDoom::Patch).null)
+	class_getter bp : Array(Pointer(CDoom::Patch)) = Array.new(CDoom::MAXPLAYERS, Pointer(CDoom::Patch).null)
+	class_getter lnames : Array(Pointer(CDoom::Patch)) = [] of Pointer(CDoom::Patch)
+	class_getter hu_font : Array(Pointer(CDoom::Patch)) = Array.new(CDoom::HU_FONTSIZE, Pointer(CDoom::Patch).null)
+	class_property sttminus : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
+	class_property fixedcolormap : Pointer(CDoom::Lighttable) = Pointer(CDoom::Lighttable).null
+	class_property planezlight : Pointer(Pointer(CDoom::Lighttable)) = Pointer(Pointer(CDoom::Lighttable)).null
+	class_property curline : Pointer(CDoom::Seg) = Pointer(CDoom::Seg).null
+	class_property sidedef : Pointer(CDoom::Side) = Pointer(CDoom::Side).null
+	class_property linedef : Pointer(CDoom::Line) = Pointer(CDoom::Line).null
+	class_property frontsector : Pointer(CDoom::Sector) = Pointer(CDoom::Sector).null
+	class_property backsector : Pointer(CDoom::Sector) = Pointer(CDoom::Sector).null
+	class_property dc_colormap : Pointer(CDoom::Lighttable) = Pointer(CDoom::Lighttable).null
+	class_property ds_colormap : Pointer(CDoom::Lighttable) = Pointer(CDoom::Lighttable).null
+	class_property dc_source : Pointer(UInt8) = Pointer(UInt8).null
+	class_property ds_source : Pointer(UInt8) = Pointer(UInt8).null
+	class_property dc_translation : Pointer(UInt8) = Pointer(UInt8).null
+	class_property colormaps : Pointer(CDoom::Lighttable) = Pointer(CDoom::Lighttable).null
+	class_property mfloorclip : Pointer(Int16) = Pointer(Int16).null
+	class_property mceilingclip : Pointer(Int16) = Pointer(Int16).null
+	class_property maskedtexturecol : Pointer(Int16) = Pointer(Int16).null
+	class_property viewplayer : Pointer(CDoom::Player) = Pointer(CDoom::Player).null
+	class_property debugfile : File? = nil
+
+	def self.debug_fprint(text : String)
+		self.debugfile.try { |file| file << text }
+	end
+
+	def self.debug_fprint(text : UInt8*)
+		debug_fprint(String.new(text))
+	end
+	class_getter wipe_y : Array(Int32) = [] of Int32
 	class_property numflats : Int32 = 0
 	class_property numtextures : Int32 = 0
 	class_property flatmemory : Int32 = 0

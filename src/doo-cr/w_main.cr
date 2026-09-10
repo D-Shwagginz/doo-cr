@@ -250,7 +250,7 @@ module Doocr
 
     i = Doocr.reloadlump
     while i < (Doocr.reloadlump + lumpcount).to_u32!
-      CDoom.z_free(CDoom.lumpcache[i]) unless CDoom.lumpcache[i].null?
+      CDoom.z_free(Doocr.lumpcache[i]) unless Doocr.lumpcache[i].null?
 
       @@lumpinfo[i].position = fileinfo.value.filepos
       @@lumpinfo[i].size = fileinfo.value.size
@@ -272,12 +272,8 @@ module Doocr
     CDoom.i_error("Error: w_merge_multiple_files: no files found") if Doocr.numlumps == 0
 
     # set up caching
-    size = Doocr.numlumps * sizeof(Void*)
-    CDoom.lumpcache = GC.malloc(size).as(Void**)
-
-    CDoom.i_error("Error: Couldn't allocate lumpcache") if CDoom.lumpcache.null?
-
-    CDoom.doom_memset(CDoom.lumpcache, 0, size)
+    Doocr.lumpcache.clear
+    Doocr.numlumps.times { Doocr.lumpcache << Pointer(Void).null }
   end
 
   #
@@ -307,12 +303,8 @@ module Doocr
     CDoom.i_error("Error: w_init_multiple_files: no files found") if Doocr.numlumps == 0
 
     # set up caching
-    size = Doocr.numlumps * sizeof(Void*)
-    CDoom.lumpcache = GC.malloc(size).as(Void**)
-
-    CDoom.i_error("Error: Couldn't allocate lumpcache") if CDoom.lumpcache.null?
-
-    CDoom.doom_memset(CDoom.lumpcache, 0, size)
+    Doocr.lumpcache.clear
+    Doocr.numlumps.times { Doocr.lumpcache << Pointer(Void).null }
 
     if w_check_num_for_name("STDISK".to_unsafe) != -1
       @@loading_patch = w_cache_lump_name("STDISK".to_unsafe, CDoom::PU_STATIC).as(CDoom::Patch*)
@@ -429,17 +421,17 @@ module Doocr
       CDoom.i_error("Error: w_cache_lump_num #{lump} >= numlumps")
     end
 
-    if CDoom.lumpcache[lump].null?
+    if Doocr.lumpcache[lump].null?
       # read the lump in
       @@do_loading_disk = true
 
-      ptr = CDoom.z_malloc(CDoom.w_lump_length(lump), tag, CDoom.lumpcache + lump).as(CDoom::Byte*)
-      CDoom.w_read_lump(lump, CDoom.lumpcache[lump])
+      ptr = CDoom.z_malloc(CDoom.w_lump_length(lump), tag, Doocr.lumpcache.to_unsafe + lump).as(CDoom::Byte*)
+      CDoom.w_read_lump(lump, Doocr.lumpcache[lump])
     else
-      z_change_tag(CDoom.lumpcache[lump], tag)
+      z_change_tag(Doocr.lumpcache[lump], tag)
     end
 
-    return CDoom.lumpcache[lump]
+    return Doocr.lumpcache[lump]
   end
 
   def self.w_cache_lump_name(name : LibC::Char*, tag : LibC::Int) : Void*

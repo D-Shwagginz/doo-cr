@@ -265,7 +265,7 @@ module Doocr
       CDoom.doom_concat(buffer, "0") if j < 10
       CDoom.doom_concat(buffer, CDoom.doom_itoa(j, 10))
       j += 1
-      CDoom.hu_font[i] = CDoom.w_cache_lump_name(buffer, CDoom::PU_STATIC).as(CDoom::Patch*)
+      Doocr.hu_font[i] = CDoom.w_cache_lump_name(buffer, CDoom::PU_STATIC).as(CDoom::Patch*)
     end
   end
 
@@ -285,12 +285,12 @@ module Doocr
     # create the message widget
     CDoom.hulib_init_s_text(pointerof(CDoom.w_message),
       CDoom::HU_MSGX, CDoom::HU_MSGY, CDoom::HU_MSGHEIGHT,
-      CDoom.hu_font, CDoom::HU_FONTSTART, pointerof(@@message_on))
+      Doocr.hu_font.to_unsafe.as(CDoom::Patch**), CDoom::HU_FONTSTART, pointerof(@@message_on))
 
     # # create the map title widget
     CDoom.hulib_init_text_line(pointerof(CDoom.w_title),
-      0, 167 - CDoom.hu_font[0].value.height.to_i16!,
-      CDoom.hu_font, CDoom::HU_FONTSTART)
+      0, 167 - Doocr.hu_font[0].value.height.to_i16!,
+      Doocr.hu_font.to_unsafe.as(CDoom::Patch**), CDoom::HU_FONTSTART)
 
     s = ""
     case Doocr.gamemode
@@ -312,8 +312,8 @@ module Doocr
     end
 
     # create the chat widget
-    CDoom.hulib_init_i_text(pointerof(CDoom.w_chat), CDoom::HU_MSGX, CDoom::HU_MSGY + CDoom::HU_MSGHEIGHT*(CDoom.hu_font[0].value.height.to_i16! + 1),
-      CDoom.hu_font, CDoom::HU_FONTSTART, Doocr.chat_on_ptr)
+    CDoom.hulib_init_i_text(pointerof(CDoom.w_chat), CDoom::HU_MSGX, CDoom::HU_MSGY + CDoom::HU_MSGHEIGHT*(Doocr.hu_font[0].value.height.to_i16! + 1),
+      Doocr.hu_font.to_unsafe.as(CDoom::Patch**), CDoom::HU_FONTSTART, Doocr.chat_on_ptr)
 
     # create the inputbuffer widgets
     CDoom::MAXPLAYERS.times do |i|

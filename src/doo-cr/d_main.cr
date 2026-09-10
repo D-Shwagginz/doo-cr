@@ -987,7 +987,7 @@ module Doocr
     if ARGV.includes?("-debugfile")
       filename = "debug#{Doocr.consoleplayer}.txt"
       puts "debug output to: #{filename}"
-      CDoom.debugfile = Box.box(File.open(filename, "w"))
+      Doocr.debugfile = File.open(filename, "w")
     end
 
     CDoom.d_doom_loop # never returns [ddos] Called by app
