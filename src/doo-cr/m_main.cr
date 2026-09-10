@@ -1258,7 +1258,7 @@ module Doocr
           if @@defaults[i].defaultvalue > -0xfff && @@defaults[i].defaultvalue < 0xfff
             file << "#{@@defaults[i].name}\t\t#{@@defaults[i].location.not_nil!.value}\n"
           else
-            text = String.new(@@defaults[i].text_location.not_nil!.value)
+            text = @@defaults[i].name.starts_with?("chatmacro") ? Doocr.chat_macros[@@defaults[i].name[9].to_i] : String.new(@@defaults[i].text_location.not_nil!.value)
             file << "#{@@defaults[i].name}\t\t\"#{text}\"\n"
           end
         end
@@ -1273,7 +1273,11 @@ module Doocr
 
     @@defaults.size.times do |i|
       if @@defaults[i].defaultvalue == 0xffff
-        @@defaults[i].text_location.not_nil!.value = @@defaults[i].default_text_value.to_unsafe
+        if @@defaults[i].name.starts_with?("chatmacro")
+          Doocr.chat_macros[@@defaults[i].name[9].to_i] = @@defaults[i].default_text_value
+        else
+          @@defaults[i].text_location.not_nil!.value = @@defaults[i].default_text_value.to_unsafe
+        end
       else
         @@defaults[i].location.not_nil!.value = @@defaults[i].defaultvalue.to_i32!
       end
@@ -1285,7 +1289,7 @@ module Doocr
       Doocr.defaultfile = ARGV[i + 1]
       puts "        default file: #{Doocr.defaultfile}"
     else
-      Doocr.defaultfile = String.new(CDoom.basedefault.to_unsafe)
+      Doocr.defaultfile = Doocr.basedefault
     end
 
     begin
@@ -1298,7 +1302,11 @@ module Doocr
           next unless @@defaults[i].name == name
           if value.starts_with?('"')
             text = value.strip('"').to_unsafe
-            @@defaults[i].text_location.not_nil!.value = text
+            if @@defaults[i].name.starts_with?("chatmacro")
+              Doocr.chat_macros[@@defaults[i].name[9].to_i] = value.strip('"')
+            else
+              @@defaults[i].text_location.not_nil!.value = text
+            end
           elsif value.starts_with?("0x")
             @@defaults[i].location.not_nil!.value = CDoom.doom_atox(value.to_unsafe)
           else

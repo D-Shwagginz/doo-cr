@@ -808,6 +808,9 @@ module Doocr
 	class_property level_timer : Int32 = 0
 	class_property level_time_count : Int32 = 0
 	class_property defaultfile : String = "default.cfg"
+	class_property basedefault : String = "./config.cfg"
+	class_getter wadfiles : Array(String) = [] of String
+	class_property deathmatch_p : Int32 = 0
 	class_property d_skill : CDoom::Skill = CDoom::Skill::Medium
 	class_property epi : Int32 = 1
 	class_property pagename : String = "TITLEPIC"
@@ -956,11 +959,37 @@ module Doocr
 		end
 	end
 
+	class Weaponinfo
+		property ammo : CDoom::Ammotype
+		property upstate : Int32
+		property downstate : Int32
+		property readystate : Int32
+		property atkstate : Int32
+		property flashstate : Int32
+
+		def initialize(@ammo : CDoom::Ammotype, upstate : CDoom::Statenum, downstate : CDoom::Statenum,
+		               readystate : CDoom::Statenum, atkstate : CDoom::Statenum, flashstate : CDoom::Statenum)
+			@upstate = upstate.value
+			@downstate = downstate.value
+			@readystate = readystate.value
+			@atkstate = atkstate.value
+			@flashstate = flashstate.value
+		end
+	end
+
+	class_getter weaponinfo : Array(Weaponinfo) = [] of Weaponinfo
+	class_getter keyboxes : Array(Int32) = Array.new(3, -1)
+	class_getter oldweaponsowned : Array(Int32) = Array.new(CDoom::Weapontype::NUMWEAPONS.value, 0)
+	class_getter queued_midi_msgs : Array(UInt64) = Array.new(CDoom::MAX_QUEUED_MIDI_MSGS, 0_u64)
+	class_getter chat_macros : Array(String) = Array.new(10, "")
+	class_getter consistancy : Array(Array(Int16)) = Array.new(CDoom::MAXPLAYERS) { Array.new(CDoom::BACKUPTICS, 0_i16) }
+
 	class_getter solidsegs : Array(Cliprange) = Array.new(CDoom::MAXSEGS) { Cliprange.new }
 	class_property newend : Int32 = 0
 	class_getter linespeciallist : Array(Pointer(CDoom::Line)) = Array.new(CDoom::MAXLINEANIMS, Pointer(CDoom::Line).null)
 	class_getter switchlist : Array(Int32) = Array.new(CDoom::SWITCHLIST_SIZE, -1)
 	class_getter bodyque : Array(Pointer(CDoom::Mobj)) = Array.new(CDoom::BODYQUESIZE, Pointer(CDoom::Mobj).null)
+	class_getter marknums : Array(Pointer(CDoom::Patch)) = Array.new(10, Pointer(CDoom::Patch).null)
 	class_property precache : Int32 = 1
 	class_property singletics : Int32 = 0
 	class_property bodyqueslot : Int32 = 0

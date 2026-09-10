@@ -405,7 +405,7 @@ module Doocr
 
   def self.reset_all_channels
     16.times do |i|
-      CDoom.queued_midi_msgs[Doocr.queue_midi_tail % CDoom::MAX_QUEUED_MIDI_MSGS] = 0b10110000_u32 | i | (123_u32 << 8)
+      Doocr.queued_midi_msgs[Doocr.queue_midi_tail % CDoom::MAX_QUEUED_MIDI_MSGS] = 0b10110000_u64 | i.to_u64 | (123_u64 << 8)
       Doocr.queue_midi_tail += 1
     end
   end
@@ -463,7 +463,7 @@ module Doocr
     # Dequeue MIDI events
     if Doocr.queue_midi_head != Doocr.queue_midi_tail
       Doocr.queue_midi_head += 1
-      r = CDoom.queued_midi_msgs[(Doocr.queue_midi_head - 1).remainder(CDoom::MAX_QUEUED_MIDI_MSGS)]
+      r = Doocr.queued_midi_msgs[(Doocr.queue_midi_head - 1).remainder(CDoom::MAX_QUEUED_MIDI_MSGS)]
       r.to_u64!
     end
 

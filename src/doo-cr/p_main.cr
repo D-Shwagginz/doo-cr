@@ -2346,9 +2346,9 @@ module Doocr
       player.value.weaponowned[weapon.value] = 1
 
       if Doocr.deathmatch != 0
-        CDoom.p_give_ammo(player, CDoom.weaponinfo[weapon.value].ammo, 5)
+        CDoom.p_give_ammo(player, Doocr.weaponinfo[weapon.value].ammo, 5)
       else
-        CDoom.p_give_ammo(player, CDoom.weaponinfo[weapon.value].ammo, 2)
+        CDoom.p_give_ammo(player, Doocr.weaponinfo[weapon.value].ammo, 2)
       end
       player.value.pendingweapon = weapon
 
@@ -2358,13 +2358,13 @@ module Doocr
       return 0
     end
 
-    if CDoom.weaponinfo[weapon.value].ammo != CDoom::Ammotype::Noammo
+    if Doocr.weaponinfo[weapon.value].ammo != CDoom::Ammotype::Noammo
       # give one clip with a dropped weapon,
       # two clips with a found weapon
       if dropped != 0
-        gaveammo = CDoom.p_give_ammo(player, CDoom.weaponinfo[weapon.value].ammo, 1)
+        gaveammo = CDoom.p_give_ammo(player, Doocr.weaponinfo[weapon.value].ammo, 1)
       else
-        gaveammo = CDoom.p_give_ammo(player, CDoom.weaponinfo[weapon.value].ammo, 2)
+        gaveammo = CDoom.p_give_ammo(player, Doocr.weaponinfo[weapon.value].ammo, 2)
       end
     else
       gaveammo = 0
@@ -5053,9 +5053,9 @@ module Doocr
   def self.p_spawn_map_thing(mthing : CDoom::Mapthing*)
     # count deathmatch start positions
     if mthing.value.type == 11
-      if CDoom.deathmatch_p < CDoom.deathmatchstarts.to_unsafe + 10
-        CDoom.doom_memcpy(CDoom.deathmatch_p, mthing, sizeof(CDoom::Mapthing))
-        CDoom.deathmatch_p += 1
+      if Doocr.deathmatch_p < 10
+        CDoom.doom_memcpy(CDoom.deathmatchstarts.to_unsafe + Doocr.deathmatch_p, mthing, sizeof(CDoom::Mapthing))
+        Doocr.deathmatch_p += 1
       end
       return
     end
@@ -5497,7 +5497,7 @@ module Doocr
 
     CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_sawup.value) if player.value.pendingweapon == CDoom::Weapontype::Chainsaw
 
-    newstate = CDoom.weaponinfo[player.value.pendingweapon.value].upstate
+    newstate = Doocr.weaponinfo[player.value.pendingweapon.value].upstate
 
     player.value.pendingweapon = CDoom::Weapontype::Nochange
     (player.value.psprites.to_unsafe + CDoom::Psprnum::Weapon.value).value.sy = CDoom::WEAPONBOTTOM
@@ -5510,7 +5510,7 @@ module Doocr
   # If not, selects the next weapon to use.
   #
   def self.p_check_ammo(player : CDoom::Player*) : CDoom::DoomBool
-    ammo = CDoom::Ammotype.new(CDoom.weaponinfo[player.value.readyweapon.value].ammo)
+    ammo = CDoom::Ammotype.new(Doocr.weaponinfo[player.value.readyweapon.value].ammo)
 
     # Minimal amount for one shot varies.
     if player.value.readyweapon == CDoom::Weapontype::Bfg
@@ -5564,7 +5564,7 @@ module Doocr
     # Now set appropriate weapon overlay.
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Weapon,
-      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].downstate))
+      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].downstate))
 
     return 0
   end
@@ -5573,7 +5573,7 @@ module Doocr
     return if CDoom.p_check_ammo(player) == 0
 
     CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK1)
-    newstate = CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].atkstate)
+    newstate = CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].atkstate)
     CDoom.p_set_psprite(player, CDoom::Psprnum::Weapon, newstate)
     CDoom.p_noise_alert(player.value.mo, player.value.mo)
 
@@ -5591,7 +5591,7 @@ module Doocr
   def self.p_drop_weapon(player : CDoom::Player*)
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Weapon,
-      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].downstate))
+      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].downstate))
   end
 
   #
@@ -5617,7 +5617,7 @@ module Doocr
     if player.value.pendingweapon != CDoom::Weapontype::Nochange || player.value.health == 0
       # change weapon
       #  (pending weapon should allready be validated)
-      newstate = CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].downstate)
+      newstate = CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].downstate)
       CDoom.p_set_psprite(player, CDoom::Psprnum::Weapon, newstate)
       return
     end
@@ -5705,14 +5705,14 @@ module Doocr
 
     # The weapon has been raised all the way,
     #  so change to the ready state.
-    newstate = CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].readystate)
+    newstate = CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].readystate)
 
     CDoom.p_set_psprite(player, CDoom::Psprnum::Weapon, newstate)
   end
 
   def self.a_gun_flash(player : CDoom::Player*, psp : CDoom::Pspdef*)
     CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
-    CDoom.p_set_psprite(player, CDoom::Psprnum::Flash, CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate))
+    CDoom.p_set_psprite(player, CDoom::Psprnum::Flash, CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].flashstate))
   end
 
   #
@@ -5776,23 +5776,23 @@ module Doocr
   end
 
   def self.a_fire_missile(player : CDoom::Player*, psp : CDoom::Pspdef*)
-    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
     CDoom.p_spawn_player_missile(player.value.mo, CDoom::Mobjtype::MT_ROCKET)
   end
 
   def self.a_fire_bfg(player : CDoom::Player*, psp : CDoom::Pspdef*)
-    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - @@deh_bfg_cells_per_shot
+    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - @@deh_bfg_cells_per_shot
     CDoom.p_spawn_player_missile(player.value.mo, CDoom::Mobjtype::MT_BFG)
   end
 
   def self.a_fire_plasma(player : CDoom::Player*, psp : CDoom::Pspdef*)
-    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Flash,
-      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate + (CDoom.p_random & 1)))
+      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].flashstate + (CDoom.p_random & 1)))
 
     CDoom.p_spawn_player_missile(player.value.mo, CDoom::Mobjtype::MT_PLASMA)
   end
@@ -5829,12 +5829,12 @@ module Doocr
     CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_pistol.value)
 
     CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
-    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
 
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Flash,
-      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate))
+      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].flashstate))
 
     CDoom.p_bullet_slope(player.value.mo)
     CDoom.p_gunshot(player.value.mo, (player.value.refire == 0).to_unsafe)
@@ -5844,12 +5844,12 @@ module Doocr
     CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_shotgn.value)
     CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
 
-    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
 
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Flash,
-      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate))
+      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].flashstate))
 
     CDoom.p_bullet_slope(player.value.mo)
 
@@ -5862,12 +5862,12 @@ module Doocr
     CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_dshtgn.value)
     CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
 
-    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 2
+    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 2
 
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Flash,
-      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate))
+      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].flashstate))
 
     CDoom.p_bullet_slope(player.value.mo)
 
@@ -5885,15 +5885,15 @@ module Doocr
   def self.a_fire_cgun(player : CDoom::Player*, psp : CDoom::Pspdef*)
     CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_pistol.value)
 
-    return if player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] == 0
+    return if player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] == 0
 
     CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
-    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
 
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Flash,
-      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate +
+      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].flashstate +
                           (psp.value.state - (@@states.to_unsafe + CDoom::Statenum::S_CHAIN1.value)).to_i32!))
 
     CDoom.p_bullet_slope(player.value.mo)
@@ -6781,7 +6781,7 @@ module Doocr
     CDoom.p_group_lines
 
     Doocr.bodyqueslot = 0
-    CDoom.deathmatch_p = CDoom.deathmatchstarts.to_unsafe
+    Doocr.deathmatch_p = 0
     CDoom.p_load_things(lumpnum + CDoom::ML_THINGS)
 
     # if deathmatch, randomly spawn the active players

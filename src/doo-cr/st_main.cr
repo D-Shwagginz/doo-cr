@@ -457,9 +457,9 @@ module Doocr
         doevilgrin = false
 
         CDoom::Weapontype::NUMWEAPONS.value.times do |i|
-          if CDoom.oldweaponsowned[i] != CDoom.plyr.value.weaponowned[i]
+          if Doocr.oldweaponsowned[i] != CDoom.plyr.value.weaponowned[i]
             doevilgrin = true
-            CDoom.oldweaponsowned[i] = CDoom.plyr.value.weaponowned[i]
+            Doocr.oldweaponsowned[i] = CDoom.plyr.value.weaponowned[i]
           end
         end
         if doevilgrin
@@ -569,19 +569,19 @@ module Doocr
   @@largeammo = 1994 # means "n/a"
 
   def self.st_update_widgets
-    if CDoom.weaponinfo[CDoom.plyr.value.readyweapon.value].ammo == CDoom::Ammotype::Noammo
+    if Doocr.weaponinfo[CDoom.plyr.value.readyweapon.value].ammo == CDoom::Ammotype::Noammo
       CDoom.w_ready.num = pointerof(@@largeammo)
     else
-      CDoom.w_ready.num = CDoom.plyr.value.ammo.to_unsafe + CDoom.weaponinfo[CDoom.plyr.value.readyweapon.value].ammo.value
+      CDoom.w_ready.num = CDoom.plyr.value.ammo.to_unsafe + Doocr.weaponinfo[CDoom.plyr.value.readyweapon.value].ammo.value
     end
 
     CDoom.w_ready.data = CDoom.plyr.value.readyweapon
 
     # update keycard multiple widgets
     3.times do |i|
-      CDoom.keyboxes[i] = CDoom.plyr.value.cards[i] != 0 ? i : -1
+      Doocr.keyboxes[i] = CDoom.plyr.value.cards[i] != 0 ? i : -1
 
-      CDoom.keyboxes[i] = i + 3 if CDoom.plyr.value.cards[i + 3] != 0
+      Doocr.keyboxes[i] = i + 3 if CDoom.plyr.value.cards[i + 3] != 0
     end
 
     # refresh everything if this is him coming back to life
@@ -857,10 +857,10 @@ module Doocr
     Doocr.st_oldhealth = -1
 
     CDoom::Weapontype::NUMWEAPONS.value.times do |i|
-      CDoom.oldweaponsowned[i] = CDoom.plyr.value.weaponowned[i]
+      Doocr.oldweaponsowned[i] = CDoom.plyr.value.weaponowned[i]
     end
 
-    3.times { |i| CDoom.keyboxes[i] = -1 }
+    3.times { |i| Doocr.keyboxes[i] = -1 }
 
     CDoom.stlib_init
   end
@@ -871,7 +871,7 @@ module Doocr
       CDoom::ST_AMMOX,
       CDoom::ST_AMMOY,
       CDoom.tallnum,
-      CDoom.plyr.value.ammo.to_unsafe + CDoom.weaponinfo[CDoom.plyr.value.readyweapon.value].ammo.value,
+      CDoom.plyr.value.ammo.to_unsafe + Doocr.weaponinfo[CDoom.plyr.value.readyweapon.value].ammo.value,
       Doocr.st_statusbaron_ptr,
       CDoom::ST_AMMOWIDTH)
 
@@ -936,21 +936,21 @@ module Doocr
       CDoom::ST_KEY0X,
       CDoom::ST_KEY0Y,
       CDoom.keys,
-      CDoom.keyboxes.to_unsafe,
+      Doocr.keyboxes.to_unsafe,
       Doocr.st_statusbaron_ptr)
 
     CDoom.stlib_init_mult_icon(CDoom.w_keyboxes.to_unsafe + 1,
       CDoom::ST_KEY1X,
       CDoom::ST_KEY1Y,
       CDoom.keys,
-      CDoom.keyboxes.to_unsafe + 1,
+      Doocr.keyboxes.to_unsafe + 1,
       Doocr.st_statusbaron_ptr)
 
     CDoom.stlib_init_mult_icon(CDoom.w_keyboxes.to_unsafe + 2,
       CDoom::ST_KEY2X,
       CDoom::ST_KEY2Y,
       CDoom.keys,
-      CDoom.keyboxes.to_unsafe + 2,
+      Doocr.keyboxes.to_unsafe + 2,
       Doocr.st_statusbaron_ptr)
 
     # ammo count (all four kinds)

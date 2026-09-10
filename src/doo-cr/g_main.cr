@@ -137,7 +137,7 @@ module Doocr
     CDoom.doom_memcpy(cmd, base, sizeof(typeof(cmd.value)))
 
     cmd.value.consistancy =
-      CDoom.consistancy[Doocr.consoleplayer][Doocr.maketic % CDoom::BACKUPTICS]
+      Doocr.consistancy[Doocr.consoleplayer][Doocr.maketic % CDoom::BACKUPTICS]
 
     unless Doocr.menuactive != 0
       strafe = (Doocr.gamekeydown[Doocr.key_strafe] != 0 || Doocr.mousebuttons[Doocr.mousebstrafe] != 0 ||
@@ -484,13 +484,13 @@ module Doocr
 
         if Doocr.netgame != 0 && Doocr.netdemo == 0 && (Doocr.gametic % Doocr.ticdup) == 0
           if Doocr.gametic > CDoom::BACKUPTICS &&
-             CDoom.consistancy[i][buf] != cmd.value.consistancy
-            CDoom.i_error("Error: consistency failure (#{cmd.value.consistancy} should be #{CDoom.consistancy[i][buf]})")
+             Doocr.consistancy[i][buf] != cmd.value.consistancy
+            CDoom.i_error("Error: consistency failure (#{cmd.value.consistancy} should be #{Doocr.consistancy[i][buf]})")
           end
           if !@@players[i].mo.null?
-            CDoom.consistancy[i][buf] = @@players[i].mo.value.x.to_i16!
+            Doocr.consistancy[i][buf] = @@players[i].mo.value.x.to_i16!
           else
-            CDoom.consistancy[i][buf] = Doocr.rndindex.to_i16!
+            Doocr.consistancy[i][buf] = Doocr.rndindex.to_i16!
           end
         end
       end
@@ -637,7 +637,7 @@ module Doocr
   end
 
   def self.g_deathmatch_spawn_player(playernum : Int32)
-    selections = (CDoom.deathmatch_p - CDoom.deathmatchstarts.to_unsafe).to_i32!
+    selections = Doocr.deathmatch_p
     if selections < 4
       CDoom.i_error("Error: Only #{selections} deathmatch spots, 4 required")
     end

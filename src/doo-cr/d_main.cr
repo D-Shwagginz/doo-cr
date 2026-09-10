@@ -351,16 +351,8 @@ module Doocr
     CDoom.d_advance_demo
   end
 
-  def self.d_add_file(file : UInt8*)
-    numwadfiles = 0
-    until CDoom.wadfiles[numwadfiles].null?
-      numwadfiles += 1
-    end
-
-    newfile = GC.malloc(doom_strlen(file) + 1)
-    CDoom.doom_strcpy(newfile.as(UInt8*), file)
-
-    CDoom.wadfiles[numwadfiles] = newfile.as(UInt8*)
+  def self.d_add_file(file : String)
+    Doocr.wadfiles << file
   end
 
   def self.d_merge_file(file : String)
@@ -435,10 +427,7 @@ module Doocr
     # French stuff
     doom2fwad = String.new(doomwaddir) + "/doom2f.wad"
 
-    home = ".".to_unsafe # Don't be cute. Just use binary dir
-
-    CDoom.doom_strcpy(CDoom.basedefault, home)
-    CDoom.doom_concat(CDoom.basedefault, "/config.cfg")
+    Doocr.basedefault = "./config.cfg" # Don't be cute. Just use binary dir
 
     # Custom. Prioritize over other parmgs
     customwad = Pointer(UInt8*).null
@@ -454,7 +443,7 @@ module Doocr
       customwad = String.new(doomwaddir) + "/" + ARGV[p + 1]
       unless File.exists?(customwad)
         # Wad not found, give them a chance
-        CDoom.doom_concat(customwad, ".wad".to_unsafe)
+        customwad += ".wad"
         unless File.exists?(customwad)
           CDoom.i_error("Error: identify_version: '-iwad #{customwad}' could not find file specified")
         end
@@ -472,7 +461,7 @@ module Doocr
 
       Doocr.gamemode = CDoom::GameMode::Indetermined
       Doocr.gamemission = CDoom::GameMission::None
-      CDoom.d_add_file(customwad)
+      Doocr.d_add_file(customwad)
       return
     end
 
@@ -480,10 +469,10 @@ module Doocr
       Doocr.gamemode = CDoom::GameMode::Shareware
       Doocr.gamemission = CDoom::GameMission::Doom
       Doocr.devparm = 1
-      CDoom.d_add_file(CDoom::DEVDATA + "doom1.wad")
-      CDoom.d_add_file(CDoom::DEVMAPS + "data_se/texture1.lmp")
-      CDoom.d_add_file(CDoom::DEVMAPS + "data_se/pnames.lmp")
-      CDoom.doom_strcpy(CDoom.basedefault, CDoom::DEVDATA + "default.cfg")
+      Doocr.d_add_file(CDoom::DEVDATA + "doom1.wad")
+      Doocr.d_add_file(CDoom::DEVMAPS + "data_se/texture1.lmp")
+      Doocr.d_add_file(CDoom::DEVMAPS + "data_se/pnames.lmp")
+      Doocr.basedefault = "#{CDoom::DEVDATA}/default.cfg"
       return
     end
 
@@ -491,11 +480,11 @@ module Doocr
       Doocr.gamemode = CDoom::GameMode::Registered
       Doocr.gamemission = CDoom::GameMission::Doom
       Doocr.devparm = 1
-      CDoom.d_add_file(CDoom::DEVDATA + "doom.wad")
-      CDoom.d_add_file(CDoom::DEVMAPS + "data_se/texture1.lmp")
-      CDoom.d_add_file(CDoom::DEVMAPS + "data_se/texture2.lmp")
-      CDoom.d_add_file(CDoom::DEVMAPS + "data_se/pnames.lmp")
-      CDoom.doom_strcpy(CDoom.basedefault, CDoom::DEVDATA + "default.cfg")
+      Doocr.d_add_file(CDoom::DEVDATA + "doom.wad")
+      Doocr.d_add_file(CDoom::DEVMAPS + "data_se/texture1.lmp")
+      Doocr.d_add_file(CDoom::DEVMAPS + "data_se/texture2.lmp")
+      Doocr.d_add_file(CDoom::DEVMAPS + "data_se/pnames.lmp")
+      Doocr.basedefault = "#{CDoom::DEVDATA}/default.cfg"
       return
     end
 
@@ -503,11 +492,11 @@ module Doocr
       Doocr.gamemode = CDoom::GameMode::Commercial
       Doocr.gamemission = CDoom::GameMission::Doom2
       Doocr.devparm = 1
-      CDoom.d_add_file(CDoom::DEVDATA + "doom2.wad")
+      Doocr.d_add_file(CDoom::DEVDATA + "doom2.wad")
 
-      CDoom.d_add_file(CDoom::DEVMAPS + "cdata/texture1.lmp")
-      CDoom.d_add_file(CDoom::DEVMAPS + "cdata/pnames.lmp")
-      CDoom.doom_strcpy(CDoom.basedefault, CDoom::DEVDATA + "default.cfg")
+      Doocr.d_add_file(CDoom::DEVMAPS + "cdata/texture1.lmp")
+      Doocr.d_add_file(CDoom::DEVMAPS + "cdata/pnames.lmp")
+      Doocr.basedefault = "#{CDoom::DEVDATA}/default.cfg"
       return
     end
 
@@ -518,49 +507,49 @@ module Doocr
       # Let's handle languages in config files, okay?
       Doocr.language = CDoom::Language::French
       puts "French version"
-      CDoom.d_add_file(doom2fwad)
+      Doocr.d_add_file(doom2fwad)
       return
     end
 
     if File.exists?(doom2wad)
       Doocr.gamemode = CDoom::GameMode::Commercial
       Doocr.gamemission = CDoom::GameMission::Doom2
-      CDoom.d_add_file(doom2wad)
+      Doocr.d_add_file(doom2wad)
       return
     end
 
     if File.exists?(plutoniawad)
       Doocr.gamemode = CDoom::GameMode::Commercial
       Doocr.gamemission = CDoom::GameMission::PackPlut
-      CDoom.d_add_file(plutoniawad)
+      Doocr.d_add_file(plutoniawad)
       return
     end
 
     if File.exists?(tntwad)
       Doocr.gamemode = CDoom::GameMode::Commercial
       Doocr.gamemission = CDoom::GameMission::PackTnt
-      CDoom.d_add_file(tntwad)
+      Doocr.d_add_file(tntwad)
       return
     end
 
     if File.exists?(doomuwad)
       Doocr.gamemode = CDoom::GameMode::Retail
       Doocr.gamemission = CDoom::GameMission::Doom
-      CDoom.d_add_file(doomuwad)
+      Doocr.d_add_file(doomuwad)
       return
     end
 
     if File.exists?(doomwad)
       Doocr.gamemode = CDoom::GameMode::Registered
       Doocr.gamemission = CDoom::GameMission::Doom
-      CDoom.d_add_file(doomwad)
+      Doocr.d_add_file(doomwad)
       return
     end
 
     if File.exists?(doom1wad)
       Doocr.gamemode = CDoom::GameMode::Shareware
       Doocr.gamemission = CDoom::GameMission::Doom
-      CDoom.d_add_file(doom1wad)
+      Doocr.d_add_file(doom1wad)
       return
     end
 
@@ -569,7 +558,7 @@ module Doocr
       wad = wad.downcase
       wad += ".wad" unless wad.ends_with?(".wad")
       if File.exists?(wad)
-        CDoom.d_add_file(wad)
+        Doocr.d_add_file(wad)
         added = true
       end
     end
@@ -739,7 +728,7 @@ module Doocr
           file = "~#{CDoom::DEVMAPS}cdata/map#{p}.wad"
         end
       end
-      CDoom.d_add_file(file)
+      Doocr.d_add_file(file)
     end
 
     p = ARGV.index("-file")
@@ -749,7 +738,7 @@ module Doocr
       Doocr.modifiedgame = 1 # homebrew levels
       p += 1
       while (p != ARGV.size) && ARGV[p][0] != '-'
-        CDoom.d_add_file(ARGV[p])
+        Doocr.d_add_file(ARGV[p])
         p += 1
       end
     end
@@ -772,7 +761,7 @@ module Doocr
 
     if p && p < ARGV.size - 1
       file = ARGV[p + 1] + ".lmp"
-      CDoom.d_add_file(file)
+      Doocr.d_add_file(file)
       puts "Playing demo #{ARGV[p + 1]}.lmp."
     end
 
@@ -845,7 +834,11 @@ module Doocr
     CDoom.z_init
 
     puts "w_init: Init Wadfiles."
-    CDoom.w_init_multiple_files(CDoom.wadfiles)
+    wadnames = uninitialized StaticArray(UInt8*, CDoom::MAXWADFILES)
+    CDoom::MAXWADFILES.times do |i|
+      wadnames[i] = i < Doocr.wadfiles.size ? Doocr.wadfiles[i].to_unsafe : Pointer(UInt8).null
+    end
+    CDoom.w_init_multiple_files(wadnames.to_unsafe.as(LibC::Char**))
 
     puts "        Init Mergefiles." if ARGV.includes?("-merge")
     w_merge_multiple_files(@@merge_files)
@@ -947,7 +940,6 @@ module Doocr
       p = ARGV.index("-statcopy")
       if p && p < ARGV.size - 1
         # for statistics driver
-        CDoom.statcopy = String.new(ARGV[p + 1]).to_i64.as(Void*)
         puts "External statistics registered."
       end
     {% end %}

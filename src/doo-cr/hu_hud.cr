@@ -481,21 +481,20 @@ module Doocr
       if @@altdown != 0
         return 0 if c < '0'.ord || c > '9'.ord
         c = c - '0'.ord
-        macromessage = CDoom.chat_macros[c]
+        macromessage = Doocr.chat_macros[c]
 
         # kill last message with a '\n'
         CDoom.hu_queue_chat_char(CDoom::KEY_ENTER) # DEBUG!!!
 
         # send the macro message
-        while macromessage.value != 0
-          CDoom.hu_queue_chat_char(macromessage.value)
-          macromessage += 1
+        macromessage.each_byte do |byte|
+          CDoom.hu_queue_chat_char(byte)
         end
         CDoom.hu_queue_chat_char(CDoom::KEY_ENTER)
 
         # leave chat mode and notify that it was sent
         Doocr.chat_on = 0
-        CDoom.doom_strcpy(@@lastmessage, CDoom.chat_macros[c])
+        CDoom.doom_strcpy(@@lastmessage, Doocr.chat_macros[c].to_unsafe)
         CDoom.plr.value.message = @@lastmessage
         eatkey = 1
       else

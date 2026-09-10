@@ -369,18 +369,6 @@ lib CDoom
 
   # __D_ITEMS__
 
-  # Weapon info: sprite frames, ammunition use.
-  struct Weaponinfo
-    ammo : Ammotype
-    upstate : LibC::Int
-    downstate : LibC::Int
-    readystate : LibC::Int
-    atkstate : LibC::Int
-    flashstate : LibC::Int
-  end
-
-  $weaponinfo : Weaponinfo[Weapontype::NUMWEAPONS]
-
   # __DOOMTYPE__
 
   alias Byte = LibC::UChar
@@ -452,7 +440,6 @@ lib CDoom
 
   MAXWADFILES = 20
 
-  $wadfiles : LibC::Char*[MAXWADFILES]
 
   fun d_add_file = D_AddFile(file : LibC::Char*)
 
@@ -3148,7 +3135,6 @@ lib CDoom
   # Player spawn spots for deathmatch.
   MAX_DM_STARTS = 10
   $deathmatchstarts : Mapthing[MAX_DM_STARTS]
-  $deathmatch_p : Mapthing*
 
   # Player spawn spots.
   $playerstarts : Mapthing[MAXPLAYERS]
@@ -3163,7 +3149,6 @@ lib CDoom
   #
 
   # File handling stuff.
-  $basedefault : LibC::Char[1024]
   $debugfile : Void*
 
   # if true, load all graphics at level load
@@ -4915,18 +4900,14 @@ lib CDoom
 
   $plr : Player* # the player represented by an arrow
 
-  $marknums : Patch*[10]                 # numbers used for marking by the automap
 
 
 
 
-  $weaponinfo : Weaponinfo[Weapontype::NUMWEAPONS]
 
   MAXARGVS = 100
 
-  $wadfiles : LibC::Char*[MAXWADFILES]
 
-  $drone : DoomBool
 
 
   $is_wiping_screen : DoomBool
@@ -4934,9 +4915,6 @@ lib CDoom
   $debugfile : Void*
 
 
-  $wadfile : LibC::Char[1024]     # primary wad file
-  $mapdir : LibC::Char[1024]      # directory of development maps
-  $basedefault : LibC::Char[1024] # default file
 
   #
   # EVENT HANDLING
@@ -4951,7 +4929,6 @@ lib CDoom
 
   # print title for every printed line
 
-  $showmessages = showMessages : LibC::Int
   fun d_doom_loop = D_DoomLoop
   fun d_check_net_game = D_CheckNetGame
   fun d_process_events = D_ProcessEvents
@@ -5128,7 +5105,6 @@ lib CDoom
   $demo_p : Byte*
   $demoend : Byte*
 
-  $consistancy : LibC::Short[BACKUPTICS][MAXPLAYERS]
 
   $savebuffer : Byte*
 
@@ -5143,7 +5119,6 @@ lib CDoom
 
 
 
-  $statcopy : Void* # for statistics driver
 
   # DOOM Par Times
 
@@ -5177,7 +5152,6 @@ lib CDoom
   $w_inputbuffer : HU_Itext[MAXPLAYERS]
   $w_message : HU_Stext
 
-  $chat_macros : LibC::Char*[10]
 
 
 
@@ -5281,7 +5255,6 @@ lib CDoom
 
   # Hardware left and right channel volume lookup.
 
-  $queued_midi_msgs : LibC::ULongLong[MAX_QUEUED_MIDI_MSGS]
 
   fun tick_song = TickSong
 
@@ -5397,7 +5370,6 @@ lib CDoom
 
   # we are going to be entering a savegame string
 
-  $endstring : LibC::Char[160]
 
 
   # graphic name of skulls
@@ -5408,9 +5380,7 @@ lib CDoom
   # We create new menu text by cutting into existing graphics and pasting them to create the new text.
   # This way we don't ship code with embeded graphics that come from WAD files.
 
-  $custom_texts_count : LibC::Int
 
-  $tempstring : LibC::Char[80]
 
 
 
@@ -5530,7 +5500,6 @@ lib CDoom
   #
   $num_channels = numChannels : LibC::Int
 
-  $numdefaults : LibC::Int
 
 
 
@@ -5862,7 +5831,6 @@ lib CDoom
 
   # OPTIMIZE: closed two sided lines as single sided
 
-  $masekdtexture : DoomBool
 
 
 
@@ -6101,8 +6069,6 @@ lib CDoom
   $w_armor : ST_Percent                                      # armor widget
   $w_ammo : ST_Number[4]                                     # ammo widgets
   $w_maxammo : ST_Number[4]                                  # max ammo widgets
-  $oldweaponsowned : DoomBool[CDoom::Weapontype::NUMWEAPONS] # used for evil grin
-  $keyboxes : LibC::Int[3]                                   # holds key-type for each key box on bar
 
   # Massive bunches of cheat shit
   #  to keep it from being easy to figure them out.

@@ -288,7 +288,7 @@ module Doocr
 
   Doocr.automapactive = 0
 
-  CDoom.weaponinfo[0] = CDoom::Weaponinfo.new(
+  Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # fist
     ammo: CDoom::Ammotype::Noammo,
     upstate: CDoom::Statenum::S_PUNCHUP,
@@ -297,7 +297,7 @@ module Doocr
     atkstate: CDoom::Statenum::S_PUNCH1,
     flashstate: CDoom::Statenum::S_NULL
   )
-  CDoom.weaponinfo[1] = CDoom::Weaponinfo.new(
+  Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # pistol
     ammo: CDoom::Ammotype::Clip,
     upstate: CDoom::Statenum::S_PISTOLUP,
@@ -306,7 +306,7 @@ module Doocr
     atkstate: CDoom::Statenum::S_PISTOL1,
     flashstate: CDoom::Statenum::S_PISTOLFLASH
   )
-  CDoom.weaponinfo[2] = CDoom::Weaponinfo.new(
+  Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # shotgun
     ammo: CDoom::Ammotype::Shell,
     upstate: CDoom::Statenum::S_SGUNUP,
@@ -315,7 +315,7 @@ module Doocr
     atkstate: CDoom::Statenum::S_SGUN1,
     flashstate: CDoom::Statenum::S_SGUNFLASH1
   )
-  CDoom.weaponinfo[3] = CDoom::Weaponinfo.new(
+  Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # chaingun
     ammo: CDoom::Ammotype::Clip,
     upstate: CDoom::Statenum::S_CHAINUP,
@@ -324,7 +324,7 @@ module Doocr
     atkstate: CDoom::Statenum::S_CHAIN1,
     flashstate: CDoom::Statenum::S_CHAINFLASH1
   )
-  CDoom.weaponinfo[4] = CDoom::Weaponinfo.new(
+  Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # missile launcher
     ammo: CDoom::Ammotype::Misl,
     upstate: CDoom::Statenum::S_MISSILEUP,
@@ -333,7 +333,7 @@ module Doocr
     atkstate: CDoom::Statenum::S_MISSILE1,
     flashstate: CDoom::Statenum::S_MISSILEFLASH1
   )
-  CDoom.weaponinfo[5] = CDoom::Weaponinfo.new(
+  Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # plasma rifle
     ammo: CDoom::Ammotype::Cell,
     upstate: CDoom::Statenum::S_PLASMAUP,
@@ -342,7 +342,7 @@ module Doocr
     atkstate: CDoom::Statenum::S_PLASMA1,
     flashstate: CDoom::Statenum::S_PLASMAFLASH1
   )
-  CDoom.weaponinfo[6] = CDoom::Weaponinfo.new(
+  Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # bfg 9000
     ammo: CDoom::Ammotype::Cell,
     upstate: CDoom::Statenum::S_BFGUP,
@@ -351,7 +351,7 @@ module Doocr
     atkstate: CDoom::Statenum::S_BFG1,
     flashstate: CDoom::Statenum::S_BFGFLASH1
   )
-  CDoom.weaponinfo[7] = CDoom::Weaponinfo.new(
+  Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # chainsaw
     ammo: CDoom::Ammotype::Noammo,
     upstate: CDoom::Statenum::S_SAWUP,
@@ -360,7 +360,7 @@ module Doocr
     atkstate: CDoom::Statenum::S_SAW1,
     flashstate: CDoom::Statenum::S_NULL
   )
-  CDoom.weaponinfo[8] = CDoom::Weaponinfo.new(
+  Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # Super Shotgun
     ammo: CDoom::Ammotype::Shell,
     upstate: CDoom::Statenum::S_DSGUNUP,
@@ -465,16 +465,16 @@ module Doocr
   Doocr.head = 0
   Doocr.tail = 0
 
-  CDoom.chat_macros[0] = @@deh_hustr_chatmacro0.to_unsafe
-  CDoom.chat_macros[1] = @@deh_hustr_chatmacro1.to_unsafe
-  CDoom.chat_macros[2] = @@deh_hustr_chatmacro2.to_unsafe
-  CDoom.chat_macros[3] = @@deh_hustr_chatmacro3.to_unsafe
-  CDoom.chat_macros[4] = @@deh_hustr_chatmacro4.to_unsafe
-  CDoom.chat_macros[5] = @@deh_hustr_chatmacro5.to_unsafe
-  CDoom.chat_macros[6] = @@deh_hustr_chatmacro6.to_unsafe
-  CDoom.chat_macros[7] = @@deh_hustr_chatmacro7.to_unsafe
-  CDoom.chat_macros[8] = @@deh_hustr_chatmacro8.to_unsafe
-  CDoom.chat_macros[9] = @@deh_hustr_chatmacro9.to_unsafe
+  Doocr.chat_macros[0] = @@deh_hustr_chatmacro0
+  Doocr.chat_macros[1] = @@deh_hustr_chatmacro1
+  Doocr.chat_macros[2] = @@deh_hustr_chatmacro2
+  Doocr.chat_macros[3] = @@deh_hustr_chatmacro3
+  Doocr.chat_macros[4] = @@deh_hustr_chatmacro4
+  Doocr.chat_macros[5] = @@deh_hustr_chatmacro5
+  Doocr.chat_macros[6] = @@deh_hustr_chatmacro6
+  Doocr.chat_macros[7] = @@deh_hustr_chatmacro7
+  Doocr.chat_macros[8] = @@deh_hustr_chatmacro8
+  Doocr.chat_macros[9] = @@deh_hustr_chatmacro9
 
   Doocr.player_names[0] = @@deh_hustr_plrgreen
   Doocr.player_names[1] = @@deh_hustr_plrindigo
@@ -5799,16 +5799,16 @@ module Doocr
 
                 CDoom::Default.new(name: "usegamma", location: pointerof(@@usegamma), defaultvalue: 0),
 
-                CDoom::Default.new(name: "chatmacro0", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe, default_text_value: @@deh_hustr_chatmacro0),
-                CDoom::Default.new(name: "chatmacro1", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 1, default_text_value: @@deh_hustr_chatmacro1),
-                CDoom::Default.new(name: "chatmacro2", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 2, default_text_value: @@deh_hustr_chatmacro2),
-                CDoom::Default.new(name: "chatmacro3", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 3, default_text_value: @@deh_hustr_chatmacro3),
-                CDoom::Default.new(name: "chatmacro4", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 4, default_text_value: @@deh_hustr_chatmacro4),
-                CDoom::Default.new(name: "chatmacro5", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 5, default_text_value: @@deh_hustr_chatmacro5),
-                CDoom::Default.new(name: "chatmacro6", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 6, default_text_value: @@deh_hustr_chatmacro6),
-                CDoom::Default.new(name: "chatmacro7", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 7, default_text_value: @@deh_hustr_chatmacro7),
-                CDoom::Default.new(name: "chatmacro8", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 8, default_text_value: @@deh_hustr_chatmacro8),
-                CDoom::Default.new(name: "chatmacro9", defaultvalue: CDoom::STRING_VALUE, text_location: CDoom.chat_macros.to_unsafe + 9, default_text_value: @@deh_hustr_chatmacro9),
+                CDoom::Default.new(name: "chatmacro0", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro0),
+                CDoom::Default.new(name: "chatmacro1", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro1),
+                CDoom::Default.new(name: "chatmacro2", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro2),
+                CDoom::Default.new(name: "chatmacro3", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro3),
+                CDoom::Default.new(name: "chatmacro4", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro4),
+                CDoom::Default.new(name: "chatmacro5", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro5),
+                CDoom::Default.new(name: "chatmacro6", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro6),
+                CDoom::Default.new(name: "chatmacro7", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro7),
+                CDoom::Default.new(name: "chatmacro8", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro8),
+                CDoom::Default.new(name: "chatmacro9", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro9),
                 CDoom::Default.new(name: "fullscreen", location: pointerof(@@rlfullscreen), defaultvalue: 0),
                 CDoom::Default.new(name: "midismoothpan", location: pointerof(@@midismoothpan), defaultvalue: 1),
                 CDoom::Default.new(name: "randompitching", location: pointerof(@@randompitch), defaultvalue: 0),
@@ -8505,16 +8505,16 @@ module Doocr
     # QuitDOOM II messages
     @@doom2_endmsg[0] = @@deh_quit_msg
 
-    CDoom.chat_macros[0] = @@deh_hustr_chatmacro0.to_unsafe
-    CDoom.chat_macros[1] = @@deh_hustr_chatmacro1.to_unsafe
-    CDoom.chat_macros[2] = @@deh_hustr_chatmacro2.to_unsafe
-    CDoom.chat_macros[3] = @@deh_hustr_chatmacro3.to_unsafe
-    CDoom.chat_macros[4] = @@deh_hustr_chatmacro4.to_unsafe
-    CDoom.chat_macros[5] = @@deh_hustr_chatmacro5.to_unsafe
-    CDoom.chat_macros[6] = @@deh_hustr_chatmacro6.to_unsafe
-    CDoom.chat_macros[7] = @@deh_hustr_chatmacro7.to_unsafe
-    CDoom.chat_macros[8] = @@deh_hustr_chatmacro8.to_unsafe
-    CDoom.chat_macros[9] = @@deh_hustr_chatmacro9.to_unsafe
+    Doocr.chat_macros[0] = @@deh_hustr_chatmacro0
+    Doocr.chat_macros[1] = @@deh_hustr_chatmacro1
+    Doocr.chat_macros[2] = @@deh_hustr_chatmacro2
+    Doocr.chat_macros[3] = @@deh_hustr_chatmacro3
+    Doocr.chat_macros[4] = @@deh_hustr_chatmacro4
+    Doocr.chat_macros[5] = @@deh_hustr_chatmacro5
+    Doocr.chat_macros[6] = @@deh_hustr_chatmacro6
+    Doocr.chat_macros[7] = @@deh_hustr_chatmacro7
+    Doocr.chat_macros[8] = @@deh_hustr_chatmacro8
+    Doocr.chat_macros[9] = @@deh_hustr_chatmacro9
 
     Doocr.player_names[0] = @@deh_hustr_plrgreen
     Doocr.player_names[1] = @@deh_hustr_plrindigo

@@ -151,7 +151,7 @@ fun d_start_title = D_StartTitle
 end
 
 fun d_add_file = D_AddFile(file : LibC::Char*)
-  Doocr.d_add_file(file)
+  Doocr.d_add_file(String.new(file))
 end
 
 fun identify_version = IdentifyVersion

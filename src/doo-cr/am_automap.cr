@@ -169,12 +169,12 @@ module Doocr
     namebuf = uninitialized StaticArray(UInt8, 9)
 
     10.times do |i|
-      CDoom.marknums[i] = CDoom.w_cache_lump_name("AMMNUM#{i}", CDoom::PU_STATIC).as(CDoom::Patch*)
+      Doocr.marknums[i] = CDoom.w_cache_lump_name("AMMNUM#{i}", CDoom::PU_STATIC).as(CDoom::Patch*)
     end
   end
 
   def self.am_unload_pics
-    10.times { |i| z_change_tag(CDoom.marknums[i], CDoom::PU_CACHE) }
+    10.times { |i| z_change_tag(Doocr.marknums[i], CDoom::PU_CACHE) }
   end
 
   def self.am_clear_marks
@@ -819,14 +819,14 @@ module Doocr
   def self.am_draw_marks
     CDoom::AM_NUMMARKPOINTS.times do |i|
       if @@markpoints[i].x != -1
-        # w = CDoom.marknums[i].value.width.to_i16!
-        # h = CDoom.marknums[i].value.height.to_i16!
+        # w = Doocr.marknums[i].value.width.to_i16!
+        # h = Doocr.marknums[i].value.height.to_i16!
         w = 5 # because somethings wrong with the wad, i guess
         h = 6 # because somethings wrong with the wad, i guess
         fx = cxmtof(@@markpoints[i].x)
         fy = cymtof(@@markpoints[i].y)
         if fx >= Doocr.f_x && fx <= Doocr.f_w - w && fy >= Doocr.f_y && fy <= Doocr.f_h - h
-          CDoom.v_draw_patch(fx, fy, CDoom::FB, CDoom.marknums[i])
+          CDoom.v_draw_patch(fx, fy, CDoom::FB, Doocr.marknums[i])
         end
       end
     end

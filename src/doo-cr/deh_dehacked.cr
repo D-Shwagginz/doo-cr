@@ -313,8 +313,16 @@ module Doocr
               # Weapon is all Int32, parse based off loc
             when DehBlocks::Weapon
               next if cur_num < 0 || cur_num >= CDoom::Weapontype::NUMWEAPONS.value
-              ((CDoom.weaponinfo.to_unsafe + cur_num).as(Int32*) + loc).value =
-                line[start.size..].to_i(strict: false)
+              value = line[start.size..].to_i(strict: false)
+              weapon = Doocr.weaponinfo[cur_num]
+              case loc
+              when 0 then weapon.ammo = CDoom::Ammotype.new(value)
+              when 1 then weapon.upstate = value
+              when 2 then weapon.downstate = value
+              when 3 then weapon.readystate = value
+              when 4 then weapon.atkstate = value
+              when 5 then weapon.flashstate = value
+              end
               # Custom cheats
             when DehBlocks::Cheat
               value = [] of UInt8
