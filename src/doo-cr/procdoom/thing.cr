@@ -95,7 +95,7 @@ module Doocr::Mod
     getter db_name : String
     getter db_sprite : String = ""
     getter doomednum : Int32 = 5050 # I think 5002 is the last thing number in doom builder, but 5050 to be safe
-    getter mobjtype : Int32 = CDoom::Mobjtype::NUMMOBJTYPES.value
+    getter mobjtype : Int32 = Doocr::Mobjtype::NUMMOBJTYPES.value
 
     property health : Int32 = 0
     property speed : Float64 = 0.0

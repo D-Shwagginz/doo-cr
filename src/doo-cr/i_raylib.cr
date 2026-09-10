@@ -105,7 +105,7 @@ module Doocr
           # Draw crosshair
            if (Doocr.crosshair != 0 &&
              Doocr.menuactive == 0 &&
-             Doocr.gamestate == CDoom::Gamestate::Level &&
+             Doocr.gamestate == Doocr::Gamestate::Level &&
              Doocr.automapactive == 0)
             y = CDoom::SCREENHEIGHT // 2
             y += Doocr.setblocks == 11 ? 8 : -8

@@ -17,7 +17,7 @@
 
 module Doocr
   def self.wipe_shitty_col_major_x_form(array : Int16*, width : Int32, height : Int32)
-    dest = CDoom.z_malloc(width * height * sizeof(Int16), CDoom::PU_STATIC, Pointer(Void).null).as(Int16*)
+    dest = CDoom.z_malloc(width * height * sizeof(Int16), Doocr::PU_STATIC, Pointer(Void).null).as(Int16*)
 
     height.times do |y|
       width.times do |x|

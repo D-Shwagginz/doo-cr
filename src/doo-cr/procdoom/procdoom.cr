@@ -59,15 +59,15 @@ module Doocr
   #       mo = thing
   #       an = mo.value.angle
   #
-  #       x = mo.value.x + Doocr.fixed_mul(Doocr::FRACUNIT * 55, Doocr.finecosine[an >> CDoom::ANGLETOFINESHIFT])
-  #       y = mo.value.y + Doocr.fixed_mul(Doocr::FRACUNIT * 55, Doocr.finesine[an >> CDoom::ANGLETOFINESHIFT])
+  #       x = mo.value.x + Doocr.fixed_mul(Doocr::FRACUNIT * 55, Doocr.finecosine[an >> Doocr::ANGLETOFINESHIFT])
+  #       y = mo.value.y + Doocr.fixed_mul(Doocr::FRACUNIT * 55, Doocr.finesine[an >> Doocr::ANGLETOFINESHIFT])
   #       z = mo.value.z
   #
-  #       th = Doocr.p_spawn_mobj(x, y, z, CDoom::Mobjtype::MT_POSSESSED)
+  #       th = Doocr.p_spawn_mobj(x, y, z, Doocr::Mobjtype::MT_POSSESSED)
   #
   #       th.value.angle = an
-  #       th.value.momx = Doocr.fixed_mul(Doocr::FRACUNIT * 8, Doocr.finecosine[an >> CDoom::ANGLETOFINESHIFT])
-  #       th.value.momy = Doocr.fixed_mul(Doocr::FRACUNIT * 8, Doocr.finesine[an >> CDoom::ANGLETOFINESHIFT])
+  #       th.value.momx = Doocr.fixed_mul(Doocr::FRACUNIT * 8, Doocr.finecosine[an >> Doocr::ANGLETOFINESHIFT])
+  #       th.value.momy = Doocr.fixed_mul(Doocr::FRACUNIT * 8, Doocr.finesine[an >> Doocr::ANGLETOFINESHIFT])
   #     end
   #   end
   # end
@@ -111,8 +111,8 @@ module Doocr
   #
   #         player.value.itemcount = player.value.itemcount + 1
   #         CDoom.p_remove_mobj(special)
-  #         player.value.bonuscount = player.value.bonuscount + CDoom::BONUSADD
-  #         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_itemup.value) if mod.get_player_num(player) == Doocr.consoleplayer
+  #         player.value.bonuscount = player.value.bonuscount + Doocr::BONUSADD
+  #         Doocr.s_start_sound(Pointer(Void).null, Doocr::Sfxenum::SFX_itemup.value) if mod.get_player_num(player) == Doocr.consoleplayer
   #       end
   #     end
   #   end
@@ -148,11 +148,11 @@ module Doocr
     # Adds a thing into the mod
     # Takes a block which yields the thing for setup
     # Returns the index of the mobj for spawning inside of your methods
-    def self.add_thing(db_name : String, db_spawnable : Bool = true, &) : CDoom::Mobjtype
+    def self.add_thing(db_name : String, db_spawnable : Bool = true, &) : Doocr::Mobjtype
       thing = Thing.new(db_name, db_spawnable)
       yield thing
       @@things << thing
-      return CDoom::Mobjtype.new(thing.mobjtype)
+      return Doocr::Mobjtype.new(thing.mobjtype)
     end
 
     # Adds a sound into the mod

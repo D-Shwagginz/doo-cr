@@ -27,7 +27,7 @@ module Doocr
     Doocr.mainzone.value.blocklist.prev = block
 
     Doocr.mainzone.value.blocklist.user = Doocr.mainzone.as(Void**)
-    Doocr.mainzone.value.blocklist.tag = CDoom::PU_STATIC
+    Doocr.mainzone.value.blocklist.tag = Doocr::PU_STATIC
     Doocr.mainzone.value.rover = block
 
     block.value.prev = pointerof(Doocr.mainzone.value.@blocklist)
@@ -43,7 +43,7 @@ module Doocr
   def self.z_free(ptr : Void*)
     block = (ptr.as(UInt8*) - sizeof(CDoom::Memblock)).as(CDoom::Memblock*)
 
-    if block.value.id != CDoom::ZONEID
+    if block.value.id != Doocr::ZONEID
       CDoom.i_error("Error: z_free: freed a pointer without ZONEID")
     end
 
@@ -84,7 +84,7 @@ module Doocr
   end
 
   def self.z_malloc(size : LibC::Int, tag : LibC::Int, user : Void*) : Void*
-    size = (size + CDoom::MEM_ALIGN - 1) & ~(CDoom::MEM_ALIGN - 1)
+    size = (size + Doocr::MEM_ALIGN - 1) & ~(Doocr::MEM_ALIGN - 1)
 
     # scan through the block list,
     # looking for the first free block
@@ -110,7 +110,7 @@ module Doocr
       end
 
       if !rover.value.user.null?
-        if rover.value.tag < CDoom::PU_PURGELEVEL
+        if rover.value.tag < Doocr::PU_PURGELEVEL
           # hit a block that can't be purged,
           #  so move base past it
           base = rover.value.next
@@ -134,7 +134,7 @@ module Doocr
     # found a block big enough
     extra = base.value.size - size
 
-    if extra > CDoom::MINFRAGMENT
+    if extra > Doocr::MINFRAGMENT
       # there will be a free fragment after the allocated block
       newblock = (base.as(UInt8*) + size).as(CDoom::Memblock*)
       newblock.value.size = extra
@@ -155,7 +155,7 @@ module Doocr
       base.value.user = user.as(Void**)
       user.as(Void**).value = (base.as(UInt8*) + sizeof(CDoom::Memblock)).as(Void*)
     else
-      if tag >= CDoom::PU_PURGELEVEL
+      if tag >= Doocr::PU_PURGELEVEL
         CDoom.i_error("Error: z_malloc: an owner is required for purgable blocks")
       end
 
@@ -167,7 +167,7 @@ module Doocr
     # next allocation will start looking here
     Doocr.mainzone.value.rover = base.value.next
 
-    base.value.id = CDoom::ZONEID
+    base.value.id = Doocr::ZONEID
 
     return (base.as(UInt8*) + sizeof(CDoom::Memblock)).as(Void*)
   end
@@ -220,11 +220,11 @@ module Doocr
   def self.z_change_tag2(ptr : Void*, tag : LibC::Int)
     block = (ptr.as(UInt8*) - sizeof(CDoom::Memblock)).as(CDoom::Memblock*)
 
-    if block.value.id != CDoom::ZONEID
+    if block.value.id != Doocr::ZONEID
       CDoom.i_error("Error: z_change_tag: freed a pointer without ZONEID")
     end
 
-    if tag >= CDoom::PU_PURGELEVEL && block.value.user.address < 0x100
+    if tag >= Doocr::PU_PURGELEVEL && block.value.user.address < 0x100
       CDoom.i_error("Error: z_change_tag: an owner is required for purgable blocks")
     end
 

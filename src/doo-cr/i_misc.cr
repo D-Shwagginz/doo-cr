@@ -20,9 +20,9 @@ module Doocr
     return Doocr.mb_used * 1024 * 1024
   end
 
-  def self.i_zone_base(size : LibC::Int*) : CDoom::Byte*
+  def self.i_zone_base(size : LibC::Int*) : UInt8*
     size.value = Doocr.mb_used * 1024 * 1024
-    return GC.malloc(size.value).as(CDoom::Byte*)
+    return GC.malloc(size.value).as(UInt8*)
   end
 
   @@basetime = 0
@@ -55,7 +55,7 @@ module Doocr
   def self.i_quit
     @@closing = true
     CDoom.d_quit_net_game
-    CDoom.s_stop_music
+    Doocr.s_stop_music
     CDoom.i_shutdown_sound
     CDoom.i_shutdown_music
     CDoom.m_save_defaults
@@ -72,8 +72,8 @@ module Doocr
     end
   end
 
-  def self.i_alloc_low(length : LibC::Int) : CDoom::Byte*
-    mem = GC.malloc(length).as(CDoom::Byte*)
+  def self.i_alloc_low(length : LibC::Int) : UInt8*
+    mem = GC.malloc(length).as(UInt8*)
     CDoom.doom_memset(mem, 0, length)
     return mem
   end
@@ -244,7 +244,7 @@ module Doocr
     best_idx.to_u8
   end
 
-  def self.i_read_screen(scr : CDoom::Byte*)
+  def self.i_read_screen(scr : UInt8*)
     if @@software_rendering
       CDoom.doom_memcpy(scr, Doocr.screens[0], CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
     else
@@ -270,7 +270,7 @@ module Doocr
     end
   end
 
-  def self.i_set_palette(palette : CDoom::Byte*)
+  def self.i_set_palette(palette : UInt8*)
     256.times do |i|
       r = Doocr.gammatable[Doocr.usegamma][palette.value] & ~3
       palette += 1
@@ -285,7 +285,7 @@ module Doocr
     end
   end
 
-  def self.float_to_fixed(f : Float64) : CDoom::Fixed
+  def self.float_to_fixed(f : Float64) : LibC::Int
     (f * FRACUNIT).round.to_i32
   end
 
@@ -314,6 +314,6 @@ module Doocr
       Raylib.set_texture_filter(@@render_target.not_nil!.texture, Raylib::TextureFilter::Point)
     end
 
-    CDoom.i_set_palette(CDoom.w_cache_lump_name("PLAYPAL", CDoom::PU_CACHE).as(UInt8*))
+    CDoom.i_set_palette(CDoom.w_cache_lump_name("PLAYPAL", Doocr::PU_CACHE).as(UInt8*))
   end
 end

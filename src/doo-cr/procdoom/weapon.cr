@@ -64,12 +64,12 @@ module Doocr::Mod
       flash_num = @flash.parse
 
       Doocr.weaponinfo[@slot.value] = Doocr::Weaponinfo.new(
-        ammo: CDoom::Ammotype.from_value(@ammo_type.value),
-        upstate: CDoom::Statenum.new(up_num),
-        downstate: CDoom::Statenum.new(down_num),
-        readystate: CDoom::Statenum.new(ready_num),
-        atkstate: CDoom::Statenum.new(atk_num),
-        flashstate: CDoom::Statenum.new(flash_num),
+        ammo: Doocr::Ammotype.from_value(@ammo_type.value),
+        upstate: Doocr::Statenum.new(up_num),
+        downstate: Doocr::Statenum.new(down_num),
+        readystate: Doocr::Statenum.new(ready_num),
+        atkstate: Doocr::Statenum.new(atk_num),
+        flashstate: Doocr::Statenum.new(flash_num),
       )
 
       @up.parse_ends

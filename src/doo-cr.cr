@@ -146,7 +146,7 @@ at_exit do
   print "\e[?25h" # show cursor
 
   unless Doocr.w_check_num_for_name("ENDOOM".to_unsafe) == -1
-    endoom = Doocr.w_cache_lump_name("ENDOOM".to_unsafe, CDoom::PU_CACHE).as(UInt8*)
+    endoom = Doocr.w_cache_lump_name("ENDOOM".to_unsafe, Doocr::PU_CACHE).as(UInt8*)
 
     cp437 = [
       " ", "☺", "☻", "♥", "♦", "♣", "♠", "•",

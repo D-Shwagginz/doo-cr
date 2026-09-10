@@ -92,7 +92,7 @@ module Doocr
 
   Doocr.precache = 1
 
-  class_getter keystates = Array(Bool).new(CDoom::NUMKEYS, false)
+  class_getter keystates = Array(Bool).new(Doocr::NUMKEYS, false)
 
   @@st_notify : CDoom::Event = CDoom::Event.new
   @@st_notify
@@ -115,12 +115,12 @@ module Doocr
 
   RESENDCOUNT =   10
   PL_DRONE    = 0x80        # bit flag in doomdata->player
-  @@doomport : Int32 = 5029 # CDoom::IPPORT_USERRESERVED + 0x1d
+  @@doomport : Int32 = 5029 # Doocr::IPPORT_USERRESERVED + 0x1d
 
   @@insocket : UDPSocket? = nil
   @@sendsocket : UDPSocket? = nil
-  @@sendaddress = Array(Socket::IPAddress?).new(CDoom::MAXNETNODES, nil)
-  @@recv_channel = Channel(Tuple(CDoom::Doomdata, Int32, Socket::IPAddress)).new(CDoom::MAXEVENTS)
+  @@sendaddress = Array(Socket::IPAddress?).new(Doocr::MAXNETNODES, nil)
+  @@recv_channel = Channel(Tuple(CDoom::Doomdata, Int32, Socket::IPAddress)).new(Doocr::MAXEVENTS)
 
   @@netget : Proc(Nil) = -> { nil }
   @@netsend : Proc(Nil) = -> { nil }
@@ -155,7 +155,7 @@ module Doocr
   @@music_buffer = Pointer(Int16).null
   @@midi_tick_accumulator = 0.0
 
-  @@switch_origins : Array(CDoom::Degenmobj) = [] of CDoom::Degenmobj
+  @@switch_origins : Array(Doocr::Degenmobj) = [] of Doocr::Degenmobj
 
   Doocr.last_update_time = 0
   Doocr.button_states.fill(0)
@@ -219,7 +219,7 @@ module Doocr
   Doocr.finit_width = CDoom::SCREENWIDTH
   Doocr.finit_height = CDoom::SCREENHEIGHT - 32
 
-  Doocr.scale_mtof = CDoom::INITSCALEMTOF.to_i32!
+  Doocr.scale_mtof = Doocr::INITSCALEMTOF.to_i32!
 
   Doocr.markpointnum = 0
 
@@ -288,84 +288,84 @@ module Doocr
 
   Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # fist
-    ammo: CDoom::Ammotype::Noammo,
-    upstate: CDoom::Statenum::S_PUNCHUP,
-    downstate: CDoom::Statenum::S_PUNCHDOWN,
-    readystate: CDoom::Statenum::S_PUNCH,
-    atkstate: CDoom::Statenum::S_PUNCH1,
-    flashstate: CDoom::Statenum::S_NULL
+    ammo: Doocr::Ammotype::Noammo,
+    upstate: Doocr::Statenum::S_PUNCHUP,
+    downstate: Doocr::Statenum::S_PUNCHDOWN,
+    readystate: Doocr::Statenum::S_PUNCH,
+    atkstate: Doocr::Statenum::S_PUNCH1,
+    flashstate: Doocr::Statenum::S_NULL
   )
   Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # pistol
-    ammo: CDoom::Ammotype::Clip,
-    upstate: CDoom::Statenum::S_PISTOLUP,
-    downstate: CDoom::Statenum::S_PISTOLDOWN,
-    readystate: CDoom::Statenum::S_PISTOL,
-    atkstate: CDoom::Statenum::S_PISTOL1,
-    flashstate: CDoom::Statenum::S_PISTOLFLASH
+    ammo: Doocr::Ammotype::Clip,
+    upstate: Doocr::Statenum::S_PISTOLUP,
+    downstate: Doocr::Statenum::S_PISTOLDOWN,
+    readystate: Doocr::Statenum::S_PISTOL,
+    atkstate: Doocr::Statenum::S_PISTOL1,
+    flashstate: Doocr::Statenum::S_PISTOLFLASH
   )
   Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # shotgun
-    ammo: CDoom::Ammotype::Shell,
-    upstate: CDoom::Statenum::S_SGUNUP,
-    downstate: CDoom::Statenum::S_SGUNDOWN,
-    readystate: CDoom::Statenum::S_SGUN,
-    atkstate: CDoom::Statenum::S_SGUN1,
-    flashstate: CDoom::Statenum::S_SGUNFLASH1
+    ammo: Doocr::Ammotype::Shell,
+    upstate: Doocr::Statenum::S_SGUNUP,
+    downstate: Doocr::Statenum::S_SGUNDOWN,
+    readystate: Doocr::Statenum::S_SGUN,
+    atkstate: Doocr::Statenum::S_SGUN1,
+    flashstate: Doocr::Statenum::S_SGUNFLASH1
   )
   Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # chaingun
-    ammo: CDoom::Ammotype::Clip,
-    upstate: CDoom::Statenum::S_CHAINUP,
-    downstate: CDoom::Statenum::S_CHAINDOWN,
-    readystate: CDoom::Statenum::S_CHAIN,
-    atkstate: CDoom::Statenum::S_CHAIN1,
-    flashstate: CDoom::Statenum::S_CHAINFLASH1
+    ammo: Doocr::Ammotype::Clip,
+    upstate: Doocr::Statenum::S_CHAINUP,
+    downstate: Doocr::Statenum::S_CHAINDOWN,
+    readystate: Doocr::Statenum::S_CHAIN,
+    atkstate: Doocr::Statenum::S_CHAIN1,
+    flashstate: Doocr::Statenum::S_CHAINFLASH1
   )
   Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # missile launcher
-    ammo: CDoom::Ammotype::Misl,
-    upstate: CDoom::Statenum::S_MISSILEUP,
-    downstate: CDoom::Statenum::S_MISSILEDOWN,
-    readystate: CDoom::Statenum::S_MISSILE,
-    atkstate: CDoom::Statenum::S_MISSILE1,
-    flashstate: CDoom::Statenum::S_MISSILEFLASH1
+    ammo: Doocr::Ammotype::Misl,
+    upstate: Doocr::Statenum::S_MISSILEUP,
+    downstate: Doocr::Statenum::S_MISSILEDOWN,
+    readystate: Doocr::Statenum::S_MISSILE,
+    atkstate: Doocr::Statenum::S_MISSILE1,
+    flashstate: Doocr::Statenum::S_MISSILEFLASH1
   )
   Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # plasma rifle
-    ammo: CDoom::Ammotype::Cell,
-    upstate: CDoom::Statenum::S_PLASMAUP,
-    downstate: CDoom::Statenum::S_PLASMADOWN,
-    readystate: CDoom::Statenum::S_PLASMA,
-    atkstate: CDoom::Statenum::S_PLASMA1,
-    flashstate: CDoom::Statenum::S_PLASMAFLASH1
+    ammo: Doocr::Ammotype::Cell,
+    upstate: Doocr::Statenum::S_PLASMAUP,
+    downstate: Doocr::Statenum::S_PLASMADOWN,
+    readystate: Doocr::Statenum::S_PLASMA,
+    atkstate: Doocr::Statenum::S_PLASMA1,
+    flashstate: Doocr::Statenum::S_PLASMAFLASH1
   )
   Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # bfg 9000
-    ammo: CDoom::Ammotype::Cell,
-    upstate: CDoom::Statenum::S_BFGUP,
-    downstate: CDoom::Statenum::S_BFGDOWN,
-    readystate: CDoom::Statenum::S_BFG,
-    atkstate: CDoom::Statenum::S_BFG1,
-    flashstate: CDoom::Statenum::S_BFGFLASH1
+    ammo: Doocr::Ammotype::Cell,
+    upstate: Doocr::Statenum::S_BFGUP,
+    downstate: Doocr::Statenum::S_BFGDOWN,
+    readystate: Doocr::Statenum::S_BFG,
+    atkstate: Doocr::Statenum::S_BFG1,
+    flashstate: Doocr::Statenum::S_BFGFLASH1
   )
   Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # chainsaw
-    ammo: CDoom::Ammotype::Noammo,
-    upstate: CDoom::Statenum::S_SAWUP,
-    downstate: CDoom::Statenum::S_SAWDOWN,
-    readystate: CDoom::Statenum::S_SAW,
-    atkstate: CDoom::Statenum::S_SAW1,
-    flashstate: CDoom::Statenum::S_NULL
+    ammo: Doocr::Ammotype::Noammo,
+    upstate: Doocr::Statenum::S_SAWUP,
+    downstate: Doocr::Statenum::S_SAWDOWN,
+    readystate: Doocr::Statenum::S_SAW,
+    atkstate: Doocr::Statenum::S_SAW1,
+    flashstate: Doocr::Statenum::S_NULL
   )
   Doocr.weaponinfo << Doocr::Weaponinfo.new(
     # Super Shotgun
-    ammo: CDoom::Ammotype::Shell,
-    upstate: CDoom::Statenum::S_DSGUNUP,
-    downstate: CDoom::Statenum::S_DSGUNDOWN,
-    readystate: CDoom::Statenum::S_DSGUN,
-    atkstate: CDoom::Statenum::S_DSGUN1,
-    flashstate: CDoom::Statenum::S_DSGUNFLASH1
+    ammo: Doocr::Ammotype::Shell,
+    upstate: Doocr::Statenum::S_DSGUNUP,
+    downstate: Doocr::Statenum::S_DSGUNDOWN,
+    readystate: Doocr::Statenum::S_DSGUN,
+    atkstate: Doocr::Statenum::S_DSGUN1,
+    flashstate: Doocr::Statenum::S_DSGUNFLASH1
   )
 
   Doocr.singletics = 0
@@ -373,7 +373,7 @@ module Doocr
   Doocr.is_wiping_screen = 0
 
 
-  Doocr.wipegamestate = CDoom::Gamestate::Demoscreen
+  Doocr.wipegamestate = Doocr::Gamestate::Demoscreen
 
   Doocr.forwardmove[0] = 0x19
   Doocr.forwardmove[1] = 0x32
@@ -383,11 +383,11 @@ module Doocr
   Doocr.angleturn[1] = 1280
   Doocr.angleturn[2] = 320
 
-  Doocr.gamemode = CDoom::GameMode::Indetermined
-  Doocr.gamemission = CDoom::GameMission::Doom
+  Doocr.gamemode = Doocr::GameMode::Indetermined
+  Doocr.gamemission = Doocr::GameMission::Doom
 
   # Language.
-  Doocr.language = CDoom::Language::English
+  Doocr.language = Doocr::Language::English
 
   # Set if homebrew PWAD stuff has been added.
   Doocr.modifiedgame
@@ -414,23 +414,23 @@ module Doocr
   # Stage of animation:
   #  0 = text, 1 = art screen, 2 = character cast
   # CDoom.finalstage
-  @@castorder[0] = Castinfo.new(name: @@deh_cc_zombie, type: CDoom::Mobjtype::MT_POSSESSED)
-  @@castorder[1] = Castinfo.new(name: @@deh_cc_shotgun, type: CDoom::Mobjtype::MT_SHOTGUY)
-  @@castorder[2] = Castinfo.new(name: @@deh_cc_heavy, type: CDoom::Mobjtype::MT_CHAINGUY)
-  @@castorder[3] = Castinfo.new(name: @@deh_cc_imp, type: CDoom::Mobjtype::MT_TROOP)
-  @@castorder[4] = Castinfo.new(name: @@deh_cc_demon, type: CDoom::Mobjtype::MT_SERGEANT)
-  @@castorder[5] = Castinfo.new(name: @@deh_cc_lost, type: CDoom::Mobjtype::MT_SKULL)
-  @@castorder[6] = Castinfo.new(name: @@deh_cc_caco, type: CDoom::Mobjtype::MT_HEAD)
-  @@castorder[7] = Castinfo.new(name: @@deh_cc_hell, type: CDoom::Mobjtype::MT_KNIGHT)
-  @@castorder[8] = Castinfo.new(name: @@deh_cc_baron, type: CDoom::Mobjtype::MT_BRUISER)
-  @@castorder[9] = Castinfo.new(name: @@deh_cc_arach, type: CDoom::Mobjtype::MT_BABY)
-  @@castorder[10] = Castinfo.new(name: @@deh_cc_pain, type: CDoom::Mobjtype::MT_PAIN)
-  @@castorder[11] = Castinfo.new(name: @@deh_cc_reven, type: CDoom::Mobjtype::MT_UNDEAD)
-  @@castorder[12] = Castinfo.new(name: @@deh_cc_mancu, type: CDoom::Mobjtype::MT_FATSO)
-  @@castorder[13] = Castinfo.new(name: @@deh_cc_arch, type: CDoom::Mobjtype::MT_VILE)
-  @@castorder[14] = Castinfo.new(name: @@deh_cc_spider, type: CDoom::Mobjtype::MT_SPIDER)
-  @@castorder[15] = Castinfo.new(name: @@deh_cc_cyber, type: CDoom::Mobjtype::MT_CYBORG)
-  @@castorder[16] = Castinfo.new(name: @@deh_cc_hero, type: CDoom::Mobjtype::MT_PLAYER)
+  @@castorder[0] = Castinfo.new(name: @@deh_cc_zombie, type: Doocr::Mobjtype::MT_POSSESSED)
+  @@castorder[1] = Castinfo.new(name: @@deh_cc_shotgun, type: Doocr::Mobjtype::MT_SHOTGUY)
+  @@castorder[2] = Castinfo.new(name: @@deh_cc_heavy, type: Doocr::Mobjtype::MT_CHAINGUY)
+  @@castorder[3] = Castinfo.new(name: @@deh_cc_imp, type: Doocr::Mobjtype::MT_TROOP)
+  @@castorder[4] = Castinfo.new(name: @@deh_cc_demon, type: Doocr::Mobjtype::MT_SERGEANT)
+  @@castorder[5] = Castinfo.new(name: @@deh_cc_lost, type: Doocr::Mobjtype::MT_SKULL)
+  @@castorder[6] = Castinfo.new(name: @@deh_cc_caco, type: Doocr::Mobjtype::MT_HEAD)
+  @@castorder[7] = Castinfo.new(name: @@deh_cc_hell, type: Doocr::Mobjtype::MT_KNIGHT)
+  @@castorder[8] = Castinfo.new(name: @@deh_cc_baron, type: Doocr::Mobjtype::MT_BRUISER)
+  @@castorder[9] = Castinfo.new(name: @@deh_cc_arach, type: Doocr::Mobjtype::MT_BABY)
+  @@castorder[10] = Castinfo.new(name: @@deh_cc_pain, type: Doocr::Mobjtype::MT_PAIN)
+  @@castorder[11] = Castinfo.new(name: @@deh_cc_reven, type: Doocr::Mobjtype::MT_UNDEAD)
+  @@castorder[12] = Castinfo.new(name: @@deh_cc_mancu, type: Doocr::Mobjtype::MT_FATSO)
+  @@castorder[13] = Castinfo.new(name: @@deh_cc_arch, type: Doocr::Mobjtype::MT_VILE)
+  @@castorder[14] = Castinfo.new(name: @@deh_cc_spider, type: Doocr::Mobjtype::MT_SPIDER)
+  @@castorder[15] = Castinfo.new(name: @@deh_cc_cyber, type: Doocr::Mobjtype::MT_CYBORG)
+  @@castorder[16] = Castinfo.new(name: @@deh_cc_hero, type: Doocr::Mobjtype::MT_PLAYER)
 
   @@castorder[17] = Castinfo.new
 
@@ -1063,976 +1063,976 @@ module Doocr
                            "COL5", "TBLU", "TGRN", "TRED", "SMBT", "SMGT", "SMRT", "HDB1", "HDB2", "HDB3",
                            "HDB4", "HDB5", "HDB6", "POB1", "POB2", "BRS1", "TLMP", "TLP2"]
 
-  @@statedata : Array(Tuple(CDoom::Spritenum, Int32, Int32, Void*, CDoom::Statenum, Int32, Int32)) = [
-    {CDoom::Spritenum::SPR_TROO, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_NULL
-    {CDoom::Spritenum::SPR_SHTG, 4, 0, (->CDoom.a_light0).pointer, CDoom::Statenum::S_NULL, 0, 0},                 # S_LIGHTDONE
-    {CDoom::Spritenum::SPR_PUNG, 0, 1, (->CDoom.a_weapon_ready).pointer, CDoom::Statenum::S_PUNCH, 0, 0},          # S_PUNCH
-    {CDoom::Spritenum::SPR_PUNG, 0, 1, (->CDoom.a_lower).pointer, CDoom::Statenum::S_PUNCHDOWN, 0, 0},             # S_PUNCHDOWN
-    {CDoom::Spritenum::SPR_PUNG, 0, 1, (->CDoom.a_raise).pointer, CDoom::Statenum::S_PUNCHUP, 0, 0},               # S_PUNCHUP
-    {CDoom::Spritenum::SPR_PUNG, 1, 4, Pointer(Void).null, CDoom::Statenum::S_PUNCH2, 0, 0},                       # S_PUNCH1
-    {CDoom::Spritenum::SPR_PUNG, 2, 4, (->CDoom.a_punch).pointer, CDoom::Statenum::S_PUNCH3, 0, 0},                # S_PUNCH2
-    {CDoom::Spritenum::SPR_PUNG, 3, 5, Pointer(Void).null, CDoom::Statenum::S_PUNCH4, 0, 0},                       # S_PUNCH3
-    {CDoom::Spritenum::SPR_PUNG, 2, 4, Pointer(Void).null, CDoom::Statenum::S_PUNCH5, 0, 0},                       # S_PUNCH4
-    {CDoom::Spritenum::SPR_PUNG, 1, 5, (->CDoom.a_refire).pointer, CDoom::Statenum::S_PUNCH, 0, 0},                # S_PUNCH5
-    {CDoom::Spritenum::SPR_PISG, 0, 1, (->CDoom.a_weapon_ready).pointer, CDoom::Statenum::S_PISTOL, 0, 0},         # S_PISTOL
-    {CDoom::Spritenum::SPR_PISG, 0, 1, (->CDoom.a_lower).pointer, CDoom::Statenum::S_PISTOLDOWN, 0, 0},            # S_PISTOLDOWN
-    {CDoom::Spritenum::SPR_PISG, 0, 1, (->CDoom.a_raise).pointer, CDoom::Statenum::S_PISTOLUP, 0, 0},              # S_PISTOLUP
-    {CDoom::Spritenum::SPR_PISG, 0, 4, Pointer(Void).null, CDoom::Statenum::S_PISTOL2, 0, 0},                      # S_PISTOL1
-    {CDoom::Spritenum::SPR_PISG, 1, 6, (->CDoom.a_fire_pistol).pointer, CDoom::Statenum::S_PISTOL3, 0, 0},         # S_PISTOL2
-    {CDoom::Spritenum::SPR_PISG, 2, 4, Pointer(Void).null, CDoom::Statenum::S_PISTOL4, 0, 0},                      # S_PISTOL3
-    {CDoom::Spritenum::SPR_PISG, 1, 5, (->CDoom.a_refire).pointer, CDoom::Statenum::S_PISTOL, 0, 0},               # S_PISTOL4
-    {CDoom::Spritenum::SPR_PISF, 32768, 7, (->CDoom.a_light1).pointer, CDoom::Statenum::S_LIGHTDONE, 0, 0},        # S_PISTOLFLASH
-    {CDoom::Spritenum::SPR_SHTG, 0, 1, (->CDoom.a_weapon_ready).pointer, CDoom::Statenum::S_SGUN, 0, 0},           # S_SGUN
-    {CDoom::Spritenum::SPR_SHTG, 0, 1, (->CDoom.a_lower).pointer, CDoom::Statenum::S_SGUNDOWN, 0, 0},              # S_SGUNDOWN
-    {CDoom::Spritenum::SPR_SHTG, 0, 1, (->CDoom.a_raise).pointer, CDoom::Statenum::S_SGUNUP, 0, 0},                # S_SGUNUP
-    {CDoom::Spritenum::SPR_SHTG, 0, 3, Pointer(Void).null, CDoom::Statenum::S_SGUN2, 0, 0},                        # S_SGUN1
-    {CDoom::Spritenum::SPR_SHTG, 0, 7, (->CDoom.a_fire_shotgun).pointer, CDoom::Statenum::S_SGUN3, 0, 0},          # S_SGUN2
-    {CDoom::Spritenum::SPR_SHTG, 1, 5, Pointer(Void).null, CDoom::Statenum::S_SGUN4, 0, 0},                        # S_SGUN3
-    {CDoom::Spritenum::SPR_SHTG, 2, 5, Pointer(Void).null, CDoom::Statenum::S_SGUN5, 0, 0},                        # S_SGUN4
-    {CDoom::Spritenum::SPR_SHTG, 3, 4, Pointer(Void).null, CDoom::Statenum::S_SGUN6, 0, 0},                        # S_SGUN5
-    {CDoom::Spritenum::SPR_SHTG, 2, 5, Pointer(Void).null, CDoom::Statenum::S_SGUN7, 0, 0},                        # S_SGUN6
-    {CDoom::Spritenum::SPR_SHTG, 1, 5, Pointer(Void).null, CDoom::Statenum::S_SGUN8, 0, 0},                        # S_SGUN7
-    {CDoom::Spritenum::SPR_SHTG, 0, 3, Pointer(Void).null, CDoom::Statenum::S_SGUN9, 0, 0},                        # S_SGUN8
-    {CDoom::Spritenum::SPR_SHTG, 0, 7, (->CDoom.a_refire).pointer, CDoom::Statenum::S_SGUN, 0, 0},                 # S_SGUN9
-    {CDoom::Spritenum::SPR_SHTF, 32768, 4, (->CDoom.a_light1).pointer, CDoom::Statenum::S_SGUNFLASH2, 0, 0},       # S_SGUNFLASH1
-    {CDoom::Spritenum::SPR_SHTF, 32769, 3, (->CDoom.a_light2).pointer, CDoom::Statenum::S_LIGHTDONE, 0, 0},        # S_SGUNFLASH2
-    {CDoom::Spritenum::SPR_SHT2, 0, 1, (->CDoom.a_weapon_ready).pointer, CDoom::Statenum::S_DSGUN, 0, 0},          # S_DSGUN
-    {CDoom::Spritenum::SPR_SHT2, 0, 1, (->CDoom.a_lower).pointer, CDoom::Statenum::S_DSGUNDOWN, 0, 0},             # S_DSGUNDOWN
-    {CDoom::Spritenum::SPR_SHT2, 0, 1, (->CDoom.a_raise).pointer, CDoom::Statenum::S_DSGUNUP, 0, 0},               # S_DSGUNUP
-    {CDoom::Spritenum::SPR_SHT2, 0, 3, Pointer(Void).null, CDoom::Statenum::S_DSGUN2, 0, 0},                       # S_DSGUN1
-    {CDoom::Spritenum::SPR_SHT2, 0, 7, (->CDoom.a_fire_shotgun2).pointer, CDoom::Statenum::S_DSGUN3, 0, 0},        # S_DSGUN2
-    {CDoom::Spritenum::SPR_SHT2, 1, 7, Pointer(Void).null, CDoom::Statenum::S_DSGUN4, 0, 0},                       # S_DSGUN3
-    {CDoom::Spritenum::SPR_SHT2, 2, 7, (->CDoom.a_check_reload).pointer, CDoom::Statenum::S_DSGUN5, 0, 0},         # S_DSGUN4
-    {CDoom::Spritenum::SPR_SHT2, 3, 7, (->CDoom.a_open_shotgun2).pointer, CDoom::Statenum::S_DSGUN6, 0, 0},        # S_DSGUN5
-    {CDoom::Spritenum::SPR_SHT2, 4, 7, Pointer(Void).null, CDoom::Statenum::S_DSGUN7, 0, 0},                       # S_DSGUN6
-    {CDoom::Spritenum::SPR_SHT2, 5, 7, (->CDoom.a_load_shotgun2).pointer, CDoom::Statenum::S_DSGUN8, 0, 0},        # S_DSGUN7
-    {CDoom::Spritenum::SPR_SHT2, 6, 6, Pointer(Void).null, CDoom::Statenum::S_DSGUN9, 0, 0},                       # S_DSGUN8
-    {CDoom::Spritenum::SPR_SHT2, 7, 6, (->CDoom.a_close_shotgun2).pointer, CDoom::Statenum::S_DSGUN10, 0, 0},      # S_DSGUN9
-    {CDoom::Spritenum::SPR_SHT2, 0, 5, (->CDoom.a_refire).pointer, CDoom::Statenum::S_DSGUN, 0, 0},                # S_DSGUN10
-    {CDoom::Spritenum::SPR_SHT2, 1, 7, Pointer(Void).null, CDoom::Statenum::S_DSNR2, 0, 0},                        # S_DSNR1
-    {CDoom::Spritenum::SPR_SHT2, 0, 3, Pointer(Void).null, CDoom::Statenum::S_DSGUNDOWN, 0, 0},                    # S_DSNR2
-    {CDoom::Spritenum::SPR_SHT2, 32776, 5, (->CDoom.a_light1).pointer, CDoom::Statenum::S_DSGUNFLASH2, 0, 0},      # S_DSGUNFLASH1
-    {CDoom::Spritenum::SPR_SHT2, 32777, 4, (->CDoom.a_light2).pointer, CDoom::Statenum::S_LIGHTDONE, 0, 0},        # S_DSGUNFLASH2
-    {CDoom::Spritenum::SPR_CHGG, 0, 1, (->CDoom.a_weapon_ready).pointer, CDoom::Statenum::S_CHAIN, 0, 0},          # S_CHAIN
-    {CDoom::Spritenum::SPR_CHGG, 0, 1, (->CDoom.a_lower).pointer, CDoom::Statenum::S_CHAINDOWN, 0, 0},             # S_CHAINDOWN
-    {CDoom::Spritenum::SPR_CHGG, 0, 1, (->CDoom.a_raise).pointer, CDoom::Statenum::S_CHAINUP, 0, 0},               # S_CHAINUP
-    {CDoom::Spritenum::SPR_CHGG, 0, 4, (->CDoom.a_fire_cgun).pointer, CDoom::Statenum::S_CHAIN2, 0, 0},            # S_CHAIN1
-    {CDoom::Spritenum::SPR_CHGG, 1, 4, (->CDoom.a_fire_cgun).pointer, CDoom::Statenum::S_CHAIN3, 0, 0},            # S_CHAIN2
-    {CDoom::Spritenum::SPR_CHGG, 1, 0, (->CDoom.a_refire).pointer, CDoom::Statenum::S_CHAIN, 0, 0},                # S_CHAIN3
-    {CDoom::Spritenum::SPR_CHGF, 32768, 5, (->CDoom.a_light1).pointer, CDoom::Statenum::S_LIGHTDONE, 0, 0},        # S_CHAINFLASH1
-    {CDoom::Spritenum::SPR_CHGF, 32769, 5, (->CDoom.a_light2).pointer, CDoom::Statenum::S_LIGHTDONE, 0, 0},        # S_CHAINFLASH2
-    {CDoom::Spritenum::SPR_MISG, 0, 1, (->CDoom.a_weapon_ready).pointer, CDoom::Statenum::S_MISSILE, 0, 0},        # S_MISSILE
-    {CDoom::Spritenum::SPR_MISG, 0, 1, (->CDoom.a_lower).pointer, CDoom::Statenum::S_MISSILEDOWN, 0, 0},           # S_MISSILEDOWN
-    {CDoom::Spritenum::SPR_MISG, 0, 1, (->CDoom.a_raise).pointer, CDoom::Statenum::S_MISSILEUP, 0, 0},             # S_MISSILEUP
-    {CDoom::Spritenum::SPR_MISG, 1, 8, (->CDoom.a_gun_flash).pointer, CDoom::Statenum::S_MISSILE2, 0, 0},          # S_MISSILE1
-    {CDoom::Spritenum::SPR_MISG, 1, 12, (->CDoom.a_fire_missile).pointer, CDoom::Statenum::S_MISSILE3, 0, 0},      # S_MISSILE2
-    {CDoom::Spritenum::SPR_MISG, 1, 0, (->CDoom.a_refire).pointer, CDoom::Statenum::S_MISSILE, 0, 0},              # S_MISSILE3
-    {CDoom::Spritenum::SPR_MISF, 32768, 3, (->CDoom.a_light1).pointer, CDoom::Statenum::S_MISSILEFLASH2, 0, 0},    # S_MISSILEFLASH1
-    {CDoom::Spritenum::SPR_MISF, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_MISSILEFLASH3, 0, 0},            # S_MISSILEFLASH2
-    {CDoom::Spritenum::SPR_MISF, 32770, 4, (->CDoom.a_light2).pointer, CDoom::Statenum::S_MISSILEFLASH4, 0, 0},    # S_MISSILEFLASH3
-    {CDoom::Spritenum::SPR_MISF, 32771, 4, (->CDoom.a_light2).pointer, CDoom::Statenum::S_LIGHTDONE, 0, 0},        # S_MISSILEFLASH4
-    {CDoom::Spritenum::SPR_SAWG, 2, 4, (->CDoom.a_weapon_ready).pointer, CDoom::Statenum::S_SAWB, 0, 0},           # S_SAW
-    {CDoom::Spritenum::SPR_SAWG, 3, 4, (->CDoom.a_weapon_ready).pointer, CDoom::Statenum::S_SAW, 0, 0},            # S_SAWB
-    {CDoom::Spritenum::SPR_SAWG, 2, 1, (->CDoom.a_lower).pointer, CDoom::Statenum::S_SAWDOWN, 0, 0},               # S_SAWDOWN
-    {CDoom::Spritenum::SPR_SAWG, 2, 1, (->CDoom.a_raise).pointer, CDoom::Statenum::S_SAWUP, 0, 0},                 # S_SAWUP
-    {CDoom::Spritenum::SPR_SAWG, 0, 4, (->CDoom.a_saw).pointer, CDoom::Statenum::S_SAW2, 0, 0},                    # S_SAW1
-    {CDoom::Spritenum::SPR_SAWG, 1, 4, (->CDoom.a_saw).pointer, CDoom::Statenum::S_SAW3, 0, 0},                    # S_SAW2
-    {CDoom::Spritenum::SPR_SAWG, 1, 0, (->CDoom.a_refire).pointer, CDoom::Statenum::S_SAW, 0, 0},                  # S_SAW3
-    {CDoom::Spritenum::SPR_PLSG, 0, 1, (->CDoom.a_weapon_ready).pointer, CDoom::Statenum::S_PLASMA, 0, 0},         # S_PLASMA
-    {CDoom::Spritenum::SPR_PLSG, 0, 1, (->CDoom.a_lower).pointer, CDoom::Statenum::S_PLASMADOWN, 0, 0},            # S_PLASMADOWN
-    {CDoom::Spritenum::SPR_PLSG, 0, 1, (->CDoom.a_raise).pointer, CDoom::Statenum::S_PLASMAUP, 0, 0},              # S_PLASMAUP
-    {CDoom::Spritenum::SPR_PLSG, 0, 3, (->CDoom.a_fire_plasma).pointer, CDoom::Statenum::S_PLASMA2, 0, 0},         # S_PLASMA1
-    {CDoom::Spritenum::SPR_PLSG, 1, 20, (->CDoom.a_refire).pointer, CDoom::Statenum::S_PLASMA, 0, 0},              # S_PLASMA2
-    {CDoom::Spritenum::SPR_PLSF, 32768, 4, (->CDoom.a_light1).pointer, CDoom::Statenum::S_LIGHTDONE, 0, 0},        # S_PLASMAFLASH1
-    {CDoom::Spritenum::SPR_PLSF, 32769, 4, (->CDoom.a_light1).pointer, CDoom::Statenum::S_LIGHTDONE, 0, 0},        # S_PLASMAFLASH2
-    {CDoom::Spritenum::SPR_BFGG, 0, 1, (->CDoom.a_weapon_ready).pointer, CDoom::Statenum::S_BFG, 0, 0},            # S_BFG
-    {CDoom::Spritenum::SPR_BFGG, 0, 1, (->CDoom.a_lower).pointer, CDoom::Statenum::S_BFGDOWN, 0, 0},               # S_BFGDOWN
-    {CDoom::Spritenum::SPR_BFGG, 0, 1, (->CDoom.a_raise).pointer, CDoom::Statenum::S_BFGUP, 0, 0},                 # S_BFGUP
-    {CDoom::Spritenum::SPR_BFGG, 0, 20, (->CDoom.a_bfg_sound).pointer, CDoom::Statenum::S_BFG2, 0, 0},             # S_BFG1
-    {CDoom::Spritenum::SPR_BFGG, 1, 10, (->CDoom.a_gun_flash).pointer, CDoom::Statenum::S_BFG3, 0, 0},             # S_BFG2
-    {CDoom::Spritenum::SPR_BFGG, 1, 10, (->CDoom.a_fire_bfg).pointer, CDoom::Statenum::S_BFG4, 0, 0},              # S_BFG3
-    {CDoom::Spritenum::SPR_BFGG, 1, 20, (->CDoom.a_refire).pointer, CDoom::Statenum::S_BFG, 0, 0},                 # S_BFG4
-    {CDoom::Spritenum::SPR_BFGF, 32768, 11, (->CDoom.a_light1).pointer, CDoom::Statenum::S_BFGFLASH2, 0, 0},       # S_BFGFLASH1
-    {CDoom::Spritenum::SPR_BFGF, 32769, 6, (->CDoom.a_light2).pointer, CDoom::Statenum::S_LIGHTDONE, 0, 0},        # S_BFGFLASH2
-    {CDoom::Spritenum::SPR_BLUD, 2, 8, Pointer(Void).null, CDoom::Statenum::S_BLOOD2, 0, 0},                       # S_BLOOD1
-    {CDoom::Spritenum::SPR_BLUD, 1, 8, Pointer(Void).null, CDoom::Statenum::S_BLOOD3, 0, 0},                       # S_BLOOD2
-    {CDoom::Spritenum::SPR_BLUD, 0, 8, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                         # S_BLOOD3
-    {CDoom::Spritenum::SPR_PUFF, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_PUFF2, 0, 0},                    # S_PUFF1
-    {CDoom::Spritenum::SPR_PUFF, 1, 4, Pointer(Void).null, CDoom::Statenum::S_PUFF3, 0, 0},                        # S_PUFF2
-    {CDoom::Spritenum::SPR_PUFF, 2, 4, Pointer(Void).null, CDoom::Statenum::S_PUFF4, 0, 0},                        # S_PUFF3
-    {CDoom::Spritenum::SPR_PUFF, 3, 4, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                         # S_PUFF4
-    {CDoom::Spritenum::SPR_BAL1, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_TBALL2, 0, 0},                   # S_TBALL1
-    {CDoom::Spritenum::SPR_BAL1, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_TBALL1, 0, 0},                   # S_TBALL2
-    {CDoom::Spritenum::SPR_BAL1, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_TBALLX2, 0, 0},                  # S_TBALLX1
-    {CDoom::Spritenum::SPR_BAL1, 32771, 6, Pointer(Void).null, CDoom::Statenum::S_TBALLX3, 0, 0},                  # S_TBALLX2
-    {CDoom::Spritenum::SPR_BAL1, 32772, 6, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                     # S_TBALLX3
-    {CDoom::Spritenum::SPR_BAL2, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_RBALL2, 0, 0},                   # S_RBALL1
-    {CDoom::Spritenum::SPR_BAL2, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_RBALL1, 0, 0},                   # S_RBALL2
-    {CDoom::Spritenum::SPR_BAL2, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_RBALLX2, 0, 0},                  # S_RBALLX1
-    {CDoom::Spritenum::SPR_BAL2, 32771, 6, Pointer(Void).null, CDoom::Statenum::S_RBALLX3, 0, 0},                  # S_RBALLX2
-    {CDoom::Spritenum::SPR_BAL2, 32772, 6, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                     # S_RBALLX3
-    {CDoom::Spritenum::SPR_PLSS, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_PLASBALL2, 0, 0},                # S_PLASBALL
-    {CDoom::Spritenum::SPR_PLSS, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_PLASBALL, 0, 0},                 # S_PLASBALL2
-    {CDoom::Spritenum::SPR_PLSE, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_PLASEXP2, 0, 0},                 # S_PLASEXP
-    {CDoom::Spritenum::SPR_PLSE, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_PLASEXP3, 0, 0},                 # S_PLASEXP2
-    {CDoom::Spritenum::SPR_PLSE, 32770, 4, Pointer(Void).null, CDoom::Statenum::S_PLASEXP4, 0, 0},                 # S_PLASEXP3
-    {CDoom::Spritenum::SPR_PLSE, 32771, 4, Pointer(Void).null, CDoom::Statenum::S_PLASEXP5, 0, 0},                 # S_PLASEXP4
-    {CDoom::Spritenum::SPR_PLSE, 32772, 4, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                     # S_PLASEXP5
-    {CDoom::Spritenum::SPR_MISL, 32768, 1, Pointer(Void).null, CDoom::Statenum::S_ROCKET, 0, 0},                   # S_ROCKET
-    {CDoom::Spritenum::SPR_BFS1, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_BFGSHOT2, 0, 0},                 # S_BFGSHOT
-    {CDoom::Spritenum::SPR_BFS1, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_BFGSHOT, 0, 0},                  # S_BFGSHOT2
-    {CDoom::Spritenum::SPR_BFE1, 32768, 8, Pointer(Void).null, CDoom::Statenum::S_BFGLAND2, 0, 0},                 # S_BFGLAND
-    {CDoom::Spritenum::SPR_BFE1, 32769, 8, Pointer(Void).null, CDoom::Statenum::S_BFGLAND3, 0, 0},                 # S_BFGLAND2
-    {CDoom::Spritenum::SPR_BFE1, 32770, 8, (->CDoom.a_bfg_spray).pointer, CDoom::Statenum::S_BFGLAND4, 0, 0},      # S_BFGLAND3
-    {CDoom::Spritenum::SPR_BFE1, 32771, 8, Pointer(Void).null, CDoom::Statenum::S_BFGLAND5, 0, 0},                 # S_BFGLAND4
-    {CDoom::Spritenum::SPR_BFE1, 32772, 8, Pointer(Void).null, CDoom::Statenum::S_BFGLAND6, 0, 0},                 # S_BFGLAND5
-    {CDoom::Spritenum::SPR_BFE1, 32773, 8, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                     # S_BFGLAND6
-    {CDoom::Spritenum::SPR_BFE2, 32768, 8, Pointer(Void).null, CDoom::Statenum::S_BFGEXP2, 0, 0},                  # S_BFGEXP
-    {CDoom::Spritenum::SPR_BFE2, 32769, 8, Pointer(Void).null, CDoom::Statenum::S_BFGEXP3, 0, 0},                  # S_BFGEXP2
-    {CDoom::Spritenum::SPR_BFE2, 32770, 8, Pointer(Void).null, CDoom::Statenum::S_BFGEXP4, 0, 0},                  # S_BFGEXP3
-    {CDoom::Spritenum::SPR_BFE2, 32771, 8, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                     # S_BFGEXP4
-    {CDoom::Spritenum::SPR_MISL, 32769, 8, (->CDoom.a_explode).pointer, CDoom::Statenum::S_EXPLODE2, 0, 0},        # S_EXPLODE1
-    {CDoom::Spritenum::SPR_MISL, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_EXPLODE3, 0, 0},                 # S_EXPLODE2
-    {CDoom::Spritenum::SPR_MISL, 32771, 4, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                     # S_EXPLODE3
-    {CDoom::Spritenum::SPR_TFOG, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_TFOG01, 0, 0},                   # S_TFOG
-    {CDoom::Spritenum::SPR_TFOG, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_TFOG02, 0, 0},                   # S_TFOG01
-    {CDoom::Spritenum::SPR_TFOG, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_TFOG2, 0, 0},                    # S_TFOG02
-    {CDoom::Spritenum::SPR_TFOG, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_TFOG3, 0, 0},                    # S_TFOG2
-    {CDoom::Spritenum::SPR_TFOG, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_TFOG4, 0, 0},                    # S_TFOG3
-    {CDoom::Spritenum::SPR_TFOG, 32771, 6, Pointer(Void).null, CDoom::Statenum::S_TFOG5, 0, 0},                    # S_TFOG4
-    {CDoom::Spritenum::SPR_TFOG, 32772, 6, Pointer(Void).null, CDoom::Statenum::S_TFOG6, 0, 0},                    # S_TFOG5
-    {CDoom::Spritenum::SPR_TFOG, 32773, 6, Pointer(Void).null, CDoom::Statenum::S_TFOG7, 0, 0},                    # S_TFOG6
-    {CDoom::Spritenum::SPR_TFOG, 32774, 6, Pointer(Void).null, CDoom::Statenum::S_TFOG8, 0, 0},                    # S_TFOG7
-    {CDoom::Spritenum::SPR_TFOG, 32775, 6, Pointer(Void).null, CDoom::Statenum::S_TFOG9, 0, 0},                    # S_TFOG8
-    {CDoom::Spritenum::SPR_TFOG, 32776, 6, Pointer(Void).null, CDoom::Statenum::S_TFOG10, 0, 0},                   # S_TFOG9
-    {CDoom::Spritenum::SPR_TFOG, 32777, 6, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                     # S_TFOG10
-    {CDoom::Spritenum::SPR_IFOG, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_IFOG01, 0, 0},                   # S_IFOG
-    {CDoom::Spritenum::SPR_IFOG, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_IFOG02, 0, 0},                   # S_IFOG01
-    {CDoom::Spritenum::SPR_IFOG, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_IFOG2, 0, 0},                    # S_IFOG02
-    {CDoom::Spritenum::SPR_IFOG, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_IFOG3, 0, 0},                    # S_IFOG2
-    {CDoom::Spritenum::SPR_IFOG, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_IFOG4, 0, 0},                    # S_IFOG3
-    {CDoom::Spritenum::SPR_IFOG, 32771, 6, Pointer(Void).null, CDoom::Statenum::S_IFOG5, 0, 0},                    # S_IFOG4
-    {CDoom::Spritenum::SPR_IFOG, 32772, 6, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                     # S_IFOG5
-    {CDoom::Spritenum::SPR_PLAY, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_PLAY
-    {CDoom::Spritenum::SPR_PLAY, 0, 4, Pointer(Void).null, CDoom::Statenum::S_PLAY_RUN2, 0, 0},                    # S_PLAY_RUN1
-    {CDoom::Spritenum::SPR_PLAY, 1, 4, Pointer(Void).null, CDoom::Statenum::S_PLAY_RUN3, 0, 0},                    # S_PLAY_RUN2
-    {CDoom::Spritenum::SPR_PLAY, 2, 4, Pointer(Void).null, CDoom::Statenum::S_PLAY_RUN4, 0, 0},                    # S_PLAY_RUN3
-    {CDoom::Spritenum::SPR_PLAY, 3, 4, Pointer(Void).null, CDoom::Statenum::S_PLAY_RUN1, 0, 0},                    # S_PLAY_RUN4
-    {CDoom::Spritenum::SPR_PLAY, 4, 12, Pointer(Void).null, CDoom::Statenum::S_PLAY, 0, 0},                        # S_PLAY_ATK1
-    {CDoom::Spritenum::SPR_PLAY, 32773, 6, Pointer(Void).null, CDoom::Statenum::S_PLAY_ATK1, 0, 0},                # S_PLAY_ATK2
-    {CDoom::Spritenum::SPR_PLAY, 6, 4, Pointer(Void).null, CDoom::Statenum::S_PLAY_PAIN2, 0, 0},                   # S_PLAY_PAIN
-    {CDoom::Spritenum::SPR_PLAY, 6, 4, (->CDoom.a_pain).pointer, CDoom::Statenum::S_PLAY, 0, 0},                   # S_PLAY_PAIN2
-    {CDoom::Spritenum::SPR_PLAY, 7, 10, Pointer(Void).null, CDoom::Statenum::S_PLAY_DIE2, 0, 0},                   # S_PLAY_DIE1
-    {CDoom::Spritenum::SPR_PLAY, 8, 10, (->CDoom.a_player_scream).pointer, CDoom::Statenum::S_PLAY_DIE3, 0, 0},    # S_PLAY_DIE2
-    {CDoom::Spritenum::SPR_PLAY, 9, 10, (->CDoom.a_fall).pointer, CDoom::Statenum::S_PLAY_DIE4, 0, 0},             # S_PLAY_DIE3
-    {CDoom::Spritenum::SPR_PLAY, 10, 10, Pointer(Void).null, CDoom::Statenum::S_PLAY_DIE5, 0, 0},                  # S_PLAY_DIE4
-    {CDoom::Spritenum::SPR_PLAY, 11, 10, Pointer(Void).null, CDoom::Statenum::S_PLAY_DIE6, 0, 0},                  # S_PLAY_DIE5
-    {CDoom::Spritenum::SPR_PLAY, 12, 10, Pointer(Void).null, CDoom::Statenum::S_PLAY_DIE7, 0, 0},                  # S_PLAY_DIE6
-    {CDoom::Spritenum::SPR_PLAY, 13, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_PLAY_DIE7
-    {CDoom::Spritenum::SPR_PLAY, 14, 5, Pointer(Void).null, CDoom::Statenum::S_PLAY_XDIE2, 0, 0},                  # S_PLAY_XDIE1
-    {CDoom::Spritenum::SPR_PLAY, 15, 5, (->CDoom.a_xscream).pointer, CDoom::Statenum::S_PLAY_XDIE3, 0, 0},         # S_PLAY_XDIE2
-    {CDoom::Spritenum::SPR_PLAY, 16, 5, (->CDoom.a_fall).pointer, CDoom::Statenum::S_PLAY_XDIE4, 0, 0},            # S_PLAY_XDIE3
-    {CDoom::Spritenum::SPR_PLAY, 17, 5, Pointer(Void).null, CDoom::Statenum::S_PLAY_XDIE5, 0, 0},                  # S_PLAY_XDIE4
-    {CDoom::Spritenum::SPR_PLAY, 18, 5, Pointer(Void).null, CDoom::Statenum::S_PLAY_XDIE6, 0, 0},                  # S_PLAY_XDIE5
-    {CDoom::Spritenum::SPR_PLAY, 19, 5, Pointer(Void).null, CDoom::Statenum::S_PLAY_XDIE7, 0, 0},                  # S_PLAY_XDIE6
-    {CDoom::Spritenum::SPR_PLAY, 20, 5, Pointer(Void).null, CDoom::Statenum::S_PLAY_XDIE8, 0, 0},                  # S_PLAY_XDIE7
-    {CDoom::Spritenum::SPR_PLAY, 21, 5, Pointer(Void).null, CDoom::Statenum::S_PLAY_XDIE9, 0, 0},                  # S_PLAY_XDIE8
-    {CDoom::Spritenum::SPR_PLAY, 22, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_PLAY_XDIE9
-    {CDoom::Spritenum::SPR_POSS, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_POSS_STND2, 0, 0},            # S_POSS_STND
-    {CDoom::Spritenum::SPR_POSS, 1, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_POSS_STND, 0, 0},             # S_POSS_STND2
-    {CDoom::Spritenum::SPR_POSS, 0, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_POSS_RUN2, 0, 0},             # S_POSS_RUN1
-    {CDoom::Spritenum::SPR_POSS, 0, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_POSS_RUN3, 0, 0},             # S_POSS_RUN2
-    {CDoom::Spritenum::SPR_POSS, 1, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_POSS_RUN4, 0, 0},             # S_POSS_RUN3
-    {CDoom::Spritenum::SPR_POSS, 1, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_POSS_RUN5, 0, 0},             # S_POSS_RUN4
-    {CDoom::Spritenum::SPR_POSS, 2, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_POSS_RUN6, 0, 0},             # S_POSS_RUN5
-    {CDoom::Spritenum::SPR_POSS, 2, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_POSS_RUN7, 0, 0},             # S_POSS_RUN6
-    {CDoom::Spritenum::SPR_POSS, 3, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_POSS_RUN8, 0, 0},             # S_POSS_RUN7
-    {CDoom::Spritenum::SPR_POSS, 3, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_POSS_RUN1, 0, 0},             # S_POSS_RUN8
-    {CDoom::Spritenum::SPR_POSS, 4, 10, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_POSS_ATK2, 0, 0},      # S_POSS_ATK1
-    {CDoom::Spritenum::SPR_POSS, 5, 8, (->CDoom.a_pos_attack).pointer, CDoom::Statenum::S_POSS_ATK3, 0, 0},        # S_POSS_ATK2
-    {CDoom::Spritenum::SPR_POSS, 4, 8, Pointer(Void).null, CDoom::Statenum::S_POSS_RUN1, 0, 0},                    # S_POSS_ATK3
-    {CDoom::Spritenum::SPR_POSS, 6, 3, Pointer(Void).null, CDoom::Statenum::S_POSS_PAIN2, 0, 0},                   # S_POSS_PAIN
-    {CDoom::Spritenum::SPR_POSS, 6, 3, (->CDoom.a_pain).pointer, CDoom::Statenum::S_POSS_RUN1, 0, 0},              # S_POSS_PAIN2
-    {CDoom::Spritenum::SPR_POSS, 7, 5, Pointer(Void).null, CDoom::Statenum::S_POSS_DIE2, 0, 0},                    # S_POSS_DIE1
-    {CDoom::Spritenum::SPR_POSS, 8, 5, (->CDoom.a_scream).pointer, CDoom::Statenum::S_POSS_DIE3, 0, 0},            # S_POSS_DIE2
-    {CDoom::Spritenum::SPR_POSS, 9, 5, (->CDoom.a_fall).pointer, CDoom::Statenum::S_POSS_DIE4, 0, 0},              # S_POSS_DIE3
-    {CDoom::Spritenum::SPR_POSS, 10, 5, Pointer(Void).null, CDoom::Statenum::S_POSS_DIE5, 0, 0},                   # S_POSS_DIE4
-    {CDoom::Spritenum::SPR_POSS, 11, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_POSS_DIE5
-    {CDoom::Spritenum::SPR_POSS, 12, 5, Pointer(Void).null, CDoom::Statenum::S_POSS_XDIE2, 0, 0},                  # S_POSS_XDIE1
-    {CDoom::Spritenum::SPR_POSS, 13, 5, (->CDoom.a_xscream).pointer, CDoom::Statenum::S_POSS_XDIE3, 0, 0},         # S_POSS_XDIE2
-    {CDoom::Spritenum::SPR_POSS, 14, 5, (->CDoom.a_fall).pointer, CDoom::Statenum::S_POSS_XDIE4, 0, 0},            # S_POSS_XDIE3
-    {CDoom::Spritenum::SPR_POSS, 15, 5, Pointer(Void).null, CDoom::Statenum::S_POSS_XDIE5, 0, 0},                  # S_POSS_XDIE4
-    {CDoom::Spritenum::SPR_POSS, 16, 5, Pointer(Void).null, CDoom::Statenum::S_POSS_XDIE6, 0, 0},                  # S_POSS_XDIE5
-    {CDoom::Spritenum::SPR_POSS, 17, 5, Pointer(Void).null, CDoom::Statenum::S_POSS_XDIE7, 0, 0},                  # S_POSS_XDIE6
-    {CDoom::Spritenum::SPR_POSS, 18, 5, Pointer(Void).null, CDoom::Statenum::S_POSS_XDIE8, 0, 0},                  # S_POSS_XDIE7
-    {CDoom::Spritenum::SPR_POSS, 19, 5, Pointer(Void).null, CDoom::Statenum::S_POSS_XDIE9, 0, 0},                  # S_POSS_XDIE8
-    {CDoom::Spritenum::SPR_POSS, 20, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_POSS_XDIE9
-    {CDoom::Spritenum::SPR_POSS, 10, 5, Pointer(Void).null, CDoom::Statenum::S_POSS_RAISE2, 0, 0},                 # S_POSS_RAISE1
-    {CDoom::Spritenum::SPR_POSS, 9, 5, Pointer(Void).null, CDoom::Statenum::S_POSS_RAISE3, 0, 0},                  # S_POSS_RAISE2
-    {CDoom::Spritenum::SPR_POSS, 8, 5, Pointer(Void).null, CDoom::Statenum::S_POSS_RAISE4, 0, 0},                  # S_POSS_RAISE3
-    {CDoom::Spritenum::SPR_POSS, 7, 5, Pointer(Void).null, CDoom::Statenum::S_POSS_RUN1, 0, 0},                    # S_POSS_RAISE4
-    {CDoom::Spritenum::SPR_SPOS, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_SPOS_STND2, 0, 0},            # S_SPOS_STND
-    {CDoom::Spritenum::SPR_SPOS, 1, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_SPOS_STND, 0, 0},             # S_SPOS_STND2
-    {CDoom::Spritenum::SPR_SPOS, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPOS_RUN2, 0, 0},             # S_SPOS_RUN1
-    {CDoom::Spritenum::SPR_SPOS, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPOS_RUN3, 0, 0},             # S_SPOS_RUN2
-    {CDoom::Spritenum::SPR_SPOS, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPOS_RUN4, 0, 0},             # S_SPOS_RUN3
-    {CDoom::Spritenum::SPR_SPOS, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPOS_RUN5, 0, 0},             # S_SPOS_RUN4
-    {CDoom::Spritenum::SPR_SPOS, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPOS_RUN6, 0, 0},             # S_SPOS_RUN5
-    {CDoom::Spritenum::SPR_SPOS, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPOS_RUN7, 0, 0},             # S_SPOS_RUN6
-    {CDoom::Spritenum::SPR_SPOS, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPOS_RUN8, 0, 0},             # S_SPOS_RUN7
-    {CDoom::Spritenum::SPR_SPOS, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPOS_RUN1, 0, 0},             # S_SPOS_RUN8
-    {CDoom::Spritenum::SPR_SPOS, 4, 10, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_SPOS_ATK2, 0, 0},      # S_SPOS_ATK1
-    {CDoom::Spritenum::SPR_SPOS, 32773, 10, (->CDoom.a_spos_attack).pointer, CDoom::Statenum::S_SPOS_ATK3, 0, 0},  # S_SPOS_ATK2
-    {CDoom::Spritenum::SPR_SPOS, 4, 10, Pointer(Void).null, CDoom::Statenum::S_SPOS_RUN1, 0, 0},                   # S_SPOS_ATK3
-    {CDoom::Spritenum::SPR_SPOS, 6, 3, Pointer(Void).null, CDoom::Statenum::S_SPOS_PAIN2, 0, 0},                   # S_SPOS_PAIN
-    {CDoom::Spritenum::SPR_SPOS, 6, 3, (->CDoom.a_pain).pointer, CDoom::Statenum::S_SPOS_RUN1, 0, 0},              # S_SPOS_PAIN2
-    {CDoom::Spritenum::SPR_SPOS, 7, 5, Pointer(Void).null, CDoom::Statenum::S_SPOS_DIE2, 0, 0},                    # S_SPOS_DIE1
-    {CDoom::Spritenum::SPR_SPOS, 8, 5, (->CDoom.a_scream).pointer, CDoom::Statenum::S_SPOS_DIE3, 0, 0},            # S_SPOS_DIE2
-    {CDoom::Spritenum::SPR_SPOS, 9, 5, (->CDoom.a_fall).pointer, CDoom::Statenum::S_SPOS_DIE4, 0, 0},              # S_SPOS_DIE3
-    {CDoom::Spritenum::SPR_SPOS, 10, 5, Pointer(Void).null, CDoom::Statenum::S_SPOS_DIE5, 0, 0},                   # S_SPOS_DIE4
-    {CDoom::Spritenum::SPR_SPOS, 11, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_SPOS_DIE5
-    {CDoom::Spritenum::SPR_SPOS, 12, 5, Pointer(Void).null, CDoom::Statenum::S_SPOS_XDIE2, 0, 0},                  # S_SPOS_XDIE1
-    {CDoom::Spritenum::SPR_SPOS, 13, 5, (->CDoom.a_xscream).pointer, CDoom::Statenum::S_SPOS_XDIE3, 0, 0},         # S_SPOS_XDIE2
-    {CDoom::Spritenum::SPR_SPOS, 14, 5, (->CDoom.a_fall).pointer, CDoom::Statenum::S_SPOS_XDIE4, 0, 0},            # S_SPOS_XDIE3
-    {CDoom::Spritenum::SPR_SPOS, 15, 5, Pointer(Void).null, CDoom::Statenum::S_SPOS_XDIE5, 0, 0},                  # S_SPOS_XDIE4
-    {CDoom::Spritenum::SPR_SPOS, 16, 5, Pointer(Void).null, CDoom::Statenum::S_SPOS_XDIE6, 0, 0},                  # S_SPOS_XDIE5
-    {CDoom::Spritenum::SPR_SPOS, 17, 5, Pointer(Void).null, CDoom::Statenum::S_SPOS_XDIE7, 0, 0},                  # S_SPOS_XDIE6
-    {CDoom::Spritenum::SPR_SPOS, 18, 5, Pointer(Void).null, CDoom::Statenum::S_SPOS_XDIE8, 0, 0},                  # S_SPOS_XDIE7
-    {CDoom::Spritenum::SPR_SPOS, 19, 5, Pointer(Void).null, CDoom::Statenum::S_SPOS_XDIE9, 0, 0},                  # S_SPOS_XDIE8
-    {CDoom::Spritenum::SPR_SPOS, 20, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_SPOS_XDIE9
-    {CDoom::Spritenum::SPR_SPOS, 11, 5, Pointer(Void).null, CDoom::Statenum::S_SPOS_RAISE2, 0, 0},                 # S_SPOS_RAISE1
-    {CDoom::Spritenum::SPR_SPOS, 10, 5, Pointer(Void).null, CDoom::Statenum::S_SPOS_RAISE3, 0, 0},                 # S_SPOS_RAISE2
-    {CDoom::Spritenum::SPR_SPOS, 9, 5, Pointer(Void).null, CDoom::Statenum::S_SPOS_RAISE4, 0, 0},                  # S_SPOS_RAISE3
-    {CDoom::Spritenum::SPR_SPOS, 8, 5, Pointer(Void).null, CDoom::Statenum::S_SPOS_RAISE5, 0, 0},                  # S_SPOS_RAISE4
-    {CDoom::Spritenum::SPR_SPOS, 7, 5, Pointer(Void).null, CDoom::Statenum::S_SPOS_RUN1, 0, 0},                    # S_SPOS_RAISE5
-    {CDoom::Spritenum::SPR_VILE, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_VILE_STND2, 0, 0},            # S_VILE_STND
-    {CDoom::Spritenum::SPR_VILE, 1, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_VILE_STND, 0, 0},             # S_VILE_STND2
-    {CDoom::Spritenum::SPR_VILE, 0, 2, (->CDoom.a_vile_chase).pointer, CDoom::Statenum::S_VILE_RUN2, 0, 0},        # S_VILE_RUN1
-    {CDoom::Spritenum::SPR_VILE, 0, 2, (->CDoom.a_vile_chase).pointer, CDoom::Statenum::S_VILE_RUN3, 0, 0},        # S_VILE_RUN2
-    {CDoom::Spritenum::SPR_VILE, 1, 2, (->CDoom.a_vile_chase).pointer, CDoom::Statenum::S_VILE_RUN4, 0, 0},        # S_VILE_RUN3
-    {CDoom::Spritenum::SPR_VILE, 1, 2, (->CDoom.a_vile_chase).pointer, CDoom::Statenum::S_VILE_RUN5, 0, 0},        # S_VILE_RUN4
-    {CDoom::Spritenum::SPR_VILE, 2, 2, (->CDoom.a_vile_chase).pointer, CDoom::Statenum::S_VILE_RUN6, 0, 0},        # S_VILE_RUN5
-    {CDoom::Spritenum::SPR_VILE, 2, 2, (->CDoom.a_vile_chase).pointer, CDoom::Statenum::S_VILE_RUN7, 0, 0},        # S_VILE_RUN6
-    {CDoom::Spritenum::SPR_VILE, 3, 2, (->CDoom.a_vile_chase).pointer, CDoom::Statenum::S_VILE_RUN8, 0, 0},        # S_VILE_RUN7
-    {CDoom::Spritenum::SPR_VILE, 3, 2, (->CDoom.a_vile_chase).pointer, CDoom::Statenum::S_VILE_RUN9, 0, 0},        # S_VILE_RUN8
-    {CDoom::Spritenum::SPR_VILE, 4, 2, (->CDoom.a_vile_chase).pointer, CDoom::Statenum::S_VILE_RUN10, 0, 0},       # S_VILE_RUN9
-    {CDoom::Spritenum::SPR_VILE, 4, 2, (->CDoom.a_vile_chase).pointer, CDoom::Statenum::S_VILE_RUN11, 0, 0},       # S_VILE_RUN10
-    {CDoom::Spritenum::SPR_VILE, 5, 2, (->CDoom.a_vile_chase).pointer, CDoom::Statenum::S_VILE_RUN12, 0, 0},       # S_VILE_RUN11
-    {CDoom::Spritenum::SPR_VILE, 5, 2, (->CDoom.a_vile_chase).pointer, CDoom::Statenum::S_VILE_RUN1, 0, 0},        # S_VILE_RUN12
-    {CDoom::Spritenum::SPR_VILE, 32774, 0, (->CDoom.a_vile_start).pointer, CDoom::Statenum::S_VILE_ATK2, 0, 0},    # S_VILE_ATK1
-    {CDoom::Spritenum::SPR_VILE, 32774, 10, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_VILE_ATK3, 0, 0},  # S_VILE_ATK2
-    {CDoom::Spritenum::SPR_VILE, 32775, 8, (->CDoom.a_vile_target).pointer, CDoom::Statenum::S_VILE_ATK4, 0, 0},   # S_VILE_ATK3
-    {CDoom::Spritenum::SPR_VILE, 32776, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_VILE_ATK5, 0, 0},   # S_VILE_ATK4
-    {CDoom::Spritenum::SPR_VILE, 32777, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_VILE_ATK6, 0, 0},   # S_VILE_ATK5
-    {CDoom::Spritenum::SPR_VILE, 32778, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_VILE_ATK7, 0, 0},   # S_VILE_ATK6
-    {CDoom::Spritenum::SPR_VILE, 32779, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_VILE_ATK8, 0, 0},   # S_VILE_ATK7
-    {CDoom::Spritenum::SPR_VILE, 32780, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_VILE_ATK9, 0, 0},   # S_VILE_ATK8
-    {CDoom::Spritenum::SPR_VILE, 32781, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_VILE_ATK10, 0, 0},  # S_VILE_ATK9
-    {CDoom::Spritenum::SPR_VILE, 32782, 8, (->CDoom.a_vile_attack).pointer, CDoom::Statenum::S_VILE_ATK11, 0, 0},  # S_VILE_ATK10
-    {CDoom::Spritenum::SPR_VILE, 32783, 20, Pointer(Void).null, CDoom::Statenum::S_VILE_RUN1, 0, 0},               # S_VILE_ATK11
-    {CDoom::Spritenum::SPR_VILE, 32794, 10, Pointer(Void).null, CDoom::Statenum::S_VILE_HEAL2, 0, 0},              # S_VILE_HEAL1
-    {CDoom::Spritenum::SPR_VILE, 32795, 10, Pointer(Void).null, CDoom::Statenum::S_VILE_HEAL3, 0, 0},              # S_VILE_HEAL2
-    {CDoom::Spritenum::SPR_VILE, 32796, 10, Pointer(Void).null, CDoom::Statenum::S_VILE_RUN1, 0, 0},               # S_VILE_HEAL3
-    {CDoom::Spritenum::SPR_VILE, 16, 5, Pointer(Void).null, CDoom::Statenum::S_VILE_PAIN2, 0, 0},                  # S_VILE_PAIN
-    {CDoom::Spritenum::SPR_VILE, 16, 5, (->CDoom.a_pain).pointer, CDoom::Statenum::S_VILE_RUN1, 0, 0},             # S_VILE_PAIN2
-    {CDoom::Spritenum::SPR_VILE, 16, 7, Pointer(Void).null, CDoom::Statenum::S_VILE_DIE2, 0, 0},                   # S_VILE_DIE1
-    {CDoom::Spritenum::SPR_VILE, 17, 7, (->CDoom.a_scream).pointer, CDoom::Statenum::S_VILE_DIE3, 0, 0},           # S_VILE_DIE2
-    {CDoom::Spritenum::SPR_VILE, 18, 7, (->CDoom.a_fall).pointer, CDoom::Statenum::S_VILE_DIE4, 0, 0},             # S_VILE_DIE3
-    {CDoom::Spritenum::SPR_VILE, 19, 7, Pointer(Void).null, CDoom::Statenum::S_VILE_DIE5, 0, 0},                   # S_VILE_DIE4
-    {CDoom::Spritenum::SPR_VILE, 20, 7, Pointer(Void).null, CDoom::Statenum::S_VILE_DIE6, 0, 0},                   # S_VILE_DIE5
-    {CDoom::Spritenum::SPR_VILE, 21, 7, Pointer(Void).null, CDoom::Statenum::S_VILE_DIE7, 0, 0},                   # S_VILE_DIE6
-    {CDoom::Spritenum::SPR_VILE, 22, 7, Pointer(Void).null, CDoom::Statenum::S_VILE_DIE8, 0, 0},                   # S_VILE_DIE7
-    {CDoom::Spritenum::SPR_VILE, 23, 5, Pointer(Void).null, CDoom::Statenum::S_VILE_DIE9, 0, 0},                   # S_VILE_DIE8
-    {CDoom::Spritenum::SPR_VILE, 24, 5, Pointer(Void).null, CDoom::Statenum::S_VILE_DIE10, 0, 0},                  # S_VILE_DIE9
-    {CDoom::Spritenum::SPR_VILE, 25, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_VILE_DIE10
-    {CDoom::Spritenum::SPR_FIRE, 32768, 2, (->CDoom.a_start_fire).pointer, CDoom::Statenum::S_FIRE2, 0, 0},        # S_FIRE1
-    {CDoom::Spritenum::SPR_FIRE, 32769, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE3, 0, 0},              # S_FIRE2
-    {CDoom::Spritenum::SPR_FIRE, 32768, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE4, 0, 0},              # S_FIRE3
-    {CDoom::Spritenum::SPR_FIRE, 32769, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE5, 0, 0},              # S_FIRE4
-    {CDoom::Spritenum::SPR_FIRE, 32770, 2, (->CDoom.a_fire_crackle).pointer, CDoom::Statenum::S_FIRE6, 0, 0},      # S_FIRE5
-    {CDoom::Spritenum::SPR_FIRE, 32769, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE7, 0, 0},              # S_FIRE6
-    {CDoom::Spritenum::SPR_FIRE, 32770, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE8, 0, 0},              # S_FIRE7
-    {CDoom::Spritenum::SPR_FIRE, 32769, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE9, 0, 0},              # S_FIRE8
-    {CDoom::Spritenum::SPR_FIRE, 32770, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE10, 0, 0},             # S_FIRE9
-    {CDoom::Spritenum::SPR_FIRE, 32771, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE11, 0, 0},             # S_FIRE10
-    {CDoom::Spritenum::SPR_FIRE, 32770, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE12, 0, 0},             # S_FIRE11
-    {CDoom::Spritenum::SPR_FIRE, 32771, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE13, 0, 0},             # S_FIRE12
-    {CDoom::Spritenum::SPR_FIRE, 32770, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE14, 0, 0},             # S_FIRE13
-    {CDoom::Spritenum::SPR_FIRE, 32771, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE15, 0, 0},             # S_FIRE14
-    {CDoom::Spritenum::SPR_FIRE, 32772, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE16, 0, 0},             # S_FIRE15
-    {CDoom::Spritenum::SPR_FIRE, 32771, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE17, 0, 0},             # S_FIRE16
-    {CDoom::Spritenum::SPR_FIRE, 32772, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE18, 0, 0},             # S_FIRE17
-    {CDoom::Spritenum::SPR_FIRE, 32771, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE19, 0, 0},             # S_FIRE18
-    {CDoom::Spritenum::SPR_FIRE, 32772, 2, (->CDoom.a_fire_crackle).pointer, CDoom::Statenum::S_FIRE20, 0, 0},     # S_FIRE19
-    {CDoom::Spritenum::SPR_FIRE, 32773, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE21, 0, 0},             # S_FIRE20
-    {CDoom::Spritenum::SPR_FIRE, 32772, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE22, 0, 0},             # S_FIRE21
-    {CDoom::Spritenum::SPR_FIRE, 32773, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE23, 0, 0},             # S_FIRE22
-    {CDoom::Spritenum::SPR_FIRE, 32772, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE24, 0, 0},             # S_FIRE23
-    {CDoom::Spritenum::SPR_FIRE, 32773, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE25, 0, 0},             # S_FIRE24
-    {CDoom::Spritenum::SPR_FIRE, 32774, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE26, 0, 0},             # S_FIRE25
-    {CDoom::Spritenum::SPR_FIRE, 32775, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE27, 0, 0},             # S_FIRE26
-    {CDoom::Spritenum::SPR_FIRE, 32774, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE28, 0, 0},             # S_FIRE27
-    {CDoom::Spritenum::SPR_FIRE, 32775, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE29, 0, 0},             # S_FIRE28
-    {CDoom::Spritenum::SPR_FIRE, 32774, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_FIRE30, 0, 0},             # S_FIRE29
-    {CDoom::Spritenum::SPR_FIRE, 32775, 2, (->CDoom.a_fire).pointer, CDoom::Statenum::S_NULL, 0, 0},               # S_FIRE30
-    {CDoom::Spritenum::SPR_PUFF, 1, 4, Pointer(Void).null, CDoom::Statenum::S_SMOKE2, 0, 0},                       # S_SMOKE1
-    {CDoom::Spritenum::SPR_PUFF, 2, 4, Pointer(Void).null, CDoom::Statenum::S_SMOKE3, 0, 0},                       # S_SMOKE2
-    {CDoom::Spritenum::SPR_PUFF, 1, 4, Pointer(Void).null, CDoom::Statenum::S_SMOKE4, 0, 0},                       # S_SMOKE3
-    {CDoom::Spritenum::SPR_PUFF, 2, 4, Pointer(Void).null, CDoom::Statenum::S_SMOKE5, 0, 0},                       # S_SMOKE4
-    {CDoom::Spritenum::SPR_PUFF, 3, 4, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                         # S_SMOKE5
-    {CDoom::Spritenum::SPR_FATB, 32768, 2, (->CDoom.a_tracer).pointer, CDoom::Statenum::S_TRACER2, 0, 0},          # S_TRACER
-    {CDoom::Spritenum::SPR_FATB, 32769, 2, (->CDoom.a_tracer).pointer, CDoom::Statenum::S_TRACER, 0, 0},           # S_TRACER2
-    {CDoom::Spritenum::SPR_FBXP, 32768, 8, Pointer(Void).null, CDoom::Statenum::S_TRACEEXP2, 0, 0},                # S_TRACEEXP1
-    {CDoom::Spritenum::SPR_FBXP, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_TRACEEXP3, 0, 0},                # S_TRACEEXP2
-    {CDoom::Spritenum::SPR_FBXP, 32770, 4, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                     # S_TRACEEXP3
-    {CDoom::Spritenum::SPR_SKEL, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_SKEL_STND2, 0, 0},            # S_SKEL_STND
-    {CDoom::Spritenum::SPR_SKEL, 1, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_SKEL_STND, 0, 0},             # S_SKEL_STND2
-    {CDoom::Spritenum::SPR_SKEL, 0, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKEL_RUN2, 0, 0},             # S_SKEL_RUN1
-    {CDoom::Spritenum::SPR_SKEL, 0, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKEL_RUN3, 0, 0},             # S_SKEL_RUN2
-    {CDoom::Spritenum::SPR_SKEL, 1, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKEL_RUN4, 0, 0},             # S_SKEL_RUN3
-    {CDoom::Spritenum::SPR_SKEL, 1, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKEL_RUN5, 0, 0},             # S_SKEL_RUN4
-    {CDoom::Spritenum::SPR_SKEL, 2, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKEL_RUN6, 0, 0},             # S_SKEL_RUN5
-    {CDoom::Spritenum::SPR_SKEL, 2, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKEL_RUN7, 0, 0},             # S_SKEL_RUN6
-    {CDoom::Spritenum::SPR_SKEL, 3, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKEL_RUN8, 0, 0},             # S_SKEL_RUN7
-    {CDoom::Spritenum::SPR_SKEL, 3, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKEL_RUN9, 0, 0},             # S_SKEL_RUN8
-    {CDoom::Spritenum::SPR_SKEL, 4, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKEL_RUN10, 0, 0},            # S_SKEL_RUN9
-    {CDoom::Spritenum::SPR_SKEL, 4, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKEL_RUN11, 0, 0},            # S_SKEL_RUN10
-    {CDoom::Spritenum::SPR_SKEL, 5, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKEL_RUN12, 0, 0},            # S_SKEL_RUN11
-    {CDoom::Spritenum::SPR_SKEL, 5, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKEL_RUN1, 0, 0},             # S_SKEL_RUN12
-    {CDoom::Spritenum::SPR_SKEL, 6, 0, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_SKEL_FIST2, 0, 0},      # S_SKEL_FIST1
-    {CDoom::Spritenum::SPR_SKEL, 6, 6, (->CDoom.a_skel_whoosh).pointer, CDoom::Statenum::S_SKEL_FIST3, 0, 0},      # S_SKEL_FIST2
-    {CDoom::Spritenum::SPR_SKEL, 7, 6, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_SKEL_FIST4, 0, 0},      # S_SKEL_FIST3
-    {CDoom::Spritenum::SPR_SKEL, 8, 6, (->CDoom.a_skel_fist).pointer, CDoom::Statenum::S_SKEL_RUN1, 0, 0},         # S_SKEL_FIST4
-    {CDoom::Spritenum::SPR_SKEL, 32777, 0, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_SKEL_MISS2, 0, 0},  # S_SKEL_MISS1
-    {CDoom::Spritenum::SPR_SKEL, 32777, 10, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_SKEL_MISS3, 0, 0}, # S_SKEL_MISS2
-    {CDoom::Spritenum::SPR_SKEL, 10, 10, (->CDoom.a_skel_missile).pointer, CDoom::Statenum::S_SKEL_MISS4, 0, 0},   # S_SKEL_MISS3
-    {CDoom::Spritenum::SPR_SKEL, 10, 10, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_SKEL_RUN1, 0, 0},     # S_SKEL_MISS4
-    {CDoom::Spritenum::SPR_SKEL, 11, 5, Pointer(Void).null, CDoom::Statenum::S_SKEL_PAIN2, 0, 0},                  # S_SKEL_PAIN
-    {CDoom::Spritenum::SPR_SKEL, 11, 5, (->CDoom.a_pain).pointer, CDoom::Statenum::S_SKEL_RUN1, 0, 0},             # S_SKEL_PAIN2
-    {CDoom::Spritenum::SPR_SKEL, 11, 7, Pointer(Void).null, CDoom::Statenum::S_SKEL_DIE2, 0, 0},                   # S_SKEL_DIE1
-    {CDoom::Spritenum::SPR_SKEL, 12, 7, Pointer(Void).null, CDoom::Statenum::S_SKEL_DIE3, 0, 0},                   # S_SKEL_DIE2
-    {CDoom::Spritenum::SPR_SKEL, 13, 7, (->CDoom.a_scream).pointer, CDoom::Statenum::S_SKEL_DIE4, 0, 0},           # S_SKEL_DIE3
-    {CDoom::Spritenum::SPR_SKEL, 14, 7, (->CDoom.a_fall).pointer, CDoom::Statenum::S_SKEL_DIE5, 0, 0},             # S_SKEL_DIE4
-    {CDoom::Spritenum::SPR_SKEL, 15, 7, Pointer(Void).null, CDoom::Statenum::S_SKEL_DIE6, 0, 0},                   # S_SKEL_DIE5
-    {CDoom::Spritenum::SPR_SKEL, 16, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_SKEL_DIE6
-    {CDoom::Spritenum::SPR_SKEL, 16, 5, Pointer(Void).null, CDoom::Statenum::S_SKEL_RAISE2, 0, 0},                 # S_SKEL_RAISE1
-    {CDoom::Spritenum::SPR_SKEL, 15, 5, Pointer(Void).null, CDoom::Statenum::S_SKEL_RAISE3, 0, 0},                 # S_SKEL_RAISE2
-    {CDoom::Spritenum::SPR_SKEL, 14, 5, Pointer(Void).null, CDoom::Statenum::S_SKEL_RAISE4, 0, 0},                 # S_SKEL_RAISE3
-    {CDoom::Spritenum::SPR_SKEL, 13, 5, Pointer(Void).null, CDoom::Statenum::S_SKEL_RAISE5, 0, 0},                 # S_SKEL_RAISE4
-    {CDoom::Spritenum::SPR_SKEL, 12, 5, Pointer(Void).null, CDoom::Statenum::S_SKEL_RAISE6, 0, 0},                 # S_SKEL_RAISE5
-    {CDoom::Spritenum::SPR_SKEL, 11, 5, Pointer(Void).null, CDoom::Statenum::S_SKEL_RUN1, 0, 0},                   # S_SKEL_RAISE6
-    {CDoom::Spritenum::SPR_MANF, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_FATSHOT2, 0, 0},                 # S_FATSHOT1
-    {CDoom::Spritenum::SPR_MANF, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_FATSHOT1, 0, 0},                 # S_FATSHOT2
-    {CDoom::Spritenum::SPR_MISL, 32769, 8, Pointer(Void).null, CDoom::Statenum::S_FATSHOTX2, 0, 0},                # S_FATSHOTX1
-    {CDoom::Spritenum::SPR_MISL, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_FATSHOTX3, 0, 0},                # S_FATSHOTX2
-    {CDoom::Spritenum::SPR_MISL, 32771, 4, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                     # S_FATSHOTX3
-    {CDoom::Spritenum::SPR_FATT, 0, 15, (->CDoom.a_look).pointer, CDoom::Statenum::S_FATT_STND2, 0, 0},            # S_FATT_STND
-    {CDoom::Spritenum::SPR_FATT, 1, 15, (->CDoom.a_look).pointer, CDoom::Statenum::S_FATT_STND, 0, 0},             # S_FATT_STND2
-    {CDoom::Spritenum::SPR_FATT, 0, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_FATT_RUN2, 0, 0},             # S_FATT_RUN1
-    {CDoom::Spritenum::SPR_FATT, 0, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_FATT_RUN3, 0, 0},             # S_FATT_RUN2
-    {CDoom::Spritenum::SPR_FATT, 1, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_FATT_RUN4, 0, 0},             # S_FATT_RUN3
-    {CDoom::Spritenum::SPR_FATT, 1, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_FATT_RUN5, 0, 0},             # S_FATT_RUN4
-    {CDoom::Spritenum::SPR_FATT, 2, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_FATT_RUN6, 0, 0},             # S_FATT_RUN5
-    {CDoom::Spritenum::SPR_FATT, 2, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_FATT_RUN7, 0, 0},             # S_FATT_RUN6
-    {CDoom::Spritenum::SPR_FATT, 3, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_FATT_RUN8, 0, 0},             # S_FATT_RUN7
-    {CDoom::Spritenum::SPR_FATT, 3, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_FATT_RUN9, 0, 0},             # S_FATT_RUN8
-    {CDoom::Spritenum::SPR_FATT, 4, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_FATT_RUN10, 0, 0},            # S_FATT_RUN9
-    {CDoom::Spritenum::SPR_FATT, 4, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_FATT_RUN11, 0, 0},            # S_FATT_RUN10
-    {CDoom::Spritenum::SPR_FATT, 5, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_FATT_RUN12, 0, 0},            # S_FATT_RUN11
-    {CDoom::Spritenum::SPR_FATT, 5, 4, (->CDoom.a_chase).pointer, CDoom::Statenum::S_FATT_RUN1, 0, 0},             # S_FATT_RUN12
-    {CDoom::Spritenum::SPR_FATT, 6, 20, (->CDoom.a_fat_raise).pointer, CDoom::Statenum::S_FATT_ATK2, 0, 0},        # S_FATT_ATK1
-    {CDoom::Spritenum::SPR_FATT, 32775, 10, (->CDoom.a_fat_attack1).pointer, CDoom::Statenum::S_FATT_ATK3, 0, 0},  # S_FATT_ATK2
-    {CDoom::Spritenum::SPR_FATT, 8, 5, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_FATT_ATK4, 0, 0},       # S_FATT_ATK3
-    {CDoom::Spritenum::SPR_FATT, 6, 5, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_FATT_ATK5, 0, 0},       # S_FATT_ATK4
-    {CDoom::Spritenum::SPR_FATT, 32775, 10, (->CDoom.a_fat_attack2).pointer, CDoom::Statenum::S_FATT_ATK6, 0, 0},  # S_FATT_ATK5
-    {CDoom::Spritenum::SPR_FATT, 8, 5, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_FATT_ATK7, 0, 0},       # S_FATT_ATK6
-    {CDoom::Spritenum::SPR_FATT, 6, 5, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_FATT_ATK8, 0, 0},       # S_FATT_ATK7
-    {CDoom::Spritenum::SPR_FATT, 32775, 10, (->CDoom.a_fat_attack3).pointer, CDoom::Statenum::S_FATT_ATK9, 0, 0},  # S_FATT_ATK8
-    {CDoom::Spritenum::SPR_FATT, 8, 5, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_FATT_ATK10, 0, 0},      # S_FATT_ATK9
-    {CDoom::Spritenum::SPR_FATT, 6, 5, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_FATT_RUN1, 0, 0},       # S_FATT_ATK10
-    {CDoom::Spritenum::SPR_FATT, 9, 3, Pointer(Void).null, CDoom::Statenum::S_FATT_PAIN2, 0, 0},                   # S_FATT_PAIN
-    {CDoom::Spritenum::SPR_FATT, 9, 3, (->CDoom.a_pain).pointer, CDoom::Statenum::S_FATT_RUN1, 0, 0},              # S_FATT_PAIN2
-    {CDoom::Spritenum::SPR_FATT, 10, 6, Pointer(Void).null, CDoom::Statenum::S_FATT_DIE2, 0, 0},                   # S_FATT_DIE1
-    {CDoom::Spritenum::SPR_FATT, 11, 6, (->CDoom.a_scream).pointer, CDoom::Statenum::S_FATT_DIE3, 0, 0},           # S_FATT_DIE2
-    {CDoom::Spritenum::SPR_FATT, 12, 6, (->CDoom.a_fall).pointer, CDoom::Statenum::S_FATT_DIE4, 0, 0},             # S_FATT_DIE3
-    {CDoom::Spritenum::SPR_FATT, 13, 6, Pointer(Void).null, CDoom::Statenum::S_FATT_DIE5, 0, 0},                   # S_FATT_DIE4
-    {CDoom::Spritenum::SPR_FATT, 14, 6, Pointer(Void).null, CDoom::Statenum::S_FATT_DIE6, 0, 0},                   # S_FATT_DIE5
-    {CDoom::Spritenum::SPR_FATT, 15, 6, Pointer(Void).null, CDoom::Statenum::S_FATT_DIE7, 0, 0},                   # S_FATT_DIE6
-    {CDoom::Spritenum::SPR_FATT, 16, 6, Pointer(Void).null, CDoom::Statenum::S_FATT_DIE8, 0, 0},                   # S_FATT_DIE7
-    {CDoom::Spritenum::SPR_FATT, 17, 6, Pointer(Void).null, CDoom::Statenum::S_FATT_DIE9, 0, 0},                   # S_FATT_DIE8
-    {CDoom::Spritenum::SPR_FATT, 18, 6, Pointer(Void).null, CDoom::Statenum::S_FATT_DIE10, 0, 0},                  # S_FATT_DIE9
-    {CDoom::Spritenum::SPR_FATT, 19, -1, (->CDoom.a_boss_death).pointer, CDoom::Statenum::S_NULL, 0, 0},           # S_FATT_DIE10
-    {CDoom::Spritenum::SPR_FATT, 17, 5, Pointer(Void).null, CDoom::Statenum::S_FATT_RAISE2, 0, 0},                 # S_FATT_RAISE1
-    {CDoom::Spritenum::SPR_FATT, 16, 5, Pointer(Void).null, CDoom::Statenum::S_FATT_RAISE3, 0, 0},                 # S_FATT_RAISE2
-    {CDoom::Spritenum::SPR_FATT, 15, 5, Pointer(Void).null, CDoom::Statenum::S_FATT_RAISE4, 0, 0},                 # S_FATT_RAISE3
-    {CDoom::Spritenum::SPR_FATT, 14, 5, Pointer(Void).null, CDoom::Statenum::S_FATT_RAISE5, 0, 0},                 # S_FATT_RAISE4
-    {CDoom::Spritenum::SPR_FATT, 13, 5, Pointer(Void).null, CDoom::Statenum::S_FATT_RAISE6, 0, 0},                 # S_FATT_RAISE5
-    {CDoom::Spritenum::SPR_FATT, 12, 5, Pointer(Void).null, CDoom::Statenum::S_FATT_RAISE7, 0, 0},                 # S_FATT_RAISE6
-    {CDoom::Spritenum::SPR_FATT, 11, 5, Pointer(Void).null, CDoom::Statenum::S_FATT_RAISE8, 0, 0},                 # S_FATT_RAISE7
-    {CDoom::Spritenum::SPR_FATT, 10, 5, Pointer(Void).null, CDoom::Statenum::S_FATT_RUN1, 0, 0},                   # S_FATT_RAISE8
-    {CDoom::Spritenum::SPR_CPOS, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_CPOS_STND2, 0, 0},            # S_CPOS_STND
-    {CDoom::Spritenum::SPR_CPOS, 1, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_CPOS_STND, 0, 0},             # S_CPOS_STND2
-    {CDoom::Spritenum::SPR_CPOS, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CPOS_RUN2, 0, 0},             # S_CPOS_RUN1
-    {CDoom::Spritenum::SPR_CPOS, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CPOS_RUN3, 0, 0},             # S_CPOS_RUN2
-    {CDoom::Spritenum::SPR_CPOS, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CPOS_RUN4, 0, 0},             # S_CPOS_RUN3
-    {CDoom::Spritenum::SPR_CPOS, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CPOS_RUN5, 0, 0},             # S_CPOS_RUN4
-    {CDoom::Spritenum::SPR_CPOS, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CPOS_RUN6, 0, 0},             # S_CPOS_RUN5
-    {CDoom::Spritenum::SPR_CPOS, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CPOS_RUN7, 0, 0},             # S_CPOS_RUN6
-    {CDoom::Spritenum::SPR_CPOS, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CPOS_RUN8, 0, 0},             # S_CPOS_RUN7
-    {CDoom::Spritenum::SPR_CPOS, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CPOS_RUN1, 0, 0},             # S_CPOS_RUN8
-    {CDoom::Spritenum::SPR_CPOS, 4, 10, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_CPOS_ATK2, 0, 0},      # S_CPOS_ATK1
-    {CDoom::Spritenum::SPR_CPOS, 32773, 4, (->CDoom.a_cpos_attack).pointer, CDoom::Statenum::S_CPOS_ATK3, 0, 0},   # S_CPOS_ATK2
-    {CDoom::Spritenum::SPR_CPOS, 32772, 4, (->CDoom.a_cpos_attack).pointer, CDoom::Statenum::S_CPOS_ATK4, 0, 0},   # S_CPOS_ATK3
-    {CDoom::Spritenum::SPR_CPOS, 5, 1, (->CDoom.a_cpos_refire).pointer, CDoom::Statenum::S_CPOS_ATK2, 0, 0},       # S_CPOS_ATK4
-    {CDoom::Spritenum::SPR_CPOS, 6, 3, Pointer(Void).null, CDoom::Statenum::S_CPOS_PAIN2, 0, 0},                   # S_CPOS_PAIN
-    {CDoom::Spritenum::SPR_CPOS, 6, 3, (->CDoom.a_pain).pointer, CDoom::Statenum::S_CPOS_RUN1, 0, 0},              # S_CPOS_PAIN2
-    {CDoom::Spritenum::SPR_CPOS, 7, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_DIE2, 0, 0},                    # S_CPOS_DIE1
-    {CDoom::Spritenum::SPR_CPOS, 8, 5, (->CDoom.a_scream).pointer, CDoom::Statenum::S_CPOS_DIE3, 0, 0},            # S_CPOS_DIE2
-    {CDoom::Spritenum::SPR_CPOS, 9, 5, (->CDoom.a_fall).pointer, CDoom::Statenum::S_CPOS_DIE4, 0, 0},              # S_CPOS_DIE3
-    {CDoom::Spritenum::SPR_CPOS, 10, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_DIE5, 0, 0},                   # S_CPOS_DIE4
-    {CDoom::Spritenum::SPR_CPOS, 11, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_DIE6, 0, 0},                   # S_CPOS_DIE5
-    {CDoom::Spritenum::SPR_CPOS, 12, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_DIE7, 0, 0},                   # S_CPOS_DIE6
-    {CDoom::Spritenum::SPR_CPOS, 13, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_CPOS_DIE7
-    {CDoom::Spritenum::SPR_CPOS, 14, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_XDIE2, 0, 0},                  # S_CPOS_XDIE1
-    {CDoom::Spritenum::SPR_CPOS, 15, 5, (->CDoom.a_xscream).pointer, CDoom::Statenum::S_CPOS_XDIE3, 0, 0},         # S_CPOS_XDIE2
-    {CDoom::Spritenum::SPR_CPOS, 16, 5, (->CDoom.a_fall).pointer, CDoom::Statenum::S_CPOS_XDIE4, 0, 0},            # S_CPOS_XDIE3
-    {CDoom::Spritenum::SPR_CPOS, 17, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_XDIE5, 0, 0},                  # S_CPOS_XDIE4
-    {CDoom::Spritenum::SPR_CPOS, 18, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_XDIE6, 0, 0},                  # S_CPOS_XDIE5
-    {CDoom::Spritenum::SPR_CPOS, 19, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_CPOS_XDIE6
-    {CDoom::Spritenum::SPR_CPOS, 13, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_RAISE2, 0, 0},                 # S_CPOS_RAISE1
-    {CDoom::Spritenum::SPR_CPOS, 12, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_RAISE3, 0, 0},                 # S_CPOS_RAISE2
-    {CDoom::Spritenum::SPR_CPOS, 11, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_RAISE4, 0, 0},                 # S_CPOS_RAISE3
-    {CDoom::Spritenum::SPR_CPOS, 10, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_RAISE5, 0, 0},                 # S_CPOS_RAISE4
-    {CDoom::Spritenum::SPR_CPOS, 9, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_RAISE6, 0, 0},                  # S_CPOS_RAISE5
-    {CDoom::Spritenum::SPR_CPOS, 8, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_RAISE7, 0, 0},                  # S_CPOS_RAISE6
-    {CDoom::Spritenum::SPR_CPOS, 7, 5, Pointer(Void).null, CDoom::Statenum::S_CPOS_RUN1, 0, 0},                    # S_CPOS_RAISE7
-    {CDoom::Spritenum::SPR_TROO, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_TROO_STND2, 0, 0},            # S_TROO_STND
-    {CDoom::Spritenum::SPR_TROO, 1, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_TROO_STND, 0, 0},             # S_TROO_STND2
-    {CDoom::Spritenum::SPR_TROO, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_TROO_RUN2, 0, 0},             # S_TROO_RUN1
-    {CDoom::Spritenum::SPR_TROO, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_TROO_RUN3, 0, 0},             # S_TROO_RUN2
-    {CDoom::Spritenum::SPR_TROO, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_TROO_RUN4, 0, 0},             # S_TROO_RUN3
-    {CDoom::Spritenum::SPR_TROO, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_TROO_RUN5, 0, 0},             # S_TROO_RUN4
-    {CDoom::Spritenum::SPR_TROO, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_TROO_RUN6, 0, 0},             # S_TROO_RUN5
-    {CDoom::Spritenum::SPR_TROO, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_TROO_RUN7, 0, 0},             # S_TROO_RUN6
-    {CDoom::Spritenum::SPR_TROO, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_TROO_RUN8, 0, 0},             # S_TROO_RUN7
-    {CDoom::Spritenum::SPR_TROO, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_TROO_RUN1, 0, 0},             # S_TROO_RUN8
-    {CDoom::Spritenum::SPR_TROO, 4, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_TROO_ATK2, 0, 0},       # S_TROO_ATK1
-    {CDoom::Spritenum::SPR_TROO, 5, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_TROO_ATK3, 0, 0},       # S_TROO_ATK2
-    {CDoom::Spritenum::SPR_TROO, 6, 6, (->CDoom.a_troop_attack).pointer, CDoom::Statenum::S_TROO_RUN1, 0, 0},      # S_TROO_ATK3
-    {CDoom::Spritenum::SPR_TROO, 7, 2, Pointer(Void).null, CDoom::Statenum::S_TROO_PAIN2, 0, 0},                   # S_TROO_PAIN
-    {CDoom::Spritenum::SPR_TROO, 7, 2, (->CDoom.a_pain).pointer, CDoom::Statenum::S_TROO_RUN1, 0, 0},              # S_TROO_PAIN2
-    {CDoom::Spritenum::SPR_TROO, 8, 8, Pointer(Void).null, CDoom::Statenum::S_TROO_DIE2, 0, 0},                    # S_TROO_DIE1
-    {CDoom::Spritenum::SPR_TROO, 9, 8, (->CDoom.a_scream).pointer, CDoom::Statenum::S_TROO_DIE3, 0, 0},            # S_TROO_DIE2
-    {CDoom::Spritenum::SPR_TROO, 10, 6, Pointer(Void).null, CDoom::Statenum::S_TROO_DIE4, 0, 0},                   # S_TROO_DIE3
-    {CDoom::Spritenum::SPR_TROO, 11, 6, (->CDoom.a_fall).pointer, CDoom::Statenum::S_TROO_DIE5, 0, 0},             # S_TROO_DIE4
-    {CDoom::Spritenum::SPR_TROO, 12, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_TROO_DIE5
-    {CDoom::Spritenum::SPR_TROO, 13, 5, Pointer(Void).null, CDoom::Statenum::S_TROO_XDIE2, 0, 0},                  # S_TROO_XDIE1
-    {CDoom::Spritenum::SPR_TROO, 14, 5, (->CDoom.a_xscream).pointer, CDoom::Statenum::S_TROO_XDIE3, 0, 0},         # S_TROO_XDIE2
-    {CDoom::Spritenum::SPR_TROO, 15, 5, Pointer(Void).null, CDoom::Statenum::S_TROO_XDIE4, 0, 0},                  # S_TROO_XDIE3
-    {CDoom::Spritenum::SPR_TROO, 16, 5, (->CDoom.a_fall).pointer, CDoom::Statenum::S_TROO_XDIE5, 0, 0},            # S_TROO_XDIE4
-    {CDoom::Spritenum::SPR_TROO, 17, 5, Pointer(Void).null, CDoom::Statenum::S_TROO_XDIE6, 0, 0},                  # S_TROO_XDIE5
-    {CDoom::Spritenum::SPR_TROO, 18, 5, Pointer(Void).null, CDoom::Statenum::S_TROO_XDIE7, 0, 0},                  # S_TROO_XDIE6
-    {CDoom::Spritenum::SPR_TROO, 19, 5, Pointer(Void).null, CDoom::Statenum::S_TROO_XDIE8, 0, 0},                  # S_TROO_XDIE7
-    {CDoom::Spritenum::SPR_TROO, 20, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_TROO_XDIE8
-    {CDoom::Spritenum::SPR_TROO, 12, 8, Pointer(Void).null, CDoom::Statenum::S_TROO_RAISE2, 0, 0},                 # S_TROO_RAISE1
-    {CDoom::Spritenum::SPR_TROO, 11, 8, Pointer(Void).null, CDoom::Statenum::S_TROO_RAISE3, 0, 0},                 # S_TROO_RAISE2
-    {CDoom::Spritenum::SPR_TROO, 10, 6, Pointer(Void).null, CDoom::Statenum::S_TROO_RAISE4, 0, 0},                 # S_TROO_RAISE3
-    {CDoom::Spritenum::SPR_TROO, 9, 6, Pointer(Void).null, CDoom::Statenum::S_TROO_RAISE5, 0, 0},                  # S_TROO_RAISE4
-    {CDoom::Spritenum::SPR_TROO, 8, 6, Pointer(Void).null, CDoom::Statenum::S_TROO_RUN1, 0, 0},                    # S_TROO_RAISE5
-    {CDoom::Spritenum::SPR_SARG, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_SARG_STND2, 0, 0},            # S_SARG_STND
-    {CDoom::Spritenum::SPR_SARG, 1, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_SARG_STND, 0, 0},             # S_SARG_STND2
-    {CDoom::Spritenum::SPR_SARG, 0, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SARG_RUN2, 0, 0},             # S_SARG_RUN1
-    {CDoom::Spritenum::SPR_SARG, 0, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SARG_RUN3, 0, 0},             # S_SARG_RUN2
-    {CDoom::Spritenum::SPR_SARG, 1, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SARG_RUN4, 0, 0},             # S_SARG_RUN3
-    {CDoom::Spritenum::SPR_SARG, 1, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SARG_RUN5, 0, 0},             # S_SARG_RUN4
-    {CDoom::Spritenum::SPR_SARG, 2, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SARG_RUN6, 0, 0},             # S_SARG_RUN5
-    {CDoom::Spritenum::SPR_SARG, 2, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SARG_RUN7, 0, 0},             # S_SARG_RUN6
-    {CDoom::Spritenum::SPR_SARG, 3, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SARG_RUN8, 0, 0},             # S_SARG_RUN7
-    {CDoom::Spritenum::SPR_SARG, 3, 2, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SARG_RUN1, 0, 0},             # S_SARG_RUN8
-    {CDoom::Spritenum::SPR_SARG, 4, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_SARG_ATK2, 0, 0},       # S_SARG_ATK1
-    {CDoom::Spritenum::SPR_SARG, 5, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_SARG_ATK3, 0, 0},       # S_SARG_ATK2
-    {CDoom::Spritenum::SPR_SARG, 6, 8, (->CDoom.a_sarg_attack).pointer, CDoom::Statenum::S_SARG_RUN1, 0, 0},       # S_SARG_ATK3
-    {CDoom::Spritenum::SPR_SARG, 7, 2, Pointer(Void).null, CDoom::Statenum::S_SARG_PAIN2, 0, 0},                   # S_SARG_PAIN
-    {CDoom::Spritenum::SPR_SARG, 7, 2, (->CDoom.a_pain).pointer, CDoom::Statenum::S_SARG_RUN1, 0, 0},              # S_SARG_PAIN2
-    {CDoom::Spritenum::SPR_SARG, 8, 8, Pointer(Void).null, CDoom::Statenum::S_SARG_DIE2, 0, 0},                    # S_SARG_DIE1
-    {CDoom::Spritenum::SPR_SARG, 9, 8, (->CDoom.a_scream).pointer, CDoom::Statenum::S_SARG_DIE3, 0, 0},            # S_SARG_DIE2
-    {CDoom::Spritenum::SPR_SARG, 10, 4, Pointer(Void).null, CDoom::Statenum::S_SARG_DIE4, 0, 0},                   # S_SARG_DIE3
-    {CDoom::Spritenum::SPR_SARG, 11, 4, (->CDoom.a_fall).pointer, CDoom::Statenum::S_SARG_DIE5, 0, 0},             # S_SARG_DIE4
-    {CDoom::Spritenum::SPR_SARG, 12, 4, Pointer(Void).null, CDoom::Statenum::S_SARG_DIE6, 0, 0},                   # S_SARG_DIE5
-    {CDoom::Spritenum::SPR_SARG, 13, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_SARG_DIE6
-    {CDoom::Spritenum::SPR_SARG, 13, 5, Pointer(Void).null, CDoom::Statenum::S_SARG_RAISE2, 0, 0},                 # S_SARG_RAISE1
-    {CDoom::Spritenum::SPR_SARG, 12, 5, Pointer(Void).null, CDoom::Statenum::S_SARG_RAISE3, 0, 0},                 # S_SARG_RAISE2
-    {CDoom::Spritenum::SPR_SARG, 11, 5, Pointer(Void).null, CDoom::Statenum::S_SARG_RAISE4, 0, 0},                 # S_SARG_RAISE3
-    {CDoom::Spritenum::SPR_SARG, 10, 5, Pointer(Void).null, CDoom::Statenum::S_SARG_RAISE5, 0, 0},                 # S_SARG_RAISE4
-    {CDoom::Spritenum::SPR_SARG, 9, 5, Pointer(Void).null, CDoom::Statenum::S_SARG_RAISE6, 0, 0},                  # S_SARG_RAISE5
-    {CDoom::Spritenum::SPR_SARG, 8, 5, Pointer(Void).null, CDoom::Statenum::S_SARG_RUN1, 0, 0},                    # S_SARG_RAISE6
-    {CDoom::Spritenum::SPR_HEAD, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_HEAD_STND, 0, 0},             # S_HEAD_STND
-    {CDoom::Spritenum::SPR_HEAD, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_HEAD_RUN1, 0, 0},             # S_HEAD_RUN1
-    {CDoom::Spritenum::SPR_HEAD, 1, 5, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_HEAD_ATK2, 0, 0},       # S_HEAD_ATK1
-    {CDoom::Spritenum::SPR_HEAD, 2, 5, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_HEAD_ATK3, 0, 0},       # S_HEAD_ATK2
-    {CDoom::Spritenum::SPR_HEAD, 32771, 5, (->CDoom.a_head_attack).pointer, CDoom::Statenum::S_HEAD_RUN1, 0, 0},   # S_HEAD_ATK3
-    {CDoom::Spritenum::SPR_HEAD, 4, 3, Pointer(Void).null, CDoom::Statenum::S_HEAD_PAIN2, 0, 0},                   # S_HEAD_PAIN
-    {CDoom::Spritenum::SPR_HEAD, 4, 3, (->CDoom.a_pain).pointer, CDoom::Statenum::S_HEAD_PAIN3, 0, 0},             # S_HEAD_PAIN2
-    {CDoom::Spritenum::SPR_HEAD, 5, 6, Pointer(Void).null, CDoom::Statenum::S_HEAD_RUN1, 0, 0},                    # S_HEAD_PAIN3
-    {CDoom::Spritenum::SPR_HEAD, 6, 8, Pointer(Void).null, CDoom::Statenum::S_HEAD_DIE2, 0, 0},                    # S_HEAD_DIE1
-    {CDoom::Spritenum::SPR_HEAD, 7, 8, (->CDoom.a_scream).pointer, CDoom::Statenum::S_HEAD_DIE3, 0, 0},            # S_HEAD_DIE2
-    {CDoom::Spritenum::SPR_HEAD, 8, 8, Pointer(Void).null, CDoom::Statenum::S_HEAD_DIE4, 0, 0},                    # S_HEAD_DIE3
-    {CDoom::Spritenum::SPR_HEAD, 9, 8, Pointer(Void).null, CDoom::Statenum::S_HEAD_DIE5, 0, 0},                    # S_HEAD_DIE4
-    {CDoom::Spritenum::SPR_HEAD, 10, 8, (->CDoom.a_fall).pointer, CDoom::Statenum::S_HEAD_DIE6, 0, 0},             # S_HEAD_DIE5
-    {CDoom::Spritenum::SPR_HEAD, 11, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_HEAD_DIE6
-    {CDoom::Spritenum::SPR_HEAD, 11, 8, Pointer(Void).null, CDoom::Statenum::S_HEAD_RAISE2, 0, 0},                 # S_HEAD_RAISE1
-    {CDoom::Spritenum::SPR_HEAD, 10, 8, Pointer(Void).null, CDoom::Statenum::S_HEAD_RAISE3, 0, 0},                 # S_HEAD_RAISE2
-    {CDoom::Spritenum::SPR_HEAD, 9, 8, Pointer(Void).null, CDoom::Statenum::S_HEAD_RAISE4, 0, 0},                  # S_HEAD_RAISE3
-    {CDoom::Spritenum::SPR_HEAD, 8, 8, Pointer(Void).null, CDoom::Statenum::S_HEAD_RAISE5, 0, 0},                  # S_HEAD_RAISE4
-    {CDoom::Spritenum::SPR_HEAD, 7, 8, Pointer(Void).null, CDoom::Statenum::S_HEAD_RAISE6, 0, 0},                  # S_HEAD_RAISE5
-    {CDoom::Spritenum::SPR_HEAD, 6, 8, Pointer(Void).null, CDoom::Statenum::S_HEAD_RUN1, 0, 0},                    # S_HEAD_RAISE6
-    {CDoom::Spritenum::SPR_BAL7, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_BRBALL2, 0, 0},                  # S_BRBALL1
-    {CDoom::Spritenum::SPR_BAL7, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_BRBALL1, 0, 0},                  # S_BRBALL2
-    {CDoom::Spritenum::SPR_BAL7, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_BRBALLX2, 0, 0},                 # S_BRBALLX1
-    {CDoom::Spritenum::SPR_BAL7, 32771, 6, Pointer(Void).null, CDoom::Statenum::S_BRBALLX3, 0, 0},                 # S_BRBALLX2
-    {CDoom::Spritenum::SPR_BAL7, 32772, 6, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                     # S_BRBALLX3
-    {CDoom::Spritenum::SPR_BOSS, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_BOSS_STND2, 0, 0},            # S_BOSS_STND
-    {CDoom::Spritenum::SPR_BOSS, 1, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_BOSS_STND, 0, 0},             # S_BOSS_STND2
-    {CDoom::Spritenum::SPR_BOSS, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOSS_RUN2, 0, 0},             # S_BOSS_RUN1
-    {CDoom::Spritenum::SPR_BOSS, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOSS_RUN3, 0, 0},             # S_BOSS_RUN2
-    {CDoom::Spritenum::SPR_BOSS, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOSS_RUN4, 0, 0},             # S_BOSS_RUN3
-    {CDoom::Spritenum::SPR_BOSS, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOSS_RUN5, 0, 0},             # S_BOSS_RUN4
-    {CDoom::Spritenum::SPR_BOSS, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOSS_RUN6, 0, 0},             # S_BOSS_RUN5
-    {CDoom::Spritenum::SPR_BOSS, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOSS_RUN7, 0, 0},             # S_BOSS_RUN6
-    {CDoom::Spritenum::SPR_BOSS, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOSS_RUN8, 0, 0},             # S_BOSS_RUN7
-    {CDoom::Spritenum::SPR_BOSS, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOSS_RUN1, 0, 0},             # S_BOSS_RUN8
-    {CDoom::Spritenum::SPR_BOSS, 4, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_BOSS_ATK2, 0, 0},       # S_BOSS_ATK1
-    {CDoom::Spritenum::SPR_BOSS, 5, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_BOSS_ATK3, 0, 0},       # S_BOSS_ATK2
-    {CDoom::Spritenum::SPR_BOSS, 6, 8, (->CDoom.a_bruis_attack).pointer, CDoom::Statenum::S_BOSS_RUN1, 0, 0},      # S_BOSS_ATK3
-    {CDoom::Spritenum::SPR_BOSS, 7, 2, Pointer(Void).null, CDoom::Statenum::S_BOSS_PAIN2, 0, 0},                   # S_BOSS_PAIN
-    {CDoom::Spritenum::SPR_BOSS, 7, 2, (->CDoom.a_pain).pointer, CDoom::Statenum::S_BOSS_RUN1, 0, 0},              # S_BOSS_PAIN2
-    {CDoom::Spritenum::SPR_BOSS, 8, 8, Pointer(Void).null, CDoom::Statenum::S_BOSS_DIE2, 0, 0},                    # S_BOSS_DIE1
-    {CDoom::Spritenum::SPR_BOSS, 9, 8, (->CDoom.a_scream).pointer, CDoom::Statenum::S_BOSS_DIE3, 0, 0},            # S_BOSS_DIE2
-    {CDoom::Spritenum::SPR_BOSS, 10, 8, Pointer(Void).null, CDoom::Statenum::S_BOSS_DIE4, 0, 0},                   # S_BOSS_DIE3
-    {CDoom::Spritenum::SPR_BOSS, 11, 8, (->CDoom.a_fall).pointer, CDoom::Statenum::S_BOSS_DIE5, 0, 0},             # S_BOSS_DIE4
-    {CDoom::Spritenum::SPR_BOSS, 12, 8, Pointer(Void).null, CDoom::Statenum::S_BOSS_DIE6, 0, 0},                   # S_BOSS_DIE5
-    {CDoom::Spritenum::SPR_BOSS, 13, 8, Pointer(Void).null, CDoom::Statenum::S_BOSS_DIE7, 0, 0},                   # S_BOSS_DIE6
-    {CDoom::Spritenum::SPR_BOSS, 14, -1, (->CDoom.a_boss_death).pointer, CDoom::Statenum::S_NULL, 0, 0},           # S_BOSS_DIE7
-    {CDoom::Spritenum::SPR_BOSS, 14, 8, Pointer(Void).null, CDoom::Statenum::S_BOSS_RAISE2, 0, 0},                 # S_BOSS_RAISE1
-    {CDoom::Spritenum::SPR_BOSS, 13, 8, Pointer(Void).null, CDoom::Statenum::S_BOSS_RAISE3, 0, 0},                 # S_BOSS_RAISE2
-    {CDoom::Spritenum::SPR_BOSS, 12, 8, Pointer(Void).null, CDoom::Statenum::S_BOSS_RAISE4, 0, 0},                 # S_BOSS_RAISE3
-    {CDoom::Spritenum::SPR_BOSS, 11, 8, Pointer(Void).null, CDoom::Statenum::S_BOSS_RAISE5, 0, 0},                 # S_BOSS_RAISE4
-    {CDoom::Spritenum::SPR_BOSS, 10, 8, Pointer(Void).null, CDoom::Statenum::S_BOSS_RAISE6, 0, 0},                 # S_BOSS_RAISE5
-    {CDoom::Spritenum::SPR_BOSS, 9, 8, Pointer(Void).null, CDoom::Statenum::S_BOSS_RAISE7, 0, 0},                  # S_BOSS_RAISE6
-    {CDoom::Spritenum::SPR_BOSS, 8, 8, Pointer(Void).null, CDoom::Statenum::S_BOSS_RUN1, 0, 0},                    # S_BOSS_RAISE7
-    {CDoom::Spritenum::SPR_BOS2, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_BOS2_STND2, 0, 0},            # S_BOS2_STND
-    {CDoom::Spritenum::SPR_BOS2, 1, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_BOS2_STND, 0, 0},             # S_BOS2_STND2
-    {CDoom::Spritenum::SPR_BOS2, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOS2_RUN2, 0, 0},             # S_BOS2_RUN1
-    {CDoom::Spritenum::SPR_BOS2, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOS2_RUN3, 0, 0},             # S_BOS2_RUN2
-    {CDoom::Spritenum::SPR_BOS2, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOS2_RUN4, 0, 0},             # S_BOS2_RUN3
-    {CDoom::Spritenum::SPR_BOS2, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOS2_RUN5, 0, 0},             # S_BOS2_RUN4
-    {CDoom::Spritenum::SPR_BOS2, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOS2_RUN6, 0, 0},             # S_BOS2_RUN5
-    {CDoom::Spritenum::SPR_BOS2, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOS2_RUN7, 0, 0},             # S_BOS2_RUN6
-    {CDoom::Spritenum::SPR_BOS2, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOS2_RUN8, 0, 0},             # S_BOS2_RUN7
-    {CDoom::Spritenum::SPR_BOS2, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BOS2_RUN1, 0, 0},             # S_BOS2_RUN8
-    {CDoom::Spritenum::SPR_BOS2, 4, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_BOS2_ATK2, 0, 0},       # S_BOS2_ATK1
-    {CDoom::Spritenum::SPR_BOS2, 5, 8, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_BOS2_ATK3, 0, 0},       # S_BOS2_ATK2
-    {CDoom::Spritenum::SPR_BOS2, 6, 8, (->CDoom.a_bruis_attack).pointer, CDoom::Statenum::S_BOS2_RUN1, 0, 0},      # S_BOS2_ATK3
-    {CDoom::Spritenum::SPR_BOS2, 7, 2, Pointer(Void).null, CDoom::Statenum::S_BOS2_PAIN2, 0, 0},                   # S_BOS2_PAIN
-    {CDoom::Spritenum::SPR_BOS2, 7, 2, (->CDoom.a_pain).pointer, CDoom::Statenum::S_BOS2_RUN1, 0, 0},              # S_BOS2_PAIN2
-    {CDoom::Spritenum::SPR_BOS2, 8, 8, Pointer(Void).null, CDoom::Statenum::S_BOS2_DIE2, 0, 0},                    # S_BOS2_DIE1
-    {CDoom::Spritenum::SPR_BOS2, 9, 8, (->CDoom.a_scream).pointer, CDoom::Statenum::S_BOS2_DIE3, 0, 0},            # S_BOS2_DIE2
-    {CDoom::Spritenum::SPR_BOS2, 10, 8, Pointer(Void).null, CDoom::Statenum::S_BOS2_DIE4, 0, 0},                   # S_BOS2_DIE3
-    {CDoom::Spritenum::SPR_BOS2, 11, 8, (->CDoom.a_fall).pointer, CDoom::Statenum::S_BOS2_DIE5, 0, 0},             # S_BOS2_DIE4
-    {CDoom::Spritenum::SPR_BOS2, 12, 8, Pointer(Void).null, CDoom::Statenum::S_BOS2_DIE6, 0, 0},                   # S_BOS2_DIE5
-    {CDoom::Spritenum::SPR_BOS2, 13, 8, Pointer(Void).null, CDoom::Statenum::S_BOS2_DIE7, 0, 0},                   # S_BOS2_DIE6
-    {CDoom::Spritenum::SPR_BOS2, 14, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_BOS2_DIE7
-    {CDoom::Spritenum::SPR_BOS2, 14, 8, Pointer(Void).null, CDoom::Statenum::S_BOS2_RAISE2, 0, 0},                 # S_BOS2_RAISE1
-    {CDoom::Spritenum::SPR_BOS2, 13, 8, Pointer(Void).null, CDoom::Statenum::S_BOS2_RAISE3, 0, 0},                 # S_BOS2_RAISE2
-    {CDoom::Spritenum::SPR_BOS2, 12, 8, Pointer(Void).null, CDoom::Statenum::S_BOS2_RAISE4, 0, 0},                 # S_BOS2_RAISE3
-    {CDoom::Spritenum::SPR_BOS2, 11, 8, Pointer(Void).null, CDoom::Statenum::S_BOS2_RAISE5, 0, 0},                 # S_BOS2_RAISE4
-    {CDoom::Spritenum::SPR_BOS2, 10, 8, Pointer(Void).null, CDoom::Statenum::S_BOS2_RAISE6, 0, 0},                 # S_BOS2_RAISE5
-    {CDoom::Spritenum::SPR_BOS2, 9, 8, Pointer(Void).null, CDoom::Statenum::S_BOS2_RAISE7, 0, 0},                  # S_BOS2_RAISE6
-    {CDoom::Spritenum::SPR_BOS2, 8, 8, Pointer(Void).null, CDoom::Statenum::S_BOS2_RUN1, 0, 0},                    # S_BOS2_RAISE7
-    {CDoom::Spritenum::SPR_SKUL, 32768, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_SKULL_STND2, 0, 0},       # S_SKULL_STND
-    {CDoom::Spritenum::SPR_SKUL, 32769, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_SKULL_STND, 0, 0},        # S_SKULL_STND2
-    {CDoom::Spritenum::SPR_SKUL, 32768, 6, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKULL_RUN2, 0, 0},        # S_SKULL_RUN1
-    {CDoom::Spritenum::SPR_SKUL, 32769, 6, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SKULL_RUN1, 0, 0},        # S_SKULL_RUN2
-    {CDoom::Spritenum::SPR_SKUL, 32770, 10, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_SKULL_ATK2, 0, 0}, # S_SKULL_ATK1
-    {CDoom::Spritenum::SPR_SKUL, 32771, 4, (->CDoom.a_skull_attack).pointer, CDoom::Statenum::S_SKULL_ATK3, 0, 0}, # S_SKULL_ATK2
-    {CDoom::Spritenum::SPR_SKUL, 32770, 4, Pointer(Void).null, CDoom::Statenum::S_SKULL_ATK4, 0, 0},               # S_SKULL_ATK3
-    {CDoom::Spritenum::SPR_SKUL, 32771, 4, Pointer(Void).null, CDoom::Statenum::S_SKULL_ATK3, 0, 0},               # S_SKULL_ATK4
-    {CDoom::Spritenum::SPR_SKUL, 32772, 3, Pointer(Void).null, CDoom::Statenum::S_SKULL_PAIN2, 0, 0},              # S_SKULL_PAIN
-    {CDoom::Spritenum::SPR_SKUL, 32772, 3, (->CDoom.a_pain).pointer, CDoom::Statenum::S_SKULL_RUN1, 0, 0},         # S_SKULL_PAIN2
-    {CDoom::Spritenum::SPR_SKUL, 32773, 6, Pointer(Void).null, CDoom::Statenum::S_SKULL_DIE2, 0, 0},               # S_SKULL_DIE1
-    {CDoom::Spritenum::SPR_SKUL, 32774, 6, (->CDoom.a_scream).pointer, CDoom::Statenum::S_SKULL_DIE3, 0, 0},       # S_SKULL_DIE2
-    {CDoom::Spritenum::SPR_SKUL, 32775, 6, Pointer(Void).null, CDoom::Statenum::S_SKULL_DIE4, 0, 0},               # S_SKULL_DIE3
-    {CDoom::Spritenum::SPR_SKUL, 32776, 6, (->CDoom.a_fall).pointer, CDoom::Statenum::S_SKULL_DIE5, 0, 0},         # S_SKULL_DIE4
-    {CDoom::Spritenum::SPR_SKUL, 9, 6, Pointer(Void).null, CDoom::Statenum::S_SKULL_DIE6, 0, 0},                   # S_SKULL_DIE5
-    {CDoom::Spritenum::SPR_SKUL, 10, 6, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_SKULL_DIE6
-    {CDoom::Spritenum::SPR_SPID, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_SPID_STND2, 0, 0},            # S_SPID_STND
-    {CDoom::Spritenum::SPR_SPID, 1, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_SPID_STND, 0, 0},             # S_SPID_STND2
-    {CDoom::Spritenum::SPR_SPID, 0, 3, (->CDoom.a_metal).pointer, CDoom::Statenum::S_SPID_RUN2, 0, 0},             # S_SPID_RUN1
-    {CDoom::Spritenum::SPR_SPID, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPID_RUN3, 0, 0},             # S_SPID_RUN2
-    {CDoom::Spritenum::SPR_SPID, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPID_RUN4, 0, 0},             # S_SPID_RUN3
-    {CDoom::Spritenum::SPR_SPID, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPID_RUN5, 0, 0},             # S_SPID_RUN4
-    {CDoom::Spritenum::SPR_SPID, 2, 3, (->CDoom.a_metal).pointer, CDoom::Statenum::S_SPID_RUN6, 0, 0},             # S_SPID_RUN5
-    {CDoom::Spritenum::SPR_SPID, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPID_RUN7, 0, 0},             # S_SPID_RUN6
-    {CDoom::Spritenum::SPR_SPID, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPID_RUN8, 0, 0},             # S_SPID_RUN7
-    {CDoom::Spritenum::SPR_SPID, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPID_RUN9, 0, 0},             # S_SPID_RUN8
-    {CDoom::Spritenum::SPR_SPID, 4, 3, (->CDoom.a_metal).pointer, CDoom::Statenum::S_SPID_RUN10, 0, 0},            # S_SPID_RUN9
-    {CDoom::Spritenum::SPR_SPID, 4, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPID_RUN11, 0, 0},            # S_SPID_RUN10
-    {CDoom::Spritenum::SPR_SPID, 5, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPID_RUN12, 0, 0},            # S_SPID_RUN11
-    {CDoom::Spritenum::SPR_SPID, 5, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SPID_RUN1, 0, 0},             # S_SPID_RUN12
-    {CDoom::Spritenum::SPR_SPID, 32768, 20, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_SPID_ATK2, 0, 0},  # S_SPID_ATK1
-    {CDoom::Spritenum::SPR_SPID, 32774, 4, (->CDoom.a_spos_attack).pointer, CDoom::Statenum::S_SPID_ATK3, 0, 0},   # S_SPID_ATK2
-    {CDoom::Spritenum::SPR_SPID, 32775, 4, (->CDoom.a_spos_attack).pointer, CDoom::Statenum::S_SPID_ATK4, 0, 0},   # S_SPID_ATK3
-    {CDoom::Spritenum::SPR_SPID, 32775, 1, (->CDoom.a_spid_refire).pointer, CDoom::Statenum::S_SPID_ATK2, 0, 0},   # S_SPID_ATK4
-    {CDoom::Spritenum::SPR_SPID, 8, 3, Pointer(Void).null, CDoom::Statenum::S_SPID_PAIN2, 0, 0},                   # S_SPID_PAIN
-    {CDoom::Spritenum::SPR_SPID, 8, 3, (->CDoom.a_pain).pointer, CDoom::Statenum::S_SPID_RUN1, 0, 0},              # S_SPID_PAIN2
-    {CDoom::Spritenum::SPR_SPID, 9, 20, (->CDoom.a_scream).pointer, CDoom::Statenum::S_SPID_DIE2, 0, 0},           # S_SPID_DIE1
-    {CDoom::Spritenum::SPR_SPID, 10, 10, (->CDoom.a_fall).pointer, CDoom::Statenum::S_SPID_DIE3, 0, 0},            # S_SPID_DIE2
-    {CDoom::Spritenum::SPR_SPID, 11, 10, Pointer(Void).null, CDoom::Statenum::S_SPID_DIE4, 0, 0},                  # S_SPID_DIE3
-    {CDoom::Spritenum::SPR_SPID, 12, 10, Pointer(Void).null, CDoom::Statenum::S_SPID_DIE5, 0, 0},                  # S_SPID_DIE4
-    {CDoom::Spritenum::SPR_SPID, 13, 10, Pointer(Void).null, CDoom::Statenum::S_SPID_DIE6, 0, 0},                  # S_SPID_DIE5
-    {CDoom::Spritenum::SPR_SPID, 14, 10, Pointer(Void).null, CDoom::Statenum::S_SPID_DIE7, 0, 0},                  # S_SPID_DIE6
-    {CDoom::Spritenum::SPR_SPID, 15, 10, Pointer(Void).null, CDoom::Statenum::S_SPID_DIE8, 0, 0},                  # S_SPID_DIE7
-    {CDoom::Spritenum::SPR_SPID, 16, 10, Pointer(Void).null, CDoom::Statenum::S_SPID_DIE9, 0, 0},                  # S_SPID_DIE8
-    {CDoom::Spritenum::SPR_SPID, 17, 10, Pointer(Void).null, CDoom::Statenum::S_SPID_DIE10, 0, 0},                 # S_SPID_DIE9
-    {CDoom::Spritenum::SPR_SPID, 18, 30, Pointer(Void).null, CDoom::Statenum::S_SPID_DIE11, 0, 0},                 # S_SPID_DIE10
-    {CDoom::Spritenum::SPR_SPID, 18, -1, (->CDoom.a_boss_death).pointer, CDoom::Statenum::S_NULL, 0, 0},           # S_SPID_DIE11
-    {CDoom::Spritenum::SPR_BSPI, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_BSPI_STND2, 0, 0},            # S_BSPI_STND
-    {CDoom::Spritenum::SPR_BSPI, 1, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_BSPI_STND, 0, 0},             # S_BSPI_STND2
-    {CDoom::Spritenum::SPR_BSPI, 0, 20, Pointer(Void).null, CDoom::Statenum::S_BSPI_RUN1, 0, 0},                   # S_BSPI_SIGHT
-    {CDoom::Spritenum::SPR_BSPI, 0, 3, (->CDoom.a_baby_metal).pointer, CDoom::Statenum::S_BSPI_RUN2, 0, 0},        # S_BSPI_RUN1
-    {CDoom::Spritenum::SPR_BSPI, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BSPI_RUN3, 0, 0},             # S_BSPI_RUN2
-    {CDoom::Spritenum::SPR_BSPI, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BSPI_RUN4, 0, 0},             # S_BSPI_RUN3
-    {CDoom::Spritenum::SPR_BSPI, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BSPI_RUN5, 0, 0},             # S_BSPI_RUN4
-    {CDoom::Spritenum::SPR_BSPI, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BSPI_RUN6, 0, 0},             # S_BSPI_RUN5
-    {CDoom::Spritenum::SPR_BSPI, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BSPI_RUN7, 0, 0},             # S_BSPI_RUN6
-    {CDoom::Spritenum::SPR_BSPI, 3, 3, (->CDoom.a_baby_metal).pointer, CDoom::Statenum::S_BSPI_RUN8, 0, 0},        # S_BSPI_RUN7
-    {CDoom::Spritenum::SPR_BSPI, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BSPI_RUN9, 0, 0},             # S_BSPI_RUN8
-    {CDoom::Spritenum::SPR_BSPI, 4, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BSPI_RUN10, 0, 0},            # S_BSPI_RUN9
-    {CDoom::Spritenum::SPR_BSPI, 4, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BSPI_RUN11, 0, 0},            # S_BSPI_RUN10
-    {CDoom::Spritenum::SPR_BSPI, 5, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BSPI_RUN12, 0, 0},            # S_BSPI_RUN11
-    {CDoom::Spritenum::SPR_BSPI, 5, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_BSPI_RUN1, 0, 0},             # S_BSPI_RUN12
-    {CDoom::Spritenum::SPR_BSPI, 32768, 20, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_BSPI_ATK2, 0, 0},  # S_BSPI_ATK1
-    {CDoom::Spritenum::SPR_BSPI, 32774, 4, (->CDoom.a_bspi_attack).pointer, CDoom::Statenum::S_BSPI_ATK3, 0, 0},   # S_BSPI_ATK2
-    {CDoom::Spritenum::SPR_BSPI, 32775, 4, Pointer(Void).null, CDoom::Statenum::S_BSPI_ATK4, 0, 0},                # S_BSPI_ATK3
-    {CDoom::Spritenum::SPR_BSPI, 32775, 1, (->CDoom.a_spid_refire).pointer, CDoom::Statenum::S_BSPI_ATK2, 0, 0},   # S_BSPI_ATK4
-    {CDoom::Spritenum::SPR_BSPI, 8, 3, Pointer(Void).null, CDoom::Statenum::S_BSPI_PAIN2, 0, 0},                   # S_BSPI_PAIN
-    {CDoom::Spritenum::SPR_BSPI, 8, 3, (->CDoom.a_pain).pointer, CDoom::Statenum::S_BSPI_RUN1, 0, 0},              # S_BSPI_PAIN2
-    {CDoom::Spritenum::SPR_BSPI, 9, 20, (->CDoom.a_scream).pointer, CDoom::Statenum::S_BSPI_DIE2, 0, 0},           # S_BSPI_DIE1
-    {CDoom::Spritenum::SPR_BSPI, 10, 7, (->CDoom.a_fall).pointer, CDoom::Statenum::S_BSPI_DIE3, 0, 0},             # S_BSPI_DIE2
-    {CDoom::Spritenum::SPR_BSPI, 11, 7, Pointer(Void).null, CDoom::Statenum::S_BSPI_DIE4, 0, 0},                   # S_BSPI_DIE3
-    {CDoom::Spritenum::SPR_BSPI, 12, 7, Pointer(Void).null, CDoom::Statenum::S_BSPI_DIE5, 0, 0},                   # S_BSPI_DIE4
-    {CDoom::Spritenum::SPR_BSPI, 13, 7, Pointer(Void).null, CDoom::Statenum::S_BSPI_DIE6, 0, 0},                   # S_BSPI_DIE5
-    {CDoom::Spritenum::SPR_BSPI, 14, 7, Pointer(Void).null, CDoom::Statenum::S_BSPI_DIE7, 0, 0},                   # S_BSPI_DIE6
-    {CDoom::Spritenum::SPR_BSPI, 15, -1, (->CDoom.a_boss_death).pointer, CDoom::Statenum::S_NULL, 0, 0},           # S_BSPI_DIE7
-    {CDoom::Spritenum::SPR_BSPI, 15, 5, Pointer(Void).null, CDoom::Statenum::S_BSPI_RAISE2, 0, 0},                 # S_BSPI_RAISE1
-    {CDoom::Spritenum::SPR_BSPI, 14, 5, Pointer(Void).null, CDoom::Statenum::S_BSPI_RAISE3, 0, 0},                 # S_BSPI_RAISE2
-    {CDoom::Spritenum::SPR_BSPI, 13, 5, Pointer(Void).null, CDoom::Statenum::S_BSPI_RAISE4, 0, 0},                 # S_BSPI_RAISE3
-    {CDoom::Spritenum::SPR_BSPI, 12, 5, Pointer(Void).null, CDoom::Statenum::S_BSPI_RAISE5, 0, 0},                 # S_BSPI_RAISE4
-    {CDoom::Spritenum::SPR_BSPI, 11, 5, Pointer(Void).null, CDoom::Statenum::S_BSPI_RAISE6, 0, 0},                 # S_BSPI_RAISE5
-    {CDoom::Spritenum::SPR_BSPI, 10, 5, Pointer(Void).null, CDoom::Statenum::S_BSPI_RAISE7, 0, 0},                 # S_BSPI_RAISE6
-    {CDoom::Spritenum::SPR_BSPI, 9, 5, Pointer(Void).null, CDoom::Statenum::S_BSPI_RUN1, 0, 0},                    # S_BSPI_RAISE7
-    {CDoom::Spritenum::SPR_APLS, 32768, 5, Pointer(Void).null, CDoom::Statenum::S_ARACH_PLAZ2, 0, 0},              # S_ARACH_PLAZ
-    {CDoom::Spritenum::SPR_APLS, 32769, 5, Pointer(Void).null, CDoom::Statenum::S_ARACH_PLAZ, 0, 0},               # S_ARACH_PLAZ2
-    {CDoom::Spritenum::SPR_APBX, 32768, 5, Pointer(Void).null, CDoom::Statenum::S_ARACH_PLEX2, 0, 0},              # S_ARACH_PLEX
-    {CDoom::Spritenum::SPR_APBX, 32769, 5, Pointer(Void).null, CDoom::Statenum::S_ARACH_PLEX3, 0, 0},              # S_ARACH_PLEX2
-    {CDoom::Spritenum::SPR_APBX, 32770, 5, Pointer(Void).null, CDoom::Statenum::S_ARACH_PLEX4, 0, 0},              # S_ARACH_PLEX3
-    {CDoom::Spritenum::SPR_APBX, 32771, 5, Pointer(Void).null, CDoom::Statenum::S_ARACH_PLEX5, 0, 0},              # S_ARACH_PLEX4
-    {CDoom::Spritenum::SPR_APBX, 32772, 5, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                     # S_ARACH_PLEX5
-    {CDoom::Spritenum::SPR_CYBR, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_CYBER_STND2, 0, 0},           # S_CYBER_STND
-    {CDoom::Spritenum::SPR_CYBR, 1, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_CYBER_STND, 0, 0},            # S_CYBER_STND2
-    {CDoom::Spritenum::SPR_CYBR, 0, 3, (->CDoom.a_hoof).pointer, CDoom::Statenum::S_CYBER_RUN2, 0, 0},             # S_CYBER_RUN1
-    {CDoom::Spritenum::SPR_CYBR, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CYBER_RUN3, 0, 0},            # S_CYBER_RUN2
-    {CDoom::Spritenum::SPR_CYBR, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CYBER_RUN4, 0, 0},            # S_CYBER_RUN3
-    {CDoom::Spritenum::SPR_CYBR, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CYBER_RUN5, 0, 0},            # S_CYBER_RUN4
-    {CDoom::Spritenum::SPR_CYBR, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CYBER_RUN6, 0, 0},            # S_CYBER_RUN5
-    {CDoom::Spritenum::SPR_CYBR, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CYBER_RUN7, 0, 0},            # S_CYBER_RUN6
-    {CDoom::Spritenum::SPR_CYBR, 3, 3, (->CDoom.a_metal).pointer, CDoom::Statenum::S_CYBER_RUN8, 0, 0},            # S_CYBER_RUN7
-    {CDoom::Spritenum::SPR_CYBR, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_CYBER_RUN1, 0, 0},            # S_CYBER_RUN8
-    {CDoom::Spritenum::SPR_CYBR, 4, 6, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_CYBER_ATK2, 0, 0},      # S_CYBER_ATK1
-    {CDoom::Spritenum::SPR_CYBR, 5, 12, (->CDoom.a_cyber_attack).pointer, CDoom::Statenum::S_CYBER_ATK3, 0, 0},    # S_CYBER_ATK2
-    {CDoom::Spritenum::SPR_CYBR, 4, 12, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_CYBER_ATK4, 0, 0},     # S_CYBER_ATK3
-    {CDoom::Spritenum::SPR_CYBR, 5, 12, (->CDoom.a_cyber_attack).pointer, CDoom::Statenum::S_CYBER_ATK5, 0, 0},    # S_CYBER_ATK4
-    {CDoom::Spritenum::SPR_CYBR, 4, 12, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_CYBER_ATK6, 0, 0},     # S_CYBER_ATK5
-    {CDoom::Spritenum::SPR_CYBR, 5, 12, (->CDoom.a_cyber_attack).pointer, CDoom::Statenum::S_CYBER_RUN1, 0, 0},    # S_CYBER_ATK6
-    {CDoom::Spritenum::SPR_CYBR, 6, 10, (->CDoom.a_pain).pointer, CDoom::Statenum::S_CYBER_RUN1, 0, 0},            # S_CYBER_PAIN
-    {CDoom::Spritenum::SPR_CYBR, 7, 10, Pointer(Void).null, CDoom::Statenum::S_CYBER_DIE2, 0, 0},                  # S_CYBER_DIE1
-    {CDoom::Spritenum::SPR_CYBR, 8, 10, (->CDoom.a_scream).pointer, CDoom::Statenum::S_CYBER_DIE3, 0, 0},          # S_CYBER_DIE2
-    {CDoom::Spritenum::SPR_CYBR, 9, 10, Pointer(Void).null, CDoom::Statenum::S_CYBER_DIE4, 0, 0},                  # S_CYBER_DIE3
-    {CDoom::Spritenum::SPR_CYBR, 10, 10, Pointer(Void).null, CDoom::Statenum::S_CYBER_DIE5, 0, 0},                 # S_CYBER_DIE4
-    {CDoom::Spritenum::SPR_CYBR, 11, 10, Pointer(Void).null, CDoom::Statenum::S_CYBER_DIE6, 0, 0},                 # S_CYBER_DIE5
-    {CDoom::Spritenum::SPR_CYBR, 12, 10, (->CDoom.a_fall).pointer, CDoom::Statenum::S_CYBER_DIE7, 0, 0},           # S_CYBER_DIE6
-    {CDoom::Spritenum::SPR_CYBR, 13, 10, Pointer(Void).null, CDoom::Statenum::S_CYBER_DIE8, 0, 0},                 # S_CYBER_DIE7
-    {CDoom::Spritenum::SPR_CYBR, 14, 10, Pointer(Void).null, CDoom::Statenum::S_CYBER_DIE9, 0, 0},                 # S_CYBER_DIE8
-    {CDoom::Spritenum::SPR_CYBR, 15, 30, Pointer(Void).null, CDoom::Statenum::S_CYBER_DIE10, 0, 0},                # S_CYBER_DIE9
-    {CDoom::Spritenum::SPR_CYBR, 15, -1, (->CDoom.a_boss_death).pointer, CDoom::Statenum::S_NULL, 0, 0},           # S_CYBER_DIE10
-    {CDoom::Spritenum::SPR_PAIN, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_PAIN_STND, 0, 0},             # S_PAIN_STND
-    {CDoom::Spritenum::SPR_PAIN, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_PAIN_RUN2, 0, 0},             # S_PAIN_RUN1
-    {CDoom::Spritenum::SPR_PAIN, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_PAIN_RUN3, 0, 0},             # S_PAIN_RUN2
-    {CDoom::Spritenum::SPR_PAIN, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_PAIN_RUN4, 0, 0},             # S_PAIN_RUN3
-    {CDoom::Spritenum::SPR_PAIN, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_PAIN_RUN5, 0, 0},             # S_PAIN_RUN4
-    {CDoom::Spritenum::SPR_PAIN, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_PAIN_RUN6, 0, 0},             # S_PAIN_RUN5
-    {CDoom::Spritenum::SPR_PAIN, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_PAIN_RUN1, 0, 0},             # S_PAIN_RUN6
-    {CDoom::Spritenum::SPR_PAIN, 3, 5, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_PAIN_ATK2, 0, 0},       # S_PAIN_ATK1
-    {CDoom::Spritenum::SPR_PAIN, 4, 5, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_PAIN_ATK3, 0, 0},       # S_PAIN_ATK2
-    {CDoom::Spritenum::SPR_PAIN, 32773, 5, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_PAIN_ATK4, 0, 0},   # S_PAIN_ATK3
-    {CDoom::Spritenum::SPR_PAIN, 32773, 0, (->CDoom.a_pain_attack).pointer, CDoom::Statenum::S_PAIN_RUN1, 0, 0},   # S_PAIN_ATK4
-    {CDoom::Spritenum::SPR_PAIN, 6, 6, Pointer(Void).null, CDoom::Statenum::S_PAIN_PAIN2, 0, 0},                   # S_PAIN_PAIN
-    {CDoom::Spritenum::SPR_PAIN, 6, 6, (->CDoom.a_pain).pointer, CDoom::Statenum::S_PAIN_RUN1, 0, 0},              # S_PAIN_PAIN2
-    {CDoom::Spritenum::SPR_PAIN, 32775, 8, Pointer(Void).null, CDoom::Statenum::S_PAIN_DIE2, 0, 0},                # S_PAIN_DIE1
-    {CDoom::Spritenum::SPR_PAIN, 32776, 8, (->CDoom.a_scream).pointer, CDoom::Statenum::S_PAIN_DIE3, 0, 0},        # S_PAIN_DIE2
-    {CDoom::Spritenum::SPR_PAIN, 32777, 8, Pointer(Void).null, CDoom::Statenum::S_PAIN_DIE4, 0, 0},                # S_PAIN_DIE3
-    {CDoom::Spritenum::SPR_PAIN, 32778, 8, Pointer(Void).null, CDoom::Statenum::S_PAIN_DIE5, 0, 0},                # S_PAIN_DIE4
-    {CDoom::Spritenum::SPR_PAIN, 32779, 8, (->CDoom.a_pain_die).pointer, CDoom::Statenum::S_PAIN_DIE6, 0, 0},      # S_PAIN_DIE5
-    {CDoom::Spritenum::SPR_PAIN, 32780, 8, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                     # S_PAIN_DIE6
-    {CDoom::Spritenum::SPR_PAIN, 12, 8, Pointer(Void).null, CDoom::Statenum::S_PAIN_RAISE2, 0, 0},                 # S_PAIN_RAISE1
-    {CDoom::Spritenum::SPR_PAIN, 11, 8, Pointer(Void).null, CDoom::Statenum::S_PAIN_RAISE3, 0, 0},                 # S_PAIN_RAISE2
-    {CDoom::Spritenum::SPR_PAIN, 10, 8, Pointer(Void).null, CDoom::Statenum::S_PAIN_RAISE4, 0, 0},                 # S_PAIN_RAISE3
-    {CDoom::Spritenum::SPR_PAIN, 9, 8, Pointer(Void).null, CDoom::Statenum::S_PAIN_RAISE5, 0, 0},                  # S_PAIN_RAISE4
-    {CDoom::Spritenum::SPR_PAIN, 8, 8, Pointer(Void).null, CDoom::Statenum::S_PAIN_RAISE6, 0, 0},                  # S_PAIN_RAISE5
-    {CDoom::Spritenum::SPR_PAIN, 7, 8, Pointer(Void).null, CDoom::Statenum::S_PAIN_RUN1, 0, 0},                    # S_PAIN_RAISE6
-    {CDoom::Spritenum::SPR_SSWV, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_SSWV_STND2, 0, 0},            # S_SSWV_STND
-    {CDoom::Spritenum::SPR_SSWV, 1, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_SSWV_STND, 0, 0},             # S_SSWV_STND2
-    {CDoom::Spritenum::SPR_SSWV, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SSWV_RUN2, 0, 0},             # S_SSWV_RUN1
-    {CDoom::Spritenum::SPR_SSWV, 0, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SSWV_RUN3, 0, 0},             # S_SSWV_RUN2
-    {CDoom::Spritenum::SPR_SSWV, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SSWV_RUN4, 0, 0},             # S_SSWV_RUN3
-    {CDoom::Spritenum::SPR_SSWV, 1, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SSWV_RUN5, 0, 0},             # S_SSWV_RUN4
-    {CDoom::Spritenum::SPR_SSWV, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SSWV_RUN6, 0, 0},             # S_SSWV_RUN5
-    {CDoom::Spritenum::SPR_SSWV, 2, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SSWV_RUN7, 0, 0},             # S_SSWV_RUN6
-    {CDoom::Spritenum::SPR_SSWV, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SSWV_RUN8, 0, 0},             # S_SSWV_RUN7
-    {CDoom::Spritenum::SPR_SSWV, 3, 3, (->CDoom.a_chase).pointer, CDoom::Statenum::S_SSWV_RUN1, 0, 0},             # S_SSWV_RUN8
-    {CDoom::Spritenum::SPR_SSWV, 4, 10, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_SSWV_ATK2, 0, 0},      # S_SSWV_ATK1
-    {CDoom::Spritenum::SPR_SSWV, 5, 10, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_SSWV_ATK3, 0, 0},      # S_SSWV_ATK2
-    {CDoom::Spritenum::SPR_SSWV, 32774, 4, (->CDoom.a_cpos_attack).pointer, CDoom::Statenum::S_SSWV_ATK4, 0, 0},   # S_SSWV_ATK3
-    {CDoom::Spritenum::SPR_SSWV, 5, 6, (->CDoom.a_face_target).pointer, CDoom::Statenum::S_SSWV_ATK5, 0, 0},       # S_SSWV_ATK4
-    {CDoom::Spritenum::SPR_SSWV, 32774, 4, (->CDoom.a_cpos_attack).pointer, CDoom::Statenum::S_SSWV_ATK6, 0, 0},   # S_SSWV_ATK5
-    {CDoom::Spritenum::SPR_SSWV, 5, 1, (->CDoom.a_cpos_refire).pointer, CDoom::Statenum::S_SSWV_ATK2, 0, 0},       # S_SSWV_ATK6
-    {CDoom::Spritenum::SPR_SSWV, 7, 3, Pointer(Void).null, CDoom::Statenum::S_SSWV_PAIN2, 0, 0},                   # S_SSWV_PAIN
-    {CDoom::Spritenum::SPR_SSWV, 7, 3, (->CDoom.a_pain).pointer, CDoom::Statenum::S_SSWV_RUN1, 0, 0},              # S_SSWV_PAIN2
-    {CDoom::Spritenum::SPR_SSWV, 8, 5, Pointer(Void).null, CDoom::Statenum::S_SSWV_DIE2, 0, 0},                    # S_SSWV_DIE1
-    {CDoom::Spritenum::SPR_SSWV, 9, 5, (->CDoom.a_scream).pointer, CDoom::Statenum::S_SSWV_DIE3, 0, 0},            # S_SSWV_DIE2
-    {CDoom::Spritenum::SPR_SSWV, 10, 5, (->CDoom.a_fall).pointer, CDoom::Statenum::S_SSWV_DIE4, 0, 0},             # S_SSWV_DIE3
-    {CDoom::Spritenum::SPR_SSWV, 11, 5, Pointer(Void).null, CDoom::Statenum::S_SSWV_DIE5, 0, 0},                   # S_SSWV_DIE4
-    {CDoom::Spritenum::SPR_SSWV, 12, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_SSWV_DIE5
-    {CDoom::Spritenum::SPR_SSWV, 13, 5, Pointer(Void).null, CDoom::Statenum::S_SSWV_XDIE2, 0, 0},                  # S_SSWV_XDIE1
-    {CDoom::Spritenum::SPR_SSWV, 14, 5, (->CDoom.a_xscream).pointer, CDoom::Statenum::S_SSWV_XDIE3, 0, 0},         # S_SSWV_XDIE2
-    {CDoom::Spritenum::SPR_SSWV, 15, 5, (->CDoom.a_fall).pointer, CDoom::Statenum::S_SSWV_XDIE4, 0, 0},            # S_SSWV_XDIE3
-    {CDoom::Spritenum::SPR_SSWV, 16, 5, Pointer(Void).null, CDoom::Statenum::S_SSWV_XDIE5, 0, 0},                  # S_SSWV_XDIE4
-    {CDoom::Spritenum::SPR_SSWV, 17, 5, Pointer(Void).null, CDoom::Statenum::S_SSWV_XDIE6, 0, 0},                  # S_SSWV_XDIE5
-    {CDoom::Spritenum::SPR_SSWV, 18, 5, Pointer(Void).null, CDoom::Statenum::S_SSWV_XDIE7, 0, 0},                  # S_SSWV_XDIE6
-    {CDoom::Spritenum::SPR_SSWV, 19, 5, Pointer(Void).null, CDoom::Statenum::S_SSWV_XDIE8, 0, 0},                  # S_SSWV_XDIE7
-    {CDoom::Spritenum::SPR_SSWV, 20, 5, Pointer(Void).null, CDoom::Statenum::S_SSWV_XDIE9, 0, 0},                  # S_SSWV_XDIE8
-    {CDoom::Spritenum::SPR_SSWV, 21, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_SSWV_XDIE9
-    {CDoom::Spritenum::SPR_SSWV, 12, 5, Pointer(Void).null, CDoom::Statenum::S_SSWV_RAISE2, 0, 0},                 # S_SSWV_RAISE1
-    {CDoom::Spritenum::SPR_SSWV, 11, 5, Pointer(Void).null, CDoom::Statenum::S_SSWV_RAISE3, 0, 0},                 # S_SSWV_RAISE2
-    {CDoom::Spritenum::SPR_SSWV, 10, 5, Pointer(Void).null, CDoom::Statenum::S_SSWV_RAISE4, 0, 0},                 # S_SSWV_RAISE3
-    {CDoom::Spritenum::SPR_SSWV, 9, 5, Pointer(Void).null, CDoom::Statenum::S_SSWV_RAISE5, 0, 0},                  # S_SSWV_RAISE4
-    {CDoom::Spritenum::SPR_SSWV, 8, 5, Pointer(Void).null, CDoom::Statenum::S_SSWV_RUN1, 0, 0},                    # S_SSWV_RAISE5
-    {CDoom::Spritenum::SPR_KEEN, 0, -1, Pointer(Void).null, CDoom::Statenum::S_KEENSTND, 0, 0},                    # S_KEENSTND
-    {CDoom::Spritenum::SPR_KEEN, 0, 6, Pointer(Void).null, CDoom::Statenum::S_COMMKEEN2, 0, 0},                    # S_COMMKEEN
-    {CDoom::Spritenum::SPR_KEEN, 1, 6, Pointer(Void).null, CDoom::Statenum::S_COMMKEEN3, 0, 0},                    # S_COMMKEEN2
-    {CDoom::Spritenum::SPR_KEEN, 2, 6, (->CDoom.a_scream).pointer, CDoom::Statenum::S_COMMKEEN4, 0, 0},            # S_COMMKEEN3
-    {CDoom::Spritenum::SPR_KEEN, 3, 6, Pointer(Void).null, CDoom::Statenum::S_COMMKEEN5, 0, 0},                    # S_COMMKEEN4
-    {CDoom::Spritenum::SPR_KEEN, 4, 6, Pointer(Void).null, CDoom::Statenum::S_COMMKEEN6, 0, 0},                    # S_COMMKEEN5
-    {CDoom::Spritenum::SPR_KEEN, 5, 6, Pointer(Void).null, CDoom::Statenum::S_COMMKEEN7, 0, 0},                    # S_COMMKEEN6
-    {CDoom::Spritenum::SPR_KEEN, 6, 6, Pointer(Void).null, CDoom::Statenum::S_COMMKEEN8, 0, 0},                    # S_COMMKEEN7
-    {CDoom::Spritenum::SPR_KEEN, 7, 6, Pointer(Void).null, CDoom::Statenum::S_COMMKEEN9, 0, 0},                    # S_COMMKEEN8
-    {CDoom::Spritenum::SPR_KEEN, 8, 6, Pointer(Void).null, CDoom::Statenum::S_COMMKEEN10, 0, 0},                   # S_COMMKEEN9
-    {CDoom::Spritenum::SPR_KEEN, 9, 6, Pointer(Void).null, CDoom::Statenum::S_COMMKEEN11, 0, 0},                   # S_COMMKEEN10
-    {CDoom::Spritenum::SPR_KEEN, 10, 6, (->CDoom.a_keen_die).pointer, CDoom::Statenum::S_COMMKEEN12, 0, 0},        # S_COMMKEEN11
-    {CDoom::Spritenum::SPR_KEEN, 11, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_COMMKEEN12
-    {CDoom::Spritenum::SPR_KEEN, 12, 4, Pointer(Void).null, CDoom::Statenum::S_KEENPAIN2, 0, 0},                   # S_KEENPAIN
-    {CDoom::Spritenum::SPR_KEEN, 12, 8, (->CDoom.a_pain).pointer, CDoom::Statenum::S_KEENSTND, 0, 0},              # S_KEENPAIN2
-    {CDoom::Spritenum::SPR_BBRN, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_BRAIN
-    {CDoom::Spritenum::SPR_BBRN, 1, 36, (->CDoom.a_brain_pain).pointer, CDoom::Statenum::S_BRAIN, 0, 0},           # S_BRAIN_PAIN
-    {CDoom::Spritenum::SPR_BBRN, 0, 100, (->CDoom.a_brain_scream).pointer, CDoom::Statenum::S_BRAIN_DIE2, 0, 0},   # S_BRAIN_DIE1
-    {CDoom::Spritenum::SPR_BBRN, 0, 10, Pointer(Void).null, CDoom::Statenum::S_BRAIN_DIE3, 0, 0},                  # S_BRAIN_DIE2
-    {CDoom::Spritenum::SPR_BBRN, 0, 10, Pointer(Void).null, CDoom::Statenum::S_BRAIN_DIE4, 0, 0},                  # S_BRAIN_DIE3
-    {CDoom::Spritenum::SPR_BBRN, 0, -1, (->CDoom.a_brain_die).pointer, CDoom::Statenum::S_NULL, 0, 0},             # S_BRAIN_DIE4
-    {CDoom::Spritenum::SPR_SSWV, 0, 10, (->CDoom.a_look).pointer, CDoom::Statenum::S_BRAINEYE, 0, 0},              # S_BRAINEYE
-    {CDoom::Spritenum::SPR_SSWV, 0, 181, (->CDoom.a_brain_awake).pointer, CDoom::Statenum::S_BRAINEYE1, 0, 0},     # S_BRAINEYESEE
-    {CDoom::Spritenum::SPR_SSWV, 0, 150, (->CDoom.a_brain_spit).pointer, CDoom::Statenum::S_BRAINEYE1, 0, 0},      # S_BRAINEYE1
-    {CDoom::Spritenum::SPR_BOSF, 32768, 3, (->CDoom.a_spawn_sound).pointer, CDoom::Statenum::S_SPAWN2, 0, 0},      # S_SPAWN1
-    {CDoom::Spritenum::SPR_BOSF, 32769, 3, (->CDoom.a_spawn_fly).pointer, CDoom::Statenum::S_SPAWN3, 0, 0},        # S_SPAWN2
-    {CDoom::Spritenum::SPR_BOSF, 32770, 3, (->CDoom.a_spawn_fly).pointer, CDoom::Statenum::S_SPAWN4, 0, 0},        # S_SPAWN3
-    {CDoom::Spritenum::SPR_BOSF, 32771, 3, (->CDoom.a_spawn_fly).pointer, CDoom::Statenum::S_SPAWN1, 0, 0},        # S_SPAWN4
-    {CDoom::Spritenum::SPR_FIRE, 32768, 4, (->CDoom.a_fire).pointer, CDoom::Statenum::S_SPAWNFIRE2, 0, 0},         # S_SPAWNFIRE1
-    {CDoom::Spritenum::SPR_FIRE, 32769, 4, (->CDoom.a_fire).pointer, CDoom::Statenum::S_SPAWNFIRE3, 0, 0},         # S_SPAWNFIRE2
-    {CDoom::Spritenum::SPR_FIRE, 32770, 4, (->CDoom.a_fire).pointer, CDoom::Statenum::S_SPAWNFIRE4, 0, 0},         # S_SPAWNFIRE3
-    {CDoom::Spritenum::SPR_FIRE, 32771, 4, (->CDoom.a_fire).pointer, CDoom::Statenum::S_SPAWNFIRE5, 0, 0},         # S_SPAWNFIRE4
-    {CDoom::Spritenum::SPR_FIRE, 32772, 4, (->CDoom.a_fire).pointer, CDoom::Statenum::S_SPAWNFIRE6, 0, 0},         # S_SPAWNFIRE5
-    {CDoom::Spritenum::SPR_FIRE, 32773, 4, (->CDoom.a_fire).pointer, CDoom::Statenum::S_SPAWNFIRE7, 0, 0},         # S_SPAWNFIRE6
-    {CDoom::Spritenum::SPR_FIRE, 32774, 4, (->CDoom.a_fire).pointer, CDoom::Statenum::S_SPAWNFIRE8, 0, 0},         # S_SPAWNFIRE7
-    {CDoom::Spritenum::SPR_FIRE, 32775, 4, (->CDoom.a_fire).pointer, CDoom::Statenum::S_NULL, 0, 0},               # S_SPAWNFIRE8
-    {CDoom::Spritenum::SPR_MISL, 32769, 10, Pointer(Void).null, CDoom::Statenum::S_BRAINEXPLODE2, 0, 0},           # S_BRAINEXPLODE1
-    {CDoom::Spritenum::SPR_MISL, 32770, 10, Pointer(Void).null, CDoom::Statenum::S_BRAINEXPLODE3, 0, 0},           # S_BRAINEXPLODE2
-    {CDoom::Spritenum::SPR_MISL, 32771, 10, (->CDoom.a_brain_explode).pointer, CDoom::Statenum::S_NULL, 0, 0},     # S_BRAINEXPLODE3
-    {CDoom::Spritenum::SPR_ARM1, 0, 6, Pointer(Void).null, CDoom::Statenum::S_ARM1A, 0, 0},                        # S_ARM1
-    {CDoom::Spritenum::SPR_ARM1, 32769, 7, Pointer(Void).null, CDoom::Statenum::S_ARM1, 0, 0},                     # S_ARM1A
-    {CDoom::Spritenum::SPR_ARM2, 0, 6, Pointer(Void).null, CDoom::Statenum::S_ARM2A, 0, 0},                        # S_ARM2
-    {CDoom::Spritenum::SPR_ARM2, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_ARM2, 0, 0},                     # S_ARM2A
-    {CDoom::Spritenum::SPR_BAR1, 0, 6, Pointer(Void).null, CDoom::Statenum::S_BAR2, 0, 0},                         # S_BAR1
-    {CDoom::Spritenum::SPR_BAR1, 1, 6, Pointer(Void).null, CDoom::Statenum::S_BAR1, 0, 0},                         # S_BAR2
-    {CDoom::Spritenum::SPR_BEXP, 32768, 5, Pointer(Void).null, CDoom::Statenum::S_BEXP2, 0, 0},                    # S_BEXP
-    {CDoom::Spritenum::SPR_BEXP, 32769, 5, (->CDoom.a_scream).pointer, CDoom::Statenum::S_BEXP3, 0, 0},            # S_BEXP2
-    {CDoom::Spritenum::SPR_BEXP, 32770, 5, Pointer(Void).null, CDoom::Statenum::S_BEXP4, 0, 0},                    # S_BEXP3
-    {CDoom::Spritenum::SPR_BEXP, 32771, 10, (->CDoom.a_explode).pointer, CDoom::Statenum::S_BEXP5, 0, 0},          # S_BEXP4
-    {CDoom::Spritenum::SPR_BEXP, 32772, 10, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                    # S_BEXP5
-    {CDoom::Spritenum::SPR_FCAN, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_BBAR2, 0, 0},                    # S_BBAR1
-    {CDoom::Spritenum::SPR_FCAN, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_BBAR3, 0, 0},                    # S_BBAR2
-    {CDoom::Spritenum::SPR_FCAN, 32770, 4, Pointer(Void).null, CDoom::Statenum::S_BBAR1, 0, 0},                    # S_BBAR3
-    {CDoom::Spritenum::SPR_BON1, 0, 6, Pointer(Void).null, CDoom::Statenum::S_BON1A, 0, 0},                        # S_BON1
-    {CDoom::Spritenum::SPR_BON1, 1, 6, Pointer(Void).null, CDoom::Statenum::S_BON1B, 0, 0},                        # S_BON1A
-    {CDoom::Spritenum::SPR_BON1, 2, 6, Pointer(Void).null, CDoom::Statenum::S_BON1C, 0, 0},                        # S_BON1B
-    {CDoom::Spritenum::SPR_BON1, 3, 6, Pointer(Void).null, CDoom::Statenum::S_BON1D, 0, 0},                        # S_BON1C
-    {CDoom::Spritenum::SPR_BON1, 2, 6, Pointer(Void).null, CDoom::Statenum::S_BON1E, 0, 0},                        # S_BON1D
-    {CDoom::Spritenum::SPR_BON1, 1, 6, Pointer(Void).null, CDoom::Statenum::S_BON1, 0, 0},                         # S_BON1E
-    {CDoom::Spritenum::SPR_BON2, 0, 6, Pointer(Void).null, CDoom::Statenum::S_BON2A, 0, 0},                        # S_BON2
-    {CDoom::Spritenum::SPR_BON2, 1, 6, Pointer(Void).null, CDoom::Statenum::S_BON2B, 0, 0},                        # S_BON2A
-    {CDoom::Spritenum::SPR_BON2, 2, 6, Pointer(Void).null, CDoom::Statenum::S_BON2C, 0, 0},                        # S_BON2B
-    {CDoom::Spritenum::SPR_BON2, 3, 6, Pointer(Void).null, CDoom::Statenum::S_BON2D, 0, 0},                        # S_BON2C
-    {CDoom::Spritenum::SPR_BON2, 2, 6, Pointer(Void).null, CDoom::Statenum::S_BON2E, 0, 0},                        # S_BON2D
-    {CDoom::Spritenum::SPR_BON2, 1, 6, Pointer(Void).null, CDoom::Statenum::S_BON2, 0, 0},                         # S_BON2E
-    {CDoom::Spritenum::SPR_BKEY, 0, 10, Pointer(Void).null, CDoom::Statenum::S_BKEY2, 0, 0},                       # S_BKEY
-    {CDoom::Spritenum::SPR_BKEY, 32769, 10, Pointer(Void).null, CDoom::Statenum::S_BKEY, 0, 0},                    # S_BKEY2
-    {CDoom::Spritenum::SPR_RKEY, 0, 10, Pointer(Void).null, CDoom::Statenum::S_RKEY2, 0, 0},                       # S_RKEY
-    {CDoom::Spritenum::SPR_RKEY, 32769, 10, Pointer(Void).null, CDoom::Statenum::S_RKEY, 0, 0},                    # S_RKEY2
-    {CDoom::Spritenum::SPR_YKEY, 0, 10, Pointer(Void).null, CDoom::Statenum::S_YKEY2, 0, 0},                       # S_YKEY
-    {CDoom::Spritenum::SPR_YKEY, 32769, 10, Pointer(Void).null, CDoom::Statenum::S_YKEY, 0, 0},                    # S_YKEY2
-    {CDoom::Spritenum::SPR_BSKU, 0, 10, Pointer(Void).null, CDoom::Statenum::S_BSKULL2, 0, 0},                     # S_BSKULL
-    {CDoom::Spritenum::SPR_BSKU, 32769, 10, Pointer(Void).null, CDoom::Statenum::S_BSKULL, 0, 0},                  # S_BSKULL2
-    {CDoom::Spritenum::SPR_RSKU, 0, 10, Pointer(Void).null, CDoom::Statenum::S_RSKULL2, 0, 0},                     # S_RSKULL
-    {CDoom::Spritenum::SPR_RSKU, 32769, 10, Pointer(Void).null, CDoom::Statenum::S_RSKULL, 0, 0},                  # S_RSKULL2
-    {CDoom::Spritenum::SPR_YSKU, 0, 10, Pointer(Void).null, CDoom::Statenum::S_YSKULL2, 0, 0},                     # S_YSKULL
-    {CDoom::Spritenum::SPR_YSKU, 32769, 10, Pointer(Void).null, CDoom::Statenum::S_YSKULL, 0, 0},                  # S_YSKULL2
-    {CDoom::Spritenum::SPR_STIM, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_STIM
-    {CDoom::Spritenum::SPR_MEDI, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_MEDI
-    {CDoom::Spritenum::SPR_SOUL, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_SOUL2, 0, 0},                    # S_SOUL
-    {CDoom::Spritenum::SPR_SOUL, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_SOUL3, 0, 0},                    # S_SOUL2
-    {CDoom::Spritenum::SPR_SOUL, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_SOUL4, 0, 0},                    # S_SOUL3
-    {CDoom::Spritenum::SPR_SOUL, 32771, 6, Pointer(Void).null, CDoom::Statenum::S_SOUL5, 0, 0},                    # S_SOUL4
-    {CDoom::Spritenum::SPR_SOUL, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_SOUL6, 0, 0},                    # S_SOUL5
-    {CDoom::Spritenum::SPR_SOUL, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_SOUL, 0, 0},                     # S_SOUL6
-    {CDoom::Spritenum::SPR_PINV, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_PINV2, 0, 0},                    # S_PINV
-    {CDoom::Spritenum::SPR_PINV, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_PINV3, 0, 0},                    # S_PINV2
-    {CDoom::Spritenum::SPR_PINV, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_PINV4, 0, 0},                    # S_PINV3
-    {CDoom::Spritenum::SPR_PINV, 32771, 6, Pointer(Void).null, CDoom::Statenum::S_PINV, 0, 0},                     # S_PINV4
-    {CDoom::Spritenum::SPR_PSTR, 32768, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                    # S_PSTR
-    {CDoom::Spritenum::SPR_PINS, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_PINS2, 0, 0},                    # S_PINS
-    {CDoom::Spritenum::SPR_PINS, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_PINS3, 0, 0},                    # S_PINS2
-    {CDoom::Spritenum::SPR_PINS, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_PINS4, 0, 0},                    # S_PINS3
-    {CDoom::Spritenum::SPR_PINS, 32771, 6, Pointer(Void).null, CDoom::Statenum::S_PINS, 0, 0},                     # S_PINS4
-    {CDoom::Spritenum::SPR_MEGA, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_MEGA2, 0, 0},                    # S_MEGA
-    {CDoom::Spritenum::SPR_MEGA, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_MEGA3, 0, 0},                    # S_MEGA2
-    {CDoom::Spritenum::SPR_MEGA, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_MEGA4, 0, 0},                    # S_MEGA3
-    {CDoom::Spritenum::SPR_MEGA, 32771, 6, Pointer(Void).null, CDoom::Statenum::S_MEGA, 0, 0},                     # S_MEGA4
-    {CDoom::Spritenum::SPR_SUIT, 32768, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                    # S_SUIT
-    {CDoom::Spritenum::SPR_PMAP, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_PMAP2, 0, 0},                    # S_PMAP
-    {CDoom::Spritenum::SPR_PMAP, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_PMAP3, 0, 0},                    # S_PMAP2
-    {CDoom::Spritenum::SPR_PMAP, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_PMAP4, 0, 0},                    # S_PMAP3
-    {CDoom::Spritenum::SPR_PMAP, 32771, 6, Pointer(Void).null, CDoom::Statenum::S_PMAP5, 0, 0},                    # S_PMAP4
-    {CDoom::Spritenum::SPR_PMAP, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_PMAP6, 0, 0},                    # S_PMAP5
-    {CDoom::Spritenum::SPR_PMAP, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_PMAP, 0, 0},                     # S_PMAP6
-    {CDoom::Spritenum::SPR_PVIS, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_PVIS2, 0, 0},                    # S_PVIS
-    {CDoom::Spritenum::SPR_PVIS, 1, 6, Pointer(Void).null, CDoom::Statenum::S_PVIS, 0, 0},                         # S_PVIS2
-    {CDoom::Spritenum::SPR_CLIP, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_CLIP
-    {CDoom::Spritenum::SPR_AMMO, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_AMMO
-    {CDoom::Spritenum::SPR_ROCK, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_ROCK
-    {CDoom::Spritenum::SPR_BROK, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_BROK
-    {CDoom::Spritenum::SPR_CELL, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_CELL
-    {CDoom::Spritenum::SPR_CELP, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_CELP
-    {CDoom::Spritenum::SPR_SHEL, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_SHEL
-    {CDoom::Spritenum::SPR_SBOX, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_SBOX
-    {CDoom::Spritenum::SPR_BPAK, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_BPAK
-    {CDoom::Spritenum::SPR_BFUG, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_BFUG
-    {CDoom::Spritenum::SPR_MGUN, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_MGUN
-    {CDoom::Spritenum::SPR_CSAW, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_CSAW
-    {CDoom::Spritenum::SPR_LAUN, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_LAUN
-    {CDoom::Spritenum::SPR_PLAS, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_PLAS
-    {CDoom::Spritenum::SPR_SHOT, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_SHOT
-    {CDoom::Spritenum::SPR_SGN2, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_SHOT2
-    {CDoom::Spritenum::SPR_COLU, 32768, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                    # S_COLU
-    {CDoom::Spritenum::SPR_SMT2, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_STALAG
-    {CDoom::Spritenum::SPR_GOR1, 0, 10, Pointer(Void).null, CDoom::Statenum::S_BLOODYTWITCH2, 0, 0},               # S_BLOODYTWITCH
-    {CDoom::Spritenum::SPR_GOR1, 1, 15, Pointer(Void).null, CDoom::Statenum::S_BLOODYTWITCH3, 0, 0},               # S_BLOODYTWITCH2
-    {CDoom::Spritenum::SPR_GOR1, 2, 8, Pointer(Void).null, CDoom::Statenum::S_BLOODYTWITCH4, 0, 0},                # S_BLOODYTWITCH3
-    {CDoom::Spritenum::SPR_GOR1, 1, 6, Pointer(Void).null, CDoom::Statenum::S_BLOODYTWITCH, 0, 0},                 # S_BLOODYTWITCH4
-    {CDoom::Spritenum::SPR_PLAY, 13, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_DEADTORSO
-    {CDoom::Spritenum::SPR_PLAY, 18, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                       # S_DEADBOTTOM
-    {CDoom::Spritenum::SPR_POL2, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_HEADSONSTICK
-    {CDoom::Spritenum::SPR_POL5, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_GIBS
-    {CDoom::Spritenum::SPR_POL4, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_HEADONASTICK
-    {CDoom::Spritenum::SPR_POL3, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_HEADCANDLES2, 0, 0},             # S_HEADCANDLES
-    {CDoom::Spritenum::SPR_POL3, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_HEADCANDLES, 0, 0},              # S_HEADCANDLES2
-    {CDoom::Spritenum::SPR_POL1, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_DEADSTICK
-    {CDoom::Spritenum::SPR_POL6, 0, 6, Pointer(Void).null, CDoom::Statenum::S_LIVESTICK2, 0, 0},                   # S_LIVESTICK
-    {CDoom::Spritenum::SPR_POL6, 1, 8, Pointer(Void).null, CDoom::Statenum::S_LIVESTICK, 0, 0},                    # S_LIVESTICK2
-    {CDoom::Spritenum::SPR_GOR2, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_MEAT2
-    {CDoom::Spritenum::SPR_GOR3, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_MEAT3
-    {CDoom::Spritenum::SPR_GOR4, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_MEAT4
-    {CDoom::Spritenum::SPR_GOR5, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_MEAT5
-    {CDoom::Spritenum::SPR_SMIT, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_STALAGTITE
-    {CDoom::Spritenum::SPR_COL1, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_TALLGRNCOL
-    {CDoom::Spritenum::SPR_COL2, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_SHRTGRNCOL
-    {CDoom::Spritenum::SPR_COL3, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_TALLREDCOL
-    {CDoom::Spritenum::SPR_COL4, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_SHRTREDCOL
-    {CDoom::Spritenum::SPR_CAND, 32768, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                    # S_CANDLESTIK
-    {CDoom::Spritenum::SPR_CBRA, 32768, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                    # S_CANDELABRA
-    {CDoom::Spritenum::SPR_COL6, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_SKULLCOL
-    {CDoom::Spritenum::SPR_TRE1, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_TORCHTREE
-    {CDoom::Spritenum::SPR_TRE2, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_BIGTREE
-    {CDoom::Spritenum::SPR_ELEC, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_TECHPILLAR
-    {CDoom::Spritenum::SPR_CEYE, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_EVILEYE2, 0, 0},                 # S_EVILEYE
-    {CDoom::Spritenum::SPR_CEYE, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_EVILEYE3, 0, 0},                 # S_EVILEYE2
-    {CDoom::Spritenum::SPR_CEYE, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_EVILEYE4, 0, 0},                 # S_EVILEYE3
-    {CDoom::Spritenum::SPR_CEYE, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_EVILEYE, 0, 0},                  # S_EVILEYE4
-    {CDoom::Spritenum::SPR_FSKU, 32768, 6, Pointer(Void).null, CDoom::Statenum::S_FLOATSKULL2, 0, 0},              # S_FLOATSKULL
-    {CDoom::Spritenum::SPR_FSKU, 32769, 6, Pointer(Void).null, CDoom::Statenum::S_FLOATSKULL3, 0, 0},              # S_FLOATSKULL2
-    {CDoom::Spritenum::SPR_FSKU, 32770, 6, Pointer(Void).null, CDoom::Statenum::S_FLOATSKULL, 0, 0},               # S_FLOATSKULL3
-    {CDoom::Spritenum::SPR_COL5, 0, 14, Pointer(Void).null, CDoom::Statenum::S_HEARTCOL2, 0, 0},                   # S_HEARTCOL
-    {CDoom::Spritenum::SPR_COL5, 1, 14, Pointer(Void).null, CDoom::Statenum::S_HEARTCOL, 0, 0},                    # S_HEARTCOL2
-    {CDoom::Spritenum::SPR_TBLU, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_BLUETORCH2, 0, 0},               # S_BLUETORCH
-    {CDoom::Spritenum::SPR_TBLU, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_BLUETORCH3, 0, 0},               # S_BLUETORCH2
-    {CDoom::Spritenum::SPR_TBLU, 32770, 4, Pointer(Void).null, CDoom::Statenum::S_BLUETORCH4, 0, 0},               # S_BLUETORCH3
-    {CDoom::Spritenum::SPR_TBLU, 32771, 4, Pointer(Void).null, CDoom::Statenum::S_BLUETORCH, 0, 0},                # S_BLUETORCH4
-    {CDoom::Spritenum::SPR_TGRN, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_GREENTORCH2, 0, 0},              # S_GREENTORCH
-    {CDoom::Spritenum::SPR_TGRN, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_GREENTORCH3, 0, 0},              # S_GREENTORCH2
-    {CDoom::Spritenum::SPR_TGRN, 32770, 4, Pointer(Void).null, CDoom::Statenum::S_GREENTORCH4, 0, 0},              # S_GREENTORCH3
-    {CDoom::Spritenum::SPR_TGRN, 32771, 4, Pointer(Void).null, CDoom::Statenum::S_GREENTORCH, 0, 0},               # S_GREENTORCH4
-    {CDoom::Spritenum::SPR_TRED, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_REDTORCH2, 0, 0},                # S_REDTORCH
-    {CDoom::Spritenum::SPR_TRED, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_REDTORCH3, 0, 0},                # S_REDTORCH2
-    {CDoom::Spritenum::SPR_TRED, 32770, 4, Pointer(Void).null, CDoom::Statenum::S_REDTORCH4, 0, 0},                # S_REDTORCH3
-    {CDoom::Spritenum::SPR_TRED, 32771, 4, Pointer(Void).null, CDoom::Statenum::S_REDTORCH, 0, 0},                 # S_REDTORCH4
-    {CDoom::Spritenum::SPR_SMBT, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_BTORCHSHRT2, 0, 0},              # S_BTORCHSHRT
-    {CDoom::Spritenum::SPR_SMBT, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_BTORCHSHRT3, 0, 0},              # S_BTORCHSHRT2
-    {CDoom::Spritenum::SPR_SMBT, 32770, 4, Pointer(Void).null, CDoom::Statenum::S_BTORCHSHRT4, 0, 0},              # S_BTORCHSHRT3
-    {CDoom::Spritenum::SPR_SMBT, 32771, 4, Pointer(Void).null, CDoom::Statenum::S_BTORCHSHRT, 0, 0},               # S_BTORCHSHRT4
-    {CDoom::Spritenum::SPR_SMGT, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_GTORCHSHRT2, 0, 0},              # S_GTORCHSHRT
-    {CDoom::Spritenum::SPR_SMGT, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_GTORCHSHRT3, 0, 0},              # S_GTORCHSHRT2
-    {CDoom::Spritenum::SPR_SMGT, 32770, 4, Pointer(Void).null, CDoom::Statenum::S_GTORCHSHRT4, 0, 0},              # S_GTORCHSHRT3
-    {CDoom::Spritenum::SPR_SMGT, 32771, 4, Pointer(Void).null, CDoom::Statenum::S_GTORCHSHRT, 0, 0},               # S_GTORCHSHRT4
-    {CDoom::Spritenum::SPR_SMRT, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_RTORCHSHRT2, 0, 0},              # S_RTORCHSHRT
-    {CDoom::Spritenum::SPR_SMRT, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_RTORCHSHRT3, 0, 0},              # S_RTORCHSHRT2
-    {CDoom::Spritenum::SPR_SMRT, 32770, 4, Pointer(Void).null, CDoom::Statenum::S_RTORCHSHRT4, 0, 0},              # S_RTORCHSHRT3
-    {CDoom::Spritenum::SPR_SMRT, 32771, 4, Pointer(Void).null, CDoom::Statenum::S_RTORCHSHRT, 0, 0},               # S_RTORCHSHRT4
-    {CDoom::Spritenum::SPR_HDB1, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_HANGNOGUTS
-    {CDoom::Spritenum::SPR_HDB2, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_HANGBNOBRAIN
-    {CDoom::Spritenum::SPR_HDB3, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_HANGTLOOKDN
-    {CDoom::Spritenum::SPR_HDB4, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_HANGTSKULL
-    {CDoom::Spritenum::SPR_HDB5, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_HANGTLOOKUP
-    {CDoom::Spritenum::SPR_HDB6, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_HANGTNOBRAIN
-    {CDoom::Spritenum::SPR_POB1, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_COLONGIBS
-    {CDoom::Spritenum::SPR_POB2, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_SMALLPOOL
-    {CDoom::Spritenum::SPR_BRS1, 0, -1, Pointer(Void).null, CDoom::Statenum::S_NULL, 0, 0},                        # S_BRAINSTEM
-    {CDoom::Spritenum::SPR_TLMP, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_TECHLAMP2, 0, 0},                # S_TECHLAMP
-    {CDoom::Spritenum::SPR_TLMP, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_TECHLAMP3, 0, 0},                # S_TECHLAMP2
-    {CDoom::Spritenum::SPR_TLMP, 32770, 4, Pointer(Void).null, CDoom::Statenum::S_TECHLAMP4, 0, 0},                # S_TECHLAMP3
-    {CDoom::Spritenum::SPR_TLMP, 32771, 4, Pointer(Void).null, CDoom::Statenum::S_TECHLAMP, 0, 0},                 # S_TECHLAMP4
-    {CDoom::Spritenum::SPR_TLP2, 32768, 4, Pointer(Void).null, CDoom::Statenum::S_TECH2LAMP2, 0, 0},               # S_TECH2LAMP
-    {CDoom::Spritenum::SPR_TLP2, 32769, 4, Pointer(Void).null, CDoom::Statenum::S_TECH2LAMP3, 0, 0},               # S_TECH2LAMP2
-    {CDoom::Spritenum::SPR_TLP2, 32770, 4, Pointer(Void).null, CDoom::Statenum::S_TECH2LAMP4, 0, 0},               # S_TECH2LAMP3
-    {CDoom::Spritenum::SPR_TLP2, 32771, 4, Pointer(Void).null, CDoom::Statenum::S_TECH2LAMP, 0, 0},                # S_TECH2LAMP4
+  @@statedata : Array(Tuple(Doocr::Spritenum, Int32, Int32, Void*, Doocr::Statenum, Int32, Int32)) = [
+    {Doocr::Spritenum::SPR_TROO, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_NULL
+    {Doocr::Spritenum::SPR_SHTG, 4, 0, (->CDoom.a_light0).pointer, Doocr::Statenum::S_NULL, 0, 0},                 # S_LIGHTDONE
+    {Doocr::Spritenum::SPR_PUNG, 0, 1, (->CDoom.a_weapon_ready).pointer, Doocr::Statenum::S_PUNCH, 0, 0},          # S_PUNCH
+    {Doocr::Spritenum::SPR_PUNG, 0, 1, (->CDoom.a_lower).pointer, Doocr::Statenum::S_PUNCHDOWN, 0, 0},             # S_PUNCHDOWN
+    {Doocr::Spritenum::SPR_PUNG, 0, 1, (->CDoom.a_raise).pointer, Doocr::Statenum::S_PUNCHUP, 0, 0},               # S_PUNCHUP
+    {Doocr::Spritenum::SPR_PUNG, 1, 4, Pointer(Void).null, Doocr::Statenum::S_PUNCH2, 0, 0},                       # S_PUNCH1
+    {Doocr::Spritenum::SPR_PUNG, 2, 4, (->CDoom.a_punch).pointer, Doocr::Statenum::S_PUNCH3, 0, 0},                # S_PUNCH2
+    {Doocr::Spritenum::SPR_PUNG, 3, 5, Pointer(Void).null, Doocr::Statenum::S_PUNCH4, 0, 0},                       # S_PUNCH3
+    {Doocr::Spritenum::SPR_PUNG, 2, 4, Pointer(Void).null, Doocr::Statenum::S_PUNCH5, 0, 0},                       # S_PUNCH4
+    {Doocr::Spritenum::SPR_PUNG, 1, 5, (->CDoom.a_refire).pointer, Doocr::Statenum::S_PUNCH, 0, 0},                # S_PUNCH5
+    {Doocr::Spritenum::SPR_PISG, 0, 1, (->CDoom.a_weapon_ready).pointer, Doocr::Statenum::S_PISTOL, 0, 0},         # S_PISTOL
+    {Doocr::Spritenum::SPR_PISG, 0, 1, (->CDoom.a_lower).pointer, Doocr::Statenum::S_PISTOLDOWN, 0, 0},            # S_PISTOLDOWN
+    {Doocr::Spritenum::SPR_PISG, 0, 1, (->CDoom.a_raise).pointer, Doocr::Statenum::S_PISTOLUP, 0, 0},              # S_PISTOLUP
+    {Doocr::Spritenum::SPR_PISG, 0, 4, Pointer(Void).null, Doocr::Statenum::S_PISTOL2, 0, 0},                      # S_PISTOL1
+    {Doocr::Spritenum::SPR_PISG, 1, 6, (->CDoom.a_fire_pistol).pointer, Doocr::Statenum::S_PISTOL3, 0, 0},         # S_PISTOL2
+    {Doocr::Spritenum::SPR_PISG, 2, 4, Pointer(Void).null, Doocr::Statenum::S_PISTOL4, 0, 0},                      # S_PISTOL3
+    {Doocr::Spritenum::SPR_PISG, 1, 5, (->CDoom.a_refire).pointer, Doocr::Statenum::S_PISTOL, 0, 0},               # S_PISTOL4
+    {Doocr::Spritenum::SPR_PISF, 32768, 7, (->CDoom.a_light1).pointer, Doocr::Statenum::S_LIGHTDONE, 0, 0},        # S_PISTOLFLASH
+    {Doocr::Spritenum::SPR_SHTG, 0, 1, (->CDoom.a_weapon_ready).pointer, Doocr::Statenum::S_SGUN, 0, 0},           # S_SGUN
+    {Doocr::Spritenum::SPR_SHTG, 0, 1, (->CDoom.a_lower).pointer, Doocr::Statenum::S_SGUNDOWN, 0, 0},              # S_SGUNDOWN
+    {Doocr::Spritenum::SPR_SHTG, 0, 1, (->CDoom.a_raise).pointer, Doocr::Statenum::S_SGUNUP, 0, 0},                # S_SGUNUP
+    {Doocr::Spritenum::SPR_SHTG, 0, 3, Pointer(Void).null, Doocr::Statenum::S_SGUN2, 0, 0},                        # S_SGUN1
+    {Doocr::Spritenum::SPR_SHTG, 0, 7, (->CDoom.a_fire_shotgun).pointer, Doocr::Statenum::S_SGUN3, 0, 0},          # S_SGUN2
+    {Doocr::Spritenum::SPR_SHTG, 1, 5, Pointer(Void).null, Doocr::Statenum::S_SGUN4, 0, 0},                        # S_SGUN3
+    {Doocr::Spritenum::SPR_SHTG, 2, 5, Pointer(Void).null, Doocr::Statenum::S_SGUN5, 0, 0},                        # S_SGUN4
+    {Doocr::Spritenum::SPR_SHTG, 3, 4, Pointer(Void).null, Doocr::Statenum::S_SGUN6, 0, 0},                        # S_SGUN5
+    {Doocr::Spritenum::SPR_SHTG, 2, 5, Pointer(Void).null, Doocr::Statenum::S_SGUN7, 0, 0},                        # S_SGUN6
+    {Doocr::Spritenum::SPR_SHTG, 1, 5, Pointer(Void).null, Doocr::Statenum::S_SGUN8, 0, 0},                        # S_SGUN7
+    {Doocr::Spritenum::SPR_SHTG, 0, 3, Pointer(Void).null, Doocr::Statenum::S_SGUN9, 0, 0},                        # S_SGUN8
+    {Doocr::Spritenum::SPR_SHTG, 0, 7, (->CDoom.a_refire).pointer, Doocr::Statenum::S_SGUN, 0, 0},                 # S_SGUN9
+    {Doocr::Spritenum::SPR_SHTF, 32768, 4, (->CDoom.a_light1).pointer, Doocr::Statenum::S_SGUNFLASH2, 0, 0},       # S_SGUNFLASH1
+    {Doocr::Spritenum::SPR_SHTF, 32769, 3, (->CDoom.a_light2).pointer, Doocr::Statenum::S_LIGHTDONE, 0, 0},        # S_SGUNFLASH2
+    {Doocr::Spritenum::SPR_SHT2, 0, 1, (->CDoom.a_weapon_ready).pointer, Doocr::Statenum::S_DSGUN, 0, 0},          # S_DSGUN
+    {Doocr::Spritenum::SPR_SHT2, 0, 1, (->CDoom.a_lower).pointer, Doocr::Statenum::S_DSGUNDOWN, 0, 0},             # S_DSGUNDOWN
+    {Doocr::Spritenum::SPR_SHT2, 0, 1, (->CDoom.a_raise).pointer, Doocr::Statenum::S_DSGUNUP, 0, 0},               # S_DSGUNUP
+    {Doocr::Spritenum::SPR_SHT2, 0, 3, Pointer(Void).null, Doocr::Statenum::S_DSGUN2, 0, 0},                       # S_DSGUN1
+    {Doocr::Spritenum::SPR_SHT2, 0, 7, (->CDoom.a_fire_shotgun2).pointer, Doocr::Statenum::S_DSGUN3, 0, 0},        # S_DSGUN2
+    {Doocr::Spritenum::SPR_SHT2, 1, 7, Pointer(Void).null, Doocr::Statenum::S_DSGUN4, 0, 0},                       # S_DSGUN3
+    {Doocr::Spritenum::SPR_SHT2, 2, 7, (->CDoom.a_check_reload).pointer, Doocr::Statenum::S_DSGUN5, 0, 0},         # S_DSGUN4
+    {Doocr::Spritenum::SPR_SHT2, 3, 7, (->CDoom.a_open_shotgun2).pointer, Doocr::Statenum::S_DSGUN6, 0, 0},        # S_DSGUN5
+    {Doocr::Spritenum::SPR_SHT2, 4, 7, Pointer(Void).null, Doocr::Statenum::S_DSGUN7, 0, 0},                       # S_DSGUN6
+    {Doocr::Spritenum::SPR_SHT2, 5, 7, (->CDoom.a_load_shotgun2).pointer, Doocr::Statenum::S_DSGUN8, 0, 0},        # S_DSGUN7
+    {Doocr::Spritenum::SPR_SHT2, 6, 6, Pointer(Void).null, Doocr::Statenum::S_DSGUN9, 0, 0},                       # S_DSGUN8
+    {Doocr::Spritenum::SPR_SHT2, 7, 6, (->CDoom.a_close_shotgun2).pointer, Doocr::Statenum::S_DSGUN10, 0, 0},      # S_DSGUN9
+    {Doocr::Spritenum::SPR_SHT2, 0, 5, (->CDoom.a_refire).pointer, Doocr::Statenum::S_DSGUN, 0, 0},                # S_DSGUN10
+    {Doocr::Spritenum::SPR_SHT2, 1, 7, Pointer(Void).null, Doocr::Statenum::S_DSNR2, 0, 0},                        # S_DSNR1
+    {Doocr::Spritenum::SPR_SHT2, 0, 3, Pointer(Void).null, Doocr::Statenum::S_DSGUNDOWN, 0, 0},                    # S_DSNR2
+    {Doocr::Spritenum::SPR_SHT2, 32776, 5, (->CDoom.a_light1).pointer, Doocr::Statenum::S_DSGUNFLASH2, 0, 0},      # S_DSGUNFLASH1
+    {Doocr::Spritenum::SPR_SHT2, 32777, 4, (->CDoom.a_light2).pointer, Doocr::Statenum::S_LIGHTDONE, 0, 0},        # S_DSGUNFLASH2
+    {Doocr::Spritenum::SPR_CHGG, 0, 1, (->CDoom.a_weapon_ready).pointer, Doocr::Statenum::S_CHAIN, 0, 0},          # S_CHAIN
+    {Doocr::Spritenum::SPR_CHGG, 0, 1, (->CDoom.a_lower).pointer, Doocr::Statenum::S_CHAINDOWN, 0, 0},             # S_CHAINDOWN
+    {Doocr::Spritenum::SPR_CHGG, 0, 1, (->CDoom.a_raise).pointer, Doocr::Statenum::S_CHAINUP, 0, 0},               # S_CHAINUP
+    {Doocr::Spritenum::SPR_CHGG, 0, 4, (->CDoom.a_fire_cgun).pointer, Doocr::Statenum::S_CHAIN2, 0, 0},            # S_CHAIN1
+    {Doocr::Spritenum::SPR_CHGG, 1, 4, (->CDoom.a_fire_cgun).pointer, Doocr::Statenum::S_CHAIN3, 0, 0},            # S_CHAIN2
+    {Doocr::Spritenum::SPR_CHGG, 1, 0, (->CDoom.a_refire).pointer, Doocr::Statenum::S_CHAIN, 0, 0},                # S_CHAIN3
+    {Doocr::Spritenum::SPR_CHGF, 32768, 5, (->CDoom.a_light1).pointer, Doocr::Statenum::S_LIGHTDONE, 0, 0},        # S_CHAINFLASH1
+    {Doocr::Spritenum::SPR_CHGF, 32769, 5, (->CDoom.a_light2).pointer, Doocr::Statenum::S_LIGHTDONE, 0, 0},        # S_CHAINFLASH2
+    {Doocr::Spritenum::SPR_MISG, 0, 1, (->CDoom.a_weapon_ready).pointer, Doocr::Statenum::S_MISSILE, 0, 0},        # S_MISSILE
+    {Doocr::Spritenum::SPR_MISG, 0, 1, (->CDoom.a_lower).pointer, Doocr::Statenum::S_MISSILEDOWN, 0, 0},           # S_MISSILEDOWN
+    {Doocr::Spritenum::SPR_MISG, 0, 1, (->CDoom.a_raise).pointer, Doocr::Statenum::S_MISSILEUP, 0, 0},             # S_MISSILEUP
+    {Doocr::Spritenum::SPR_MISG, 1, 8, (->CDoom.a_gun_flash).pointer, Doocr::Statenum::S_MISSILE2, 0, 0},          # S_MISSILE1
+    {Doocr::Spritenum::SPR_MISG, 1, 12, (->CDoom.a_fire_missile).pointer, Doocr::Statenum::S_MISSILE3, 0, 0},      # S_MISSILE2
+    {Doocr::Spritenum::SPR_MISG, 1, 0, (->CDoom.a_refire).pointer, Doocr::Statenum::S_MISSILE, 0, 0},              # S_MISSILE3
+    {Doocr::Spritenum::SPR_MISF, 32768, 3, (->CDoom.a_light1).pointer, Doocr::Statenum::S_MISSILEFLASH2, 0, 0},    # S_MISSILEFLASH1
+    {Doocr::Spritenum::SPR_MISF, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_MISSILEFLASH3, 0, 0},            # S_MISSILEFLASH2
+    {Doocr::Spritenum::SPR_MISF, 32770, 4, (->CDoom.a_light2).pointer, Doocr::Statenum::S_MISSILEFLASH4, 0, 0},    # S_MISSILEFLASH3
+    {Doocr::Spritenum::SPR_MISF, 32771, 4, (->CDoom.a_light2).pointer, Doocr::Statenum::S_LIGHTDONE, 0, 0},        # S_MISSILEFLASH4
+    {Doocr::Spritenum::SPR_SAWG, 2, 4, (->CDoom.a_weapon_ready).pointer, Doocr::Statenum::S_SAWB, 0, 0},           # S_SAW
+    {Doocr::Spritenum::SPR_SAWG, 3, 4, (->CDoom.a_weapon_ready).pointer, Doocr::Statenum::S_SAW, 0, 0},            # S_SAWB
+    {Doocr::Spritenum::SPR_SAWG, 2, 1, (->CDoom.a_lower).pointer, Doocr::Statenum::S_SAWDOWN, 0, 0},               # S_SAWDOWN
+    {Doocr::Spritenum::SPR_SAWG, 2, 1, (->CDoom.a_raise).pointer, Doocr::Statenum::S_SAWUP, 0, 0},                 # S_SAWUP
+    {Doocr::Spritenum::SPR_SAWG, 0, 4, (->CDoom.a_saw).pointer, Doocr::Statenum::S_SAW2, 0, 0},                    # S_SAW1
+    {Doocr::Spritenum::SPR_SAWG, 1, 4, (->CDoom.a_saw).pointer, Doocr::Statenum::S_SAW3, 0, 0},                    # S_SAW2
+    {Doocr::Spritenum::SPR_SAWG, 1, 0, (->CDoom.a_refire).pointer, Doocr::Statenum::S_SAW, 0, 0},                  # S_SAW3
+    {Doocr::Spritenum::SPR_PLSG, 0, 1, (->CDoom.a_weapon_ready).pointer, Doocr::Statenum::S_PLASMA, 0, 0},         # S_PLASMA
+    {Doocr::Spritenum::SPR_PLSG, 0, 1, (->CDoom.a_lower).pointer, Doocr::Statenum::S_PLASMADOWN, 0, 0},            # S_PLASMADOWN
+    {Doocr::Spritenum::SPR_PLSG, 0, 1, (->CDoom.a_raise).pointer, Doocr::Statenum::S_PLASMAUP, 0, 0},              # S_PLASMAUP
+    {Doocr::Spritenum::SPR_PLSG, 0, 3, (->CDoom.a_fire_plasma).pointer, Doocr::Statenum::S_PLASMA2, 0, 0},         # S_PLASMA1
+    {Doocr::Spritenum::SPR_PLSG, 1, 20, (->CDoom.a_refire).pointer, Doocr::Statenum::S_PLASMA, 0, 0},              # S_PLASMA2
+    {Doocr::Spritenum::SPR_PLSF, 32768, 4, (->CDoom.a_light1).pointer, Doocr::Statenum::S_LIGHTDONE, 0, 0},        # S_PLASMAFLASH1
+    {Doocr::Spritenum::SPR_PLSF, 32769, 4, (->CDoom.a_light1).pointer, Doocr::Statenum::S_LIGHTDONE, 0, 0},        # S_PLASMAFLASH2
+    {Doocr::Spritenum::SPR_BFGG, 0, 1, (->CDoom.a_weapon_ready).pointer, Doocr::Statenum::S_BFG, 0, 0},            # S_BFG
+    {Doocr::Spritenum::SPR_BFGG, 0, 1, (->CDoom.a_lower).pointer, Doocr::Statenum::S_BFGDOWN, 0, 0},               # S_BFGDOWN
+    {Doocr::Spritenum::SPR_BFGG, 0, 1, (->CDoom.a_raise).pointer, Doocr::Statenum::S_BFGUP, 0, 0},                 # S_BFGUP
+    {Doocr::Spritenum::SPR_BFGG, 0, 20, (->CDoom.a_bfg_sound).pointer, Doocr::Statenum::S_BFG2, 0, 0},             # S_BFG1
+    {Doocr::Spritenum::SPR_BFGG, 1, 10, (->CDoom.a_gun_flash).pointer, Doocr::Statenum::S_BFG3, 0, 0},             # S_BFG2
+    {Doocr::Spritenum::SPR_BFGG, 1, 10, (->CDoom.a_fire_bfg).pointer, Doocr::Statenum::S_BFG4, 0, 0},              # S_BFG3
+    {Doocr::Spritenum::SPR_BFGG, 1, 20, (->CDoom.a_refire).pointer, Doocr::Statenum::S_BFG, 0, 0},                 # S_BFG4
+    {Doocr::Spritenum::SPR_BFGF, 32768, 11, (->CDoom.a_light1).pointer, Doocr::Statenum::S_BFGFLASH2, 0, 0},       # S_BFGFLASH1
+    {Doocr::Spritenum::SPR_BFGF, 32769, 6, (->CDoom.a_light2).pointer, Doocr::Statenum::S_LIGHTDONE, 0, 0},        # S_BFGFLASH2
+    {Doocr::Spritenum::SPR_BLUD, 2, 8, Pointer(Void).null, Doocr::Statenum::S_BLOOD2, 0, 0},                       # S_BLOOD1
+    {Doocr::Spritenum::SPR_BLUD, 1, 8, Pointer(Void).null, Doocr::Statenum::S_BLOOD3, 0, 0},                       # S_BLOOD2
+    {Doocr::Spritenum::SPR_BLUD, 0, 8, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                         # S_BLOOD3
+    {Doocr::Spritenum::SPR_PUFF, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_PUFF2, 0, 0},                    # S_PUFF1
+    {Doocr::Spritenum::SPR_PUFF, 1, 4, Pointer(Void).null, Doocr::Statenum::S_PUFF3, 0, 0},                        # S_PUFF2
+    {Doocr::Spritenum::SPR_PUFF, 2, 4, Pointer(Void).null, Doocr::Statenum::S_PUFF4, 0, 0},                        # S_PUFF3
+    {Doocr::Spritenum::SPR_PUFF, 3, 4, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                         # S_PUFF4
+    {Doocr::Spritenum::SPR_BAL1, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_TBALL2, 0, 0},                   # S_TBALL1
+    {Doocr::Spritenum::SPR_BAL1, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_TBALL1, 0, 0},                   # S_TBALL2
+    {Doocr::Spritenum::SPR_BAL1, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_TBALLX2, 0, 0},                  # S_TBALLX1
+    {Doocr::Spritenum::SPR_BAL1, 32771, 6, Pointer(Void).null, Doocr::Statenum::S_TBALLX3, 0, 0},                  # S_TBALLX2
+    {Doocr::Spritenum::SPR_BAL1, 32772, 6, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                     # S_TBALLX3
+    {Doocr::Spritenum::SPR_BAL2, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_RBALL2, 0, 0},                   # S_RBALL1
+    {Doocr::Spritenum::SPR_BAL2, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_RBALL1, 0, 0},                   # S_RBALL2
+    {Doocr::Spritenum::SPR_BAL2, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_RBALLX2, 0, 0},                  # S_RBALLX1
+    {Doocr::Spritenum::SPR_BAL2, 32771, 6, Pointer(Void).null, Doocr::Statenum::S_RBALLX3, 0, 0},                  # S_RBALLX2
+    {Doocr::Spritenum::SPR_BAL2, 32772, 6, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                     # S_RBALLX3
+    {Doocr::Spritenum::SPR_PLSS, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_PLASBALL2, 0, 0},                # S_PLASBALL
+    {Doocr::Spritenum::SPR_PLSS, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_PLASBALL, 0, 0},                 # S_PLASBALL2
+    {Doocr::Spritenum::SPR_PLSE, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_PLASEXP2, 0, 0},                 # S_PLASEXP
+    {Doocr::Spritenum::SPR_PLSE, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_PLASEXP3, 0, 0},                 # S_PLASEXP2
+    {Doocr::Spritenum::SPR_PLSE, 32770, 4, Pointer(Void).null, Doocr::Statenum::S_PLASEXP4, 0, 0},                 # S_PLASEXP3
+    {Doocr::Spritenum::SPR_PLSE, 32771, 4, Pointer(Void).null, Doocr::Statenum::S_PLASEXP5, 0, 0},                 # S_PLASEXP4
+    {Doocr::Spritenum::SPR_PLSE, 32772, 4, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                     # S_PLASEXP5
+    {Doocr::Spritenum::SPR_MISL, 32768, 1, Pointer(Void).null, Doocr::Statenum::S_ROCKET, 0, 0},                   # S_ROCKET
+    {Doocr::Spritenum::SPR_BFS1, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_BFGSHOT2, 0, 0},                 # S_BFGSHOT
+    {Doocr::Spritenum::SPR_BFS1, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_BFGSHOT, 0, 0},                  # S_BFGSHOT2
+    {Doocr::Spritenum::SPR_BFE1, 32768, 8, Pointer(Void).null, Doocr::Statenum::S_BFGLAND2, 0, 0},                 # S_BFGLAND
+    {Doocr::Spritenum::SPR_BFE1, 32769, 8, Pointer(Void).null, Doocr::Statenum::S_BFGLAND3, 0, 0},                 # S_BFGLAND2
+    {Doocr::Spritenum::SPR_BFE1, 32770, 8, (->CDoom.a_bfg_spray).pointer, Doocr::Statenum::S_BFGLAND4, 0, 0},      # S_BFGLAND3
+    {Doocr::Spritenum::SPR_BFE1, 32771, 8, Pointer(Void).null, Doocr::Statenum::S_BFGLAND5, 0, 0},                 # S_BFGLAND4
+    {Doocr::Spritenum::SPR_BFE1, 32772, 8, Pointer(Void).null, Doocr::Statenum::S_BFGLAND6, 0, 0},                 # S_BFGLAND5
+    {Doocr::Spritenum::SPR_BFE1, 32773, 8, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                     # S_BFGLAND6
+    {Doocr::Spritenum::SPR_BFE2, 32768, 8, Pointer(Void).null, Doocr::Statenum::S_BFGEXP2, 0, 0},                  # S_BFGEXP
+    {Doocr::Spritenum::SPR_BFE2, 32769, 8, Pointer(Void).null, Doocr::Statenum::S_BFGEXP3, 0, 0},                  # S_BFGEXP2
+    {Doocr::Spritenum::SPR_BFE2, 32770, 8, Pointer(Void).null, Doocr::Statenum::S_BFGEXP4, 0, 0},                  # S_BFGEXP3
+    {Doocr::Spritenum::SPR_BFE2, 32771, 8, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                     # S_BFGEXP4
+    {Doocr::Spritenum::SPR_MISL, 32769, 8, (->CDoom.a_explode).pointer, Doocr::Statenum::S_EXPLODE2, 0, 0},        # S_EXPLODE1
+    {Doocr::Spritenum::SPR_MISL, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_EXPLODE3, 0, 0},                 # S_EXPLODE2
+    {Doocr::Spritenum::SPR_MISL, 32771, 4, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                     # S_EXPLODE3
+    {Doocr::Spritenum::SPR_TFOG, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_TFOG01, 0, 0},                   # S_TFOG
+    {Doocr::Spritenum::SPR_TFOG, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_TFOG02, 0, 0},                   # S_TFOG01
+    {Doocr::Spritenum::SPR_TFOG, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_TFOG2, 0, 0},                    # S_TFOG02
+    {Doocr::Spritenum::SPR_TFOG, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_TFOG3, 0, 0},                    # S_TFOG2
+    {Doocr::Spritenum::SPR_TFOG, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_TFOG4, 0, 0},                    # S_TFOG3
+    {Doocr::Spritenum::SPR_TFOG, 32771, 6, Pointer(Void).null, Doocr::Statenum::S_TFOG5, 0, 0},                    # S_TFOG4
+    {Doocr::Spritenum::SPR_TFOG, 32772, 6, Pointer(Void).null, Doocr::Statenum::S_TFOG6, 0, 0},                    # S_TFOG5
+    {Doocr::Spritenum::SPR_TFOG, 32773, 6, Pointer(Void).null, Doocr::Statenum::S_TFOG7, 0, 0},                    # S_TFOG6
+    {Doocr::Spritenum::SPR_TFOG, 32774, 6, Pointer(Void).null, Doocr::Statenum::S_TFOG8, 0, 0},                    # S_TFOG7
+    {Doocr::Spritenum::SPR_TFOG, 32775, 6, Pointer(Void).null, Doocr::Statenum::S_TFOG9, 0, 0},                    # S_TFOG8
+    {Doocr::Spritenum::SPR_TFOG, 32776, 6, Pointer(Void).null, Doocr::Statenum::S_TFOG10, 0, 0},                   # S_TFOG9
+    {Doocr::Spritenum::SPR_TFOG, 32777, 6, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                     # S_TFOG10
+    {Doocr::Spritenum::SPR_IFOG, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_IFOG01, 0, 0},                   # S_IFOG
+    {Doocr::Spritenum::SPR_IFOG, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_IFOG02, 0, 0},                   # S_IFOG01
+    {Doocr::Spritenum::SPR_IFOG, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_IFOG2, 0, 0},                    # S_IFOG02
+    {Doocr::Spritenum::SPR_IFOG, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_IFOG3, 0, 0},                    # S_IFOG2
+    {Doocr::Spritenum::SPR_IFOG, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_IFOG4, 0, 0},                    # S_IFOG3
+    {Doocr::Spritenum::SPR_IFOG, 32771, 6, Pointer(Void).null, Doocr::Statenum::S_IFOG5, 0, 0},                    # S_IFOG4
+    {Doocr::Spritenum::SPR_IFOG, 32772, 6, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                     # S_IFOG5
+    {Doocr::Spritenum::SPR_PLAY, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_PLAY
+    {Doocr::Spritenum::SPR_PLAY, 0, 4, Pointer(Void).null, Doocr::Statenum::S_PLAY_RUN2, 0, 0},                    # S_PLAY_RUN1
+    {Doocr::Spritenum::SPR_PLAY, 1, 4, Pointer(Void).null, Doocr::Statenum::S_PLAY_RUN3, 0, 0},                    # S_PLAY_RUN2
+    {Doocr::Spritenum::SPR_PLAY, 2, 4, Pointer(Void).null, Doocr::Statenum::S_PLAY_RUN4, 0, 0},                    # S_PLAY_RUN3
+    {Doocr::Spritenum::SPR_PLAY, 3, 4, Pointer(Void).null, Doocr::Statenum::S_PLAY_RUN1, 0, 0},                    # S_PLAY_RUN4
+    {Doocr::Spritenum::SPR_PLAY, 4, 12, Pointer(Void).null, Doocr::Statenum::S_PLAY, 0, 0},                        # S_PLAY_ATK1
+    {Doocr::Spritenum::SPR_PLAY, 32773, 6, Pointer(Void).null, Doocr::Statenum::S_PLAY_ATK1, 0, 0},                # S_PLAY_ATK2
+    {Doocr::Spritenum::SPR_PLAY, 6, 4, Pointer(Void).null, Doocr::Statenum::S_PLAY_PAIN2, 0, 0},                   # S_PLAY_PAIN
+    {Doocr::Spritenum::SPR_PLAY, 6, 4, (->CDoom.a_pain).pointer, Doocr::Statenum::S_PLAY, 0, 0},                   # S_PLAY_PAIN2
+    {Doocr::Spritenum::SPR_PLAY, 7, 10, Pointer(Void).null, Doocr::Statenum::S_PLAY_DIE2, 0, 0},                   # S_PLAY_DIE1
+    {Doocr::Spritenum::SPR_PLAY, 8, 10, (->CDoom.a_player_scream).pointer, Doocr::Statenum::S_PLAY_DIE3, 0, 0},    # S_PLAY_DIE2
+    {Doocr::Spritenum::SPR_PLAY, 9, 10, (->CDoom.a_fall).pointer, Doocr::Statenum::S_PLAY_DIE4, 0, 0},             # S_PLAY_DIE3
+    {Doocr::Spritenum::SPR_PLAY, 10, 10, Pointer(Void).null, Doocr::Statenum::S_PLAY_DIE5, 0, 0},                  # S_PLAY_DIE4
+    {Doocr::Spritenum::SPR_PLAY, 11, 10, Pointer(Void).null, Doocr::Statenum::S_PLAY_DIE6, 0, 0},                  # S_PLAY_DIE5
+    {Doocr::Spritenum::SPR_PLAY, 12, 10, Pointer(Void).null, Doocr::Statenum::S_PLAY_DIE7, 0, 0},                  # S_PLAY_DIE6
+    {Doocr::Spritenum::SPR_PLAY, 13, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_PLAY_DIE7
+    {Doocr::Spritenum::SPR_PLAY, 14, 5, Pointer(Void).null, Doocr::Statenum::S_PLAY_XDIE2, 0, 0},                  # S_PLAY_XDIE1
+    {Doocr::Spritenum::SPR_PLAY, 15, 5, (->CDoom.a_xscream).pointer, Doocr::Statenum::S_PLAY_XDIE3, 0, 0},         # S_PLAY_XDIE2
+    {Doocr::Spritenum::SPR_PLAY, 16, 5, (->CDoom.a_fall).pointer, Doocr::Statenum::S_PLAY_XDIE4, 0, 0},            # S_PLAY_XDIE3
+    {Doocr::Spritenum::SPR_PLAY, 17, 5, Pointer(Void).null, Doocr::Statenum::S_PLAY_XDIE5, 0, 0},                  # S_PLAY_XDIE4
+    {Doocr::Spritenum::SPR_PLAY, 18, 5, Pointer(Void).null, Doocr::Statenum::S_PLAY_XDIE6, 0, 0},                  # S_PLAY_XDIE5
+    {Doocr::Spritenum::SPR_PLAY, 19, 5, Pointer(Void).null, Doocr::Statenum::S_PLAY_XDIE7, 0, 0},                  # S_PLAY_XDIE6
+    {Doocr::Spritenum::SPR_PLAY, 20, 5, Pointer(Void).null, Doocr::Statenum::S_PLAY_XDIE8, 0, 0},                  # S_PLAY_XDIE7
+    {Doocr::Spritenum::SPR_PLAY, 21, 5, Pointer(Void).null, Doocr::Statenum::S_PLAY_XDIE9, 0, 0},                  # S_PLAY_XDIE8
+    {Doocr::Spritenum::SPR_PLAY, 22, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_PLAY_XDIE9
+    {Doocr::Spritenum::SPR_POSS, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_POSS_STND2, 0, 0},            # S_POSS_STND
+    {Doocr::Spritenum::SPR_POSS, 1, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_POSS_STND, 0, 0},             # S_POSS_STND2
+    {Doocr::Spritenum::SPR_POSS, 0, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_POSS_RUN2, 0, 0},             # S_POSS_RUN1
+    {Doocr::Spritenum::SPR_POSS, 0, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_POSS_RUN3, 0, 0},             # S_POSS_RUN2
+    {Doocr::Spritenum::SPR_POSS, 1, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_POSS_RUN4, 0, 0},             # S_POSS_RUN3
+    {Doocr::Spritenum::SPR_POSS, 1, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_POSS_RUN5, 0, 0},             # S_POSS_RUN4
+    {Doocr::Spritenum::SPR_POSS, 2, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_POSS_RUN6, 0, 0},             # S_POSS_RUN5
+    {Doocr::Spritenum::SPR_POSS, 2, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_POSS_RUN7, 0, 0},             # S_POSS_RUN6
+    {Doocr::Spritenum::SPR_POSS, 3, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_POSS_RUN8, 0, 0},             # S_POSS_RUN7
+    {Doocr::Spritenum::SPR_POSS, 3, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_POSS_RUN1, 0, 0},             # S_POSS_RUN8
+    {Doocr::Spritenum::SPR_POSS, 4, 10, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_POSS_ATK2, 0, 0},      # S_POSS_ATK1
+    {Doocr::Spritenum::SPR_POSS, 5, 8, (->CDoom.a_pos_attack).pointer, Doocr::Statenum::S_POSS_ATK3, 0, 0},        # S_POSS_ATK2
+    {Doocr::Spritenum::SPR_POSS, 4, 8, Pointer(Void).null, Doocr::Statenum::S_POSS_RUN1, 0, 0},                    # S_POSS_ATK3
+    {Doocr::Spritenum::SPR_POSS, 6, 3, Pointer(Void).null, Doocr::Statenum::S_POSS_PAIN2, 0, 0},                   # S_POSS_PAIN
+    {Doocr::Spritenum::SPR_POSS, 6, 3, (->CDoom.a_pain).pointer, Doocr::Statenum::S_POSS_RUN1, 0, 0},              # S_POSS_PAIN2
+    {Doocr::Spritenum::SPR_POSS, 7, 5, Pointer(Void).null, Doocr::Statenum::S_POSS_DIE2, 0, 0},                    # S_POSS_DIE1
+    {Doocr::Spritenum::SPR_POSS, 8, 5, (->CDoom.a_scream).pointer, Doocr::Statenum::S_POSS_DIE3, 0, 0},            # S_POSS_DIE2
+    {Doocr::Spritenum::SPR_POSS, 9, 5, (->CDoom.a_fall).pointer, Doocr::Statenum::S_POSS_DIE4, 0, 0},              # S_POSS_DIE3
+    {Doocr::Spritenum::SPR_POSS, 10, 5, Pointer(Void).null, Doocr::Statenum::S_POSS_DIE5, 0, 0},                   # S_POSS_DIE4
+    {Doocr::Spritenum::SPR_POSS, 11, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_POSS_DIE5
+    {Doocr::Spritenum::SPR_POSS, 12, 5, Pointer(Void).null, Doocr::Statenum::S_POSS_XDIE2, 0, 0},                  # S_POSS_XDIE1
+    {Doocr::Spritenum::SPR_POSS, 13, 5, (->CDoom.a_xscream).pointer, Doocr::Statenum::S_POSS_XDIE3, 0, 0},         # S_POSS_XDIE2
+    {Doocr::Spritenum::SPR_POSS, 14, 5, (->CDoom.a_fall).pointer, Doocr::Statenum::S_POSS_XDIE4, 0, 0},            # S_POSS_XDIE3
+    {Doocr::Spritenum::SPR_POSS, 15, 5, Pointer(Void).null, Doocr::Statenum::S_POSS_XDIE5, 0, 0},                  # S_POSS_XDIE4
+    {Doocr::Spritenum::SPR_POSS, 16, 5, Pointer(Void).null, Doocr::Statenum::S_POSS_XDIE6, 0, 0},                  # S_POSS_XDIE5
+    {Doocr::Spritenum::SPR_POSS, 17, 5, Pointer(Void).null, Doocr::Statenum::S_POSS_XDIE7, 0, 0},                  # S_POSS_XDIE6
+    {Doocr::Spritenum::SPR_POSS, 18, 5, Pointer(Void).null, Doocr::Statenum::S_POSS_XDIE8, 0, 0},                  # S_POSS_XDIE7
+    {Doocr::Spritenum::SPR_POSS, 19, 5, Pointer(Void).null, Doocr::Statenum::S_POSS_XDIE9, 0, 0},                  # S_POSS_XDIE8
+    {Doocr::Spritenum::SPR_POSS, 20, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_POSS_XDIE9
+    {Doocr::Spritenum::SPR_POSS, 10, 5, Pointer(Void).null, Doocr::Statenum::S_POSS_RAISE2, 0, 0},                 # S_POSS_RAISE1
+    {Doocr::Spritenum::SPR_POSS, 9, 5, Pointer(Void).null, Doocr::Statenum::S_POSS_RAISE3, 0, 0},                  # S_POSS_RAISE2
+    {Doocr::Spritenum::SPR_POSS, 8, 5, Pointer(Void).null, Doocr::Statenum::S_POSS_RAISE4, 0, 0},                  # S_POSS_RAISE3
+    {Doocr::Spritenum::SPR_POSS, 7, 5, Pointer(Void).null, Doocr::Statenum::S_POSS_RUN1, 0, 0},                    # S_POSS_RAISE4
+    {Doocr::Spritenum::SPR_SPOS, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_SPOS_STND2, 0, 0},            # S_SPOS_STND
+    {Doocr::Spritenum::SPR_SPOS, 1, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_SPOS_STND, 0, 0},             # S_SPOS_STND2
+    {Doocr::Spritenum::SPR_SPOS, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPOS_RUN2, 0, 0},             # S_SPOS_RUN1
+    {Doocr::Spritenum::SPR_SPOS, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPOS_RUN3, 0, 0},             # S_SPOS_RUN2
+    {Doocr::Spritenum::SPR_SPOS, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPOS_RUN4, 0, 0},             # S_SPOS_RUN3
+    {Doocr::Spritenum::SPR_SPOS, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPOS_RUN5, 0, 0},             # S_SPOS_RUN4
+    {Doocr::Spritenum::SPR_SPOS, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPOS_RUN6, 0, 0},             # S_SPOS_RUN5
+    {Doocr::Spritenum::SPR_SPOS, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPOS_RUN7, 0, 0},             # S_SPOS_RUN6
+    {Doocr::Spritenum::SPR_SPOS, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPOS_RUN8, 0, 0},             # S_SPOS_RUN7
+    {Doocr::Spritenum::SPR_SPOS, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPOS_RUN1, 0, 0},             # S_SPOS_RUN8
+    {Doocr::Spritenum::SPR_SPOS, 4, 10, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_SPOS_ATK2, 0, 0},      # S_SPOS_ATK1
+    {Doocr::Spritenum::SPR_SPOS, 32773, 10, (->CDoom.a_spos_attack).pointer, Doocr::Statenum::S_SPOS_ATK3, 0, 0},  # S_SPOS_ATK2
+    {Doocr::Spritenum::SPR_SPOS, 4, 10, Pointer(Void).null, Doocr::Statenum::S_SPOS_RUN1, 0, 0},                   # S_SPOS_ATK3
+    {Doocr::Spritenum::SPR_SPOS, 6, 3, Pointer(Void).null, Doocr::Statenum::S_SPOS_PAIN2, 0, 0},                   # S_SPOS_PAIN
+    {Doocr::Spritenum::SPR_SPOS, 6, 3, (->CDoom.a_pain).pointer, Doocr::Statenum::S_SPOS_RUN1, 0, 0},              # S_SPOS_PAIN2
+    {Doocr::Spritenum::SPR_SPOS, 7, 5, Pointer(Void).null, Doocr::Statenum::S_SPOS_DIE2, 0, 0},                    # S_SPOS_DIE1
+    {Doocr::Spritenum::SPR_SPOS, 8, 5, (->CDoom.a_scream).pointer, Doocr::Statenum::S_SPOS_DIE3, 0, 0},            # S_SPOS_DIE2
+    {Doocr::Spritenum::SPR_SPOS, 9, 5, (->CDoom.a_fall).pointer, Doocr::Statenum::S_SPOS_DIE4, 0, 0},              # S_SPOS_DIE3
+    {Doocr::Spritenum::SPR_SPOS, 10, 5, Pointer(Void).null, Doocr::Statenum::S_SPOS_DIE5, 0, 0},                   # S_SPOS_DIE4
+    {Doocr::Spritenum::SPR_SPOS, 11, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_SPOS_DIE5
+    {Doocr::Spritenum::SPR_SPOS, 12, 5, Pointer(Void).null, Doocr::Statenum::S_SPOS_XDIE2, 0, 0},                  # S_SPOS_XDIE1
+    {Doocr::Spritenum::SPR_SPOS, 13, 5, (->CDoom.a_xscream).pointer, Doocr::Statenum::S_SPOS_XDIE3, 0, 0},         # S_SPOS_XDIE2
+    {Doocr::Spritenum::SPR_SPOS, 14, 5, (->CDoom.a_fall).pointer, Doocr::Statenum::S_SPOS_XDIE4, 0, 0},            # S_SPOS_XDIE3
+    {Doocr::Spritenum::SPR_SPOS, 15, 5, Pointer(Void).null, Doocr::Statenum::S_SPOS_XDIE5, 0, 0},                  # S_SPOS_XDIE4
+    {Doocr::Spritenum::SPR_SPOS, 16, 5, Pointer(Void).null, Doocr::Statenum::S_SPOS_XDIE6, 0, 0},                  # S_SPOS_XDIE5
+    {Doocr::Spritenum::SPR_SPOS, 17, 5, Pointer(Void).null, Doocr::Statenum::S_SPOS_XDIE7, 0, 0},                  # S_SPOS_XDIE6
+    {Doocr::Spritenum::SPR_SPOS, 18, 5, Pointer(Void).null, Doocr::Statenum::S_SPOS_XDIE8, 0, 0},                  # S_SPOS_XDIE7
+    {Doocr::Spritenum::SPR_SPOS, 19, 5, Pointer(Void).null, Doocr::Statenum::S_SPOS_XDIE9, 0, 0},                  # S_SPOS_XDIE8
+    {Doocr::Spritenum::SPR_SPOS, 20, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_SPOS_XDIE9
+    {Doocr::Spritenum::SPR_SPOS, 11, 5, Pointer(Void).null, Doocr::Statenum::S_SPOS_RAISE2, 0, 0},                 # S_SPOS_RAISE1
+    {Doocr::Spritenum::SPR_SPOS, 10, 5, Pointer(Void).null, Doocr::Statenum::S_SPOS_RAISE3, 0, 0},                 # S_SPOS_RAISE2
+    {Doocr::Spritenum::SPR_SPOS, 9, 5, Pointer(Void).null, Doocr::Statenum::S_SPOS_RAISE4, 0, 0},                  # S_SPOS_RAISE3
+    {Doocr::Spritenum::SPR_SPOS, 8, 5, Pointer(Void).null, Doocr::Statenum::S_SPOS_RAISE5, 0, 0},                  # S_SPOS_RAISE4
+    {Doocr::Spritenum::SPR_SPOS, 7, 5, Pointer(Void).null, Doocr::Statenum::S_SPOS_RUN1, 0, 0},                    # S_SPOS_RAISE5
+    {Doocr::Spritenum::SPR_VILE, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_VILE_STND2, 0, 0},            # S_VILE_STND
+    {Doocr::Spritenum::SPR_VILE, 1, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_VILE_STND, 0, 0},             # S_VILE_STND2
+    {Doocr::Spritenum::SPR_VILE, 0, 2, (->CDoom.a_vile_chase).pointer, Doocr::Statenum::S_VILE_RUN2, 0, 0},        # S_VILE_RUN1
+    {Doocr::Spritenum::SPR_VILE, 0, 2, (->CDoom.a_vile_chase).pointer, Doocr::Statenum::S_VILE_RUN3, 0, 0},        # S_VILE_RUN2
+    {Doocr::Spritenum::SPR_VILE, 1, 2, (->CDoom.a_vile_chase).pointer, Doocr::Statenum::S_VILE_RUN4, 0, 0},        # S_VILE_RUN3
+    {Doocr::Spritenum::SPR_VILE, 1, 2, (->CDoom.a_vile_chase).pointer, Doocr::Statenum::S_VILE_RUN5, 0, 0},        # S_VILE_RUN4
+    {Doocr::Spritenum::SPR_VILE, 2, 2, (->CDoom.a_vile_chase).pointer, Doocr::Statenum::S_VILE_RUN6, 0, 0},        # S_VILE_RUN5
+    {Doocr::Spritenum::SPR_VILE, 2, 2, (->CDoom.a_vile_chase).pointer, Doocr::Statenum::S_VILE_RUN7, 0, 0},        # S_VILE_RUN6
+    {Doocr::Spritenum::SPR_VILE, 3, 2, (->CDoom.a_vile_chase).pointer, Doocr::Statenum::S_VILE_RUN8, 0, 0},        # S_VILE_RUN7
+    {Doocr::Spritenum::SPR_VILE, 3, 2, (->CDoom.a_vile_chase).pointer, Doocr::Statenum::S_VILE_RUN9, 0, 0},        # S_VILE_RUN8
+    {Doocr::Spritenum::SPR_VILE, 4, 2, (->CDoom.a_vile_chase).pointer, Doocr::Statenum::S_VILE_RUN10, 0, 0},       # S_VILE_RUN9
+    {Doocr::Spritenum::SPR_VILE, 4, 2, (->CDoom.a_vile_chase).pointer, Doocr::Statenum::S_VILE_RUN11, 0, 0},       # S_VILE_RUN10
+    {Doocr::Spritenum::SPR_VILE, 5, 2, (->CDoom.a_vile_chase).pointer, Doocr::Statenum::S_VILE_RUN12, 0, 0},       # S_VILE_RUN11
+    {Doocr::Spritenum::SPR_VILE, 5, 2, (->CDoom.a_vile_chase).pointer, Doocr::Statenum::S_VILE_RUN1, 0, 0},        # S_VILE_RUN12
+    {Doocr::Spritenum::SPR_VILE, 32774, 0, (->CDoom.a_vile_start).pointer, Doocr::Statenum::S_VILE_ATK2, 0, 0},    # S_VILE_ATK1
+    {Doocr::Spritenum::SPR_VILE, 32774, 10, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_VILE_ATK3, 0, 0},  # S_VILE_ATK2
+    {Doocr::Spritenum::SPR_VILE, 32775, 8, (->CDoom.a_vile_target).pointer, Doocr::Statenum::S_VILE_ATK4, 0, 0},   # S_VILE_ATK3
+    {Doocr::Spritenum::SPR_VILE, 32776, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_VILE_ATK5, 0, 0},   # S_VILE_ATK4
+    {Doocr::Spritenum::SPR_VILE, 32777, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_VILE_ATK6, 0, 0},   # S_VILE_ATK5
+    {Doocr::Spritenum::SPR_VILE, 32778, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_VILE_ATK7, 0, 0},   # S_VILE_ATK6
+    {Doocr::Spritenum::SPR_VILE, 32779, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_VILE_ATK8, 0, 0},   # S_VILE_ATK7
+    {Doocr::Spritenum::SPR_VILE, 32780, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_VILE_ATK9, 0, 0},   # S_VILE_ATK8
+    {Doocr::Spritenum::SPR_VILE, 32781, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_VILE_ATK10, 0, 0},  # S_VILE_ATK9
+    {Doocr::Spritenum::SPR_VILE, 32782, 8, (->CDoom.a_vile_attack).pointer, Doocr::Statenum::S_VILE_ATK11, 0, 0},  # S_VILE_ATK10
+    {Doocr::Spritenum::SPR_VILE, 32783, 20, Pointer(Void).null, Doocr::Statenum::S_VILE_RUN1, 0, 0},               # S_VILE_ATK11
+    {Doocr::Spritenum::SPR_VILE, 32794, 10, Pointer(Void).null, Doocr::Statenum::S_VILE_HEAL2, 0, 0},              # S_VILE_HEAL1
+    {Doocr::Spritenum::SPR_VILE, 32795, 10, Pointer(Void).null, Doocr::Statenum::S_VILE_HEAL3, 0, 0},              # S_VILE_HEAL2
+    {Doocr::Spritenum::SPR_VILE, 32796, 10, Pointer(Void).null, Doocr::Statenum::S_VILE_RUN1, 0, 0},               # S_VILE_HEAL3
+    {Doocr::Spritenum::SPR_VILE, 16, 5, Pointer(Void).null, Doocr::Statenum::S_VILE_PAIN2, 0, 0},                  # S_VILE_PAIN
+    {Doocr::Spritenum::SPR_VILE, 16, 5, (->CDoom.a_pain).pointer, Doocr::Statenum::S_VILE_RUN1, 0, 0},             # S_VILE_PAIN2
+    {Doocr::Spritenum::SPR_VILE, 16, 7, Pointer(Void).null, Doocr::Statenum::S_VILE_DIE2, 0, 0},                   # S_VILE_DIE1
+    {Doocr::Spritenum::SPR_VILE, 17, 7, (->CDoom.a_scream).pointer, Doocr::Statenum::S_VILE_DIE3, 0, 0},           # S_VILE_DIE2
+    {Doocr::Spritenum::SPR_VILE, 18, 7, (->CDoom.a_fall).pointer, Doocr::Statenum::S_VILE_DIE4, 0, 0},             # S_VILE_DIE3
+    {Doocr::Spritenum::SPR_VILE, 19, 7, Pointer(Void).null, Doocr::Statenum::S_VILE_DIE5, 0, 0},                   # S_VILE_DIE4
+    {Doocr::Spritenum::SPR_VILE, 20, 7, Pointer(Void).null, Doocr::Statenum::S_VILE_DIE6, 0, 0},                   # S_VILE_DIE5
+    {Doocr::Spritenum::SPR_VILE, 21, 7, Pointer(Void).null, Doocr::Statenum::S_VILE_DIE7, 0, 0},                   # S_VILE_DIE6
+    {Doocr::Spritenum::SPR_VILE, 22, 7, Pointer(Void).null, Doocr::Statenum::S_VILE_DIE8, 0, 0},                   # S_VILE_DIE7
+    {Doocr::Spritenum::SPR_VILE, 23, 5, Pointer(Void).null, Doocr::Statenum::S_VILE_DIE9, 0, 0},                   # S_VILE_DIE8
+    {Doocr::Spritenum::SPR_VILE, 24, 5, Pointer(Void).null, Doocr::Statenum::S_VILE_DIE10, 0, 0},                  # S_VILE_DIE9
+    {Doocr::Spritenum::SPR_VILE, 25, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_VILE_DIE10
+    {Doocr::Spritenum::SPR_FIRE, 32768, 2, (->CDoom.a_start_fire).pointer, Doocr::Statenum::S_FIRE2, 0, 0},        # S_FIRE1
+    {Doocr::Spritenum::SPR_FIRE, 32769, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE3, 0, 0},              # S_FIRE2
+    {Doocr::Spritenum::SPR_FIRE, 32768, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE4, 0, 0},              # S_FIRE3
+    {Doocr::Spritenum::SPR_FIRE, 32769, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE5, 0, 0},              # S_FIRE4
+    {Doocr::Spritenum::SPR_FIRE, 32770, 2, (->CDoom.a_fire_crackle).pointer, Doocr::Statenum::S_FIRE6, 0, 0},      # S_FIRE5
+    {Doocr::Spritenum::SPR_FIRE, 32769, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE7, 0, 0},              # S_FIRE6
+    {Doocr::Spritenum::SPR_FIRE, 32770, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE8, 0, 0},              # S_FIRE7
+    {Doocr::Spritenum::SPR_FIRE, 32769, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE9, 0, 0},              # S_FIRE8
+    {Doocr::Spritenum::SPR_FIRE, 32770, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE10, 0, 0},             # S_FIRE9
+    {Doocr::Spritenum::SPR_FIRE, 32771, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE11, 0, 0},             # S_FIRE10
+    {Doocr::Spritenum::SPR_FIRE, 32770, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE12, 0, 0},             # S_FIRE11
+    {Doocr::Spritenum::SPR_FIRE, 32771, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE13, 0, 0},             # S_FIRE12
+    {Doocr::Spritenum::SPR_FIRE, 32770, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE14, 0, 0},             # S_FIRE13
+    {Doocr::Spritenum::SPR_FIRE, 32771, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE15, 0, 0},             # S_FIRE14
+    {Doocr::Spritenum::SPR_FIRE, 32772, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE16, 0, 0},             # S_FIRE15
+    {Doocr::Spritenum::SPR_FIRE, 32771, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE17, 0, 0},             # S_FIRE16
+    {Doocr::Spritenum::SPR_FIRE, 32772, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE18, 0, 0},             # S_FIRE17
+    {Doocr::Spritenum::SPR_FIRE, 32771, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE19, 0, 0},             # S_FIRE18
+    {Doocr::Spritenum::SPR_FIRE, 32772, 2, (->CDoom.a_fire_crackle).pointer, Doocr::Statenum::S_FIRE20, 0, 0},     # S_FIRE19
+    {Doocr::Spritenum::SPR_FIRE, 32773, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE21, 0, 0},             # S_FIRE20
+    {Doocr::Spritenum::SPR_FIRE, 32772, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE22, 0, 0},             # S_FIRE21
+    {Doocr::Spritenum::SPR_FIRE, 32773, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE23, 0, 0},             # S_FIRE22
+    {Doocr::Spritenum::SPR_FIRE, 32772, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE24, 0, 0},             # S_FIRE23
+    {Doocr::Spritenum::SPR_FIRE, 32773, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE25, 0, 0},             # S_FIRE24
+    {Doocr::Spritenum::SPR_FIRE, 32774, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE26, 0, 0},             # S_FIRE25
+    {Doocr::Spritenum::SPR_FIRE, 32775, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE27, 0, 0},             # S_FIRE26
+    {Doocr::Spritenum::SPR_FIRE, 32774, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE28, 0, 0},             # S_FIRE27
+    {Doocr::Spritenum::SPR_FIRE, 32775, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE29, 0, 0},             # S_FIRE28
+    {Doocr::Spritenum::SPR_FIRE, 32774, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_FIRE30, 0, 0},             # S_FIRE29
+    {Doocr::Spritenum::SPR_FIRE, 32775, 2, (->CDoom.a_fire).pointer, Doocr::Statenum::S_NULL, 0, 0},               # S_FIRE30
+    {Doocr::Spritenum::SPR_PUFF, 1, 4, Pointer(Void).null, Doocr::Statenum::S_SMOKE2, 0, 0},                       # S_SMOKE1
+    {Doocr::Spritenum::SPR_PUFF, 2, 4, Pointer(Void).null, Doocr::Statenum::S_SMOKE3, 0, 0},                       # S_SMOKE2
+    {Doocr::Spritenum::SPR_PUFF, 1, 4, Pointer(Void).null, Doocr::Statenum::S_SMOKE4, 0, 0},                       # S_SMOKE3
+    {Doocr::Spritenum::SPR_PUFF, 2, 4, Pointer(Void).null, Doocr::Statenum::S_SMOKE5, 0, 0},                       # S_SMOKE4
+    {Doocr::Spritenum::SPR_PUFF, 3, 4, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                         # S_SMOKE5
+    {Doocr::Spritenum::SPR_FATB, 32768, 2, (->CDoom.a_tracer).pointer, Doocr::Statenum::S_TRACER2, 0, 0},          # S_TRACER
+    {Doocr::Spritenum::SPR_FATB, 32769, 2, (->CDoom.a_tracer).pointer, Doocr::Statenum::S_TRACER, 0, 0},           # S_TRACER2
+    {Doocr::Spritenum::SPR_FBXP, 32768, 8, Pointer(Void).null, Doocr::Statenum::S_TRACEEXP2, 0, 0},                # S_TRACEEXP1
+    {Doocr::Spritenum::SPR_FBXP, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_TRACEEXP3, 0, 0},                # S_TRACEEXP2
+    {Doocr::Spritenum::SPR_FBXP, 32770, 4, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                     # S_TRACEEXP3
+    {Doocr::Spritenum::SPR_SKEL, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_SKEL_STND2, 0, 0},            # S_SKEL_STND
+    {Doocr::Spritenum::SPR_SKEL, 1, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_SKEL_STND, 0, 0},             # S_SKEL_STND2
+    {Doocr::Spritenum::SPR_SKEL, 0, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKEL_RUN2, 0, 0},             # S_SKEL_RUN1
+    {Doocr::Spritenum::SPR_SKEL, 0, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKEL_RUN3, 0, 0},             # S_SKEL_RUN2
+    {Doocr::Spritenum::SPR_SKEL, 1, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKEL_RUN4, 0, 0},             # S_SKEL_RUN3
+    {Doocr::Spritenum::SPR_SKEL, 1, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKEL_RUN5, 0, 0},             # S_SKEL_RUN4
+    {Doocr::Spritenum::SPR_SKEL, 2, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKEL_RUN6, 0, 0},             # S_SKEL_RUN5
+    {Doocr::Spritenum::SPR_SKEL, 2, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKEL_RUN7, 0, 0},             # S_SKEL_RUN6
+    {Doocr::Spritenum::SPR_SKEL, 3, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKEL_RUN8, 0, 0},             # S_SKEL_RUN7
+    {Doocr::Spritenum::SPR_SKEL, 3, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKEL_RUN9, 0, 0},             # S_SKEL_RUN8
+    {Doocr::Spritenum::SPR_SKEL, 4, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKEL_RUN10, 0, 0},            # S_SKEL_RUN9
+    {Doocr::Spritenum::SPR_SKEL, 4, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKEL_RUN11, 0, 0},            # S_SKEL_RUN10
+    {Doocr::Spritenum::SPR_SKEL, 5, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKEL_RUN12, 0, 0},            # S_SKEL_RUN11
+    {Doocr::Spritenum::SPR_SKEL, 5, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKEL_RUN1, 0, 0},             # S_SKEL_RUN12
+    {Doocr::Spritenum::SPR_SKEL, 6, 0, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_SKEL_FIST2, 0, 0},      # S_SKEL_FIST1
+    {Doocr::Spritenum::SPR_SKEL, 6, 6, (->CDoom.a_skel_whoosh).pointer, Doocr::Statenum::S_SKEL_FIST3, 0, 0},      # S_SKEL_FIST2
+    {Doocr::Spritenum::SPR_SKEL, 7, 6, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_SKEL_FIST4, 0, 0},      # S_SKEL_FIST3
+    {Doocr::Spritenum::SPR_SKEL, 8, 6, (->CDoom.a_skel_fist).pointer, Doocr::Statenum::S_SKEL_RUN1, 0, 0},         # S_SKEL_FIST4
+    {Doocr::Spritenum::SPR_SKEL, 32777, 0, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_SKEL_MISS2, 0, 0},  # S_SKEL_MISS1
+    {Doocr::Spritenum::SPR_SKEL, 32777, 10, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_SKEL_MISS3, 0, 0}, # S_SKEL_MISS2
+    {Doocr::Spritenum::SPR_SKEL, 10, 10, (->CDoom.a_skel_missile).pointer, Doocr::Statenum::S_SKEL_MISS4, 0, 0},   # S_SKEL_MISS3
+    {Doocr::Spritenum::SPR_SKEL, 10, 10, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_SKEL_RUN1, 0, 0},     # S_SKEL_MISS4
+    {Doocr::Spritenum::SPR_SKEL, 11, 5, Pointer(Void).null, Doocr::Statenum::S_SKEL_PAIN2, 0, 0},                  # S_SKEL_PAIN
+    {Doocr::Spritenum::SPR_SKEL, 11, 5, (->CDoom.a_pain).pointer, Doocr::Statenum::S_SKEL_RUN1, 0, 0},             # S_SKEL_PAIN2
+    {Doocr::Spritenum::SPR_SKEL, 11, 7, Pointer(Void).null, Doocr::Statenum::S_SKEL_DIE2, 0, 0},                   # S_SKEL_DIE1
+    {Doocr::Spritenum::SPR_SKEL, 12, 7, Pointer(Void).null, Doocr::Statenum::S_SKEL_DIE3, 0, 0},                   # S_SKEL_DIE2
+    {Doocr::Spritenum::SPR_SKEL, 13, 7, (->CDoom.a_scream).pointer, Doocr::Statenum::S_SKEL_DIE4, 0, 0},           # S_SKEL_DIE3
+    {Doocr::Spritenum::SPR_SKEL, 14, 7, (->CDoom.a_fall).pointer, Doocr::Statenum::S_SKEL_DIE5, 0, 0},             # S_SKEL_DIE4
+    {Doocr::Spritenum::SPR_SKEL, 15, 7, Pointer(Void).null, Doocr::Statenum::S_SKEL_DIE6, 0, 0},                   # S_SKEL_DIE5
+    {Doocr::Spritenum::SPR_SKEL, 16, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_SKEL_DIE6
+    {Doocr::Spritenum::SPR_SKEL, 16, 5, Pointer(Void).null, Doocr::Statenum::S_SKEL_RAISE2, 0, 0},                 # S_SKEL_RAISE1
+    {Doocr::Spritenum::SPR_SKEL, 15, 5, Pointer(Void).null, Doocr::Statenum::S_SKEL_RAISE3, 0, 0},                 # S_SKEL_RAISE2
+    {Doocr::Spritenum::SPR_SKEL, 14, 5, Pointer(Void).null, Doocr::Statenum::S_SKEL_RAISE4, 0, 0},                 # S_SKEL_RAISE3
+    {Doocr::Spritenum::SPR_SKEL, 13, 5, Pointer(Void).null, Doocr::Statenum::S_SKEL_RAISE5, 0, 0},                 # S_SKEL_RAISE4
+    {Doocr::Spritenum::SPR_SKEL, 12, 5, Pointer(Void).null, Doocr::Statenum::S_SKEL_RAISE6, 0, 0},                 # S_SKEL_RAISE5
+    {Doocr::Spritenum::SPR_SKEL, 11, 5, Pointer(Void).null, Doocr::Statenum::S_SKEL_RUN1, 0, 0},                   # S_SKEL_RAISE6
+    {Doocr::Spritenum::SPR_MANF, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_FATSHOT2, 0, 0},                 # S_FATSHOT1
+    {Doocr::Spritenum::SPR_MANF, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_FATSHOT1, 0, 0},                 # S_FATSHOT2
+    {Doocr::Spritenum::SPR_MISL, 32769, 8, Pointer(Void).null, Doocr::Statenum::S_FATSHOTX2, 0, 0},                # S_FATSHOTX1
+    {Doocr::Spritenum::SPR_MISL, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_FATSHOTX3, 0, 0},                # S_FATSHOTX2
+    {Doocr::Spritenum::SPR_MISL, 32771, 4, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                     # S_FATSHOTX3
+    {Doocr::Spritenum::SPR_FATT, 0, 15, (->CDoom.a_look).pointer, Doocr::Statenum::S_FATT_STND2, 0, 0},            # S_FATT_STND
+    {Doocr::Spritenum::SPR_FATT, 1, 15, (->CDoom.a_look).pointer, Doocr::Statenum::S_FATT_STND, 0, 0},             # S_FATT_STND2
+    {Doocr::Spritenum::SPR_FATT, 0, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_FATT_RUN2, 0, 0},             # S_FATT_RUN1
+    {Doocr::Spritenum::SPR_FATT, 0, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_FATT_RUN3, 0, 0},             # S_FATT_RUN2
+    {Doocr::Spritenum::SPR_FATT, 1, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_FATT_RUN4, 0, 0},             # S_FATT_RUN3
+    {Doocr::Spritenum::SPR_FATT, 1, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_FATT_RUN5, 0, 0},             # S_FATT_RUN4
+    {Doocr::Spritenum::SPR_FATT, 2, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_FATT_RUN6, 0, 0},             # S_FATT_RUN5
+    {Doocr::Spritenum::SPR_FATT, 2, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_FATT_RUN7, 0, 0},             # S_FATT_RUN6
+    {Doocr::Spritenum::SPR_FATT, 3, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_FATT_RUN8, 0, 0},             # S_FATT_RUN7
+    {Doocr::Spritenum::SPR_FATT, 3, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_FATT_RUN9, 0, 0},             # S_FATT_RUN8
+    {Doocr::Spritenum::SPR_FATT, 4, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_FATT_RUN10, 0, 0},            # S_FATT_RUN9
+    {Doocr::Spritenum::SPR_FATT, 4, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_FATT_RUN11, 0, 0},            # S_FATT_RUN10
+    {Doocr::Spritenum::SPR_FATT, 5, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_FATT_RUN12, 0, 0},            # S_FATT_RUN11
+    {Doocr::Spritenum::SPR_FATT, 5, 4, (->CDoom.a_chase).pointer, Doocr::Statenum::S_FATT_RUN1, 0, 0},             # S_FATT_RUN12
+    {Doocr::Spritenum::SPR_FATT, 6, 20, (->CDoom.a_fat_raise).pointer, Doocr::Statenum::S_FATT_ATK2, 0, 0},        # S_FATT_ATK1
+    {Doocr::Spritenum::SPR_FATT, 32775, 10, (->CDoom.a_fat_attack1).pointer, Doocr::Statenum::S_FATT_ATK3, 0, 0},  # S_FATT_ATK2
+    {Doocr::Spritenum::SPR_FATT, 8, 5, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_FATT_ATK4, 0, 0},       # S_FATT_ATK3
+    {Doocr::Spritenum::SPR_FATT, 6, 5, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_FATT_ATK5, 0, 0},       # S_FATT_ATK4
+    {Doocr::Spritenum::SPR_FATT, 32775, 10, (->CDoom.a_fat_attack2).pointer, Doocr::Statenum::S_FATT_ATK6, 0, 0},  # S_FATT_ATK5
+    {Doocr::Spritenum::SPR_FATT, 8, 5, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_FATT_ATK7, 0, 0},       # S_FATT_ATK6
+    {Doocr::Spritenum::SPR_FATT, 6, 5, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_FATT_ATK8, 0, 0},       # S_FATT_ATK7
+    {Doocr::Spritenum::SPR_FATT, 32775, 10, (->CDoom.a_fat_attack3).pointer, Doocr::Statenum::S_FATT_ATK9, 0, 0},  # S_FATT_ATK8
+    {Doocr::Spritenum::SPR_FATT, 8, 5, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_FATT_ATK10, 0, 0},      # S_FATT_ATK9
+    {Doocr::Spritenum::SPR_FATT, 6, 5, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_FATT_RUN1, 0, 0},       # S_FATT_ATK10
+    {Doocr::Spritenum::SPR_FATT, 9, 3, Pointer(Void).null, Doocr::Statenum::S_FATT_PAIN2, 0, 0},                   # S_FATT_PAIN
+    {Doocr::Spritenum::SPR_FATT, 9, 3, (->CDoom.a_pain).pointer, Doocr::Statenum::S_FATT_RUN1, 0, 0},              # S_FATT_PAIN2
+    {Doocr::Spritenum::SPR_FATT, 10, 6, Pointer(Void).null, Doocr::Statenum::S_FATT_DIE2, 0, 0},                   # S_FATT_DIE1
+    {Doocr::Spritenum::SPR_FATT, 11, 6, (->CDoom.a_scream).pointer, Doocr::Statenum::S_FATT_DIE3, 0, 0},           # S_FATT_DIE2
+    {Doocr::Spritenum::SPR_FATT, 12, 6, (->CDoom.a_fall).pointer, Doocr::Statenum::S_FATT_DIE4, 0, 0},             # S_FATT_DIE3
+    {Doocr::Spritenum::SPR_FATT, 13, 6, Pointer(Void).null, Doocr::Statenum::S_FATT_DIE5, 0, 0},                   # S_FATT_DIE4
+    {Doocr::Spritenum::SPR_FATT, 14, 6, Pointer(Void).null, Doocr::Statenum::S_FATT_DIE6, 0, 0},                   # S_FATT_DIE5
+    {Doocr::Spritenum::SPR_FATT, 15, 6, Pointer(Void).null, Doocr::Statenum::S_FATT_DIE7, 0, 0},                   # S_FATT_DIE6
+    {Doocr::Spritenum::SPR_FATT, 16, 6, Pointer(Void).null, Doocr::Statenum::S_FATT_DIE8, 0, 0},                   # S_FATT_DIE7
+    {Doocr::Spritenum::SPR_FATT, 17, 6, Pointer(Void).null, Doocr::Statenum::S_FATT_DIE9, 0, 0},                   # S_FATT_DIE8
+    {Doocr::Spritenum::SPR_FATT, 18, 6, Pointer(Void).null, Doocr::Statenum::S_FATT_DIE10, 0, 0},                  # S_FATT_DIE9
+    {Doocr::Spritenum::SPR_FATT, 19, -1, (->CDoom.a_boss_death).pointer, Doocr::Statenum::S_NULL, 0, 0},           # S_FATT_DIE10
+    {Doocr::Spritenum::SPR_FATT, 17, 5, Pointer(Void).null, Doocr::Statenum::S_FATT_RAISE2, 0, 0},                 # S_FATT_RAISE1
+    {Doocr::Spritenum::SPR_FATT, 16, 5, Pointer(Void).null, Doocr::Statenum::S_FATT_RAISE3, 0, 0},                 # S_FATT_RAISE2
+    {Doocr::Spritenum::SPR_FATT, 15, 5, Pointer(Void).null, Doocr::Statenum::S_FATT_RAISE4, 0, 0},                 # S_FATT_RAISE3
+    {Doocr::Spritenum::SPR_FATT, 14, 5, Pointer(Void).null, Doocr::Statenum::S_FATT_RAISE5, 0, 0},                 # S_FATT_RAISE4
+    {Doocr::Spritenum::SPR_FATT, 13, 5, Pointer(Void).null, Doocr::Statenum::S_FATT_RAISE6, 0, 0},                 # S_FATT_RAISE5
+    {Doocr::Spritenum::SPR_FATT, 12, 5, Pointer(Void).null, Doocr::Statenum::S_FATT_RAISE7, 0, 0},                 # S_FATT_RAISE6
+    {Doocr::Spritenum::SPR_FATT, 11, 5, Pointer(Void).null, Doocr::Statenum::S_FATT_RAISE8, 0, 0},                 # S_FATT_RAISE7
+    {Doocr::Spritenum::SPR_FATT, 10, 5, Pointer(Void).null, Doocr::Statenum::S_FATT_RUN1, 0, 0},                   # S_FATT_RAISE8
+    {Doocr::Spritenum::SPR_CPOS, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_CPOS_STND2, 0, 0},            # S_CPOS_STND
+    {Doocr::Spritenum::SPR_CPOS, 1, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_CPOS_STND, 0, 0},             # S_CPOS_STND2
+    {Doocr::Spritenum::SPR_CPOS, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CPOS_RUN2, 0, 0},             # S_CPOS_RUN1
+    {Doocr::Spritenum::SPR_CPOS, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CPOS_RUN3, 0, 0},             # S_CPOS_RUN2
+    {Doocr::Spritenum::SPR_CPOS, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CPOS_RUN4, 0, 0},             # S_CPOS_RUN3
+    {Doocr::Spritenum::SPR_CPOS, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CPOS_RUN5, 0, 0},             # S_CPOS_RUN4
+    {Doocr::Spritenum::SPR_CPOS, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CPOS_RUN6, 0, 0},             # S_CPOS_RUN5
+    {Doocr::Spritenum::SPR_CPOS, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CPOS_RUN7, 0, 0},             # S_CPOS_RUN6
+    {Doocr::Spritenum::SPR_CPOS, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CPOS_RUN8, 0, 0},             # S_CPOS_RUN7
+    {Doocr::Spritenum::SPR_CPOS, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CPOS_RUN1, 0, 0},             # S_CPOS_RUN8
+    {Doocr::Spritenum::SPR_CPOS, 4, 10, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_CPOS_ATK2, 0, 0},      # S_CPOS_ATK1
+    {Doocr::Spritenum::SPR_CPOS, 32773, 4, (->CDoom.a_cpos_attack).pointer, Doocr::Statenum::S_CPOS_ATK3, 0, 0},   # S_CPOS_ATK2
+    {Doocr::Spritenum::SPR_CPOS, 32772, 4, (->CDoom.a_cpos_attack).pointer, Doocr::Statenum::S_CPOS_ATK4, 0, 0},   # S_CPOS_ATK3
+    {Doocr::Spritenum::SPR_CPOS, 5, 1, (->CDoom.a_cpos_refire).pointer, Doocr::Statenum::S_CPOS_ATK2, 0, 0},       # S_CPOS_ATK4
+    {Doocr::Spritenum::SPR_CPOS, 6, 3, Pointer(Void).null, Doocr::Statenum::S_CPOS_PAIN2, 0, 0},                   # S_CPOS_PAIN
+    {Doocr::Spritenum::SPR_CPOS, 6, 3, (->CDoom.a_pain).pointer, Doocr::Statenum::S_CPOS_RUN1, 0, 0},              # S_CPOS_PAIN2
+    {Doocr::Spritenum::SPR_CPOS, 7, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_DIE2, 0, 0},                    # S_CPOS_DIE1
+    {Doocr::Spritenum::SPR_CPOS, 8, 5, (->CDoom.a_scream).pointer, Doocr::Statenum::S_CPOS_DIE3, 0, 0},            # S_CPOS_DIE2
+    {Doocr::Spritenum::SPR_CPOS, 9, 5, (->CDoom.a_fall).pointer, Doocr::Statenum::S_CPOS_DIE4, 0, 0},              # S_CPOS_DIE3
+    {Doocr::Spritenum::SPR_CPOS, 10, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_DIE5, 0, 0},                   # S_CPOS_DIE4
+    {Doocr::Spritenum::SPR_CPOS, 11, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_DIE6, 0, 0},                   # S_CPOS_DIE5
+    {Doocr::Spritenum::SPR_CPOS, 12, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_DIE7, 0, 0},                   # S_CPOS_DIE6
+    {Doocr::Spritenum::SPR_CPOS, 13, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_CPOS_DIE7
+    {Doocr::Spritenum::SPR_CPOS, 14, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_XDIE2, 0, 0},                  # S_CPOS_XDIE1
+    {Doocr::Spritenum::SPR_CPOS, 15, 5, (->CDoom.a_xscream).pointer, Doocr::Statenum::S_CPOS_XDIE3, 0, 0},         # S_CPOS_XDIE2
+    {Doocr::Spritenum::SPR_CPOS, 16, 5, (->CDoom.a_fall).pointer, Doocr::Statenum::S_CPOS_XDIE4, 0, 0},            # S_CPOS_XDIE3
+    {Doocr::Spritenum::SPR_CPOS, 17, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_XDIE5, 0, 0},                  # S_CPOS_XDIE4
+    {Doocr::Spritenum::SPR_CPOS, 18, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_XDIE6, 0, 0},                  # S_CPOS_XDIE5
+    {Doocr::Spritenum::SPR_CPOS, 19, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_CPOS_XDIE6
+    {Doocr::Spritenum::SPR_CPOS, 13, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_RAISE2, 0, 0},                 # S_CPOS_RAISE1
+    {Doocr::Spritenum::SPR_CPOS, 12, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_RAISE3, 0, 0},                 # S_CPOS_RAISE2
+    {Doocr::Spritenum::SPR_CPOS, 11, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_RAISE4, 0, 0},                 # S_CPOS_RAISE3
+    {Doocr::Spritenum::SPR_CPOS, 10, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_RAISE5, 0, 0},                 # S_CPOS_RAISE4
+    {Doocr::Spritenum::SPR_CPOS, 9, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_RAISE6, 0, 0},                  # S_CPOS_RAISE5
+    {Doocr::Spritenum::SPR_CPOS, 8, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_RAISE7, 0, 0},                  # S_CPOS_RAISE6
+    {Doocr::Spritenum::SPR_CPOS, 7, 5, Pointer(Void).null, Doocr::Statenum::S_CPOS_RUN1, 0, 0},                    # S_CPOS_RAISE7
+    {Doocr::Spritenum::SPR_TROO, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_TROO_STND2, 0, 0},            # S_TROO_STND
+    {Doocr::Spritenum::SPR_TROO, 1, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_TROO_STND, 0, 0},             # S_TROO_STND2
+    {Doocr::Spritenum::SPR_TROO, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_TROO_RUN2, 0, 0},             # S_TROO_RUN1
+    {Doocr::Spritenum::SPR_TROO, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_TROO_RUN3, 0, 0},             # S_TROO_RUN2
+    {Doocr::Spritenum::SPR_TROO, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_TROO_RUN4, 0, 0},             # S_TROO_RUN3
+    {Doocr::Spritenum::SPR_TROO, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_TROO_RUN5, 0, 0},             # S_TROO_RUN4
+    {Doocr::Spritenum::SPR_TROO, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_TROO_RUN6, 0, 0},             # S_TROO_RUN5
+    {Doocr::Spritenum::SPR_TROO, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_TROO_RUN7, 0, 0},             # S_TROO_RUN6
+    {Doocr::Spritenum::SPR_TROO, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_TROO_RUN8, 0, 0},             # S_TROO_RUN7
+    {Doocr::Spritenum::SPR_TROO, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_TROO_RUN1, 0, 0},             # S_TROO_RUN8
+    {Doocr::Spritenum::SPR_TROO, 4, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_TROO_ATK2, 0, 0},       # S_TROO_ATK1
+    {Doocr::Spritenum::SPR_TROO, 5, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_TROO_ATK3, 0, 0},       # S_TROO_ATK2
+    {Doocr::Spritenum::SPR_TROO, 6, 6, (->CDoom.a_troop_attack).pointer, Doocr::Statenum::S_TROO_RUN1, 0, 0},      # S_TROO_ATK3
+    {Doocr::Spritenum::SPR_TROO, 7, 2, Pointer(Void).null, Doocr::Statenum::S_TROO_PAIN2, 0, 0},                   # S_TROO_PAIN
+    {Doocr::Spritenum::SPR_TROO, 7, 2, (->CDoom.a_pain).pointer, Doocr::Statenum::S_TROO_RUN1, 0, 0},              # S_TROO_PAIN2
+    {Doocr::Spritenum::SPR_TROO, 8, 8, Pointer(Void).null, Doocr::Statenum::S_TROO_DIE2, 0, 0},                    # S_TROO_DIE1
+    {Doocr::Spritenum::SPR_TROO, 9, 8, (->CDoom.a_scream).pointer, Doocr::Statenum::S_TROO_DIE3, 0, 0},            # S_TROO_DIE2
+    {Doocr::Spritenum::SPR_TROO, 10, 6, Pointer(Void).null, Doocr::Statenum::S_TROO_DIE4, 0, 0},                   # S_TROO_DIE3
+    {Doocr::Spritenum::SPR_TROO, 11, 6, (->CDoom.a_fall).pointer, Doocr::Statenum::S_TROO_DIE5, 0, 0},             # S_TROO_DIE4
+    {Doocr::Spritenum::SPR_TROO, 12, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_TROO_DIE5
+    {Doocr::Spritenum::SPR_TROO, 13, 5, Pointer(Void).null, Doocr::Statenum::S_TROO_XDIE2, 0, 0},                  # S_TROO_XDIE1
+    {Doocr::Spritenum::SPR_TROO, 14, 5, (->CDoom.a_xscream).pointer, Doocr::Statenum::S_TROO_XDIE3, 0, 0},         # S_TROO_XDIE2
+    {Doocr::Spritenum::SPR_TROO, 15, 5, Pointer(Void).null, Doocr::Statenum::S_TROO_XDIE4, 0, 0},                  # S_TROO_XDIE3
+    {Doocr::Spritenum::SPR_TROO, 16, 5, (->CDoom.a_fall).pointer, Doocr::Statenum::S_TROO_XDIE5, 0, 0},            # S_TROO_XDIE4
+    {Doocr::Spritenum::SPR_TROO, 17, 5, Pointer(Void).null, Doocr::Statenum::S_TROO_XDIE6, 0, 0},                  # S_TROO_XDIE5
+    {Doocr::Spritenum::SPR_TROO, 18, 5, Pointer(Void).null, Doocr::Statenum::S_TROO_XDIE7, 0, 0},                  # S_TROO_XDIE6
+    {Doocr::Spritenum::SPR_TROO, 19, 5, Pointer(Void).null, Doocr::Statenum::S_TROO_XDIE8, 0, 0},                  # S_TROO_XDIE7
+    {Doocr::Spritenum::SPR_TROO, 20, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_TROO_XDIE8
+    {Doocr::Spritenum::SPR_TROO, 12, 8, Pointer(Void).null, Doocr::Statenum::S_TROO_RAISE2, 0, 0},                 # S_TROO_RAISE1
+    {Doocr::Spritenum::SPR_TROO, 11, 8, Pointer(Void).null, Doocr::Statenum::S_TROO_RAISE3, 0, 0},                 # S_TROO_RAISE2
+    {Doocr::Spritenum::SPR_TROO, 10, 6, Pointer(Void).null, Doocr::Statenum::S_TROO_RAISE4, 0, 0},                 # S_TROO_RAISE3
+    {Doocr::Spritenum::SPR_TROO, 9, 6, Pointer(Void).null, Doocr::Statenum::S_TROO_RAISE5, 0, 0},                  # S_TROO_RAISE4
+    {Doocr::Spritenum::SPR_TROO, 8, 6, Pointer(Void).null, Doocr::Statenum::S_TROO_RUN1, 0, 0},                    # S_TROO_RAISE5
+    {Doocr::Spritenum::SPR_SARG, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_SARG_STND2, 0, 0},            # S_SARG_STND
+    {Doocr::Spritenum::SPR_SARG, 1, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_SARG_STND, 0, 0},             # S_SARG_STND2
+    {Doocr::Spritenum::SPR_SARG, 0, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SARG_RUN2, 0, 0},             # S_SARG_RUN1
+    {Doocr::Spritenum::SPR_SARG, 0, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SARG_RUN3, 0, 0},             # S_SARG_RUN2
+    {Doocr::Spritenum::SPR_SARG, 1, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SARG_RUN4, 0, 0},             # S_SARG_RUN3
+    {Doocr::Spritenum::SPR_SARG, 1, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SARG_RUN5, 0, 0},             # S_SARG_RUN4
+    {Doocr::Spritenum::SPR_SARG, 2, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SARG_RUN6, 0, 0},             # S_SARG_RUN5
+    {Doocr::Spritenum::SPR_SARG, 2, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SARG_RUN7, 0, 0},             # S_SARG_RUN6
+    {Doocr::Spritenum::SPR_SARG, 3, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SARG_RUN8, 0, 0},             # S_SARG_RUN7
+    {Doocr::Spritenum::SPR_SARG, 3, 2, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SARG_RUN1, 0, 0},             # S_SARG_RUN8
+    {Doocr::Spritenum::SPR_SARG, 4, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_SARG_ATK2, 0, 0},       # S_SARG_ATK1
+    {Doocr::Spritenum::SPR_SARG, 5, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_SARG_ATK3, 0, 0},       # S_SARG_ATK2
+    {Doocr::Spritenum::SPR_SARG, 6, 8, (->CDoom.a_sarg_attack).pointer, Doocr::Statenum::S_SARG_RUN1, 0, 0},       # S_SARG_ATK3
+    {Doocr::Spritenum::SPR_SARG, 7, 2, Pointer(Void).null, Doocr::Statenum::S_SARG_PAIN2, 0, 0},                   # S_SARG_PAIN
+    {Doocr::Spritenum::SPR_SARG, 7, 2, (->CDoom.a_pain).pointer, Doocr::Statenum::S_SARG_RUN1, 0, 0},              # S_SARG_PAIN2
+    {Doocr::Spritenum::SPR_SARG, 8, 8, Pointer(Void).null, Doocr::Statenum::S_SARG_DIE2, 0, 0},                    # S_SARG_DIE1
+    {Doocr::Spritenum::SPR_SARG, 9, 8, (->CDoom.a_scream).pointer, Doocr::Statenum::S_SARG_DIE3, 0, 0},            # S_SARG_DIE2
+    {Doocr::Spritenum::SPR_SARG, 10, 4, Pointer(Void).null, Doocr::Statenum::S_SARG_DIE4, 0, 0},                   # S_SARG_DIE3
+    {Doocr::Spritenum::SPR_SARG, 11, 4, (->CDoom.a_fall).pointer, Doocr::Statenum::S_SARG_DIE5, 0, 0},             # S_SARG_DIE4
+    {Doocr::Spritenum::SPR_SARG, 12, 4, Pointer(Void).null, Doocr::Statenum::S_SARG_DIE6, 0, 0},                   # S_SARG_DIE5
+    {Doocr::Spritenum::SPR_SARG, 13, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_SARG_DIE6
+    {Doocr::Spritenum::SPR_SARG, 13, 5, Pointer(Void).null, Doocr::Statenum::S_SARG_RAISE2, 0, 0},                 # S_SARG_RAISE1
+    {Doocr::Spritenum::SPR_SARG, 12, 5, Pointer(Void).null, Doocr::Statenum::S_SARG_RAISE3, 0, 0},                 # S_SARG_RAISE2
+    {Doocr::Spritenum::SPR_SARG, 11, 5, Pointer(Void).null, Doocr::Statenum::S_SARG_RAISE4, 0, 0},                 # S_SARG_RAISE3
+    {Doocr::Spritenum::SPR_SARG, 10, 5, Pointer(Void).null, Doocr::Statenum::S_SARG_RAISE5, 0, 0},                 # S_SARG_RAISE4
+    {Doocr::Spritenum::SPR_SARG, 9, 5, Pointer(Void).null, Doocr::Statenum::S_SARG_RAISE6, 0, 0},                  # S_SARG_RAISE5
+    {Doocr::Spritenum::SPR_SARG, 8, 5, Pointer(Void).null, Doocr::Statenum::S_SARG_RUN1, 0, 0},                    # S_SARG_RAISE6
+    {Doocr::Spritenum::SPR_HEAD, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_HEAD_STND, 0, 0},             # S_HEAD_STND
+    {Doocr::Spritenum::SPR_HEAD, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_HEAD_RUN1, 0, 0},             # S_HEAD_RUN1
+    {Doocr::Spritenum::SPR_HEAD, 1, 5, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_HEAD_ATK2, 0, 0},       # S_HEAD_ATK1
+    {Doocr::Spritenum::SPR_HEAD, 2, 5, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_HEAD_ATK3, 0, 0},       # S_HEAD_ATK2
+    {Doocr::Spritenum::SPR_HEAD, 32771, 5, (->CDoom.a_head_attack).pointer, Doocr::Statenum::S_HEAD_RUN1, 0, 0},   # S_HEAD_ATK3
+    {Doocr::Spritenum::SPR_HEAD, 4, 3, Pointer(Void).null, Doocr::Statenum::S_HEAD_PAIN2, 0, 0},                   # S_HEAD_PAIN
+    {Doocr::Spritenum::SPR_HEAD, 4, 3, (->CDoom.a_pain).pointer, Doocr::Statenum::S_HEAD_PAIN3, 0, 0},             # S_HEAD_PAIN2
+    {Doocr::Spritenum::SPR_HEAD, 5, 6, Pointer(Void).null, Doocr::Statenum::S_HEAD_RUN1, 0, 0},                    # S_HEAD_PAIN3
+    {Doocr::Spritenum::SPR_HEAD, 6, 8, Pointer(Void).null, Doocr::Statenum::S_HEAD_DIE2, 0, 0},                    # S_HEAD_DIE1
+    {Doocr::Spritenum::SPR_HEAD, 7, 8, (->CDoom.a_scream).pointer, Doocr::Statenum::S_HEAD_DIE3, 0, 0},            # S_HEAD_DIE2
+    {Doocr::Spritenum::SPR_HEAD, 8, 8, Pointer(Void).null, Doocr::Statenum::S_HEAD_DIE4, 0, 0},                    # S_HEAD_DIE3
+    {Doocr::Spritenum::SPR_HEAD, 9, 8, Pointer(Void).null, Doocr::Statenum::S_HEAD_DIE5, 0, 0},                    # S_HEAD_DIE4
+    {Doocr::Spritenum::SPR_HEAD, 10, 8, (->CDoom.a_fall).pointer, Doocr::Statenum::S_HEAD_DIE6, 0, 0},             # S_HEAD_DIE5
+    {Doocr::Spritenum::SPR_HEAD, 11, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_HEAD_DIE6
+    {Doocr::Spritenum::SPR_HEAD, 11, 8, Pointer(Void).null, Doocr::Statenum::S_HEAD_RAISE2, 0, 0},                 # S_HEAD_RAISE1
+    {Doocr::Spritenum::SPR_HEAD, 10, 8, Pointer(Void).null, Doocr::Statenum::S_HEAD_RAISE3, 0, 0},                 # S_HEAD_RAISE2
+    {Doocr::Spritenum::SPR_HEAD, 9, 8, Pointer(Void).null, Doocr::Statenum::S_HEAD_RAISE4, 0, 0},                  # S_HEAD_RAISE3
+    {Doocr::Spritenum::SPR_HEAD, 8, 8, Pointer(Void).null, Doocr::Statenum::S_HEAD_RAISE5, 0, 0},                  # S_HEAD_RAISE4
+    {Doocr::Spritenum::SPR_HEAD, 7, 8, Pointer(Void).null, Doocr::Statenum::S_HEAD_RAISE6, 0, 0},                  # S_HEAD_RAISE5
+    {Doocr::Spritenum::SPR_HEAD, 6, 8, Pointer(Void).null, Doocr::Statenum::S_HEAD_RUN1, 0, 0},                    # S_HEAD_RAISE6
+    {Doocr::Spritenum::SPR_BAL7, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_BRBALL2, 0, 0},                  # S_BRBALL1
+    {Doocr::Spritenum::SPR_BAL7, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_BRBALL1, 0, 0},                  # S_BRBALL2
+    {Doocr::Spritenum::SPR_BAL7, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_BRBALLX2, 0, 0},                 # S_BRBALLX1
+    {Doocr::Spritenum::SPR_BAL7, 32771, 6, Pointer(Void).null, Doocr::Statenum::S_BRBALLX3, 0, 0},                 # S_BRBALLX2
+    {Doocr::Spritenum::SPR_BAL7, 32772, 6, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                     # S_BRBALLX3
+    {Doocr::Spritenum::SPR_BOSS, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_BOSS_STND2, 0, 0},            # S_BOSS_STND
+    {Doocr::Spritenum::SPR_BOSS, 1, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_BOSS_STND, 0, 0},             # S_BOSS_STND2
+    {Doocr::Spritenum::SPR_BOSS, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOSS_RUN2, 0, 0},             # S_BOSS_RUN1
+    {Doocr::Spritenum::SPR_BOSS, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOSS_RUN3, 0, 0},             # S_BOSS_RUN2
+    {Doocr::Spritenum::SPR_BOSS, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOSS_RUN4, 0, 0},             # S_BOSS_RUN3
+    {Doocr::Spritenum::SPR_BOSS, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOSS_RUN5, 0, 0},             # S_BOSS_RUN4
+    {Doocr::Spritenum::SPR_BOSS, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOSS_RUN6, 0, 0},             # S_BOSS_RUN5
+    {Doocr::Spritenum::SPR_BOSS, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOSS_RUN7, 0, 0},             # S_BOSS_RUN6
+    {Doocr::Spritenum::SPR_BOSS, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOSS_RUN8, 0, 0},             # S_BOSS_RUN7
+    {Doocr::Spritenum::SPR_BOSS, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOSS_RUN1, 0, 0},             # S_BOSS_RUN8
+    {Doocr::Spritenum::SPR_BOSS, 4, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_BOSS_ATK2, 0, 0},       # S_BOSS_ATK1
+    {Doocr::Spritenum::SPR_BOSS, 5, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_BOSS_ATK3, 0, 0},       # S_BOSS_ATK2
+    {Doocr::Spritenum::SPR_BOSS, 6, 8, (->CDoom.a_bruis_attack).pointer, Doocr::Statenum::S_BOSS_RUN1, 0, 0},      # S_BOSS_ATK3
+    {Doocr::Spritenum::SPR_BOSS, 7, 2, Pointer(Void).null, Doocr::Statenum::S_BOSS_PAIN2, 0, 0},                   # S_BOSS_PAIN
+    {Doocr::Spritenum::SPR_BOSS, 7, 2, (->CDoom.a_pain).pointer, Doocr::Statenum::S_BOSS_RUN1, 0, 0},              # S_BOSS_PAIN2
+    {Doocr::Spritenum::SPR_BOSS, 8, 8, Pointer(Void).null, Doocr::Statenum::S_BOSS_DIE2, 0, 0},                    # S_BOSS_DIE1
+    {Doocr::Spritenum::SPR_BOSS, 9, 8, (->CDoom.a_scream).pointer, Doocr::Statenum::S_BOSS_DIE3, 0, 0},            # S_BOSS_DIE2
+    {Doocr::Spritenum::SPR_BOSS, 10, 8, Pointer(Void).null, Doocr::Statenum::S_BOSS_DIE4, 0, 0},                   # S_BOSS_DIE3
+    {Doocr::Spritenum::SPR_BOSS, 11, 8, (->CDoom.a_fall).pointer, Doocr::Statenum::S_BOSS_DIE5, 0, 0},             # S_BOSS_DIE4
+    {Doocr::Spritenum::SPR_BOSS, 12, 8, Pointer(Void).null, Doocr::Statenum::S_BOSS_DIE6, 0, 0},                   # S_BOSS_DIE5
+    {Doocr::Spritenum::SPR_BOSS, 13, 8, Pointer(Void).null, Doocr::Statenum::S_BOSS_DIE7, 0, 0},                   # S_BOSS_DIE6
+    {Doocr::Spritenum::SPR_BOSS, 14, -1, (->CDoom.a_boss_death).pointer, Doocr::Statenum::S_NULL, 0, 0},           # S_BOSS_DIE7
+    {Doocr::Spritenum::SPR_BOSS, 14, 8, Pointer(Void).null, Doocr::Statenum::S_BOSS_RAISE2, 0, 0},                 # S_BOSS_RAISE1
+    {Doocr::Spritenum::SPR_BOSS, 13, 8, Pointer(Void).null, Doocr::Statenum::S_BOSS_RAISE3, 0, 0},                 # S_BOSS_RAISE2
+    {Doocr::Spritenum::SPR_BOSS, 12, 8, Pointer(Void).null, Doocr::Statenum::S_BOSS_RAISE4, 0, 0},                 # S_BOSS_RAISE3
+    {Doocr::Spritenum::SPR_BOSS, 11, 8, Pointer(Void).null, Doocr::Statenum::S_BOSS_RAISE5, 0, 0},                 # S_BOSS_RAISE4
+    {Doocr::Spritenum::SPR_BOSS, 10, 8, Pointer(Void).null, Doocr::Statenum::S_BOSS_RAISE6, 0, 0},                 # S_BOSS_RAISE5
+    {Doocr::Spritenum::SPR_BOSS, 9, 8, Pointer(Void).null, Doocr::Statenum::S_BOSS_RAISE7, 0, 0},                  # S_BOSS_RAISE6
+    {Doocr::Spritenum::SPR_BOSS, 8, 8, Pointer(Void).null, Doocr::Statenum::S_BOSS_RUN1, 0, 0},                    # S_BOSS_RAISE7
+    {Doocr::Spritenum::SPR_BOS2, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_BOS2_STND2, 0, 0},            # S_BOS2_STND
+    {Doocr::Spritenum::SPR_BOS2, 1, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_BOS2_STND, 0, 0},             # S_BOS2_STND2
+    {Doocr::Spritenum::SPR_BOS2, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOS2_RUN2, 0, 0},             # S_BOS2_RUN1
+    {Doocr::Spritenum::SPR_BOS2, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOS2_RUN3, 0, 0},             # S_BOS2_RUN2
+    {Doocr::Spritenum::SPR_BOS2, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOS2_RUN4, 0, 0},             # S_BOS2_RUN3
+    {Doocr::Spritenum::SPR_BOS2, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOS2_RUN5, 0, 0},             # S_BOS2_RUN4
+    {Doocr::Spritenum::SPR_BOS2, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOS2_RUN6, 0, 0},             # S_BOS2_RUN5
+    {Doocr::Spritenum::SPR_BOS2, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOS2_RUN7, 0, 0},             # S_BOS2_RUN6
+    {Doocr::Spritenum::SPR_BOS2, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOS2_RUN8, 0, 0},             # S_BOS2_RUN7
+    {Doocr::Spritenum::SPR_BOS2, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BOS2_RUN1, 0, 0},             # S_BOS2_RUN8
+    {Doocr::Spritenum::SPR_BOS2, 4, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_BOS2_ATK2, 0, 0},       # S_BOS2_ATK1
+    {Doocr::Spritenum::SPR_BOS2, 5, 8, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_BOS2_ATK3, 0, 0},       # S_BOS2_ATK2
+    {Doocr::Spritenum::SPR_BOS2, 6, 8, (->CDoom.a_bruis_attack).pointer, Doocr::Statenum::S_BOS2_RUN1, 0, 0},      # S_BOS2_ATK3
+    {Doocr::Spritenum::SPR_BOS2, 7, 2, Pointer(Void).null, Doocr::Statenum::S_BOS2_PAIN2, 0, 0},                   # S_BOS2_PAIN
+    {Doocr::Spritenum::SPR_BOS2, 7, 2, (->CDoom.a_pain).pointer, Doocr::Statenum::S_BOS2_RUN1, 0, 0},              # S_BOS2_PAIN2
+    {Doocr::Spritenum::SPR_BOS2, 8, 8, Pointer(Void).null, Doocr::Statenum::S_BOS2_DIE2, 0, 0},                    # S_BOS2_DIE1
+    {Doocr::Spritenum::SPR_BOS2, 9, 8, (->CDoom.a_scream).pointer, Doocr::Statenum::S_BOS2_DIE3, 0, 0},            # S_BOS2_DIE2
+    {Doocr::Spritenum::SPR_BOS2, 10, 8, Pointer(Void).null, Doocr::Statenum::S_BOS2_DIE4, 0, 0},                   # S_BOS2_DIE3
+    {Doocr::Spritenum::SPR_BOS2, 11, 8, (->CDoom.a_fall).pointer, Doocr::Statenum::S_BOS2_DIE5, 0, 0},             # S_BOS2_DIE4
+    {Doocr::Spritenum::SPR_BOS2, 12, 8, Pointer(Void).null, Doocr::Statenum::S_BOS2_DIE6, 0, 0},                   # S_BOS2_DIE5
+    {Doocr::Spritenum::SPR_BOS2, 13, 8, Pointer(Void).null, Doocr::Statenum::S_BOS2_DIE7, 0, 0},                   # S_BOS2_DIE6
+    {Doocr::Spritenum::SPR_BOS2, 14, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_BOS2_DIE7
+    {Doocr::Spritenum::SPR_BOS2, 14, 8, Pointer(Void).null, Doocr::Statenum::S_BOS2_RAISE2, 0, 0},                 # S_BOS2_RAISE1
+    {Doocr::Spritenum::SPR_BOS2, 13, 8, Pointer(Void).null, Doocr::Statenum::S_BOS2_RAISE3, 0, 0},                 # S_BOS2_RAISE2
+    {Doocr::Spritenum::SPR_BOS2, 12, 8, Pointer(Void).null, Doocr::Statenum::S_BOS2_RAISE4, 0, 0},                 # S_BOS2_RAISE3
+    {Doocr::Spritenum::SPR_BOS2, 11, 8, Pointer(Void).null, Doocr::Statenum::S_BOS2_RAISE5, 0, 0},                 # S_BOS2_RAISE4
+    {Doocr::Spritenum::SPR_BOS2, 10, 8, Pointer(Void).null, Doocr::Statenum::S_BOS2_RAISE6, 0, 0},                 # S_BOS2_RAISE5
+    {Doocr::Spritenum::SPR_BOS2, 9, 8, Pointer(Void).null, Doocr::Statenum::S_BOS2_RAISE7, 0, 0},                  # S_BOS2_RAISE6
+    {Doocr::Spritenum::SPR_BOS2, 8, 8, Pointer(Void).null, Doocr::Statenum::S_BOS2_RUN1, 0, 0},                    # S_BOS2_RAISE7
+    {Doocr::Spritenum::SPR_SKUL, 32768, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_SKULL_STND2, 0, 0},       # S_SKULL_STND
+    {Doocr::Spritenum::SPR_SKUL, 32769, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_SKULL_STND, 0, 0},        # S_SKULL_STND2
+    {Doocr::Spritenum::SPR_SKUL, 32768, 6, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKULL_RUN2, 0, 0},        # S_SKULL_RUN1
+    {Doocr::Spritenum::SPR_SKUL, 32769, 6, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SKULL_RUN1, 0, 0},        # S_SKULL_RUN2
+    {Doocr::Spritenum::SPR_SKUL, 32770, 10, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_SKULL_ATK2, 0, 0}, # S_SKULL_ATK1
+    {Doocr::Spritenum::SPR_SKUL, 32771, 4, (->CDoom.a_skull_attack).pointer, Doocr::Statenum::S_SKULL_ATK3, 0, 0}, # S_SKULL_ATK2
+    {Doocr::Spritenum::SPR_SKUL, 32770, 4, Pointer(Void).null, Doocr::Statenum::S_SKULL_ATK4, 0, 0},               # S_SKULL_ATK3
+    {Doocr::Spritenum::SPR_SKUL, 32771, 4, Pointer(Void).null, Doocr::Statenum::S_SKULL_ATK3, 0, 0},               # S_SKULL_ATK4
+    {Doocr::Spritenum::SPR_SKUL, 32772, 3, Pointer(Void).null, Doocr::Statenum::S_SKULL_PAIN2, 0, 0},              # S_SKULL_PAIN
+    {Doocr::Spritenum::SPR_SKUL, 32772, 3, (->CDoom.a_pain).pointer, Doocr::Statenum::S_SKULL_RUN1, 0, 0},         # S_SKULL_PAIN2
+    {Doocr::Spritenum::SPR_SKUL, 32773, 6, Pointer(Void).null, Doocr::Statenum::S_SKULL_DIE2, 0, 0},               # S_SKULL_DIE1
+    {Doocr::Spritenum::SPR_SKUL, 32774, 6, (->CDoom.a_scream).pointer, Doocr::Statenum::S_SKULL_DIE3, 0, 0},       # S_SKULL_DIE2
+    {Doocr::Spritenum::SPR_SKUL, 32775, 6, Pointer(Void).null, Doocr::Statenum::S_SKULL_DIE4, 0, 0},               # S_SKULL_DIE3
+    {Doocr::Spritenum::SPR_SKUL, 32776, 6, (->CDoom.a_fall).pointer, Doocr::Statenum::S_SKULL_DIE5, 0, 0},         # S_SKULL_DIE4
+    {Doocr::Spritenum::SPR_SKUL, 9, 6, Pointer(Void).null, Doocr::Statenum::S_SKULL_DIE6, 0, 0},                   # S_SKULL_DIE5
+    {Doocr::Spritenum::SPR_SKUL, 10, 6, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_SKULL_DIE6
+    {Doocr::Spritenum::SPR_SPID, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_SPID_STND2, 0, 0},            # S_SPID_STND
+    {Doocr::Spritenum::SPR_SPID, 1, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_SPID_STND, 0, 0},             # S_SPID_STND2
+    {Doocr::Spritenum::SPR_SPID, 0, 3, (->CDoom.a_metal).pointer, Doocr::Statenum::S_SPID_RUN2, 0, 0},             # S_SPID_RUN1
+    {Doocr::Spritenum::SPR_SPID, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPID_RUN3, 0, 0},             # S_SPID_RUN2
+    {Doocr::Spritenum::SPR_SPID, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPID_RUN4, 0, 0},             # S_SPID_RUN3
+    {Doocr::Spritenum::SPR_SPID, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPID_RUN5, 0, 0},             # S_SPID_RUN4
+    {Doocr::Spritenum::SPR_SPID, 2, 3, (->CDoom.a_metal).pointer, Doocr::Statenum::S_SPID_RUN6, 0, 0},             # S_SPID_RUN5
+    {Doocr::Spritenum::SPR_SPID, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPID_RUN7, 0, 0},             # S_SPID_RUN6
+    {Doocr::Spritenum::SPR_SPID, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPID_RUN8, 0, 0},             # S_SPID_RUN7
+    {Doocr::Spritenum::SPR_SPID, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPID_RUN9, 0, 0},             # S_SPID_RUN8
+    {Doocr::Spritenum::SPR_SPID, 4, 3, (->CDoom.a_metal).pointer, Doocr::Statenum::S_SPID_RUN10, 0, 0},            # S_SPID_RUN9
+    {Doocr::Spritenum::SPR_SPID, 4, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPID_RUN11, 0, 0},            # S_SPID_RUN10
+    {Doocr::Spritenum::SPR_SPID, 5, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPID_RUN12, 0, 0},            # S_SPID_RUN11
+    {Doocr::Spritenum::SPR_SPID, 5, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SPID_RUN1, 0, 0},             # S_SPID_RUN12
+    {Doocr::Spritenum::SPR_SPID, 32768, 20, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_SPID_ATK2, 0, 0},  # S_SPID_ATK1
+    {Doocr::Spritenum::SPR_SPID, 32774, 4, (->CDoom.a_spos_attack).pointer, Doocr::Statenum::S_SPID_ATK3, 0, 0},   # S_SPID_ATK2
+    {Doocr::Spritenum::SPR_SPID, 32775, 4, (->CDoom.a_spos_attack).pointer, Doocr::Statenum::S_SPID_ATK4, 0, 0},   # S_SPID_ATK3
+    {Doocr::Spritenum::SPR_SPID, 32775, 1, (->CDoom.a_spid_refire).pointer, Doocr::Statenum::S_SPID_ATK2, 0, 0},   # S_SPID_ATK4
+    {Doocr::Spritenum::SPR_SPID, 8, 3, Pointer(Void).null, Doocr::Statenum::S_SPID_PAIN2, 0, 0},                   # S_SPID_PAIN
+    {Doocr::Spritenum::SPR_SPID, 8, 3, (->CDoom.a_pain).pointer, Doocr::Statenum::S_SPID_RUN1, 0, 0},              # S_SPID_PAIN2
+    {Doocr::Spritenum::SPR_SPID, 9, 20, (->CDoom.a_scream).pointer, Doocr::Statenum::S_SPID_DIE2, 0, 0},           # S_SPID_DIE1
+    {Doocr::Spritenum::SPR_SPID, 10, 10, (->CDoom.a_fall).pointer, Doocr::Statenum::S_SPID_DIE3, 0, 0},            # S_SPID_DIE2
+    {Doocr::Spritenum::SPR_SPID, 11, 10, Pointer(Void).null, Doocr::Statenum::S_SPID_DIE4, 0, 0},                  # S_SPID_DIE3
+    {Doocr::Spritenum::SPR_SPID, 12, 10, Pointer(Void).null, Doocr::Statenum::S_SPID_DIE5, 0, 0},                  # S_SPID_DIE4
+    {Doocr::Spritenum::SPR_SPID, 13, 10, Pointer(Void).null, Doocr::Statenum::S_SPID_DIE6, 0, 0},                  # S_SPID_DIE5
+    {Doocr::Spritenum::SPR_SPID, 14, 10, Pointer(Void).null, Doocr::Statenum::S_SPID_DIE7, 0, 0},                  # S_SPID_DIE6
+    {Doocr::Spritenum::SPR_SPID, 15, 10, Pointer(Void).null, Doocr::Statenum::S_SPID_DIE8, 0, 0},                  # S_SPID_DIE7
+    {Doocr::Spritenum::SPR_SPID, 16, 10, Pointer(Void).null, Doocr::Statenum::S_SPID_DIE9, 0, 0},                  # S_SPID_DIE8
+    {Doocr::Spritenum::SPR_SPID, 17, 10, Pointer(Void).null, Doocr::Statenum::S_SPID_DIE10, 0, 0},                 # S_SPID_DIE9
+    {Doocr::Spritenum::SPR_SPID, 18, 30, Pointer(Void).null, Doocr::Statenum::S_SPID_DIE11, 0, 0},                 # S_SPID_DIE10
+    {Doocr::Spritenum::SPR_SPID, 18, -1, (->CDoom.a_boss_death).pointer, Doocr::Statenum::S_NULL, 0, 0},           # S_SPID_DIE11
+    {Doocr::Spritenum::SPR_BSPI, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_BSPI_STND2, 0, 0},            # S_BSPI_STND
+    {Doocr::Spritenum::SPR_BSPI, 1, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_BSPI_STND, 0, 0},             # S_BSPI_STND2
+    {Doocr::Spritenum::SPR_BSPI, 0, 20, Pointer(Void).null, Doocr::Statenum::S_BSPI_RUN1, 0, 0},                   # S_BSPI_SIGHT
+    {Doocr::Spritenum::SPR_BSPI, 0, 3, (->CDoom.a_baby_metal).pointer, Doocr::Statenum::S_BSPI_RUN2, 0, 0},        # S_BSPI_RUN1
+    {Doocr::Spritenum::SPR_BSPI, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BSPI_RUN3, 0, 0},             # S_BSPI_RUN2
+    {Doocr::Spritenum::SPR_BSPI, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BSPI_RUN4, 0, 0},             # S_BSPI_RUN3
+    {Doocr::Spritenum::SPR_BSPI, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BSPI_RUN5, 0, 0},             # S_BSPI_RUN4
+    {Doocr::Spritenum::SPR_BSPI, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BSPI_RUN6, 0, 0},             # S_BSPI_RUN5
+    {Doocr::Spritenum::SPR_BSPI, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BSPI_RUN7, 0, 0},             # S_BSPI_RUN6
+    {Doocr::Spritenum::SPR_BSPI, 3, 3, (->CDoom.a_baby_metal).pointer, Doocr::Statenum::S_BSPI_RUN8, 0, 0},        # S_BSPI_RUN7
+    {Doocr::Spritenum::SPR_BSPI, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BSPI_RUN9, 0, 0},             # S_BSPI_RUN8
+    {Doocr::Spritenum::SPR_BSPI, 4, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BSPI_RUN10, 0, 0},            # S_BSPI_RUN9
+    {Doocr::Spritenum::SPR_BSPI, 4, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BSPI_RUN11, 0, 0},            # S_BSPI_RUN10
+    {Doocr::Spritenum::SPR_BSPI, 5, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BSPI_RUN12, 0, 0},            # S_BSPI_RUN11
+    {Doocr::Spritenum::SPR_BSPI, 5, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_BSPI_RUN1, 0, 0},             # S_BSPI_RUN12
+    {Doocr::Spritenum::SPR_BSPI, 32768, 20, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_BSPI_ATK2, 0, 0},  # S_BSPI_ATK1
+    {Doocr::Spritenum::SPR_BSPI, 32774, 4, (->CDoom.a_bspi_attack).pointer, Doocr::Statenum::S_BSPI_ATK3, 0, 0},   # S_BSPI_ATK2
+    {Doocr::Spritenum::SPR_BSPI, 32775, 4, Pointer(Void).null, Doocr::Statenum::S_BSPI_ATK4, 0, 0},                # S_BSPI_ATK3
+    {Doocr::Spritenum::SPR_BSPI, 32775, 1, (->CDoom.a_spid_refire).pointer, Doocr::Statenum::S_BSPI_ATK2, 0, 0},   # S_BSPI_ATK4
+    {Doocr::Spritenum::SPR_BSPI, 8, 3, Pointer(Void).null, Doocr::Statenum::S_BSPI_PAIN2, 0, 0},                   # S_BSPI_PAIN
+    {Doocr::Spritenum::SPR_BSPI, 8, 3, (->CDoom.a_pain).pointer, Doocr::Statenum::S_BSPI_RUN1, 0, 0},              # S_BSPI_PAIN2
+    {Doocr::Spritenum::SPR_BSPI, 9, 20, (->CDoom.a_scream).pointer, Doocr::Statenum::S_BSPI_DIE2, 0, 0},           # S_BSPI_DIE1
+    {Doocr::Spritenum::SPR_BSPI, 10, 7, (->CDoom.a_fall).pointer, Doocr::Statenum::S_BSPI_DIE3, 0, 0},             # S_BSPI_DIE2
+    {Doocr::Spritenum::SPR_BSPI, 11, 7, Pointer(Void).null, Doocr::Statenum::S_BSPI_DIE4, 0, 0},                   # S_BSPI_DIE3
+    {Doocr::Spritenum::SPR_BSPI, 12, 7, Pointer(Void).null, Doocr::Statenum::S_BSPI_DIE5, 0, 0},                   # S_BSPI_DIE4
+    {Doocr::Spritenum::SPR_BSPI, 13, 7, Pointer(Void).null, Doocr::Statenum::S_BSPI_DIE6, 0, 0},                   # S_BSPI_DIE5
+    {Doocr::Spritenum::SPR_BSPI, 14, 7, Pointer(Void).null, Doocr::Statenum::S_BSPI_DIE7, 0, 0},                   # S_BSPI_DIE6
+    {Doocr::Spritenum::SPR_BSPI, 15, -1, (->CDoom.a_boss_death).pointer, Doocr::Statenum::S_NULL, 0, 0},           # S_BSPI_DIE7
+    {Doocr::Spritenum::SPR_BSPI, 15, 5, Pointer(Void).null, Doocr::Statenum::S_BSPI_RAISE2, 0, 0},                 # S_BSPI_RAISE1
+    {Doocr::Spritenum::SPR_BSPI, 14, 5, Pointer(Void).null, Doocr::Statenum::S_BSPI_RAISE3, 0, 0},                 # S_BSPI_RAISE2
+    {Doocr::Spritenum::SPR_BSPI, 13, 5, Pointer(Void).null, Doocr::Statenum::S_BSPI_RAISE4, 0, 0},                 # S_BSPI_RAISE3
+    {Doocr::Spritenum::SPR_BSPI, 12, 5, Pointer(Void).null, Doocr::Statenum::S_BSPI_RAISE5, 0, 0},                 # S_BSPI_RAISE4
+    {Doocr::Spritenum::SPR_BSPI, 11, 5, Pointer(Void).null, Doocr::Statenum::S_BSPI_RAISE6, 0, 0},                 # S_BSPI_RAISE5
+    {Doocr::Spritenum::SPR_BSPI, 10, 5, Pointer(Void).null, Doocr::Statenum::S_BSPI_RAISE7, 0, 0},                 # S_BSPI_RAISE6
+    {Doocr::Spritenum::SPR_BSPI, 9, 5, Pointer(Void).null, Doocr::Statenum::S_BSPI_RUN1, 0, 0},                    # S_BSPI_RAISE7
+    {Doocr::Spritenum::SPR_APLS, 32768, 5, Pointer(Void).null, Doocr::Statenum::S_ARACH_PLAZ2, 0, 0},              # S_ARACH_PLAZ
+    {Doocr::Spritenum::SPR_APLS, 32769, 5, Pointer(Void).null, Doocr::Statenum::S_ARACH_PLAZ, 0, 0},               # S_ARACH_PLAZ2
+    {Doocr::Spritenum::SPR_APBX, 32768, 5, Pointer(Void).null, Doocr::Statenum::S_ARACH_PLEX2, 0, 0},              # S_ARACH_PLEX
+    {Doocr::Spritenum::SPR_APBX, 32769, 5, Pointer(Void).null, Doocr::Statenum::S_ARACH_PLEX3, 0, 0},              # S_ARACH_PLEX2
+    {Doocr::Spritenum::SPR_APBX, 32770, 5, Pointer(Void).null, Doocr::Statenum::S_ARACH_PLEX4, 0, 0},              # S_ARACH_PLEX3
+    {Doocr::Spritenum::SPR_APBX, 32771, 5, Pointer(Void).null, Doocr::Statenum::S_ARACH_PLEX5, 0, 0},              # S_ARACH_PLEX4
+    {Doocr::Spritenum::SPR_APBX, 32772, 5, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                     # S_ARACH_PLEX5
+    {Doocr::Spritenum::SPR_CYBR, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_CYBER_STND2, 0, 0},           # S_CYBER_STND
+    {Doocr::Spritenum::SPR_CYBR, 1, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_CYBER_STND, 0, 0},            # S_CYBER_STND2
+    {Doocr::Spritenum::SPR_CYBR, 0, 3, (->CDoom.a_hoof).pointer, Doocr::Statenum::S_CYBER_RUN2, 0, 0},             # S_CYBER_RUN1
+    {Doocr::Spritenum::SPR_CYBR, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CYBER_RUN3, 0, 0},            # S_CYBER_RUN2
+    {Doocr::Spritenum::SPR_CYBR, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CYBER_RUN4, 0, 0},            # S_CYBER_RUN3
+    {Doocr::Spritenum::SPR_CYBR, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CYBER_RUN5, 0, 0},            # S_CYBER_RUN4
+    {Doocr::Spritenum::SPR_CYBR, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CYBER_RUN6, 0, 0},            # S_CYBER_RUN5
+    {Doocr::Spritenum::SPR_CYBR, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CYBER_RUN7, 0, 0},            # S_CYBER_RUN6
+    {Doocr::Spritenum::SPR_CYBR, 3, 3, (->CDoom.a_metal).pointer, Doocr::Statenum::S_CYBER_RUN8, 0, 0},            # S_CYBER_RUN7
+    {Doocr::Spritenum::SPR_CYBR, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_CYBER_RUN1, 0, 0},            # S_CYBER_RUN8
+    {Doocr::Spritenum::SPR_CYBR, 4, 6, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_CYBER_ATK2, 0, 0},      # S_CYBER_ATK1
+    {Doocr::Spritenum::SPR_CYBR, 5, 12, (->CDoom.a_cyber_attack).pointer, Doocr::Statenum::S_CYBER_ATK3, 0, 0},    # S_CYBER_ATK2
+    {Doocr::Spritenum::SPR_CYBR, 4, 12, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_CYBER_ATK4, 0, 0},     # S_CYBER_ATK3
+    {Doocr::Spritenum::SPR_CYBR, 5, 12, (->CDoom.a_cyber_attack).pointer, Doocr::Statenum::S_CYBER_ATK5, 0, 0},    # S_CYBER_ATK4
+    {Doocr::Spritenum::SPR_CYBR, 4, 12, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_CYBER_ATK6, 0, 0},     # S_CYBER_ATK5
+    {Doocr::Spritenum::SPR_CYBR, 5, 12, (->CDoom.a_cyber_attack).pointer, Doocr::Statenum::S_CYBER_RUN1, 0, 0},    # S_CYBER_ATK6
+    {Doocr::Spritenum::SPR_CYBR, 6, 10, (->CDoom.a_pain).pointer, Doocr::Statenum::S_CYBER_RUN1, 0, 0},            # S_CYBER_PAIN
+    {Doocr::Spritenum::SPR_CYBR, 7, 10, Pointer(Void).null, Doocr::Statenum::S_CYBER_DIE2, 0, 0},                  # S_CYBER_DIE1
+    {Doocr::Spritenum::SPR_CYBR, 8, 10, (->CDoom.a_scream).pointer, Doocr::Statenum::S_CYBER_DIE3, 0, 0},          # S_CYBER_DIE2
+    {Doocr::Spritenum::SPR_CYBR, 9, 10, Pointer(Void).null, Doocr::Statenum::S_CYBER_DIE4, 0, 0},                  # S_CYBER_DIE3
+    {Doocr::Spritenum::SPR_CYBR, 10, 10, Pointer(Void).null, Doocr::Statenum::S_CYBER_DIE5, 0, 0},                 # S_CYBER_DIE4
+    {Doocr::Spritenum::SPR_CYBR, 11, 10, Pointer(Void).null, Doocr::Statenum::S_CYBER_DIE6, 0, 0},                 # S_CYBER_DIE5
+    {Doocr::Spritenum::SPR_CYBR, 12, 10, (->CDoom.a_fall).pointer, Doocr::Statenum::S_CYBER_DIE7, 0, 0},           # S_CYBER_DIE6
+    {Doocr::Spritenum::SPR_CYBR, 13, 10, Pointer(Void).null, Doocr::Statenum::S_CYBER_DIE8, 0, 0},                 # S_CYBER_DIE7
+    {Doocr::Spritenum::SPR_CYBR, 14, 10, Pointer(Void).null, Doocr::Statenum::S_CYBER_DIE9, 0, 0},                 # S_CYBER_DIE8
+    {Doocr::Spritenum::SPR_CYBR, 15, 30, Pointer(Void).null, Doocr::Statenum::S_CYBER_DIE10, 0, 0},                # S_CYBER_DIE9
+    {Doocr::Spritenum::SPR_CYBR, 15, -1, (->CDoom.a_boss_death).pointer, Doocr::Statenum::S_NULL, 0, 0},           # S_CYBER_DIE10
+    {Doocr::Spritenum::SPR_PAIN, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_PAIN_STND, 0, 0},             # S_PAIN_STND
+    {Doocr::Spritenum::SPR_PAIN, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_PAIN_RUN2, 0, 0},             # S_PAIN_RUN1
+    {Doocr::Spritenum::SPR_PAIN, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_PAIN_RUN3, 0, 0},             # S_PAIN_RUN2
+    {Doocr::Spritenum::SPR_PAIN, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_PAIN_RUN4, 0, 0},             # S_PAIN_RUN3
+    {Doocr::Spritenum::SPR_PAIN, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_PAIN_RUN5, 0, 0},             # S_PAIN_RUN4
+    {Doocr::Spritenum::SPR_PAIN, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_PAIN_RUN6, 0, 0},             # S_PAIN_RUN5
+    {Doocr::Spritenum::SPR_PAIN, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_PAIN_RUN1, 0, 0},             # S_PAIN_RUN6
+    {Doocr::Spritenum::SPR_PAIN, 3, 5, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_PAIN_ATK2, 0, 0},       # S_PAIN_ATK1
+    {Doocr::Spritenum::SPR_PAIN, 4, 5, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_PAIN_ATK3, 0, 0},       # S_PAIN_ATK2
+    {Doocr::Spritenum::SPR_PAIN, 32773, 5, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_PAIN_ATK4, 0, 0},   # S_PAIN_ATK3
+    {Doocr::Spritenum::SPR_PAIN, 32773, 0, (->CDoom.a_pain_attack).pointer, Doocr::Statenum::S_PAIN_RUN1, 0, 0},   # S_PAIN_ATK4
+    {Doocr::Spritenum::SPR_PAIN, 6, 6, Pointer(Void).null, Doocr::Statenum::S_PAIN_PAIN2, 0, 0},                   # S_PAIN_PAIN
+    {Doocr::Spritenum::SPR_PAIN, 6, 6, (->CDoom.a_pain).pointer, Doocr::Statenum::S_PAIN_RUN1, 0, 0},              # S_PAIN_PAIN2
+    {Doocr::Spritenum::SPR_PAIN, 32775, 8, Pointer(Void).null, Doocr::Statenum::S_PAIN_DIE2, 0, 0},                # S_PAIN_DIE1
+    {Doocr::Spritenum::SPR_PAIN, 32776, 8, (->CDoom.a_scream).pointer, Doocr::Statenum::S_PAIN_DIE3, 0, 0},        # S_PAIN_DIE2
+    {Doocr::Spritenum::SPR_PAIN, 32777, 8, Pointer(Void).null, Doocr::Statenum::S_PAIN_DIE4, 0, 0},                # S_PAIN_DIE3
+    {Doocr::Spritenum::SPR_PAIN, 32778, 8, Pointer(Void).null, Doocr::Statenum::S_PAIN_DIE5, 0, 0},                # S_PAIN_DIE4
+    {Doocr::Spritenum::SPR_PAIN, 32779, 8, (->CDoom.a_pain_die).pointer, Doocr::Statenum::S_PAIN_DIE6, 0, 0},      # S_PAIN_DIE5
+    {Doocr::Spritenum::SPR_PAIN, 32780, 8, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                     # S_PAIN_DIE6
+    {Doocr::Spritenum::SPR_PAIN, 12, 8, Pointer(Void).null, Doocr::Statenum::S_PAIN_RAISE2, 0, 0},                 # S_PAIN_RAISE1
+    {Doocr::Spritenum::SPR_PAIN, 11, 8, Pointer(Void).null, Doocr::Statenum::S_PAIN_RAISE3, 0, 0},                 # S_PAIN_RAISE2
+    {Doocr::Spritenum::SPR_PAIN, 10, 8, Pointer(Void).null, Doocr::Statenum::S_PAIN_RAISE4, 0, 0},                 # S_PAIN_RAISE3
+    {Doocr::Spritenum::SPR_PAIN, 9, 8, Pointer(Void).null, Doocr::Statenum::S_PAIN_RAISE5, 0, 0},                  # S_PAIN_RAISE4
+    {Doocr::Spritenum::SPR_PAIN, 8, 8, Pointer(Void).null, Doocr::Statenum::S_PAIN_RAISE6, 0, 0},                  # S_PAIN_RAISE5
+    {Doocr::Spritenum::SPR_PAIN, 7, 8, Pointer(Void).null, Doocr::Statenum::S_PAIN_RUN1, 0, 0},                    # S_PAIN_RAISE6
+    {Doocr::Spritenum::SPR_SSWV, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_SSWV_STND2, 0, 0},            # S_SSWV_STND
+    {Doocr::Spritenum::SPR_SSWV, 1, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_SSWV_STND, 0, 0},             # S_SSWV_STND2
+    {Doocr::Spritenum::SPR_SSWV, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SSWV_RUN2, 0, 0},             # S_SSWV_RUN1
+    {Doocr::Spritenum::SPR_SSWV, 0, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SSWV_RUN3, 0, 0},             # S_SSWV_RUN2
+    {Doocr::Spritenum::SPR_SSWV, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SSWV_RUN4, 0, 0},             # S_SSWV_RUN3
+    {Doocr::Spritenum::SPR_SSWV, 1, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SSWV_RUN5, 0, 0},             # S_SSWV_RUN4
+    {Doocr::Spritenum::SPR_SSWV, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SSWV_RUN6, 0, 0},             # S_SSWV_RUN5
+    {Doocr::Spritenum::SPR_SSWV, 2, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SSWV_RUN7, 0, 0},             # S_SSWV_RUN6
+    {Doocr::Spritenum::SPR_SSWV, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SSWV_RUN8, 0, 0},             # S_SSWV_RUN7
+    {Doocr::Spritenum::SPR_SSWV, 3, 3, (->CDoom.a_chase).pointer, Doocr::Statenum::S_SSWV_RUN1, 0, 0},             # S_SSWV_RUN8
+    {Doocr::Spritenum::SPR_SSWV, 4, 10, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_SSWV_ATK2, 0, 0},      # S_SSWV_ATK1
+    {Doocr::Spritenum::SPR_SSWV, 5, 10, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_SSWV_ATK3, 0, 0},      # S_SSWV_ATK2
+    {Doocr::Spritenum::SPR_SSWV, 32774, 4, (->CDoom.a_cpos_attack).pointer, Doocr::Statenum::S_SSWV_ATK4, 0, 0},   # S_SSWV_ATK3
+    {Doocr::Spritenum::SPR_SSWV, 5, 6, (->CDoom.a_face_target).pointer, Doocr::Statenum::S_SSWV_ATK5, 0, 0},       # S_SSWV_ATK4
+    {Doocr::Spritenum::SPR_SSWV, 32774, 4, (->CDoom.a_cpos_attack).pointer, Doocr::Statenum::S_SSWV_ATK6, 0, 0},   # S_SSWV_ATK5
+    {Doocr::Spritenum::SPR_SSWV, 5, 1, (->CDoom.a_cpos_refire).pointer, Doocr::Statenum::S_SSWV_ATK2, 0, 0},       # S_SSWV_ATK6
+    {Doocr::Spritenum::SPR_SSWV, 7, 3, Pointer(Void).null, Doocr::Statenum::S_SSWV_PAIN2, 0, 0},                   # S_SSWV_PAIN
+    {Doocr::Spritenum::SPR_SSWV, 7, 3, (->CDoom.a_pain).pointer, Doocr::Statenum::S_SSWV_RUN1, 0, 0},              # S_SSWV_PAIN2
+    {Doocr::Spritenum::SPR_SSWV, 8, 5, Pointer(Void).null, Doocr::Statenum::S_SSWV_DIE2, 0, 0},                    # S_SSWV_DIE1
+    {Doocr::Spritenum::SPR_SSWV, 9, 5, (->CDoom.a_scream).pointer, Doocr::Statenum::S_SSWV_DIE3, 0, 0},            # S_SSWV_DIE2
+    {Doocr::Spritenum::SPR_SSWV, 10, 5, (->CDoom.a_fall).pointer, Doocr::Statenum::S_SSWV_DIE4, 0, 0},             # S_SSWV_DIE3
+    {Doocr::Spritenum::SPR_SSWV, 11, 5, Pointer(Void).null, Doocr::Statenum::S_SSWV_DIE5, 0, 0},                   # S_SSWV_DIE4
+    {Doocr::Spritenum::SPR_SSWV, 12, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_SSWV_DIE5
+    {Doocr::Spritenum::SPR_SSWV, 13, 5, Pointer(Void).null, Doocr::Statenum::S_SSWV_XDIE2, 0, 0},                  # S_SSWV_XDIE1
+    {Doocr::Spritenum::SPR_SSWV, 14, 5, (->CDoom.a_xscream).pointer, Doocr::Statenum::S_SSWV_XDIE3, 0, 0},         # S_SSWV_XDIE2
+    {Doocr::Spritenum::SPR_SSWV, 15, 5, (->CDoom.a_fall).pointer, Doocr::Statenum::S_SSWV_XDIE4, 0, 0},            # S_SSWV_XDIE3
+    {Doocr::Spritenum::SPR_SSWV, 16, 5, Pointer(Void).null, Doocr::Statenum::S_SSWV_XDIE5, 0, 0},                  # S_SSWV_XDIE4
+    {Doocr::Spritenum::SPR_SSWV, 17, 5, Pointer(Void).null, Doocr::Statenum::S_SSWV_XDIE6, 0, 0},                  # S_SSWV_XDIE5
+    {Doocr::Spritenum::SPR_SSWV, 18, 5, Pointer(Void).null, Doocr::Statenum::S_SSWV_XDIE7, 0, 0},                  # S_SSWV_XDIE6
+    {Doocr::Spritenum::SPR_SSWV, 19, 5, Pointer(Void).null, Doocr::Statenum::S_SSWV_XDIE8, 0, 0},                  # S_SSWV_XDIE7
+    {Doocr::Spritenum::SPR_SSWV, 20, 5, Pointer(Void).null, Doocr::Statenum::S_SSWV_XDIE9, 0, 0},                  # S_SSWV_XDIE8
+    {Doocr::Spritenum::SPR_SSWV, 21, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_SSWV_XDIE9
+    {Doocr::Spritenum::SPR_SSWV, 12, 5, Pointer(Void).null, Doocr::Statenum::S_SSWV_RAISE2, 0, 0},                 # S_SSWV_RAISE1
+    {Doocr::Spritenum::SPR_SSWV, 11, 5, Pointer(Void).null, Doocr::Statenum::S_SSWV_RAISE3, 0, 0},                 # S_SSWV_RAISE2
+    {Doocr::Spritenum::SPR_SSWV, 10, 5, Pointer(Void).null, Doocr::Statenum::S_SSWV_RAISE4, 0, 0},                 # S_SSWV_RAISE3
+    {Doocr::Spritenum::SPR_SSWV, 9, 5, Pointer(Void).null, Doocr::Statenum::S_SSWV_RAISE5, 0, 0},                  # S_SSWV_RAISE4
+    {Doocr::Spritenum::SPR_SSWV, 8, 5, Pointer(Void).null, Doocr::Statenum::S_SSWV_RUN1, 0, 0},                    # S_SSWV_RAISE5
+    {Doocr::Spritenum::SPR_KEEN, 0, -1, Pointer(Void).null, Doocr::Statenum::S_KEENSTND, 0, 0},                    # S_KEENSTND
+    {Doocr::Spritenum::SPR_KEEN, 0, 6, Pointer(Void).null, Doocr::Statenum::S_COMMKEEN2, 0, 0},                    # S_COMMKEEN
+    {Doocr::Spritenum::SPR_KEEN, 1, 6, Pointer(Void).null, Doocr::Statenum::S_COMMKEEN3, 0, 0},                    # S_COMMKEEN2
+    {Doocr::Spritenum::SPR_KEEN, 2, 6, (->CDoom.a_scream).pointer, Doocr::Statenum::S_COMMKEEN4, 0, 0},            # S_COMMKEEN3
+    {Doocr::Spritenum::SPR_KEEN, 3, 6, Pointer(Void).null, Doocr::Statenum::S_COMMKEEN5, 0, 0},                    # S_COMMKEEN4
+    {Doocr::Spritenum::SPR_KEEN, 4, 6, Pointer(Void).null, Doocr::Statenum::S_COMMKEEN6, 0, 0},                    # S_COMMKEEN5
+    {Doocr::Spritenum::SPR_KEEN, 5, 6, Pointer(Void).null, Doocr::Statenum::S_COMMKEEN7, 0, 0},                    # S_COMMKEEN6
+    {Doocr::Spritenum::SPR_KEEN, 6, 6, Pointer(Void).null, Doocr::Statenum::S_COMMKEEN8, 0, 0},                    # S_COMMKEEN7
+    {Doocr::Spritenum::SPR_KEEN, 7, 6, Pointer(Void).null, Doocr::Statenum::S_COMMKEEN9, 0, 0},                    # S_COMMKEEN8
+    {Doocr::Spritenum::SPR_KEEN, 8, 6, Pointer(Void).null, Doocr::Statenum::S_COMMKEEN10, 0, 0},                   # S_COMMKEEN9
+    {Doocr::Spritenum::SPR_KEEN, 9, 6, Pointer(Void).null, Doocr::Statenum::S_COMMKEEN11, 0, 0},                   # S_COMMKEEN10
+    {Doocr::Spritenum::SPR_KEEN, 10, 6, (->CDoom.a_keen_die).pointer, Doocr::Statenum::S_COMMKEEN12, 0, 0},        # S_COMMKEEN11
+    {Doocr::Spritenum::SPR_KEEN, 11, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_COMMKEEN12
+    {Doocr::Spritenum::SPR_KEEN, 12, 4, Pointer(Void).null, Doocr::Statenum::S_KEENPAIN2, 0, 0},                   # S_KEENPAIN
+    {Doocr::Spritenum::SPR_KEEN, 12, 8, (->CDoom.a_pain).pointer, Doocr::Statenum::S_KEENSTND, 0, 0},              # S_KEENPAIN2
+    {Doocr::Spritenum::SPR_BBRN, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_BRAIN
+    {Doocr::Spritenum::SPR_BBRN, 1, 36, (->CDoom.a_brain_pain).pointer, Doocr::Statenum::S_BRAIN, 0, 0},           # S_BRAIN_PAIN
+    {Doocr::Spritenum::SPR_BBRN, 0, 100, (->CDoom.a_brain_scream).pointer, Doocr::Statenum::S_BRAIN_DIE2, 0, 0},   # S_BRAIN_DIE1
+    {Doocr::Spritenum::SPR_BBRN, 0, 10, Pointer(Void).null, Doocr::Statenum::S_BRAIN_DIE3, 0, 0},                  # S_BRAIN_DIE2
+    {Doocr::Spritenum::SPR_BBRN, 0, 10, Pointer(Void).null, Doocr::Statenum::S_BRAIN_DIE4, 0, 0},                  # S_BRAIN_DIE3
+    {Doocr::Spritenum::SPR_BBRN, 0, -1, (->CDoom.a_brain_die).pointer, Doocr::Statenum::S_NULL, 0, 0},             # S_BRAIN_DIE4
+    {Doocr::Spritenum::SPR_SSWV, 0, 10, (->CDoom.a_look).pointer, Doocr::Statenum::S_BRAINEYE, 0, 0},              # S_BRAINEYE
+    {Doocr::Spritenum::SPR_SSWV, 0, 181, (->CDoom.a_brain_awake).pointer, Doocr::Statenum::S_BRAINEYE1, 0, 0},     # S_BRAINEYESEE
+    {Doocr::Spritenum::SPR_SSWV, 0, 150, (->CDoom.a_brain_spit).pointer, Doocr::Statenum::S_BRAINEYE1, 0, 0},      # S_BRAINEYE1
+    {Doocr::Spritenum::SPR_BOSF, 32768, 3, (->CDoom.a_spawn_sound).pointer, Doocr::Statenum::S_SPAWN2, 0, 0},      # S_SPAWN1
+    {Doocr::Spritenum::SPR_BOSF, 32769, 3, (->CDoom.a_spawn_fly).pointer, Doocr::Statenum::S_SPAWN3, 0, 0},        # S_SPAWN2
+    {Doocr::Spritenum::SPR_BOSF, 32770, 3, (->CDoom.a_spawn_fly).pointer, Doocr::Statenum::S_SPAWN4, 0, 0},        # S_SPAWN3
+    {Doocr::Spritenum::SPR_BOSF, 32771, 3, (->CDoom.a_spawn_fly).pointer, Doocr::Statenum::S_SPAWN1, 0, 0},        # S_SPAWN4
+    {Doocr::Spritenum::SPR_FIRE, 32768, 4, (->CDoom.a_fire).pointer, Doocr::Statenum::S_SPAWNFIRE2, 0, 0},         # S_SPAWNFIRE1
+    {Doocr::Spritenum::SPR_FIRE, 32769, 4, (->CDoom.a_fire).pointer, Doocr::Statenum::S_SPAWNFIRE3, 0, 0},         # S_SPAWNFIRE2
+    {Doocr::Spritenum::SPR_FIRE, 32770, 4, (->CDoom.a_fire).pointer, Doocr::Statenum::S_SPAWNFIRE4, 0, 0},         # S_SPAWNFIRE3
+    {Doocr::Spritenum::SPR_FIRE, 32771, 4, (->CDoom.a_fire).pointer, Doocr::Statenum::S_SPAWNFIRE5, 0, 0},         # S_SPAWNFIRE4
+    {Doocr::Spritenum::SPR_FIRE, 32772, 4, (->CDoom.a_fire).pointer, Doocr::Statenum::S_SPAWNFIRE6, 0, 0},         # S_SPAWNFIRE5
+    {Doocr::Spritenum::SPR_FIRE, 32773, 4, (->CDoom.a_fire).pointer, Doocr::Statenum::S_SPAWNFIRE7, 0, 0},         # S_SPAWNFIRE6
+    {Doocr::Spritenum::SPR_FIRE, 32774, 4, (->CDoom.a_fire).pointer, Doocr::Statenum::S_SPAWNFIRE8, 0, 0},         # S_SPAWNFIRE7
+    {Doocr::Spritenum::SPR_FIRE, 32775, 4, (->CDoom.a_fire).pointer, Doocr::Statenum::S_NULL, 0, 0},               # S_SPAWNFIRE8
+    {Doocr::Spritenum::SPR_MISL, 32769, 10, Pointer(Void).null, Doocr::Statenum::S_BRAINEXPLODE2, 0, 0},           # S_BRAINEXPLODE1
+    {Doocr::Spritenum::SPR_MISL, 32770, 10, Pointer(Void).null, Doocr::Statenum::S_BRAINEXPLODE3, 0, 0},           # S_BRAINEXPLODE2
+    {Doocr::Spritenum::SPR_MISL, 32771, 10, (->CDoom.a_brain_explode).pointer, Doocr::Statenum::S_NULL, 0, 0},     # S_BRAINEXPLODE3
+    {Doocr::Spritenum::SPR_ARM1, 0, 6, Pointer(Void).null, Doocr::Statenum::S_ARM1A, 0, 0},                        # S_ARM1
+    {Doocr::Spritenum::SPR_ARM1, 32769, 7, Pointer(Void).null, Doocr::Statenum::S_ARM1, 0, 0},                     # S_ARM1A
+    {Doocr::Spritenum::SPR_ARM2, 0, 6, Pointer(Void).null, Doocr::Statenum::S_ARM2A, 0, 0},                        # S_ARM2
+    {Doocr::Spritenum::SPR_ARM2, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_ARM2, 0, 0},                     # S_ARM2A
+    {Doocr::Spritenum::SPR_BAR1, 0, 6, Pointer(Void).null, Doocr::Statenum::S_BAR2, 0, 0},                         # S_BAR1
+    {Doocr::Spritenum::SPR_BAR1, 1, 6, Pointer(Void).null, Doocr::Statenum::S_BAR1, 0, 0},                         # S_BAR2
+    {Doocr::Spritenum::SPR_BEXP, 32768, 5, Pointer(Void).null, Doocr::Statenum::S_BEXP2, 0, 0},                    # S_BEXP
+    {Doocr::Spritenum::SPR_BEXP, 32769, 5, (->CDoom.a_scream).pointer, Doocr::Statenum::S_BEXP3, 0, 0},            # S_BEXP2
+    {Doocr::Spritenum::SPR_BEXP, 32770, 5, Pointer(Void).null, Doocr::Statenum::S_BEXP4, 0, 0},                    # S_BEXP3
+    {Doocr::Spritenum::SPR_BEXP, 32771, 10, (->CDoom.a_explode).pointer, Doocr::Statenum::S_BEXP5, 0, 0},          # S_BEXP4
+    {Doocr::Spritenum::SPR_BEXP, 32772, 10, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                    # S_BEXP5
+    {Doocr::Spritenum::SPR_FCAN, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_BBAR2, 0, 0},                    # S_BBAR1
+    {Doocr::Spritenum::SPR_FCAN, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_BBAR3, 0, 0},                    # S_BBAR2
+    {Doocr::Spritenum::SPR_FCAN, 32770, 4, Pointer(Void).null, Doocr::Statenum::S_BBAR1, 0, 0},                    # S_BBAR3
+    {Doocr::Spritenum::SPR_BON1, 0, 6, Pointer(Void).null, Doocr::Statenum::S_BON1A, 0, 0},                        # S_BON1
+    {Doocr::Spritenum::SPR_BON1, 1, 6, Pointer(Void).null, Doocr::Statenum::S_BON1B, 0, 0},                        # S_BON1A
+    {Doocr::Spritenum::SPR_BON1, 2, 6, Pointer(Void).null, Doocr::Statenum::S_BON1C, 0, 0},                        # S_BON1B
+    {Doocr::Spritenum::SPR_BON1, 3, 6, Pointer(Void).null, Doocr::Statenum::S_BON1D, 0, 0},                        # S_BON1C
+    {Doocr::Spritenum::SPR_BON1, 2, 6, Pointer(Void).null, Doocr::Statenum::S_BON1E, 0, 0},                        # S_BON1D
+    {Doocr::Spritenum::SPR_BON1, 1, 6, Pointer(Void).null, Doocr::Statenum::S_BON1, 0, 0},                         # S_BON1E
+    {Doocr::Spritenum::SPR_BON2, 0, 6, Pointer(Void).null, Doocr::Statenum::S_BON2A, 0, 0},                        # S_BON2
+    {Doocr::Spritenum::SPR_BON2, 1, 6, Pointer(Void).null, Doocr::Statenum::S_BON2B, 0, 0},                        # S_BON2A
+    {Doocr::Spritenum::SPR_BON2, 2, 6, Pointer(Void).null, Doocr::Statenum::S_BON2C, 0, 0},                        # S_BON2B
+    {Doocr::Spritenum::SPR_BON2, 3, 6, Pointer(Void).null, Doocr::Statenum::S_BON2D, 0, 0},                        # S_BON2C
+    {Doocr::Spritenum::SPR_BON2, 2, 6, Pointer(Void).null, Doocr::Statenum::S_BON2E, 0, 0},                        # S_BON2D
+    {Doocr::Spritenum::SPR_BON2, 1, 6, Pointer(Void).null, Doocr::Statenum::S_BON2, 0, 0},                         # S_BON2E
+    {Doocr::Spritenum::SPR_BKEY, 0, 10, Pointer(Void).null, Doocr::Statenum::S_BKEY2, 0, 0},                       # S_BKEY
+    {Doocr::Spritenum::SPR_BKEY, 32769, 10, Pointer(Void).null, Doocr::Statenum::S_BKEY, 0, 0},                    # S_BKEY2
+    {Doocr::Spritenum::SPR_RKEY, 0, 10, Pointer(Void).null, Doocr::Statenum::S_RKEY2, 0, 0},                       # S_RKEY
+    {Doocr::Spritenum::SPR_RKEY, 32769, 10, Pointer(Void).null, Doocr::Statenum::S_RKEY, 0, 0},                    # S_RKEY2
+    {Doocr::Spritenum::SPR_YKEY, 0, 10, Pointer(Void).null, Doocr::Statenum::S_YKEY2, 0, 0},                       # S_YKEY
+    {Doocr::Spritenum::SPR_YKEY, 32769, 10, Pointer(Void).null, Doocr::Statenum::S_YKEY, 0, 0},                    # S_YKEY2
+    {Doocr::Spritenum::SPR_BSKU, 0, 10, Pointer(Void).null, Doocr::Statenum::S_BSKULL2, 0, 0},                     # S_BSKULL
+    {Doocr::Spritenum::SPR_BSKU, 32769, 10, Pointer(Void).null, Doocr::Statenum::S_BSKULL, 0, 0},                  # S_BSKULL2
+    {Doocr::Spritenum::SPR_RSKU, 0, 10, Pointer(Void).null, Doocr::Statenum::S_RSKULL2, 0, 0},                     # S_RSKULL
+    {Doocr::Spritenum::SPR_RSKU, 32769, 10, Pointer(Void).null, Doocr::Statenum::S_RSKULL, 0, 0},                  # S_RSKULL2
+    {Doocr::Spritenum::SPR_YSKU, 0, 10, Pointer(Void).null, Doocr::Statenum::S_YSKULL2, 0, 0},                     # S_YSKULL
+    {Doocr::Spritenum::SPR_YSKU, 32769, 10, Pointer(Void).null, Doocr::Statenum::S_YSKULL, 0, 0},                  # S_YSKULL2
+    {Doocr::Spritenum::SPR_STIM, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_STIM
+    {Doocr::Spritenum::SPR_MEDI, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_MEDI
+    {Doocr::Spritenum::SPR_SOUL, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_SOUL2, 0, 0},                    # S_SOUL
+    {Doocr::Spritenum::SPR_SOUL, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_SOUL3, 0, 0},                    # S_SOUL2
+    {Doocr::Spritenum::SPR_SOUL, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_SOUL4, 0, 0},                    # S_SOUL3
+    {Doocr::Spritenum::SPR_SOUL, 32771, 6, Pointer(Void).null, Doocr::Statenum::S_SOUL5, 0, 0},                    # S_SOUL4
+    {Doocr::Spritenum::SPR_SOUL, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_SOUL6, 0, 0},                    # S_SOUL5
+    {Doocr::Spritenum::SPR_SOUL, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_SOUL, 0, 0},                     # S_SOUL6
+    {Doocr::Spritenum::SPR_PINV, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_PINV2, 0, 0},                    # S_PINV
+    {Doocr::Spritenum::SPR_PINV, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_PINV3, 0, 0},                    # S_PINV2
+    {Doocr::Spritenum::SPR_PINV, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_PINV4, 0, 0},                    # S_PINV3
+    {Doocr::Spritenum::SPR_PINV, 32771, 6, Pointer(Void).null, Doocr::Statenum::S_PINV, 0, 0},                     # S_PINV4
+    {Doocr::Spritenum::SPR_PSTR, 32768, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                    # S_PSTR
+    {Doocr::Spritenum::SPR_PINS, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_PINS2, 0, 0},                    # S_PINS
+    {Doocr::Spritenum::SPR_PINS, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_PINS3, 0, 0},                    # S_PINS2
+    {Doocr::Spritenum::SPR_PINS, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_PINS4, 0, 0},                    # S_PINS3
+    {Doocr::Spritenum::SPR_PINS, 32771, 6, Pointer(Void).null, Doocr::Statenum::S_PINS, 0, 0},                     # S_PINS4
+    {Doocr::Spritenum::SPR_MEGA, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_MEGA2, 0, 0},                    # S_MEGA
+    {Doocr::Spritenum::SPR_MEGA, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_MEGA3, 0, 0},                    # S_MEGA2
+    {Doocr::Spritenum::SPR_MEGA, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_MEGA4, 0, 0},                    # S_MEGA3
+    {Doocr::Spritenum::SPR_MEGA, 32771, 6, Pointer(Void).null, Doocr::Statenum::S_MEGA, 0, 0},                     # S_MEGA4
+    {Doocr::Spritenum::SPR_SUIT, 32768, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                    # S_SUIT
+    {Doocr::Spritenum::SPR_PMAP, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_PMAP2, 0, 0},                    # S_PMAP
+    {Doocr::Spritenum::SPR_PMAP, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_PMAP3, 0, 0},                    # S_PMAP2
+    {Doocr::Spritenum::SPR_PMAP, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_PMAP4, 0, 0},                    # S_PMAP3
+    {Doocr::Spritenum::SPR_PMAP, 32771, 6, Pointer(Void).null, Doocr::Statenum::S_PMAP5, 0, 0},                    # S_PMAP4
+    {Doocr::Spritenum::SPR_PMAP, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_PMAP6, 0, 0},                    # S_PMAP5
+    {Doocr::Spritenum::SPR_PMAP, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_PMAP, 0, 0},                     # S_PMAP6
+    {Doocr::Spritenum::SPR_PVIS, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_PVIS2, 0, 0},                    # S_PVIS
+    {Doocr::Spritenum::SPR_PVIS, 1, 6, Pointer(Void).null, Doocr::Statenum::S_PVIS, 0, 0},                         # S_PVIS2
+    {Doocr::Spritenum::SPR_CLIP, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_CLIP
+    {Doocr::Spritenum::SPR_AMMO, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_AMMO
+    {Doocr::Spritenum::SPR_ROCK, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_ROCK
+    {Doocr::Spritenum::SPR_BROK, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_BROK
+    {Doocr::Spritenum::SPR_CELL, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_CELL
+    {Doocr::Spritenum::SPR_CELP, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_CELP
+    {Doocr::Spritenum::SPR_SHEL, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_SHEL
+    {Doocr::Spritenum::SPR_SBOX, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_SBOX
+    {Doocr::Spritenum::SPR_BPAK, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_BPAK
+    {Doocr::Spritenum::SPR_BFUG, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_BFUG
+    {Doocr::Spritenum::SPR_MGUN, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_MGUN
+    {Doocr::Spritenum::SPR_CSAW, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_CSAW
+    {Doocr::Spritenum::SPR_LAUN, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_LAUN
+    {Doocr::Spritenum::SPR_PLAS, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_PLAS
+    {Doocr::Spritenum::SPR_SHOT, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_SHOT
+    {Doocr::Spritenum::SPR_SGN2, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_SHOT2
+    {Doocr::Spritenum::SPR_COLU, 32768, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                    # S_COLU
+    {Doocr::Spritenum::SPR_SMT2, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_STALAG
+    {Doocr::Spritenum::SPR_GOR1, 0, 10, Pointer(Void).null, Doocr::Statenum::S_BLOODYTWITCH2, 0, 0},               # S_BLOODYTWITCH
+    {Doocr::Spritenum::SPR_GOR1, 1, 15, Pointer(Void).null, Doocr::Statenum::S_BLOODYTWITCH3, 0, 0},               # S_BLOODYTWITCH2
+    {Doocr::Spritenum::SPR_GOR1, 2, 8, Pointer(Void).null, Doocr::Statenum::S_BLOODYTWITCH4, 0, 0},                # S_BLOODYTWITCH3
+    {Doocr::Spritenum::SPR_GOR1, 1, 6, Pointer(Void).null, Doocr::Statenum::S_BLOODYTWITCH, 0, 0},                 # S_BLOODYTWITCH4
+    {Doocr::Spritenum::SPR_PLAY, 13, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_DEADTORSO
+    {Doocr::Spritenum::SPR_PLAY, 18, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                       # S_DEADBOTTOM
+    {Doocr::Spritenum::SPR_POL2, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_HEADSONSTICK
+    {Doocr::Spritenum::SPR_POL5, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_GIBS
+    {Doocr::Spritenum::SPR_POL4, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_HEADONASTICK
+    {Doocr::Spritenum::SPR_POL3, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_HEADCANDLES2, 0, 0},             # S_HEADCANDLES
+    {Doocr::Spritenum::SPR_POL3, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_HEADCANDLES, 0, 0},              # S_HEADCANDLES2
+    {Doocr::Spritenum::SPR_POL1, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_DEADSTICK
+    {Doocr::Spritenum::SPR_POL6, 0, 6, Pointer(Void).null, Doocr::Statenum::S_LIVESTICK2, 0, 0},                   # S_LIVESTICK
+    {Doocr::Spritenum::SPR_POL6, 1, 8, Pointer(Void).null, Doocr::Statenum::S_LIVESTICK, 0, 0},                    # S_LIVESTICK2
+    {Doocr::Spritenum::SPR_GOR2, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_MEAT2
+    {Doocr::Spritenum::SPR_GOR3, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_MEAT3
+    {Doocr::Spritenum::SPR_GOR4, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_MEAT4
+    {Doocr::Spritenum::SPR_GOR5, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_MEAT5
+    {Doocr::Spritenum::SPR_SMIT, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_STALAGTITE
+    {Doocr::Spritenum::SPR_COL1, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_TALLGRNCOL
+    {Doocr::Spritenum::SPR_COL2, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_SHRTGRNCOL
+    {Doocr::Spritenum::SPR_COL3, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_TALLREDCOL
+    {Doocr::Spritenum::SPR_COL4, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_SHRTREDCOL
+    {Doocr::Spritenum::SPR_CAND, 32768, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                    # S_CANDLESTIK
+    {Doocr::Spritenum::SPR_CBRA, 32768, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                    # S_CANDELABRA
+    {Doocr::Spritenum::SPR_COL6, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_SKULLCOL
+    {Doocr::Spritenum::SPR_TRE1, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_TORCHTREE
+    {Doocr::Spritenum::SPR_TRE2, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_BIGTREE
+    {Doocr::Spritenum::SPR_ELEC, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_TECHPILLAR
+    {Doocr::Spritenum::SPR_CEYE, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_EVILEYE2, 0, 0},                 # S_EVILEYE
+    {Doocr::Spritenum::SPR_CEYE, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_EVILEYE3, 0, 0},                 # S_EVILEYE2
+    {Doocr::Spritenum::SPR_CEYE, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_EVILEYE4, 0, 0},                 # S_EVILEYE3
+    {Doocr::Spritenum::SPR_CEYE, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_EVILEYE, 0, 0},                  # S_EVILEYE4
+    {Doocr::Spritenum::SPR_FSKU, 32768, 6, Pointer(Void).null, Doocr::Statenum::S_FLOATSKULL2, 0, 0},              # S_FLOATSKULL
+    {Doocr::Spritenum::SPR_FSKU, 32769, 6, Pointer(Void).null, Doocr::Statenum::S_FLOATSKULL3, 0, 0},              # S_FLOATSKULL2
+    {Doocr::Spritenum::SPR_FSKU, 32770, 6, Pointer(Void).null, Doocr::Statenum::S_FLOATSKULL, 0, 0},               # S_FLOATSKULL3
+    {Doocr::Spritenum::SPR_COL5, 0, 14, Pointer(Void).null, Doocr::Statenum::S_HEARTCOL2, 0, 0},                   # S_HEARTCOL
+    {Doocr::Spritenum::SPR_COL5, 1, 14, Pointer(Void).null, Doocr::Statenum::S_HEARTCOL, 0, 0},                    # S_HEARTCOL2
+    {Doocr::Spritenum::SPR_TBLU, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_BLUETORCH2, 0, 0},               # S_BLUETORCH
+    {Doocr::Spritenum::SPR_TBLU, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_BLUETORCH3, 0, 0},               # S_BLUETORCH2
+    {Doocr::Spritenum::SPR_TBLU, 32770, 4, Pointer(Void).null, Doocr::Statenum::S_BLUETORCH4, 0, 0},               # S_BLUETORCH3
+    {Doocr::Spritenum::SPR_TBLU, 32771, 4, Pointer(Void).null, Doocr::Statenum::S_BLUETORCH, 0, 0},                # S_BLUETORCH4
+    {Doocr::Spritenum::SPR_TGRN, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_GREENTORCH2, 0, 0},              # S_GREENTORCH
+    {Doocr::Spritenum::SPR_TGRN, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_GREENTORCH3, 0, 0},              # S_GREENTORCH2
+    {Doocr::Spritenum::SPR_TGRN, 32770, 4, Pointer(Void).null, Doocr::Statenum::S_GREENTORCH4, 0, 0},              # S_GREENTORCH3
+    {Doocr::Spritenum::SPR_TGRN, 32771, 4, Pointer(Void).null, Doocr::Statenum::S_GREENTORCH, 0, 0},               # S_GREENTORCH4
+    {Doocr::Spritenum::SPR_TRED, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_REDTORCH2, 0, 0},                # S_REDTORCH
+    {Doocr::Spritenum::SPR_TRED, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_REDTORCH3, 0, 0},                # S_REDTORCH2
+    {Doocr::Spritenum::SPR_TRED, 32770, 4, Pointer(Void).null, Doocr::Statenum::S_REDTORCH4, 0, 0},                # S_REDTORCH3
+    {Doocr::Spritenum::SPR_TRED, 32771, 4, Pointer(Void).null, Doocr::Statenum::S_REDTORCH, 0, 0},                 # S_REDTORCH4
+    {Doocr::Spritenum::SPR_SMBT, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_BTORCHSHRT2, 0, 0},              # S_BTORCHSHRT
+    {Doocr::Spritenum::SPR_SMBT, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_BTORCHSHRT3, 0, 0},              # S_BTORCHSHRT2
+    {Doocr::Spritenum::SPR_SMBT, 32770, 4, Pointer(Void).null, Doocr::Statenum::S_BTORCHSHRT4, 0, 0},              # S_BTORCHSHRT3
+    {Doocr::Spritenum::SPR_SMBT, 32771, 4, Pointer(Void).null, Doocr::Statenum::S_BTORCHSHRT, 0, 0},               # S_BTORCHSHRT4
+    {Doocr::Spritenum::SPR_SMGT, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_GTORCHSHRT2, 0, 0},              # S_GTORCHSHRT
+    {Doocr::Spritenum::SPR_SMGT, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_GTORCHSHRT3, 0, 0},              # S_GTORCHSHRT2
+    {Doocr::Spritenum::SPR_SMGT, 32770, 4, Pointer(Void).null, Doocr::Statenum::S_GTORCHSHRT4, 0, 0},              # S_GTORCHSHRT3
+    {Doocr::Spritenum::SPR_SMGT, 32771, 4, Pointer(Void).null, Doocr::Statenum::S_GTORCHSHRT, 0, 0},               # S_GTORCHSHRT4
+    {Doocr::Spritenum::SPR_SMRT, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_RTORCHSHRT2, 0, 0},              # S_RTORCHSHRT
+    {Doocr::Spritenum::SPR_SMRT, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_RTORCHSHRT3, 0, 0},              # S_RTORCHSHRT2
+    {Doocr::Spritenum::SPR_SMRT, 32770, 4, Pointer(Void).null, Doocr::Statenum::S_RTORCHSHRT4, 0, 0},              # S_RTORCHSHRT3
+    {Doocr::Spritenum::SPR_SMRT, 32771, 4, Pointer(Void).null, Doocr::Statenum::S_RTORCHSHRT, 0, 0},               # S_RTORCHSHRT4
+    {Doocr::Spritenum::SPR_HDB1, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_HANGNOGUTS
+    {Doocr::Spritenum::SPR_HDB2, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_HANGBNOBRAIN
+    {Doocr::Spritenum::SPR_HDB3, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_HANGTLOOKDN
+    {Doocr::Spritenum::SPR_HDB4, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_HANGTSKULL
+    {Doocr::Spritenum::SPR_HDB5, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_HANGTLOOKUP
+    {Doocr::Spritenum::SPR_HDB6, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_HANGTNOBRAIN
+    {Doocr::Spritenum::SPR_POB1, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_COLONGIBS
+    {Doocr::Spritenum::SPR_POB2, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_SMALLPOOL
+    {Doocr::Spritenum::SPR_BRS1, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_BRAINSTEM
+    {Doocr::Spritenum::SPR_TLMP, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_TECHLAMP2, 0, 0},                # S_TECHLAMP
+    {Doocr::Spritenum::SPR_TLMP, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_TECHLAMP3, 0, 0},                # S_TECHLAMP2
+    {Doocr::Spritenum::SPR_TLMP, 32770, 4, Pointer(Void).null, Doocr::Statenum::S_TECHLAMP4, 0, 0},                # S_TECHLAMP3
+    {Doocr::Spritenum::SPR_TLMP, 32771, 4, Pointer(Void).null, Doocr::Statenum::S_TECHLAMP, 0, 0},                 # S_TECHLAMP4
+    {Doocr::Spritenum::SPR_TLP2, 32768, 4, Pointer(Void).null, Doocr::Statenum::S_TECH2LAMP2, 0, 0},               # S_TECH2LAMP
+    {Doocr::Spritenum::SPR_TLP2, 32769, 4, Pointer(Void).null, Doocr::Statenum::S_TECH2LAMP3, 0, 0},               # S_TECH2LAMP2
+    {Doocr::Spritenum::SPR_TLP2, 32770, 4, Pointer(Void).null, Doocr::Statenum::S_TECH2LAMP4, 0, 0},               # S_TECH2LAMP3
+    {Doocr::Spritenum::SPR_TLP2, 32771, 4, Pointer(Void).null, Doocr::Statenum::S_TECH2LAMP, 0, 0},                # S_TECH2LAMP4
   ]
-  class_getter states : Array(CDoom::State) = Array.new(CDoom::Statenum::NUMSTATES.value, CDoom::State.new)
+  class_getter states : Array(CDoom::State) = Array.new(Doocr::Statenum::NUMSTATES.value, CDoom::State.new)
   @@statedata.each_with_index do |elm, i|
     (@@states.to_unsafe + i).value.sprite = elm[0]
     (@@states.to_unsafe + i).value.frame = elm[1]
@@ -2070,3431 +2070,3431 @@ module Doocr
   )) = [
     {                                                                                                                                                                                       # MT_PLAYER
       -1,                                                                                                                                                                                   # doomednum
-      CDoom::Statenum::S_PLAY.value,                                                                                                                                                        # spawnstate
+      Doocr::Statenum::S_PLAY.value,                                                                                                                                                        # spawnstate
       100,                                                                                                                                                                                  # spawnhealth
-      CDoom::Statenum::S_PLAY_RUN1.value,                                                                                                                                                   # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                                                       # seesound
+      Doocr::Statenum::S_PLAY_RUN1.value,                                                                                                                                                   # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                                                       # seesound
       0,                                                                                                                                                                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                                                       # attacksound
-      CDoom::Statenum::S_PLAY_PAIN.value,                                                                                                                                                   # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                                                       # attacksound
+      Doocr::Statenum::S_PLAY_PAIN.value,                                                                                                                                                   # painstate
       255,                                                                                                                                                                                  # painchance
-      CDoom::Sfxenum::SFX_plpain.value,                                                                                                                                                     # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                        # meleestate
-      CDoom::Statenum::S_PLAY_ATK1.value,                                                                                                                                                   # missilestate
-      CDoom::Statenum::S_PLAY_DIE1.value,                                                                                                                                                   # deathstate
-      CDoom::Statenum::S_PLAY_XDIE1.value,                                                                                                                                                  # xdeathstate
-      CDoom::Sfxenum::SFX_pldeth.value,                                                                                                                                                     # deathsound
+      Doocr::Sfxenum::SFX_plpain.value,                                                                                                                                                     # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                        # meleestate
+      Doocr::Statenum::S_PLAY_ATK1.value,                                                                                                                                                   # missilestate
+      Doocr::Statenum::S_PLAY_DIE1.value,                                                                                                                                                   # deathstate
+      Doocr::Statenum::S_PLAY_XDIE1.value,                                                                                                                                                  # xdeathstate
+      Doocr::Sfxenum::SFX_pldeth.value,                                                                                                                                                     # deathsound
       0,                                                                                                                                                                                    # speed
       16 * FRACUNIT,                                                                                                                                                                        # radius
       56 * FRACUNIT,                                                                                                                                                                        # height
       100,                                                                                                                                                                                  # mass
       0,                                                                                                                                                                                    # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                                                       # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_DROPOFF.value | CDoom::Mobjflag::MF_PICKUP.value | CDoom::Mobjflag::MF_NOTDMATCH.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                        # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                                                       # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_DROPOFF.value | Doocr::Mobjflag::MF_PICKUP.value | Doocr::Mobjflag::MF_NOTDMATCH.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                        # raisestate
     },
     {                                                                                                                # MT_POSSESSED
       3004,                                                                                                          # doomednum
-      CDoom::Statenum::S_POSS_STND.value,                                                                            # spawnstate
+      Doocr::Statenum::S_POSS_STND.value,                                                                            # spawnstate
       20,                                                                                                            # spawnhealth
-      CDoom::Statenum::S_POSS_RUN1.value,                                                                            # seestate
-      CDoom::Sfxenum::SFX_posit1.value,                                                                              # seesound
+      Doocr::Statenum::S_POSS_RUN1.value,                                                                            # seestate
+      Doocr::Sfxenum::SFX_posit1.value,                                                                              # seesound
       8,                                                                                                             # reactiontime
-      CDoom::Sfxenum::SFX_pistol.value,                                                                              # attacksound
-      CDoom::Statenum::S_POSS_PAIN.value,                                                                            # painstate
+      Doocr::Sfxenum::SFX_pistol.value,                                                                              # attacksound
+      Doocr::Statenum::S_POSS_PAIN.value,                                                                            # painstate
       200,                                                                                                           # painchance
-      CDoom::Sfxenum::SFX_popain.value,                                                                              # painsound
+      Doocr::Sfxenum::SFX_popain.value,                                                                              # painsound
       0,                                                                                                             # meleestate
-      CDoom::Statenum::S_POSS_ATK1.value,                                                                            # missilestate
-      CDoom::Statenum::S_POSS_DIE1.value,                                                                            # deathstate
-      CDoom::Statenum::S_POSS_XDIE1.value,                                                                           # xdeathstate
-      CDoom::Sfxenum::SFX_podth1.value,                                                                              # deathsound
+      Doocr::Statenum::S_POSS_ATK1.value,                                                                            # missilestate
+      Doocr::Statenum::S_POSS_DIE1.value,                                                                            # deathstate
+      Doocr::Statenum::S_POSS_XDIE1.value,                                                                           # xdeathstate
+      Doocr::Sfxenum::SFX_podth1.value,                                                                              # deathsound
       8,                                                                                                             # speed
       20 * FRACUNIT,                                                                                                 # radius
       56 * FRACUNIT,                                                                                                 # height
       100,                                                                                                           # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_posact.value,                                                                              # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_POSS_RAISE1.value,                                                                          # raisestate
+      Doocr::Sfxenum::SFX_posact.value,                                                                              # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_POSS_RAISE1.value,                                                                          # raisestate
     },
     {                                                                                                                # MT_SHOTGUY
       9,                                                                                                             # doomednum
-      CDoom::Statenum::S_SPOS_STND.value,                                                                            # spawnstate
+      Doocr::Statenum::S_SPOS_STND.value,                                                                            # spawnstate
       30,                                                                                                            # spawnhealth
-      CDoom::Statenum::S_SPOS_RUN1.value,                                                                            # seestate
-      CDoom::Sfxenum::SFX_posit2.value,                                                                              # seesound
+      Doocr::Statenum::S_SPOS_RUN1.value,                                                                            # seestate
+      Doocr::Sfxenum::SFX_posit2.value,                                                                              # seesound
       8,                                                                                                             # reactiontime
       0,                                                                                                             # attacksound
-      CDoom::Statenum::S_SPOS_PAIN.value,                                                                            # painstate
+      Doocr::Statenum::S_SPOS_PAIN.value,                                                                            # painstate
       170,                                                                                                           # painchance
-      CDoom::Sfxenum::SFX_popain.value,                                                                              # painsound
+      Doocr::Sfxenum::SFX_popain.value,                                                                              # painsound
       0,                                                                                                             # meleestate
-      CDoom::Statenum::S_SPOS_ATK1.value,                                                                            # missilestate
-      CDoom::Statenum::S_SPOS_DIE1.value,                                                                            # deathstate
-      CDoom::Statenum::S_SPOS_XDIE1.value,                                                                           # xdeathstate
-      CDoom::Sfxenum::SFX_podth2.value,                                                                              # deathsound
+      Doocr::Statenum::S_SPOS_ATK1.value,                                                                            # missilestate
+      Doocr::Statenum::S_SPOS_DIE1.value,                                                                            # deathstate
+      Doocr::Statenum::S_SPOS_XDIE1.value,                                                                           # xdeathstate
+      Doocr::Sfxenum::SFX_podth2.value,                                                                              # deathsound
       8,                                                                                                             # speed
       20 * FRACUNIT,                                                                                                 # radius
       56 * FRACUNIT,                                                                                                 # height
       100,                                                                                                           # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_posact.value,                                                                              # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_SPOS_RAISE1.value,                                                                          # raisestate
+      Doocr::Sfxenum::SFX_posact.value,                                                                              # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_SPOS_RAISE1.value,                                                                          # raisestate
     },
     {                                                                                                                # MT_VILE
       64,                                                                                                            # doomednum
-      CDoom::Statenum::S_VILE_STND.value,                                                                            # spawnstate
+      Doocr::Statenum::S_VILE_STND.value,                                                                            # spawnstate
       700,                                                                                                           # spawnhealth
-      CDoom::Statenum::S_VILE_RUN1.value,                                                                            # seestate
-      CDoom::Sfxenum::SFX_vilsit.value,                                                                              # seesound
+      Doocr::Statenum::S_VILE_RUN1.value,                                                                            # seestate
+      Doocr::Sfxenum::SFX_vilsit.value,                                                                              # seesound
       8,                                                                                                             # reactiontime
       0,                                                                                                             # attacksound
-      CDoom::Statenum::S_VILE_PAIN.value,                                                                            # painstate
+      Doocr::Statenum::S_VILE_PAIN.value,                                                                            # painstate
       10,                                                                                                            # painchance
-      CDoom::Sfxenum::SFX_vipain.value,                                                                              # painsound
+      Doocr::Sfxenum::SFX_vipain.value,                                                                              # painsound
       0,                                                                                                             # meleestate
-      CDoom::Statenum::S_VILE_ATK1.value,                                                                            # missilestate
-      CDoom::Statenum::S_VILE_DIE1.value,                                                                            # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                 # xdeathstate
-      CDoom::Sfxenum::SFX_vildth.value,                                                                              # deathsound
+      Doocr::Statenum::S_VILE_ATK1.value,                                                                            # missilestate
+      Doocr::Statenum::S_VILE_DIE1.value,                                                                            # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                 # xdeathstate
+      Doocr::Sfxenum::SFX_vildth.value,                                                                              # deathsound
       15,                                                                                                            # speed
       20 * FRACUNIT,                                                                                                 # radius
       56 * FRACUNIT,                                                                                                 # height
       500,                                                                                                           # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_vilact.value,                                                                              # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                 # raisestate
+      Doocr::Sfxenum::SFX_vilact.value,                                                                              # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                 # raisestate
     },
     {                                                                               # MT_FIRE
       -1,                                                                           # doomednum
-      CDoom::Statenum::S_FIRE1.value,                                               # spawnstate
+      Doocr::Statenum::S_FIRE1.value,                                               # spawnstate
       1000,                                                                         # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                # seestate
-      CDoom::Sfxenum::SFX_None.value,                                               # seesound
+      Doocr::Statenum::S_NULL.value,                                                # seestate
+      Doocr::Sfxenum::SFX_None.value,                                               # seesound
       8,                                                                            # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                               # attacksound
-      CDoom::Statenum::S_NULL.value,                                                # painstate
+      Doocr::Sfxenum::SFX_None.value,                                               # attacksound
+      Doocr::Statenum::S_NULL.value,                                                # painstate
       0,                                                                            # painchance
-      CDoom::Sfxenum::SFX_None.value,                                               # painsound
-      CDoom::Statenum::S_NULL.value,                                                # meleestate
-      CDoom::Statenum::S_NULL.value,                                                # missilestate
-      CDoom::Statenum::S_NULL.value,                                                # deathstate
-      CDoom::Statenum::S_NULL.value,                                                # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                               # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                               # painsound
+      Doocr::Statenum::S_NULL.value,                                                # meleestate
+      Doocr::Statenum::S_NULL.value,                                                # missilestate
+      Doocr::Statenum::S_NULL.value,                                                # deathstate
+      Doocr::Statenum::S_NULL.value,                                                # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                               # deathsound
       0,                                                                            # speed
       20 * FRACUNIT,                                                                # radius
       16 * FRACUNIT,                                                                # height
       100,                                                                          # mass
       0,                                                                            # damage
-      CDoom::Sfxenum::SFX_None.value,                                               # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                               # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                # raisestate
     },
     {                                                                                                                # MT_UNDEAD
       66,                                                                                                            # doomednum
-      CDoom::Statenum::S_SKEL_STND.value,                                                                            # spawnstate
+      Doocr::Statenum::S_SKEL_STND.value,                                                                            # spawnstate
       300,                                                                                                           # spawnhealth
-      CDoom::Statenum::S_SKEL_RUN1.value,                                                                            # seestate
-      CDoom::Sfxenum::SFX_skesit.value,                                                                              # seesound
+      Doocr::Statenum::S_SKEL_RUN1.value,                                                                            # seestate
+      Doocr::Sfxenum::SFX_skesit.value,                                                                              # seesound
       8,                                                                                                             # reactiontime
       0,                                                                                                             # attacksound
-      CDoom::Statenum::S_SKEL_PAIN.value,                                                                            # painstate
+      Doocr::Statenum::S_SKEL_PAIN.value,                                                                            # painstate
       100,                                                                                                           # painchance
-      CDoom::Sfxenum::SFX_popain.value,                                                                              # painsound
-      CDoom::Statenum::S_SKEL_FIST1.value,                                                                           # meleestate
-      CDoom::Statenum::S_SKEL_MISS1.value,                                                                           # missilestate
-      CDoom::Statenum::S_SKEL_DIE1.value,                                                                            # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                 # xdeathstate
-      CDoom::Sfxenum::SFX_skedth.value,                                                                              # deathsound
+      Doocr::Sfxenum::SFX_popain.value,                                                                              # painsound
+      Doocr::Statenum::S_SKEL_FIST1.value,                                                                           # meleestate
+      Doocr::Statenum::S_SKEL_MISS1.value,                                                                           # missilestate
+      Doocr::Statenum::S_SKEL_DIE1.value,                                                                            # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                 # xdeathstate
+      Doocr::Sfxenum::SFX_skedth.value,                                                                              # deathsound
       10,                                                                                                            # speed
       20 * FRACUNIT,                                                                                                 # radius
       56 * FRACUNIT,                                                                                                 # height
       500,                                                                                                           # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_skeact.value,                                                                              # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_SKEL_RAISE1.value,                                                                          # raisestate
+      Doocr::Sfxenum::SFX_skeact.value,                                                                              # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_SKEL_RAISE1.value,                                                                          # raisestate
     },
     {                                                                                                                                                       # MT_TRACER
       -1,                                                                                                                                                   # doomednum
-      CDoom::Statenum::S_TRACER.value,                                                                                                                      # spawnstate
+      Doocr::Statenum::S_TRACER.value,                                                                                                                      # spawnstate
       1000,                                                                                                                                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # seestate
-      CDoom::Sfxenum::SFX_skeatk.value,                                                                                                                     # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # seestate
+      Doocr::Sfxenum::SFX_skeatk.value,                                                                                                                     # seesound
       8,                                                                                                                                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # painstate
       0,                                                                                                                                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # missilestate
-      CDoom::Statenum::S_TRACEEXP1.value,                                                                                                                   # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
-      CDoom::Sfxenum::SFX_barexp.value,                                                                                                                     # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # missilestate
+      Doocr::Statenum::S_TRACEEXP1.value,                                                                                                                   # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
+      Doocr::Sfxenum::SFX_barexp.value,                                                                                                                     # deathsound
       10 * FRACUNIT,                                                                                                                                        # speed
       11 * FRACUNIT,                                                                                                                                        # radius
       8 * FRACUNIT,                                                                                                                                         # height
       100,                                                                                                                                                  # mass
       10,                                                                                                                                                   # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_MISSILE.value | CDoom::Mobjflag::MF_DROPOFF.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_MISSILE.value | Doocr::Mobjflag::MF_DROPOFF.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # raisestate
     },
     {                                                                               # MT_SMOKE
       -1,                                                                           # doomednum
-      CDoom::Statenum::S_SMOKE1.value,                                              # spawnstate
+      Doocr::Statenum::S_SMOKE1.value,                                              # spawnstate
       1000,                                                                         # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                # seestate
-      CDoom::Sfxenum::SFX_None.value,                                               # seesound
+      Doocr::Statenum::S_NULL.value,                                                # seestate
+      Doocr::Sfxenum::SFX_None.value,                                               # seesound
       8,                                                                            # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                               # attacksound
-      CDoom::Statenum::S_NULL.value,                                                # painstate
+      Doocr::Sfxenum::SFX_None.value,                                               # attacksound
+      Doocr::Statenum::S_NULL.value,                                                # painstate
       0,                                                                            # painchance
-      CDoom::Sfxenum::SFX_None.value,                                               # painsound
-      CDoom::Statenum::S_NULL.value,                                                # meleestate
-      CDoom::Statenum::S_NULL.value,                                                # missilestate
-      CDoom::Statenum::S_NULL.value,                                                # deathstate
-      CDoom::Statenum::S_NULL.value,                                                # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                               # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                               # painsound
+      Doocr::Statenum::S_NULL.value,                                                # meleestate
+      Doocr::Statenum::S_NULL.value,                                                # missilestate
+      Doocr::Statenum::S_NULL.value,                                                # deathstate
+      Doocr::Statenum::S_NULL.value,                                                # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                               # deathsound
       0,                                                                            # speed
       20 * FRACUNIT,                                                                # radius
       16 * FRACUNIT,                                                                # height
       100,                                                                          # mass
       0,                                                                            # damage
-      CDoom::Sfxenum::SFX_None.value,                                               # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                               # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                # raisestate
     },
     {                                                                                                                # MT_FATSO
       67,                                                                                                            # doomednum
-      CDoom::Statenum::S_FATT_STND.value,                                                                            # spawnstate
+      Doocr::Statenum::S_FATT_STND.value,                                                                            # spawnstate
       600,                                                                                                           # spawnhealth
-      CDoom::Statenum::S_FATT_RUN1.value,                                                                            # seestate
-      CDoom::Sfxenum::SFX_mansit.value,                                                                              # seesound
+      Doocr::Statenum::S_FATT_RUN1.value,                                                                            # seestate
+      Doocr::Sfxenum::SFX_mansit.value,                                                                              # seesound
       8,                                                                                                             # reactiontime
       0,                                                                                                             # attacksound
-      CDoom::Statenum::S_FATT_PAIN.value,                                                                            # painstate
+      Doocr::Statenum::S_FATT_PAIN.value,                                                                            # painstate
       80,                                                                                                            # painchance
-      CDoom::Sfxenum::SFX_mnpain.value,                                                                              # painsound
+      Doocr::Sfxenum::SFX_mnpain.value,                                                                              # painsound
       0,                                                                                                             # meleestate
-      CDoom::Statenum::S_FATT_ATK1.value,                                                                            # missilestate
-      CDoom::Statenum::S_FATT_DIE1.value,                                                                            # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                 # xdeathstate
-      CDoom::Sfxenum::SFX_mandth.value,                                                                              # deathsound
+      Doocr::Statenum::S_FATT_ATK1.value,                                                                            # missilestate
+      Doocr::Statenum::S_FATT_DIE1.value,                                                                            # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                 # xdeathstate
+      Doocr::Sfxenum::SFX_mandth.value,                                                                              # deathsound
       8,                                                                                                             # speed
       48 * FRACUNIT,                                                                                                 # radius
       64 * FRACUNIT,                                                                                                 # height
       1000,                                                                                                          # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_posact.value,                                                                              # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_FATT_RAISE1.value,                                                                          # raisestate
+      Doocr::Sfxenum::SFX_posact.value,                                                                              # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_FATT_RAISE1.value,                                                                          # raisestate
     },
     {                                                                                                                                                       # MT_FATSHOT
       -1,                                                                                                                                                   # doomednum
-      CDoom::Statenum::S_FATSHOT1.value,                                                                                                                    # spawnstate
+      Doocr::Statenum::S_FATSHOT1.value,                                                                                                                    # spawnstate
       1000,                                                                                                                                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # seestate
-      CDoom::Sfxenum::SFX_firsht.value,                                                                                                                     # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # seestate
+      Doocr::Sfxenum::SFX_firsht.value,                                                                                                                     # seesound
       8,                                                                                                                                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # painstate
       0,                                                                                                                                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # missilestate
-      CDoom::Statenum::S_FATSHOTX1.value,                                                                                                                   # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
-      CDoom::Sfxenum::SFX_firxpl.value,                                                                                                                     # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # missilestate
+      Doocr::Statenum::S_FATSHOTX1.value,                                                                                                                   # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
+      Doocr::Sfxenum::SFX_firxpl.value,                                                                                                                     # deathsound
       20 * FRACUNIT,                                                                                                                                        # speed
       6 * FRACUNIT,                                                                                                                                         # radius
       8 * FRACUNIT,                                                                                                                                         # height
       100,                                                                                                                                                  # mass
       8,                                                                                                                                                    # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_MISSILE.value | CDoom::Mobjflag::MF_DROPOFF.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_MISSILE.value | Doocr::Mobjflag::MF_DROPOFF.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # raisestate
     },
     {                                                                                                                # MT_CHAINGUY
       65,                                                                                                            # doomednum
-      CDoom::Statenum::S_CPOS_STND.value,                                                                            # spawnstate
+      Doocr::Statenum::S_CPOS_STND.value,                                                                            # spawnstate
       70,                                                                                                            # spawnhealth
-      CDoom::Statenum::S_CPOS_RUN1.value,                                                                            # seestate
-      CDoom::Sfxenum::SFX_posit2.value,                                                                              # seesound
+      Doocr::Statenum::S_CPOS_RUN1.value,                                                                            # seestate
+      Doocr::Sfxenum::SFX_posit2.value,                                                                              # seesound
       8,                                                                                                             # reactiontime
       0,                                                                                                             # attacksound
-      CDoom::Statenum::S_CPOS_PAIN.value,                                                                            # painstate
+      Doocr::Statenum::S_CPOS_PAIN.value,                                                                            # painstate
       170,                                                                                                           # painchance
-      CDoom::Sfxenum::SFX_popain.value,                                                                              # painsound
+      Doocr::Sfxenum::SFX_popain.value,                                                                              # painsound
       0,                                                                                                             # meleestate
-      CDoom::Statenum::S_CPOS_ATK1.value,                                                                            # missilestate
-      CDoom::Statenum::S_CPOS_DIE1.value,                                                                            # deathstate
-      CDoom::Statenum::S_CPOS_XDIE1.value,                                                                           # xdeathstate
-      CDoom::Sfxenum::SFX_podth2.value,                                                                              # deathsound
+      Doocr::Statenum::S_CPOS_ATK1.value,                                                                            # missilestate
+      Doocr::Statenum::S_CPOS_DIE1.value,                                                                            # deathstate
+      Doocr::Statenum::S_CPOS_XDIE1.value,                                                                           # xdeathstate
+      Doocr::Sfxenum::SFX_podth2.value,                                                                              # deathsound
       8,                                                                                                             # speed
       20 * FRACUNIT,                                                                                                 # radius
       56 * FRACUNIT,                                                                                                 # height
       100,                                                                                                           # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_posact.value,                                                                              # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_CPOS_RAISE1.value,                                                                          # raisestate
+      Doocr::Sfxenum::SFX_posact.value,                                                                              # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_CPOS_RAISE1.value,                                                                          # raisestate
     },
     {                                                                                                                # MT_TROOP
       3001,                                                                                                          # doomednum
-      CDoom::Statenum::S_TROO_STND.value,                                                                            # spawnstate
+      Doocr::Statenum::S_TROO_STND.value,                                                                            # spawnstate
       60,                                                                                                            # spawnhealth
-      CDoom::Statenum::S_TROO_RUN1.value,                                                                            # seestate
-      CDoom::Sfxenum::SFX_bgsit1.value,                                                                              # seesound
+      Doocr::Statenum::S_TROO_RUN1.value,                                                                            # seestate
+      Doocr::Sfxenum::SFX_bgsit1.value,                                                                              # seesound
       8,                                                                                                             # reactiontime
       0,                                                                                                             # attacksound
-      CDoom::Statenum::S_TROO_PAIN.value,                                                                            # painstate
+      Doocr::Statenum::S_TROO_PAIN.value,                                                                            # painstate
       200,                                                                                                           # painchance
-      CDoom::Sfxenum::SFX_popain.value,                                                                              # painsound
-      CDoom::Statenum::S_TROO_ATK1.value,                                                                            # meleestate
-      CDoom::Statenum::S_TROO_ATK1.value,                                                                            # missilestate
-      CDoom::Statenum::S_TROO_DIE1.value,                                                                            # deathstate
-      CDoom::Statenum::S_TROO_XDIE1.value,                                                                           # xdeathstate
-      CDoom::Sfxenum::SFX_bgdth1.value,                                                                              # deathsound
+      Doocr::Sfxenum::SFX_popain.value,                                                                              # painsound
+      Doocr::Statenum::S_TROO_ATK1.value,                                                                            # meleestate
+      Doocr::Statenum::S_TROO_ATK1.value,                                                                            # missilestate
+      Doocr::Statenum::S_TROO_DIE1.value,                                                                            # deathstate
+      Doocr::Statenum::S_TROO_XDIE1.value,                                                                           # xdeathstate
+      Doocr::Sfxenum::SFX_bgdth1.value,                                                                              # deathsound
       8,                                                                                                             # speed
       20 * FRACUNIT,                                                                                                 # radius
       56 * FRACUNIT,                                                                                                 # height
       100,                                                                                                           # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_bgact.value,                                                                               # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_TROO_RAISE1.value,                                                                          # raisestate
+      Doocr::Sfxenum::SFX_bgact.value,                                                                               # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_TROO_RAISE1.value,                                                                          # raisestate
     },
     {                                                                                                                # MT_SERGEANT
       3002,                                                                                                          # doomednum
-      CDoom::Statenum::S_SARG_STND.value,                                                                            # spawnstate
+      Doocr::Statenum::S_SARG_STND.value,                                                                            # spawnstate
       150,                                                                                                           # spawnhealth
-      CDoom::Statenum::S_SARG_RUN1.value,                                                                            # seestate
-      CDoom::Sfxenum::SFX_sgtsit.value,                                                                              # seesound
+      Doocr::Statenum::S_SARG_RUN1.value,                                                                            # seestate
+      Doocr::Sfxenum::SFX_sgtsit.value,                                                                              # seesound
       8,                                                                                                             # reactiontime
-      CDoom::Sfxenum::SFX_sgtatk.value,                                                                              # attacksound
-      CDoom::Statenum::S_SARG_PAIN.value,                                                                            # painstate
+      Doocr::Sfxenum::SFX_sgtatk.value,                                                                              # attacksound
+      Doocr::Statenum::S_SARG_PAIN.value,                                                                            # painstate
       180,                                                                                                           # painchance
-      CDoom::Sfxenum::SFX_dmpain.value,                                                                              # painsound
-      CDoom::Statenum::S_SARG_ATK1.value,                                                                            # meleestate
+      Doocr::Sfxenum::SFX_dmpain.value,                                                                              # painsound
+      Doocr::Statenum::S_SARG_ATK1.value,                                                                            # meleestate
       0,                                                                                                             # missilestate
-      CDoom::Statenum::S_SARG_DIE1.value,                                                                            # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                 # xdeathstate
-      CDoom::Sfxenum::SFX_sgtdth.value,                                                                              # deathsound
+      Doocr::Statenum::S_SARG_DIE1.value,                                                                            # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                 # xdeathstate
+      Doocr::Sfxenum::SFX_sgtdth.value,                                                                              # deathsound
       10,                                                                                                            # speed
       30 * FRACUNIT,                                                                                                 # radius
       56 * FRACUNIT,                                                                                                 # height
       400,                                                                                                           # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_dmact.value,                                                                               # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_SARG_RAISE1.value,                                                                          # raisestate
+      Doocr::Sfxenum::SFX_dmact.value,                                                                               # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_SARG_RAISE1.value,                                                                          # raisestate
     },
     {                                                                                                                                                   # MT_SHADOWS
       58,                                                                                                                                               # doomednum
-      CDoom::Statenum::S_SARG_STND.value,                                                                                                               # spawnstate
+      Doocr::Statenum::S_SARG_STND.value,                                                                                                               # spawnstate
       150,                                                                                                                                              # spawnhealth
-      CDoom::Statenum::S_SARG_RUN1.value,                                                                                                               # seestate
-      CDoom::Sfxenum::SFX_sgtsit.value,                                                                                                                 # seesound
+      Doocr::Statenum::S_SARG_RUN1.value,                                                                                                               # seestate
+      Doocr::Sfxenum::SFX_sgtsit.value,                                                                                                                 # seesound
       8,                                                                                                                                                # reactiontime
-      CDoom::Sfxenum::SFX_sgtatk.value,                                                                                                                 # attacksound
-      CDoom::Statenum::S_SARG_PAIN.value,                                                                                                               # painstate
+      Doocr::Sfxenum::SFX_sgtatk.value,                                                                                                                 # attacksound
+      Doocr::Statenum::S_SARG_PAIN.value,                                                                                                               # painstate
       180,                                                                                                                                              # painchance
-      CDoom::Sfxenum::SFX_dmpain.value,                                                                                                                 # painsound
-      CDoom::Statenum::S_SARG_ATK1.value,                                                                                                               # meleestate
+      Doocr::Sfxenum::SFX_dmpain.value,                                                                                                                 # painsound
+      Doocr::Statenum::S_SARG_ATK1.value,                                                                                                               # meleestate
       0,                                                                                                                                                # missilestate
-      CDoom::Statenum::S_SARG_DIE1.value,                                                                                                               # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                    # xdeathstate
-      CDoom::Sfxenum::SFX_sgtdth.value,                                                                                                                 # deathsound
+      Doocr::Statenum::S_SARG_DIE1.value,                                                                                                               # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                    # xdeathstate
+      Doocr::Sfxenum::SFX_sgtdth.value,                                                                                                                 # deathsound
       10,                                                                                                                                               # speed
       30 * FRACUNIT,                                                                                                                                    # radius
       56 * FRACUNIT,                                                                                                                                    # height
       400,                                                                                                                                              # mass
       0,                                                                                                                                                # damage
-      CDoom::Sfxenum::SFX_dmact.value,                                                                                                                  # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_SHADOW.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_SARG_RAISE1.value,                                                                                                             # raisestate
+      Doocr::Sfxenum::SFX_dmact.value,                                                                                                                  # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_SHADOW.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_SARG_RAISE1.value,                                                                                                             # raisestate
     },
     {                                                                                                                                                                                        # MT_HEAD
       3005,                                                                                                                                                                                  # doomednum
-      CDoom::Statenum::S_HEAD_STND.value,                                                                                                                                                    # spawnstate
+      Doocr::Statenum::S_HEAD_STND.value,                                                                                                                                                    # spawnstate
       400,                                                                                                                                                                                   # spawnhealth
-      CDoom::Statenum::S_HEAD_RUN1.value,                                                                                                                                                    # seestate
-      CDoom::Sfxenum::SFX_cacsit.value,                                                                                                                                                      # seesound
+      Doocr::Statenum::S_HEAD_RUN1.value,                                                                                                                                                    # seestate
+      Doocr::Sfxenum::SFX_cacsit.value,                                                                                                                                                      # seesound
       8,                                                                                                                                                                                     # reactiontime
       0,                                                                                                                                                                                     # attacksound
-      CDoom::Statenum::S_HEAD_PAIN.value,                                                                                                                                                    # painstate
+      Doocr::Statenum::S_HEAD_PAIN.value,                                                                                                                                                    # painstate
       128,                                                                                                                                                                                   # painchance
-      CDoom::Sfxenum::SFX_dmpain.value,                                                                                                                                                      # painsound
+      Doocr::Sfxenum::SFX_dmpain.value,                                                                                                                                                      # painsound
       0,                                                                                                                                                                                     # meleestate
-      CDoom::Statenum::S_HEAD_ATK1.value,                                                                                                                                                    # missilestate
-      CDoom::Statenum::S_HEAD_DIE1.value,                                                                                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                         # xdeathstate
-      CDoom::Sfxenum::SFX_cacdth.value,                                                                                                                                                      # deathsound
+      Doocr::Statenum::S_HEAD_ATK1.value,                                                                                                                                                    # missilestate
+      Doocr::Statenum::S_HEAD_DIE1.value,                                                                                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                         # xdeathstate
+      Doocr::Sfxenum::SFX_cacdth.value,                                                                                                                                                      # deathsound
       8,                                                                                                                                                                                     # speed
       31 * FRACUNIT,                                                                                                                                                                         # radius
       56 * FRACUNIT,                                                                                                                                                                         # height
       400,                                                                                                                                                                                   # mass
       0,                                                                                                                                                                                     # damage
-      CDoom::Sfxenum::SFX_dmact.value,                                                                                                                                                       # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_FLOAT.value | CDoom::Mobjflag::MF_NOGRAVITY.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_HEAD_RAISE1.value,                                                                                                                                                  # raisestate
+      Doocr::Sfxenum::SFX_dmact.value,                                                                                                                                                       # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_FLOAT.value | Doocr::Mobjflag::MF_NOGRAVITY.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_HEAD_RAISE1.value,                                                                                                                                                  # raisestate
     },
     {                                                                                                                # MT_BRUISER
       3003,                                                                                                          # doomednum
-      CDoom::Statenum::S_BOSS_STND.value,                                                                            # spawnstate
+      Doocr::Statenum::S_BOSS_STND.value,                                                                            # spawnstate
       1000,                                                                                                          # spawnhealth
-      CDoom::Statenum::S_BOSS_RUN1.value,                                                                            # seestate
-      CDoom::Sfxenum::SFX_brssit.value,                                                                              # seesound
+      Doocr::Statenum::S_BOSS_RUN1.value,                                                                            # seestate
+      Doocr::Sfxenum::SFX_brssit.value,                                                                              # seesound
       8,                                                                                                             # reactiontime
       0,                                                                                                             # attacksound
-      CDoom::Statenum::S_BOSS_PAIN.value,                                                                            # painstate
+      Doocr::Statenum::S_BOSS_PAIN.value,                                                                            # painstate
       50,                                                                                                            # painchance
-      CDoom::Sfxenum::SFX_dmpain.value,                                                                              # painsound
-      CDoom::Statenum::S_BOSS_ATK1.value,                                                                            # meleestate
-      CDoom::Statenum::S_BOSS_ATK1.value,                                                                            # missilestate
-      CDoom::Statenum::S_BOSS_DIE1.value,                                                                            # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                 # xdeathstate
-      CDoom::Sfxenum::SFX_brsdth.value,                                                                              # deathsound
+      Doocr::Sfxenum::SFX_dmpain.value,                                                                              # painsound
+      Doocr::Statenum::S_BOSS_ATK1.value,                                                                            # meleestate
+      Doocr::Statenum::S_BOSS_ATK1.value,                                                                            # missilestate
+      Doocr::Statenum::S_BOSS_DIE1.value,                                                                            # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                 # xdeathstate
+      Doocr::Sfxenum::SFX_brsdth.value,                                                                              # deathsound
       8,                                                                                                             # speed
       24 * FRACUNIT,                                                                                                 # radius
       64 * FRACUNIT,                                                                                                 # height
       1000,                                                                                                          # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_dmact.value,                                                                               # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_BOSS_RAISE1.value,                                                                          # raisestate
+      Doocr::Sfxenum::SFX_dmact.value,                                                                               # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_BOSS_RAISE1.value,                                                                          # raisestate
     },
     {                                                                                                                                                       # MT_BRUISERSHOT
       -1,                                                                                                                                                   # doomednum
-      CDoom::Statenum::S_BRBALL1.value,                                                                                                                     # spawnstate
+      Doocr::Statenum::S_BRBALL1.value,                                                                                                                     # spawnstate
       1000,                                                                                                                                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # seestate
-      CDoom::Sfxenum::SFX_firsht.value,                                                                                                                     # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # seestate
+      Doocr::Sfxenum::SFX_firsht.value,                                                                                                                     # seesound
       8,                                                                                                                                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # painstate
       0,                                                                                                                                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # missilestate
-      CDoom::Statenum::S_BRBALLX1.value,                                                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
-      CDoom::Sfxenum::SFX_firxpl.value,                                                                                                                     # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # missilestate
+      Doocr::Statenum::S_BRBALLX1.value,                                                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
+      Doocr::Sfxenum::SFX_firxpl.value,                                                                                                                     # deathsound
       15 * FRACUNIT,                                                                                                                                        # speed
       6 * FRACUNIT,                                                                                                                                         # radius
       8 * FRACUNIT,                                                                                                                                         # height
       100,                                                                                                                                                  # mass
       8,                                                                                                                                                    # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_MISSILE.value | CDoom::Mobjflag::MF_DROPOFF.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_MISSILE.value | Doocr::Mobjflag::MF_DROPOFF.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # raisestate
     },
     {                                                                                                                # MT_KNIGHT
       69,                                                                                                            # doomednum
-      CDoom::Statenum::S_BOS2_STND.value,                                                                            # spawnstate
+      Doocr::Statenum::S_BOS2_STND.value,                                                                            # spawnstate
       500,                                                                                                           # spawnhealth
-      CDoom::Statenum::S_BOS2_RUN1.value,                                                                            # seestate
-      CDoom::Sfxenum::SFX_kntsit.value,                                                                              # seesound
+      Doocr::Statenum::S_BOS2_RUN1.value,                                                                            # seestate
+      Doocr::Sfxenum::SFX_kntsit.value,                                                                              # seesound
       8,                                                                                                             # reactiontime
       0,                                                                                                             # attacksound
-      CDoom::Statenum::S_BOS2_PAIN.value,                                                                            # painstate
+      Doocr::Statenum::S_BOS2_PAIN.value,                                                                            # painstate
       50,                                                                                                            # painchance
-      CDoom::Sfxenum::SFX_dmpain.value,                                                                              # painsound
-      CDoom::Statenum::S_BOS2_ATK1.value,                                                                            # meleestate
-      CDoom::Statenum::S_BOS2_ATK1.value,                                                                            # missilestate
-      CDoom::Statenum::S_BOS2_DIE1.value,                                                                            # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                 # xdeathstate
-      CDoom::Sfxenum::SFX_kntdth.value,                                                                              # deathsound
+      Doocr::Sfxenum::SFX_dmpain.value,                                                                              # painsound
+      Doocr::Statenum::S_BOS2_ATK1.value,                                                                            # meleestate
+      Doocr::Statenum::S_BOS2_ATK1.value,                                                                            # missilestate
+      Doocr::Statenum::S_BOS2_DIE1.value,                                                                            # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                 # xdeathstate
+      Doocr::Sfxenum::SFX_kntdth.value,                                                                              # deathsound
       8,                                                                                                             # speed
       24 * FRACUNIT,                                                                                                 # radius
       64 * FRACUNIT,                                                                                                 # height
       1000,                                                                                                          # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_dmact.value,                                                                               # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_BOS2_RAISE1.value,                                                                          # raisestate
+      Doocr::Sfxenum::SFX_dmact.value,                                                                               # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_BOS2_RAISE1.value,                                                                          # raisestate
     },
     {                                                                                                                                                  # MT_SKULL
       3006,                                                                                                                                            # doomednum
-      CDoom::Statenum::S_SKULL_STND.value,                                                                                                             # spawnstate
+      Doocr::Statenum::S_SKULL_STND.value,                                                                                                             # spawnstate
       100,                                                                                                                                             # spawnhealth
-      CDoom::Statenum::S_SKULL_RUN1.value,                                                                                                             # seestate
+      Doocr::Statenum::S_SKULL_RUN1.value,                                                                                                             # seestate
       0,                                                                                                                                               # seesound
       8,                                                                                                                                               # reactiontime
-      CDoom::Sfxenum::SFX_sklatk.value,                                                                                                                # attacksound
-      CDoom::Statenum::S_SKULL_PAIN.value,                                                                                                             # painstate
+      Doocr::Sfxenum::SFX_sklatk.value,                                                                                                                # attacksound
+      Doocr::Statenum::S_SKULL_PAIN.value,                                                                                                             # painstate
       256,                                                                                                                                             # painchance
-      CDoom::Sfxenum::SFX_dmpain.value,                                                                                                                # painsound
+      Doocr::Sfxenum::SFX_dmpain.value,                                                                                                                # painsound
       0,                                                                                                                                               # meleestate
-      CDoom::Statenum::S_SKULL_ATK1.value,                                                                                                             # missilestate
-      CDoom::Statenum::S_SKULL_DIE1.value,                                                                                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                   # xdeathstate
-      CDoom::Sfxenum::SFX_firxpl.value,                                                                                                                # deathsound
+      Doocr::Statenum::S_SKULL_ATK1.value,                                                                                                             # missilestate
+      Doocr::Statenum::S_SKULL_DIE1.value,                                                                                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                   # xdeathstate
+      Doocr::Sfxenum::SFX_firxpl.value,                                                                                                                # deathsound
       8,                                                                                                                                               # speed
       16 * FRACUNIT,                                                                                                                                   # radius
       56 * FRACUNIT,                                                                                                                                   # height
       50,                                                                                                                                              # mass
       3,                                                                                                                                               # damage
-      CDoom::Sfxenum::SFX_dmact.value,                                                                                                                 # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_FLOAT.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                                                   # raisestate
+      Doocr::Sfxenum::SFX_dmact.value,                                                                                                                 # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_FLOAT.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                                                   # raisestate
     },
     {                                                                                                                # MT_SPIDER
       7,                                                                                                             # doomednum
-      CDoom::Statenum::S_SPID_STND.value,                                                                            # spawnstate
+      Doocr::Statenum::S_SPID_STND.value,                                                                            # spawnstate
       3000,                                                                                                          # spawnhealth
-      CDoom::Statenum::S_SPID_RUN1.value,                                                                            # seestate
-      CDoom::Sfxenum::SFX_spisit.value,                                                                              # seesound
+      Doocr::Statenum::S_SPID_RUN1.value,                                                                            # seestate
+      Doocr::Sfxenum::SFX_spisit.value,                                                                              # seesound
       8,                                                                                                             # reactiontime
-      CDoom::Sfxenum::SFX_shotgn.value,                                                                              # attacksound
-      CDoom::Statenum::S_SPID_PAIN.value,                                                                            # painstate
+      Doocr::Sfxenum::SFX_shotgn.value,                                                                              # attacksound
+      Doocr::Statenum::S_SPID_PAIN.value,                                                                            # painstate
       40,                                                                                                            # painchance
-      CDoom::Sfxenum::SFX_dmpain.value,                                                                              # painsound
+      Doocr::Sfxenum::SFX_dmpain.value,                                                                              # painsound
       0,                                                                                                             # meleestate
-      CDoom::Statenum::S_SPID_ATK1.value,                                                                            # missilestate
-      CDoom::Statenum::S_SPID_DIE1.value,                                                                            # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                 # xdeathstate
-      CDoom::Sfxenum::SFX_spidth.value,                                                                              # deathsound
+      Doocr::Statenum::S_SPID_ATK1.value,                                                                            # missilestate
+      Doocr::Statenum::S_SPID_DIE1.value,                                                                            # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                 # xdeathstate
+      Doocr::Sfxenum::SFX_spidth.value,                                                                              # deathsound
       12,                                                                                                            # speed
       128 * FRACUNIT,                                                                                                # radius
       100 * FRACUNIT,                                                                                                # height
       1000,                                                                                                          # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_dmact.value,                                                                               # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                 # raisestate
+      Doocr::Sfxenum::SFX_dmact.value,                                                                               # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                 # raisestate
     },
     {                                                                                                                # MT_BABY
       68,                                                                                                            # doomednum
-      CDoom::Statenum::S_BSPI_STND.value,                                                                            # spawnstate
+      Doocr::Statenum::S_BSPI_STND.value,                                                                            # spawnstate
       500,                                                                                                           # spawnhealth
-      CDoom::Statenum::S_BSPI_SIGHT.value,                                                                           # seestate
-      CDoom::Sfxenum::SFX_bspsit.value,                                                                              # seesound
+      Doocr::Statenum::S_BSPI_SIGHT.value,                                                                           # seestate
+      Doocr::Sfxenum::SFX_bspsit.value,                                                                              # seesound
       8,                                                                                                             # reactiontime
       0,                                                                                                             # attacksound
-      CDoom::Statenum::S_BSPI_PAIN.value,                                                                            # painstate
+      Doocr::Statenum::S_BSPI_PAIN.value,                                                                            # painstate
       128,                                                                                                           # painchance
-      CDoom::Sfxenum::SFX_dmpain.value,                                                                              # painsound
+      Doocr::Sfxenum::SFX_dmpain.value,                                                                              # painsound
       0,                                                                                                             # meleestate
-      CDoom::Statenum::S_BSPI_ATK1.value,                                                                            # missilestate
-      CDoom::Statenum::S_BSPI_DIE1.value,                                                                            # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                 # xdeathstate
-      CDoom::Sfxenum::SFX_bspdth.value,                                                                              # deathsound
+      Doocr::Statenum::S_BSPI_ATK1.value,                                                                            # missilestate
+      Doocr::Statenum::S_BSPI_DIE1.value,                                                                            # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                 # xdeathstate
+      Doocr::Sfxenum::SFX_bspdth.value,                                                                              # deathsound
       12,                                                                                                            # speed
       64 * FRACUNIT,                                                                                                 # radius
       64 * FRACUNIT,                                                                                                 # height
       600,                                                                                                           # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_bspact.value,                                                                              # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_BSPI_RAISE1.value,                                                                          # raisestate
+      Doocr::Sfxenum::SFX_bspact.value,                                                                              # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_BSPI_RAISE1.value,                                                                          # raisestate
     },
     {                                                                                                                # MT_CYBORG
       16,                                                                                                            # doomednum
-      CDoom::Statenum::S_CYBER_STND.value,                                                                           # spawnstate
+      Doocr::Statenum::S_CYBER_STND.value,                                                                           # spawnstate
       4000,                                                                                                          # spawnhealth
-      CDoom::Statenum::S_CYBER_RUN1.value,                                                                           # seestate
-      CDoom::Sfxenum::SFX_cybsit.value,                                                                              # seesound
+      Doocr::Statenum::S_CYBER_RUN1.value,                                                                           # seestate
+      Doocr::Sfxenum::SFX_cybsit.value,                                                                              # seesound
       8,                                                                                                             # reactiontime
       0,                                                                                                             # attacksound
-      CDoom::Statenum::S_CYBER_PAIN.value,                                                                           # painstate
+      Doocr::Statenum::S_CYBER_PAIN.value,                                                                           # painstate
       20,                                                                                                            # painchance
-      CDoom::Sfxenum::SFX_dmpain.value,                                                                              # painsound
+      Doocr::Sfxenum::SFX_dmpain.value,                                                                              # painsound
       0,                                                                                                             # meleestate
-      CDoom::Statenum::S_CYBER_ATK1.value,                                                                           # missilestate
-      CDoom::Statenum::S_CYBER_DIE1.value,                                                                           # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                 # xdeathstate
-      CDoom::Sfxenum::SFX_cybdth.value,                                                                              # deathsound
+      Doocr::Statenum::S_CYBER_ATK1.value,                                                                           # missilestate
+      Doocr::Statenum::S_CYBER_DIE1.value,                                                                           # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                 # xdeathstate
+      Doocr::Sfxenum::SFX_cybdth.value,                                                                              # deathsound
       16,                                                                                                            # speed
       40 * FRACUNIT,                                                                                                 # radius
       110 * FRACUNIT,                                                                                                # height
       1000,                                                                                                          # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_dmact.value,                                                                               # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                 # raisestate
+      Doocr::Sfxenum::SFX_dmact.value,                                                                               # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                 # raisestate
     },
     {                                                                                                                                                                                        # MT_PAIN
       71,                                                                                                                                                                                    # doomednum
-      CDoom::Statenum::S_PAIN_STND.value,                                                                                                                                                    # spawnstate
+      Doocr::Statenum::S_PAIN_STND.value,                                                                                                                                                    # spawnstate
       400,                                                                                                                                                                                   # spawnhealth
-      CDoom::Statenum::S_PAIN_RUN1.value,                                                                                                                                                    # seestate
-      CDoom::Sfxenum::SFX_pesit.value,                                                                                                                                                       # seesound
+      Doocr::Statenum::S_PAIN_RUN1.value,                                                                                                                                                    # seestate
+      Doocr::Sfxenum::SFX_pesit.value,                                                                                                                                                       # seesound
       8,                                                                                                                                                                                     # reactiontime
       0,                                                                                                                                                                                     # attacksound
-      CDoom::Statenum::S_PAIN_PAIN.value,                                                                                                                                                    # painstate
+      Doocr::Statenum::S_PAIN_PAIN.value,                                                                                                                                                    # painstate
       128,                                                                                                                                                                                   # painchance
-      CDoom::Sfxenum::SFX_pepain.value,                                                                                                                                                      # painsound
+      Doocr::Sfxenum::SFX_pepain.value,                                                                                                                                                      # painsound
       0,                                                                                                                                                                                     # meleestate
-      CDoom::Statenum::S_PAIN_ATK1.value,                                                                                                                                                    # missilestate
-      CDoom::Statenum::S_PAIN_DIE1.value,                                                                                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                         # xdeathstate
-      CDoom::Sfxenum::SFX_pedth.value,                                                                                                                                                       # deathsound
+      Doocr::Statenum::S_PAIN_ATK1.value,                                                                                                                                                    # missilestate
+      Doocr::Statenum::S_PAIN_DIE1.value,                                                                                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                         # xdeathstate
+      Doocr::Sfxenum::SFX_pedth.value,                                                                                                                                                       # deathsound
       8,                                                                                                                                                                                     # speed
       31 * FRACUNIT,                                                                                                                                                                         # radius
       56 * FRACUNIT,                                                                                                                                                                         # height
       400,                                                                                                                                                                                   # mass
       0,                                                                                                                                                                                     # damage
-      CDoom::Sfxenum::SFX_dmact.value,                                                                                                                                                       # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_FLOAT.value | CDoom::Mobjflag::MF_NOGRAVITY.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_PAIN_RAISE1.value,                                                                                                                                                  # raisestate
+      Doocr::Sfxenum::SFX_dmact.value,                                                                                                                                                       # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_FLOAT.value | Doocr::Mobjflag::MF_NOGRAVITY.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_PAIN_RAISE1.value,                                                                                                                                                  # raisestate
     },
     {                                                                                                                # MT_WOLFSS
       84,                                                                                                            # doomednum
-      CDoom::Statenum::S_SSWV_STND.value,                                                                            # spawnstate
+      Doocr::Statenum::S_SSWV_STND.value,                                                                            # spawnstate
       50,                                                                                                            # spawnhealth
-      CDoom::Statenum::S_SSWV_RUN1.value,                                                                            # seestate
-      CDoom::Sfxenum::SFX_sssit.value,                                                                               # seesound
+      Doocr::Statenum::S_SSWV_RUN1.value,                                                                            # seestate
+      Doocr::Sfxenum::SFX_sssit.value,                                                                               # seesound
       8,                                                                                                             # reactiontime
       0,                                                                                                             # attacksound
-      CDoom::Statenum::S_SSWV_PAIN.value,                                                                            # painstate
+      Doocr::Statenum::S_SSWV_PAIN.value,                                                                            # painstate
       170,                                                                                                           # painchance
-      CDoom::Sfxenum::SFX_popain.value,                                                                              # painsound
+      Doocr::Sfxenum::SFX_popain.value,                                                                              # painsound
       0,                                                                                                             # meleestate
-      CDoom::Statenum::S_SSWV_ATK1.value,                                                                            # missilestate
-      CDoom::Statenum::S_SSWV_DIE1.value,                                                                            # deathstate
-      CDoom::Statenum::S_SSWV_XDIE1.value,                                                                           # xdeathstate
-      CDoom::Sfxenum::SFX_ssdth.value,                                                                               # deathsound
+      Doocr::Statenum::S_SSWV_ATK1.value,                                                                            # missilestate
+      Doocr::Statenum::S_SSWV_DIE1.value,                                                                            # deathstate
+      Doocr::Statenum::S_SSWV_XDIE1.value,                                                                           # xdeathstate
+      Doocr::Sfxenum::SFX_ssdth.value,                                                                               # deathsound
       8,                                                                                                             # speed
       20 * FRACUNIT,                                                                                                 # radius
       56 * FRACUNIT,                                                                                                 # height
       100,                                                                                                           # mass
       0,                                                                                                             # damage
-      CDoom::Sfxenum::SFX_posact.value,                                                                              # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_SSWV_RAISE1.value,                                                                          # raisestate
+      Doocr::Sfxenum::SFX_posact.value,                                                                              # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_SSWV_RAISE1.value,                                                                          # raisestate
     },
     {                                                                                                                                                                                               # MT_KEEN
       72,                                                                                                                                                                                           # doomednum
-      CDoom::Statenum::S_KEENSTND.value,                                                                                                                                                            # spawnstate
+      Doocr::Statenum::S_KEENSTND.value,                                                                                                                                                            # spawnstate
       100,                                                                                                                                                                                          # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                                # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                                                               # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                                # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                                                               # seesound
       8,                                                                                                                                                                                            # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                                                               # attacksound
-      CDoom::Statenum::S_KEENPAIN.value,                                                                                                                                                            # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                                                               # attacksound
+      Doocr::Statenum::S_KEENPAIN.value,                                                                                                                                                            # painstate
       256,                                                                                                                                                                                          # painchance
-      CDoom::Sfxenum::SFX_keenpn.value,                                                                                                                                                             # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                                # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                                # missilestate
-      CDoom::Statenum::S_COMMKEEN.value,                                                                                                                                                            # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                                # xdeathstate
-      CDoom::Sfxenum::SFX_keendt.value,                                                                                                                                                             # deathsound
+      Doocr::Sfxenum::SFX_keenpn.value,                                                                                                                                                             # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                                # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                                # missilestate
+      Doocr::Statenum::S_COMMKEEN.value,                                                                                                                                                            # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                                # xdeathstate
+      Doocr::Sfxenum::SFX_keendt.value,                                                                                                                                                             # deathsound
       0,                                                                                                                                                                                            # speed
       16 * FRACUNIT,                                                                                                                                                                                # radius
       72 * FRACUNIT,                                                                                                                                                                                # height
       10000000,                                                                                                                                                                                     # mass
       0,                                                                                                                                                                                            # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                                                               # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_COUNTKILL.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                                # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                                                               # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_COUNTKILL.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                                # raisestate
     },
     {                                                                          # MT_BOSSBRAIN
       88,                                                                      # doomednum
-      CDoom::Statenum::S_BRAIN.value,                                          # spawnstate
+      Doocr::Statenum::S_BRAIN.value,                                          # spawnstate
       250,                                                                     # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                           # seestate
-      CDoom::Sfxenum::SFX_None.value,                                          # seesound
+      Doocr::Statenum::S_NULL.value,                                           # seestate
+      Doocr::Sfxenum::SFX_None.value,                                          # seesound
       8,                                                                       # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                          # attacksound
-      CDoom::Statenum::S_BRAIN_PAIN.value,                                     # painstate
+      Doocr::Sfxenum::SFX_None.value,                                          # attacksound
+      Doocr::Statenum::S_BRAIN_PAIN.value,                                     # painstate
       255,                                                                     # painchance
-      CDoom::Sfxenum::SFX_bospn.value,                                         # painsound
-      CDoom::Statenum::S_NULL.value,                                           # meleestate
-      CDoom::Statenum::S_NULL.value,                                           # missilestate
-      CDoom::Statenum::S_BRAIN_DIE1.value,                                     # deathstate
-      CDoom::Statenum::S_NULL.value,                                           # xdeathstate
-      CDoom::Sfxenum::SFX_bosdth.value,                                        # deathsound
+      Doocr::Sfxenum::SFX_bospn.value,                                         # painsound
+      Doocr::Statenum::S_NULL.value,                                           # meleestate
+      Doocr::Statenum::S_NULL.value,                                           # missilestate
+      Doocr::Statenum::S_BRAIN_DIE1.value,                                     # deathstate
+      Doocr::Statenum::S_NULL.value,                                           # xdeathstate
+      Doocr::Sfxenum::SFX_bosdth.value,                                        # deathsound
       0,                                                                       # speed
       16 * FRACUNIT,                                                           # radius
       16 * FRACUNIT,                                                           # height
       10000000,                                                                # mass
       0,                                                                       # damage
-      CDoom::Sfxenum::SFX_None.value,                                          # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value), # flags
-      CDoom::Statenum::S_NULL.value,                                           # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                          # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value), # flags
+      Doocr::Statenum::S_NULL.value,                                           # raisestate
     },
     {                                                                              # MT_BOSSSPIT
       89,                                                                          # doomednum
-      CDoom::Statenum::S_BRAINEYE.value,                                           # spawnstate
+      Doocr::Statenum::S_BRAINEYE.value,                                           # spawnstate
       1000,                                                                        # spawnhealth
-      CDoom::Statenum::S_BRAINEYESEE.value,                                        # seestate
-      CDoom::Sfxenum::SFX_None.value,                                              # seesound
+      Doocr::Statenum::S_BRAINEYESEE.value,                                        # seestate
+      Doocr::Sfxenum::SFX_None.value,                                              # seesound
       8,                                                                           # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                              # attacksound
-      CDoom::Statenum::S_NULL.value,                                               # painstate
+      Doocr::Sfxenum::SFX_None.value,                                              # attacksound
+      Doocr::Statenum::S_NULL.value,                                               # painstate
       0,                                                                           # painchance
-      CDoom::Sfxenum::SFX_None.value,                                              # painsound
-      CDoom::Statenum::S_NULL.value,                                               # meleestate
-      CDoom::Statenum::S_NULL.value,                                               # missilestate
-      CDoom::Statenum::S_NULL.value,                                               # deathstate
-      CDoom::Statenum::S_NULL.value,                                               # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                              # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                              # painsound
+      Doocr::Statenum::S_NULL.value,                                               # meleestate
+      Doocr::Statenum::S_NULL.value,                                               # missilestate
+      Doocr::Statenum::S_NULL.value,                                               # deathstate
+      Doocr::Statenum::S_NULL.value,                                               # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                              # deathsound
       0,                                                                           # speed
       20 * FRACUNIT,                                                               # radius
       32 * FRACUNIT,                                                               # height
       100,                                                                         # mass
       0,                                                                           # damage
-      CDoom::Sfxenum::SFX_None.value,                                              # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_NOSECTOR.value), # flags
-      CDoom::Statenum::S_NULL.value,                                               # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                              # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_NOSECTOR.value), # flags
+      Doocr::Statenum::S_NULL.value,                                               # raisestate
     },
     {                                                                              # MT_BOSSTARGET
       87,                                                                          # doomednum
-      CDoom::Statenum::S_NULL.value,                                               # spawnstate
+      Doocr::Statenum::S_NULL.value,                                               # spawnstate
       1000,                                                                        # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                               # seestate
-      CDoom::Sfxenum::SFX_None.value,                                              # seesound
+      Doocr::Statenum::S_NULL.value,                                               # seestate
+      Doocr::Sfxenum::SFX_None.value,                                              # seesound
       8,                                                                           # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                              # attacksound
-      CDoom::Statenum::S_NULL.value,                                               # painstate
+      Doocr::Sfxenum::SFX_None.value,                                              # attacksound
+      Doocr::Statenum::S_NULL.value,                                               # painstate
       0,                                                                           # painchance
-      CDoom::Sfxenum::SFX_None.value,                                              # painsound
-      CDoom::Statenum::S_NULL.value,                                               # meleestate
-      CDoom::Statenum::S_NULL.value,                                               # missilestate
-      CDoom::Statenum::S_NULL.value,                                               # deathstate
-      CDoom::Statenum::S_NULL.value,                                               # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                              # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                              # painsound
+      Doocr::Statenum::S_NULL.value,                                               # meleestate
+      Doocr::Statenum::S_NULL.value,                                               # missilestate
+      Doocr::Statenum::S_NULL.value,                                               # deathstate
+      Doocr::Statenum::S_NULL.value,                                               # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                              # deathsound
       0,                                                                           # speed
       20 * FRACUNIT,                                                               # radius
       32 * FRACUNIT,                                                               # height
       100,                                                                         # mass
       0,                                                                           # damage
-      CDoom::Sfxenum::SFX_None.value,                                              # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_NOSECTOR.value), # flags
-      CDoom::Statenum::S_NULL.value,                                               # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                              # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_NOSECTOR.value), # flags
+      Doocr::Statenum::S_NULL.value,                                               # raisestate
     },
     {                                                                                                                                                                                          # MT_SPAWNSHOT
       -1,                                                                                                                                                                                      # doomednum
-      CDoom::Statenum::S_SPAWN1.value,                                                                                                                                                         # spawnstate
+      Doocr::Statenum::S_SPAWN1.value,                                                                                                                                                         # spawnstate
       1000,                                                                                                                                                                                    # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                           # seestate
-      CDoom::Sfxenum::SFX_bospit.value,                                                                                                                                                        # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                           # seestate
+      Doocr::Sfxenum::SFX_bospit.value,                                                                                                                                                        # seesound
       8,                                                                                                                                                                                       # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                                                          # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                           # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                                                          # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                           # painstate
       0,                                                                                                                                                                                       # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                                                          # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                           # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                           # missilestate
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                           # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                           # xdeathstate
-      CDoom::Sfxenum::SFX_firxpl.value,                                                                                                                                                        # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                                                          # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                           # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                           # missilestate
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                           # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                           # xdeathstate
+      Doocr::Sfxenum::SFX_firxpl.value,                                                                                                                                                        # deathsound
       10 * FRACUNIT,                                                                                                                                                                           # speed
       6 * FRACUNIT,                                                                                                                                                                            # radius
       32 * FRACUNIT,                                                                                                                                                                           # height
       100,                                                                                                                                                                                     # mass
       3,                                                                                                                                                                                       # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                                                          # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_MISSILE.value | CDoom::Mobjflag::MF_DROPOFF.value | CDoom::Mobjflag::MF_NOGRAVITY.value | CDoom::Mobjflag::MF_NOCLIP.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                                                                                           # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                                                          # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_MISSILE.value | Doocr::Mobjflag::MF_DROPOFF.value | Doocr::Mobjflag::MF_NOGRAVITY.value | Doocr::Mobjflag::MF_NOCLIP.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                                                                                           # raisestate
     },
     {                                                                               # MT_SPAWNFIRE
       -1,                                                                           # doomednum
-      CDoom::Statenum::S_SPAWNFIRE1.value,                                          # spawnstate
+      Doocr::Statenum::S_SPAWNFIRE1.value,                                          # spawnstate
       1000,                                                                         # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                # seestate
-      CDoom::Sfxenum::SFX_None.value,                                               # seesound
+      Doocr::Statenum::S_NULL.value,                                                # seestate
+      Doocr::Sfxenum::SFX_None.value,                                               # seesound
       8,                                                                            # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                               # attacksound
-      CDoom::Statenum::S_NULL.value,                                                # painstate
+      Doocr::Sfxenum::SFX_None.value,                                               # attacksound
+      Doocr::Statenum::S_NULL.value,                                                # painstate
       0,                                                                            # painchance
-      CDoom::Sfxenum::SFX_None.value,                                               # painsound
-      CDoom::Statenum::S_NULL.value,                                                # meleestate
-      CDoom::Statenum::S_NULL.value,                                                # missilestate
-      CDoom::Statenum::S_NULL.value,                                                # deathstate
-      CDoom::Statenum::S_NULL.value,                                                # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                               # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                               # painsound
+      Doocr::Statenum::S_NULL.value,                                                # meleestate
+      Doocr::Statenum::S_NULL.value,                                                # missilestate
+      Doocr::Statenum::S_NULL.value,                                                # deathstate
+      Doocr::Statenum::S_NULL.value,                                                # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                               # deathsound
       0,                                                                            # speed
       20 * FRACUNIT,                                                                # radius
       16 * FRACUNIT,                                                                # height
       100,                                                                          # mass
       0,                                                                            # damage
-      CDoom::Sfxenum::SFX_None.value,                                               # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                               # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                # raisestate
     },
     {                                                                                                              # MT_BARREL
       2035,                                                                                                        # doomednum
-      CDoom::Statenum::S_BAR1.value,                                                                               # spawnstate
+      Doocr::Statenum::S_BAR1.value,                                                                               # spawnstate
       20,                                                                                                          # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                               # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                              # seesound
+      Doocr::Statenum::S_NULL.value,                                                                               # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                              # seesound
       8,                                                                                                           # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                              # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                               # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                              # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                               # painstate
       0,                                                                                                           # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                              # painsound
-      CDoom::Statenum::S_NULL.value,                                                                               # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                               # missilestate
-      CDoom::Statenum::S_BEXP.value,                                                                               # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                               # xdeathstate
-      CDoom::Sfxenum::SFX_barexp.value,                                                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                              # painsound
+      Doocr::Statenum::S_NULL.value,                                                                               # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                               # missilestate
+      Doocr::Statenum::S_BEXP.value,                                                                               # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                               # xdeathstate
+      Doocr::Sfxenum::SFX_barexp.value,                                                                            # deathsound
       0,                                                                                                           # speed
       10 * FRACUNIT,                                                                                               # radius
       42 * FRACUNIT,                                                                                               # height
       100,                                                                                                         # mass
       0,                                                                                                           # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                              # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_NOBLOOD.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                               # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                              # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SHOOTABLE.value | Doocr::Mobjflag::MF_NOBLOOD.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                               # raisestate
     },
     {                                                                                                                                                       # MT_TROOPSHOT
       -1,                                                                                                                                                   # doomednum
-      CDoom::Statenum::S_TBALL1.value,                                                                                                                      # spawnstate
+      Doocr::Statenum::S_TBALL1.value,                                                                                                                      # spawnstate
       1000,                                                                                                                                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # seestate
-      CDoom::Sfxenum::SFX_firsht.value,                                                                                                                     # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # seestate
+      Doocr::Sfxenum::SFX_firsht.value,                                                                                                                     # seesound
       8,                                                                                                                                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # painstate
       0,                                                                                                                                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # missilestate
-      CDoom::Statenum::S_TBALLX1.value,                                                                                                                     # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
-      CDoom::Sfxenum::SFX_firxpl.value,                                                                                                                     # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # missilestate
+      Doocr::Statenum::S_TBALLX1.value,                                                                                                                     # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
+      Doocr::Sfxenum::SFX_firxpl.value,                                                                                                                     # deathsound
       10 * FRACUNIT,                                                                                                                                        # speed
       6 * FRACUNIT,                                                                                                                                         # radius
       8 * FRACUNIT,                                                                                                                                         # height
       100,                                                                                                                                                  # mass
       3,                                                                                                                                                    # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_MISSILE.value | CDoom::Mobjflag::MF_DROPOFF.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_MISSILE.value | Doocr::Mobjflag::MF_DROPOFF.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # raisestate
     },
     {                                                                                                                                                       # MT_HEADSHOT
       -1,                                                                                                                                                   # doomednum
-      CDoom::Statenum::S_RBALL1.value,                                                                                                                      # spawnstate
+      Doocr::Statenum::S_RBALL1.value,                                                                                                                      # spawnstate
       1000,                                                                                                                                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # seestate
-      CDoom::Sfxenum::SFX_firsht.value,                                                                                                                     # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # seestate
+      Doocr::Sfxenum::SFX_firsht.value,                                                                                                                     # seesound
       8,                                                                                                                                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # painstate
       0,                                                                                                                                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # missilestate
-      CDoom::Statenum::S_RBALLX1.value,                                                                                                                     # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
-      CDoom::Sfxenum::SFX_firxpl.value,                                                                                                                     # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # missilestate
+      Doocr::Statenum::S_RBALLX1.value,                                                                                                                     # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
+      Doocr::Sfxenum::SFX_firxpl.value,                                                                                                                     # deathsound
       10 * FRACUNIT,                                                                                                                                        # speed
       6 * FRACUNIT,                                                                                                                                         # radius
       8 * FRACUNIT,                                                                                                                                         # height
       100,                                                                                                                                                  # mass
       5,                                                                                                                                                    # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_MISSILE.value | CDoom::Mobjflag::MF_DROPOFF.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_MISSILE.value | Doocr::Mobjflag::MF_DROPOFF.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # raisestate
     },
     {                                                                                                                                                       # MT_ROCKET
       -1,                                                                                                                                                   # doomednum
-      CDoom::Statenum::S_ROCKET.value,                                                                                                                      # spawnstate
+      Doocr::Statenum::S_ROCKET.value,                                                                                                                      # spawnstate
       1000,                                                                                                                                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # seestate
-      CDoom::Sfxenum::SFX_rlaunc.value,                                                                                                                     # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # seestate
+      Doocr::Sfxenum::SFX_rlaunc.value,                                                                                                                     # seesound
       8,                                                                                                                                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # painstate
       0,                                                                                                                                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # missilestate
-      CDoom::Statenum::S_EXPLODE1.value,                                                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
-      CDoom::Sfxenum::SFX_barexp.value,                                                                                                                     # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # missilestate
+      Doocr::Statenum::S_EXPLODE1.value,                                                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
+      Doocr::Sfxenum::SFX_barexp.value,                                                                                                                     # deathsound
       20 * FRACUNIT,                                                                                                                                        # speed
       11 * FRACUNIT,                                                                                                                                        # radius
       8 * FRACUNIT,                                                                                                                                         # height
       100,                                                                                                                                                  # mass
       20,                                                                                                                                                   # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_MISSILE.value | CDoom::Mobjflag::MF_DROPOFF.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_MISSILE.value | Doocr::Mobjflag::MF_DROPOFF.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # raisestate
     },
     {                                                                                                                                                       # MT_PLASMA
       -1,                                                                                                                                                   # doomednum
-      CDoom::Statenum::S_PLASBALL.value,                                                                                                                    # spawnstate
+      Doocr::Statenum::S_PLASBALL.value,                                                                                                                    # spawnstate
       1000,                                                                                                                                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # seestate
-      CDoom::Sfxenum::SFX_plasma.value,                                                                                                                     # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # seestate
+      Doocr::Sfxenum::SFX_plasma.value,                                                                                                                     # seesound
       8,                                                                                                                                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # painstate
       0,                                                                                                                                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # missilestate
-      CDoom::Statenum::S_PLASEXP.value,                                                                                                                     # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
-      CDoom::Sfxenum::SFX_firxpl.value,                                                                                                                     # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # missilestate
+      Doocr::Statenum::S_PLASEXP.value,                                                                                                                     # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
+      Doocr::Sfxenum::SFX_firxpl.value,                                                                                                                     # deathsound
       25 * FRACUNIT,                                                                                                                                        # speed
       13 * FRACUNIT,                                                                                                                                        # radius
       8 * FRACUNIT,                                                                                                                                         # height
       100,                                                                                                                                                  # mass
       5,                                                                                                                                                    # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_MISSILE.value | CDoom::Mobjflag::MF_DROPOFF.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_MISSILE.value | Doocr::Mobjflag::MF_DROPOFF.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # raisestate
     },
     {                                                                                                                                                       # MT_BFG
       -1,                                                                                                                                                   # doomednum
-      CDoom::Statenum::S_BFGSHOT.value,                                                                                                                     # spawnstate
+      Doocr::Statenum::S_BFGSHOT.value,                                                                                                                     # spawnstate
       1000,                                                                                                                                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # seestate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # seestate
       0,                                                                                                                                                    # seesound
       8,                                                                                                                                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # painstate
       0,                                                                                                                                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # missilestate
-      CDoom::Statenum::S_BFGLAND.value,                                                                                                                     # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
-      CDoom::Sfxenum::SFX_rxplod.value,                                                                                                                     # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # missilestate
+      Doocr::Statenum::S_BFGLAND.value,                                                                                                                     # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
+      Doocr::Sfxenum::SFX_rxplod.value,                                                                                                                     # deathsound
       25 * FRACUNIT,                                                                                                                                        # speed
       13 * FRACUNIT,                                                                                                                                        # radius
       8 * FRACUNIT,                                                                                                                                         # height
       100,                                                                                                                                                  # mass
       100,                                                                                                                                                  # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_MISSILE.value | CDoom::Mobjflag::MF_DROPOFF.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_MISSILE.value | Doocr::Mobjflag::MF_DROPOFF.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # raisestate
     },
     {                                                                                                                                                       # MT_ARACHPLAZ
       -1,                                                                                                                                                   # doomednum
-      CDoom::Statenum::S_ARACH_PLAZ.value,                                                                                                                  # spawnstate
+      Doocr::Statenum::S_ARACH_PLAZ.value,                                                                                                                  # spawnstate
       1000,                                                                                                                                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # seestate
-      CDoom::Sfxenum::SFX_plasma.value,                                                                                                                     # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # seestate
+      Doocr::Sfxenum::SFX_plasma.value,                                                                                                                     # seesound
       8,                                                                                                                                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # painstate
       0,                                                                                                                                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # missilestate
-      CDoom::Statenum::S_ARACH_PLEX.value,                                                                                                                  # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
-      CDoom::Sfxenum::SFX_firxpl.value,                                                                                                                     # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # missilestate
+      Doocr::Statenum::S_ARACH_PLEX.value,                                                                                                                  # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # xdeathstate
+      Doocr::Sfxenum::SFX_firxpl.value,                                                                                                                     # deathsound
       25 * FRACUNIT,                                                                                                                                        # speed
       13 * FRACUNIT,                                                                                                                                        # radius
       8 * FRACUNIT,                                                                                                                                         # height
       100,                                                                                                                                                  # mass
       5,                                                                                                                                                    # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                                                       # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_MISSILE.value | CDoom::Mobjflag::MF_DROPOFF.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                                                        # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                                                       # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_MISSILE.value | Doocr::Mobjflag::MF_DROPOFF.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                                                        # raisestate
     },
     {                                                                               # MT_PUFF
       -1,                                                                           # doomednum
-      CDoom::Statenum::S_PUFF1.value,                                               # spawnstate
+      Doocr::Statenum::S_PUFF1.value,                                               # spawnstate
       1000,                                                                         # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                # seestate
-      CDoom::Sfxenum::SFX_None.value,                                               # seesound
+      Doocr::Statenum::S_NULL.value,                                                # seestate
+      Doocr::Sfxenum::SFX_None.value,                                               # seesound
       8,                                                                            # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                               # attacksound
-      CDoom::Statenum::S_NULL.value,                                                # painstate
+      Doocr::Sfxenum::SFX_None.value,                                               # attacksound
+      Doocr::Statenum::S_NULL.value,                                                # painstate
       0,                                                                            # painchance
-      CDoom::Sfxenum::SFX_None.value,                                               # painsound
-      CDoom::Statenum::S_NULL.value,                                                # meleestate
-      CDoom::Statenum::S_NULL.value,                                                # missilestate
-      CDoom::Statenum::S_NULL.value,                                                # deathstate
-      CDoom::Statenum::S_NULL.value,                                                # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                               # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                               # painsound
+      Doocr::Statenum::S_NULL.value,                                                # meleestate
+      Doocr::Statenum::S_NULL.value,                                                # missilestate
+      Doocr::Statenum::S_NULL.value,                                                # deathstate
+      Doocr::Statenum::S_NULL.value,                                                # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                               # deathsound
       0,                                                                            # speed
       20 * FRACUNIT,                                                                # radius
       16 * FRACUNIT,                                                                # height
       100,                                                                          # mass
       0,                                                                            # damage
-      CDoom::Sfxenum::SFX_None.value,                                               # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                               # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                # raisestate
     },
     {                                       # MT_BLOOD
       -1,                                   # doomednum
-      CDoom::Statenum::S_BLOOD1.value,      # spawnstate
+      Doocr::Statenum::S_BLOOD1.value,      # spawnstate
       1000,                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,        # seestate
-      CDoom::Sfxenum::SFX_None.value,       # seesound
+      Doocr::Statenum::S_NULL.value,        # seestate
+      Doocr::Sfxenum::SFX_None.value,       # seesound
       8,                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,       # attacksound
-      CDoom::Statenum::S_NULL.value,        # painstate
+      Doocr::Sfxenum::SFX_None.value,       # attacksound
+      Doocr::Statenum::S_NULL.value,        # painstate
       0,                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,       # painsound
-      CDoom::Statenum::S_NULL.value,        # meleestate
-      CDoom::Statenum::S_NULL.value,        # missilestate
-      CDoom::Statenum::S_NULL.value,        # deathstate
-      CDoom::Statenum::S_NULL.value,        # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,       # deathsound
+      Doocr::Sfxenum::SFX_None.value,       # painsound
+      Doocr::Statenum::S_NULL.value,        # meleestate
+      Doocr::Statenum::S_NULL.value,        # missilestate
+      Doocr::Statenum::S_NULL.value,        # deathstate
+      Doocr::Statenum::S_NULL.value,        # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,       # deathsound
       0,                                    # speed
       20 * FRACUNIT,                        # radius
       16 * FRACUNIT,                        # height
       100,                                  # mass
       0,                                    # damage
-      CDoom::Sfxenum::SFX_None.value,       # activesound
-      CDoom::Mobjflag::MF_NOBLOCKMAP.value, # flags
-      CDoom::Statenum::S_NULL.value,        # raisestate
+      Doocr::Sfxenum::SFX_None.value,       # activesound
+      Doocr::Mobjflag::MF_NOBLOCKMAP.value, # flags
+      Doocr::Statenum::S_NULL.value,        # raisestate
     },
     {                                                                               # MT_TFOG
       -1,                                                                           # doomednum
-      CDoom::Statenum::S_TFOG.value,                                                # spawnstate
+      Doocr::Statenum::S_TFOG.value,                                                # spawnstate
       1000,                                                                         # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                # seestate
-      CDoom::Sfxenum::SFX_None.value,                                               # seesound
+      Doocr::Statenum::S_NULL.value,                                                # seestate
+      Doocr::Sfxenum::SFX_None.value,                                               # seesound
       8,                                                                            # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                               # attacksound
-      CDoom::Statenum::S_NULL.value,                                                # painstate
+      Doocr::Sfxenum::SFX_None.value,                                               # attacksound
+      Doocr::Statenum::S_NULL.value,                                                # painstate
       0,                                                                            # painchance
-      CDoom::Sfxenum::SFX_None.value,                                               # painsound
-      CDoom::Statenum::S_NULL.value,                                                # meleestate
-      CDoom::Statenum::S_NULL.value,                                                # missilestate
-      CDoom::Statenum::S_NULL.value,                                                # deathstate
-      CDoom::Statenum::S_NULL.value,                                                # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                               # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                               # painsound
+      Doocr::Statenum::S_NULL.value,                                                # meleestate
+      Doocr::Statenum::S_NULL.value,                                                # missilestate
+      Doocr::Statenum::S_NULL.value,                                                # deathstate
+      Doocr::Statenum::S_NULL.value,                                                # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                               # deathsound
       0,                                                                            # speed
       20 * FRACUNIT,                                                                # radius
       16 * FRACUNIT,                                                                # height
       100,                                                                          # mass
       0,                                                                            # damage
-      CDoom::Sfxenum::SFX_None.value,                                               # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                               # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                # raisestate
     },
     {                                                                               # MT_IFOG
       -1,                                                                           # doomednum
-      CDoom::Statenum::S_IFOG.value,                                                # spawnstate
+      Doocr::Statenum::S_IFOG.value,                                                # spawnstate
       1000,                                                                         # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                # seestate
-      CDoom::Sfxenum::SFX_None.value,                                               # seesound
+      Doocr::Statenum::S_NULL.value,                                                # seestate
+      Doocr::Sfxenum::SFX_None.value,                                               # seesound
       8,                                                                            # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                               # attacksound
-      CDoom::Statenum::S_NULL.value,                                                # painstate
+      Doocr::Sfxenum::SFX_None.value,                                               # attacksound
+      Doocr::Statenum::S_NULL.value,                                                # painstate
       0,                                                                            # painchance
-      CDoom::Sfxenum::SFX_None.value,                                               # painsound
-      CDoom::Statenum::S_NULL.value,                                                # meleestate
-      CDoom::Statenum::S_NULL.value,                                                # missilestate
-      CDoom::Statenum::S_NULL.value,                                                # deathstate
-      CDoom::Statenum::S_NULL.value,                                                # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                               # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                               # painsound
+      Doocr::Statenum::S_NULL.value,                                                # meleestate
+      Doocr::Statenum::S_NULL.value,                                                # missilestate
+      Doocr::Statenum::S_NULL.value,                                                # deathstate
+      Doocr::Statenum::S_NULL.value,                                                # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                               # deathsound
       0,                                                                            # speed
       20 * FRACUNIT,                                                                # radius
       16 * FRACUNIT,                                                                # height
       100,                                                                          # mass
       0,                                                                            # damage
-      CDoom::Sfxenum::SFX_None.value,                                               # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                               # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                # raisestate
     },
     {                                                                              # MT_TELEPORTMAN
       14,                                                                          # doomednum
-      CDoom::Statenum::S_NULL.value,                                               # spawnstate
+      Doocr::Statenum::S_NULL.value,                                               # spawnstate
       1000,                                                                        # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                               # seestate
-      CDoom::Sfxenum::SFX_None.value,                                              # seesound
+      Doocr::Statenum::S_NULL.value,                                               # seestate
+      Doocr::Sfxenum::SFX_None.value,                                              # seesound
       8,                                                                           # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                              # attacksound
-      CDoom::Statenum::S_NULL.value,                                               # painstate
+      Doocr::Sfxenum::SFX_None.value,                                              # attacksound
+      Doocr::Statenum::S_NULL.value,                                               # painstate
       0,                                                                           # painchance
-      CDoom::Sfxenum::SFX_None.value,                                              # painsound
-      CDoom::Statenum::S_NULL.value,                                               # meleestate
-      CDoom::Statenum::S_NULL.value,                                               # missilestate
-      CDoom::Statenum::S_NULL.value,                                               # deathstate
-      CDoom::Statenum::S_NULL.value,                                               # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                              # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                              # painsound
+      Doocr::Statenum::S_NULL.value,                                               # meleestate
+      Doocr::Statenum::S_NULL.value,                                               # missilestate
+      Doocr::Statenum::S_NULL.value,                                               # deathstate
+      Doocr::Statenum::S_NULL.value,                                               # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                              # deathsound
       0,                                                                           # speed
       20 * FRACUNIT,                                                               # radius
       16 * FRACUNIT,                                                               # height
       100,                                                                         # mass
       0,                                                                           # damage
-      CDoom::Sfxenum::SFX_None.value,                                              # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_NOSECTOR.value), # flags
-      CDoom::Statenum::S_NULL.value,                                               # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                              # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_NOSECTOR.value), # flags
+      Doocr::Statenum::S_NULL.value,                                               # raisestate
     },
     {                                                                               # MT_EXTRABFG
       -1,                                                                           # doomednum
-      CDoom::Statenum::S_BFGEXP.value,                                              # spawnstate
+      Doocr::Statenum::S_BFGEXP.value,                                              # spawnstate
       1000,                                                                         # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                # seestate
-      CDoom::Sfxenum::SFX_None.value,                                               # seesound
+      Doocr::Statenum::S_NULL.value,                                                # seestate
+      Doocr::Sfxenum::SFX_None.value,                                               # seesound
       8,                                                                            # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                               # attacksound
-      CDoom::Statenum::S_NULL.value,                                                # painstate
+      Doocr::Sfxenum::SFX_None.value,                                               # attacksound
+      Doocr::Statenum::S_NULL.value,                                                # painstate
       0,                                                                            # painchance
-      CDoom::Sfxenum::SFX_None.value,                                               # painsound
-      CDoom::Statenum::S_NULL.value,                                                # meleestate
-      CDoom::Statenum::S_NULL.value,                                                # missilestate
-      CDoom::Statenum::S_NULL.value,                                                # deathstate
-      CDoom::Statenum::S_NULL.value,                                                # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                               # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                               # painsound
+      Doocr::Statenum::S_NULL.value,                                                # meleestate
+      Doocr::Statenum::S_NULL.value,                                                # missilestate
+      Doocr::Statenum::S_NULL.value,                                                # deathstate
+      Doocr::Statenum::S_NULL.value,                                                # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                               # deathsound
       0,                                                                            # speed
       20 * FRACUNIT,                                                                # radius
       16 * FRACUNIT,                                                                # height
       100,                                                                          # mass
       0,                                                                            # damage
-      CDoom::Sfxenum::SFX_None.value,                                               # activesound
-      (CDoom::Mobjflag::MF_NOBLOCKMAP.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                               # activesound
+      (Doocr::Mobjflag::MF_NOBLOCKMAP.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                # raisestate
     },
     {                                    # MT_MISC0
       2018,                              # doomednum
-      CDoom::Statenum::S_ARM1.value,     # spawnstate
+      Doocr::Statenum::S_ARM1.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC1
       2019,                              # doomednum
-      CDoom::Statenum::S_ARM2.value,     # spawnstate
+      Doocr::Statenum::S_ARM2.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                                                            # MT_MISC2
       2014,                                                                      # doomednum
-      CDoom::Statenum::S_BON1.value,                                             # spawnstate
+      Doocr::Statenum::S_BON1.value,                                             # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_COUNTITEM.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_COUNTITEM.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                                                            # MT_MISC3
       2015,                                                                      # doomednum
-      CDoom::Statenum::S_BON2.value,                                             # spawnstate
+      Doocr::Statenum::S_BON2.value,                                             # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_COUNTITEM.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_COUNTITEM.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                                                            # MT_MISC4
       5,                                                                         # doomednum
-      CDoom::Statenum::S_BKEY.value,                                             # spawnstate
+      Doocr::Statenum::S_BKEY.value,                                             # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_NOTDMATCH.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_NOTDMATCH.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                                                            # MT_MISC5
       13,                                                                        # doomednum
-      CDoom::Statenum::S_RKEY.value,                                             # spawnstate
+      Doocr::Statenum::S_RKEY.value,                                             # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_NOTDMATCH.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_NOTDMATCH.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                                                            # MT_MISC6
       6,                                                                         # doomednum
-      CDoom::Statenum::S_YKEY.value,                                             # spawnstate
+      Doocr::Statenum::S_YKEY.value,                                             # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_NOTDMATCH.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_NOTDMATCH.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                                                            # MT_MISC7
       39,                                                                        # doomednum
-      CDoom::Statenum::S_YSKULL.value,                                           # spawnstate
+      Doocr::Statenum::S_YSKULL.value,                                           # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_NOTDMATCH.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_NOTDMATCH.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                                                            # MT_MISC8
       38,                                                                        # doomednum
-      CDoom::Statenum::S_RSKULL.value,                                           # spawnstate
+      Doocr::Statenum::S_RSKULL.value,                                           # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_NOTDMATCH.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_NOTDMATCH.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                                                            # MT_MISC9
       40,                                                                        # doomednum
-      CDoom::Statenum::S_BSKULL.value,                                           # spawnstate
+      Doocr::Statenum::S_BSKULL.value,                                           # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_NOTDMATCH.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_NOTDMATCH.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                    # MT_MISC10
       2011,                              # doomednum
-      CDoom::Statenum::S_STIM.value,     # spawnstate
+      Doocr::Statenum::S_STIM.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC11
       2012,                              # doomednum
-      CDoom::Statenum::S_MEDI.value,     # spawnstate
+      Doocr::Statenum::S_MEDI.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                                                            # MT_MISC12
       2013,                                                                      # doomednum
-      CDoom::Statenum::S_SOUL.value,                                             # spawnstate
+      Doocr::Statenum::S_SOUL.value,                                             # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_COUNTITEM.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_COUNTITEM.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                                                            # MT_INV
       2022,                                                                      # doomednum
-      CDoom::Statenum::S_PINV.value,                                             # spawnstate
+      Doocr::Statenum::S_PINV.value,                                             # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_COUNTITEM.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_COUNTITEM.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                                                            # MT_MISC13
       2023,                                                                      # doomednum
-      CDoom::Statenum::S_PSTR.value,                                             # spawnstate
+      Doocr::Statenum::S_PSTR.value,                                             # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_COUNTITEM.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_COUNTITEM.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                                                            # MT_INS
       2024,                                                                      # doomednum
-      CDoom::Statenum::S_PINS.value,                                             # spawnstate
+      Doocr::Statenum::S_PINS.value,                                             # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_COUNTITEM.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_COUNTITEM.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                    # MT_MISC14
       2025,                              # doomednum
-      CDoom::Statenum::S_SUIT.value,     # spawnstate
+      Doocr::Statenum::S_SUIT.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                                                            # MT_MISC15
       2026,                                                                      # doomednum
-      CDoom::Statenum::S_PMAP.value,                                             # spawnstate
+      Doocr::Statenum::S_PMAP.value,                                             # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_COUNTITEM.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_COUNTITEM.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                                                            # MT_MISC16
       2045,                                                                      # doomednum
-      CDoom::Statenum::S_PVIS.value,                                             # spawnstate
+      Doocr::Statenum::S_PVIS.value,                                             # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_COUNTITEM.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_COUNTITEM.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                                                            # MT_MEGA
       83,                                                                        # doomednum
-      CDoom::Statenum::S_MEGA.value,                                             # spawnstate
+      Doocr::Statenum::S_MEGA.value,                                             # spawnstate
       1000,                                                                      # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                             # seestate
-      CDoom::Sfxenum::SFX_None.value,                                            # seesound
+      Doocr::Statenum::S_NULL.value,                                             # seestate
+      Doocr::Sfxenum::SFX_None.value,                                            # seesound
       8,                                                                         # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                            # attacksound
-      CDoom::Statenum::S_NULL.value,                                             # painstate
+      Doocr::Sfxenum::SFX_None.value,                                            # attacksound
+      Doocr::Statenum::S_NULL.value,                                             # painstate
       0,                                                                         # painchance
-      CDoom::Sfxenum::SFX_None.value,                                            # painsound
-      CDoom::Statenum::S_NULL.value,                                             # meleestate
-      CDoom::Statenum::S_NULL.value,                                             # missilestate
-      CDoom::Statenum::S_NULL.value,                                             # deathstate
-      CDoom::Statenum::S_NULL.value,                                             # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                            # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                            # painsound
+      Doocr::Statenum::S_NULL.value,                                             # meleestate
+      Doocr::Statenum::S_NULL.value,                                             # missilestate
+      Doocr::Statenum::S_NULL.value,                                             # deathstate
+      Doocr::Statenum::S_NULL.value,                                             # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                            # deathsound
       0,                                                                         # speed
       20 * FRACUNIT,                                                             # radius
       16 * FRACUNIT,                                                             # height
       100,                                                                       # mass
       0,                                                                         # damage
-      CDoom::Sfxenum::SFX_None.value,                                            # activesound
-      (CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_COUNTITEM.value), # flags
-      CDoom::Statenum::S_NULL.value,                                             # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                            # activesound
+      (Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_COUNTITEM.value), # flags
+      Doocr::Statenum::S_NULL.value,                                             # raisestate
     },
     {                                    # MT_CLIP
       2007,                              # doomednum
-      CDoom::Statenum::S_CLIP.value,     # spawnstate
+      Doocr::Statenum::S_CLIP.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC17
       2048,                              # doomednum
-      CDoom::Statenum::S_AMMO.value,     # spawnstate
+      Doocr::Statenum::S_AMMO.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC18
       2010,                              # doomednum
-      CDoom::Statenum::S_ROCK.value,     # spawnstate
+      Doocr::Statenum::S_ROCK.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC19
       2046,                              # doomednum
-      CDoom::Statenum::S_BROK.value,     # spawnstate
+      Doocr::Statenum::S_BROK.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC20
       2047,                              # doomednum
-      CDoom::Statenum::S_CELL.value,     # spawnstate
+      Doocr::Statenum::S_CELL.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC21
       17,                                # doomednum
-      CDoom::Statenum::S_CELP.value,     # spawnstate
+      Doocr::Statenum::S_CELP.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC22
       2008,                              # doomednum
-      CDoom::Statenum::S_SHEL.value,     # spawnstate
+      Doocr::Statenum::S_SHEL.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC23
       2049,                              # doomednum
-      CDoom::Statenum::S_SBOX.value,     # spawnstate
+      Doocr::Statenum::S_SBOX.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC24
       8,                                 # doomednum
-      CDoom::Statenum::S_BPAK.value,     # spawnstate
+      Doocr::Statenum::S_BPAK.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC25
       2006,                              # doomednum
-      CDoom::Statenum::S_BFUG.value,     # spawnstate
+      Doocr::Statenum::S_BFUG.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_CHAINGUN
       2002,                              # doomednum
-      CDoom::Statenum::S_MGUN.value,     # spawnstate
+      Doocr::Statenum::S_MGUN.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC26
       2005,                              # doomednum
-      CDoom::Statenum::S_CSAW.value,     # spawnstate
+      Doocr::Statenum::S_CSAW.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC27
       2003,                              # doomednum
-      CDoom::Statenum::S_LAUN.value,     # spawnstate
+      Doocr::Statenum::S_LAUN.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC28
       2004,                              # doomednum
-      CDoom::Statenum::S_PLAS.value,     # spawnstate
+      Doocr::Statenum::S_PLAS.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_SHOTGUN
       2001,                              # doomednum
-      CDoom::Statenum::S_SHOT.value,     # spawnstate
+      Doocr::Statenum::S_SHOT.value,     # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_SUPERSHOTGUN
       82,                                # doomednum
-      CDoom::Statenum::S_SHOT2.value,    # spawnstate
+      Doocr::Statenum::S_SHOT2.value,    # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       20 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SPECIAL.value, # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SPECIAL.value, # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC29
       85,                                # doomednum
-      CDoom::Statenum::S_TECHLAMP.value, # spawnstate
+      Doocr::Statenum::S_TECHLAMP.value, # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       16 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SOLID.value,   # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SOLID.value,   # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                     # MT_MISC30
       86,                                 # doomednum
-      CDoom::Statenum::S_TECH2LAMP.value, # spawnstate
+      Doocr::Statenum::S_TECH2LAMP.value, # spawnstate
       1000,                               # spawnhealth
-      CDoom::Statenum::S_NULL.value,      # seestate
-      CDoom::Sfxenum::SFX_None.value,     # seesound
+      Doocr::Statenum::S_NULL.value,      # seestate
+      Doocr::Sfxenum::SFX_None.value,     # seesound
       8,                                  # reactiontime
-      CDoom::Sfxenum::SFX_None.value,     # attacksound
-      CDoom::Statenum::S_NULL.value,      # painstate
+      Doocr::Sfxenum::SFX_None.value,     # attacksound
+      Doocr::Statenum::S_NULL.value,      # painstate
       0,                                  # painchance
-      CDoom::Sfxenum::SFX_None.value,     # painsound
-      CDoom::Statenum::S_NULL.value,      # meleestate
-      CDoom::Statenum::S_NULL.value,      # missilestate
-      CDoom::Statenum::S_NULL.value,      # deathstate
-      CDoom::Statenum::S_NULL.value,      # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,     # deathsound
+      Doocr::Sfxenum::SFX_None.value,     # painsound
+      Doocr::Statenum::S_NULL.value,      # meleestate
+      Doocr::Statenum::S_NULL.value,      # missilestate
+      Doocr::Statenum::S_NULL.value,      # deathstate
+      Doocr::Statenum::S_NULL.value,      # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,     # deathsound
       0,                                  # speed
       16 * FRACUNIT,                      # radius
       16 * FRACUNIT,                      # height
       100,                                # mass
       0,                                  # damage
-      CDoom::Sfxenum::SFX_None.value,     # activesound
-      CDoom::Mobjflag::MF_SOLID.value,    # flags
-      CDoom::Statenum::S_NULL.value,      # raisestate
+      Doocr::Sfxenum::SFX_None.value,     # activesound
+      Doocr::Mobjflag::MF_SOLID.value,    # flags
+      Doocr::Statenum::S_NULL.value,      # raisestate
     },
     {                                  # MT_MISC31
       2028,                            # doomednum
-      CDoom::Statenum::S_COLU.value,   # spawnstate
+      Doocr::Statenum::S_COLU.value,   # spawnstate
       1000,                            # spawnhealth
-      CDoom::Statenum::S_NULL.value,   # seestate
-      CDoom::Sfxenum::SFX_None.value,  # seesound
+      Doocr::Statenum::S_NULL.value,   # seestate
+      Doocr::Sfxenum::SFX_None.value,  # seesound
       8,                               # reactiontime
-      CDoom::Sfxenum::SFX_None.value,  # attacksound
-      CDoom::Statenum::S_NULL.value,   # painstate
+      Doocr::Sfxenum::SFX_None.value,  # attacksound
+      Doocr::Statenum::S_NULL.value,   # painstate
       0,                               # painchance
-      CDoom::Sfxenum::SFX_None.value,  # painsound
-      CDoom::Statenum::S_NULL.value,   # meleestate
-      CDoom::Statenum::S_NULL.value,   # missilestate
-      CDoom::Statenum::S_NULL.value,   # deathstate
-      CDoom::Statenum::S_NULL.value,   # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,  # deathsound
+      Doocr::Sfxenum::SFX_None.value,  # painsound
+      Doocr::Statenum::S_NULL.value,   # meleestate
+      Doocr::Statenum::S_NULL.value,   # missilestate
+      Doocr::Statenum::S_NULL.value,   # deathstate
+      Doocr::Statenum::S_NULL.value,   # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,  # deathsound
       0,                               # speed
       16 * FRACUNIT,                   # radius
       16 * FRACUNIT,                   # height
       100,                             # mass
       0,                               # damage
-      CDoom::Sfxenum::SFX_None.value,  # activesound
-      CDoom::Mobjflag::MF_SOLID.value, # flags
-      CDoom::Statenum::S_NULL.value,   # raisestate
+      Doocr::Sfxenum::SFX_None.value,  # activesound
+      Doocr::Mobjflag::MF_SOLID.value, # flags
+      Doocr::Statenum::S_NULL.value,   # raisestate
     },
     {                                      # MT_MISC32
       30,                                  # doomednum
-      CDoom::Statenum::S_TALLGRNCOL.value, # spawnstate
+      Doocr::Statenum::S_TALLGRNCOL.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       16 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
-      CDoom::Mobjflag::MF_SOLID.value,     # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Mobjflag::MF_SOLID.value,     # flags
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                      # MT_MISC33
       31,                                  # doomednum
-      CDoom::Statenum::S_SHRTGRNCOL.value, # spawnstate
+      Doocr::Statenum::S_SHRTGRNCOL.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       16 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
-      CDoom::Mobjflag::MF_SOLID.value,     # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Mobjflag::MF_SOLID.value,     # flags
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                      # MT_MISC34
       32,                                  # doomednum
-      CDoom::Statenum::S_TALLREDCOL.value, # spawnstate
+      Doocr::Statenum::S_TALLREDCOL.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       16 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
-      CDoom::Mobjflag::MF_SOLID.value,     # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Mobjflag::MF_SOLID.value,     # flags
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                      # MT_MISC35
       33,                                  # doomednum
-      CDoom::Statenum::S_SHRTREDCOL.value, # spawnstate
+      Doocr::Statenum::S_SHRTREDCOL.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       16 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
-      CDoom::Mobjflag::MF_SOLID.value,     # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Mobjflag::MF_SOLID.value,     # flags
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                    # MT_MISC36
       37,                                # doomednum
-      CDoom::Statenum::S_SKULLCOL.value, # spawnstate
+      Doocr::Statenum::S_SKULLCOL.value, # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       16 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SOLID.value,   # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SOLID.value,   # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                    # MT_MISC37
       36,                                # doomednum
-      CDoom::Statenum::S_HEARTCOL.value, # spawnstate
+      Doocr::Statenum::S_HEARTCOL.value, # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       16 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SOLID.value,   # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SOLID.value,   # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                   # MT_MISC38
       41,                               # doomednum
-      CDoom::Statenum::S_EVILEYE.value, # spawnstate
+      Doocr::Statenum::S_EVILEYE.value, # spawnstate
       1000,                             # spawnhealth
-      CDoom::Statenum::S_NULL.value,    # seestate
-      CDoom::Sfxenum::SFX_None.value,   # seesound
+      Doocr::Statenum::S_NULL.value,    # seestate
+      Doocr::Sfxenum::SFX_None.value,   # seesound
       8,                                # reactiontime
-      CDoom::Sfxenum::SFX_None.value,   # attacksound
-      CDoom::Statenum::S_NULL.value,    # painstate
+      Doocr::Sfxenum::SFX_None.value,   # attacksound
+      Doocr::Statenum::S_NULL.value,    # painstate
       0,                                # painchance
-      CDoom::Sfxenum::SFX_None.value,   # painsound
-      CDoom::Statenum::S_NULL.value,    # meleestate
-      CDoom::Statenum::S_NULL.value,    # missilestate
-      CDoom::Statenum::S_NULL.value,    # deathstate
-      CDoom::Statenum::S_NULL.value,    # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,   # deathsound
+      Doocr::Sfxenum::SFX_None.value,   # painsound
+      Doocr::Statenum::S_NULL.value,    # meleestate
+      Doocr::Statenum::S_NULL.value,    # missilestate
+      Doocr::Statenum::S_NULL.value,    # deathstate
+      Doocr::Statenum::S_NULL.value,    # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,   # deathsound
       0,                                # speed
       16 * FRACUNIT,                    # radius
       16 * FRACUNIT,                    # height
       100,                              # mass
       0,                                # damage
-      CDoom::Sfxenum::SFX_None.value,   # activesound
-      CDoom::Mobjflag::MF_SOLID.value,  # flags
-      CDoom::Statenum::S_NULL.value,    # raisestate
+      Doocr::Sfxenum::SFX_None.value,   # activesound
+      Doocr::Mobjflag::MF_SOLID.value,  # flags
+      Doocr::Statenum::S_NULL.value,    # raisestate
     },
     {                                      # MT_MISC39
       42,                                  # doomednum
-      CDoom::Statenum::S_FLOATSKULL.value, # spawnstate
+      Doocr::Statenum::S_FLOATSKULL.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       16 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
-      CDoom::Mobjflag::MF_SOLID.value,     # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Mobjflag::MF_SOLID.value,     # flags
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                     # MT_MISC40
       43,                                 # doomednum
-      CDoom::Statenum::S_TORCHTREE.value, # spawnstate
+      Doocr::Statenum::S_TORCHTREE.value, # spawnstate
       1000,                               # spawnhealth
-      CDoom::Statenum::S_NULL.value,      # seestate
-      CDoom::Sfxenum::SFX_None.value,     # seesound
+      Doocr::Statenum::S_NULL.value,      # seestate
+      Doocr::Sfxenum::SFX_None.value,     # seesound
       8,                                  # reactiontime
-      CDoom::Sfxenum::SFX_None.value,     # attacksound
-      CDoom::Statenum::S_NULL.value,      # painstate
+      Doocr::Sfxenum::SFX_None.value,     # attacksound
+      Doocr::Statenum::S_NULL.value,      # painstate
       0,                                  # painchance
-      CDoom::Sfxenum::SFX_None.value,     # painsound
-      CDoom::Statenum::S_NULL.value,      # meleestate
-      CDoom::Statenum::S_NULL.value,      # missilestate
-      CDoom::Statenum::S_NULL.value,      # deathstate
-      CDoom::Statenum::S_NULL.value,      # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,     # deathsound
+      Doocr::Sfxenum::SFX_None.value,     # painsound
+      Doocr::Statenum::S_NULL.value,      # meleestate
+      Doocr::Statenum::S_NULL.value,      # missilestate
+      Doocr::Statenum::S_NULL.value,      # deathstate
+      Doocr::Statenum::S_NULL.value,      # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,     # deathsound
       0,                                  # speed
       16 * FRACUNIT,                      # radius
       16 * FRACUNIT,                      # height
       100,                                # mass
       0,                                  # damage
-      CDoom::Sfxenum::SFX_None.value,     # activesound
-      CDoom::Mobjflag::MF_SOLID.value,    # flags
-      CDoom::Statenum::S_NULL.value,      # raisestate
+      Doocr::Sfxenum::SFX_None.value,     # activesound
+      Doocr::Mobjflag::MF_SOLID.value,    # flags
+      Doocr::Statenum::S_NULL.value,      # raisestate
     },
     {                                     # MT_MISC41
       44,                                 # doomednum
-      CDoom::Statenum::S_BLUETORCH.value, # spawnstate
+      Doocr::Statenum::S_BLUETORCH.value, # spawnstate
       1000,                               # spawnhealth
-      CDoom::Statenum::S_NULL.value,      # seestate
-      CDoom::Sfxenum::SFX_None.value,     # seesound
+      Doocr::Statenum::S_NULL.value,      # seestate
+      Doocr::Sfxenum::SFX_None.value,     # seesound
       8,                                  # reactiontime
-      CDoom::Sfxenum::SFX_None.value,     # attacksound
-      CDoom::Statenum::S_NULL.value,      # painstate
+      Doocr::Sfxenum::SFX_None.value,     # attacksound
+      Doocr::Statenum::S_NULL.value,      # painstate
       0,                                  # painchance
-      CDoom::Sfxenum::SFX_None.value,     # painsound
-      CDoom::Statenum::S_NULL.value,      # meleestate
-      CDoom::Statenum::S_NULL.value,      # missilestate
-      CDoom::Statenum::S_NULL.value,      # deathstate
-      CDoom::Statenum::S_NULL.value,      # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,     # deathsound
+      Doocr::Sfxenum::SFX_None.value,     # painsound
+      Doocr::Statenum::S_NULL.value,      # meleestate
+      Doocr::Statenum::S_NULL.value,      # missilestate
+      Doocr::Statenum::S_NULL.value,      # deathstate
+      Doocr::Statenum::S_NULL.value,      # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,     # deathsound
       0,                                  # speed
       16 * FRACUNIT,                      # radius
       16 * FRACUNIT,                      # height
       100,                                # mass
       0,                                  # damage
-      CDoom::Sfxenum::SFX_None.value,     # activesound
-      CDoom::Mobjflag::MF_SOLID.value,    # flags
-      CDoom::Statenum::S_NULL.value,      # raisestate
+      Doocr::Sfxenum::SFX_None.value,     # activesound
+      Doocr::Mobjflag::MF_SOLID.value,    # flags
+      Doocr::Statenum::S_NULL.value,      # raisestate
     },
     {                                      # MT_MISC42
       45,                                  # doomednum
-      CDoom::Statenum::S_GREENTORCH.value, # spawnstate
+      Doocr::Statenum::S_GREENTORCH.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       16 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
-      CDoom::Mobjflag::MF_SOLID.value,     # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Mobjflag::MF_SOLID.value,     # flags
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                    # MT_MISC43
       46,                                # doomednum
-      CDoom::Statenum::S_REDTORCH.value, # spawnstate
+      Doocr::Statenum::S_REDTORCH.value, # spawnstate
       1000,                              # spawnhealth
-      CDoom::Statenum::S_NULL.value,     # seestate
-      CDoom::Sfxenum::SFX_None.value,    # seesound
+      Doocr::Statenum::S_NULL.value,     # seestate
+      Doocr::Sfxenum::SFX_None.value,    # seesound
       8,                                 # reactiontime
-      CDoom::Sfxenum::SFX_None.value,    # attacksound
-      CDoom::Statenum::S_NULL.value,     # painstate
+      Doocr::Sfxenum::SFX_None.value,    # attacksound
+      Doocr::Statenum::S_NULL.value,     # painstate
       0,                                 # painchance
-      CDoom::Sfxenum::SFX_None.value,    # painsound
-      CDoom::Statenum::S_NULL.value,     # meleestate
-      CDoom::Statenum::S_NULL.value,     # missilestate
-      CDoom::Statenum::S_NULL.value,     # deathstate
-      CDoom::Statenum::S_NULL.value,     # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,    # deathsound
+      Doocr::Sfxenum::SFX_None.value,    # painsound
+      Doocr::Statenum::S_NULL.value,     # meleestate
+      Doocr::Statenum::S_NULL.value,     # missilestate
+      Doocr::Statenum::S_NULL.value,     # deathstate
+      Doocr::Statenum::S_NULL.value,     # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,    # deathsound
       0,                                 # speed
       16 * FRACUNIT,                     # radius
       16 * FRACUNIT,                     # height
       100,                               # mass
       0,                                 # damage
-      CDoom::Sfxenum::SFX_None.value,    # activesound
-      CDoom::Mobjflag::MF_SOLID.value,   # flags
-      CDoom::Statenum::S_NULL.value,     # raisestate
+      Doocr::Sfxenum::SFX_None.value,    # activesound
+      Doocr::Mobjflag::MF_SOLID.value,   # flags
+      Doocr::Statenum::S_NULL.value,     # raisestate
     },
     {                                      # MT_MISC44
       55,                                  # doomednum
-      CDoom::Statenum::S_BTORCHSHRT.value, # spawnstate
+      Doocr::Statenum::S_BTORCHSHRT.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       16 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
-      CDoom::Mobjflag::MF_SOLID.value,     # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Mobjflag::MF_SOLID.value,     # flags
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                      # MT_MISC45
       56,                                  # doomednum
-      CDoom::Statenum::S_GTORCHSHRT.value, # spawnstate
+      Doocr::Statenum::S_GTORCHSHRT.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       16 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
-      CDoom::Mobjflag::MF_SOLID.value,     # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Mobjflag::MF_SOLID.value,     # flags
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                      # MT_MISC46
       57,                                  # doomednum
-      CDoom::Statenum::S_RTORCHSHRT.value, # spawnstate
+      Doocr::Statenum::S_RTORCHSHRT.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       16 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
-      CDoom::Mobjflag::MF_SOLID.value,     # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Mobjflag::MF_SOLID.value,     # flags
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                      # MT_MISC47
       47,                                  # doomednum
-      CDoom::Statenum::S_STALAGTITE.value, # spawnstate
+      Doocr::Statenum::S_STALAGTITE.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       16 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
-      CDoom::Mobjflag::MF_SOLID.value,     # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Mobjflag::MF_SOLID.value,     # flags
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                      # MT_MISC48
       48,                                  # doomednum
-      CDoom::Statenum::S_TECHPILLAR.value, # spawnstate
+      Doocr::Statenum::S_TECHPILLAR.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       16 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
-      CDoom::Mobjflag::MF_SOLID.value,     # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Mobjflag::MF_SOLID.value,     # flags
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                      # MT_MISC49
       34,                                  # doomednum
-      CDoom::Statenum::S_CANDLESTIK.value, # spawnstate
+      Doocr::Statenum::S_CANDLESTIK.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       20 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Sfxenum::SFX_None.value,      # activesound
       0,                                   # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                      # MT_MISC50
       35,                                  # doomednum
-      CDoom::Statenum::S_CANDELABRA.value, # spawnstate
+      Doocr::Statenum::S_CANDELABRA.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       16 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
-      CDoom::Mobjflag::MF_SOLID.value,     # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Mobjflag::MF_SOLID.value,     # flags
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                                                                                                   # MT_MISC51
       49,                                                                                                               # doomednum
-      CDoom::Statenum::S_BLOODYTWITCH.value,                                                                            # spawnstate
+      Doocr::Statenum::S_BLOODYTWITCH.value,                                                                            # spawnstate
       1000,                                                                                                             # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                    # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                    # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # seesound
       8,                                                                                                                # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                    # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                    # painstate
       0,                                                                                                                # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                    # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # missilestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                    # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                    # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # missilestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                    # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # deathsound
       0,                                                                                                                # speed
       16 * FRACUNIT,                                                                                                    # radius
       68 * FRACUNIT,                                                                                                    # height
       100,                                                                                                              # mass
       0,                                                                                                                # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                    # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                    # raisestate
     },
     {                                                                                                                   # MT_MISC52
       50,                                                                                                               # doomednum
-      CDoom::Statenum::S_MEAT2.value,                                                                                   # spawnstate
+      Doocr::Statenum::S_MEAT2.value,                                                                                   # spawnstate
       1000,                                                                                                             # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                    # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                    # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # seesound
       8,                                                                                                                # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                    # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                    # painstate
       0,                                                                                                                # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                    # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # missilestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                    # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                    # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # missilestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                    # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # deathsound
       0,                                                                                                                # speed
       16 * FRACUNIT,                                                                                                    # radius
       84 * FRACUNIT,                                                                                                    # height
       100,                                                                                                              # mass
       0,                                                                                                                # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                    # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                    # raisestate
     },
     {                                                                                                                   # MT_MISC53
       51,                                                                                                               # doomednum
-      CDoom::Statenum::S_MEAT3.value,                                                                                   # spawnstate
+      Doocr::Statenum::S_MEAT3.value,                                                                                   # spawnstate
       1000,                                                                                                             # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                    # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                    # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # seesound
       8,                                                                                                                # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                    # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                    # painstate
       0,                                                                                                                # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                    # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # missilestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                    # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                    # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # missilestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                    # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # deathsound
       0,                                                                                                                # speed
       16 * FRACUNIT,                                                                                                    # radius
       84 * FRACUNIT,                                                                                                    # height
       100,                                                                                                              # mass
       0,                                                                                                                # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                    # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                    # raisestate
     },
     {                                                                                                                   # MT_MISC54
       52,                                                                                                               # doomednum
-      CDoom::Statenum::S_MEAT4.value,                                                                                   # spawnstate
+      Doocr::Statenum::S_MEAT4.value,                                                                                   # spawnstate
       1000,                                                                                                             # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                    # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                    # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # seesound
       8,                                                                                                                # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                    # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                    # painstate
       0,                                                                                                                # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                    # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # missilestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                    # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                    # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # missilestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                    # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # deathsound
       0,                                                                                                                # speed
       16 * FRACUNIT,                                                                                                    # radius
       68 * FRACUNIT,                                                                                                    # height
       100,                                                                                                              # mass
       0,                                                                                                                # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                    # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                    # raisestate
     },
     {                                                                                                                   # MT_MISC55
       53,                                                                                                               # doomednum
-      CDoom::Statenum::S_MEAT5.value,                                                                                   # spawnstate
+      Doocr::Statenum::S_MEAT5.value,                                                                                   # spawnstate
       1000,                                                                                                             # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                    # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                    # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # seesound
       8,                                                                                                                # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                    # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                    # painstate
       0,                                                                                                                # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                    # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # missilestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                    # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                    # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # missilestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                    # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # deathsound
       0,                                                                                                                # speed
       16 * FRACUNIT,                                                                                                    # radius
       52 * FRACUNIT,                                                                                                    # height
       100,                                                                                                              # mass
       0,                                                                                                                # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                    # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                    # raisestate
     },
     {                                                                                 # MT_MISC56
       59,                                                                             # doomednum
-      CDoom::Statenum::S_MEAT2.value,                                                 # spawnstate
+      Doocr::Statenum::S_MEAT2.value,                                                 # spawnstate
       1000,                                                                           # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                  # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                 # seesound
+      Doocr::Statenum::S_NULL.value,                                                  # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                 # seesound
       8,                                                                              # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                 # attacksound
-      CDoom::Statenum::S_NULL.value,                                                  # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                 # attacksound
+      Doocr::Statenum::S_NULL.value,                                                  # painstate
       0,                                                                              # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                 # painsound
-      CDoom::Statenum::S_NULL.value,                                                  # meleestate
-      CDoom::Statenum::S_NULL.value,                                                  # missilestate
-      CDoom::Statenum::S_NULL.value,                                                  # deathstate
-      CDoom::Statenum::S_NULL.value,                                                  # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                 # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                 # painsound
+      Doocr::Statenum::S_NULL.value,                                                  # meleestate
+      Doocr::Statenum::S_NULL.value,                                                  # missilestate
+      Doocr::Statenum::S_NULL.value,                                                  # deathstate
+      Doocr::Statenum::S_NULL.value,                                                  # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                 # deathsound
       0,                                                                              # speed
       20 * FRACUNIT,                                                                  # radius
       84 * FRACUNIT,                                                                  # height
       100,                                                                            # mass
       0,                                                                              # damage
-      CDoom::Sfxenum::SFX_None.value,                                                 # activesound
-      (CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                  # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                 # activesound
+      (Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                  # raisestate
     },
     {                                                                                 # MT_MISC57
       60,                                                                             # doomednum
-      CDoom::Statenum::S_MEAT4.value,                                                 # spawnstate
+      Doocr::Statenum::S_MEAT4.value,                                                 # spawnstate
       1000,                                                                           # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                  # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                 # seesound
+      Doocr::Statenum::S_NULL.value,                                                  # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                 # seesound
       8,                                                                              # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                 # attacksound
-      CDoom::Statenum::S_NULL.value,                                                  # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                 # attacksound
+      Doocr::Statenum::S_NULL.value,                                                  # painstate
       0,                                                                              # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                 # painsound
-      CDoom::Statenum::S_NULL.value,                                                  # meleestate
-      CDoom::Statenum::S_NULL.value,                                                  # missilestate
-      CDoom::Statenum::S_NULL.value,                                                  # deathstate
-      CDoom::Statenum::S_NULL.value,                                                  # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                 # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                 # painsound
+      Doocr::Statenum::S_NULL.value,                                                  # meleestate
+      Doocr::Statenum::S_NULL.value,                                                  # missilestate
+      Doocr::Statenum::S_NULL.value,                                                  # deathstate
+      Doocr::Statenum::S_NULL.value,                                                  # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                 # deathsound
       0,                                                                              # speed
       20 * FRACUNIT,                                                                  # radius
       68 * FRACUNIT,                                                                  # height
       100,                                                                            # mass
       0,                                                                              # damage
-      CDoom::Sfxenum::SFX_None.value,                                                 # activesound
-      (CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                  # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                 # activesound
+      (Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                  # raisestate
     },
     {                                                                                 # MT_MISC58
       61,                                                                             # doomednum
-      CDoom::Statenum::S_MEAT3.value,                                                 # spawnstate
+      Doocr::Statenum::S_MEAT3.value,                                                 # spawnstate
       1000,                                                                           # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                  # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                 # seesound
+      Doocr::Statenum::S_NULL.value,                                                  # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                 # seesound
       8,                                                                              # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                 # attacksound
-      CDoom::Statenum::S_NULL.value,                                                  # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                 # attacksound
+      Doocr::Statenum::S_NULL.value,                                                  # painstate
       0,                                                                              # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                 # painsound
-      CDoom::Statenum::S_NULL.value,                                                  # meleestate
-      CDoom::Statenum::S_NULL.value,                                                  # missilestate
-      CDoom::Statenum::S_NULL.value,                                                  # deathstate
-      CDoom::Statenum::S_NULL.value,                                                  # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                 # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                 # painsound
+      Doocr::Statenum::S_NULL.value,                                                  # meleestate
+      Doocr::Statenum::S_NULL.value,                                                  # missilestate
+      Doocr::Statenum::S_NULL.value,                                                  # deathstate
+      Doocr::Statenum::S_NULL.value,                                                  # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                 # deathsound
       0,                                                                              # speed
       20 * FRACUNIT,                                                                  # radius
       52 * FRACUNIT,                                                                  # height
       100,                                                                            # mass
       0,                                                                              # damage
-      CDoom::Sfxenum::SFX_None.value,                                                 # activesound
-      (CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                  # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                 # activesound
+      (Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                  # raisestate
     },
     {                                                                                 # MT_MISC59
       62,                                                                             # doomednum
-      CDoom::Statenum::S_MEAT5.value,                                                 # spawnstate
+      Doocr::Statenum::S_MEAT5.value,                                                 # spawnstate
       1000,                                                                           # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                  # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                 # seesound
+      Doocr::Statenum::S_NULL.value,                                                  # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                 # seesound
       8,                                                                              # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                 # attacksound
-      CDoom::Statenum::S_NULL.value,                                                  # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                 # attacksound
+      Doocr::Statenum::S_NULL.value,                                                  # painstate
       0,                                                                              # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                 # painsound
-      CDoom::Statenum::S_NULL.value,                                                  # meleestate
-      CDoom::Statenum::S_NULL.value,                                                  # missilestate
-      CDoom::Statenum::S_NULL.value,                                                  # deathstate
-      CDoom::Statenum::S_NULL.value,                                                  # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                 # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                 # painsound
+      Doocr::Statenum::S_NULL.value,                                                  # meleestate
+      Doocr::Statenum::S_NULL.value,                                                  # missilestate
+      Doocr::Statenum::S_NULL.value,                                                  # deathstate
+      Doocr::Statenum::S_NULL.value,                                                  # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                 # deathsound
       0,                                                                              # speed
       20 * FRACUNIT,                                                                  # radius
       52 * FRACUNIT,                                                                  # height
       100,                                                                            # mass
       0,                                                                              # damage
-      CDoom::Sfxenum::SFX_None.value,                                                 # activesound
-      (CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                  # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                 # activesound
+      (Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                  # raisestate
     },
     {                                                                                 # MT_MISC60
       63,                                                                             # doomednum
-      CDoom::Statenum::S_BLOODYTWITCH.value,                                          # spawnstate
+      Doocr::Statenum::S_BLOODYTWITCH.value,                                          # spawnstate
       1000,                                                                           # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                  # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                 # seesound
+      Doocr::Statenum::S_NULL.value,                                                  # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                 # seesound
       8,                                                                              # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                 # attacksound
-      CDoom::Statenum::S_NULL.value,                                                  # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                 # attacksound
+      Doocr::Statenum::S_NULL.value,                                                  # painstate
       0,                                                                              # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                 # painsound
-      CDoom::Statenum::S_NULL.value,                                                  # meleestate
-      CDoom::Statenum::S_NULL.value,                                                  # missilestate
-      CDoom::Statenum::S_NULL.value,                                                  # deathstate
-      CDoom::Statenum::S_NULL.value,                                                  # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                 # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                 # painsound
+      Doocr::Statenum::S_NULL.value,                                                  # meleestate
+      Doocr::Statenum::S_NULL.value,                                                  # missilestate
+      Doocr::Statenum::S_NULL.value,                                                  # deathstate
+      Doocr::Statenum::S_NULL.value,                                                  # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                 # deathsound
       0,                                                                              # speed
       20 * FRACUNIT,                                                                  # radius
       68 * FRACUNIT,                                                                  # height
       100,                                                                            # mass
       0,                                                                              # damage
-      CDoom::Sfxenum::SFX_None.value,                                                 # activesound
-      (CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                  # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                 # activesound
+      (Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                  # raisestate
     },
     {                                     # MT_MISC61
       22,                                 # doomednum
-      CDoom::Statenum::S_HEAD_DIE6.value, # spawnstate
+      Doocr::Statenum::S_HEAD_DIE6.value, # spawnstate
       1000,                               # spawnhealth
-      CDoom::Statenum::S_NULL.value,      # seestate
-      CDoom::Sfxenum::SFX_None.value,     # seesound
+      Doocr::Statenum::S_NULL.value,      # seestate
+      Doocr::Sfxenum::SFX_None.value,     # seesound
       8,                                  # reactiontime
-      CDoom::Sfxenum::SFX_None.value,     # attacksound
-      CDoom::Statenum::S_NULL.value,      # painstate
+      Doocr::Sfxenum::SFX_None.value,     # attacksound
+      Doocr::Statenum::S_NULL.value,      # painstate
       0,                                  # painchance
-      CDoom::Sfxenum::SFX_None.value,     # painsound
-      CDoom::Statenum::S_NULL.value,      # meleestate
-      CDoom::Statenum::S_NULL.value,      # missilestate
-      CDoom::Statenum::S_NULL.value,      # deathstate
-      CDoom::Statenum::S_NULL.value,      # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,     # deathsound
+      Doocr::Sfxenum::SFX_None.value,     # painsound
+      Doocr::Statenum::S_NULL.value,      # meleestate
+      Doocr::Statenum::S_NULL.value,      # missilestate
+      Doocr::Statenum::S_NULL.value,      # deathstate
+      Doocr::Statenum::S_NULL.value,      # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,     # deathsound
       0,                                  # speed
       20 * FRACUNIT,                      # radius
       16 * FRACUNIT,                      # height
       100,                                # mass
       0,                                  # damage
-      CDoom::Sfxenum::SFX_None.value,     # activesound
+      Doocr::Sfxenum::SFX_None.value,     # activesound
       0,                                  # flags
-      CDoom::Statenum::S_NULL.value,      # raisestate
+      Doocr::Statenum::S_NULL.value,      # raisestate
     },
     {                                     # MT_MISC62
       15,                                 # doomednum
-      CDoom::Statenum::S_PLAY_DIE7.value, # spawnstate
+      Doocr::Statenum::S_PLAY_DIE7.value, # spawnstate
       1000,                               # spawnhealth
-      CDoom::Statenum::S_NULL.value,      # seestate
-      CDoom::Sfxenum::SFX_None.value,     # seesound
+      Doocr::Statenum::S_NULL.value,      # seestate
+      Doocr::Sfxenum::SFX_None.value,     # seesound
       8,                                  # reactiontime
-      CDoom::Sfxenum::SFX_None.value,     # attacksound
-      CDoom::Statenum::S_NULL.value,      # painstate
+      Doocr::Sfxenum::SFX_None.value,     # attacksound
+      Doocr::Statenum::S_NULL.value,      # painstate
       0,                                  # painchance
-      CDoom::Sfxenum::SFX_None.value,     # painsound
-      CDoom::Statenum::S_NULL.value,      # meleestate
-      CDoom::Statenum::S_NULL.value,      # missilestate
-      CDoom::Statenum::S_NULL.value,      # deathstate
-      CDoom::Statenum::S_NULL.value,      # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,     # deathsound
+      Doocr::Sfxenum::SFX_None.value,     # painsound
+      Doocr::Statenum::S_NULL.value,      # meleestate
+      Doocr::Statenum::S_NULL.value,      # missilestate
+      Doocr::Statenum::S_NULL.value,      # deathstate
+      Doocr::Statenum::S_NULL.value,      # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,     # deathsound
       0,                                  # speed
       20 * FRACUNIT,                      # radius
       16 * FRACUNIT,                      # height
       100,                                # mass
       0,                                  # damage
-      CDoom::Sfxenum::SFX_None.value,     # activesound
+      Doocr::Sfxenum::SFX_None.value,     # activesound
       0,                                  # flags
-      CDoom::Statenum::S_NULL.value,      # raisestate
+      Doocr::Statenum::S_NULL.value,      # raisestate
     },
     {                                     # MT_MISC63
       18,                                 # doomednum
-      CDoom::Statenum::S_POSS_DIE5.value, # spawnstate
+      Doocr::Statenum::S_POSS_DIE5.value, # spawnstate
       1000,                               # spawnhealth
-      CDoom::Statenum::S_NULL.value,      # seestate
-      CDoom::Sfxenum::SFX_None.value,     # seesound
+      Doocr::Statenum::S_NULL.value,      # seestate
+      Doocr::Sfxenum::SFX_None.value,     # seesound
       8,                                  # reactiontime
-      CDoom::Sfxenum::SFX_None.value,     # attacksound
-      CDoom::Statenum::S_NULL.value,      # painstate
+      Doocr::Sfxenum::SFX_None.value,     # attacksound
+      Doocr::Statenum::S_NULL.value,      # painstate
       0,                                  # painchance
-      CDoom::Sfxenum::SFX_None.value,     # painsound
-      CDoom::Statenum::S_NULL.value,      # meleestate
-      CDoom::Statenum::S_NULL.value,      # missilestate
-      CDoom::Statenum::S_NULL.value,      # deathstate
-      CDoom::Statenum::S_NULL.value,      # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,     # deathsound
+      Doocr::Sfxenum::SFX_None.value,     # painsound
+      Doocr::Statenum::S_NULL.value,      # meleestate
+      Doocr::Statenum::S_NULL.value,      # missilestate
+      Doocr::Statenum::S_NULL.value,      # deathstate
+      Doocr::Statenum::S_NULL.value,      # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,     # deathsound
       0,                                  # speed
       20 * FRACUNIT,                      # radius
       16 * FRACUNIT,                      # height
       100,                                # mass
       0,                                  # damage
-      CDoom::Sfxenum::SFX_None.value,     # activesound
+      Doocr::Sfxenum::SFX_None.value,     # activesound
       0,                                  # flags
-      CDoom::Statenum::S_NULL.value,      # raisestate
+      Doocr::Statenum::S_NULL.value,      # raisestate
     },
     {                                     # MT_MISC64
       21,                                 # doomednum
-      CDoom::Statenum::S_SARG_DIE6.value, # spawnstate
+      Doocr::Statenum::S_SARG_DIE6.value, # spawnstate
       1000,                               # spawnhealth
-      CDoom::Statenum::S_NULL.value,      # seestate
-      CDoom::Sfxenum::SFX_None.value,     # seesound
+      Doocr::Statenum::S_NULL.value,      # seestate
+      Doocr::Sfxenum::SFX_None.value,     # seesound
       8,                                  # reactiontime
-      CDoom::Sfxenum::SFX_None.value,     # attacksound
-      CDoom::Statenum::S_NULL.value,      # painstate
+      Doocr::Sfxenum::SFX_None.value,     # attacksound
+      Doocr::Statenum::S_NULL.value,      # painstate
       0,                                  # painchance
-      CDoom::Sfxenum::SFX_None.value,     # painsound
-      CDoom::Statenum::S_NULL.value,      # meleestate
-      CDoom::Statenum::S_NULL.value,      # missilestate
-      CDoom::Statenum::S_NULL.value,      # deathstate
-      CDoom::Statenum::S_NULL.value,      # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,     # deathsound
+      Doocr::Sfxenum::SFX_None.value,     # painsound
+      Doocr::Statenum::S_NULL.value,      # meleestate
+      Doocr::Statenum::S_NULL.value,      # missilestate
+      Doocr::Statenum::S_NULL.value,      # deathstate
+      Doocr::Statenum::S_NULL.value,      # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,     # deathsound
       0,                                  # speed
       20 * FRACUNIT,                      # radius
       16 * FRACUNIT,                      # height
       100,                                # mass
       0,                                  # damage
-      CDoom::Sfxenum::SFX_None.value,     # activesound
+      Doocr::Sfxenum::SFX_None.value,     # activesound
       0,                                  # flags
-      CDoom::Statenum::S_NULL.value,      # raisestate
+      Doocr::Statenum::S_NULL.value,      # raisestate
     },
     {                                      # MT_MISC65
       23,                                  # doomednum
-      CDoom::Statenum::S_SKULL_DIE6.value, # spawnstate
+      Doocr::Statenum::S_SKULL_DIE6.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       20 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Sfxenum::SFX_None.value,      # activesound
       0,                                   # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                     # MT_MISC66
       20,                                 # doomednum
-      CDoom::Statenum::S_TROO_DIE5.value, # spawnstate
+      Doocr::Statenum::S_TROO_DIE5.value, # spawnstate
       1000,                               # spawnhealth
-      CDoom::Statenum::S_NULL.value,      # seestate
-      CDoom::Sfxenum::SFX_None.value,     # seesound
+      Doocr::Statenum::S_NULL.value,      # seestate
+      Doocr::Sfxenum::SFX_None.value,     # seesound
       8,                                  # reactiontime
-      CDoom::Sfxenum::SFX_None.value,     # attacksound
-      CDoom::Statenum::S_NULL.value,      # painstate
+      Doocr::Sfxenum::SFX_None.value,     # attacksound
+      Doocr::Statenum::S_NULL.value,      # painstate
       0,                                  # painchance
-      CDoom::Sfxenum::SFX_None.value,     # painsound
-      CDoom::Statenum::S_NULL.value,      # meleestate
-      CDoom::Statenum::S_NULL.value,      # missilestate
-      CDoom::Statenum::S_NULL.value,      # deathstate
-      CDoom::Statenum::S_NULL.value,      # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,     # deathsound
+      Doocr::Sfxenum::SFX_None.value,     # painsound
+      Doocr::Statenum::S_NULL.value,      # meleestate
+      Doocr::Statenum::S_NULL.value,      # missilestate
+      Doocr::Statenum::S_NULL.value,      # deathstate
+      Doocr::Statenum::S_NULL.value,      # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,     # deathsound
       0,                                  # speed
       20 * FRACUNIT,                      # radius
       16 * FRACUNIT,                      # height
       100,                                # mass
       0,                                  # damage
-      CDoom::Sfxenum::SFX_None.value,     # activesound
+      Doocr::Sfxenum::SFX_None.value,     # activesound
       0,                                  # flags
-      CDoom::Statenum::S_NULL.value,      # raisestate
+      Doocr::Statenum::S_NULL.value,      # raisestate
     },
     {                                     # MT_MISC67
       19,                                 # doomednum
-      CDoom::Statenum::S_SPOS_DIE5.value, # spawnstate
+      Doocr::Statenum::S_SPOS_DIE5.value, # spawnstate
       1000,                               # spawnhealth
-      CDoom::Statenum::S_NULL.value,      # seestate
-      CDoom::Sfxenum::SFX_None.value,     # seesound
+      Doocr::Statenum::S_NULL.value,      # seestate
+      Doocr::Sfxenum::SFX_None.value,     # seesound
       8,                                  # reactiontime
-      CDoom::Sfxenum::SFX_None.value,     # attacksound
-      CDoom::Statenum::S_NULL.value,      # painstate
+      Doocr::Sfxenum::SFX_None.value,     # attacksound
+      Doocr::Statenum::S_NULL.value,      # painstate
       0,                                  # painchance
-      CDoom::Sfxenum::SFX_None.value,     # painsound
-      CDoom::Statenum::S_NULL.value,      # meleestate
-      CDoom::Statenum::S_NULL.value,      # missilestate
-      CDoom::Statenum::S_NULL.value,      # deathstate
-      CDoom::Statenum::S_NULL.value,      # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,     # deathsound
+      Doocr::Sfxenum::SFX_None.value,     # painsound
+      Doocr::Statenum::S_NULL.value,      # meleestate
+      Doocr::Statenum::S_NULL.value,      # missilestate
+      Doocr::Statenum::S_NULL.value,      # deathstate
+      Doocr::Statenum::S_NULL.value,      # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,     # deathsound
       0,                                  # speed
       20 * FRACUNIT,                      # radius
       16 * FRACUNIT,                      # height
       100,                                # mass
       0,                                  # damage
-      CDoom::Sfxenum::SFX_None.value,     # activesound
+      Doocr::Sfxenum::SFX_None.value,     # activesound
       0,                                  # flags
-      CDoom::Statenum::S_NULL.value,      # raisestate
+      Doocr::Statenum::S_NULL.value,      # raisestate
     },
     {                                      # MT_MISC68
       10,                                  # doomednum
-      CDoom::Statenum::S_PLAY_XDIE9.value, # spawnstate
+      Doocr::Statenum::S_PLAY_XDIE9.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       20 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Sfxenum::SFX_None.value,      # activesound
       0,                                   # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                      # MT_MISC69
       12,                                  # doomednum
-      CDoom::Statenum::S_PLAY_XDIE9.value, # spawnstate
+      Doocr::Statenum::S_PLAY_XDIE9.value, # spawnstate
       1000,                                # spawnhealth
-      CDoom::Statenum::S_NULL.value,       # seestate
-      CDoom::Sfxenum::SFX_None.value,      # seesound
+      Doocr::Statenum::S_NULL.value,       # seestate
+      Doocr::Sfxenum::SFX_None.value,      # seesound
       8,                                   # reactiontime
-      CDoom::Sfxenum::SFX_None.value,      # attacksound
-      CDoom::Statenum::S_NULL.value,       # painstate
+      Doocr::Sfxenum::SFX_None.value,      # attacksound
+      Doocr::Statenum::S_NULL.value,       # painstate
       0,                                   # painchance
-      CDoom::Sfxenum::SFX_None.value,      # painsound
-      CDoom::Statenum::S_NULL.value,       # meleestate
-      CDoom::Statenum::S_NULL.value,       # missilestate
-      CDoom::Statenum::S_NULL.value,       # deathstate
-      CDoom::Statenum::S_NULL.value,       # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,      # deathsound
+      Doocr::Sfxenum::SFX_None.value,      # painsound
+      Doocr::Statenum::S_NULL.value,       # meleestate
+      Doocr::Statenum::S_NULL.value,       # missilestate
+      Doocr::Statenum::S_NULL.value,       # deathstate
+      Doocr::Statenum::S_NULL.value,       # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,      # deathsound
       0,                                   # speed
       20 * FRACUNIT,                       # radius
       16 * FRACUNIT,                       # height
       100,                                 # mass
       0,                                   # damage
-      CDoom::Sfxenum::SFX_None.value,      # activesound
+      Doocr::Sfxenum::SFX_None.value,      # activesound
       0,                                   # flags
-      CDoom::Statenum::S_NULL.value,       # raisestate
+      Doocr::Statenum::S_NULL.value,       # raisestate
     },
     {                                        # MT_MISC70
       28,                                    # doomednum
-      CDoom::Statenum::S_HEADSONSTICK.value, # spawnstate
+      Doocr::Statenum::S_HEADSONSTICK.value, # spawnstate
       1000,                                  # spawnhealth
-      CDoom::Statenum::S_NULL.value,         # seestate
-      CDoom::Sfxenum::SFX_None.value,        # seesound
+      Doocr::Statenum::S_NULL.value,         # seestate
+      Doocr::Sfxenum::SFX_None.value,        # seesound
       8,                                     # reactiontime
-      CDoom::Sfxenum::SFX_None.value,        # attacksound
-      CDoom::Statenum::S_NULL.value,         # painstate
+      Doocr::Sfxenum::SFX_None.value,        # attacksound
+      Doocr::Statenum::S_NULL.value,         # painstate
       0,                                     # painchance
-      CDoom::Sfxenum::SFX_None.value,        # painsound
-      CDoom::Statenum::S_NULL.value,         # meleestate
-      CDoom::Statenum::S_NULL.value,         # missilestate
-      CDoom::Statenum::S_NULL.value,         # deathstate
-      CDoom::Statenum::S_NULL.value,         # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,        # deathsound
+      Doocr::Sfxenum::SFX_None.value,        # painsound
+      Doocr::Statenum::S_NULL.value,         # meleestate
+      Doocr::Statenum::S_NULL.value,         # missilestate
+      Doocr::Statenum::S_NULL.value,         # deathstate
+      Doocr::Statenum::S_NULL.value,         # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,        # deathsound
       0,                                     # speed
       16 * FRACUNIT,                         # radius
       16 * FRACUNIT,                         # height
       100,                                   # mass
       0,                                     # damage
-      CDoom::Sfxenum::SFX_None.value,        # activesound
-      CDoom::Mobjflag::MF_SOLID.value,       # flags
-      CDoom::Statenum::S_NULL.value,         # raisestate
+      Doocr::Sfxenum::SFX_None.value,        # activesound
+      Doocr::Mobjflag::MF_SOLID.value,       # flags
+      Doocr::Statenum::S_NULL.value,         # raisestate
     },
     {                                 # MT_MISC71
       24,                             # doomednum
-      CDoom::Statenum::S_GIBS.value,  # spawnstate
+      Doocr::Statenum::S_GIBS.value,  # spawnstate
       1000,                           # spawnhealth
-      CDoom::Statenum::S_NULL.value,  # seestate
-      CDoom::Sfxenum::SFX_None.value, # seesound
+      Doocr::Statenum::S_NULL.value,  # seestate
+      Doocr::Sfxenum::SFX_None.value, # seesound
       8,                              # reactiontime
-      CDoom::Sfxenum::SFX_None.value, # attacksound
-      CDoom::Statenum::S_NULL.value,  # painstate
+      Doocr::Sfxenum::SFX_None.value, # attacksound
+      Doocr::Statenum::S_NULL.value,  # painstate
       0,                              # painchance
-      CDoom::Sfxenum::SFX_None.value, # painsound
-      CDoom::Statenum::S_NULL.value,  # meleestate
-      CDoom::Statenum::S_NULL.value,  # missilestate
-      CDoom::Statenum::S_NULL.value,  # deathstate
-      CDoom::Statenum::S_NULL.value,  # xdeathstate
-      CDoom::Sfxenum::SFX_None.value, # deathsound
+      Doocr::Sfxenum::SFX_None.value, # painsound
+      Doocr::Statenum::S_NULL.value,  # meleestate
+      Doocr::Statenum::S_NULL.value,  # missilestate
+      Doocr::Statenum::S_NULL.value,  # deathstate
+      Doocr::Statenum::S_NULL.value,  # xdeathstate
+      Doocr::Sfxenum::SFX_None.value, # deathsound
       0,                              # speed
       20 * FRACUNIT,                  # radius
       16 * FRACUNIT,                  # height
       100,                            # mass
       0,                              # damage
-      CDoom::Sfxenum::SFX_None.value, # activesound
+      Doocr::Sfxenum::SFX_None.value, # activesound
       0,                              # flags
-      CDoom::Statenum::S_NULL.value,  # raisestate
+      Doocr::Statenum::S_NULL.value,  # raisestate
     },
     {                                        # MT_MISC72
       27,                                    # doomednum
-      CDoom::Statenum::S_HEADONASTICK.value, # spawnstate
+      Doocr::Statenum::S_HEADONASTICK.value, # spawnstate
       1000,                                  # spawnhealth
-      CDoom::Statenum::S_NULL.value,         # seestate
-      CDoom::Sfxenum::SFX_None.value,        # seesound
+      Doocr::Statenum::S_NULL.value,         # seestate
+      Doocr::Sfxenum::SFX_None.value,        # seesound
       8,                                     # reactiontime
-      CDoom::Sfxenum::SFX_None.value,        # attacksound
-      CDoom::Statenum::S_NULL.value,         # painstate
+      Doocr::Sfxenum::SFX_None.value,        # attacksound
+      Doocr::Statenum::S_NULL.value,         # painstate
       0,                                     # painchance
-      CDoom::Sfxenum::SFX_None.value,        # painsound
-      CDoom::Statenum::S_NULL.value,         # meleestate
-      CDoom::Statenum::S_NULL.value,         # missilestate
-      CDoom::Statenum::S_NULL.value,         # deathstate
-      CDoom::Statenum::S_NULL.value,         # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,        # deathsound
+      Doocr::Sfxenum::SFX_None.value,        # painsound
+      Doocr::Statenum::S_NULL.value,         # meleestate
+      Doocr::Statenum::S_NULL.value,         # missilestate
+      Doocr::Statenum::S_NULL.value,         # deathstate
+      Doocr::Statenum::S_NULL.value,         # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,        # deathsound
       0,                                     # speed
       16 * FRACUNIT,                         # radius
       16 * FRACUNIT,                         # height
       100,                                   # mass
       0,                                     # damage
-      CDoom::Sfxenum::SFX_None.value,        # activesound
-      CDoom::Mobjflag::MF_SOLID.value,       # flags
-      CDoom::Statenum::S_NULL.value,         # raisestate
+      Doocr::Sfxenum::SFX_None.value,        # activesound
+      Doocr::Mobjflag::MF_SOLID.value,       # flags
+      Doocr::Statenum::S_NULL.value,         # raisestate
     },
     {                                       # MT_MISC73
       29,                                   # doomednum
-      CDoom::Statenum::S_HEADCANDLES.value, # spawnstate
+      Doocr::Statenum::S_HEADCANDLES.value, # spawnstate
       1000,                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,        # seestate
-      CDoom::Sfxenum::SFX_None.value,       # seesound
+      Doocr::Statenum::S_NULL.value,        # seestate
+      Doocr::Sfxenum::SFX_None.value,       # seesound
       8,                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,       # attacksound
-      CDoom::Statenum::S_NULL.value,        # painstate
+      Doocr::Sfxenum::SFX_None.value,       # attacksound
+      Doocr::Statenum::S_NULL.value,        # painstate
       0,                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,       # painsound
-      CDoom::Statenum::S_NULL.value,        # meleestate
-      CDoom::Statenum::S_NULL.value,        # missilestate
-      CDoom::Statenum::S_NULL.value,        # deathstate
-      CDoom::Statenum::S_NULL.value,        # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,       # deathsound
+      Doocr::Sfxenum::SFX_None.value,       # painsound
+      Doocr::Statenum::S_NULL.value,        # meleestate
+      Doocr::Statenum::S_NULL.value,        # missilestate
+      Doocr::Statenum::S_NULL.value,        # deathstate
+      Doocr::Statenum::S_NULL.value,        # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,       # deathsound
       0,                                    # speed
       16 * FRACUNIT,                        # radius
       16 * FRACUNIT,                        # height
       100,                                  # mass
       0,                                    # damage
-      CDoom::Sfxenum::SFX_None.value,       # activesound
-      CDoom::Mobjflag::MF_SOLID.value,      # flags
-      CDoom::Statenum::S_NULL.value,        # raisestate
+      Doocr::Sfxenum::SFX_None.value,       # activesound
+      Doocr::Mobjflag::MF_SOLID.value,      # flags
+      Doocr::Statenum::S_NULL.value,        # raisestate
     },
     {                                     # MT_MISC74
       25,                                 # doomednum
-      CDoom::Statenum::S_DEADSTICK.value, # spawnstate
+      Doocr::Statenum::S_DEADSTICK.value, # spawnstate
       1000,                               # spawnhealth
-      CDoom::Statenum::S_NULL.value,      # seestate
-      CDoom::Sfxenum::SFX_None.value,     # seesound
+      Doocr::Statenum::S_NULL.value,      # seestate
+      Doocr::Sfxenum::SFX_None.value,     # seesound
       8,                                  # reactiontime
-      CDoom::Sfxenum::SFX_None.value,     # attacksound
-      CDoom::Statenum::S_NULL.value,      # painstate
+      Doocr::Sfxenum::SFX_None.value,     # attacksound
+      Doocr::Statenum::S_NULL.value,      # painstate
       0,                                  # painchance
-      CDoom::Sfxenum::SFX_None.value,     # painsound
-      CDoom::Statenum::S_NULL.value,      # meleestate
-      CDoom::Statenum::S_NULL.value,      # missilestate
-      CDoom::Statenum::S_NULL.value,      # deathstate
-      CDoom::Statenum::S_NULL.value,      # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,     # deathsound
+      Doocr::Sfxenum::SFX_None.value,     # painsound
+      Doocr::Statenum::S_NULL.value,      # meleestate
+      Doocr::Statenum::S_NULL.value,      # missilestate
+      Doocr::Statenum::S_NULL.value,      # deathstate
+      Doocr::Statenum::S_NULL.value,      # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,     # deathsound
       0,                                  # speed
       16 * FRACUNIT,                      # radius
       16 * FRACUNIT,                      # height
       100,                                # mass
       0,                                  # damage
-      CDoom::Sfxenum::SFX_None.value,     # activesound
-      CDoom::Mobjflag::MF_SOLID.value,    # flags
-      CDoom::Statenum::S_NULL.value,      # raisestate
+      Doocr::Sfxenum::SFX_None.value,     # activesound
+      Doocr::Mobjflag::MF_SOLID.value,    # flags
+      Doocr::Statenum::S_NULL.value,      # raisestate
     },
     {                                     # MT_MISC75
       26,                                 # doomednum
-      CDoom::Statenum::S_LIVESTICK.value, # spawnstate
+      Doocr::Statenum::S_LIVESTICK.value, # spawnstate
       1000,                               # spawnhealth
-      CDoom::Statenum::S_NULL.value,      # seestate
-      CDoom::Sfxenum::SFX_None.value,     # seesound
+      Doocr::Statenum::S_NULL.value,      # seestate
+      Doocr::Sfxenum::SFX_None.value,     # seesound
       8,                                  # reactiontime
-      CDoom::Sfxenum::SFX_None.value,     # attacksound
-      CDoom::Statenum::S_NULL.value,      # painstate
+      Doocr::Sfxenum::SFX_None.value,     # attacksound
+      Doocr::Statenum::S_NULL.value,      # painstate
       0,                                  # painchance
-      CDoom::Sfxenum::SFX_None.value,     # painsound
-      CDoom::Statenum::S_NULL.value,      # meleestate
-      CDoom::Statenum::S_NULL.value,      # missilestate
-      CDoom::Statenum::S_NULL.value,      # deathstate
-      CDoom::Statenum::S_NULL.value,      # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,     # deathsound
+      Doocr::Sfxenum::SFX_None.value,     # painsound
+      Doocr::Statenum::S_NULL.value,      # meleestate
+      Doocr::Statenum::S_NULL.value,      # missilestate
+      Doocr::Statenum::S_NULL.value,      # deathstate
+      Doocr::Statenum::S_NULL.value,      # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,     # deathsound
       0,                                  # speed
       16 * FRACUNIT,                      # radius
       16 * FRACUNIT,                      # height
       100,                                # mass
       0,                                  # damage
-      CDoom::Sfxenum::SFX_None.value,     # activesound
-      CDoom::Mobjflag::MF_SOLID.value,    # flags
-      CDoom::Statenum::S_NULL.value,      # raisestate
+      Doocr::Sfxenum::SFX_None.value,     # activesound
+      Doocr::Mobjflag::MF_SOLID.value,    # flags
+      Doocr::Statenum::S_NULL.value,      # raisestate
     },
     {                                   # MT_MISC76
       54,                               # doomednum
-      CDoom::Statenum::S_BIGTREE.value, # spawnstate
+      Doocr::Statenum::S_BIGTREE.value, # spawnstate
       1000,                             # spawnhealth
-      CDoom::Statenum::S_NULL.value,    # seestate
-      CDoom::Sfxenum::SFX_None.value,   # seesound
+      Doocr::Statenum::S_NULL.value,    # seestate
+      Doocr::Sfxenum::SFX_None.value,   # seesound
       8,                                # reactiontime
-      CDoom::Sfxenum::SFX_None.value,   # attacksound
-      CDoom::Statenum::S_NULL.value,    # painstate
+      Doocr::Sfxenum::SFX_None.value,   # attacksound
+      Doocr::Statenum::S_NULL.value,    # painstate
       0,                                # painchance
-      CDoom::Sfxenum::SFX_None.value,   # painsound
-      CDoom::Statenum::S_NULL.value,    # meleestate
-      CDoom::Statenum::S_NULL.value,    # missilestate
-      CDoom::Statenum::S_NULL.value,    # deathstate
-      CDoom::Statenum::S_NULL.value,    # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,   # deathsound
+      Doocr::Sfxenum::SFX_None.value,   # painsound
+      Doocr::Statenum::S_NULL.value,    # meleestate
+      Doocr::Statenum::S_NULL.value,    # missilestate
+      Doocr::Statenum::S_NULL.value,    # deathstate
+      Doocr::Statenum::S_NULL.value,    # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,   # deathsound
       0,                                # speed
       32 * FRACUNIT,                    # radius
       16 * FRACUNIT,                    # height
       100,                              # mass
       0,                                # damage
-      CDoom::Sfxenum::SFX_None.value,   # activesound
-      CDoom::Mobjflag::MF_SOLID.value,  # flags
-      CDoom::Statenum::S_NULL.value,    # raisestate
+      Doocr::Sfxenum::SFX_None.value,   # activesound
+      Doocr::Mobjflag::MF_SOLID.value,  # flags
+      Doocr::Statenum::S_NULL.value,    # raisestate
     },
     {                                  # MT_MISC77
       70,                              # doomednum
-      CDoom::Statenum::S_BBAR1.value,  # spawnstate
+      Doocr::Statenum::S_BBAR1.value,  # spawnstate
       1000,                            # spawnhealth
-      CDoom::Statenum::S_NULL.value,   # seestate
-      CDoom::Sfxenum::SFX_None.value,  # seesound
+      Doocr::Statenum::S_NULL.value,   # seestate
+      Doocr::Sfxenum::SFX_None.value,  # seesound
       8,                               # reactiontime
-      CDoom::Sfxenum::SFX_None.value,  # attacksound
-      CDoom::Statenum::S_NULL.value,   # painstate
+      Doocr::Sfxenum::SFX_None.value,  # attacksound
+      Doocr::Statenum::S_NULL.value,   # painstate
       0,                               # painchance
-      CDoom::Sfxenum::SFX_None.value,  # painsound
-      CDoom::Statenum::S_NULL.value,   # meleestate
-      CDoom::Statenum::S_NULL.value,   # missilestate
-      CDoom::Statenum::S_NULL.value,   # deathstate
-      CDoom::Statenum::S_NULL.value,   # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,  # deathsound
+      Doocr::Sfxenum::SFX_None.value,  # painsound
+      Doocr::Statenum::S_NULL.value,   # meleestate
+      Doocr::Statenum::S_NULL.value,   # missilestate
+      Doocr::Statenum::S_NULL.value,   # deathstate
+      Doocr::Statenum::S_NULL.value,   # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,  # deathsound
       0,                               # speed
       16 * FRACUNIT,                   # radius
       16 * FRACUNIT,                   # height
       100,                             # mass
       0,                               # damage
-      CDoom::Sfxenum::SFX_None.value,  # activesound
-      CDoom::Mobjflag::MF_SOLID.value, # flags
-      CDoom::Statenum::S_NULL.value,   # raisestate
+      Doocr::Sfxenum::SFX_None.value,  # activesound
+      Doocr::Mobjflag::MF_SOLID.value, # flags
+      Doocr::Statenum::S_NULL.value,   # raisestate
     },
     {                                                                                                                   # MT_MISC78
       73,                                                                                                               # doomednum
-      CDoom::Statenum::S_HANGNOGUTS.value,                                                                              # spawnstate
+      Doocr::Statenum::S_HANGNOGUTS.value,                                                                              # spawnstate
       1000,                                                                                                             # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                    # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                    # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # seesound
       8,                                                                                                                # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                    # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                    # painstate
       0,                                                                                                                # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                    # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # missilestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                    # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                    # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # missilestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                    # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # deathsound
       0,                                                                                                                # speed
       16 * FRACUNIT,                                                                                                    # radius
       88 * FRACUNIT,                                                                                                    # height
       100,                                                                                                              # mass
       0,                                                                                                                # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                    # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                    # raisestate
     },
     {                                                                                                                   # MT_MISC79
       74,                                                                                                               # doomednum
-      CDoom::Statenum::S_HANGBNOBRAIN.value,                                                                            # spawnstate
+      Doocr::Statenum::S_HANGBNOBRAIN.value,                                                                            # spawnstate
       1000,                                                                                                             # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                    # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                    # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # seesound
       8,                                                                                                                # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                    # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                    # painstate
       0,                                                                                                                # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                    # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # missilestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                    # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                    # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # missilestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                    # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # deathsound
       0,                                                                                                                # speed
       16 * FRACUNIT,                                                                                                    # radius
       88 * FRACUNIT,                                                                                                    # height
       100,                                                                                                              # mass
       0,                                                                                                                # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                    # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                    # raisestate
     },
     {                                                                                                                   # MT_MISC80
       75,                                                                                                               # doomednum
-      CDoom::Statenum::S_HANGTLOOKDN.value,                                                                             # spawnstate
+      Doocr::Statenum::S_HANGTLOOKDN.value,                                                                             # spawnstate
       1000,                                                                                                             # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                    # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                    # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # seesound
       8,                                                                                                                # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                    # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                    # painstate
       0,                                                                                                                # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                    # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # missilestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                    # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                    # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # missilestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                    # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # deathsound
       0,                                                                                                                # speed
       16 * FRACUNIT,                                                                                                    # radius
       64 * FRACUNIT,                                                                                                    # height
       100,                                                                                                              # mass
       0,                                                                                                                # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                    # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                    # raisestate
     },
     {                                                                                                                   # MT_MISC81
       76,                                                                                                               # doomednum
-      CDoom::Statenum::S_HANGTSKULL.value,                                                                              # spawnstate
+      Doocr::Statenum::S_HANGTSKULL.value,                                                                              # spawnstate
       1000,                                                                                                             # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                    # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                    # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # seesound
       8,                                                                                                                # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                    # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                    # painstate
       0,                                                                                                                # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                    # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # missilestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                    # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                    # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # missilestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                    # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # deathsound
       0,                                                                                                                # speed
       16 * FRACUNIT,                                                                                                    # radius
       64 * FRACUNIT,                                                                                                    # height
       100,                                                                                                              # mass
       0,                                                                                                                # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                    # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                    # raisestate
     },
     {                                                                                                                   # MT_MISC82
       77,                                                                                                               # doomednum
-      CDoom::Statenum::S_HANGTLOOKUP.value,                                                                             # spawnstate
+      Doocr::Statenum::S_HANGTLOOKUP.value,                                                                             # spawnstate
       1000,                                                                                                             # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                    # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                    # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # seesound
       8,                                                                                                                # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                    # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                    # painstate
       0,                                                                                                                # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                    # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # missilestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                    # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                    # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # missilestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                    # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # deathsound
       0,                                                                                                                # speed
       16 * FRACUNIT,                                                                                                    # radius
       64 * FRACUNIT,                                                                                                    # height
       100,                                                                                                              # mass
       0,                                                                                                                # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                    # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                    # raisestate
     },
     {                                                                                                                   # MT_MISC83
       78,                                                                                                               # doomednum
-      CDoom::Statenum::S_HANGTNOBRAIN.value,                                                                            # spawnstate
+      Doocr::Statenum::S_HANGTNOBRAIN.value,                                                                            # spawnstate
       1000,                                                                                                             # spawnhealth
-      CDoom::Statenum::S_NULL.value,                                                                                    # seestate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # seesound
+      Doocr::Statenum::S_NULL.value,                                                                                    # seestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # seesound
       8,                                                                                                                # reactiontime
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # attacksound
-      CDoom::Statenum::S_NULL.value,                                                                                    # painstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # attacksound
+      Doocr::Statenum::S_NULL.value,                                                                                    # painstate
       0,                                                                                                                # painchance
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # painsound
-      CDoom::Statenum::S_NULL.value,                                                                                    # meleestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # missilestate
-      CDoom::Statenum::S_NULL.value,                                                                                    # deathstate
-      CDoom::Statenum::S_NULL.value,                                                                                    # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # deathsound
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # painsound
+      Doocr::Statenum::S_NULL.value,                                                                                    # meleestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # missilestate
+      Doocr::Statenum::S_NULL.value,                                                                                    # deathstate
+      Doocr::Statenum::S_NULL.value,                                                                                    # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # deathsound
       0,                                                                                                                # speed
       16 * FRACUNIT,                                                                                                    # radius
       64 * FRACUNIT,                                                                                                    # height
       100,                                                                                                              # mass
       0,                                                                                                                # damage
-      CDoom::Sfxenum::SFX_None.value,                                                                                   # activesound
-      (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPAWNCEILING.value | CDoom::Mobjflag::MF_NOGRAVITY.value), # flags
-      CDoom::Statenum::S_NULL.value,                                                                                    # raisestate
+      Doocr::Sfxenum::SFX_None.value,                                                                                   # activesound
+      (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SPAWNCEILING.value | Doocr::Mobjflag::MF_NOGRAVITY.value), # flags
+      Doocr::Statenum::S_NULL.value,                                                                                    # raisestate
     },
     {                                       # MT_MISC84
       79,                                   # doomednum
-      CDoom::Statenum::S_COLONGIBS.value,   # spawnstate
+      Doocr::Statenum::S_COLONGIBS.value,   # spawnstate
       1000,                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,        # seestate
-      CDoom::Sfxenum::SFX_None.value,       # seesound
+      Doocr::Statenum::S_NULL.value,        # seestate
+      Doocr::Sfxenum::SFX_None.value,       # seesound
       8,                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,       # attacksound
-      CDoom::Statenum::S_NULL.value,        # painstate
+      Doocr::Sfxenum::SFX_None.value,       # attacksound
+      Doocr::Statenum::S_NULL.value,        # painstate
       0,                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,       # painsound
-      CDoom::Statenum::S_NULL.value,        # meleestate
-      CDoom::Statenum::S_NULL.value,        # missilestate
-      CDoom::Statenum::S_NULL.value,        # deathstate
-      CDoom::Statenum::S_NULL.value,        # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,       # deathsound
+      Doocr::Sfxenum::SFX_None.value,       # painsound
+      Doocr::Statenum::S_NULL.value,        # meleestate
+      Doocr::Statenum::S_NULL.value,        # missilestate
+      Doocr::Statenum::S_NULL.value,        # deathstate
+      Doocr::Statenum::S_NULL.value,        # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,       # deathsound
       0,                                    # speed
       20 * FRACUNIT,                        # radius
       16 * FRACUNIT,                        # height
       100,                                  # mass
       0,                                    # damage
-      CDoom::Sfxenum::SFX_None.value,       # activesound
-      CDoom::Mobjflag::MF_NOBLOCKMAP.value, # flags
-      CDoom::Statenum::S_NULL.value,        # raisestate
+      Doocr::Sfxenum::SFX_None.value,       # activesound
+      Doocr::Mobjflag::MF_NOBLOCKMAP.value, # flags
+      Doocr::Statenum::S_NULL.value,        # raisestate
     },
     {                                       # MT_MISC85
       80,                                   # doomednum
-      CDoom::Statenum::S_SMALLPOOL.value,   # spawnstate
+      Doocr::Statenum::S_SMALLPOOL.value,   # spawnstate
       1000,                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,        # seestate
-      CDoom::Sfxenum::SFX_None.value,       # seesound
+      Doocr::Statenum::S_NULL.value,        # seestate
+      Doocr::Sfxenum::SFX_None.value,       # seesound
       8,                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,       # attacksound
-      CDoom::Statenum::S_NULL.value,        # painstate
+      Doocr::Sfxenum::SFX_None.value,       # attacksound
+      Doocr::Statenum::S_NULL.value,        # painstate
       0,                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,       # painsound
-      CDoom::Statenum::S_NULL.value,        # meleestate
-      CDoom::Statenum::S_NULL.value,        # missilestate
-      CDoom::Statenum::S_NULL.value,        # deathstate
-      CDoom::Statenum::S_NULL.value,        # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,       # deathsound
+      Doocr::Sfxenum::SFX_None.value,       # painsound
+      Doocr::Statenum::S_NULL.value,        # meleestate
+      Doocr::Statenum::S_NULL.value,        # missilestate
+      Doocr::Statenum::S_NULL.value,        # deathstate
+      Doocr::Statenum::S_NULL.value,        # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,       # deathsound
       0,                                    # speed
       20 * FRACUNIT,                        # radius
       16 * FRACUNIT,                        # height
       100,                                  # mass
       0,                                    # damage
-      CDoom::Sfxenum::SFX_None.value,       # activesound
-      CDoom::Mobjflag::MF_NOBLOCKMAP.value, # flags
-      CDoom::Statenum::S_NULL.value,        # raisestate
+      Doocr::Sfxenum::SFX_None.value,       # activesound
+      Doocr::Mobjflag::MF_NOBLOCKMAP.value, # flags
+      Doocr::Statenum::S_NULL.value,        # raisestate
     },
     {                                       # MT_MISC86
       81,                                   # doomednum
-      CDoom::Statenum::S_BRAINSTEM.value,   # spawnstate
+      Doocr::Statenum::S_BRAINSTEM.value,   # spawnstate
       1000,                                 # spawnhealth
-      CDoom::Statenum::S_NULL.value,        # seestate
-      CDoom::Sfxenum::SFX_None.value,       # seesound
+      Doocr::Statenum::S_NULL.value,        # seestate
+      Doocr::Sfxenum::SFX_None.value,       # seesound
       8,                                    # reactiontime
-      CDoom::Sfxenum::SFX_None.value,       # attacksound
-      CDoom::Statenum::S_NULL.value,        # painstate
+      Doocr::Sfxenum::SFX_None.value,       # attacksound
+      Doocr::Statenum::S_NULL.value,        # painstate
       0,                                    # painchance
-      CDoom::Sfxenum::SFX_None.value,       # painsound
-      CDoom::Statenum::S_NULL.value,        # meleestate
-      CDoom::Statenum::S_NULL.value,        # missilestate
-      CDoom::Statenum::S_NULL.value,        # deathstate
-      CDoom::Statenum::S_NULL.value,        # xdeathstate
-      CDoom::Sfxenum::SFX_None.value,       # deathsound
+      Doocr::Sfxenum::SFX_None.value,       # painsound
+      Doocr::Statenum::S_NULL.value,        # meleestate
+      Doocr::Statenum::S_NULL.value,        # missilestate
+      Doocr::Statenum::S_NULL.value,        # deathstate
+      Doocr::Statenum::S_NULL.value,        # xdeathstate
+      Doocr::Sfxenum::SFX_None.value,       # deathsound
       0,                                    # speed
       20 * FRACUNIT,                        # radius
       16 * FRACUNIT,                        # height
       100,                                  # mass
       0,                                    # damage
-      CDoom::Sfxenum::SFX_None.value,       # activesound
-      CDoom::Mobjflag::MF_NOBLOCKMAP.value, # flags
-      CDoom::Statenum::S_NULL.value,        # raisestate
+      Doocr::Sfxenum::SFX_None.value,       # activesound
+      Doocr::Mobjflag::MF_NOBLOCKMAP.value, # flags
+      Doocr::Statenum::S_NULL.value,        # raisestate
     },
   ]
-  class_getter mobjinfo : Array(CDoom::Mobjinfo) = Array.new(CDoom::Mobjtype::NUMMOBJTYPES.value, CDoom::Mobjinfo.new)
+  class_getter mobjinfo : Array(CDoom::Mobjinfo) = Array.new(Doocr::Mobjtype::NUMMOBJTYPES.value, CDoom::Mobjinfo.new)
   @@mobjinfo_data.each_with_index do |elm, i|
     (@@mobjinfo.to_unsafe + i).value.doomednum = elm[0]
     (@@mobjinfo.to_unsafe + i).value.spawnstate = elm[1]
@@ -5529,24 +5529,24 @@ module Doocr
 
 
   c_array(Doocr.quitsounds,
-    CDoom::Sfxenum::SFX_pldeth.value,
-    CDoom::Sfxenum::SFX_dmpain.value,
-    CDoom::Sfxenum::SFX_popain.value,
-    CDoom::Sfxenum::SFX_slop.value,
-    CDoom::Sfxenum::SFX_telept.value,
-    CDoom::Sfxenum::SFX_posit1.value,
-    CDoom::Sfxenum::SFX_posit3.value,
-    CDoom::Sfxenum::SFX_sgtatk.value)
+    Doocr::Sfxenum::SFX_pldeth.value,
+    Doocr::Sfxenum::SFX_dmpain.value,
+    Doocr::Sfxenum::SFX_popain.value,
+    Doocr::Sfxenum::SFX_slop.value,
+    Doocr::Sfxenum::SFX_telept.value,
+    Doocr::Sfxenum::SFX_posit1.value,
+    Doocr::Sfxenum::SFX_posit3.value,
+    Doocr::Sfxenum::SFX_sgtatk.value)
 
   c_array(Doocr.quitsounds2,
-    CDoom::Sfxenum::SFX_vilact.value,
-    CDoom::Sfxenum::SFX_getpow.value,
-    CDoom::Sfxenum::SFX_boscub.value,
-    CDoom::Sfxenum::SFX_slop.value,
-    CDoom::Sfxenum::SFX_skeswg.value,
-    CDoom::Sfxenum::SFX_kntdth.value,
-    CDoom::Sfxenum::SFX_bspact.value,
-    CDoom::Sfxenum::SFX_sgtatk.value)
+    Doocr::Sfxenum::SFX_vilact.value,
+    Doocr::Sfxenum::SFX_getpow.value,
+    Doocr::Sfxenum::SFX_boscub.value,
+    Doocr::Sfxenum::SFX_slop.value,
+    Doocr::Sfxenum::SFX_skeswg.value,
+    Doocr::Sfxenum::SFX_kntdth.value,
+    Doocr::Sfxenum::SFX_bspact.value,
+    Doocr::Sfxenum::SFX_sgtatk.value)
 
   @@current_menu : Menu = @@maindef
 
@@ -5579,7 +5579,7 @@ module Doocr
     menuitems: @@episodemenu,
     routine: ->m_draw_episode,
     x: 48, y: 63,
-    last_on: CDoom::Episodesenum::Ep1.value
+    last_on: Doocr::Episodesenum::Ep1.value
   )
   @@epidef
 
@@ -5596,7 +5596,7 @@ module Doocr
     menuitems: @@newgame_menu,
     routine: ->m_draw_newgame,
     x: 48, y: 63,
-    last_on: CDoom::NewgameEnum::Hurtme.value
+    last_on: Doocr::NewgameEnum::Hurtme.value
   )
   @@newdef
 
@@ -5758,60 +5758,60 @@ module Doocr
   @@savegamestrings : Array(String) = Array(String).new(10, "")
   @@save_old_string = ""
 
-  @@defaults = [CDoom::Default.new(name: "mouse_sensitivity", location: pointerof(@@mouse_sensitivity), defaultvalue: 5),
-                CDoom::Default.new(name: "sfx_volume", location: pointerof(@@snd_sfx_volume), defaultvalue: 8),
-                CDoom::Default.new(name: "music_volume", location: Doocr.snd_music_volume_ptr, defaultvalue: 8),
-                CDoom::Default.new(name: "show_messages", location: Doocr.show_messages_ptr, defaultvalue: 1),
+  @@defaults = [Doocr::Default.new(name: "mouse_sensitivity", location: pointerof(@@mouse_sensitivity), defaultvalue: 5),
+                Doocr::Default.new(name: "sfx_volume", location: pointerof(@@snd_sfx_volume), defaultvalue: 8),
+                Doocr::Default.new(name: "music_volume", location: Doocr.snd_music_volume_ptr, defaultvalue: 8),
+                Doocr::Default.new(name: "show_messages", location: Doocr.show_messages_ptr, defaultvalue: 1),
 
-                CDoom::Default.new(name: "key_right", location: pointerof(@@key_right), defaultvalue: CDoom::KEY_RIGHTARROW),
-                CDoom::Default.new(name: "key_left", location: pointerof(@@key_left), defaultvalue: CDoom::KEY_LEFTARROW),
-                CDoom::Default.new(name: "key_up", location: pointerof(@@key_up), defaultvalue: CDoom::DoomKey::W.value),
-                CDoom::Default.new(name: "key_down", location: pointerof(@@key_down), defaultvalue: CDoom::DoomKey::S.value),
-                CDoom::Default.new(name: "key_strafeleft", location: pointerof(@@key_strafeleft), defaultvalue: CDoom::DoomKey::A.value),
-                CDoom::Default.new(name: "key_straferight", location: pointerof(@@key_straferight), defaultvalue: CDoom::DoomKey::D.value),
+                Doocr::Default.new(name: "key_right", location: pointerof(@@key_right), defaultvalue: Doocr::KEY_RIGHTARROW),
+                Doocr::Default.new(name: "key_left", location: pointerof(@@key_left), defaultvalue: Doocr::KEY_LEFTARROW),
+                Doocr::Default.new(name: "key_up", location: pointerof(@@key_up), defaultvalue: Doocr::DoomKey::W.value),
+                Doocr::Default.new(name: "key_down", location: pointerof(@@key_down), defaultvalue: Doocr::DoomKey::S.value),
+                Doocr::Default.new(name: "key_strafeleft", location: pointerof(@@key_strafeleft), defaultvalue: Doocr::DoomKey::A.value),
+                Doocr::Default.new(name: "key_straferight", location: pointerof(@@key_straferight), defaultvalue: Doocr::DoomKey::D.value),
 
-                CDoom::Default.new(name: "key_fire", location: pointerof(@@key_fire), defaultvalue: CDoom::KEY_RCTRL),
-                CDoom::Default.new(name: "key_use", location: pointerof(@@key_use), defaultvalue: ' '.ord),
-                CDoom::Default.new(name: "key_strafe", location: pointerof(@@key_strafe), defaultvalue: CDoom::KEY_RALT),
-                CDoom::Default.new(name: "key_speed", location: pointerof(@@key_speed), defaultvalue: CDoom::KEY_RSHIFT),
+                Doocr::Default.new(name: "key_fire", location: pointerof(@@key_fire), defaultvalue: Doocr::KEY_RCTRL),
+                Doocr::Default.new(name: "key_use", location: pointerof(@@key_use), defaultvalue: ' '.ord),
+                Doocr::Default.new(name: "key_strafe", location: pointerof(@@key_strafe), defaultvalue: Doocr::KEY_RALT),
+                Doocr::Default.new(name: "key_speed", location: pointerof(@@key_speed), defaultvalue: Doocr::KEY_RSHIFT),
 
-                CDoom::Default.new(name: "use_mouse", location: pointerof(@@usemouse), defaultvalue: 1),
-                CDoom::Default.new(name: "mouseb_fire", location: pointerof(@@mousebfire), defaultvalue: 0),
-                CDoom::Default.new(name: "mouseb_strafe", location: pointerof(@@mousebstrafe), defaultvalue: 1),
-                CDoom::Default.new(name: "mouseb_forward", location: pointerof(@@mousebforward), defaultvalue: 2),
-                CDoom::Default.new(name: "mouse_move", location: pointerof(@@mousemove), defaultvalue: 0),
+                Doocr::Default.new(name: "use_mouse", location: pointerof(@@usemouse), defaultvalue: 1),
+                Doocr::Default.new(name: "mouseb_fire", location: pointerof(@@mousebfire), defaultvalue: 0),
+                Doocr::Default.new(name: "mouseb_strafe", location: pointerof(@@mousebstrafe), defaultvalue: 1),
+                Doocr::Default.new(name: "mouseb_forward", location: pointerof(@@mousebforward), defaultvalue: 2),
+                Doocr::Default.new(name: "mouse_move", location: pointerof(@@mousemove), defaultvalue: 0),
 
-                CDoom::Default.new(name: "use_joystick", location: pointerof(@@usejoystick), defaultvalue: 0),
-                CDoom::Default.new(name: "joyb_fire", location: pointerof(@@joybfire), defaultvalue: 0),
-                CDoom::Default.new(name: "joyb_strafe", location: pointerof(@@joybstrafe), defaultvalue: 1),
-                CDoom::Default.new(name: "joyb_use", location: pointerof(@@joybuse), defaultvalue: 3),
-                CDoom::Default.new(name: "joyb_speed", location: pointerof(@@joybspeed), defaultvalue: 2),
+                Doocr::Default.new(name: "use_joystick", location: pointerof(@@usejoystick), defaultvalue: 0),
+                Doocr::Default.new(name: "joyb_fire", location: pointerof(@@joybfire), defaultvalue: 0),
+                Doocr::Default.new(name: "joyb_strafe", location: pointerof(@@joybstrafe), defaultvalue: 1),
+                Doocr::Default.new(name: "joyb_use", location: pointerof(@@joybuse), defaultvalue: 3),
+                Doocr::Default.new(name: "joyb_speed", location: pointerof(@@joybspeed), defaultvalue: 2),
 
-                CDoom::Default.new(name: "screenblocks", location: pointerof(@@screenblocks), defaultvalue: 9),
-                CDoom::Default.new(name: "detaillevel", location: pointerof(@@detail_level), defaultvalue: 0),
-                CDoom::Default.new(name: "crosshair", location: pointerof(@@crosshair), defaultvalue: 0),
-                CDoom::Default.new(name: "always_run", location: pointerof(@@always_run), defaultvalue: 0),
+                Doocr::Default.new(name: "screenblocks", location: pointerof(@@screenblocks), defaultvalue: 9),
+                Doocr::Default.new(name: "detaillevel", location: pointerof(@@detail_level), defaultvalue: 0),
+                Doocr::Default.new(name: "crosshair", location: pointerof(@@crosshair), defaultvalue: 0),
+                Doocr::Default.new(name: "always_run", location: pointerof(@@always_run), defaultvalue: 0),
 
-                CDoom::Default.new(name: "snd_channels", defaultvalue: 16),
+                Doocr::Default.new(name: "snd_channels", defaultvalue: 16),
 
-                CDoom::Default.new(name: "usegamma", location: pointerof(@@usegamma), defaultvalue: 0),
+                Doocr::Default.new(name: "usegamma", location: pointerof(@@usegamma), defaultvalue: 0),
 
-                CDoom::Default.new(name: "chatmacro0", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro0),
-                CDoom::Default.new(name: "chatmacro1", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro1),
-                CDoom::Default.new(name: "chatmacro2", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro2),
-                CDoom::Default.new(name: "chatmacro3", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro3),
-                CDoom::Default.new(name: "chatmacro4", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro4),
-                CDoom::Default.new(name: "chatmacro5", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro5),
-                CDoom::Default.new(name: "chatmacro6", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro6),
-                CDoom::Default.new(name: "chatmacro7", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro7),
-                CDoom::Default.new(name: "chatmacro8", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro8),
-                CDoom::Default.new(name: "chatmacro9", defaultvalue: CDoom::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro9),
-                CDoom::Default.new(name: "fullscreen", location: pointerof(@@rlfullscreen), defaultvalue: 0),
-                CDoom::Default.new(name: "midismoothpan", location: pointerof(@@midismoothpan), defaultvalue: 1),
-                CDoom::Default.new(name: "randompitching", location: pointerof(@@randompitch), defaultvalue: 0),
-                CDoom::Default.new(name: "amactivedraw", location: pointerof(@@amactivedraw), defaultvalue: 1),
-                CDoom::Default.new(name: "weaponfirecentered", location: pointerof(@@weaponfirecentered), defaultvalue: 1),
-                CDoom::Default.new(name: "midibank", location: pointerof(@@midibank), defaultvalue: 16),
+                Doocr::Default.new(name: "chatmacro0", defaultvalue: Doocr::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro0),
+                Doocr::Default.new(name: "chatmacro1", defaultvalue: Doocr::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro1),
+                Doocr::Default.new(name: "chatmacro2", defaultvalue: Doocr::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro2),
+                Doocr::Default.new(name: "chatmacro3", defaultvalue: Doocr::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro3),
+                Doocr::Default.new(name: "chatmacro4", defaultvalue: Doocr::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro4),
+                Doocr::Default.new(name: "chatmacro5", defaultvalue: Doocr::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro5),
+                Doocr::Default.new(name: "chatmacro6", defaultvalue: Doocr::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro6),
+                Doocr::Default.new(name: "chatmacro7", defaultvalue: Doocr::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro7),
+                Doocr::Default.new(name: "chatmacro8", defaultvalue: Doocr::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro8),
+                Doocr::Default.new(name: "chatmacro9", defaultvalue: Doocr::STRING_VALUE, default_text_value: @@deh_hustr_chatmacro9),
+                Doocr::Default.new(name: "fullscreen", location: pointerof(@@rlfullscreen), defaultvalue: 0),
+                Doocr::Default.new(name: "midismoothpan", location: pointerof(@@midismoothpan), defaultvalue: 1),
+                Doocr::Default.new(name: "randompitching", location: pointerof(@@randompitch), defaultvalue: 0),
+                Doocr::Default.new(name: "amactivedraw", location: pointerof(@@amactivedraw), defaultvalue: 1),
+                Doocr::Default.new(name: "weaponfirecentered", location: pointerof(@@weaponfirecentered), defaultvalue: 1),
+                Doocr::Default.new(name: "midibank", location: pointerof(@@midibank), defaultvalue: 16),
   ]
 
   # Crystal-owned random table remains the existing lookup data.
@@ -5849,11 +5849,11 @@ module Doocr
   # p_new_chase_dire related LUT.
   #
   c_array(Doocr.opposite,
-    CDoom::Dirtype::West, CDoom::Dirtype::SouthWest, CDoom::Dirtype::South, CDoom::Dirtype::SouthEast,
-    CDoom::Dirtype::East, CDoom::Dirtype::NorthEast, CDoom::Dirtype::North, CDoom::Dirtype::NorthWest, CDoom::Dirtype::NoDir)
+    Doocr::Dirtype::West, Doocr::Dirtype::SouthWest, Doocr::Dirtype::South, Doocr::Dirtype::SouthEast,
+    Doocr::Dirtype::East, Doocr::Dirtype::NorthEast, Doocr::Dirtype::North, Doocr::Dirtype::NorthWest, Doocr::Dirtype::NoDir)
 
   c_array(Doocr.diags,
-    CDoom::Dirtype::NorthWest, CDoom::Dirtype::NorthEast, CDoom::Dirtype::SouthWest, CDoom::Dirtype::SouthEast)
+    Doocr::Dirtype::NorthWest, Doocr::Dirtype::NorthEast, Doocr::Dirtype::SouthWest, Doocr::Dirtype::SouthEast)
 
   c_array(Doocr.xspeed, FRACUNIT, 47000, 0, -47000, -FRACUNIT, -47000, 0, 47000)
   c_array(Doocr.yspeed, 0, 47000, FRACUNIT, 47000, 0, -47000, -FRACUNIT, -47000)
@@ -5870,7 +5870,7 @@ module Doocr
   #  using all the flats between the start
   #  and end entry, in the order found in
   #  the WAD file.
-  @@animdef_data : Array(Tuple(CDoom::DoomBool, String, String, Int32)) = [
+  @@animdef_data : Array(Tuple(LibC::Int, String, String, Int32)) = [
     {0, "NUKAGE3", "NUKAGE1", 8},
     {0, "FWATER4", "FWATER1", 8},
     {0, "SWATER4", "SWATER1", 8},
@@ -5967,13 +5967,13 @@ module Doocr
   end
 
   c_array(Doocr.fuzzoffset,
-    CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF,
-    CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF,
-    CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF, -CDoom::FUZZOFF, -CDoom::FUZZOFF, -CDoom::FUZZOFF,
-    CDoom::FUZZOFF, -CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF,
-    CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF,
-    CDoom::FUZZOFF, -CDoom::FUZZOFF, -CDoom::FUZZOFF, -CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF,
-    CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF, CDoom::FUZZOFF, -CDoom::FUZZOFF, CDoom::FUZZOFF
+    Doocr::FUZZOFF, -Doocr::FUZZOFF, Doocr::FUZZOFF, -Doocr::FUZZOFF, Doocr::FUZZOFF, Doocr::FUZZOFF, -Doocr::FUZZOFF,
+    Doocr::FUZZOFF, Doocr::FUZZOFF, -Doocr::FUZZOFF, Doocr::FUZZOFF, Doocr::FUZZOFF, Doocr::FUZZOFF, -Doocr::FUZZOFF,
+    Doocr::FUZZOFF, Doocr::FUZZOFF, Doocr::FUZZOFF, -Doocr::FUZZOFF, -Doocr::FUZZOFF, -Doocr::FUZZOFF, -Doocr::FUZZOFF,
+    Doocr::FUZZOFF, -Doocr::FUZZOFF, -Doocr::FUZZOFF, Doocr::FUZZOFF, Doocr::FUZZOFF, Doocr::FUZZOFF, Doocr::FUZZOFF, -Doocr::FUZZOFF,
+    Doocr::FUZZOFF, -Doocr::FUZZOFF, Doocr::FUZZOFF, Doocr::FUZZOFF, -Doocr::FUZZOFF, -Doocr::FUZZOFF, Doocr::FUZZOFF,
+    Doocr::FUZZOFF, -Doocr::FUZZOFF, -Doocr::FUZZOFF, -Doocr::FUZZOFF, -Doocr::FUZZOFF, Doocr::FUZZOFF, Doocr::FUZZOFF,
+    Doocr::FUZZOFF, Doocr::FUZZOFF, -Doocr::FUZZOFF, Doocr::FUZZOFF, Doocr::FUZZOFF, -Doocr::FUZZOFF, Doocr::FUZZOFF
   )
 
   Doocr.fuzzpos = 0
@@ -6142,7 +6142,7 @@ module Doocr
     {"punch", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
     {"hoof", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
     {"metal", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"chgun", false, 64, @@s_sfx.to_unsafe + CDoom::Sfxenum::SFX_pistol.value, 150, 0, 0},
+    {"chgun", false, 64, @@s_sfx.to_unsafe + Doocr::Sfxenum::SFX_pistol.value, 150, 0, 0},
     {"tink", false, 60, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
     {"bdopn", false, 100, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
     {"bdcls", false, 100, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
@@ -6239,22 +6239,22 @@ module Doocr
 
   @@cheat_me_seq = [0x26, 0xA2, 0xEA, 0x32, 0xEE, 0xA2, 0xE6, 0xFF] of UInt8
 
-  Doocr.cheat_mus.value.sequence = @@cheat_mus_seq.to_unsafe
-  Doocr.cheat_mus.value.p = Pointer(UInt8).null
-  Doocr.cheat_god.value.sequence = @@cheat_god_seq.to_unsafe
-  Doocr.cheat_god.value.p = Pointer(UInt8).null
-  Doocr.cheat_ammo.value.sequence = @@cheat_ammo_seq.to_unsafe
-  Doocr.cheat_ammo.value.p = Pointer(UInt8).null
-  Doocr.cheat_ammonokey.value.sequence = @@cheat_ammonokey_seq.to_unsafe
-  Doocr.cheat_ammonokey.value.p = Pointer(UInt8).null
-  Doocr.cheat_noclip.value.sequence = @@cheat_noclip_seq.to_unsafe
-  Doocr.cheat_noclip.value.p = Pointer(UInt8).null
-  Doocr.cheat_commercial_noclip.value.sequence = @@cheat_commercial_noclip_seq.to_unsafe
-  Doocr.cheat_commercial_noclip.value.p = Pointer(UInt8).null
-  Doocr.cheat_amap.value.sequence = @@cheat_amap_seq.to_unsafe
-  Doocr.cheat_amap.value.p = Pointer(UInt8).null
-  Doocr.cheat_me.value.sequence = @@cheat_me_seq.to_unsafe
-  Doocr.cheat_me.value.p = Pointer(UInt8).null
+  Doocr.cheat_mus.sequence = @@cheat_mus_seq.to_unsafe
+  Doocr.cheat_mus.p = Pointer(UInt8).null
+  Doocr.cheat_god.sequence = @@cheat_god_seq.to_unsafe
+  Doocr.cheat_god.p = Pointer(UInt8).null
+  Doocr.cheat_ammo.sequence = @@cheat_ammo_seq.to_unsafe
+  Doocr.cheat_ammo.p = Pointer(UInt8).null
+  Doocr.cheat_ammonokey.sequence = @@cheat_ammonokey_seq.to_unsafe
+  Doocr.cheat_ammonokey.p = Pointer(UInt8).null
+  Doocr.cheat_noclip.sequence = @@cheat_noclip_seq.to_unsafe
+  Doocr.cheat_noclip.p = Pointer(UInt8).null
+  Doocr.cheat_commercial_noclip.sequence = @@cheat_commercial_noclip_seq.to_unsafe
+  Doocr.cheat_commercial_noclip.p = Pointer(UInt8).null
+  Doocr.cheat_amap.sequence = @@cheat_amap_seq.to_unsafe
+  Doocr.cheat_amap.p = Pointer(UInt8).null
+  Doocr.cheat_me.sequence = @@cheat_me_seq.to_unsafe
+  Doocr.cheat_me.p = Pointer(UInt8).null
 
   c_array_cheat(Doocr.cheat_powerup,
     {@@cheat_powerup_seq[0].to_unsafe, Pointer(UInt8).null},
@@ -6266,12 +6266,12 @@ module Doocr
     {@@cheat_powerup_seq[6].to_unsafe, Pointer(UInt8).null}
   )
 
-  Doocr.cheat_choppers.value.sequence = @@cheat_choppers_seq.to_unsafe
-  Doocr.cheat_choppers.value.p = Pointer(UInt8).null
-  Doocr.cheat_clev.value.sequence = @@cheat_clev_seq.to_unsafe
-  Doocr.cheat_clev.value.p = Pointer(UInt8).null
-  Doocr.cheat_mypos.value.sequence = @@cheat_mypos_seq.to_unsafe
-  Doocr.cheat_mypos.value.p = Pointer(UInt8).null
+  Doocr.cheat_choppers.sequence = @@cheat_choppers_seq.to_unsafe
+  Doocr.cheat_choppers.p = Pointer(UInt8).null
+  Doocr.cheat_clev.sequence = @@cheat_clev_seq.to_unsafe
+  Doocr.cheat_clev.p = Pointer(UInt8).null
+  Doocr.cheat_mypos.sequence = @@cheat_mypos_seq.to_unsafe
+  Doocr.cheat_mypos.p = Pointer(UInt8).null
 
   {% if flag?("PRECOMPUTED") %}
     class_getter finetangent = [
@@ -8330,11 +8330,11 @@ module Doocr
       536870912_u32,
     ]
   {% else %}
-    class_getter finetangent = [] of CDoom::Fixed
-    class_getter finesine = [] of CDoom::Fixed
+    class_getter finetangent = [] of LibC::Int
+    class_getter finesine = [] of LibC::Int
     class_getter tantoangle : Array(UInt32) = [] of UInt32
   {% end %}
-  class_getter finecosine : Array(CDoom::Fixed) = [] of CDoom::Fixed
+  class_getter finecosine : Array(LibC::Int) = [] of LibC::Int
 
   # Now where did these came from?
   c_array(Doocr.gammatable[0],
@@ -8467,28 +8467,28 @@ module Doocr
 
   @@anims_wi_stuff = [
     [
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(224, 104)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(184, 160)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(112, 136)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(72, 112)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(88, 96)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(64, 48)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(192, 40)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(136, 16)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(80, 16)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(64, 24)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(224, 104)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(184, 160)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(112, 136)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(72, 112)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(88, 96)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(64, 48)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(192, 40)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(136, 16)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(80, 16)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(64, 24)),
     ],
     (1..9).map do |level|
-      AnimWIStuff.new(CDoom::Animenum::Level, CDoom::TICRATE // 3, level == 8 ? 3 : 1,
+      AnimWIStuff.new(Doocr::Animenum::Level, CDoom::TICRATE // 3, level == 8 ? 3 : 1,
         level == 8 ? Point.new(192, 144) : Point.new(128, 136), level == 9 ? 8 : level)
     end,
     [
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(104, 168)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(40, 136)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(160, 96)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(104, 80)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(120, 32)),
-      AnimWIStuff.new(CDoom::Animenum::Always, CDoom::TICRATE // 4, 3, Point.new(40, 0)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(104, 168)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(40, 136)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(160, 96)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(104, 80)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 3, 3, Point.new(120, 32)),
+      AnimWIStuff.new(Doocr::Animenum::Always, CDoom::TICRATE // 4, 3, Point.new(40, 0)),
     ],
   ]
   @@numanims = @@anims_wi_stuff.map(&.size)

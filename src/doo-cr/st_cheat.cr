@@ -19,38 +19,38 @@ module Doocr
   @@firsttime = 1
   @@cheat_xlate_table = uninitialized StaticArray(UInt8, 256)
 
-  def self.cht_check_cheat(cht : Pointer(Doocr::Cheatseq), key : UInt8) : LibC::Int
+  def self.cht_check_cheat(cht : Doocr::Cheatseq, key : UInt8) : LibC::Int
     rc = 0
     if @@firsttime != 0
       @@firsttime = 0
       256.times { |i| @@cheat_xlate_table[i] = (scramble(i)).to_u8 }
     end
 
-    if cht.value.p.null?
-      cht.value.p = cht.value.sequence # initialize if first time
+    if cht.p.null?
+      cht.p = cht.sequence # initialize if first time
     end
 
-    if cht.value.p.value == 0
-      cht.value.p.value = key
-      cht.value.p = cht.value.p + 1
-    elsif @@cheat_xlate_table[key.to_u8!] == cht.value.p.value
-      cht.value.p = cht.value.p + 1
+    if cht.p.value == 0
+      cht.p.value = key
+      cht.p = cht.p + 1
+    elsif @@cheat_xlate_table[key.to_u8!] == cht.p.value
+      cht.p = cht.p + 1
     else
-      cht.value.p = cht.value.sequence
+      cht.p = cht.sequence
     end
 
-    if cht.value.p.value == 1
-      cht.value.p = cht.value.p + 1
-    elsif cht.value.p.value == 0xff # end of sequence character
-      cht.value.p = cht.value.sequence
+    if cht.p.value == 1
+      cht.p = cht.p + 1
+    elsif cht.p.value == 0xff # end of sequence character
+      cht.p = cht.sequence
       rc = 1
     end
 
     return rc
   end
 
-  def self.cht_get_param(cht : Pointer(Doocr::Cheatseq), buffer : LibC::Char*)
-    p = cht.value.sequence
+  def self.cht_get_param(cht : Doocr::Cheatseq, buffer : LibC::Char*)
+    p = cht.sequence
     while p.value != 1
       p += 1
     end

@@ -92,19 +92,19 @@ fun doom_get_sound_buffer : Int16*
   Doocr.doom_get_sound_buffer
 end
 
-fun doom_key_down(key : CDoom::DoomKey)
+fun doom_key_down(key : Doocr::DoomKey)
   Doocr.doom_key_down(key)
 end
 
-fun doom_key_up(key : CDoom::DoomKey)
+fun doom_key_up(key : Doocr::DoomKey)
   Doocr.doom_key_up(key)
 end
 
-fun doom_button_down(button : CDoom::DoomButton)
+fun doom_button_down(button : Doocr::DoomButton)
   Doocr.doom_button_down(button)
 end
 
-fun doom_button_up(button : CDoom::DoomButton)
+fun doom_button_up(button : Doocr::DoomButton)
   Doocr.doom_button_up(button)
 end
 
@@ -178,7 +178,7 @@ fun h_send_packet = HSendPacket(node : LibC::Int, flags : LibC::Int)
   Doocr.h_send_packet(node, flags)
 end
 
-fun h_get_packet = HGetPacket : CDoom::DoomBool
+fun h_get_packet = HGetPacket : LibC::Int
   Doocr.h_get_packet
 end
 
@@ -214,7 +214,7 @@ fun f_start_finale = F_StartFinale
   Doocr.f_start_finale
 end
 
-fun f_responder = F_Responder(event : CDoom::Event*) : CDoom::DoomBool
+fun f_responder = F_Responder(event : CDoom::Event*) : LibC::Int
   Doocr.f_responder(event)
 end
 
@@ -234,7 +234,7 @@ fun f_cast_ticker = F_CastTicker
   Doocr.f_cast_ticker
 end
 
-fun f_cast_responder = F_CastResponder(ev : CDoom::Event*) : CDoom::DoomBool
+fun f_cast_responder = F_CastResponder(ev : CDoom::Event*) : LibC::Int
   Doocr.f_cast_responder(ev)
 end
 
@@ -306,7 +306,7 @@ fun g_do_load_level = G_DoLoadLevel
   Doocr.g_do_load_level
 end
 
-fun g_responder = G_Responder(ev : CDoom::Event*) : CDoom::DoomBool
+fun g_responder = G_Responder(ev : CDoom::Event*) : LibC::Int
   Doocr.g_responder(ev)
 end
 
@@ -326,7 +326,7 @@ fun g_player_reborn = G_PlayerReborn(player : LibC::Int)
   Doocr.g_player_reborn(player)
 end
 
-fun g_check_spot = G_CheckSpot(playernum : LibC::Int, mthing : CDoom::Mapthing*) : CDoom::DoomBool
+fun g_check_spot = G_CheckSpot(playernum : LibC::Int, mthing : CDoom::Mapthing*) : LibC::Int
   Doocr.g_check_spot(playernum, mthing)
 end
 
@@ -378,7 +378,7 @@ fun g_do_save_game = G_DoSaveGame
   Doocr.g_do_save_game
 end
 
-fun g_defered_init_new = G_DeferedInitNew(skill : CDoom::Skill, episode : LibC::Int, map : LibC::Int)
+fun g_defered_init_new = G_DeferedInitNew(skill : Doocr::Skill, episode : LibC::Int, map : LibC::Int)
   Doocr.g_defered_init_new(skill, episode, map)
 end
 
@@ -386,7 +386,7 @@ fun g_do_new_game = G_DoNewGame
   Doocr.g_do_new_game
 end
 
-fun g_init_new = G_InitNew(skill : CDoom::Skill, episode : LibC::Int, map : LibC::Int)
+fun g_init_new = G_InitNew(skill : Doocr::Skill, episode : LibC::Int, map : LibC::Int)
   Doocr.g_init_new(skill, episode, map)
 end
 
@@ -410,7 +410,7 @@ fun g_defered_play_demo = G_DeferedPlayDemo(demo : LibC::Char*)
   Doocr.g_defered_play_demo(demo)
 end
 
-fun p_give_power = P_GivePower(player : CDoom::Player*, power : LibC::Int) : CDoom::DoomBool
+fun p_give_power = P_GivePower(player : CDoom::Player*, power : LibC::Int) : LibC::Int
   Doocr.p_give_power(player, power)
 end
 
@@ -422,7 +422,7 @@ fun g_time_demo = G_TimeDemo(name : LibC::Char*)
   Doocr.g_time_demo(name)
 end
 
-fun g_check_demo_status = G_CheckDemoStatus : CDoom::DoomBool
+fun g_check_demo_status = G_CheckDemoStatus : LibC::Int
   Doocr.g_check_demo_status
 end
 
@@ -434,15 +434,15 @@ fun hulib_init_text_line = HUlib_initTextLine(t : CDoom::HU_Textline*, x : LibC:
   Doocr.hulib_init_text_line(t, x, y, f, sc)
 end
 
-fun hulib_add_char_to_text_line = HUlib_addCharToTextLine(t : CDoom::HU_Textline*, ch : LibC::Char) : CDoom::DoomBool
+fun hulib_add_char_to_text_line = HUlib_addCharToTextLine(t : CDoom::HU_Textline*, ch : LibC::Char) : LibC::Int
   Doocr.hulib_add_char_to_text_line(t, ch)
 end
 
-fun hulib_del_char_from_text_line = HUlib_delCharFromTextLine(t : CDoom::HU_Textline*) : CDoom::DoomBool
+fun hulib_del_char_from_text_line = HUlib_delCharFromTextLine(t : CDoom::HU_Textline*) : LibC::Int
   Doocr.hulib_del_char_from_text_line(t)
 end
 
-fun hulib_draw_text_line = HUlib_drawTextLine(l : CDoom::HU_Textline*, drawcursor : CDoom::DoomBool)
+fun hulib_draw_text_line = HUlib_drawTextLine(l : CDoom::HU_Textline*, drawcursor : LibC::Int)
   Doocr.hulib_draw_text_line(l, drawcursor)
 end
 
@@ -456,7 +456,7 @@ fun hulib_init_s_text = HUlib_initSText(s : CDoom::HU_Stext*,
                                         h : LibC::Int,
                                         font : CDoom::Patch**,
                                         startchar : LibC::Int,
-                                        on : CDoom::DoomBool*)
+                                        on : LibC::Int*)
   Doocr.hulib_init_s_text(s, x, y, h, font, startchar, on)
 end
 
@@ -481,7 +481,7 @@ fun hulib_init_i_text = HUlib_initIText(it : CDoom::HU_Itext*,
                                         y : LibC::Int,
                                         font : CDoom::Patch**,
                                         startchar : LibC::Int,
-                                        on : CDoom::DoomBool*)
+                                        on : LibC::Int*)
   Doocr.hulib_init_i_text(it, x, y, font, startchar, on)
 end
 
@@ -501,7 +501,7 @@ fun hulib_add_prefix_to_i_text = HUlib_addPrefixToIText(it : CDoom::HU_Itext*, s
   Doocr.hulib_add_prefix_to_i_text(it, str)
 end
 
-fun hulib_key_in_i_text = HUlib_keyInIText(it : CDoom::HU_Itext*, ch : LibC::UChar) : CDoom::DoomBool
+fun hulib_key_in_i_text = HUlib_keyInIText(it : CDoom::HU_Itext*, ch : LibC::UChar) : LibC::Int
   Doocr.hulib_key_in_i_text(it, ch)
 end
 
@@ -549,7 +549,7 @@ fun hu_dequeue_chat_char = HU_dequeueChatChar : LibC::Char
   Doocr.hu_dequeue_chat_char
 end
 
-fun hu_responder = HU_Responder(ev : CDoom::Event*) : CDoom::DoomBool
+fun hu_responder = HU_Responder(ev : CDoom::Event*) : LibC::Int
   Doocr.hu_responder(ev)
 end
 
@@ -665,7 +665,7 @@ fun i_get_heap_size = I_GetHeapSize : LibC::Int
   Doocr.i_get_heap_size
 end
 
-fun i_zone_base = I_ZoneBase(size : LibC::Int*) : CDoom::Byte*
+fun i_zone_base = I_ZoneBase(size : LibC::Int*) : UInt8*
   Doocr.i_zone_base(size)
 end
 
@@ -693,7 +693,7 @@ fun i_init_graphics = I_InitGraphics
   Doocr.i_init_graphics
 end
 
-fun i_alloc_low = I_AllocLow(length : LibC::Int) : CDoom::Byte*
+fun i_alloc_low = I_AllocLow(length : LibC::Int) : UInt8*
   Doocr.i_alloc_low(length)
 end
 
@@ -721,11 +721,11 @@ fun i_finish_update = I_FinishUpdate
   Doocr.i_finish_update
 end
 
-fun i_read_screen = I_ReadScreen(scr : CDoom::Byte*)
+fun i_read_screen = I_ReadScreen(scr : UInt8*)
   Doocr.i_read_screen(scr)
 end
 
-fun i_set_palette = I_SetPalette(palette : CDoom::Byte*)
+fun i_set_palette = I_SetPalette(palette : UInt8*)
   Doocr.i_set_palette(palette)
 end
 
@@ -733,11 +733,11 @@ fun i_init_graphics = I_InitGraphics
   Doocr.i_init_graphics
 end
 
-fun m_clear_box = M_ClearBox(box : CDoom::Fixed*)
+fun m_clear_box = M_ClearBox(box : LibC::Int*)
   Doocr.m_clear_box(box)
 end
 
-fun m_add_to_box = M_AddToBox(box : CDoom::Fixed*, x : CDoom::Fixed, y : CDoom::Fixed)
+fun m_add_to_box = M_AddToBox(box : LibC::Int*, x : LibC::Int, y : LibC::Int)
   Doocr.m_add_to_box(box, x, y)
 end
 
@@ -749,15 +749,15 @@ fun cht_get_param = cht_GetParam(cht : CDoom::Cheatseq*, buffer : LibC::Char*)
   Doocr.cht_get_param(Doocr.cheat_me, buffer)
 end
 
-fun fixed_mul = FixedMul(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
+fun fixed_mul = FixedMul(a : LibC::Int, b : LibC::Int) : LibC::Int
   Doocr.fixed_mul(a, b)
 end
 
-fun fixed_div = FixedDiv(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
+fun fixed_div = FixedDiv(a : LibC::Int, b : LibC::Int) : LibC::Int
   Doocr.fixed_div(a, b)
 end
 
-fun fixed_div2 = FixedDiv2(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
+fun fixed_div2 = FixedDiv2(a : LibC::Int, b : LibC::Int) : LibC::Int
   Doocr.fixed_div2(a, b)
 end
 
@@ -949,11 +949,11 @@ fun m_ticker = M_Ticker
   Doocr.m_ticker
 end
 
-fun m_draw_text(x : LibC::Int, y : LibC::Int, direct : CDoom::DoomBool, string : LibC::Char*) : LibC::Int
+fun m_draw_text(x : LibC::Int, y : LibC::Int, direct : LibC::Int, string : LibC::Char*) : LibC::Int
   Doocr.m_draw_text(x, y, direct, string)
 end
 
-fun m_write_file = M_WriteFile(name : LibC::Char*, source : Void*, length : LibC::Int) : CDoom::DoomBool
+fun m_write_file = M_WriteFile(name : LibC::Char*, source : Void*, length : LibC::Int) : LibC::Int
   Doocr.m_write_file(name, source, length)
 end
 
@@ -986,7 +986,7 @@ fun t_move_ceiling = T_MoveCeiling(ceiling : CDoom::Ceiling*)
   Doocr.t_move_ceiling(ceiling)
 end
 
-fun ev_do_ceiling = EV_DoCeiling(line : CDoom::Line*, type : CDoom::Ceilingenum) : LibC::Int
+fun ev_do_ceiling = EV_DoCeiling(line : CDoom::Line*, type : Doocr::Ceilingenum) : LibC::Int
   Doocr.ev_do_ceiling(line, type)
 end
 
@@ -1010,11 +1010,11 @@ fun t_vertical_door = T_VerticalDoor(door : CDoom::Vldoor*)
   Doocr.t_vertical_door(door)
 end
 
-fun ev_do_locked_door = EV_DoLockedDoor(line : CDoom::Line*, type : CDoom::Vldoorenum, thing : CDoom::Mobj*) : LibC::Int
+fun ev_do_locked_door = EV_DoLockedDoor(line : CDoom::Line*, type : Doocr::Vldoorenum, thing : CDoom::Mobj*) : LibC::Int
   Doocr.ev_do_locked_door(line, type, thing)
 end
 
-fun ev_do_door = EV_DoDoor(line : CDoom::Line*, type : CDoom::Vldoorenum) : LibC::Int
+fun ev_do_door = EV_DoDoor(line : CDoom::Line*, type : Doocr::Vldoorenum) : LibC::Int
   Doocr.ev_do_door(line, type)
 end
 
@@ -1038,19 +1038,19 @@ fun p_noise_alert = P_NoiseAlert(target : CDoom::Mobj*, emmiter : CDoom::Mobj*)
   Doocr.p_noise_alert(target, emmiter)
 end
 
-fun p_check_melee_range = P_CheckMeleeRange(actor : CDoom::Mobj*) : CDoom::DoomBool
+fun p_check_melee_range = P_CheckMeleeRange(actor : CDoom::Mobj*) : LibC::Int
   Doocr.p_check_melee_range(actor)
 end
 
-fun p_check_missile_range = P_CheckMissileRange(actor : CDoom::Mobj*) : CDoom::DoomBool
+fun p_check_missile_range = P_CheckMissileRange(actor : CDoom::Mobj*) : LibC::Int
   Doocr.p_check_missile_range(actor)
 end
 
-fun p_move = P_Move(actor : CDoom::Mobj*) : CDoom::DoomBool
+fun p_move = P_Move(actor : CDoom::Mobj*) : LibC::Int
   Doocr.p_move(actor)
 end
 
-fun p_try_walk = P_TryWalk(actor : CDoom::Mobj*) : CDoom::DoomBool
+fun p_try_walk = P_TryWalk(actor : CDoom::Mobj*) : LibC::Int
   Doocr.p_try_walk(actor)
 end
 
@@ -1058,7 +1058,7 @@ fun p_new_chase_dir = P_NewChaseDir(actor : CDoom::Mobj*)
   Doocr.p_new_chase_dir(actor)
 end
 
-fun p_look_for_players = P_LookForPlayers(actor : CDoom::Mobj*, allaround : CDoom::DoomBool) : CDoom::DoomBool
+fun p_look_for_players = P_LookForPlayers(actor : CDoom::Mobj*, allaround : LibC::Int) : LibC::Int
   Doocr.p_look_for_players(actor, allaround)
 end
 
@@ -1138,7 +1138,7 @@ fun a_skel_fist = A_SkelFist(actor : CDoom::Mobj*)
   Doocr.a_skel_fist(actor)
 end
 
-fun pit_vile_check = PIT_VileCheck(thing : CDoom::Mobj*) : CDoom::DoomBool
+fun pit_vile_check = PIT_VileCheck(thing : CDoom::Mobj*) : LibC::Int
   Doocr.pit_vile_check(thing)
 end
 
@@ -1190,7 +1190,7 @@ fun a_skull_attack = A_SkullAttack(actor : CDoom::Mobj*)
   Doocr.a_skull_attack(actor)
 end
 
-fun a_pain_shoot_skull = A_PainShootSkull(actor : CDoom::Mobj*, angle : CDoom::Angle)
+fun a_pain_shoot_skull = A_PainShootSkull(actor : CDoom::Mobj*, angle : LibC::UInt)
   Doocr.a_pain_shoot_skull(actor, angle)
 end
 
@@ -1286,7 +1286,7 @@ fun a_player_scream = A_PlayerScream(mo : CDoom::Mobj*)
   Doocr.a_player_scream(mo)
 end
 
-fun t_move_plane = T_MovePlane(sector : CDoom::Sector*, speed : CDoom::Fixed, dest : CDoom::Fixed, crush : CDoom::DoomBool, floor_or_ceiling : LibC::Int, direction : LibC::Int) : CDoom::Result
+fun t_move_plane = T_MovePlane(sector : CDoom::Sector*, speed : LibC::Int, dest : LibC::Int, crush : LibC::Int, floor_or_ceiling : LibC::Int, direction : LibC::Int) : Doocr::Result
   Doocr.t_move_plane(sector, speed, dest, crush, floor_or_ceiling, direction)
 end
 
@@ -1294,31 +1294,31 @@ fun t_move_floor = T_MoveFloor(floor : CDoom::Floormove*)
   Doocr.t_move_floor(floor)
 end
 
-fun ev_do_floor = EV_DoFloor(line : CDoom::Line*, floortype : CDoom::Floorenum) : LibC::Int
+fun ev_do_floor = EV_DoFloor(line : CDoom::Line*, floortype : Doocr::Floorenum) : LibC::Int
   Doocr.ev_do_floor(line, floortype)
 end
 
-fun ev_build_stairs = EV_BuildStairs(line : CDoom::Line*, type : CDoom::Stairenum) : LibC::Int
+fun ev_build_stairs = EV_BuildStairs(line : CDoom::Line*, type : Doocr::Stairenum) : LibC::Int
   Doocr.ev_build_stairs(line, type)
 end
 
-fun p_give_ammo = P_GiveAmmo(player : CDoom::Player*, ammo : CDoom::Ammotype, num : LibC::Int) : CDoom::DoomBool
+fun p_give_ammo = P_GiveAmmo(player : CDoom::Player*, ammo : Doocr::Ammotype, num : LibC::Int) : LibC::Int
   Doocr.p_give_ammo(player, ammo, num)
 end
 
-fun p_give_weapon = P_GiveWeapon(player : CDoom::Player*, weapon : CDoom::Weapontype, dropped : CDoom::DoomBool) : CDoom::DoomBool
+fun p_give_weapon = P_GiveWeapon(player : CDoom::Player*, weapon : Doocr::Weapontype, dropped : LibC::Int) : LibC::Int
   Doocr.p_give_weapon(player, weapon, dropped)
 end
 
-fun p_give_body = P_GiveBody(player : CDoom::Player*, num : LibC::Int) : CDoom::DoomBool
+fun p_give_body = P_GiveBody(player : CDoom::Player*, num : LibC::Int) : LibC::Int
   Doocr.p_give_body(player, num)
 end
 
-fun p_give_armor = P_GiveArmor(player : CDoom::Player*, armortype : LibC::Int) : CDoom::DoomBool
+fun p_give_armor = P_GiveArmor(player : CDoom::Player*, armortype : LibC::Int) : LibC::Int
   Doocr.p_give_armor(player, armortype)
 end
 
-fun p_give_card = P_GiveCard(player : CDoom::Player*, card : CDoom::Card)
+fun p_give_card = P_GiveCard(player : CDoom::Player*, card : Doocr::Card)
   Doocr.p_give_card(player, card)
 end
 
@@ -1378,31 +1378,31 @@ fun p_spawn_glowing_light = P_SpawnGlowingLight(sector : CDoom::Sector*)
   Doocr.p_spawn_glowing_light(sector)
 end
 
-fun pit_stomp_thing = PIT_StompThing(thing : CDoom::Mobj*) : CDoom::DoomBool
+fun pit_stomp_thing = PIT_StompThing(thing : CDoom::Mobj*) : LibC::Int
   Doocr.pit_stomp_thing(thing)
 end
 
-fun p_teleport_move = P_TeleportMove(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
+fun p_teleport_move = P_TeleportMove(thing : CDoom::Mobj*, x : LibC::Int, y : LibC::Int) : LibC::Int
   Doocr.p_teleport_move(thing, x, y)
 end
 
-fun pit_check_line = PIT_CheckLine(ld : CDoom::Line*) : CDoom::DoomBool
+fun pit_check_line = PIT_CheckLine(ld : CDoom::Line*) : LibC::Int
   Doocr.pit_check_line(ld)
 end
 
-fun pit_check_thing = PIT_CheckThing(thing : CDoom::Mobj*) : CDoom::DoomBool
+fun pit_check_thing = PIT_CheckThing(thing : CDoom::Mobj*) : LibC::Int
   Doocr.pit_check_thing(thing)
 end
 
-fun p_check_position = P_CheckPosition(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
+fun p_check_position = P_CheckPosition(thing : CDoom::Mobj*, x : LibC::Int, y : LibC::Int) : LibC::Int
   Doocr.p_check_position(thing, x, y)
 end
 
-fun p_try_move = P_TryMove(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
+fun p_try_move = P_TryMove(thing : CDoom::Mobj*, x : LibC::Int, y : LibC::Int) : LibC::Int
   Doocr.p_try_move(thing, x, y)
 end
 
-fun p_thing_height_clip = P_ThingHeightClip(thing : CDoom::Mobj*) : CDoom::DoomBool
+fun p_thing_height_clip = P_ThingHeightClip(thing : CDoom::Mobj*) : LibC::Int
   Doocr.p_thing_height_clip(thing)
 end
 
@@ -1410,7 +1410,7 @@ fun p_hit_slide_line = P_HitSlideLine(ld : CDoom::Line*)
   Doocr.p_hit_slide_line(ld)
 end
 
-fun ptr_slide_traverse = PTR_SlideTraverse(int : CDoom::Intercept*) : CDoom::DoomBool
+fun ptr_slide_traverse = PTR_SlideTraverse(int : CDoom::Intercept*) : LibC::Int
   Doocr.ptr_slide_traverse(int)
 end
 
@@ -1418,23 +1418,23 @@ fun p_slide_move = P_SlideMove(mo : CDoom::Mobj*)
   Doocr.p_slide_move(mo)
 end
 
-fun ptr_aim_traverse = PTR_AimTraverse(int : CDoom::Intercept*) : CDoom::DoomBool
+fun ptr_aim_traverse = PTR_AimTraverse(int : CDoom::Intercept*) : LibC::Int
   Doocr.ptr_aim_traverse(int)
 end
 
-fun ptr_shoot_traverse = PTR_ShootTraverse(int : CDoom::Intercept*) : CDoom::DoomBool
+fun ptr_shoot_traverse = PTR_ShootTraverse(int : CDoom::Intercept*) : LibC::Int
   Doocr.ptr_shoot_traverse(int)
 end
 
-fun p_aim_line_attack = P_AimLineAttack(t1 : CDoom::Mobj*, angle : CDoom::Angle, distance : CDoom::Fixed) : CDoom::Fixed
+fun p_aim_line_attack = P_AimLineAttack(t1 : CDoom::Mobj*, angle : LibC::UInt, distance : LibC::Int) : LibC::Int
   Doocr.p_aim_line_attack(t1, angle, distance)
 end
 
-fun p_line_attack = P_LineAttack(t1 : CDoom::Mobj*, angle : CDoom::Angle, distance : CDoom::Fixed, slope : CDoom::Fixed, damage : LibC::Int)
+fun p_line_attack = P_LineAttack(t1 : CDoom::Mobj*, angle : LibC::UInt, distance : LibC::Int, slope : LibC::Int, damage : LibC::Int)
   Doocr.p_line_attack(t1, angle, distance, slope, damage)
 end
 
-fun ptr_use_traverse = PTR_UseTraverse(int : CDoom::Intercept*) : CDoom::DoomBool
+fun ptr_use_traverse = PTR_UseTraverse(int : CDoom::Intercept*) : LibC::Int
   Doocr.ptr_use_traverse(int)
 end
 
@@ -1442,7 +1442,7 @@ fun p_use_lines = P_UseLines(player : CDoom::Player*)
   Doocr.p_use_lines(player)
 end
 
-fun pit_radius_attack = PIT_RadiusAttack(thing : CDoom::Mobj*) : CDoom::DoomBool
+fun pit_radius_attack = PIT_RadiusAttack(thing : CDoom::Mobj*) : LibC::Int
   Doocr.pit_radius_attack(thing)
 end
 
@@ -1450,27 +1450,27 @@ fun p_radius_attack = P_RadiusAttack(spot : CDoom::Mobj*, source : CDoom::Mobj*,
   Doocr.p_radius_attack(spot, source, damage)
 end
 
-fun pit_change_sector = PIT_ChangeSector(thing : CDoom::Mobj*) : CDoom::DoomBool
+fun pit_change_sector = PIT_ChangeSector(thing : CDoom::Mobj*) : LibC::Int
   Doocr.pit_change_sector(thing)
 end
 
-fun p_change_sector = P_ChangeSector(sector : CDoom::Sector*, crunch : CDoom::DoomBool) : CDoom::DoomBool
+fun p_change_sector = P_ChangeSector(sector : CDoom::Sector*, crunch : LibC::Int) : LibC::Int
   Doocr.p_change_sector(sector, crunch)
 end
 
-fun p_aprox_distance = P_AproxDistance(dx : CDoom::Fixed, dy : CDoom::Fixed) : CDoom::Fixed
+fun p_aprox_distance = P_AproxDistance(dx : LibC::Int, dy : LibC::Int) : LibC::Int
   Doocr.p_aprox_distance(dx, dy)
 end
 
-fun p_point_on_line_side = P_PointOnLineSide(x : CDoom::Fixed, y : CDoom::Fixed, line : CDoom::Line*) : LibC::Int
+fun p_point_on_line_side = P_PointOnLineSide(x : LibC::Int, y : LibC::Int, line : CDoom::Line*) : LibC::Int
   Doocr.p_point_on_line_side(x, y, line)
 end
 
-fun p_box_on_line_side = P_BoxOnLineSide(tmbox : CDoom::Fixed*, ld : CDoom::Line*) : LibC::Int
+fun p_box_on_line_side = P_BoxOnLineSide(tmbox : LibC::Int*, ld : CDoom::Line*) : LibC::Int
   Doocr.p_box_on_line_side(tmbox, ld)
 end
 
-fun p_point_on_divline_side = P_PointOnDivlineSide(x : CDoom::Fixed, y : CDoom::Fixed, line : CDoom::Divline*) : LibC::Int
+fun p_point_on_divline_side = P_PointOnDivlineSide(x : LibC::Int, y : LibC::Int, line : CDoom::Divline*) : LibC::Int
   Doocr.p_point_on_divline_side(x, y, line)
 end
 
@@ -1478,7 +1478,7 @@ fun p_make_divline = P_MakeDivline(li : CDoom::Line*, dl : CDoom::Divline*)
   Doocr.p_make_divline(li, dl)
 end
 
-fun p_intercept_vector = P_InterceptVector(v2 : CDoom::Divline*, v1 : CDoom::Divline*) : CDoom::Fixed
+fun p_intercept_vector = P_InterceptVector(v2 : CDoom::Divline*, v1 : CDoom::Divline*) : LibC::Int
   Doocr.p_intercept_vector(v2, v1)
 end
 
@@ -1494,31 +1494,31 @@ fun p_set_thing_position = P_SetThingPosition(thing : CDoom::Mobj*)
   Doocr.p_set_thing_position(thing)
 end
 
-fun p_block_lines_iterator = P_BlockLinesIterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Line*, CDoom::DoomBool)) : CDoom::DoomBool
+fun p_block_lines_iterator = P_BlockLinesIterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Line*, LibC::Int)) : LibC::Int
   Doocr.p_block_lines_iterator(x, y, func)
 end
 
-fun p_block_things_iterator = P_BlockThingsIterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Mobj*, CDoom::DoomBool)) : CDoom::DoomBool
+fun p_block_things_iterator = P_BlockThingsIterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Mobj*, LibC::Int)) : LibC::Int
   Doocr.p_block_things_iterator(x, y, func)
 end
 
-fun pit_add_line_intercepts = PIT_AddLineIntercepts(ld : CDoom::Line*) : CDoom::DoomBool
+fun pit_add_line_intercepts = PIT_AddLineIntercepts(ld : CDoom::Line*) : LibC::Int
   Doocr.pit_add_line_intercepts(ld)
 end
 
-fun pit_add_thing_intercepts = PIT_AddThingIntercepts(thing : CDoom::Mobj*) : CDoom::DoomBool
+fun pit_add_thing_intercepts = PIT_AddThingIntercepts(thing : CDoom::Mobj*) : LibC::Int
   Doocr.pit_add_thing_intercepts(thing)
 end
 
-fun p_traverse_intercepts = P_TraverseIntercepts(func : CDoom::Traverser, maxfrac : CDoom::Fixed) : CDoom::DoomBool
+fun p_traverse_intercepts = P_TraverseIntercepts(func : Doocr::Traverser, maxfrac : LibC::Int) : LibC::Int
   Doocr.p_traverse_intercepts(func, maxfrac)
 end
 
-fun p_path_traverse = P_PathTraverse(x1 : CDoom::Fixed, y1 : CDoom::Fixed, x2 : CDoom::Fixed, y2 : CDoom::Fixed, flags : LibC::Int, trav : Proc(CDoom::Intercept*, CDoom::DoomBool)) : CDoom::DoomBool
+fun p_path_traverse = P_PathTraverse(x1 : LibC::Int, y1 : LibC::Int, x2 : LibC::Int, y2 : LibC::Int, flags : LibC::Int, trav : Proc(CDoom::Intercept*, LibC::Int)) : LibC::Int
   Doocr.p_path_traverse(x1, y1, x2, y2, flags, trav)
 end
 
-fun p_set_mobj_state = P_SetMobjState(mobj : CDoom::Mobj*, state : CDoom::Statenum) : CDoom::DoomBool
+fun p_set_mobj_state = P_SetMobjState(mobj : CDoom::Mobj*, state : Doocr::Statenum) : LibC::Int
   Doocr.p_set_mobj_state(mobj, state)
 end
 
@@ -1542,7 +1542,7 @@ fun p_mobj_thinker = P_MobjThinker(mobj : CDoom::Mobj*)
   Doocr.p_mobj_thinker(mobj)
 end
 
-fun p_spawn_mobj = P_SpawnMobj(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, type : CDoom::Mobjtype) : CDoom::Mobj*
+fun p_spawn_mobj = P_SpawnMobj(x : LibC::Int, y : LibC::Int, z : LibC::Int, type : Doocr::Mobjtype) : CDoom::Mobj*
   Doocr.p_spawn_mobj(x, y, z, type)
 end
 
@@ -1562,11 +1562,11 @@ fun p_spawn_map_thing = P_SpawnMapThing(mthing : CDoom::Mapthing*)
   Doocr.p_spawn_map_thing(mthing)
 end
 
-fun p_spawn_puff = P_SpawnPuff(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed)
+fun p_spawn_puff = P_SpawnPuff(x : LibC::Int, y : LibC::Int, z : LibC::Int)
   Doocr.p_spawn_puff(x, y, z)
 end
 
-fun p_spawn_blood = P_SpawnBlood(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, damage : LibC::Int)
+fun p_spawn_blood = P_SpawnBlood(x : LibC::Int, y : LibC::Int, z : LibC::Int, damage : LibC::Int)
   Doocr.p_spawn_blood(x, y, z, damage)
 end
 
@@ -1574,11 +1574,11 @@ fun p_check_missile_spawn = P_CheckMissileSpawn(th : CDoom::Mobj*)
   Doocr.p_check_missile_spawn(th)
 end
 
-fun p_spawn_missile = P_SpawnMissile(source : CDoom::Mobj*, dest : CDoom::Mobj*, type : CDoom::Mobjtype) : CDoom::Mobj*
+fun p_spawn_missile = P_SpawnMissile(source : CDoom::Mobj*, dest : CDoom::Mobj*, type : Doocr::Mobjtype) : CDoom::Mobj*
   Doocr.p_spawn_missile(source, dest, type)
 end
 
-fun p_spawn_player_missile = P_SpawnPlayerMissile(source : CDoom::Mobj*, type : CDoom::Mobjtype)
+fun p_spawn_player_missile = P_SpawnPlayerMissile(source : CDoom::Mobj*, type : Doocr::Mobjtype)
   Doocr.p_spawn_player_missile(source, type)
 end
 
@@ -1586,7 +1586,7 @@ fun t_plat_raise = T_PlatRaise(plat : CDoom::Plat*)
   Doocr.t_plat_raise(plat)
 end
 
-fun ev_do_plat = EV_DoPlat(line : CDoom::Line*, type : CDoom::Plattype, amount : LibC::Int) : LibC::Int
+fun ev_do_plat = EV_DoPlat(line : CDoom::Line*, type : Doocr::Plattype, amount : LibC::Int) : LibC::Int
   Doocr.ev_do_plat(line, type, amount)
 end
 
@@ -1606,7 +1606,7 @@ fun p_remove_active_plat = P_RemoveActivePlat(plat : CDoom::Plat*)
   Doocr.p_remove_active_plat(plat)
 end
 
-fun p_set_psprite = P_SetPsprite(player : CDoom::Player*, position : LibC::Int, stnum : CDoom::Statenum)
+fun p_set_psprite = P_SetPsprite(player : CDoom::Player*, position : LibC::Int, stnum : Doocr::Statenum)
   Doocr.p_set_psprite(player, position, stnum)
 end
 
@@ -1614,7 +1614,7 @@ fun p_bring_up_weapon = P_BringUpWeapon(player : CDoom::Player*)
   Doocr.p_bring_up_weapon(player)
 end
 
-fun p_check_ammo = P_CheckAmmo(player : CDoom::Player*) : CDoom::DoomBool
+fun p_check_ammo = P_CheckAmmo(player : CDoom::Player*) : LibC::Int
   Doocr.p_check_ammo(player)
 end
 
@@ -1674,7 +1674,7 @@ fun p_bullet_slope = P_BulletSlope(mo : CDoom::Mobj*)
   Doocr.p_bullet_slope(mo)
 end
 
-fun p_gunshot = P_GunShot(mo : CDoom::Mobj*, accurate : CDoom::DoomBool)
+fun p_gunshot = P_GunShot(mo : CDoom::Mobj*, accurate : LibC::Int)
   Doocr.p_gunshot(mo, accurate)
 end
 
@@ -1758,7 +1758,7 @@ fun p_group_lines = P_GroupLines
   Doocr.p_group_lines
 end
 
-fun p_setup_level = P_SetupLevel(episode : LibC::Int, map : LibC::Int, playermask : LibC::Int, skill : CDoom::Skill)
+fun p_setup_level = P_SetupLevel(episode : LibC::Int, map : LibC::Int, playermask : LibC::Int, skill : Doocr::Skill)
   Doocr.p_setup_level(episode, map, playermask, skill)
 end
 
@@ -1766,23 +1766,23 @@ fun p_init = P_Init
   Doocr.p_init
 end
 
-fun p_divline_side = P_DivlineSide(x : CDoom::Fixed, y : CDoom::Fixed, node : CDoom::Divline*) : LibC::Int
+fun p_divline_side = P_DivlineSide(x : LibC::Int, y : LibC::Int, node : CDoom::Divline*) : LibC::Int
   Doocr.p_divline_side(x, y, node)
 end
 
-fun p_intercept_vector2 = P_InterceptVector2(v2 : CDoom::Divline*, v1 : CDoom::Divline*) : CDoom::Fixed
+fun p_intercept_vector2 = P_InterceptVector2(v2 : CDoom::Divline*, v1 : CDoom::Divline*) : LibC::Int
   Doocr.p_intercept_vector2(v2, v1)
 end
 
-fun p_cross_subsector = P_CrossSubsector(num : LibC::Int) : CDoom::DoomBool
+fun p_cross_subsector = P_CrossSubsector(num : LibC::Int) : LibC::Int
   Doocr.p_cross_subsector(num)
 end
 
-fun p_cross_bsp_node = P_CrossBSPNode(bspnum : LibC::Int) : CDoom::DoomBool
+fun p_cross_bsp_node = P_CrossBSPNode(bspnum : LibC::Int) : LibC::Int
   Doocr.p_cross_bsp_node(bspnum)
 end
 
-fun p_check_sight = P_CheckSight(t1 : CDoom::Mobj*, t2 : CDoom::Mobj*) : CDoom::DoomBool
+fun p_check_sight = P_CheckSight(t1 : CDoom::Mobj*, t2 : CDoom::Mobj*) : LibC::Int
   Doocr.p_check_sight(t1, t2)
 end
 
@@ -1806,23 +1806,23 @@ fun get_next_sector = getNextSector(line : CDoom::Line*, sec : CDoom::Sector*) :
   Doocr.get_next_sector(line, sec)
 end
 
-fun p_find_lowest_floor_surrounding = P_FindLowestFloorSurrounding(sec : CDoom::Sector*) : CDoom::Fixed
+fun p_find_lowest_floor_surrounding = P_FindLowestFloorSurrounding(sec : CDoom::Sector*) : LibC::Int
   Doocr.p_find_lowest_floor_surrounding(sec)
 end
 
-fun p_find_highest_floor_surrounding = P_FindHighestFloorSurrounding(sec : CDoom::Sector*) : CDoom::Fixed
+fun p_find_highest_floor_surrounding = P_FindHighestFloorSurrounding(sec : CDoom::Sector*) : LibC::Int
   Doocr.p_find_highest_floor_surrounding(sec)
 end
 
-fun p_find_next_highest_floor = P_FindNextHighestFloor(sec : CDoom::Sector*, currentheight : LibC::Int) : CDoom::Fixed
+fun p_find_next_highest_floor = P_FindNextHighestFloor(sec : CDoom::Sector*, currentheight : LibC::Int) : LibC::Int
   Doocr.p_find_next_highest_floor(sec, currentheight)
 end
 
-fun p_find_lowest_ceiling_surrounding = P_FindLowestCeilingSurrounding(sec : CDoom::Sector*) : CDoom::Fixed
+fun p_find_lowest_ceiling_surrounding = P_FindLowestCeilingSurrounding(sec : CDoom::Sector*) : LibC::Int
   Doocr.p_find_lowest_ceiling_surrounding(sec)
 end
 
-fun p_find_highest_ceiling_surrounding = P_FindHighestCeilingSurrounding(sec : CDoom::Sector*) : CDoom::Fixed
+fun p_find_highest_ceiling_surrounding = P_FindHighestCeilingSurrounding(sec : CDoom::Sector*) : LibC::Int
   Doocr.p_find_highest_ceiling_surrounding(sec)
 end
 
@@ -1866,7 +1866,7 @@ fun p_change_switch_texture = P_ChangeSwitchTexture(line : CDoom::Line*, use_aga
   Doocr.p_change_switch_texture(line, use_again)
 end
 
-fun p_use_special_line = P_UseSpecialLine(thing : CDoom::Mobj*, line : CDoom::Line*, side : LibC::Int) : CDoom::DoomBool
+fun p_use_special_line = P_UseSpecialLine(thing : CDoom::Mobj*, line : CDoom::Line*, side : LibC::Int) : LibC::Int
   Doocr.p_use_special_line(thing, line, side)
 end
 
@@ -1894,7 +1894,7 @@ fun p_ticker = P_Ticker
   Doocr.p_ticker
 end
 
-fun p_thrust = P_Thrust(player : CDoom::Player*, angle : CDoom::Angle, move : CDoom::Fixed)
+fun p_thrust = P_Thrust(player : CDoom::Player*, angle : LibC::UInt, move : LibC::Int)
   Doocr.p_thrust(player, angle, move)
 end
 
@@ -1934,7 +1934,7 @@ fun r_addline = R_AddLine(line : CDoom::Seg*)
   Doocr.r_addline(line)
 end
 
-fun r_check_bbox = R_CheckBBox(bspcoord : CDoom::Fixed*) : CDoom::DoomBool
+fun r_check_bbox = R_CheckBBox(bspcoord : LibC::Int*) : LibC::Int
   Doocr.r_check_bbox(bspcoord)
 end
 
@@ -1946,7 +1946,7 @@ fun r_render_bsp_node = R_RenderBSPNode(bspnum : LibC::Int)
   Doocr.r_render_bsp_node(bspnum)
 end
 
-fun r_draw_column_in_cache = R_DrawColumnInCache(patch : CDoom::Column*, cache : CDoom::Byte*, originy : LibC::Int, cacheheight : LibC::Int)
+fun r_draw_column_in_cache = R_DrawColumnInCache(patch : CDoom::Post*, cache : UInt8*, originy : LibC::Int, cacheheight : LibC::Int)
   Doocr.r_draw_column_in_cache(patch, cache, originy, cacheheight)
 end
 
@@ -1958,7 +1958,7 @@ fun r_generate_lookup = R_GenerateLookup(texnum : LibC::Int)
   Doocr.r_generate_lookup(texnum)
 end
 
-fun r_get_column = R_GetColumn(tex : LibC::Int, col : LibC::Int) : CDoom::Byte*
+fun r_get_column = R_GetColumn(tex : LibC::Int, col : LibC::Int) : UInt8*
   Doocr.r_get_column(tex, col)
 end
 
@@ -2034,31 +2034,31 @@ fun r_draw_view_border = R_DrawViewBorder
   Doocr.r_draw_view_border
 end
 
-fun r_add_point_to_box = R_AddPointToBox(x : LibC::Int, y : LibC::Int, box : CDoom::Fixed*)
+fun r_add_point_to_box = R_AddPointToBox(x : LibC::Int, y : LibC::Int, box : LibC::Int*)
   Doocr.r_add_point_to_box(x, y, box)
 end
 
-fun r_point_on_side = R_PointOnSide(x : CDoom::Fixed, y : CDoom::Fixed, node : CDoom::Node*) : LibC::Int
+fun r_point_on_side = R_PointOnSide(x : LibC::Int, y : LibC::Int, node : CDoom::Node*) : LibC::Int
   Doocr.r_point_on_side(x, y, node)
 end
 
-fun r_point_on_seg_side = R_PointOnSegSide(x : CDoom::Fixed, y : CDoom::Fixed, line : CDoom::Seg*) : LibC::Int
+fun r_point_on_seg_side = R_PointOnSegSide(x : LibC::Int, y : LibC::Int, line : CDoom::Seg*) : LibC::Int
   Doocr.r_point_on_seg_side(x, y, line)
 end
 
-fun r_point_to_angle = R_PointToAngle(x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::Angle
+fun r_point_to_angle = R_PointToAngle(x : LibC::Int, y : LibC::Int) : LibC::UInt
   Doocr.r_point_to_angle(x, y)
 end
 
-fun r_point_to_angle2 = R_PointToAngle2(x1 : CDoom::Fixed, y1 : CDoom::Fixed, x2 : CDoom::Fixed, y2 : CDoom::Fixed) : CDoom::Angle
+fun r_point_to_angle2 = R_PointToAngle2(x1 : LibC::Int, y1 : LibC::Int, x2 : LibC::Int, y2 : LibC::Int) : LibC::UInt
   Doocr.r_point_to_angle2(x1, y1, x2, y2)
 end
 
-fun r_point_to_dist = R_PointToDist(x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::Fixed
+fun r_point_to_dist = R_PointToDist(x : LibC::Int, y : LibC::Int) : LibC::Int
   Doocr.r_point_to_dist(x, y)
 end
 
-fun r_scale_from_global_angle = R_ScaleFromGlobalAngle(visangle : CDoom::Angle) : CDoom::Fixed
+fun r_scale_from_global_angle = R_ScaleFromGlobalAngle(visangle : LibC::UInt) : LibC::Int
   Doocr.r_scale_from_global_angle(visangle)
 end
 
@@ -2086,7 +2086,7 @@ fun r_init = R_Init
   Doocr.r_init
 end
 
-fun r_point_in_subsector = R_PointInSubsector(x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::Subsector*
+fun r_point_in_subsector = R_PointInSubsector(x : LibC::Int, y : LibC::Int) : CDoom::Subsector*
   Doocr.r_point_in_subsector(x, y)
 end
 
@@ -2130,7 +2130,7 @@ fun r_init_sky_map = R_InitSkyMap
   Doocr.r_init_sky_map
 end
 
-fun r_install_sprite_lump = R_InstallSpriteLump(lump : LibC::Int, frame : LibC::UInt, rotation : LibC::UInt, flipped : CDoom::DoomBool)
+fun r_install_sprite_lump = R_InstallSpriteLump(lump : LibC::Int, frame : LibC::UInt, rotation : LibC::UInt, flipped : LibC::Int)
   Doocr.r_install_sprite_lump(lump, frame, rotation, flipped)
 end
 
@@ -2142,7 +2142,7 @@ fun r_new_vis_sprite = R_NewVisSprite : CDoom::Vissprite*
   Doocr.r_new_vis_sprite
 end
 
-fun r_draw_masked_column = R_DrawMaskedColumn(column : CDoom::Column*)
+fun r_draw_masked_column = R_DrawMaskedColumn(column : CDoom::Post*)
   Doocr.r_draw_masked_column(column)
 end
 
@@ -2247,7 +2247,7 @@ fun stlib_init_num = STlib_initNum(n : CDoom::ST_Number*,
                                    y : LibC::Int,
                                    pl : CDoom::Patch**,
                                    num : LibC::Int*,
-                                   on : CDoom::DoomBool*,
+                                   on : LibC::Int*,
                                    width : LibC::Int)
   Doocr.stlib_init_num(n,
     x,
@@ -2258,11 +2258,11 @@ fun stlib_init_num = STlib_initNum(n : CDoom::ST_Number*,
     width)
 end
 
-fun stlib_draw_num = STlib_drawNum(n : CDoom::ST_Number*, refresh : CDoom::DoomBool)
+fun stlib_draw_num = STlib_drawNum(n : CDoom::ST_Number*, refresh : LibC::Int)
   Doocr.stlib_draw_num(n, refresh)
 end
 
-fun stlib_update_num = STlib_updateNum(n : CDoom::ST_Number*, refresh : CDoom::DoomBool)
+fun stlib_update_num = STlib_updateNum(n : CDoom::ST_Number*, refresh : LibC::Int)
   Doocr.stlib_update_num(n, refresh)
 end
 
@@ -2271,7 +2271,7 @@ fun stlib_init_percent = STlib_initPercent(p : CDoom::ST_Percent*,
                                            y : LibC::Int,
                                            pl : CDoom::Patch**,
                                            num : LibC::Int*,
-                                           on : CDoom::DoomBool*,
+                                           on : LibC::Int*,
                                            percent : CDoom::Patch*)
   Doocr.stlib_init_percent(p, x, y, pl, num, on, percent)
 end
@@ -2285,11 +2285,11 @@ fun stlib_init_mult_icon = STlib_initMultIcon(mi : CDoom::ST_Multicon*,
                                               y : LibC::Int,
                                               il : CDoom::Patch**,
                                               inum : LibC::Int*,
-                                              on : CDoom::DoomBool*)
+                                              on : LibC::Int*)
   Doocr.stlib_init_mult_icon(mi, x, y, il, inum, on)
 end
 
-fun stlib_update_mult_icon = STlib_updateMultIcon(mi : CDoom::ST_Multicon*, refresh : CDoom::DoomBool)
+fun stlib_update_mult_icon = STlib_updateMultIcon(mi : CDoom::ST_Multicon*, refresh : LibC::Int)
   Doocr.stlib_update_mult_icon(mi, refresh)
 end
 
@@ -2297,12 +2297,12 @@ fun stlib_init_bin_icon = STlib_initBinIcon(b : CDoom::ST_Binicon*,
                                             x : LibC::Int,
                                             y : LibC::Int,
                                             i : CDoom::Patch*,
-                                            val : CDoom::DoomBool*,
-                                            on : CDoom::DoomBool*)
+                                            val : LibC::Int*,
+                                            on : LibC::Int*)
   Doocr.stlib_init_bin_icon(b, x, y, i, val, on)
 end
 
-fun stlib_update_bin_icon = STlib_updateBinIcon(bi : CDoom::ST_Binicon*, refresh : CDoom::DoomBool)
+fun stlib_update_bin_icon = STlib_updateBinIcon(bi : CDoom::ST_Binicon*, refresh : LibC::Int)
   Doocr.stlib_update_bin_icon(bi, refresh)
 end
 
@@ -2310,7 +2310,7 @@ fun st_refresh_background = ST_refreshBackground
   Doocr.st_refresh_background
 end
 
-fun st_responder = ST_Responder(ev : CDoom::Event*) : CDoom::DoomBool
+fun st_responder = ST_Responder(ev : CDoom::Event*) : LibC::Int
   Doocr.st_responder(ev)
 end
 
@@ -2334,7 +2334,7 @@ fun st_do_palette_stuff = ST_doPaletteStuff
   Doocr.st_do_palette_stuff
 end
 
-fun st_draw_widgets = ST_drawWidgets(refresh : CDoom::DoomBool)
+fun st_draw_widgets = ST_drawWidgets(refresh : LibC::Int)
   Doocr.st_draw_widgets(refresh)
 end
 
@@ -2346,7 +2346,7 @@ fun st_diff_draw = ST_diffDraw
   Doocr.st_diff_draw
 end
 
-fun st_drawer = ST_Drawer(fullscreen : CDoom::DoomBool, refresh : CDoom::DoomBool)
+fun st_drawer = ST_Drawer(fullscreen : LibC::Int, refresh : LibC::Int)
   Doocr.st_drawer(fullscreen, refresh)
 end
 
@@ -2435,7 +2435,7 @@ fun v_draw_block = V_DrawBlock(x : LibC::Int,
                                scrn : LibC::Int,
                                width : LibC::Int,
                                height : LibC::Int,
-                               src : CDoom::Byte*)
+                               src : UInt8*)
   Doocr.v_draw_block(x, y, scrn, width, height, src)
 end
 
@@ -2444,7 +2444,7 @@ fun v_get_block = V_GetBlock(x : LibC::Int,
                              scrn : LibC::Int,
                              width : LibC::Int,
                              height : LibC::Int,
-                             dest : CDoom::Byte*)
+                             dest : UInt8*)
   Doocr.v_get_block(x, y, scrn, width, height, dest)
 end
 

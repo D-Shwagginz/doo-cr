@@ -57,7 +57,7 @@ module Doocr
 
     CDoom.i_error("Error: Tried to transmit to another node") if Doocr.netgame == 0
 
-    Doocr.doomcom.value.command = CDoom::Command::SEND
+    Doocr.doomcom.value.command = Doocr::Command::SEND
     Doocr.doomcom.value.remotenode = node
     Doocr.doomcom.value.datalength = CDoom.net_buffer_size
 
@@ -92,7 +92,7 @@ module Doocr
   # h_get_packet
   # Returns false if no packet is waiting
   #
-  def self.h_get_packet : CDoom::DoomBool
+  def self.h_get_packet : LibC::Int
     if Doocr.reboundpacket != 0
       Doocr.netbuffer.copy_from(Doocr.reboundstore.to_unsafe, 1)
       Doocr.doomcom.value.remotenode = 0
@@ -104,7 +104,7 @@ module Doocr
 
     return 0 if Doocr.demoplayback != 0
 
-    Doocr.doomcom.value.command = CDoom::Command::GET
+    Doocr.doomcom.value.command = Doocr::Command::GET
     CDoom.i_net_cmd
 
     return 0 if Doocr.doomcom.value.remotenode == -1
@@ -243,7 +243,7 @@ module Doocr
 
       while Doocr.nettics[netnode] < realend
         # puts "get_packet: Copying tics"
-        dest = (Doocr.netcmds.to_unsafe + netconsole).value.to_unsafe + (Doocr.nettics[netnode] % CDoom::BACKUPTICS)
+        dest = (Doocr.netcmds.to_unsafe + netconsole).value.to_unsafe + (Doocr.nettics[netnode] % Doocr::BACKUPTICS)
         Doocr.nettics[netnode] = Doocr.nettics[netnode] + 1
         dest.copy_from(src, 1)
         src += 1
@@ -283,7 +283,7 @@ module Doocr
       gameticdiv = Doocr.gametic // Doocr.ticdup
       newtics.times do |i|
         remaining = newtics - i
-        break if Doocr.maketic - gameticdiv >= CDoom::BACKUPTICS // 2 - 1 # can't hold any more
+        break if Doocr.maketic - gameticdiv >= Doocr::BACKUPTICS // 2 - 1 # can't hold any more
 
         mouse_step = Raylib::Vector2.new(
           x: @@mouse_queued.x // remaining,
@@ -295,7 +295,7 @@ module Doocr
         i_start_tic(mouse_step)
         CDoom.d_process_events
 
-        CDoom.g_build_ticcmd(Doocr.localcmds.to_unsafe + Doocr.maketic % CDoom::BACKUPTICS)
+        CDoom.g_build_ticcmd(Doocr.localcmds.to_unsafe + Doocr.maketic % Doocr::BACKUPTICS)
         Doocr.maketic += 1
       end
 
@@ -308,7 +308,7 @@ module Doocr
           Doocr.netbuffer.value.starttic = Doocr.resendto[i]
           realstart = Doocr.resendto[i]
           Doocr.netbuffer.value.numtics = Doocr.maketic - realstart
-          if Doocr.netbuffer.value.numtics > CDoom::BACKUPTICS
+          if Doocr.netbuffer.value.numtics > Doocr::BACKUPTICS
             CDoom.i_error("Error: net_update: netbuffer.value.numtics > BACKUPTICS")
           end
 
@@ -316,7 +316,7 @@ module Doocr
 
           Doocr.netbuffer.value.numtics.times do |j|
             (Doocr.netbuffer.value.cmds.to_unsafe + j).copy_from(
-              Doocr.localcmds.to_unsafe + ((realstart + j) % CDoom::BACKUPTICS), 1)
+              Doocr.localcmds.to_unsafe + ((realstart + j) % Doocr::BACKUPTICS), 1)
           end
 
           if Doocr.remoteresend[i] != 0
@@ -345,11 +345,11 @@ module Doocr
     i_start_tic
     while Doocr.eventtail != Doocr.eventhead
       ev = Doocr.events.to_unsafe + Doocr.eventtail
-      if ev.value.type == CDoom::Evtype::Keydown && ev.value.data1 == CDoom::KEY_ESCAPE
+      if ev.value.type == Doocr::Evtype::Keydown && ev.value.data1 == Doocr::KEY_ESCAPE
         CDoom.i_error("Error: Network game synchronization aborted.")
       end
       Doocr.eventtail += 1
-      Doocr.eventtail = (Doocr.eventtail) & (CDoom::MAXEVENTS - 1)
+      Doocr.eventtail = (Doocr.eventtail) & (Doocr::MAXEVENTS - 1)
     end
   end
 
@@ -391,7 +391,7 @@ module Doocr
           if Doocr.netbuffer.value.player != NETVERSION
             CDoom.i_error("Error: Different DOOM versions cannot play a net game!")
           end
-          Doocr.startskill = CDoom::Skill.new(Doocr.netbuffer.value.retransmitfrom & 15)
+          Doocr.startskill = Doocr::Skill.new(Doocr.netbuffer.value.retransmitfrom & 15)
           Doocr.deathmatch = (Doocr.netbuffer.value.retransmitfrom & 0xc0) >> 6
           Doocr.nomonsters = ((Doocr.netbuffer.value.retransmitfrom & 0x20) > 0).to_unsafe
           Doocr.respawnparm = ((Doocr.netbuffer.value.retransmitfrom & 0x10) > 0).to_unsafe
@@ -535,7 +535,7 @@ module Doocr
   # Works out player numbers among the net participants
   #
   def self.d_check_net_game
-    CDoom::MAXNETNODES.times do |i|
+    Doocr::MAXNETNODES.times do |i|
       Doocr.nodeingame[i] = 0
       Doocr.nettics[i] = 0
       Doocr.remoteresend[i] = 0 # set when local needs tics
@@ -544,7 +544,7 @@ module Doocr
 
     # i_init_network sets doomcom and netgame
     CDoom.i_init_network
-    CDoom.i_error("Error: Doomcom buffer invalid!") if Doocr.doomcom.value.id != CDoom::DOOMCOM_ID
+    CDoom.i_error("Error: Doomcom buffer invalid!") if Doocr.doomcom.value.id != Doocr::DOOMCOM_ID
 
     Doocr.netbuffer = pointerof(Doocr.doomcom.value.@data)
     Doocr.consoleplayer = Doocr.doomcom.value.consoleplayer
@@ -556,7 +556,7 @@ module Doocr
 
     # read values out of doomcom
     Doocr.ticdup = Doocr.doomcom.value.ticdup
-    Doocr.maxsend = CDoom::BACKUPTICS // (2 * Doocr.ticdup) - 1
+    Doocr.maxsend = Doocr::BACKUPTICS // (2 * Doocr.ticdup) - 1
     Doocr.maxsend = 1 if Doocr.maxsend < 1
 
     Doocr.doomcom.value.numplayers.times { |i| Doocr.playeringame[i] = 1 }
@@ -772,7 +772,7 @@ module Doocr
     unless i
       # single player game
       Doocr.netgame = 0
-      Doocr.doomcom.value.id = CDoom::DOOMCOM_ID
+      Doocr.doomcom.value.id = Doocr::DOOMCOM_ID
       Doocr.doomcom.value.numplayers = 1
       Doocr.doomcom.value.numnodes = 1
       Doocr.doomcom.value.consoleplayer = 0
@@ -806,7 +806,7 @@ module Doocr
       Doocr.doomcom.value.consoleplayer = -1 # Setup in d_arbitrate_net_start
     end
 
-    Doocr.doomcom.value.id = CDoom::DOOMCOM_ID
+    Doocr.doomcom.value.id = Doocr::DOOMCOM_ID
     Doocr.doomcom.value.numplayers = Doocr.doomcom.value.numnodes
 
     @@insocket = udp_socket()
@@ -816,13 +816,13 @@ module Doocr
   end
 
   def self.i_net_cmd
-    case CDoom::Command.new(Doocr.doomcom.value.command.to_i32)
-    when CDoom::Command::SEND
+    case Doocr::Command.new(Doocr.doomcom.value.command.to_i32)
+    when Doocr::Command::SEND
       @@netsend.call
-    when CDoom::Command::GET
+    when Doocr::Command::GET
       @@netget.call
     else
-      i_error("Error: Bad net cmd: #{CDoom::Command.new(Doocr.doomcom.value.command.to_i32)}")
+      i_error("Error: Bad net cmd: #{Doocr::Command.new(Doocr.doomcom.value.command.to_i32)}")
     end
   end
 end

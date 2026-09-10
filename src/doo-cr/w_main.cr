@@ -192,16 +192,16 @@ module Doocr
 
       if lump_num == Doocr.numlumps
         # Not been loaded. Initialize lump
-        Doocr.numlumps += ismap ? CDoom::ML_BLOCKMAP + 1 : 1
+        Doocr.numlumps += ismap ? Doocr::ML_BLOCKMAP + 1 : 1
 
-        (ismap ? CDoom::ML_BLOCKMAP + 1 : 1).times do |i|
+        (ismap ? Doocr::ML_BLOCKMAP + 1 : 1).times do |i|
           @@lumpinfo << Lumpinfo.new
         end
         startlump += 1
       end
       # Set the lump
       if ismap
-        (CDoom::ML_BLOCKMAP + 1).times do |m|
+        (Doocr::ML_BLOCKMAP + 1).times do |m|
           lump = @@lumpinfo[lump_num + m]
           lump.handle = Doocr.reloadname.empty? ? file : nil
           lump.position = fileinfo[mlump].filepos
@@ -307,7 +307,7 @@ module Doocr
     Doocr.numlumps.times { Doocr.lumpcache << Pointer(Void).null }
 
     if w_check_num_for_name("STDISK".to_unsafe) != -1
-      @@loading_patch = w_cache_lump_name("STDISK".to_unsafe, CDoom::PU_STATIC).as(CDoom::Patch*)
+      @@loading_patch = w_cache_lump_name("STDISK".to_unsafe, Doocr::PU_STATIC).as(CDoom::Patch*)
     end
   end
 
@@ -425,7 +425,7 @@ module Doocr
       # read the lump in
       @@do_loading_disk = true
 
-      ptr = CDoom.z_malloc(CDoom.w_lump_length(lump), tag, Doocr.lumpcache.to_unsafe + lump).as(CDoom::Byte*)
+      ptr = CDoom.z_malloc(CDoom.w_lump_length(lump), tag, Doocr.lumpcache.to_unsafe + lump).as(UInt8*)
       CDoom.w_read_lump(lump, Doocr.lumpcache[lump])
     else
       z_change_tag(Doocr.lumpcache[lump], tag)
