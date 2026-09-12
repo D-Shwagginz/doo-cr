@@ -265,8 +265,10 @@ module Doocr
     @@last_time = Raylib.get_time
 
     loop do
-      next unless Raylib.window_ready? && RAudio.audio_device_ready? &&
-                  @@audio_stream && @@adl_player
+      unless Raylib.window_ready? && RAudio.audio_device_ready? && @@audio_stream && @@adl_player
+        sleep 1.millisecond
+        next
+      end 
       now = Raylib.get_time
       @@midi_tick_accumulator += now - @@last_time
       @@last_time = now
@@ -332,6 +334,7 @@ module Doocr
           RAudio.update_audio_stream(a, doom_get_sound_buffer, 512)
         end
       end
+    sleep 1.millisecond
     end
 
     @@audio_stream.try { |a| RAudio.unload_audio_stream(a) }
