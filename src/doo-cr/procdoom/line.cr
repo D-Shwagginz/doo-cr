@@ -25,7 +25,7 @@ module Doocr::Mod
 
     getter db_name : String
     getter when : When
-    getter action : Proc(CDoom::Line*, Int32, CDoom::Mobj*, Nil)
+    getter action : Proc(Doocr::Line, Int32, Doocr::Mobj, Nil)
     getter number : Int32 = 200 # I believe 141 is the last special line number in Doom. 200 to be safe and round
 
     def initialize(@db_name, @when, @action)

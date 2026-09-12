@@ -347,10 +347,10 @@ module Doocr
   @@mouse_scale_remx = 0
   @@mouse_scale_remy = 0
 
-  def self.g_responder(ev : CDoom::Event*) : LibC::Int
+  def self.g_responder(ev : Doocr::Event) : LibC::Int
     # allow spy mode changes even during the demo
-    if Doocr.gamestate == Doocr::Gamestate::Level && ev.value.type == Doocr::Evtype::Keydown &&
-       ev.value.data1 == Doocr::KEY_F12 && (Doocr.singledemo != 0 || Doocr.deathmatch == 0)
+     if Doocr.gamestate == Doocr::Gamestate::Level && ev.type == Doocr::Evtype::Keydown &&
+       ev.data1 == Doocr::KEY_F12 && (Doocr.singledemo != 0 || Doocr.deathmatch == 0)
       # spy mode
       loop do
         Doocr.displayplayer += 1
@@ -364,9 +364,9 @@ module Doocr
     # any other key pops up menu if in demos
     if Doocr.gameaction == Doocr::Gameaction::Nothing && Doocr.singledemo == 0 &&
        (Doocr.demoplayback != 0 || Doocr.gamestate == Doocr::Gamestate::Demoscreen)
-      if ev.value.type == Doocr::Evtype::Keydown ||
-         (ev.value.type == Doocr::Evtype::Mouse && ev.value.data1 != 0) ||
-         (ev.value.type == Doocr::Evtype::Joystick && ev.value.data1 != 0)
+      if ev.type == Doocr::Evtype::Keydown ||
+        (ev.type == Doocr::Evtype::Mouse && ev.data1 != 0) ||
+        (ev.type == Doocr::Evtype::Joystick && ev.data1 != 0)
         CDoom.m_start_control_panel
         return 1
       end
@@ -375,49 +375,49 @@ module Doocr
 
     if Doocr.gamestate == Doocr::Gamestate::Level
       {% if false %}
-        if Doocr.devparm != 0 && ev.value.type == Doocr::Evtype::Keydown && ev.value.data1 == ';'.ord
+        if Doocr.devparm != 0 && ev.type == Doocr::Evtype::Keydown && ev.data1 == ';'.ord
           CDoom.g_deathmatch_spawn_player(0)
           return 1
         end
       {% end %}
-      return 1 if CDoom.hu_responder(ev) != 0 # chat ate the event
-      return 1 if CDoom.st_responder(ev) != 0 # status window ate it
+      return 1 if Doocr.hu_responder(ev) != 0 # chat ate the event
+      return 1 if Doocr.st_responder(ev) != 0 # status window ate it
       return 1 if Doocr.am_responder(ev) != 0 # automap ate it
     end
 
     if Doocr.gamestate == Doocr::Gamestate::Finale
-      return 1 if CDoom.f_responder(ev) != 0 # finale ate the event
+      return 1 if Doocr.f_responder(ev) != 0 # finale ate the event
     end
 
-    case ev.value.type
+    case ev.type
     when Doocr::Evtype::Keydown
-      if ev.value.data1 == Doocr::KEY_PAUSE
+      if ev.data1 == Doocr::KEY_PAUSE
         Doocr.sendpause = 1
         return 1
       end
-      Doocr.gamekeydown[ev.value.data1] = 1 if ev.value.data1 < Doocr::NUMKEYS
+      Doocr.gamekeydown[ev.data1] = 1 if ev.data1 < Doocr::NUMKEYS
       return 1 # eat key down events
     when Doocr::Evtype::Keyup
-      Doocr.gamekeydown[ev.value.data1] = 0 if ev.value.data1 < Doocr::NUMKEYS
+      Doocr.gamekeydown[ev.data1] = 0 if ev.data1 < Doocr::NUMKEYS
       return 0 # always let key up events filter down
     when Doocr::Evtype::Mouse
-      Doocr.mousebuttons[0] = ev.value.data1 & 1
-      Doocr.mousebuttons[1] = ev.value.data1 & 2
-      Doocr.mousebuttons[2] = ev.value.data1 & 4
-      scaled_x = ev.value.data2 * (Doocr.mouse_sensitivity + 5) + @@mouse_scale_remx
-      scaled_y = ev.value.data3 * (Doocr.mouse_sensitivity + 5) + @@mouse_scale_remy
+      Doocr.mousebuttons[0] = ev.data1 & 1
+      Doocr.mousebuttons[1] = ev.data1 & 2
+      Doocr.mousebuttons[2] = ev.data1 & 4
+      scaled_x = ev.data2 * (Doocr.mouse_sensitivity + 5) + @@mouse_scale_remx
+      scaled_y = ev.data3 * (Doocr.mouse_sensitivity + 5) + @@mouse_scale_remy
       @@mousex = scaled_x // 10
       @@mousey = scaled_y // 10
       @@mouse_scale_remx = scaled_x % 10
       @@mouse_scale_remy = scaled_y % 10
       return 1 # eat events
     when Doocr::Evtype::Joystick
-      Doocr.joybuttons[0] = ev.value.data1 & 1
-      Doocr.joybuttons[1] = ev.value.data1 & 2
-      Doocr.joybuttons[2] = ev.value.data1 & 4
-      Doocr.joybuttons[3] = ev.value.data1 & 8
-      Doocr.joyxmove = ev.value.data2
-      Doocr.joyymove = ev.value.data3
+      Doocr.joybuttons[0] = ev.data1 & 1
+      Doocr.joybuttons[1] = ev.data1 & 2
+      Doocr.joybuttons[2] = ev.data1 & 4
+      Doocr.joybuttons[3] = ev.data1 & 8
+      Doocr.joyxmove = ev.data2
+      Doocr.joyymove = ev.data3
       return 1 # eat events
     end
 
@@ -479,7 +479,7 @@ module Doocr
            (Doocr.gametic & 31) == 0 && (Doocr.gametic >> 5) & 3 == i
           CDoom.doom_strcpy(@@turbomessage, Doocr.player_names[i].to_unsafe)
           CDoom.doom_concat(@@turbomessage, " is turbo!")
-          (@@players.to_unsafe + Doocr.consoleplayer).value.message = @@turbomessage
+          @@players[Doocr.consoleplayer].message = String.new(@@turbomessage.to_unsafe)
         end
 
         if Doocr.netgame != 0 && Doocr.netdemo == 0 && (Doocr.gametic % Doocr.ticdup) == 0
@@ -487,8 +487,8 @@ module Doocr
              Doocr.consistancy[i][buf] != cmd.value.consistancy
             CDoom.i_error("Error: consistency failure (#{cmd.value.consistancy} should be #{Doocr.consistancy[i][buf]})")
           end
-          if !@@players[i].mo.null?
-            Doocr.consistancy[i][buf] = @@players[i].mo.value.x.to_i16!
+          if @@players[i].mo
+            Doocr.consistancy[i][buf] = @@players[i].mo.not_nil!.x.to_i16!
           else
             Doocr.consistancy[i][buf] = Doocr.rndindex.to_i16!
           end
@@ -559,7 +559,7 @@ module Doocr
 
     CDoom.doom_memset(p.value.powers.to_unsafe, 0, sizeof(typeof(p.value.powers)))
     CDoom.doom_memset(p.value.cards.to_unsafe, 0, sizeof(typeof(p.value.cards)))
-    p.value.mo.value.flags = p.value.mo.value.flags & ~Doocr::Mobjflag::MF_SHADOW.value # cancel invisibility
+    p.value.mo.not_nil!.flags = p.value.mo.not_nil!.flags & ~Doocr::Mobjflag::MF_SHADOW.value # cancel invisibility
     p.value.extralight = 0                                                              # cancel gun flashes
     p.value.fixedcolormap = 0                                                           # cancel ir gogles
     p.value.damagecount = 0                                                             # no palette changes
@@ -603,11 +603,11 @@ module Doocr
   end
 
   def self.g_check_spot(playernum : Int32, mthing : CDoom::Mapthing*) : LibC::Int
-    if @@players[playernum].mo.null?
+    if @@players[playernum].mo.nil?
       # first spawn of level, before corpses
       playernum.times do |i|
-        return 0 if (@@players[i].mo.value.x == mthing.value.x.to_i32! << FRACBITS &&
-                    @@players[i].mo.value.y == mthing.value.y.to_i32! << FRACBITS)
+        return 0 if (@@players[i].mo.not_nil!.x == mthing.value.x.to_i32! << FRACBITS &&
+              @@players[i].mo.not_nil!.y == mthing.value.y.to_i32! << FRACBITS)
       end
       return 1
     end
@@ -615,21 +615,21 @@ module Doocr
     x = mthing.value.x.to_i32! << FRACBITS
     y = mthing.value.y.to_i32! << FRACBITS
 
-    return 0 if CDoom.p_check_position(@@players[playernum].mo, x, y) == 0
+    return 0 if Doocr.p_check_position(@@players[playernum].mo.not_nil!, x, y) == 0
 
     # flush an old corpse if needed
     if Doocr.bodyqueslot >= Doocr::BODYQUESIZE
-      CDoom.p_remove_mobj(Doocr.bodyque[Doocr.bodyqueslot % Doocr::BODYQUESIZE])
+      p_remove_mobj(Doocr.bodyque[Doocr.bodyqueslot % Doocr::BODYQUESIZE].not_nil!)
     end
     Doocr.bodyque[Doocr.bodyqueslot % Doocr::BODYQUESIZE] = @@players[playernum].mo
     Doocr.bodyqueslot += 1
 
     # spawn a teleport fog
-    ss = CDoom.r_point_in_subsector(x, y)
+    ss = Doocr.r_point_in_subsector(x, y)
     an = (ANG45 &* (mthing.value.angle.tdiv(45))) >> Doocr::ANGLETOFINESHIFT
 
-    mo = CDoom.p_spawn_mobj(x + 20 * @@finecosine[an], y + 20 * @@finesine[an],
-      ss.value.sector.value.floorheight, Doocr::Mobjtype::MT_TFOG)
+    mo = Doocr.p_spawn_mobj(x + 20 * @@finecosine[an], y + 20 * @@finesine[an],
+      ss.sector.not_nil!.floorheight, Doocr::Mobjtype::MT_TFOG)
 
     Doocr.s_start_sound(mo, Doocr::Sfxenum::SFX_telept) if @@players[Doocr.consoleplayer].viewz != 1 # don't start sound on first frame
 
@@ -658,21 +658,21 @@ module Doocr
   def self.g_despawn_player(playernum : Int32)
     pmo = @@players[playernum].mo
 
-    x = pmo.value.x.to_i32!
-    y = pmo.value.y.to_i32!
+    x = pmo.not_nil!.x.to_i32!
+    y = pmo.not_nil!.y.to_i32!
 
     # spawn a teleport fog
-    ss = CDoom.r_point_in_subsector(x, y)
-    an = (ANG45 &* (pmo.value.angle.tdiv(45))) >> Doocr::ANGLETOFINESHIFT
+    ss = Doocr.r_point_in_subsector(x, y)
+    an = (ANG45 &* (pmo.not_nil!.angle.tdiv(45))) >> Doocr::ANGLETOFINESHIFT
 
-    mo = CDoom.p_spawn_mobj(x + 20 * @@finecosine[an], y + 20 * @@finesine[an],
-      ss.value.sector.value.floorheight, Doocr::Mobjtype::MT_TFOG)
+    mo = Doocr.p_spawn_mobj(x + 20 * @@finecosine[an], y + 20 * @@finesine[an],
+      ss.sector.not_nil!.floorheight, Doocr::Mobjtype::MT_TFOG)
 
     Doocr.s_start_sound(mo, Doocr::Sfxenum::SFX_telept) if @@players[Doocr.consoleplayer].viewz != 1 # don't start sound on first frame
 
     # Despawn player mobj
-    p_remove_mobj(pmo)
-    (@@players.to_unsafe + playernum).value.mo = Pointer(CDoom::Mobj).null
+    Doocr.p_remove_mobj(pmo.not_nil!)
+    @@players[playernum].mo = nil
   end
 
   #
@@ -686,7 +686,7 @@ module Doocr
       # respawn at the start
 
       # first dissasociate the corpse
-      @@players[playernum].mo.value.player = Pointer(CDoom::Player).null
+      @@players[playernum].mo.not_nil!.player = nil
 
       # spawn at random spot if in death match
       if Doocr.deathmatch != 0
@@ -1026,18 +1026,18 @@ module Doocr
         (@@states.to_unsafe + i).value.tics = @@states[i].tics >> 1
         i += 1
       end
-      (Doocr.mobjinfo.to_unsafe + Doocr::Mobjtype::MT_BRUISERSHOT.value).value.speed = 20 * FRACUNIT
-      (Doocr.mobjinfo.to_unsafe + Doocr::Mobjtype::MT_HEADSHOT.value).value.speed = 20 * FRACUNIT
-      (Doocr.mobjinfo.to_unsafe + Doocr::Mobjtype::MT_TROOPSHOT.value).value.speed = 20 * FRACUNIT
+      Doocr.mobjinfo[Doocr::Mobjtype::MT_BRUISERSHOT.value].speed = 20 * FRACUNIT
+      Doocr.mobjinfo[Doocr::Mobjtype::MT_HEADSHOT.value].speed = 20 * FRACUNIT
+      Doocr.mobjinfo[Doocr::Mobjtype::MT_TROOPSHOT.value].speed = 20 * FRACUNIT
     elsif skill != Doocr::Skill::Nightmare && Doocr.gameskill == Doocr::Skill::Nightmare
       i = Doocr::Statenum::S_SARG_RUN1.value
       while i <= Doocr::Statenum::S_SARG_PAIN2.value
         (@@states.to_unsafe + i).value.tics = @@states[i].tics << 1
         i += 1
       end
-      (Doocr.mobjinfo.to_unsafe + Doocr::Mobjtype::MT_BRUISERSHOT.value).value.speed = 15 * FRACUNIT
-      (Doocr.mobjinfo.to_unsafe + Doocr::Mobjtype::MT_HEADSHOT.value).value.speed = 10 * FRACUNIT
-      (Doocr.mobjinfo.to_unsafe + Doocr::Mobjtype::MT_TROOPSHOT.value).value.speed = 10 * FRACUNIT
+      Doocr.mobjinfo[Doocr::Mobjtype::MT_BRUISERSHOT.value].speed = 15 * FRACUNIT
+      Doocr.mobjinfo[Doocr::Mobjtype::MT_HEADSHOT.value].speed = 10 * FRACUNIT
+      Doocr.mobjinfo[Doocr::Mobjtype::MT_TROOPSHOT.value].speed = 10 * FRACUNIT
     end
 
     # force players to be initialized upon first level load

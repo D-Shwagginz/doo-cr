@@ -131,7 +131,7 @@ module Doocr::Mod
       @flags = @flags & ~flags
     end
 
-    getter on_touch : Proc(CDoom::Mobj*, CDoom::Mobj*, Nil) = ->(special : CDoom::Mobj*, toucher : CDoom::Mobj*) { nil }
+    getter on_touch : Proc(Doocr::Mobj, Doocr::Mobj, Nil) = ->(special : Doocr::Mobj, toucher : Doocr::Mobj) { nil }
 
     def on_touch(&touch : CDoom::Mobj*, CDoom::Mobj* -> Nil)
       @on_touch = touch
@@ -180,7 +180,7 @@ module Doocr::Mod
       # Sounds
       if @alertsound.empty?
         alert_sound = 0
-      elsif sound = Doocr.s_sfx.index { |sfx| sfx.name.value == @alertsound[0..5].downcase }
+      elsif sound = Doocr.s_sfx.index { |sfx| sfx.name == @alertsound[0..5].downcase }
         alert_sound = sound
       else
         alert_sound = Mod.add_sound(@alertsound)
@@ -188,7 +188,7 @@ module Doocr::Mod
 
       if @attacksound.empty?
         attack_sound = 0
-      elsif sound = Doocr.s_sfx.index { |sfx| sfx.name.value == @attacksound[0..5].downcase }
+      elsif sound = Doocr.s_sfx.index { |sfx| sfx.name == @attacksound[0..5].downcase }
         attack_sound = sound
       else
         attack_sound = Mod.add_sound(@attacksound)
@@ -196,7 +196,7 @@ module Doocr::Mod
 
       if @painsound.empty?
         pain_sound = 0
-      elsif sound = Doocr.s_sfx.index { |sfx| sfx.name.value == @painsound[0..5].downcase }
+      elsif sound = Doocr.s_sfx.index { |sfx| sfx.name == @painsound[0..5].downcase }
         pain_sound = sound
       else
         pain_sound = Mod.add_sound(@painsound)
@@ -204,7 +204,7 @@ module Doocr::Mod
 
       if @deathsound.empty?
         death_sound = 0
-      elsif sound = Doocr.s_sfx.index { |sfx| sfx.name.value == @deathsound[0..5].downcase }
+      elsif sound = Doocr.s_sfx.index { |sfx| sfx.name == @deathsound[0..5].downcase }
         death_sound = sound
       else
         death_sound = Mod.add_sound(@deathsound)
@@ -212,27 +212,27 @@ module Doocr::Mod
 
       if @activesound.empty?
         active_sound = 0
-      elsif sound = Doocr.s_sfx.index { |sfx| sfx.name.value == @activesound[0..5].downcase }
+      elsif sound = Doocr.s_sfx.index { |sfx| sfx.name == @activesound[0..5].downcase }
         active_sound = sound
       else
         active_sound = Mod.add_sound(@activesound)
       end
 
-      Doocr.mobjinfo << CDoom::Mobjinfo.new(
+      Doocr.mobjinfo << Doocr::Mobjinfo.new(
         doomednum: @doomednum,
-        spawnstate: spawn_num,
+        spawnstate: spawn_num.value,
         spawnhealth: @health,
-        seestate: walk_num,
+        seestate: walk_num.value,
         seesound: alert_sound,
         reactiontime: @reaction_time,
         attacksound: attack_sound,
-        painstate: pain_num,
+        painstate: pain_num.value,
         painchance: @pain_chance,
         painsound: pain_sound,
-        meleestate: melee_num,
-        missilestate: attack_num,
-        deathstate: death_num,
-        xdeathstate: explode_num,
+        meleestate: melee_num.value,
+        missilestate: attack_num.value,
+        deathstate: death_num.value,
+        xdeathstate: explode_num.value,
         deathsound: death_sound,
         speed: Doocr.float_to_fixed(@speed),
         radius: Doocr.float_to_fixed(@radius),
@@ -241,7 +241,7 @@ module Doocr::Mod
         damage: @damage,
         activesound: active_sound,
         flags: @flags.value,
-        raisestate: raise_num
+        raisestate: raise_num.value
       )
 
       @spawnstate.parse_ends

@@ -424,34 +424,34 @@ module Doocr
   ]
   @@num_nobrainers = 0
 
-  def self.hu_responder(ev : CDoom::Event*) : LibC::Int
+  def self.hu_responder(ev : Doocr::Event) : LibC::Int
     eatkey = 0
     numplayers = 0
     CDoom::MAXPLAYERS.times { |i| numplayers += Doocr.playeringame[i] }
 
-    if ev.value.data1 == Doocr::KEY_RSHIFT
-      @@shiftdown = (ev.value.type == Doocr::Evtype::Keydown).to_unsafe
-      return 0
-    elsif ev.value.data1 == Doocr::KEY_RALT || ev.value.data1 == Doocr::KEY_LALT
-      @@altdown = (ev.value.type == Doocr::Evtype::Keydown).to_unsafe
-      return 0
+      if ev.data1 == Doocr::KEY_RSHIFT
+        @@shiftdown = (ev.type == Doocr::Evtype::Keydown).to_unsafe
+        return 0
+      elsif ev.data1 == Doocr::KEY_RALT || ev.data1 == Doocr::KEY_LALT
+        @@altdown = (ev.type == Doocr::Evtype::Keydown).to_unsafe
+        return 0
     end
 
-    return 0 if ev.value.type != Doocr::Evtype::Keydown
+      return 0 if ev.type != Doocr::Evtype::Keydown
 
     if Doocr.chat_on == 0
-      if ev.value.data1 == Doocr::HU_MSGREFRESH
+      if ev.data1 == Doocr::HU_MSGREFRESH
         Doocr.message_on = 1
         Doocr.message_counter = Doocr::HU_MSGTIMEOUT
         eatkey = 1
-      elsif Doocr.netgame != 0 && ev.value.data1 == Doocr::HU_INPUTTOGGLE
+      elsif Doocr.netgame != 0 && ev.data1 == Doocr::HU_INPUTTOGGLE
         eatkey = 1
         Doocr.chat_on = 1
         CDoom.hulib_reset_i_text(Doocr.w_chat.to_unsafe)
         CDoom.hu_queue_chat_char(Doocr::HU_BROADCAST)
       elsif Doocr.netgame != 0 && numplayers > 2
         CDoom::MAXPLAYERS.times do |i|
-          if ev.value.data1 == @@destination_keys[i]
+          if ev.data1 == @@destination_keys[i]
             if Doocr.playeringame[i] != 0 && i != Doocr.consoleplayer
               eatkey = 1
               Doocr.chat_on = 1
@@ -476,7 +476,7 @@ module Doocr
         end
       end
     else
-      c = ev.value.data1
+      c = ev.data1
       # send a macro
       if @@altdown != 0
         return 0 if c < '0'.ord || c > '9'.ord
@@ -495,7 +495,7 @@ module Doocr
         # leave chat mode and notify that it was sent
         Doocr.chat_on = 0
         CDoom.doom_strcpy(@@lastmessage, Doocr.chat_macros[c].to_unsafe)
-        Doocr.plr.value.message = @@lastmessage
+        Doocr.plr.value.message = String.new(@@lastmessage.to_unsafe)
         eatkey = 1
       else
         c = CDoom.foreign_translation(c) if Doocr.language == Doocr::Language::French
@@ -506,7 +506,7 @@ module Doocr
           Doocr.chat_on = 0
           if Doocr.w_chat[0].l.len != 0
             CDoom.doom_strcpy(@@lastmessage, Doocr.w_chat[0].l.l)
-            Doocr.plr.value.message = @@lastmessage
+            Doocr.plr.value.message = String.new(@@lastmessage.to_unsafe)
           end
         elsif c == Doocr::KEY_ESCAPE
           Doocr.chat_on = 0

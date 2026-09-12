@@ -161,11 +161,11 @@ module Doocr
     # priority - Sfx priority for when channels get full
     # Returns the index that sound is at
     def self.add_sound(name : String, singularity : Bool = false, priority : Int32 = 64) : Int32
-      Doocr.s_sfx << CDoom::Sfxinfo.new(
+      Doocr.s_sfx << Doocr::Sfxinfo.new(
         name: name[0..5].downcase,
-        singularity: singularity.to_unsafe,
+        singularity: singularity ? 1 : 0,
         priority: priority,
-        link: Pointer(CDoom::Sfxinfo).null, pitch: -1, volume: -1,
+        link: nil, pitch: -1, volume: -1,
         data: Pointer(Void).null
       )
       Doocr.lengths << 0
@@ -185,32 +185,32 @@ module Doocr
     # when it will happen, and the block that will be performed when this occurs.
     #
     # The blocks parms are the line that the tag happened on, the side it happened, and the thing that triggered it
-    def self.add_sector(db_name : String, &action : Proc(CDoom::Sector*, CDoom::Player*, Nil))
+    def self.add_sector(db_name : String, &action : Proc(Doocr::Sector, Doocr::Player, Nil))
       sector = Sector.new(db_name, action)
       @@sectors << sector
     end
 
     # Gets which player number a player pointer is
-    def self.get_player_num(player : CDoom::Player*) : Int64
-      return player - Doocr.players
+    def self.get_player_num(player : Doocr::Player) : Int64
+      return Doocr.players.index(player).not_nil!.to_i64
     end
 
     # Gets the current player that the state is being called from.
     #  Can be null if the state isn't being called from a player (a mobj state)
-    def self.get_player : CDoom::Player*
+    def self.get_player : Doocr::Player?
       Doocr.current_thinking_player
     end
 
     # Gets the current mobj that the state is being called from.
     #  Can be null if the state isn't being called from a mobj (a weapon state)
-    def self.get_mobj : CDoom::Mobj*
+    def self.get_mobj : Doocr::Mobj?
       Doocr.current_thinking_mobj
     end
 
-    class_getter update_player_action : Proc(CDoom::Player*, Nil) = ->(player : CDoom::Player*) { nil }
+    class_getter update_player_action : Proc(Doocr::Player, Nil) = ->(player : Doocr::Player) { nil }
 
     # Sets what will happen when a player is updated
-    def self.update_player(&action : CDoom::Player* -> Nil)
+    def self.update_player(&action : Doocr::Player -> Nil)
       @@update_player_action = action
     end
 

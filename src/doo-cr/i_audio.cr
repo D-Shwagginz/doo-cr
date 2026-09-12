@@ -43,11 +43,11 @@ module Doocr
     Doocr.mus_volume = Doocr.snd_music_volume * 8
   end
 
-  def self.i_get_sfx_lump_num(sfx : CDoom::Sfxinfo*) : Int32
+  def self.i_get_sfx_lump_num(sfx : Doocr::Sfxinfo) : Int32
     namebuf = uninitialized StaticArray(UInt8, 9)
 
     CDoom.doom_strcpy(namebuf, "ds")
-    CDoom.doom_concat(namebuf, sfx.value.name)
+    CDoom.doom_concat(namebuf, sfx.name.to_unsafe)
     return CDoom.w_get_num_for_name(namebuf)
   end
 
@@ -350,13 +350,15 @@ module Doocr
     i = 1
     while i < @@s_sfx.size
       # Alias? Example is the chaingun sound linked to pistol.
-      if (@@s_sfx.to_unsafe + i).value.link.null?
+      sfx = @@s_sfx[i]
+      if sfx.link.nil?
         # Load data from WAD file.
-        (@@s_sfx.to_unsafe + i).value.data = CDoom.getsfx((@@s_sfx.to_unsafe + i).value.name, @@lengths.to_unsafe + i)
+        sfx.data = CDoom.getsfx(sfx.name.to_unsafe, @@lengths.to_unsafe + i)
       else
         # Previously loaded already?
-        (@@s_sfx.to_unsafe + i).value.data = (@@s_sfx.to_unsafe + i).value.link.value.data
-        @@lengths[i] = @@lengths[((@@s_sfx.to_unsafe + i).value.link - @@s_sfx.to_unsafe) // sizeof(CDoom::Sfxinfo)]
+        link_index = @@s_sfx.index(sfx.link.not_nil!).not_nil!
+        sfx.data = sfx.link.not_nil!.data
+        @@lengths[i] = @@lengths[link_index]
       end
 
       i += 1

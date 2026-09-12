@@ -32,7 +32,7 @@ module Doocr
     Doocr.prndindex = 0
   end
 
-  def self.t_move_ceiling(ceiling : CDoom::Ceiling*)
+  def self.t_move_ceiling(ceiling : Doocr::Ceiling)
     case ceiling.value.direction
     when 0
       # IN STASIS
@@ -112,17 +112,17 @@ module Doocr
   #
   # Move a ceiling up/down and all around!
   #
-  def self.ev_do_ceiling(line : CDoom::Line*, type : Doocr::Ceilingenum) : LibC::Int
+  def self.ev_do_ceiling(line : Doocr::Line, type : Doocr::Ceilingenum) : LibC::Int
     secnum = -1
     rtn = 0
 
     # Reactivate in-stasis ceilings...for cetain types.
     case type
-    when Doocr::Ceilingenum::FastCrushAndRaise, Doocr::Ceilingenum::SilentCrushAndRaise, Doocr::Ceilingenum::CrushAndRaise
-      CDoom.p_activate_in_stasis_ceiling(line)
+      when Doocr::Ceilingenum::FastCrushAndRaise, Doocr::Ceilingenum::SilentCrushAndRaise, Doocr::Ceilingenum::CrushAndRaise
+        CDoom.p_activate_in_stasis_ceiling(line)
     end
 
-    while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
+    while (secnum = Doocr.p_find_sector_from_line_tag(line, secnum)) >= 0
       sec = Doocr.sectors + secnum
       next unless sec.value.specialdata.null?
 
@@ -170,7 +170,7 @@ module Doocr
   #
   # Add an active ceiling
   #
-  def self.p_add_active_ceiling(c : CDoom::Ceiling*)
+  def self.p_add_active_ceiling(c : Doocr::Ceiling)
     Doocr::MAXCEILINGS.times do |i|
       if Doocr.activeceilings[i].null?
         Doocr.activeceilings[i] = c
@@ -182,7 +182,7 @@ module Doocr
   #
   # Remove a ceiling's thinker
   #
-  def self.p_remove_active_ceiling(c : CDoom::Ceiling*)
+  def self.p_remove_active_ceiling(c : Doocr::Ceiling)
     Doocr::MAXCEILINGS.times do |i|
       if Doocr.activeceilings[i] == c
         Doocr.activeceilings[i].value.sector.value.specialdata = Pointer(Void).null
@@ -196,7 +196,7 @@ module Doocr
   #
   # Restart a ceiling that's in-stasis
   #
-  def self.p_activate_in_stasis_ceiling(line : CDoom::Line*)
+  def self.p_activate_in_stasis_ceiling(line : Doocr::Line)
     Doocr::MAXCEILINGS.times do |i|
       if !Doocr.activeceilings[i].null? &&
          (Doocr.activeceilings[i].value.tag == line.value.tag) &&
@@ -210,7 +210,7 @@ module Doocr
   #
   # Stop a ceiling from crushing!
   #
-  def self.ev_ceiling_crush_stop(line : CDoom::Line*) : LibC::Int
+  def self.ev_ceiling_crush_stop(line : Doocr::Line) : LibC::Int
     rtn = 0
     Doocr::MAXCEILINGS.times do |i|
       if !Doocr.activeceilings[i].null? &&
@@ -229,7 +229,7 @@ module Doocr
   #
   # Move a locked door up/down
   #
-  def self.t_vertical_door(door : CDoom::Vldoor*)
+  def self.t_vertical_door(door : Doocr::Vldoor)
     case door.value.direction
     when 0
       # WAITING
@@ -312,7 +312,7 @@ module Doocr
     end
   end
 
-  def self.ev_do_locked_door(line : CDoom::Line*, type : Doocr::Vldoorenum, thing : CDoom::Mobj*) : LibC::Int
+  def self.ev_do_locked_door(line : Doocr::Line, type : Doocr::Vldoorenum, thing : Doocr::Mobj) : LibC::Int
     p = thing.value.player
 
     return 0 if p.null?
@@ -344,11 +344,11 @@ module Doocr
   #
   # open a door manually, no tag value
   #
-  def self.ev_do_door(line : CDoom::Line*, type : Doocr::Vldoorenum) : LibC::Int
+  def self.ev_do_door(line : Doocr::Line, type : Doocr::Vldoorenum) : LibC::Int
     secnum = -1
     rtn = 0
 
-    while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
+    while (secnum = Doocr.p_find_sector_from_line_tag(line, secnum)) >= 0
       sec = Doocr.sectors + secnum
       next unless sec.value.specialdata.null?
 
@@ -402,7 +402,7 @@ module Doocr
     return rtn
   end
 
-  def self.ev_vertical_door(line : CDoom::Line*, thing : CDoom::Mobj*)
+  def self.ev_vertical_door(line : Doocr::Line, thing : Doocr::Mobj)
     side = 0 # only front sides can be used
 
     # Check for locks
@@ -500,7 +500,7 @@ module Doocr
   #
   # Spawn a door that closes after 30 seconds
   #
-  def self.p_spawn_door_close_in_30(sec : CDoom::Sector*)
+  def self.p_spawn_door_close_in_30(sec : Doocr::Sector)
     door = CDoom.z_malloc(sizeof(CDoom::Vldoor), Doocr::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
 
     CDoom.p_add_thinker(pointerof(door.value.@thinker))
@@ -519,7 +519,7 @@ module Doocr
   #
   # Spawn a door that opens after 5 minutes
   #
-  def self.p_spawn_door_raise_in_5_mins(sec : CDoom::Sector*, secnum : LibC::Int)
+  def self.p_spawn_door_raise_in_5_mins(sec : Doocr::Sector, secnum : LibC::Int)
     door = CDoom.z_malloc(sizeof(CDoom::Vldoor), Doocr::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
 
     CDoom.p_add_thinker(pointerof(door.value.@thinker))
@@ -551,34 +551,34 @@ module Doocr
   # Recursively traverse adjacent sectors,
   # sound blocking lines cut off traversal.
   #
-  def self.p_recursive_sound(sec : CDoom::Sector*, soundblocks : LibC::Int)
+  def self.p_recursive_sound(sec : Doocr::Sector, soundblocks : LibC::Int)
     # wake up all monsters in this sector
-    if sec.value.validcount == Doocr.validcount &&
-       sec.value.soundtraversed <= soundblocks + 1
+     if sec.validcount == Doocr.validcount &&
+       sec.soundtraversed <= soundblocks + 1
       return # already flooded
     end
 
-    sec.value.validcount = Doocr.validcount
-    sec.value.soundtraversed = soundblocks + 1
-    sec.value.soundtarget = Doocr.soundtarget
+    sec.validcount = Doocr.validcount
+    sec.soundtraversed = soundblocks + 1
+    sec.soundtarget = Doocr.soundtarget
 
-    sec.value.linecount.times do |i|
-      check = sec.value.lines[i]
-      next if check.value.flags & Doocr::ML_TWOSIDED == 0
+    sec.linecount.times do |i|
+      check = sec.lines[i].not_nil!
+      next if check.flags & Doocr::ML_TWOSIDED == 0
 
-      CDoom.p_line_opening(check)
+      Doocr.p_line_opening(check)
 
       next if Doocr.openrange <= 0 # closed door
 
-      other = Doocr.sides[check.value.sidenum[0]].sector
-      if Doocr.sides[check.value.sidenum[0]].sector == sec
-        other = Doocr.sides[check.value.sidenum[1]].sector
+      other = Doocr.sides[check.sidenum[0]].sector
+      if Doocr.sides[check.sidenum[0]].sector == sec
+        other = Doocr.sides[check.sidenum[1]].sector
       end
 
-      if check.value.flags & Doocr::ML_SOUNDBLOCK != 0
-        CDoom.p_recursive_sound(other, 1) if soundblocks == 0
+      if check.flags & Doocr::ML_SOUNDBLOCK != 0
+        Doocr.p_recursive_sound(other.not_nil!, 1) if soundblocks == 0
       else
-        CDoom.p_recursive_sound(other, soundblocks)
+        Doocr.p_recursive_sound(other.not_nil!, soundblocks)
       end
     end
   end
@@ -587,81 +587,81 @@ module Doocr
   # If a monster yells at a player,
   # it will alert other monsters to the player.
   #
-  def self.p_noise_alert(target : CDoom::Mobj*, emmiter : CDoom::Mobj*)
+  def self.p_noise_alert(target : Doocr::Mobj, emmiter : Doocr::Mobj)
     Doocr.soundtarget = target
     Doocr.validcount += 1
-    CDoom.p_recursive_sound(emmiter.value.subsector.value.sector, 0)
+    Doocr.p_recursive_sound(emmiter.subsector.not_nil!.sector.not_nil!, 0)
   end
 
-  def self.p_check_melee_range(actor : CDoom::Mobj*) : LibC::Int
+  def self.p_check_melee_range(actor : Doocr::Mobj) : LibC::Int
     return 0 if actor.value.target.null?
 
     pl = actor.value.target
     dist = CDoom.p_aprox_distance(pl.value.x - actor.value.x, pl.value.y - actor.value.y)
 
-    return 0 if dist >= Doocr::MELEERANGE - 20 * FRACUNIT + pl.value.info.value.radius
+    return 0 if dist >= Doocr::MELEERANGE - 20 * FRACUNIT + Doocr.mobjinfo_for(pl.value).radius
 
-    return 0 if CDoom.p_check_sight(actor, actor.value.target) == 0
+    return 0 if Doocr.p_check_sight(actor, actor.target.not_nil!) == 0
 
     return 1
   end
 
-  def self.p_check_missile_range(actor : CDoom::Mobj*) : LibC::Int
-    return 0 if CDoom.p_check_sight(actor, actor.value.target) == 0
+  def self.p_check_missile_range(actor : Doocr::Mobj) : LibC::Int
+    return 0 if Doocr.p_check_sight(actor, actor.target.not_nil!) == 0
 
-    if actor.value.flags & Doocr::Mobjflag::MF_JUSTHIT.value != 0
+    if actor.flags & Doocr::Mobjflag::MF_JUSTHIT.value != 0
       # the target just hit the enemy,
       # so fight back!
-      actor.value.flags = actor.value.flags & ~Doocr::Mobjflag::MF_JUSTHIT.value
+      actor.flags = actor.flags & ~Doocr::Mobjflag::MF_JUSTHIT.value
       return 1
     end
 
-    return 0 if actor.value.reactiontime != 0 # do not attack yet
+    return 0 if actor.reactiontime != 0 # do not attack yet
 
     # OPTIMIZE: get this from a global checksight
-    dist = CDoom.p_aprox_distance(actor.value.x - actor.value.target.value.x,
-      actor.value.y - actor.value.target.value.y) - 64 * FRACUNIT
+    dist = CDoom.p_aprox_distance(actor.x - actor.target.not_nil!.x,
+      actor.y - actor.target.not_nil!.y) - 64 * FRACUNIT
 
-    dist -= 128 * FRACUNIT if actor.value.info.value.meleestate == 0 # no melee attack, so fire more
+    dist -= 128 * FRACUNIT if Doocr.mobjinfo_for(actor).meleestate == 0 # no melee attack, so fire more
 
     dist >>= 16
 
-    if actor.value.type == Doocr::Mobjtype::MT_VILE
+    if actor.type == Doocr::Mobjtype::MT_VILE
       return 0 if dist > 14 * 64 # too far away
     end
 
-    if actor.value.type == Doocr::Mobjtype::MT_UNDEAD
+    if actor.type == Doocr::Mobjtype::MT_UNDEAD
       return 0 if dist < 196 # close for fist attack
       dist >>= 1
     end
 
-    if actor.value.type == Doocr::Mobjtype::MT_CYBORG ||
-       actor.value.type == Doocr::Mobjtype::MT_SPIDER ||
-       actor.value.type == Doocr::Mobjtype::MT_SKULL
+     if actor.type == Doocr::Mobjtype::MT_CYBORG ||
+       actor.type == Doocr::Mobjtype::MT_SPIDER ||
+       actor.type == Doocr::Mobjtype::MT_SKULL
       dist >>= 1
     end
 
     dist = 200 if dist > 200
-    dist = 160 if actor.value.type == Doocr::Mobjtype::MT_CYBORG && dist > 160
+    dist = 160 if actor.type == Doocr::Mobjtype::MT_CYBORG && dist > 160
 
     return 0 if CDoom.p_random < dist
 
     return 1
   end
 
-  def self.p_move(actor : CDoom::Mobj*) : LibC::Int
-    return 0 if actor.value.movedir == Doocr::Dirtype::NoDir.value
+  def self.p_move(actor : Doocr::Mobj) : LibC::Int
+    return 0 if actor.movedir == Doocr::Dirtype::NoDir.value
 
-    CDoom.i_error("Error: Weird actor.value.movedir!") if actor.value.movedir.to_u32! >= 8
+    CDoom.i_error("Error: Weird actor.movedir!") if actor.movedir.to_u32! >= 8
 
-    tryx = actor.value.x + actor.value.info.value.speed * Doocr.xspeed[actor.value.movedir]
-    tryy = actor.value.y + actor.value.info.value.speed * Doocr.yspeed[actor.value.movedir]
+    tryx = actor.x + Doocr.mobjinfo_for(actor).speed * Doocr.xspeed[actor.movedir]
+    tryy = actor.y + Doocr.mobjinfo_for(actor).speed * Doocr.yspeed[actor.movedir]
 
-    try_ok = CDoom.p_try_move(actor, tryx, tryy)
+    try_ok = Doocr.p_try_move(actor, tryx, tryy)
 
     if try_ok == 0
       # open any specials
-      if actor.value.flags & Doocr::Mobjflag::MF_FLOAT.value != 0 && Doocr.floatok != 0
+      if actor.flags & Doocr::Mobjflag::MF_FLOAT.value != 0 && Doocr.floatok != 0
         # must adjust height
         if actor.value.z < Doocr.tmfloorz
           actor.value.z = actor.value.z + Doocr::FLOATSPEED
@@ -682,7 +682,7 @@ module Doocr
         # if the special is not a door
         # that can be opened,
         # return false
-        good = 1 if CDoom.p_use_special_line(actor, ld, 0) != 0
+        good = 1 if Doocr.p_use_special_line(actor, ld, 0) != 0
       end
       return good
     else
@@ -704,23 +704,23 @@ module Doocr
   # If a door is in the way,
   # an OpenDoor call is made to start it opening.
   #
-  def self.p_try_walk(actor : CDoom::Mobj*) : LibC::Int
-    return 0 if CDoom.p_move(actor) == 0
+  def self.p_try_walk(actor : Doocr::Mobj) : LibC::Int
+    return 0 if Doocr.p_move(actor) == 0
 
-    actor.value.movecount = CDoom.p_random & 15
+    actor.movecount = CDoom.p_random & 15
     return 1
   end
 
-  def self.p_new_chase_dir(actor : CDoom::Mobj*)
+  def self.p_new_chase_dir(actor : Doocr::Mobj)
     d = uninitialized StaticArray(Doocr::Dirtype, 3)
 
-    CDoom.i_error("Error: p_new_chase_dir: called with no target") if actor.value.target.null?
+    CDoom.i_error("Error: p_new_chase_dir: called with no target") if actor.target.nil?
 
-    olddir = actor.value.movedir
+    olddir = actor.movedir
     turnaround = Doocr.opposite[olddir]
 
-    deltax = actor.value.target.value.x - actor.value.x
-    deltay = actor.value.target.value.y - actor.value.y
+    deltax = actor.target.not_nil!.x - actor.x
+    deltay = actor.target.not_nil!.y - actor.y
 
     if deltax > 10 * FRACUNIT
       d[1] = Doocr::Dirtype::East
@@ -741,8 +741,8 @@ module Doocr
     # try direct route
     if d[1] != Doocr::Dirtype::NoDir &&
        d[2] != Doocr::Dirtype::NoDir
-      actor.value.movedir = Doocr.diags[((deltay < 0).to_unsafe << 1) + (deltax > 0).to_unsafe].value
-      return if actor.value.movedir != turnaround.value && CDoom.p_try_walk(actor) != 0
+      actor.movedir = Doocr.diags[((deltay < 0).to_unsafe << 1) + (deltax > 0).to_unsafe].value
+      return if actor.movedir != turnaround.value && Doocr.p_try_walk(actor) != 0
     end
 
     # try other directions
@@ -757,20 +757,20 @@ module Doocr
     d[2] = Doocr::Dirtype::NoDir if d[2] == turnaround
 
     if d[1] != Doocr::Dirtype::NoDir
-      actor.value.movedir = d[1].value
-      return if CDoom.p_try_walk(actor) != 0 # either moved toward or attacked
+      actor.movedir = d[1].value
+      return if Doocr.p_try_walk(actor) != 0 # either moved toward or attacked
     end
 
     if d[2] != Doocr::Dirtype::NoDir
-      actor.value.movedir = d[2].value
-      return if CDoom.p_try_walk(actor) != 0
+      actor.movedir = d[2].value
+      return if Doocr.p_try_walk(actor) != 0
     end
 
     # there is no direct path to the player,
     # so pick another direction.
     if olddir != Doocr::Dirtype::NoDir.value
-      actor.value.movedir = olddir
-      return if CDoom.p_try_walk(actor) != 0
+      actor.movedir = olddir
+      return if Doocr.p_try_walk(actor) != 0
     end
 
     # randomly determine direction of search
@@ -778,9 +778,9 @@ module Doocr
       tdir = Doocr::Dirtype::East.value
       while tdir <= Doocr::Dirtype::SouthEast.value
         if tdir != turnaround.value
-          actor.value.movedir = tdir
+          actor.movedir = tdir
 
-          return if CDoom.p_try_walk(actor) != 0
+          return if Doocr.p_try_walk(actor) != 0
         end
         tdir += 1
       end
@@ -788,20 +788,20 @@ module Doocr
       tdir = Doocr::Dirtype::SouthEast.value
       while tdir != (Doocr::Dirtype::East.value - 1)
         if tdir != turnaround.value
-          actor.value.movedir = tdir
+          actor.movedir = tdir
 
-          return if CDoom.p_try_walk(actor) != 0
+          return if Doocr.p_try_walk(actor) != 0
         end
         tdir -= 1
       end
     end
 
     if turnaround != Doocr::Dirtype::NoDir
-      actor.value.movedir = turnaround.value
-      return if CDoom.p_try_walk(actor) != 0
+      actor.movedir = turnaround.value
+      return if Doocr.p_try_walk(actor) != 0
     end
 
-    actor.value.movedir = Doocr::Dirtype::NoDir.value # can not move
+    actor.movedir = Doocr::Dirtype::NoDir.value # can not move
   end
 
   def self.p_look_for_players(actor : CDoom::Mobj*, allaround : LibC::Int) : LibC::Int
@@ -858,7 +858,7 @@ module Doocr
     return 0
   end
 
-  def self.a_keen_die(mo : CDoom::Mobj*)
+  def self.a_keen_die(mo : Doocr::Mobj)
     CDoom.a_fall(mo)
 
     # scan the remaining thinkers
@@ -891,7 +891,7 @@ module Doocr
   #
   # Stay in state until a player is sighted.
   #
-  def self.a_look(actor : CDoom::Mobj*)
+  def self.a_look(actor : Doocr::Mobj)
     seeyou = false
 
     actor.value.threshold = 0 # any shot will wake up
@@ -911,16 +911,16 @@ module Doocr
     return if !seeyou && CDoom.p_look_for_players(actor, 0) == 0
 
     # go into chase state
-    if actor.value.info.value.seesound != 0
+    if Doocr.mobjinfo_for(actor.value).seesound != 0
       sound = 0
 
-      case actor.value.info.value.seesound
+      case Doocr.mobjinfo_for(actor.value).seesound
       when Doocr::Sfxenum::SFX_posit1.value, Doocr::Sfxenum::SFX_posit2.value, Doocr::Sfxenum::SFX_posit3.value
         sound = Doocr::Sfxenum::SFX_posit1.value + CDoom.p_random % 3
       when Doocr::Sfxenum::SFX_bgsit1.value, Doocr::Sfxenum::SFX_bgsit2.value
         sound = Doocr::Sfxenum::SFX_bgsit1.value + CDoom.p_random % 2
       else
-        sound = actor.value.info.value.seesound
+        sound = Doocr.mobjinfo_for(actor.value).seesound
       end
 
       if actor.value.type == Doocr::Mobjtype::MT_SPIDER ||
@@ -932,14 +932,14 @@ module Doocr
       end
     end
 
-    CDoom.p_set_mobj_state(actor, Doocr::Statenum.new(actor.value.info.value.seestate))
+    CDoom.p_set_mobj_state(actor, Doocr::Statenum.new(Doocr.mobjinfo_for(actor.value).seestate))
   end
 
   #
   # Actor has a melee attack,
   # so it tries to close as fast as possible
   #
-  def self.a_chase(actor : CDoom::Mobj*)
+  def self.a_chase(actor : Doocr::Mobj)
     actor.value.reactiontime = actor.value.reactiontime - 1 if actor.value.reactiontime != 0
 
     # modify target threshold
@@ -969,39 +969,39 @@ module Doocr
       # look for a new target
       return if CDoom.p_look_for_players(actor, 1) != 0 # got a new target
 
-      CDoom.p_set_mobj_state(actor, Doocr::Statenum.new(actor.value.info.value.spawnstate))
+      CDoom.p_set_mobj_state(actor, Doocr::Statenum.new(Doocr.mobjinfo_for(actor.value).spawnstate))
       return
     end
 
     # do not attack twice in a row
     if actor.value.flags & Doocr::Mobjflag::MF_JUSTATTACKED.value != 0
       actor.value.flags = actor.value.flags & ~Doocr::Mobjflag::MF_JUSTATTACKED.value
-      CDoom.p_new_chase_dir(actor) if Doocr.gameskill != Doocr::Skill::Nightmare && Doocr.fastparm == 0
+      Doocr.p_new_chase_dir(actor) if Doocr.gameskill != Doocr::Skill::Nightmare && Doocr.fastparm == 0
       return
     end
 
     # check for melee attack
-    if actor.value.info.value.meleestate != 0 &&
-       CDoom.p_check_melee_range(actor) != 0
-      Doocr.s_start_sound(actor, actor.value.info.value.attacksound) if actor.value.info.value.attacksound != 0
+    if Doocr.mobjinfo_for(actor.value).meleestate != 0 &&
+      Doocr.p_check_melee_range(actor) != 0
+      Doocr.s_start_sound(actor, Doocr.mobjinfo_for(actor.value).attacksound) if Doocr.mobjinfo_for(actor.value).attacksound != 0
 
-      CDoom.p_set_mobj_state(actor, Doocr::Statenum.new(actor.value.info.value.meleestate))
+      CDoom.p_set_mobj_state(actor, Doocr::Statenum.new(Doocr.mobjinfo_for(actor.value).meleestate))
       return
     end
 
     nomissile = false
     # check for missile attack
-    if actor.value.info.value.missilestate != 0
+    if Doocr.mobjinfo_for(actor.value).missilestate != 0
       if Doocr.gameskill < Doocr::Skill::Nightmare &&
          Doocr.fastparm == 0 && actor.value.movecount != 0
         nomissile = true
       end
 
       unless nomissile
-        nomissile = true if CDoom.p_check_missile_range(actor) == 0
+        nomissile = true if Doocr.p_check_missile_range(actor) == 0
 
         unless nomissile
-          CDoom.p_set_mobj_state(actor, Doocr::Statenum.new(actor.value.info.value.missilestate))
+          CDoom.p_set_mobj_state(actor, Doocr::Statenum.new(Doocr.mobjinfo_for(actor.value).missilestate))
           actor.value.flags = actor.value.flags | Doocr::Mobjflag::MF_JUSTATTACKED.value
           return
         end
@@ -1018,18 +1018,18 @@ module Doocr
     # chase towards player
     actor.value.movecount = actor.value.movecount - 1
     if actor.value.movecount < 0 ||
-       CDoom.p_move(actor) == 0
-      CDoom.p_new_chase_dir(actor)
+      Doocr.p_move(actor) == 0
+      Doocr.p_new_chase_dir(actor)
     end
 
     # make active sound
-    if actor.value.info.value.activesound != 0 &&
+    if Doocr.mobjinfo_for(actor.value).activesound != 0 &&
        CDoom.p_random < 3
-      Doocr.s_start_sound(actor, actor.value.info.value.activesound)
+      Doocr.s_start_sound(actor, Doocr.mobjinfo_for(actor.value).activesound)
     end
   end
 
-  def self.a_face_target(actor : CDoom::Mobj*)
+  def self.a_face_target(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     actor.value.flags = actor.value.flags & ~Doocr::Mobjflag::MF_AMBUSH.value
@@ -1044,7 +1044,7 @@ module Doocr
     end
   end
 
-  def self.a_pos_attack(actor : CDoom::Mobj*)
+  def self.a_pos_attack(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     CDoom.a_face_target(actor)
@@ -1057,7 +1057,7 @@ module Doocr
     CDoom.p_line_attack(actor, angle, Doocr::MISSILERANGE, slope, damage)
   end
 
-  def self.a_spos_attack(actor : CDoom::Mobj*)
+  def self.a_spos_attack(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     Doocr.s_start_sound(actor, Doocr::Sfxenum::SFX_shotgn.value)
@@ -1072,7 +1072,7 @@ module Doocr
     end
   end
 
-  def self.a_cpos_attack(actor : CDoom::Mobj*)
+  def self.a_cpos_attack(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     Doocr.s_start_sound(actor, Doocr::Sfxenum::SFX_shotgn.value)
@@ -1085,7 +1085,7 @@ module Doocr
     CDoom.p_line_attack(actor, angle, Doocr::MISSILERANGE, slope, damage)
   end
 
-  def self.a_cpos_refire(actor : CDoom::Mobj*)
+  def self.a_cpos_refire(actor : Doocr::Mobj)
     # keep firing unless target got out of sight
     CDoom.a_face_target(actor)
 
@@ -1094,11 +1094,11 @@ module Doocr
     if actor.value.target.null? ||
        actor.value.target.value.health <= 0 ||
        CDoom.p_check_sight(actor, actor.value.target) == 0
-      CDoom.p_set_mobj_state(actor, Doocr::Statenum.new(actor.value.info.value.seestate))
+      CDoom.p_set_mobj_state(actor, Doocr::Statenum.new(Doocr.mobjinfo_for(actor.value).seestate))
     end
   end
 
-  def self.a_spid_refire(actor : CDoom::Mobj*)
+  def self.a_spid_refire(actor : Doocr::Mobj)
     # keep firing unless target got out of sight
     CDoom.a_face_target(actor)
 
@@ -1107,11 +1107,11 @@ module Doocr
     if actor.value.target.null? ||
        actor.value.target.value.health <= 0 ||
        CDoom.p_check_sight(actor, actor.value.target) == 0
-      CDoom.p_set_mobj_state(actor, Doocr::Statenum.new(actor.value.info.value.seestate))
+      CDoom.p_set_mobj_state(actor, Doocr::Statenum.new(Doocr.mobjinfo_for(actor.value).seestate))
     end
   end
 
-  def self.a_bspi_attack(actor : CDoom::Mobj*)
+  def self.a_bspi_attack(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     CDoom.a_face_target(actor)
@@ -1120,11 +1120,11 @@ module Doocr
     CDoom.p_spawn_missile(actor, actor.value.target, Doocr::Mobjtype::MT_ARACHPLAZ)
   end
 
-  def self.a_troop_attack(actor : CDoom::Mobj*)
+  def self.a_troop_attack(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     CDoom.a_face_target(actor)
-    if CDoom.p_check_melee_range(actor) != 0
+    if Doocr.p_check_melee_range(actor) != 0
       Doocr.s_start_sound(actor, Doocr::Sfxenum::SFX_claw.value)
       damage = (CDoom.p_random % 8 + 1) * 3
       CDoom.p_damage_mobj(actor.value.target, actor, actor, damage)
@@ -1135,21 +1135,21 @@ module Doocr
     CDoom.p_spawn_missile(actor, actor.value.target, Doocr::Mobjtype::MT_TROOPSHOT)
   end
 
-  def self.a_sarg_attack(actor : CDoom::Mobj*)
+  def self.a_sarg_attack(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     CDoom.a_face_target(actor)
-    if CDoom.p_check_melee_range(actor) != 0
+    if Doocr.p_check_melee_range(actor) != 0
       damage = ((CDoom.p_random % 10) + 1) * 4
       CDoom.p_damage_mobj(actor.value.target, actor, actor, damage)
     end
   end
 
-  def self.a_head_attack(actor : CDoom::Mobj*)
+  def self.a_head_attack(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     CDoom.a_face_target(actor)
-    if CDoom.p_check_melee_range(actor) != 0
+    if Doocr.p_check_melee_range(actor) != 0
       damage = (CDoom.p_random % 6 + 1) * 10
       CDoom.p_damage_mobj(actor.value.target, actor, actor, damage)
       return
@@ -1159,7 +1159,7 @@ module Doocr
     CDoom.p_spawn_missile(actor, actor.value.target, Doocr::Mobjtype::MT_HEADSHOT)
   end
 
-  def self.a_cyber_attack(actor : CDoom::Mobj*)
+  def self.a_cyber_attack(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     CDoom.a_face_target(actor)
@@ -1168,10 +1168,10 @@ module Doocr
     CDoom.p_spawn_missile(actor, actor.value.target, Doocr::Mobjtype::MT_ROCKET)
   end
 
-  def self.a_bruis_attack(actor : CDoom::Mobj*)
+  def self.a_bruis_attack(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
-    if CDoom.p_check_melee_range(actor) != 0
+    if Doocr.p_check_melee_range(actor) != 0
       Doocr.s_start_sound(actor, Doocr::Sfxenum::SFX_claw.value)
       damage = (CDoom.p_random % 8 + 1) * 10
       CDoom.p_damage_mobj(actor.value.target, actor, actor, damage)
@@ -1182,7 +1182,7 @@ module Doocr
     CDoom.p_spawn_missile(actor, actor.value.target, Doocr::Mobjtype::MT_BRUISERSHOT)
   end
 
-  def self.a_skel_missile(actor : CDoom::Mobj*)
+  def self.a_skel_missile(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     CDoom.a_face_target(actor)
@@ -1195,7 +1195,7 @@ module Doocr
     mo.value.tracer = actor.value.target
   end
 
-  def self.a_tracer(actor : CDoom::Mobj*)
+  def self.a_tracer(actor : Doocr::Mobj)
     return if Doocr.gametic & 3 != 0
 
     # spawn a puff of smoke behind the rocket
@@ -1231,14 +1231,14 @@ module Doocr
     end
 
     exact = actor.value.angle >> Doocr::ANGLETOFINESHIFT
-    actor.value.momx = CDoom.fixed_mul(actor.value.info.value.speed, @@finecosine[exact])
-    actor.value.momy = CDoom.fixed_mul(actor.value.info.value.speed, @@finesine[exact])
+    actor.value.momx = CDoom.fixed_mul(Doocr.mobjinfo_for(actor.value).speed, @@finecosine[exact])
+    actor.value.momy = CDoom.fixed_mul(Doocr.mobjinfo_for(actor.value).speed, @@finesine[exact])
 
     # change slope
     dist = CDoom.p_aprox_distance(dest.value.x - actor.value.x,
       dest.value.y - actor.value.y)
 
-    dist = dist.tdiv(actor.value.info.value.speed)
+    dist = dist.tdiv(Doocr.mobjinfo_for(actor.value).speed)
 
     dist = 1 if dist < 1
     slope = (dest.value.z + 40 * FRACUNIT - actor.value.z).tdiv(dist)
@@ -1250,19 +1250,19 @@ module Doocr
     end
   end
 
-  def self.a_skel_whoosh(actor : CDoom::Mobj*)
+  def self.a_skel_whoosh(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     CDoom.a_face_target(actor)
     Doocr.s_start_sound(actor, Doocr::Sfxenum::SFX_skeswg.value)
   end
 
-  def self.a_skel_fist(actor : CDoom::Mobj*)
+  def self.a_skel_fist(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     CDoom.a_face_target(actor)
 
-    if CDoom.p_check_melee_range(actor) != 0
+    if Doocr.p_check_melee_range(actor) != 0
       damage = ((CDoom.p_random % 10) + 1) * 6
       Doocr.s_start_sound(actor, Doocr::Sfxenum::SFX_skepch.value)
       CDoom.p_damage_mobj(actor.value.target, actor, actor, damage)
@@ -1277,9 +1277,9 @@ module Doocr
 
     return 1 if thing.value.tics != -1 # not lying still yet
 
-    return 1 if thing.value.info.value.raisestate == Doocr::Statenum::S_NULL.value # monster doesn't have a raise state
+    return 1 if Doocr.mobjinfo_for(thing.value).raisestate == Doocr::Statenum::S_NULL.value # monster doesn't have a raise state
 
-    maxdist = thing.value.info.value.radius + Doocr.mobjinfo[Doocr::Mobjtype::MT_VILE.value].radius
+    maxdist = Doocr.mobjinfo_for(thing.value).radius + Doocr.mobjinfo[Doocr::Mobjtype::MT_VILE.value].radius
 
     return 1 if doom_abs(thing.value.x - Doocr.viletryx) > maxdist ||
                 doom_abs(thing.value.y - Doocr.viletryy) > maxdist # not actually touching
@@ -1299,13 +1299,13 @@ module Doocr
   #
   # Check for ressurecting a body
   #
-  def self.a_vile_chase(actor : CDoom::Mobj*)
+  def self.a_vile_chase(actor : Doocr::Mobj)
     if actor.value.movedir != Doocr::Dirtype::NoDir.value
       # check for corpses to raise
       Doocr.viletryx =
-        actor.value.x + actor.value.info.value.speed * Doocr.xspeed[actor.value.movedir]
+        actor.value.x + Doocr.mobjinfo_for(actor.value).speed * Doocr.xspeed[actor.value.movedir]
       Doocr.viletryy =
-        actor.value.y + actor.value.info.value.speed * Doocr.yspeed[actor.value.movedir]
+        actor.value.y + Doocr.mobjinfo_for(actor.value).speed * Doocr.yspeed[actor.value.movedir]
 
       xl = (Doocr.viletryx - Doocr.bmaporgx - Doocr::MAXRADIUS * 2) >> Doocr::MAPBLOCKSHIFT
       xh = (Doocr.viletryx - Doocr.bmaporgx + Doocr::MAXRADIUS * 2) >> Doocr::MAPBLOCKSHIFT
@@ -1329,12 +1329,12 @@ module Doocr
 
             CDoom.p_set_mobj_state(actor, Doocr::Statenum::S_VILE_HEAL1)
             Doocr.s_start_sound(Doocr.corpsehit, Doocr::Sfxenum::SFX_slop.value)
-            info = Doocr.corpsehit.value.info
+            info = Doocr.mobjinfo_for(Doocr.corpsehit.value)
 
-            CDoom.p_set_mobj_state(Doocr.corpsehit, Doocr::Statenum.new(info.value.raisestate))
+            CDoom.p_set_mobj_state(Doocr.corpsehit, Doocr::Statenum.new(info.raisestate))
             Doocr.corpsehit.value.height = Doocr.corpsehit.value.height << 2
-            Doocr.corpsehit.value.flags = info.value.flags
-            Doocr.corpsehit.value.health = info.value.spawnhealth
+            Doocr.corpsehit.value.flags = info.flags
+            Doocr.corpsehit.value.health = info.spawnhealth
             Doocr.corpsehit.value.target = Pointer(CDoom::Mobj).null
 
             return
@@ -1351,24 +1351,24 @@ module Doocr
     CDoom.a_chase(actor)
   end
 
-  def self.a_vile_start(actor : CDoom::Mobj*)
+  def self.a_vile_start(actor : Doocr::Mobj)
     Doocr.s_start_sound(actor, Doocr::Sfxenum::SFX_vilatk.value)
   end
 
   #
   # Keep fire in front of player unless out of sight
   #
-  def self.a_start_fire(actor : CDoom::Mobj*)
+  def self.a_start_fire(actor : Doocr::Mobj)
     Doocr.s_start_sound(actor, Doocr::Sfxenum::SFX_flamst.value)
     CDoom.a_fire(actor)
   end
 
-  def self.a_fire_crackle(actor : CDoom::Mobj*)
+  def self.a_fire_crackle(actor : Doocr::Mobj)
     Doocr.s_start_sound(actor, Doocr::Sfxenum::SFX_flame.value)
     CDoom.a_fire(actor)
   end
 
-  def self.a_fire(actor : CDoom::Mobj*)
+  def self.a_fire(actor : Doocr::Mobj)
     dest = actor.value.tracer
     return if dest.null?
 
@@ -1387,7 +1387,7 @@ module Doocr
   #
   # Spawn the hellfire
   #
-  def self.a_vile_target(actor : CDoom::Mobj*)
+  def self.a_vile_target(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     CDoom.a_face_target(actor)
@@ -1402,7 +1402,7 @@ module Doocr
     CDoom.a_fire(fog)
   end
 
-  def self.a_vile_attack(actor : CDoom::Mobj*)
+  def self.a_vile_attack(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     CDoom.a_face_target(actor)
@@ -1411,7 +1411,7 @@ module Doocr
 
     Doocr.s_start_sound(actor, Doocr::Sfxenum::SFX_barexp.value)
     CDoom.p_damage_mobj(actor.value.target, actor, actor, 20)
-    actor.value.target.value.momz = 1000 * FRACUNIT // actor.value.target.value.info.value.mass
+    actor.value.target.value.momz = 1000 * FRACUNIT // Doocr.mobjinfo_for(actor.value.target.value).mass
 
     an = actor.value.angle >> Doocr::ANGLETOFINESHIFT
 
@@ -1430,12 +1430,12 @@ module Doocr
   # in three different directions?
   # Doesn't look like it.
   #
-  def self.a_fat_raise(actor : CDoom::Mobj*)
+  def self.a_fat_raise(actor : Doocr::Mobj)
     CDoom.a_face_target(actor)
     Doocr.s_start_sound(actor, Doocr::Sfxenum::SFX_manatk.value)
   end
 
-  def self.a_fat_attack1(actor : CDoom::Mobj*)
+  def self.a_fat_attack1(actor : Doocr::Mobj)
     return unless actor.value.target
     CDoom.a_face_target(actor)
     # Change direction  to ...
@@ -1445,11 +1445,11 @@ module Doocr
     mo = CDoom.p_spawn_missile(actor, actor.value.target, Doocr::Mobjtype::MT_FATSHOT)
     mo.value.angle = mo.value.angle &+ Doocr::FATSPREAD
     an = mo.value.angle >> Doocr::ANGLETOFINESHIFT
-    mo.value.momx = CDoom.fixed_mul(mo.value.info.value.speed, @@finecosine[an])
-    mo.value.momy = CDoom.fixed_mul(mo.value.info.value.speed, @@finesine[an])
+    mo.value.momx = CDoom.fixed_mul(Doocr.mobjinfo_for(mo.value).speed, @@finecosine[an])
+    mo.value.momy = CDoom.fixed_mul(Doocr.mobjinfo_for(mo.value).speed, @@finesine[an])
   end
 
-  def self.a_fat_attack2(actor : CDoom::Mobj*)
+  def self.a_fat_attack2(actor : Doocr::Mobj)
     return unless actor.value.target
     CDoom.a_face_target(actor)
     # Now here choose opposite deviation.
@@ -1459,37 +1459,37 @@ module Doocr
     mo = CDoom.p_spawn_missile(actor, actor.value.target, Doocr::Mobjtype::MT_FATSHOT)
     mo.value.angle = mo.value.angle &- Doocr::FATSPREAD * 2
     an = mo.value.angle >> Doocr::ANGLETOFINESHIFT
-    mo.value.momx = CDoom.fixed_mul(mo.value.info.value.speed, @@finecosine[an])
-    mo.value.momy = CDoom.fixed_mul(mo.value.info.value.speed, @@finesine[an])
+    mo.value.momx = CDoom.fixed_mul(Doocr.mobjinfo_for(mo.value).speed, @@finecosine[an])
+    mo.value.momy = CDoom.fixed_mul(Doocr.mobjinfo_for(mo.value).speed, @@finesine[an])
   end
 
-  def self.a_fat_attack3(actor : CDoom::Mobj*)
+  def self.a_fat_attack3(actor : Doocr::Mobj)
     return unless actor.value.target
     CDoom.a_face_target(actor)
 
     mo = CDoom.p_spawn_missile(actor, actor.value.target, Doocr::Mobjtype::MT_FATSHOT)
     mo.value.angle = mo.value.angle &- Doocr::FATSPREAD.tdiv(2)
     an = mo.value.angle >> Doocr::ANGLETOFINESHIFT
-    mo.value.momx = CDoom.fixed_mul(mo.value.info.value.speed, @@finecosine[an])
-    mo.value.momy = CDoom.fixed_mul(mo.value.info.value.speed, @@finesine[an])
+    mo.value.momx = CDoom.fixed_mul(Doocr.mobjinfo_for(mo.value).speed, @@finecosine[an])
+    mo.value.momy = CDoom.fixed_mul(Doocr.mobjinfo_for(mo.value).speed, @@finesine[an])
 
     mo = CDoom.p_spawn_missile(actor, actor.value.target, Doocr::Mobjtype::MT_FATSHOT)
     mo.value.angle = mo.value.angle &+ Doocr::FATSPREAD.tdiv(2)
     an = mo.value.angle >> Doocr::ANGLETOFINESHIFT
-    mo.value.momx = CDoom.fixed_mul(mo.value.info.value.speed, @@finecosine[an])
-    mo.value.momy = CDoom.fixed_mul(mo.value.info.value.speed, @@finesine[an])
+    mo.value.momx = CDoom.fixed_mul(Doocr.mobjinfo_for(mo.value).speed, @@finecosine[an])
+    mo.value.momy = CDoom.fixed_mul(Doocr.mobjinfo_for(mo.value).speed, @@finesine[an])
   end
 
   #
   # Fly at the player like a missile
   #
-  def self.a_skull_attack(actor : CDoom::Mobj*)
+  def self.a_skull_attack(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     dest = actor.value.target
     actor.value.flags = actor.value.flags | Doocr::Mobjflag::MF_SKULLFLY.value
 
-    Doocr.s_start_sound(actor, actor.value.info.value.attacksound)
+    Doocr.s_start_sound(actor, Doocr.mobjinfo_for(actor.value).attacksound)
     CDoom.a_face_target(actor)
     an = actor.value.angle >> Doocr::ANGLETOFINESHIFT
     actor.value.momx = CDoom.fixed_mul(Doocr::SKULLSPEED, @@finecosine[an])
@@ -1501,7 +1501,7 @@ module Doocr
     actor.value.momz = (dest.value.z + (dest.value.height >> 1) - actor.value.z).tdiv(dist)
   end
 
-  def self.a_pain_shoot_skull(actor : CDoom::Mobj*, angle : LibC::UInt)
+  def self.a_pain_shoot_skull(actor : Doocr::Mobj, angle : LibC::UInt)
     # count total number of skull currently on the level
     count = 0
 
@@ -1522,7 +1522,7 @@ module Doocr
     an = angle >> Doocr::ANGLETOFINESHIFT
 
     prestep = 4 * FRACUNIT +
-              3 * (actor.value.info.value.radius + Doocr.mobjinfo[Doocr::Mobjtype::MT_SKULL.value].radius) // 2
+              3 * (Doocr.mobjinfo_for(actor.value).radius + Doocr.mobjinfo[Doocr::Mobjtype::MT_SKULL.value].radius) // 2
 
     x = actor.value.x + CDoom.fixed_mul(prestep, @@finecosine[an])
     y = actor.value.y + CDoom.fixed_mul(prestep, @@finesine[an])
@@ -1541,24 +1541,24 @@ module Doocr
     CDoom.a_skull_attack(newmobj)
   end
 
-  def self.a_pain_attack(actor : CDoom::Mobj*)
+  def self.a_pain_attack(actor : Doocr::Mobj)
     return if actor.value.target.null?
 
     CDoom.a_face_target(actor)
     CDoom.a_pain_shoot_skull(actor, actor.value.angle)
   end
 
-  def self.a_pain_die(actor : CDoom::Mobj*)
+  def self.a_pain_die(actor : Doocr::Mobj)
     CDoom.a_fall(actor)
     CDoom.a_pain_shoot_skull(actor, actor.value.angle &+ ANG90)
     CDoom.a_pain_shoot_skull(actor, actor.value.angle &+ ANG180)
     CDoom.a_pain_shoot_skull(actor, actor.value.angle &+ ANG270)
   end
 
-  def self.a_scream(actor : CDoom::Mobj*)
+  def self.a_scream(actor : Doocr::Mobj)
     sound = 0
 
-    case actor.value.info.value.deathsound
+    case Doocr.mobjinfo_for(actor.value).deathsound
     when 0
       return
     when Doocr::Sfxenum::SFX_podth1.value, Doocr::Sfxenum::SFX_podth2.value, Doocr::Sfxenum::SFX_podth3.value
@@ -1566,7 +1566,7 @@ module Doocr
     when Doocr::Sfxenum::SFX_bgdth1.value, Doocr::Sfxenum::SFX_bgdth2.value
       sound = Doocr::Sfxenum::SFX_bgdth1.value + CDoom.p_random % 2
     else
-      sound = actor.value.info.value.deathsound
+      sound = Doocr.mobjinfo_for(actor.value).deathsound
     end
 
     # Check for bosses.
@@ -1579,17 +1579,17 @@ module Doocr
     end
   end
 
-  def self.a_xscream(actor : CDoom::Mobj*)
+  def self.a_xscream(actor : Doocr::Mobj)
     Doocr.s_start_sound(actor, Doocr::Sfxenum::SFX_slop.value)
   end
 
-  def self.a_pain(actor : CDoom::Mobj*)
-    if actor.value.info.value.painsound != 0
-      Doocr.s_start_sound(actor, actor.value.info.value.painsound)
+  def self.a_pain(actor : Doocr::Mobj)
+    if Doocr.mobjinfo_for(actor.value).painsound != 0
+      Doocr.s_start_sound(actor, Doocr.mobjinfo_for(actor.value).painsound)
     end
   end
 
-  def self.a_fall(actor : CDoom::Mobj*)
+  def self.a_fall(actor : Doocr::Mobj)
     # actor is on ground, it can be walked over
     actor.value.flags = actor.value.flags & ~Doocr::Mobjflag::MF_SOLID.value
 
@@ -1597,7 +1597,7 @@ module Doocr
     # are meant to be obstacles.
   end
 
-  def self.a_explode(thingy : CDoom::Mobj*)
+  def self.a_explode(thingy : Doocr::Mobj)
     thingy = thingy.as(CDoom::Mobj*)
     CDoom.p_radius_attack(thingy, thingy.value.target, 128)
   end
@@ -1606,7 +1606,7 @@ module Doocr
   # Possibly trigger special effects
   # if on first boss level
   #
-  def self.a_boss_death(mo : CDoom::Mobj*)
+  def self.a_boss_death(mo : Doocr::Mobj)
     if Doocr.gamemode == Doocr::GameMode::Commercial
       return if Doocr.gamemap != 7
 
@@ -1705,35 +1705,35 @@ module Doocr
     CDoom.g_exit_level
   end
 
-  def self.a_hoof(mo : CDoom::Mobj*)
+  def self.a_hoof(mo : Doocr::Mobj)
     Doocr.s_start_sound(mo, Doocr::Sfxenum::SFX_hoof)
     CDoom.a_chase(mo)
   end
 
-  def self.a_metal(mo : CDoom::Mobj*)
+  def self.a_metal(mo : Doocr::Mobj)
     Doocr.s_start_sound(mo, Doocr::Sfxenum::SFX_metal)
     CDoom.a_chase(mo)
   end
 
-  def self.a_baby_metal(mo : CDoom::Mobj*)
+  def self.a_baby_metal(mo : Doocr::Mobj)
     Doocr.s_start_sound(mo, Doocr::Sfxenum::SFX_bspwlk)
     CDoom.a_chase(mo)
   end
 
-  def self.a_open_shotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_open_shotgun2(player : Doocr::Player, psp : CDoom::Pspdef*)
     Doocr.s_start_sound(player.value.mo, Doocr::Sfxenum::SFX_dbopn)
   end
 
-  def self.a_load_shotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_load_shotgun2(player : Doocr::Player, psp : CDoom::Pspdef*)
     Doocr.s_start_sound(player.value.mo, Doocr::Sfxenum::SFX_dbload)
   end
 
-  def self.a_close_shotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_close_shotgun2(player : Doocr::Player, psp : CDoom::Pspdef*)
     Doocr.s_start_sound(player.value.mo, Doocr::Sfxenum::SFX_dbcls)
     CDoom.a_refire(player, psp)
   end
 
-  def self.a_brain_awake(mo : CDoom::Mobj*)
+  def self.a_brain_awake(mo : Doocr::Mobj)
     # find all the target spots
     Doocr.numbraintargets = 0
     Doocr.braintargeton = 0
@@ -1757,11 +1757,11 @@ module Doocr
     Doocr.s_start_sound(Pointer(Void).null, Doocr::Sfxenum::SFX_bossit.value)
   end
 
-  def self.a_brain_pain(mo : CDoom::Mobj*)
+  def self.a_brain_pain(mo : Doocr::Mobj)
     Doocr.s_start_sound(Pointer(Void).null, Doocr::Sfxenum::SFX_bospn)
   end
 
-  def self.a_brain_scream(mo : CDoom::Mobj*)
+  def self.a_brain_scream(mo : Doocr::Mobj)
     x = mo.value.x - 196 * FRACUNIT
     while x < mo.value.x + 320 * FRACUNIT
       y = mo.value.y - 320 * FRACUNIT
@@ -1780,7 +1780,7 @@ module Doocr
     Doocr.s_start_sound(Pointer(Void).null, Doocr::Sfxenum::SFX_bosdth)
   end
 
-  def self.a_brain_explode(mo : CDoom::Mobj*)
+  def self.a_brain_explode(mo : Doocr::Mobj)
     x = mo.value.x + (CDoom.p_random - CDoom.p_random) * 2048
     y = mo.value.y
     z = 128 + CDoom.p_random * 2 * FRACUNIT
@@ -1793,13 +1793,13 @@ module Doocr
     th.value.tics = 1 if th.value.tics < 1
   end
 
-  def self.a_brain_die(mo : CDoom::Mobj*)
+  def self.a_brain_die(mo : Doocr::Mobj)
     CDoom.g_exit_level
   end
 
   @@easy = 0
 
-  def self.a_brain_spit(mo : CDoom::Mobj*)
+  def self.a_brain_spit(mo : Doocr::Mobj)
     @@easy ^= 1
     return if Doocr.gameskill <= Doocr::Skill::Easy && @@easy == 0
 
@@ -1817,12 +1817,12 @@ module Doocr
   end
 
   # travelling cube sound
-  def self.a_spawn_sound(mo : CDoom::Mobj*)
+  def self.a_spawn_sound(mo : Doocr::Mobj)
     Doocr.s_start_sound(mo, Doocr::Sfxenum::SFX_boscub.value)
     CDoom.a_spawn_fly(mo)
   end
 
-  def self.a_spawn_fly(mo : CDoom::Mobj*)
+  def self.a_spawn_fly(mo : Doocr::Mobj)
     mo.value.reactiontime = mo.value.reactiontime - 1
     return if mo.value.reactiontime != 0 # still flying
 
@@ -1861,7 +1861,7 @@ module Doocr
     end
 
     newmobj = CDoom.p_spawn_mobj(targ.value.x, targ.value.y, targ.value.z, type)
-    CDoom.p_set_mobj_state(newmobj, Doocr::Statenum.new(newmobj.value.info.value.seestate)) if CDoom.p_look_for_players(newmobj, 1) != 0
+    CDoom.p_set_mobj_state(newmobj, Doocr::Statenum.new(Doocr.mobjinfo_for(newmobj.value).seestate)) if CDoom.p_look_for_players(newmobj, 1) != 0
 
     # telefrag anything in this spot
     CDoom.p_teleport_move(newmobj, newmobj.value.x, newmobj.value.y)
@@ -1870,7 +1870,7 @@ module Doocr
     CDoom.p_remove_mobj(mo)
   end
 
-  def self.a_player_scream(mo : CDoom::Mobj*)
+  def self.a_player_scream(mo : Doocr::Mobj)
     # Default death sound.
     sound = Doocr::Sfxenum::SFX_pldeth
 
@@ -1884,7 +1884,7 @@ module Doocr
     Doocr.s_start_sound(mo, sound.value)
   end
 
-  def self.t_move_plane(sector : CDoom::Sector*, speed : LibC::Int, dest : LibC::Int, crush : LibC::Int, floor_or_ceiling : LibC::Int, direction : LibC::Int) : Doocr::Result
+  def self.t_move_plane(sector : Doocr::Sector, speed : LibC::Int, dest : LibC::Int, crush : LibC::Int, floor_or_ceiling : LibC::Int, direction : LibC::Int) : Doocr::Result
     case floor_or_ceiling
     when 0
       # FLOOR
@@ -1997,7 +1997,7 @@ module Doocr
   #
   # MOVE A FLOOR TO IT'S DESTINATION (UP OR DOWN)
   #
-  def self.t_move_floor(floor : CDoom::Floormove*)
+  def self.t_move_floor(floor : Doocr::Floormove)
     res = CDoom.t_move_plane(floor.value.sector,
       floor.value.speed,
       floor.value.floordestheight,
@@ -2029,10 +2029,10 @@ module Doocr
     end
   end
 
-  def self.ev_do_floor(line : CDoom::Line*, floortype : Doocr::Floorenum) : LibC::Int
+  def self.ev_do_floor(line : Doocr::Line, floortype : Doocr::Floorenum) : LibC::Int
     secnum = -1
     rtn = 0
-    while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
+    while (secnum = Doocr.p_find_sector_from_line_tag(line, secnum)) >= 0
       sec = Doocr.sectors + secnum
 
       # ALREADY MOVING?  IF SO, KEEP GOING...
@@ -2059,7 +2059,7 @@ module Doocr
         floor.value.sector = sec
         floor.value.speed = Doocr::FLOORSPEED
         floor.value.floordestheight =
-          CDoom.p_find_lowest_floor_surrounding(sec)
+          Doocr.p_find_lowest_floor_surrounding(sec)
       when Doocr::Floorenum::TurboLower
         floor.value.direction = -1
         floor.value.sector = sec
@@ -2141,13 +2141,13 @@ module Doocr
         floor.value.sector = sec
         floor.value.speed = Doocr::FLOORSPEED
         floor.value.floordestheight =
-          CDoom.p_find_lowest_floor_surrounding(sec)
+          Doocr.p_find_lowest_floor_surrounding(sec)
         floor.value.texture = sec.value.floorpic
 
         sec.value.linecount.times do |i|
           if CDoom.two_sided(secnum, i) != 0
             if CDoom.get_side(secnum, i, 0).value.sector - Doocr.sectors == secnum
-              sec = CDoom.get_sector(secnum, i, 1)
+              sec = Doocr.get_sector(secnum, i, 1)
 
               if sec.value.floorheight == floor.value.floordestheight
                 floor.value.texture = sec.value.floorpic
@@ -2155,7 +2155,7 @@ module Doocr
                 break
               end
             else
-              sec = CDoom.get_sector(secnum, i, 0)
+              sec = Doocr.get_sector(secnum, i, 0)
 
               if sec.value.floorheight == floor.value.floordestheight
                 floor.value.texture = sec.value.floorpic
@@ -2174,10 +2174,10 @@ module Doocr
   #
   # BUILD A STAIRCASE!
   #
-  def self.ev_build_stairs(line : CDoom::Line*, type : Doocr::Stairenum) : LibC::Int
+  def self.ev_build_stairs(line : Doocr::Line, type : Doocr::Stairenum) : LibC::Int
     secnum = -1
     rtn = 0
-    while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
+    while (secnum = Doocr.p_find_sector_from_line_tag(line, secnum)) >= 0
       sec = Doocr.sectors + secnum
 
       # ALREADY MOVING?  IF SO, KEEP GOING...
@@ -2258,7 +2258,7 @@ module Doocr
   # not the individual count (0= 1/2 clip).
   # Returns false if the ammo can't be picked up at all
   #
-  def self.p_give_ammo(player : CDoom::Player*, ammo : Doocr::Ammotype, num : LibC::Int) : LibC::Int
+  def self.p_give_ammo(player : Doocr::Player, ammo : Doocr::Ammotype, num : LibC::Int) : LibC::Int
     return 0 if ammo == Doocr::Ammotype::Noammo
 
     if ammo.value < 0 || ammo.value > Doocr::Ammotype::NUMAMMO.value
@@ -2332,7 +2332,7 @@ module Doocr
   #
   # The weapon name may have a MF_DROPPED flag ored in.
   #
-  def self.p_give_weapon(player : CDoom::Player*, weapon : Doocr::Weapontype, dropped : LibC::Int) : LibC::Int
+  def self.p_give_weapon(player : Doocr::Player, weapon : Doocr::Weapontype, dropped : LibC::Int) : LibC::Int
     gaveammo = 0
     gaveweapon = 0
 
@@ -2384,7 +2384,7 @@ module Doocr
   #
   # Returns false if the body isn't needed at all
   #
-  def self.p_give_body(player : CDoom::Player*, num : LibC::Int) : LibC::Int
+  def self.p_give_body(player : Doocr::Player, num : LibC::Int) : LibC::Int
     return 0 if player.value.health >= Doocr::MAXHEALTH
 
     player.value.health = player.value.health + num
@@ -2398,7 +2398,7 @@ module Doocr
   # Returns false if the armor is worse
   # than the current armor.
   #
-  def self.p_give_armor(player : CDoom::Player*, armortype : LibC::Int) : LibC::Int
+  def self.p_give_armor(player : Doocr::Player, armortype : LibC::Int) : LibC::Int
     hits = armortype*100
     return 0 if player.value.armorpoints >= hits # don't pick up
     player.value.armortype = armortype
@@ -2407,14 +2407,14 @@ module Doocr
     return 1
   end
 
-  def self.p_give_card(player : CDoom::Player*, card : Doocr::Card)
+  def self.p_give_card(player : Doocr::Player, card : Doocr::Card)
     return if player.value.cards[card.value] != 0
 
     player.value.bonuscount = Doocr::BONUSADD
     player.value.cards[card.value] = 1
   end
 
-  def self.p_give_power(player : CDoom::Player*, power : LibC::Int) : LibC::Int
+  def self.p_give_power(player : Doocr::Player, power : LibC::Int) : LibC::Int
     if power == Doocr::Powertype::Invulnerability.value
       player.value.powers[power] = Doocr::Powerduration::INVULNTICS.value
       return 1
@@ -2448,7 +2448,7 @@ module Doocr
     return 1
   end
 
-  def self.p_touch_special_thing(special : CDoom::Mobj*, toucher : CDoom::Mobj*)
+  def self.p_touch_special_thing(special : Doocr::Mobj, toucher : Doocr::Mobj)
     delta = special.value.z - toucher.value.z
 
     if delta > toucher.value.height ||
@@ -2558,28 +2558,28 @@ module Doocr
         player.value.message = @@deh_gotmedikit
       end
     when Doocr::Spritenum::SPR_PINV
-      return if CDoom.p_give_power(player, Doocr::Powertype::Invulnerability.value) == 0
+      return if Doocr.p_give_power(player, Doocr::Powertype::Invulnerability.value) == 0
       player.value.message = @@deh_gotinvul
       sound = Doocr::Sfxenum::SFX_getpow
     when Doocr::Spritenum::SPR_PSTR
-      return if CDoom.p_give_power(player, Doocr::Powertype::Strength.value) == 0
+      return if Doocr.p_give_power(player, Doocr::Powertype::Strength.value) == 0
       player.value.message = @@deh_gotberserk
       player.value.pendingweapon = Doocr::Weapontype::Fist if player.value.readyweapon != Doocr::Weapontype::Fist
       sound = Doocr::Sfxenum::SFX_getpow
     when Doocr::Spritenum::SPR_PINS
-      return if CDoom.p_give_power(player, Doocr::Powertype::Invisibility.value) == 0
+      return if Doocr.p_give_power(player, Doocr::Powertype::Invisibility.value) == 0
       player.value.message = @@deh_gotinvis
       sound = Doocr::Sfxenum::SFX_getpow
     when Doocr::Spritenum::SPR_SUIT
-      return if CDoom.p_give_power(player, Doocr::Powertype::Ironfeet.value) == 0
+      return if Doocr.p_give_power(player, Doocr::Powertype::Ironfeet.value) == 0
       player.value.message = @@deh_gotsuit
       sound = Doocr::Sfxenum::SFX_getpow
     when Doocr::Spritenum::SPR_PMAP
-      return if CDoom.p_give_power(player, Doocr::Powertype::Allmap.value) == 0
+      return if Doocr.p_give_power(player, Doocr::Powertype::Allmap.value) == 0
       player.value.message = @@deh_gotmap
       sound = Doocr::Sfxenum::SFX_getpow
     when Doocr::Spritenum::SPR_PVIS
-      return if CDoom.p_give_power(player, Doocr::Powertype::Infrared.value) == 0
+      return if Doocr.p_give_power(player, Doocr::Powertype::Infrared.value) == 0
       player.value.message = @@deh_gotvisor
       sound = Doocr::Sfxenum::SFX_getpow
 
@@ -2721,7 +2721,7 @@ module Doocr
 
       target.value.flags = target.value.flags & ~Doocr::Mobjflag::MF_SOLID.value
       target.value.player.value.playerstate = Doocr::Playerstate::PST_DEAD
-      CDoom.p_drop_weapon(target.value.player)
+      Doocr.p_drop_weapon(target.value.player.not_nil!)
 
       if target.value.player == @@players.to_unsafe + Doocr.consoleplayer &&
          Doocr.automapactive != 0
@@ -2731,11 +2731,11 @@ module Doocr
       end
     end
 
-    if target.value.health < -target.value.info.value.spawnhealth &&
-       target.value.info.value.xdeathstate != 0
-      CDoom.p_set_mobj_state(target, Doocr::Statenum.new(target.value.info.value.xdeathstate))
+    if target.value.health < -Doocr.mobjinfo_for(target.value).spawnhealth &&
+       Doocr.mobjinfo_for(target.value).xdeathstate != 0
+      CDoom.p_set_mobj_state(target, Doocr::Statenum.new(Doocr.mobjinfo_for(target.value).xdeathstate))
     else
-      CDoom.p_set_mobj_state(target, Doocr::Statenum.new(target.value.info.value.deathstate))
+      CDoom.p_set_mobj_state(target, Doocr::Statenum.new(Doocr.mobjinfo_for(target.value).deathstate))
     end
 
     target.value.tics = target.value.tics - (CDoom.p_random & 3)
@@ -2772,7 +2772,7 @@ module Doocr
   # Source can be 0 for slime, barrel explosions
   # and other environmental stuff.
   #
-  def self.p_damage_mobj(target : CDoom::Mobj*, inflictor : CDoom::Mobj*, source : CDoom::Mobj*, damage : LibC::Int)
+  def self.p_damage_mobj(target : Doocr::Mobj, inflictor : Doocr::Mobj, source : Doocr::Mobj, damage : LibC::Int)
     return if target.value.flags & Doocr::Mobjflag::MF_SHOOTABLE.value == 0 # shouldn't happen...
 
     return if target.value.health <= 0
@@ -2803,7 +2803,7 @@ module Doocr
         target.value.x,
         target.value.y)
 
-      thrust = damage*(FRACUNIT >> 3) &* 100.tdiv(target.value.info.value.mass)
+      thrust = damage*(FRACUNIT >> 3) &* 100.tdiv(Doocr.mobjinfo_for(target.value).mass)
 
       # make fall forwards sometimes
       if damage < 40 &&
@@ -2870,11 +2870,11 @@ module Doocr
       return
     end
 
-    if CDoom.p_random < target.value.info.value.painchance &&
+    if CDoom.p_random < Doocr.mobjinfo_for(target.value).painchance &&
        target.value.flags & Doocr::Mobjflag::MF_SKULLFLY.value == 0
       target.value.flags = target.value.flags | Doocr::Mobjflag::MF_JUSTHIT.value # fight back!
 
-      CDoom.p_set_mobj_state(target, Doocr::Statenum.new(target.value.info.value.painstate))
+      CDoom.p_set_mobj_state(target, Doocr::Statenum.new(Doocr.mobjinfo_for(target.value).painstate))
     end
 
     target.value.reactiontime = 0 # we're awake now...
@@ -2885,14 +2885,14 @@ module Doocr
       # chase after this one
       target.value.target = source
       target.value.threshold = Doocr::BASETHRESHOLD
-      if target.value.state == @@states.to_unsafe + target.value.info.value.spawnstate &&
-         target.value.info.value.seestate != Doocr::Statenum::S_NULL.value
-        CDoom.p_set_mobj_state(target, Doocr::Statenum.new(target.value.info.value.seestate))
+      if target.value.state == @@states.to_unsafe + Doocr.mobjinfo_for(target.value).spawnstate &&
+         Doocr.mobjinfo_for(target.value).seestate != Doocr::Statenum::S_NULL.value
+        CDoom.p_set_mobj_state(target, Doocr::Statenum.new(Doocr.mobjinfo_for(target.value).seestate))
       end
     end
   end
 
-  def self.t_fire_flicker(flick : CDoom::Fireflicker*)
+  def self.t_fire_flicker(flick : Doocr::Fireflicker)
     flick.value.count = flick.value.count - 1
     return if flick.value.count != 0
 
@@ -2907,7 +2907,7 @@ module Doocr
     flick.value.count = 4
   end
 
-  def self.p_spawn_fire_flicker(sector : CDoom::Sector*)
+  def self.p_spawn_fire_flicker(sector : Doocr::Sector)
     # Note that we are resetting sector attributes.
     # Nothing special about it during gameplay.
     sector.value.special = 0
@@ -2930,7 +2930,7 @@ module Doocr
   #
   # Do flashing lights.
   #
-  def self.t_light_flash(flash : CDoom::Lightflash*)
+  def self.t_light_flash(flash : Doocr::Lightflash)
     flash.value.count = flash.value.count - 1
     return if flash.value.count != 0
 
@@ -2947,7 +2947,7 @@ module Doocr
   # After the map has been loaded, scan each sector
   # for specials that spawn thinkers
   #
-  def self.p_spawn_light_flash(sector : CDoom::Sector*)
+  def self.p_spawn_light_flash(sector : Doocr::Sector)
     # Nothing special about it during gameplay.
     sector.value.special = 0
 
@@ -2969,7 +2969,7 @@ module Doocr
   # STROBE LIGHT FLASHING
   #
 
-  def self.t_strobe_flash(flash : CDoom::Strobe*)
+  def self.t_strobe_flash(flash : Doocr::Strobe)
     flash.value.count = flash.value.count - 1
     return if flash.value.count != 0
 
@@ -2986,7 +2986,7 @@ module Doocr
   # After the map has been loaded, scan each sector
   # for specials that spawn thinkers
   #
-  def self.p_spawn_strobe_flash(sector : CDoom::Sector*, fast_or_slow : LibC::Int, in_sync : LibC::Int)
+  def self.p_spawn_strobe_flash(sector : Doocr::Sector, fast_or_slow : LibC::Int, in_sync : LibC::Int)
     flash = CDoom.z_malloc(sizeof(CDoom::Strobe), Doocr::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Strobe*)
 
     CDoom.p_add_thinker(pointerof(flash.value.@thinker))
@@ -3013,9 +3013,9 @@ module Doocr
   #
   # Start strobing lights (usually from a trigger)
   #
-  def self.ev_start_light_strobing(line : CDoom::Line*)
+  def self.ev_start_light_strobing(line : Doocr::Line)
     secnum = -1
-    while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
+    while (secnum = Doocr.p_find_sector_from_line_tag(line, secnum)) >= 0
       sec = Doocr.sectors + secnum
       next if !sec.value.specialdata.null?
 
@@ -3026,7 +3026,7 @@ module Doocr
   #
   # TURN LINE'S TAG LIGHTS OFF
   #
-  def self.ev_turn_tag_lights_off(line : CDoom::Line*)
+  def self.ev_turn_tag_lights_off(line : Doocr::Line)
     sector = Doocr.sectors
 
     Doocr.numsectors.times do |j|
@@ -3044,7 +3044,7 @@ module Doocr
     end
   end
 
-  def self.ev_light_turn_on(line : CDoom::Line*, bright : LibC::Int)
+  def self.ev_light_turn_on(line : Doocr::Line, bright : LibC::Int)
     sector = Doocr.sectors
 
     Doocr.numsectors.times do |j|
@@ -3066,7 +3066,7 @@ module Doocr
     end
   end
 
-  def self.t_glow(g : CDoom::Glow*)
+  def self.t_glow(g : Doocr::Glow)
     case g.value.direction
     when -1
       # DOWN
@@ -3085,7 +3085,7 @@ module Doocr
     end
   end
 
-  def self.p_spawn_glowing_light(sector : CDoom::Sector*)
+  def self.p_spawn_glowing_light(sector : Doocr::Sector)
     g = CDoom.z_malloc(sizeof(CDoom::Glow), Doocr::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Glow*)
 
     CDoom.p_add_thinker(pointerof(g.value.@thinker))
@@ -3125,7 +3125,7 @@ module Doocr
     return 1
   end
 
-  def self.p_teleport_move(thing : CDoom::Mobj*, x : LibC::Int, y : LibC::Int) : LibC::Int
+  def self.p_teleport_move(thing : Doocr::Mobj, x : LibC::Int, y : LibC::Int) : LibC::Int
     # kill anything occupying the position
     Doocr.tmthing = thing
     Doocr.tmflags = thing.value.flags
@@ -3189,7 +3189,7 @@ module Doocr
   #
   # Adjusts tmfloorz and tmceilingz as lines are contacted
   #
-  def self.pit_check_line(ld : CDoom::Line*) : LibC::Int
+  def self.pit_check_line(ld : Doocr::Line) : LibC::Int
     if Doocr.tmbbox[Doocr::BOXRIGHT] <= ld.value.bbox[Doocr::BOXLEFT] ||
        Doocr.tmbbox[Doocr::BOXLEFT] >= ld.value.bbox[Doocr::BOXRIGHT] ||
        Doocr.tmbbox[Doocr::BOXTOP] <= ld.value.bbox[Doocr::BOXBOTTOM] ||
@@ -3240,7 +3240,7 @@ module Doocr
     return 1
   end
 
-  def self.pit_check_thing(thing : CDoom::Mobj*) : LibC::Int
+  def self.pit_check_thing(thing : Doocr::Mobj) : LibC::Int
     return 1 if thing.value.flags & (Doocr::Mobjflag::MF_SOLID.value | Doocr::Mobjflag::MF_SPECIAL.value | Doocr::Mobjflag::MF_SHOOTABLE.value) == 0
 
     blockdist = thing.value.radius + Doocr.tmthing.value.radius
@@ -3256,7 +3256,7 @@ module Doocr
 
     # check for skulls slamming into things
     if Doocr.tmthing.value.flags & Doocr::Mobjflag::MF_SKULLFLY.value != 0
-      damage = ((CDoom.p_random % 8) + 1) * Doocr.tmthing.value.info.value.damage
+      damage = ((CDoom.p_random % 8) + 1) * Doocr.mobjinfo_for(Doocr.tmthing.value).damage
 
       CDoom.p_damage_mobj(thing, Doocr.tmthing, Doocr.tmthing, damage)
 
@@ -3265,7 +3265,7 @@ module Doocr
       Doocr.tmthing.value.momy = 0
       Doocr.tmthing.value.momz = 0
 
-      CDoom.p_set_mobj_state(Doocr.tmthing, Doocr::Statenum.new(Doocr.tmthing.value.info.value.spawnstate))
+      CDoom.p_set_mobj_state(Doocr.tmthing, Doocr::Statenum.new(Doocr.mobjinfo_for(Doocr.tmthing.value).spawnstate))
 
       return 0 # stop moving
     end
@@ -3297,7 +3297,7 @@ module Doocr
       end
 
       # damage / explode
-      damage = ((CDoom.p_random % 8) + 1) * Doocr.tmthing.value.info.value.damage
+      damage = ((CDoom.p_random % 8) + 1) * Doocr.mobjinfo_for(Doocr.tmthing.value).damage
       CDoom.p_damage_mobj(thing, Doocr.tmthing, Doocr.tmthing.value.target, damage)
 
       # don't traverse any more
@@ -3344,7 +3344,7 @@ module Doocr
   #  speciallines[]
   #  numspeciallines
   #
-  def self.p_check_position(thing : CDoom::Mobj*, x : LibC::Int, y : LibC::Int) : LibC::Int
+  def self.p_check_position(thing : Doocr::Mobj, x : LibC::Int, y : LibC::Int) : LibC::Int
     Doocr.tmthing = thing
     Doocr.tmflags = thing.value.flags
 
@@ -3415,7 +3415,7 @@ module Doocr
   # Attempt to move to a new position,
   # crossing special lines unless MF_TELEPORT is set.
   #
-  def self.p_try_move(thing : CDoom::Mobj*, x : LibC::Int, y : LibC::Int) : LibC::Int
+  def self.p_try_move(thing : Doocr::Mobj, x : LibC::Int, y : LibC::Int) : LibC::Int
     Doocr.floatok = 0
     return 0 if CDoom.p_check_position(thing, x, y) == 0 # solid wall or thing
 
@@ -3462,7 +3462,7 @@ module Doocr
         side = CDoom.p_point_on_line_side(thing.value.x, thing.value.y, ld)
         oldside = CDoom.p_point_on_line_side(oldx, oldy, ld)
         if side != oldside
-          CDoom.p_cross_special_line((ld - Doocr.lines).to_i32!, oldside, thing) if ld.value.special != 0
+          Doocr.p_cross_special_line((ld - Doocr.lines.to_unsafe).to_i32!, oldside, thing) if ld.value.special != 0
         end
       end
     end
@@ -3470,7 +3470,7 @@ module Doocr
     return 1
   end
 
-  def self.p_thing_height_clip(thing : CDoom::Mobj*) : LibC::Int
+  def self.p_thing_height_clip(thing : Doocr::Mobj) : LibC::Int
     onfloor = (thing.value.z == thing.value.floorz).to_unsafe
 
     CDoom.p_check_position(thing, thing.value.x, thing.value.y)
@@ -3503,7 +3503,7 @@ module Doocr
   # Adjusts the xmove / ymove
   # so that the next move will slide along the wall.
   #
-  def self.p_hit_slide_line(ld : CDoom::Line*)
+  def self.p_hit_slide_line(ld : Doocr::Line)
     if ld.value.slopetype == Doocr::Slopetype::HORIZONTAL
       Doocr.tmymove = 0
       return
@@ -3586,7 +3586,7 @@ module Doocr
   #
   # This is a kludgy mess.
   #
-  def self.p_slide_move(mo : CDoom::Mobj*)
+  def self.p_slide_move(mo : Doocr::Mobj)
     Doocr.slidemo = mo
     hitcount = 0
 
@@ -3670,27 +3670,27 @@ module Doocr
   #
   # Sets linetaget and aimslope when a target is aimed at.
   #
-  def self.ptr_aim_traverse(int : CDoom::Intercept*) : LibC::Int
-    if int.value.isaline != 0
-      li = int.value.d.line
+  def self.ptr_aim_traverse(int : Doocr::Intercept) : LibC::Int
+    if int.isaline != 0
+      li = int.d.line.not_nil!
 
-      return 0 if li.value.flags & Doocr::ML_TWOSIDED == 0 # stop
+      return 0 if li.flags & Doocr::ML_TWOSIDED == 0 # stop
 
       # Crosses a two sided line.
       # A two sided line will restrict
       # the possible target ranges.
-      CDoom.p_line_opening(li)
+      Doocr.p_line_opening(li)
 
       return 0 if Doocr.openbottom >= Doocr.opentop # stop
 
-      dist = CDoom.fixed_mul(Doocr.attackrange, int.value.frac)
+      dist = CDoom.fixed_mul(Doocr.attackrange, int.frac)
 
-      if li.value.frontsector.value.floorheight != li.value.backsector.value.floorheight
+      if li.frontsector.not_nil!.floorheight != li.backsector.not_nil!.floorheight
         slope = CDoom.fixed_div(Doocr.openbottom - Doocr.shootz, dist)
         Doocr.bottomslope = slope if slope > Doocr.bottomslope
       end
 
-      if li.value.frontsector.value.ceilingheight != li.value.backsector.value.ceilingheight
+      if li.frontsector.not_nil!.ceilingheight != li.backsector.not_nil!.ceilingheight
         slope = CDoom.fixed_div(Doocr.opentop - Doocr.shootz, dist)
         Doocr.topslope = slope if slope < Doocr.topslope
       end
@@ -3701,18 +3701,18 @@ module Doocr
     end
 
     # shoot a thing
-    th = int.value.d.thing
+    th = int.d.thing.not_nil!
     return 1 if th == Doocr.shootthing # can't shoot self
 
-    return 1 if th.value.flags & Doocr::Mobjflag::MF_SHOOTABLE.value == 0 # corpse or something
+    return 1 if th.flags & Doocr::Mobjflag::MF_SHOOTABLE.value == 0 # corpse or something
 
     # check angles to see if the thing can be aimed at
-    dist = CDoom.fixed_mul(Doocr.attackrange, int.value.frac)
-    thingtopslope = CDoom.fixed_div(th.value.z + th.value.height - Doocr.shootz, dist)
+    dist = CDoom.fixed_mul(Doocr.attackrange, int.frac)
+    thingtopslope = CDoom.fixed_div(th.z + th.height - Doocr.shootz, dist)
 
     return 1 if thingtopslope < Doocr.bottomslope # shot over the thing
 
-    thingbottomslope = CDoom.fixed_div(th.value.z - Doocr.shootz, dist)
+    thingbottomslope = CDoom.fixed_div(th.z - Doocr.shootz, dist)
 
     return 1 if thingbottomslope > Doocr.topslope # shot under the thing
 
@@ -3730,7 +3730,7 @@ module Doocr
     if int.value.isaline != 0
       li = int.value.d.line
 
-      CDoom.p_shoot_special_line(Doocr.shootthing, li) if li.value.special != 0
+      Doocr.p_shoot_special_line(Doocr.shootthing.not_nil!, li) if li.value.special != 0
 
       hitline = li.value.flags & Doocr::ML_TWOSIDED == 0 ? true : false
 
@@ -3813,27 +3813,27 @@ module Doocr
     return 0
   end
 
-  def self.p_aim_line_attack(t1 : CDoom::Mobj*, angle : LibC::UInt, distance : LibC::Int) : LibC::Int
+  def self.p_aim_line_attack(t1 : Doocr::Mobj, angle : LibC::UInt, distance : LibC::Int) : LibC::Int
     angle >>= Doocr::ANGLETOFINESHIFT
     Doocr.shootthing = t1
 
-    x2 = t1.value.x + (distance >> FRACBITS) * @@finecosine[angle]
-    y2 = t1.value.y + (distance >> FRACBITS) * @@finesine[angle]
-    Doocr.shootz = t1.value.z + (t1.value.height >> 1) + 8 * FRACUNIT
+    x2 = t1.x + (distance >> FRACBITS) * @@finecosine[angle]
+    y2 = t1.y + (distance >> FRACBITS) * @@finesine[angle]
+    Doocr.shootz = t1.z + (t1.height >> 1) + 8 * FRACUNIT
 
     # can't shoot outside view angles
     Doocr.topslope = 100 * FRACUNIT // 160
     Doocr.bottomslope = -100 * FRACUNIT // 160
 
     Doocr.attackrange = distance
-    Doocr.linetarget = Pointer(CDoom::Mobj).null
+    Doocr.linetarget = nil
 
-    CDoom.p_path_traverse(t1.value.x, t1.value.y,
+    Doocr.p_path_traverse(t1.x, t1.y,
       x2, y2,
       Doocr::PT_ADDLINES | Doocr::PT_ADDTHINGS,
-      ->CDoom.ptr_aim_traverse)
+      ->(intercept : Doocr::Intercept) { Doocr.ptr_aim_traverse(intercept) })
 
-    return Doocr.aimslope unless Doocr.linetarget.null?
+    return Doocr.aimslope unless Doocr.linetarget.nil?
 
     return 0
   end
@@ -3842,20 +3842,20 @@ module Doocr
   # If damage == 0, it is just a test trace
   # that will leave linetarget set.
   #
-  def self.p_line_attack(t1 : CDoom::Mobj*, angle : LibC::UInt, distance : LibC::Int, slope : LibC::Int, damage : LibC::Int)
+  def self.p_line_attack(t1 : Doocr::Mobj, angle : LibC::UInt, distance : LibC::Int, slope : LibC::Int, damage : LibC::Int)
     angle >>= Doocr::ANGLETOFINESHIFT
     Doocr.shootthing = t1
     Doocr.la_damage = damage
-    x2 = t1.value.x + (distance >> FRACBITS) * @@finecosine[angle]
-    y2 = t1.value.y + (distance >> FRACBITS) * @@finesine[angle]
-    Doocr.shootz = t1.value.z + (t1.value.height >> 1) + 8 * FRACUNIT
+    x2 = t1.x + (distance >> FRACBITS) * @@finecosine[angle]
+    y2 = t1.y + (distance >> FRACBITS) * @@finesine[angle]
+    Doocr.shootz = t1.z + (t1.height >> 1) + 8 * FRACUNIT
     Doocr.attackrange = distance
     Doocr.aimslope = slope
 
-    CDoom.p_path_traverse(t1.value.x, t1.value.y,
+    Doocr.p_path_traverse(t1.x, t1.y,
       x2, y2,
       Doocr::PT_ADDLINES | Doocr::PT_ADDTHINGS,
-      ->CDoom.ptr_shoot_traverse)
+      ->(intercept : Doocr::Intercept) { Doocr.ptr_shoot_traverse(intercept) })
   end
 
   def self.ptr_use_traverse(int : CDoom::Intercept*) : LibC::Int
@@ -3874,7 +3874,7 @@ module Doocr
     side = 0
     side = 1 if CDoom.p_point_on_line_side(Doocr.usething.value.x, Doocr.usething.value.y, int.value.d.line) == 1
 
-    CDoom.p_use_special_line(Doocr.usething, int.value.d.line, side)
+    Doocr.p_use_special_line(Doocr.usething.not_nil!, int.value.d.line.not_nil!, side)
 
     # can't use for than one special line in a row
     return 0
@@ -3883,7 +3883,7 @@ module Doocr
   #
   # Looks for special lines in front of the player to activate.
   #
-  def self.p_use_lines(player : CDoom::Player*)
+  def self.p_use_lines(player : Doocr::Player)
     Doocr.usething = player.value.mo
 
     angle = player.value.mo.value.angle >> Doocr::ANGLETOFINESHIFT
@@ -3904,7 +3904,7 @@ module Doocr
   # "bombsource" is the creature
   # that caused the explosion at "bombspot".
   #
-  def self.pit_radius_attack(thing : CDoom::Mobj*) : LibC::Int
+  def self.pit_radius_attack(thing : Doocr::Mobj) : LibC::Int
     return 1 if thing.value.flags & Doocr::Mobjflag::MF_SHOOTABLE.value == 0
 
     # Boss spider and cyborg
@@ -3933,7 +3933,7 @@ module Doocr
   #
   # Source is the creature that caused the explosion at spot.
   #
-  def self.p_radius_attack(spot : CDoom::Mobj*, source : CDoom::Mobj*, damage : LibC::Int)
+  def self.p_radius_attack(spot : Doocr::Mobj, source : Doocr::Mobj, damage : LibC::Int)
     dist = (damage + Doocr::MAXRADIUS) << FRACBITS
     yh = (spot.value.y + dist - Doocr.bmaporgy) >> Doocr::MAPBLOCKSHIFT
     yl = (spot.value.y - dist - Doocr.bmaporgy) >> Doocr::MAPBLOCKSHIFT
@@ -3954,7 +3954,7 @@ module Doocr
     end
   end
 
-  def self.pit_change_sector(thing : CDoom::Mobj*) : LibC::Int
+  def self.pit_change_sector(thing : Doocr::Mobj) : LibC::Int
     return 1 if CDoom.p_thing_height_clip(thing) != 0 # keep checking
 
     # crunch bodies to giblets
@@ -4000,7 +4000,7 @@ module Doocr
     return 1
   end
 
-  def self.p_change_sector(sector : CDoom::Sector*, crunch : LibC::Int) : LibC::Int
+  def self.p_change_sector(sector : Doocr::Sector, crunch : LibC::Int) : LibC::Int
     Doocr.nofit = 0
     Doocr.crushchange = crunch
 
@@ -4032,7 +4032,7 @@ module Doocr
   #
   # Returns 0 or 1
   #
-  def self.p_point_on_line_side(x : LibC::Int, y : LibC::Int, line : CDoom::Line*) : LibC::Int
+  def self.p_point_on_line_side(x : LibC::Int, y : LibC::Int, line : Doocr::Line) : LibC::Int
     if line.value.dx == 0
       return (line.value.dy > 0).to_unsafe if x <= line.value.v1.value.x
 
@@ -4058,7 +4058,7 @@ module Doocr
   # Considers the line to be infinite
   # Returns side 0 or 1, -1 if box crosses the line.
   #
-  def self.p_box_on_line_side(tmbox : LibC::Int*, ld : CDoom::Line*) : LibC::Int
+  def self.p_box_on_line_side(tmbox : LibC::Int*, ld : Doocr::Line) : LibC::Int
     p1 = 0
     p2 = 0
 
@@ -4117,7 +4117,7 @@ module Doocr
     return 1                 # back side
   end
 
-  def self.p_make_divline(li : CDoom::Line*, dl : CDoom::Divline*)
+  def self.p_make_divline(li : Doocr::Line, dl : Pointer(CDoom::Divline))
     dl.value.x = li.value.v1.value.x
     dl.value.y = li.value.v1.value.y
     dl.value.dx = li.value.dx
@@ -4148,28 +4148,28 @@ module Doocr
   # through a two sided line.
   # OPTIMIZE: keep this precalculated
   #
-  def self.p_line_opening(linedef : CDoom::Line*)
-    if linedef.value.sidenum[1] == -1
+  def self.p_line_opening(linedef : Doocr::Line)
+    if linedef.sidenum[1] == -1
       # single sided line
       Doocr.openrange = 0
       return
     end
 
-    front = linedef.value.frontsector
-    back = linedef.value.backsector
+    front = linedef.frontsector.not_nil!
+    back = linedef.backsector.not_nil!
 
-    if front.value.ceilingheight < back.value.ceilingheight
-      Doocr.opentop = front.value.ceilingheight
+    if front.ceilingheight < back.ceilingheight
+      Doocr.opentop = front.ceilingheight
     else
-      Doocr.opentop = back.value.ceilingheight
+      Doocr.opentop = back.ceilingheight
     end
 
-    if front.value.floorheight > back.value.floorheight
-      Doocr.openbottom = front.value.floorheight
-      Doocr.lowfloor = back.value.floorheight
+    if front.floorheight > back.floorheight
+      Doocr.openbottom = front.floorheight
+      Doocr.lowfloor = back.floorheight
     else
-      Doocr.openbottom = back.value.floorheight
-      Doocr.lowfloor = front.value.floorheight
+      Doocr.openbottom = back.floorheight
+      Doocr.lowfloor = front.floorheight
     end
 
     Doocr.openrange = Doocr.opentop - Doocr.openbottom
@@ -4185,73 +4185,74 @@ module Doocr
   # lookups maintaining lists ot things inside
   # these structures need to be updated.
   #
-  def self.p_unset_thing_position(thing : CDoom::Mobj*)
-    if thing.value.flags & Doocr::Mobjflag::MF_NOSECTOR.value == 0
+  def self.p_unset_thing_position(thing : Doocr::Mobj)
+    if thing.flags & Doocr::Mobjflag::MF_NOSECTOR.value == 0
       # inert things don't need to be in blockmap?
       # unlink from subsector
-      thing.value.snext.value.sprev = thing.value.sprev unless thing.value.snext.null?
+      thing.snext.not_nil!.sprev = thing.sprev unless thing.snext.nil?
 
-      if !thing.value.sprev.null?
-        thing.value.sprev.value.snext = thing.value.snext
+      if !thing.sprev.nil?
+        thing.sprev.not_nil!.snext = thing.snext
       else
-        thing.value.subsector.value.sector.value.thinglist = thing.value.snext
+        thing.subsector.not_nil!.sector.not_nil!.thinglist = thing.snext
       end
     end
 
-    if thing.value.flags & Doocr::Mobjflag::MF_NOBLOCKMAP.value == 0
+    if thing.flags & Doocr::Mobjflag::MF_NOBLOCKMAP.value == 0
       # inert things don't need to be in blockmap
       # unlink from block map
-      thing.value.bnext.value.bprev = thing.value.bprev unless thing.value.bnext.null?
+      thing.bnext.not_nil!.bprev = thing.bprev unless thing.bnext.nil?
 
-      if !thing.value.bprev.null?
-        thing.value.bprev.value.bnext = thing.value.bnext
+      if !thing.bprev.nil?
+        thing.bprev.not_nil!.bnext = thing.bnext
       else
-        blockx = (thing.value.x - Doocr.bmaporgx) >> Doocr::MAPBLOCKSHIFT
-        blocky = (thing.value.y - Doocr.bmaporgy) >> Doocr::MAPBLOCKSHIFT
+        blockx = (thing.x - Doocr.bmaporgx) >> Doocr::MAPBLOCKSHIFT
+        blocky = (thing.y - Doocr.bmaporgy) >> Doocr::MAPBLOCKSHIFT
 
         if blockx >= 0 && blockx < Doocr.bmapwidth &&
            blocky >= 0 && blocky < Doocr.bmapheight
-          Doocr.blocklinks[blocky * Doocr.bmapwidth + blockx] = thing.value.bnext
+          Doocr.blocklinks[blocky * Doocr.bmapwidth + blockx] = thing.bnext
         end
       end
     end
   end
 
-  def self.p_set_thing_position(thing : CDoom::Mobj*)
+  def self.p_set_thing_position(thing : Doocr::Mobj)
     # link into subsector
-    ss = CDoom.r_point_in_subsector(thing.value.x, thing.value.y)
-    thing.value.subsector = ss
+    ss = Doocr.r_point_in_subsector(thing.x, thing.y)
+    thing.subsector = ss
 
-    if thing.value.flags & Doocr::Mobjflag::MF_NOSECTOR.value == 0
+    if thing.flags & Doocr::Mobjflag::MF_NOSECTOR.value == 0
       # invisible things don't go into the sector links
-      sec = ss.value.sector
+      sec = ss.sector.not_nil!
 
-      thing.value.sprev = Pointer(CDoom::Mobj).null
-      thing.value.snext = sec.value.thinglist
+      thing.sprev = nil
+      thing.snext = sec.thinglist
 
-      sec.value.thinglist.value.sprev = thing unless sec.value.thinglist.null?
+      sec.thinglist.not_nil!.sprev = thing unless sec.thinglist.nil?
 
-      sec.value.thinglist = thing
+      sec.thinglist = thing
     end
 
     # link into blockmap
-    if thing.value.flags & Doocr::Mobjflag::MF_NOBLOCKMAP.value == 0
+    if thing.flags & Doocr::Mobjflag::MF_NOBLOCKMAP.value == 0
       # inert things don't need to be in blockmap
-      blockx = (thing.value.x - Doocr.bmaporgx) >> Doocr::MAPBLOCKSHIFT
-      blocky = (thing.value.y - Doocr.bmaporgy) >> Doocr::MAPBLOCKSHIFT
+      blockx = (thing.x - Doocr.bmaporgx) >> Doocr::MAPBLOCKSHIFT
+      blocky = (thing.y - Doocr.bmaporgy) >> Doocr::MAPBLOCKSHIFT
 
       if blockx >= 0 && blockx < Doocr.bmapwidth &&
          blocky >= 0 && blocky < Doocr.bmapheight
-        link = Doocr.blocklinks.to_unsafe + (blocky * Doocr.bmapwidth + blockx)
-        thing.value.bprev = Pointer(CDoom::Mobj).null
-        thing.value.bnext = link.value
-        link.value.value.bprev = thing unless link.value.null?
+        index = blocky * Doocr.bmapwidth + blockx
+        link = Doocr.blocklinks[index]
+        thing.bprev = nil
+        thing.bnext = link
+        link.not_nil!.bprev = thing unless link.nil?
 
-        link.value = thing
+        Doocr.blocklinks[index] = thing
       else
         # thing is off the map
-        thing.value.bnext = Pointer(CDoom::Mobj).null
-        thing.value.bprev = Pointer(CDoom::Mobj).null
+        thing.bnext = nil
+        thing.bprev = nil
       end
     end
   end
@@ -4271,7 +4272,7 @@ module Doocr
   # to P_BlockLinesIterator, then make one or more calls
   # to it.
   #
-  def self.p_block_lines_iterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Line*, LibC::Int)) : LibC::Int
+  def self.p_block_lines_iterator(x : LibC::Int, y : LibC::Int, func : Proc(Doocr::Line, LibC::Int)) : LibC::Int
     return 1 if x < 0 || y < 0 || x >= Doocr.bmapwidth || y >= Doocr.bmapheight
 
     offset = y * Doocr.bmapwidth + x
@@ -4297,7 +4298,7 @@ module Doocr
     return 1 # everything was checked
   end
 
-  def self.p_block_things_iterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Mobj*, LibC::Int)) : LibC::Int
+  def self.p_block_things_iterator(x : LibC::Int, y : LibC::Int, func : Proc(Doocr::Mobj, LibC::Int)) : LibC::Int
     return 1 if x < 0 || y < 0 || x >= Doocr.bmapwidth || y >= Doocr.bmapheight
 
     mobj = Doocr.blocklinks[y * Doocr.bmapwidth + x]
@@ -4354,9 +4355,10 @@ module Doocr
       return 0 # stop checking
     end
 
-    Doocr.intercept_p.value.frac = frac
-    Doocr.intercept_p.value.isaline = 1
-    Doocr.intercept_p.value.d.line = ld
+    intercept = Doocr.intercepts[Doocr.intercept_p]
+    intercept.frac = frac
+    intercept.isaline = 1
+    intercept.d.line = ld
 
     Doocr.intercept_p += 1
 
@@ -4397,9 +4399,10 @@ module Doocr
 
     return 1 if frac < 0 # behind source
 
-    Doocr.intercept_p.value.frac = frac
-    Doocr.intercept_p.value.isaline = 0
-    Doocr.intercept_p.value.d.thing = thing
+    intercept = Doocr.intercepts[Doocr.intercept_p]
+    intercept.frac = frac
+    intercept.isaline = 0
+    intercept.d.thing = thing
 
     Doocr.intercept_p += 1
 
@@ -4411,18 +4414,18 @@ module Doocr
   # for all lines.
   #
   def self.p_traverse_intercepts(func : Doocr::Traverser, maxfrac : LibC::Int) : LibC::Int
-    count = (Doocr.intercept_p - Doocr.intercepts.to_unsafe).to_i32!
-
-    int = Pointer(CDoom::Intercept).null # shut up compiler warning
+    count = Doocr.intercept_p
 
     while count != 0
       count -= 1
       dist = Int32::MAX
-      scan = Doocr.intercepts.to_unsafe
+      scan = 0
+      int = Doocr.intercepts[0]
       while scan < Doocr.intercept_p
-        if scan.value.frac < dist
-          dist = scan.value.frac
-          int = scan
+        candidate = Doocr.intercepts[scan]
+        if candidate.frac < dist
+          dist = candidate.frac
+          int = candidate
         end
         scan += 1
       end
@@ -4433,7 +4436,7 @@ module Doocr
 
       return 0 if func.call(int) == 0 # don't bother going farther
 
-      int.value.frac = Int32::MAX
+      int.frac = Int32::MAX
     end
 
     return 1 # everything was traversed
@@ -4445,11 +4448,11 @@ module Doocr
   # Returns true if the traverser function returns true
   # for all lines.
   #
-  def self.p_path_traverse(x1 : LibC::Int, y1 : LibC::Int, x2 : LibC::Int, y2 : LibC::Int, flags : LibC::Int, trav : Proc(CDoom::Intercept*, LibC::Int)) : LibC::Int
+  def self.p_path_traverse(x1 : LibC::Int, y1 : LibC::Int, x2 : LibC::Int, y2 : LibC::Int, flags : LibC::Int, trav : Proc(Doocr::Intercept, LibC::Int)) : LibC::Int
     Doocr.earlyout = (flags & Doocr::PT_EARLYOUT != 0).to_unsafe
 
     Doocr.validcount += 1
-    Doocr.intercept_p = Doocr.intercepts.to_unsafe
+    Doocr.intercept_p = 0
 
     x1 += FRACUNIT if (x1 - Doocr.bmaporgx) & (Doocr::MAPBLOCKSIZE - 1) == 0 # don't side exactly on a line
 
@@ -4536,34 +4539,34 @@ module Doocr
     return CDoom.p_traverse_intercepts(trav, FRACUNIT)
   end
 
-  def self.p_set_mobj_state(mobj : CDoom::Mobj*, state : Doocr::Statenum) : LibC::Int
+  def self.p_set_mobj_state(mobj : Doocr::Mobj, state : Doocr::Statenum) : LibC::Int
     loop do
       if state == Doocr::Statenum::S_NULL
-        mobj.value.state = Pointer(CDoom::State).new(Doocr::Statenum::S_NULL.value.to_u64!)
-        CDoom.p_remove_mobj(mobj)
+        mobj.state = @@states[Doocr::Statenum::S_NULL.value]
+        Doocr.p_remove_mobj(mobj)
         return 0
       end
 
-      st = @@states.to_unsafe + state.value
-      mobj.value.state = st
-      mobj.value.tics = st.value.tics
-      mobj.value.sprite = st.value.sprite
-      mobj.value.frame = st.value.frame
+      st = @@states[state.value]
+      mobj.state = st
+      mobj.tics = st.tics.to_i32
+      mobj.sprite = st.sprite
+      mobj.frame = st.frame.to_i32
 
       # Modified handling.
       # Call action functions when the state is set
-      if !st.value.action.null?
-        Doocr::ActionfP1.new(st.value.action, Pointer(Void).null).call(mobj.as(Void*))
+      if !st.action.null?
+        Doocr::ActionfP1.new(st.action, Pointer(Void).null).call(mobj.as(Void*))
       end
 
-      state = st.value.nextstate
-      break unless mobj.value.tics == 0
+      state = st.nextstate
+      break unless mobj.tics == 0
     end
 
     return 1
   end
 
-  def self.p_explode_missile(mo : CDoom::Mobj*)
+  def self.p_explode_missile(mo : Doocr::Mobj)
     mo.value.momx = 0
     mo.value.momy = 0
     mo.value.momz = 0
@@ -4576,10 +4579,10 @@ module Doocr
 
     mo.value.flags = mo.value.flags & ~Doocr::Mobjflag::MF_MISSILE.value
 
-    Doocr.s_start_sound(mo, mo.value.info.value.deathsound) if mo.value.info.value.deathsound != 0
+    Doocr.s_start_sound(mo, Doocr.mobjinfo_for(mo.value).deathsound) if Doocr.mobjinfo_for(mo.value).deathsound != 0
   end
 
-  def self.p_xymovement(mo : CDoom::Mobj*)
+  def self.p_xymovement(mo : Doocr::Mobj)
     if mo.value.momx == 0 && mo.value.momy == 0
       if mo.value.flags & Doocr::Mobjflag::MF_SKULLFLY.value != 0
         # the skull slammed into something
@@ -4588,7 +4591,7 @@ module Doocr
         mo.value.momy = 0
         mo.value.momz = 0
 
-        CDoom.p_set_mobj_state(mo, Doocr::Statenum.new(mo.value.info.value.spawnstate))
+        CDoom.p_set_mobj_state(mo, Doocr::Statenum.new(Doocr.mobjinfo_for(mo.value).spawnstate))
       end
       return
     end
@@ -4694,7 +4697,7 @@ module Doocr
     end
   end
 
-  def self.p_zmovement(mo : CDoom::Mobj*)
+  def self.p_zmovement(mo : Doocr::Mobj)
     # check for smooth step up
     if !mo.value.player.null? && mo.value.z < mo.value.floorz
       mo.value.player.value.viewheight = mo.value.player.value.viewheight - (mo.value.floorz - mo.value.z)
@@ -4781,7 +4784,7 @@ module Doocr
     end
   end
 
-  def self.p_nightmare_respawn(mobj : CDoom::Mobj*)
+  def self.p_nightmare_respawn(mobj : Doocr::Mobj)
     x = mobj.value.spawnpoint.x.to_i32 << FRACBITS
     y = mobj.value.spawnpoint.y.to_i32 << FRACBITS
 
@@ -4807,7 +4810,7 @@ module Doocr
     mthing = pointerof(mobj.value.@spawnpoint)
 
     # spawn it
-    if mobj.value.info.value.flags & Doocr::Mobjflag::MF_SPAWNCEILING.value != 0
+    if Doocr.mobjinfo_for(mobj.value).flags & Doocr::Mobjflag::MF_SPAWNCEILING.value != 0
       z = Doocr::ONCEILINGZ
     else
       z = Doocr::ONFLOORZ
@@ -4828,7 +4831,7 @@ module Doocr
     CDoom.p_remove_mobj(mobj)
   end
 
-  def self.p_mobj_thinker(mobj : CDoom::Mobj*)
+  def self.p_mobj_thinker(mobj : Doocr::Mobj)
     mobj = mobj.as(CDoom::Mobj*)
     @@current_thinking_mobj = mobj
     # momentum movement
@@ -4874,28 +4877,27 @@ module Doocr
     end
   end
 
-  def self.p_spawn_mobj(x : LibC::Int, y : LibC::Int, z : LibC::Int, type : Doocr::Mobjtype) : CDoom::Mobj*
+  def self.p_spawn_mobj(x : LibC::Int, y : LibC::Int, z : LibC::Int, type : Doocr::Mobjtype) : Doocr::Mobj
     mobj = CDoom.z_malloc(sizeof(CDoom::Mobj), Doocr::PU_LEVEL, Pointer(Void).null).as(CDoom::Mobj*)
     CDoom.doom_memset(mobj, 0, sizeof(CDoom::Mobj))
     type = Doocr::Mobjtype::MT_SERGEANT if ARGV.includes?("-nospectre") && type == Doocr::Mobjtype::MT_SHADOWS
 
-    info = Doocr.mobjinfo.to_unsafe + type.value
+    info = Doocr.mobjinfo[type.value]
 
     mobj.value.type = type
-    mobj.value.info = info
     mobj.value.x = x
     mobj.value.y = y
-    mobj.value.radius = info.value.radius
-    mobj.value.height = info.value.height
-    mobj.value.flags = info.value.flags
-    mobj.value.health = info.value.spawnhealth
+    mobj.value.radius = info.radius
+    mobj.value.height = info.height
+    mobj.value.flags = info.flags
+    mobj.value.health = info.spawnhealth
 
-    mobj.value.reactiontime = info.value.reactiontime if Doocr.gameskill != Doocr::Skill::Nightmare
+    mobj.value.reactiontime = info.reactiontime if Doocr.gameskill != Doocr::Skill::Nightmare
 
     mobj.value.lastlook = CDoom.p_random % CDoom::MAXPLAYERS
     # do not set the state with p_set_mobj_state,
     # because action routines can not be called yet
-    st = @@states.to_unsafe + info.value.spawnstate
+    st = @@states.to_unsafe + info.spawnstate
 
     mobj.value.state = st
     mobj.value.tics = st.value.tics
@@ -4911,7 +4913,7 @@ module Doocr
     if z == Doocr::ONFLOORZ
       mobj.value.z = mobj.value.floorz
     elsif z == Doocr::ONCEILINGZ
-      mobj.value.z = mobj.value.ceilingz - mobj.value.info.value.height
+      mobj.value.z = mobj.value.ceilingz - Doocr.mobjinfo_for(mobj.value).height
     else
       mobj.value.z = z
     end
@@ -4923,12 +4925,12 @@ module Doocr
     return mobj
   end
 
-  def self.p_remove_mobj(mobj : CDoom::Mobj*)
-    if mobj.value.flags & Doocr::Mobjflag::MF_SPECIAL.value != 0 &&
-       mobj.value.flags & Doocr::Mobjflag::MF_DROPPED.value == 0 &&
-       mobj.value.type != Doocr::Mobjtype::MT_INV &&
-       mobj.value.type != Doocr::Mobjtype::MT_INS
-      Doocr.itemrespawnque[Doocr.iquehead] = mobj.value.spawnpoint
+  def self.p_remove_mobj(mobj : Doocr::Mobj)
+     if mobj.flags & Doocr::Mobjflag::MF_SPECIAL.value != 0 &&
+       mobj.flags & Doocr::Mobjflag::MF_DROPPED.value == 0 &&
+       mobj.type != Doocr::Mobjtype::MT_INV &&
+       mobj.type != Doocr::Mobjtype::MT_INS
+      Doocr.itemrespawnque[Doocr.iquehead] = mobj.spawnpoint
       Doocr.itemrespawntime[Doocr.iquehead] = Doocr.leveltime
       Doocr.iquehead = (Doocr.iquehead + 1) & (Doocr::ITEMQUESIZE - 1)
 
@@ -4937,13 +4939,14 @@ module Doocr
     end
 
     # unlink from sector and block lists
-    CDoom.p_unset_thing_position(mobj)
+    Doocr.p_unset_thing_position(mobj)
 
     # stop any playing sound
     Doocr.s_stop_sound(mobj)
 
     # free block
-    CDoom.p_remove_thinker(mobj.as(CDoom::Thinker*))
+    thinker = mobj.thinker
+    CDoom.p_remove_thinker(pointerof(thinker))
   end
 
   def self.p_respawn_specials
@@ -5029,7 +5032,7 @@ module Doocr
     p.value.viewheight = Doocr::VIEWHEIGHT
 
     # setup gun psprite
-    CDoom.p_setup_psprites(p)
+    Doocr.p_setup_psprites(p)
 
     # give all cards in death match mode
     if Doocr.deathmatch != 0
@@ -5168,7 +5171,7 @@ module Doocr
   # Moves the missile forward a bit
   #  and possibly explodes it right there.
   #
-  def self.p_check_missile_spawn(th : CDoom::Mobj*)
+  def self.p_check_missile_spawn(th : Doocr::Mobj)
     th.value.tics = th.value.tics - (CDoom.p_random & 3)
     th.value.tics = 1 if th.value.tics < 1
 
@@ -5181,12 +5184,12 @@ module Doocr
     CDoom.p_explode_missile(th) if CDoom.p_try_move(th, th.value.x, th.value.y) == 0
   end
 
-  def self.p_spawn_missile(source : CDoom::Mobj*, dest : CDoom::Mobj*, type : Doocr::Mobjtype) : CDoom::Mobj*
+  def self.p_spawn_missile(source : Doocr::Mobj, dest : Doocr::Mobj, type : Doocr::Mobjtype) : Doocr::Mobj
     th = CDoom.p_spawn_mobj(source.value.x,
       source.value.y,
       source.value.z + 4 * 8 * FRACUNIT, type)
 
-    Doocr.s_start_sound(th, th.value.info.value.seesound) if th.value.info.value.seesound != 0
+    Doocr.s_start_sound(th, Doocr.mobjinfo_for(th.value).seesound) if Doocr.mobjinfo_for(th.value).seesound != 0
 
     th.value.target = source # where it came from
     an = CDoom.r_point_to_angle2(source.value.x, source.value.y, dest.value.x, dest.value.y)
@@ -5196,16 +5199,16 @@ module Doocr
 
     th.value.angle = an
     an >>= Doocr::ANGLETOFINESHIFT
-    th.value.momx = CDoom.fixed_mul(th.value.info.value.speed, @@finecosine[an])
-    th.value.momy = CDoom.fixed_mul(th.value.info.value.speed, @@finesine[an])
+    th.value.momx = CDoom.fixed_mul(Doocr.mobjinfo_for(th.value).speed, @@finecosine[an])
+    th.value.momy = CDoom.fixed_mul(Doocr.mobjinfo_for(th.value).speed, @@finesine[an])
 
     dist = CDoom.p_aprox_distance(dest.value.x - source.value.x, dest.value.y - source.value.y)
-    dist = dist.tdiv(th.value.info.value.speed)
+    dist = dist.tdiv(Doocr.mobjinfo_for(th.value).speed)
 
     dist = 1 if dist < 1
 
     th.value.momz = (dest.value.z - source.value.z).tdiv(dist)
-    CDoom.p_check_missile_spawn(th)
+    Doocr.p_check_missile_spawn(th)
 
     return th
   end
@@ -5213,7 +5216,7 @@ module Doocr
   #
   # Tries to aim at a nearby monster
   #
-  def self.p_spawn_player_missile(source : CDoom::Mobj*, type : Doocr::Mobjtype)
+  def self.p_spawn_player_missile(source : Doocr::Mobj, type : Doocr::Mobjtype)
     # see which target is to be aimed at
     an = source.value.angle
     slope = CDoom.p_aim_line_attack(source, an, 16 * 64 * FRACUNIT)
@@ -5239,23 +5242,23 @@ module Doocr
 
     th = CDoom.p_spawn_mobj(x, y, z, type)
 
-    Doocr.s_start_sound(th, th.value.info.value.seesound) if th.value.info.value.seesound != 0
+    Doocr.s_start_sound(th, Doocr.mobjinfo_for(th.value).seesound) if Doocr.mobjinfo_for(th.value).seesound != 0
 
     th.value.target = source
     th.value.angle = an
-    th.value.momx = CDoom.fixed_mul(th.value.info.value.speed,
+    th.value.momx = CDoom.fixed_mul(Doocr.mobjinfo_for(th.value).speed,
       @@finecosine[an >> Doocr::ANGLETOFINESHIFT])
-    th.value.momy = CDoom.fixed_mul(th.value.info.value.speed,
+    th.value.momy = CDoom.fixed_mul(Doocr.mobjinfo_for(th.value).speed,
       @@finesine[an >> Doocr::ANGLETOFINESHIFT])
-    th.value.momz = CDoom.fixed_mul(th.value.info.value.speed, slope)
+    th.value.momz = CDoom.fixed_mul(Doocr.mobjinfo_for(th.value).speed, slope)
 
-    CDoom.p_check_missile_spawn(th)
+    Doocr.p_check_missile_spawn(th)
   end
 
   #
   # Move a plat up and down
   #
-  def self.t_plat_raise(plat : CDoom::Plat*)
+  def self.t_plat_raise(plat : Doocr::Plat)
     case plat.value.status
     when Doocr::Platenum::Up
       res = CDoom.t_move_plane(plat.value.sector,
@@ -5317,7 +5320,7 @@ module Doocr
   # Do Platforms
   #  "amount" is only used for SOME platforms.
   #
-  def self.ev_do_plat(line : CDoom::Line*, type : Doocr::Plattype, amount : LibC::Int) : LibC::Int
+  def self.ev_do_plat(line : Doocr::Line, type : Doocr::Plattype, amount : LibC::Int) : LibC::Int
     secnum = -1
     rtn = 0
 
@@ -5327,7 +5330,7 @@ module Doocr
       CDoom.p_activate_in_stasis(line.value.tag)
     end
 
-    while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
+    while (secnum = Doocr.p_find_sector_from_line_tag(line, secnum)) >= 0
       sec = Doocr.sectors + secnum
 
       next if !sec.value.specialdata.null?
@@ -5418,7 +5421,7 @@ module Doocr
     end
   end
 
-  def self.ev_stop_plat(line : CDoom::Line*)
+  def self.ev_stop_plat(line : Doocr::Line)
     Doocr::MAXPLATS.times do |i|
       if !Doocr.activeplats[i].null? &&
          Doocr.activeplats[i].value.status != Doocr::Platenum::InStasis &&
@@ -5430,7 +5433,7 @@ module Doocr
     end
   end
 
-  def self.p_add_active_plat(plat : CDoom::Plat*)
+  def self.p_add_active_plat(plat : Doocr::Plat)
     Doocr::MAXPLATS.times do |i|
       if Doocr.activeplats[i].null?
         Doocr.activeplats[i] = plat
@@ -5440,7 +5443,7 @@ module Doocr
     CDoom.i_error("Error: p_add_active_plat: no more plats!")
   end
 
-  def self.p_remove_active_plat(plat : CDoom::Plat*)
+  def self.p_remove_active_plat(plat : Doocr::Plat)
     Doocr::MAXPLATS.times do |i|
       if plat == Doocr.activeplats[i]
         Doocr.activeplats[i].value.sector.value.specialdata = Pointer(Void).null
@@ -5453,36 +5456,36 @@ module Doocr
     CDoom.i_error("Error: p_remove_active_plat: can't find plat!")
   end
 
-  def self.p_set_psprite(player : CDoom::Player*, position : LibC::Int, stnum : Doocr::Statenum)
-    psp = player.value.psprites.to_unsafe + position
+  def self.p_set_psprite(player : Doocr::Player, position : LibC::Int, stnum : Doocr::Statenum)
+    psp = player.psprites[position]
 
     loop do
       if stnum.value == 0
         # object removed itself
-        psp.value.state = Pointer(CDoom::State).null
+        psp.state = nil
         break
       end
 
-      state = @@states.to_unsafe + stnum.value
-      psp.value.state = state
-      psp.value.tics = state.value.tics # could be 0
+      state = @@states[stnum.value]
+      psp.state = state
+      psp.tics = state.tics.to_i32 # could be 0
 
-      if state.value.misc1 != 0
+      if state.misc1 != 0
         # coordinate set
-        psp.value.sx = state.value.misc1 << FRACBITS
-        psp.value.sy = state.value.misc2 << FRACBITS
+        psp.sx = state.misc1.to_i32 << FRACBITS
+        psp.sy = state.misc2.to_i32 << FRACBITS
       end
 
       # Call action routine.
       # Modified handling.
-      if !state.value.action.null?
-        Doocr::ActionfP2.new(state.value.action, Pointer(Void).null).call(player.as(Void*), psp.as(Void*))
-        break if psp.value.state.null?
+      if !state.action.null?
+        Doocr::ActionfP2.new(state.action, Pointer(Void).null).call(player.as(Void*), psp.as(Void*))
+        break if psp.state.nil?
       end
 
-      stnum = psp.value.state.value.nextstate
+      stnum = psp.state.not_nil!.nextstate
 
-      break unless psp.value.tics == 0
+      break unless psp.tics == 0
     end
     # an initial state of 0 could cycle through
   end
@@ -5492,30 +5495,30 @@ module Doocr
   # from the bottom of the screen.
   # Uses player
   #
-  def self.p_bring_up_weapon(player : CDoom::Player*)
-    player.value.pendingweapon = player.value.readyweapon if player.value.pendingweapon == Doocr::Weapontype::Nochange
+  def self.p_bring_up_weapon(player : Doocr::Player)
+    player.pendingweapon = player.readyweapon if player.pendingweapon == Doocr::Weapontype::Nochange
 
-    Doocr.s_start_sound(player.value.mo, Doocr::Sfxenum::SFX_sawup.value) if player.value.pendingweapon == Doocr::Weapontype::Chainsaw
+    Doocr.s_start_sound(player.mo.not_nil!, Doocr::Sfxenum::SFX_sawup) if player.pendingweapon == Doocr::Weapontype::Chainsaw
 
-    newstate = Doocr.weaponinfo[player.value.pendingweapon.value].upstate
+    newstate = Doocr.weaponinfo[player.pendingweapon.value].upstate
 
-    player.value.pendingweapon = Doocr::Weapontype::Nochange
-    (player.value.psprites.to_unsafe + Doocr::Psprnum::Weapon.value).value.sy = Doocr::WEAPONBOTTOM
+    player.pendingweapon = Doocr::Weapontype::Nochange
+    player.psprites[Doocr::Psprnum::Weapon.value].sy = Doocr::WEAPONBOTTOM
 
-    CDoom.p_set_psprite(player, Doocr::Psprnum::Weapon, Doocr::Statenum.new(newstate))
+    Doocr.p_set_psprite(player, Doocr::Psprnum::Weapon.value, Doocr::Statenum.new(newstate))
   end
 
   #
   # Returns true if there is enough ammo to shoot.
   # If not, selects the next weapon to use.
   #
-  def self.p_check_ammo(player : CDoom::Player*) : LibC::Int
-    ammo = Doocr::Ammotype.new(Doocr.weaponinfo[player.value.readyweapon.value].ammo)
+  def self.p_check_ammo(player : Doocr::Player) : LibC::Int
+    ammo = Doocr::Ammotype.new(Doocr.weaponinfo[player.readyweapon.value].ammo)
 
     # Minimal amount for one shot varies.
-    if player.value.readyweapon == Doocr::Weapontype::Bfg
+    if player.readyweapon == Doocr::Weapontype::Bfg
       count = @@deh_bfg_cells_per_shot
-    elsif player.value.readyweapon == Doocr::Weapontype::Supershotgun
+    elsif player.readyweapon == Doocr::Weapontype::Supershotgun
       count = 2 # Double barrel.
     else
       count = 1 # Regular.
@@ -5523,75 +5526,75 @@ module Doocr
 
     # Some do not need ammunition anyway.
     # Return if current ammunition sufficient.
-    return 1 if ammo == Doocr::Ammotype::Noammo || player.value.ammo[ammo.value] >= count
+    return 1 if ammo == Doocr::Ammotype::Noammo || player.ammo[ammo.value] >= count
 
     # Out of ammo, pick a weapon to change to.
     # Preferences are set here.
     loop do
-      if player.value.weaponowned[Doocr::Weapontype::Plasma.value] != 0 &&
-         player.value.ammo[Doocr::Ammotype::Cell.value] != 0 &&
+      if player.weaponowned[Doocr::Weapontype::Plasma.value] != 0 &&
+        player.ammo[Doocr::Ammotype::Cell.value] != 0 &&
          Doocr.gamemode != Doocr::GameMode::Shareware
-        player.value.pendingweapon = Doocr::Weapontype::Plasma
-      elsif player.value.weaponowned[Doocr::Weapontype::Supershotgun.value] != 0 &&
-            player.value.ammo[Doocr::Ammotype::Shell.value] > 2 &&
+        player.pendingweapon = Doocr::Weapontype::Plasma
+      elsif player.weaponowned[Doocr::Weapontype::Supershotgun.value] != 0 &&
+        player.ammo[Doocr::Ammotype::Shell.value] > 2 &&
             Doocr.gamemode == Doocr::GameMode::Commercial
-        player.value.pendingweapon = Doocr::Weapontype::Supershotgun
-      elsif player.value.weaponowned[Doocr::Weapontype::Chaingun.value] != 0 &&
-            player.value.ammo[Doocr::Ammotype::Clip.value] != 0
-        player.value.pendingweapon = Doocr::Weapontype::Chaingun
-      elsif player.value.weaponowned[Doocr::Weapontype::Shotgun.value] != 0 &&
-            player.value.ammo[Doocr::Ammotype::Shell.value] != 0
-        player.value.pendingweapon = Doocr::Weapontype::Shotgun
-      elsif player.value.ammo[Doocr::Ammotype::Clip.value] != 0
-        player.value.pendingweapon = Doocr::Weapontype::Pistol
-      elsif player.value.weaponowned[Doocr::Weapontype::Chainsaw.value] != 0
-        player.value.pendingweapon = Doocr::Weapontype::Chainsaw
-      elsif player.value.weaponowned[Doocr::Weapontype::Missile.value] != 0 &&
-            player.value.ammo[Doocr::Ammotype::Misl.value] != 0
-        player.value.pendingweapon = Doocr::Weapontype::Missile
-      elsif player.value.weaponowned[Doocr::Weapontype::Bfg.value] != 0 &&
-            player.value.ammo[Doocr::Ammotype::Cell.value] > 40 &&
+        player.pendingweapon = Doocr::Weapontype::Supershotgun
+      elsif player.weaponowned[Doocr::Weapontype::Chaingun.value] != 0 &&
+        player.ammo[Doocr::Ammotype::Clip.value] != 0
+        player.pendingweapon = Doocr::Weapontype::Chaingun
+      elsif player.weaponowned[Doocr::Weapontype::Shotgun.value] != 0 &&
+        player.ammo[Doocr::Ammotype::Shell.value] != 0
+        player.pendingweapon = Doocr::Weapontype::Shotgun
+      elsif player.ammo[Doocr::Ammotype::Clip.value] != 0
+        player.pendingweapon = Doocr::Weapontype::Pistol
+      elsif player.weaponowned[Doocr::Weapontype::Chainsaw.value] != 0
+        player.pendingweapon = Doocr::Weapontype::Chainsaw
+      elsif player.weaponowned[Doocr::Weapontype::Missile.value] != 0 &&
+            player.ammo[Doocr::Ammotype::Misl.value] != 0
+        player.pendingweapon = Doocr::Weapontype::Missile
+      elsif player.weaponowned[Doocr::Weapontype::Bfg.value] != 0 &&
+            player.ammo[Doocr::Ammotype::Cell.value] > 40 &&
             Doocr.gamemode != Doocr::GameMode::Shareware
-        player.value.pendingweapon = Doocr::Weapontype::Bfg
+        player.pendingweapon = Doocr::Weapontype::Bfg
       else
         # If everything fails.
-        player.value.pendingweapon = Doocr::Weapontype::Fist
+        player.pendingweapon = Doocr::Weapontype::Fist
       end
 
-      break unless player.value.pendingweapon == Doocr::Weapontype::Nochange
+      break unless player.pendingweapon == Doocr::Weapontype::Nochange
     end
 
     # Now set appropriate weapon overlay.
-    CDoom.p_set_psprite(player,
-      Doocr::Psprnum::Weapon,
-      Doocr::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].downstate))
+    Doocr.p_set_psprite(player,
+      Doocr::Psprnum::Weapon.value,
+      Doocr::Statenum.new(Doocr.weaponinfo[player.readyweapon.value].downstate))
 
     return 0
   end
 
-  def self.p_fire_weapon(player : CDoom::Player*)
-    return if CDoom.p_check_ammo(player) == 0
+  def self.p_fire_weapon(player : Doocr::Player)
+    return if Doocr.p_check_ammo(player) == 0
 
-    CDoom.p_set_mobj_state(player.value.mo, Doocr::Statenum::S_PLAY_ATK1)
-    newstate = Doocr::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].atkstate)
-    CDoom.p_set_psprite(player, Doocr::Psprnum::Weapon, newstate)
-    CDoom.p_noise_alert(player.value.mo, player.value.mo)
+    Doocr.p_set_mobj_state(player.mo.not_nil!, Doocr::Statenum::S_PLAY_ATK1)
+    newstate = Doocr::Statenum.new(Doocr.weaponinfo[player.readyweapon.value].atkstate)
+    Doocr.p_set_psprite(player, Doocr::Psprnum::Weapon.value, newstate)
+    Doocr.p_noise_alert(player.mo.not_nil!, player.mo.not_nil!)
 
     # Pause gun bobbing based off setting
     if @@weaponfirecentered != 0
-      psp = player.value.psprites.to_unsafe + Doocr::Psprnum::Weapon.value
-      psp.value.sx = FRACUNIT
-      psp.value.sy = Doocr::WEAPONTOP
+      psp = player.psprites[Doocr::Psprnum::Weapon.value]
+      psp.sx = FRACUNIT
+      psp.sy = Doocr::WEAPONTOP
     end
   end
 
   #
   # Player died, so put the weapon away.
   #
-  def self.p_drop_weapon(player : CDoom::Player*)
-    CDoom.p_set_psprite(player,
-      Doocr::Psprnum::Weapon,
-      Doocr::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].downstate))
+  def self.p_drop_weapon(player : Doocr::Player)
+    Doocr.p_set_psprite(player,
+      Doocr::Psprnum::Weapon.value,
+      Doocr::Statenum.new(Doocr.weaponinfo[player.readyweapon.value].downstate))
   end
 
   #
@@ -5600,54 +5603,54 @@ module Doocr
   # Follows after getting weapon up,
   # or after previous attack/fire sequence.
   #
-  def self.a_weapon_ready(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_weapon_ready(player : Doocr::Player, psp : Doocr::Pspdef)
     # get out of attack state
-    if player.value.mo.value.state == @@states.to_unsafe + Doocr::Statenum::S_PLAY_ATK1.value ||
-       player.value.mo.value.state == @@states.to_unsafe + Doocr::Statenum::S_PLAY_ATK2.value
-      CDoom.p_set_mobj_state(player.value.mo, Doocr::Statenum::S_PLAY)
+     if player.mo.not_nil!.state == @@states[Doocr::Statenum::S_PLAY_ATK1.value] ||
+       player.mo.not_nil!.state == @@states[Doocr::Statenum::S_PLAY_ATK2.value]
+      Doocr.p_set_mobj_state(player.mo.not_nil!, Doocr::Statenum::S_PLAY)
     end
 
-    if player.value.readyweapon == Doocr::Weapontype::Chainsaw &&
-       psp.value.state == @@states.to_unsafe + Doocr::Statenum::S_SAW.value
-      Doocr.s_start_sound(player.value.mo, Doocr::Sfxenum::SFX_sawidl.value)
+     if player.readyweapon == Doocr::Weapontype::Chainsaw &&
+       psp.state == @@states[Doocr::Statenum::S_SAW.value]
+      Doocr.s_start_sound(player.mo.not_nil!, Doocr::Sfxenum::SFX_sawidl)
     end
 
     # check for change
     #  if player is dead, put the weapon away
-    if player.value.pendingweapon != Doocr::Weapontype::Nochange || player.value.health == 0
+    if player.pendingweapon != Doocr::Weapontype::Nochange || player.health == 0
       # change weapon
       #  (pending weapon should allready be validated)
-      newstate = Doocr::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].downstate)
-      CDoom.p_set_psprite(player, Doocr::Psprnum::Weapon, newstate)
+      newstate = Doocr::Statenum.new(Doocr.weaponinfo[player.readyweapon.value].downstate)
+      Doocr.p_set_psprite(player, Doocr::Psprnum::Weapon.value, newstate)
       return
     end
 
     # check for fire
     #  the missile launcher and bfg do not auto fire
-    if player.value.cmd.buttons & Doocr::Buttoncode::BT_ATTACK.value != 0
-      if player.value.attackdown == 0 ||
-         (player.value.readyweapon != Doocr::Weapontype::Missile &&
-         player.value.readyweapon != Doocr::Weapontype::Bfg)
-        player.value.attackdown = 1
-        CDoom.p_fire_weapon(player)
+    if player.cmd.buttons & Doocr::Buttoncode::BT_ATTACK.value != 0
+      if player.attackdown == 0 ||
+         (player.readyweapon != Doocr::Weapontype::Missile &&
+         player.readyweapon != Doocr::Weapontype::Bfg)
+        player.attackdown = 1
+        Doocr.p_fire_weapon(player)
         return
       end
     else
-      player.value.attackdown = 0
+      player.attackdown = 0
     end
 
     # bob the weapon based on movement speed
     angle = (128 * Doocr.leveltime) & Doocr::FINEMASK
-    psp.value.sx = FRACUNIT + CDoom.fixed_mul(player.value.bob, @@finecosine[angle])
+    psp.sx = FRACUNIT + CDoom.fixed_mul(player.bob, @@finecosine[angle])
     angle &= Doocr::FINEANGLES.tdiv(2) - 1
-    psp.value.sy = Doocr::WEAPONTOP + CDoom.fixed_mul(player.value.bob, @@finesine[angle])
+    psp.sy = Doocr::WEAPONTOP + CDoom.fixed_mul(player.bob, @@finesine[angle])
   end
 
   #
   # The player can re-fire the weapon
   # without lowering it entirely.
   #
-  def self.a_refire(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_refire(player : Doocr::Player, psp : CDoom::Pspdef*)
     # check for fire
     #  (if a weaponchange is pending, let it go through instead)
     if (player.value.cmd.buttons & Doocr::Buttoncode::BT_ATTACK.value != 0) &&
@@ -5657,27 +5660,27 @@ module Doocr
       CDoom.p_fire_weapon(player)
     else
       player.value.refire = 0
-      CDoom.p_check_ammo(player)
+      Doocr.p_check_ammo(player)
     end
   end
 
-  def self.a_check_reload(player : CDoom::Player*, psp : CDoom::Pspdef*)
-    CDoom.p_check_ammo(player)
+  def self.a_check_reload(player : Doocr::Player, psp : CDoom::Pspdef*)
+    Doocr.p_check_ammo(player)
   end
 
   #
   # Lowers current weapon,
   #  and changes weapon at bottom.
   #
-  def self.a_lower(player : CDoom::Player*, psp : CDoom::Pspdef*)
-    psp.value.sy = psp.value.sy + Doocr::LOWERSPEED
+  def self.a_lower(player : Doocr::Player, psp : Doocr::Pspdef)
+    psp.sy = psp.sy + Doocr::LOWERSPEED
 
     # Is already down.
-    return if psp.value.sy < Doocr::WEAPONBOTTOM
+    return if psp.sy < Doocr::WEAPONBOTTOM
 
     # Player is dead.
-    if player.value.playerstate == Doocr::Playerstate::PST_DEAD
-      psp.value.sy = Doocr::WEAPONBOTTOM
+    if player.playerstate == Doocr::Playerstate::PST_DEAD
+      psp.sy = Doocr::WEAPONBOTTOM
 
       # don't bring weapon back up
       return
@@ -5685,32 +5688,32 @@ module Doocr
 
     # The old weapon has been lowered off the screen,
     # so change the weapon and start raising it
-    if player.value.health == 0
+    if player.health == 0
       # Player is dead, so keep the weapon off screen.
-      CDoom.p_set_psprite(player, Doocr::Psprnum::Weapon, Doocr::Statenum::S_NULL)
+      Doocr.p_set_psprite(player, Doocr::Psprnum::Weapon.value, Doocr::Statenum::S_NULL)
       return
     end
 
-    player.value.readyweapon = player.value.pendingweapon
+    player.readyweapon = player.pendingweapon
 
-    CDoom.p_bring_up_weapon(player)
+    Doocr.p_bring_up_weapon(player)
   end
 
-  def self.a_raise(player : CDoom::Player*, psp : CDoom::Pspdef*)
-    psp.value.sy = psp.value.sy - Doocr::RAISESPEED
+  def self.a_raise(player : Doocr::Player, psp : Doocr::Pspdef)
+    psp.sy = psp.sy - Doocr::RAISESPEED
 
-    return if psp.value.sy > Doocr::WEAPONTOP
+    return if psp.sy > Doocr::WEAPONTOP
 
-    psp.value.sy = Doocr::WEAPONTOP
+    psp.sy = Doocr::WEAPONTOP
 
     # The weapon has been raised all the way,
     #  so change to the ready state.
-    newstate = Doocr::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].readystate)
+    newstate = Doocr::Statenum.new(Doocr.weaponinfo[player.readyweapon.value].readystate)
 
-    CDoom.p_set_psprite(player, Doocr::Psprnum::Weapon, newstate)
+    Doocr.p_set_psprite(player, Doocr::Psprnum::Weapon.value, newstate)
   end
 
-  def self.a_gun_flash(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_gun_flash(player : Doocr::Player, psp : CDoom::Pspdef*)
     CDoom.p_set_mobj_state(player.value.mo, Doocr::Statenum::S_PLAY_ATK2)
     CDoom.p_set_psprite(player, Doocr::Psprnum::Flash, Doocr::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].flashstate))
   end
@@ -5719,27 +5722,26 @@ module Doocr
   # WEAPON ATTACKS
   #
 
-  def self.a_punch(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_punch(player : Doocr::Player, psp : Doocr::Pspdef)
     damage = (CDoom.p_random % 10 + 1) << 1
 
-    damage *= 10 if player.value.powers[Doocr::Powertype::Strength.value] != 0
+    damage *= 10 if player.powers[Doocr::Powertype::Strength.value] != 0
 
-    angle = player.value.mo.value.angle
+    mo = player.mo.not_nil!
+    angle = mo.angle
     angle &+= (CDoom.p_random - CDoom.p_random) << 18
-    slope = CDoom.p_aim_line_attack(player.value.mo, angle, Doocr::MELEERANGE)
-    CDoom.p_line_attack(player.value.mo, angle, Doocr::MELEERANGE, slope, damage)
+    slope = Doocr.p_aim_line_attack(mo, angle, Doocr::MELEERANGE)
+    Doocr.p_line_attack(mo, angle, Doocr::MELEERANGE, slope, damage)
 
     # turn to face target
-    if !Doocr.linetarget.null?
-      Doocr.s_start_sound(player.value.mo, Doocr::Sfxenum::SFX_punch.value)
-      player.value.mo.value.angle = CDoom.r_point_to_angle2(player.value.mo.value.x,
-        player.value.mo.value.y,
-        Doocr.linetarget.value.x,
-        Doocr.linetarget.value.y)
+    if !Doocr.linetarget.nil?
+      Doocr.s_start_sound(mo, Doocr::Sfxenum::SFX_punch)
+      mo.angle = CDoom.r_point_to_angle2(mo.x, mo.y,
+        Doocr.linetarget.not_nil!.x, Doocr.linetarget.not_nil!.y)
     end
   end
 
-  def self.a_saw(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_saw(player : Doocr::Player, psp : CDoom::Pspdef*)
     damage = 2 * (CDoom.p_random % 10 + 1)
     angle = player.value.mo.value.angle
     angle &+= (CDoom.p_random - CDoom.p_random) << 18
@@ -5775,19 +5777,19 @@ module Doocr
     player.value.mo.value.flags = player.value.mo.value.flags | Doocr::Mobjflag::MF_JUSTATTACKED.value
   end
 
-  def self.a_fire_missile(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_fire_missile(player : Doocr::Player, psp : CDoom::Pspdef*)
     player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
       player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
     CDoom.p_spawn_player_missile(player.value.mo, Doocr::Mobjtype::MT_ROCKET)
   end
 
-  def self.a_fire_bfg(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_fire_bfg(player : Doocr::Player, psp : CDoom::Pspdef*)
     player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
       player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - @@deh_bfg_cells_per_shot
     CDoom.p_spawn_player_missile(player.value.mo, Doocr::Mobjtype::MT_BFG)
   end
 
-  def self.a_fire_plasma(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_fire_plasma(player : Doocr::Player, psp : CDoom::Pspdef*)
     player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
       player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
     CDoom.p_set_psprite(player,
@@ -5801,7 +5803,7 @@ module Doocr
   # Sets a slope so a near miss is at aproximately
   # the height of the intended target
   #
-  def self.p_bullet_slope(mo : CDoom::Mobj*)
+  def self.p_bullet_slope(mo : Doocr::Mobj)
     # see which target is to be aimed at
     an = mo.value.angle
     Doocr.bulletslope = CDoom.p_aim_line_attack(mo, an, 16 * 64 * FRACUNIT)
@@ -5816,7 +5818,7 @@ module Doocr
     end
   end
 
-  def self.p_gunshot(mo : CDoom::Mobj*, accurate : LibC::Int)
+  def self.p_gunshot(mo : Doocr::Mobj, accurate : LibC::Int)
     damage = 5 * (CDoom.p_random % 3 + 1)
     angle = mo.value.angle
 
@@ -5825,7 +5827,7 @@ module Doocr
     CDoom.p_line_attack(mo, angle, Doocr::MISSILERANGE, Doocr.bulletslope, damage)
   end
 
-  def self.a_fire_pistol(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_fire_pistol(player : Doocr::Player, psp : CDoom::Pspdef*)
     Doocr.s_start_sound(player.value.mo, Doocr::Sfxenum::SFX_pistol.value)
 
     CDoom.p_set_mobj_state(player.value.mo, Doocr::Statenum::S_PLAY_ATK2)
@@ -5840,7 +5842,7 @@ module Doocr
     CDoom.p_gunshot(player.value.mo, (player.value.refire == 0).to_unsafe)
   end
 
-  def self.a_fire_shotgun(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_fire_shotgun(player : Doocr::Player, psp : CDoom::Pspdef*)
     Doocr.s_start_sound(player.value.mo, Doocr::Sfxenum::SFX_shotgn.value)
     CDoom.p_set_mobj_state(player.value.mo, Doocr::Statenum::S_PLAY_ATK2)
 
@@ -5858,7 +5860,7 @@ module Doocr
     end
   end
 
-  def self.a_fire_shotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_fire_shotgun2(player : Doocr::Player, psp : CDoom::Pspdef*)
     Doocr.s_start_sound(player.value.mo, Doocr::Sfxenum::SFX_dshtgn.value)
     CDoom.p_set_mobj_state(player.value.mo, Doocr::Statenum::S_PLAY_ATK2)
 
@@ -5882,7 +5884,7 @@ module Doocr
     end
   end
 
-  def self.a_fire_cgun(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_fire_cgun(player : Doocr::Player, psp : CDoom::Pspdef*)
     Doocr.s_start_sound(player.value.mo, Doocr::Sfxenum::SFX_pistol.value)
 
     return if player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] == 0
@@ -5901,22 +5903,22 @@ module Doocr
     CDoom.p_gunshot(player.value.mo, (player.value.refire == 0).to_unsafe)
   end
 
-  def self.a_light0(player : CDoom::Player*, psp : CDoom::Pspdef*)
-    player.value.extralight = 0
+  def self.a_light0(player : Doocr::Player, psp : Doocr::Pspdef)
+    player.extralight = 0
   end
 
-  def self.a_light1(player : CDoom::Player*, psp : CDoom::Pspdef*)
-    player.value.extralight = 1
+  def self.a_light1(player : Doocr::Player, psp : Doocr::Pspdef)
+    player.extralight = 1
   end
 
-  def self.a_light2(player : CDoom::Player*, psp : CDoom::Pspdef*)
-    player.value.extralight = 2
+  def self.a_light2(player : Doocr::Player, psp : Doocr::Pspdef)
+    player.extralight = 2
   end
 
   #
   # Spawn a BFG explosion on every monster in view
   #
-  def self.a_bfg_spray(mo : CDoom::Mobj*)
+  def self.a_bfg_spray(mo : Doocr::Mobj)
     # offset angles from its attack angle
     40.times do |i|
       an = mo.value.angle &- ANG90.tdiv(2) &+ ANG90.tdiv(40) &* i
@@ -5941,14 +5943,14 @@ module Doocr
     end
   end
 
-  def self.a_bfg_sound(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  def self.a_bfg_sound(player : Doocr::Player, psp : CDoom::Pspdef*)
     Doocr.s_start_sound(player.value.mo, Doocr::Sfxenum::SFX_bfg.value)
   end
 
   #
   # Called at start of level for each player.
   #
-  def self.p_setup_psprites(player : CDoom::Player*)
+  def self.p_setup_psprites(player : Doocr::Player)
     # remove all psprites
     Doocr::Psprnum::NUMPSPRITES.value.times do |i|
       (player.value.psprites.to_unsafe + i).value.state = Pointer(CDoom::State).null
@@ -5962,7 +5964,7 @@ module Doocr
   #
   # Called every tic by player thinking routine.
   #
-  def self.p_move_psprites(player : CDoom::Player*)
+  def self.p_move_psprites(player : Doocr::Player)
     psp = (player.value.psprites.to_unsafe)
     Doocr::Psprnum::NUMPSPRITES.value.times do |i|
       # a null state means not active
@@ -6148,7 +6150,6 @@ module Doocr
           mobj.value.player.value.mo = mobj
         end
         CDoom.p_set_thing_position(mobj)
-        mobj.value.info = Doocr.mobjinfo.to_unsafe + mobj.value.type.value
         mobj.value.floorz = mobj.value.subsector.value.sector.value.floorheight
         mobj.value.ceilingz = mobj.value.subsector.value.sector.value.ceilingheight
         pointerof(mobj.value.@thinker.@function).as(Doocr::ActionfP1*).value = Doocr::ActionfP1.new((->CDoom.p_mobj_thinker).pointer, Pointer(Void).null)
@@ -7010,12 +7011,12 @@ module Doocr
   #  if a straight line between t1 and t2 is unobstructed.
   # Uses REJECT.
   #
-  def self.p_check_sight(t1 : CDoom::Mobj*, t2 : CDoom::Mobj*) : LibC::Int
+  def self.p_check_sight(t1 : Doocr::Mobj, t2 : Doocr::Mobj) : LibC::Int
     # First check for trivial rejection.
 
     # Determine subsector entries in REJECT table.
-    s1 = t1.value.subsector.value.sector - Doocr.sectors
-    s2 = t2.value.subsector.value.sector - Doocr.sectors
+    s1 = t1.subsector.value.sector - Doocr.sectors
+    s2 = t2.subsector.value.sector - Doocr.sectors
     pnum = s1 * Doocr.numsectors + s2
     bytenum = pnum >> 3
     bitnum = 1 << (pnum & 7)
@@ -7034,16 +7035,16 @@ module Doocr
 
     Doocr.validcount += 1
 
-    Doocr.sightzstart = t1.value.z + t1.value.height - (t1.value.height >> 2)
-    Doocr.topslope = (t2.value.z + t2.value.height) - Doocr.sightzstart
-    Doocr.bottomslope = (t2.value.z) - Doocr.sightzstart
+    Doocr.sightzstart = t1.z + t1.height - (t1.height >> 2)
+    Doocr.topslope = (t2.z + t2.height) - Doocr.sightzstart
+    Doocr.bottomslope = t2.z - Doocr.sightzstart
 
-    Doocr.strace.to_unsafe.value.x = t1.value.x
-    Doocr.strace.to_unsafe.value.y = t1.value.y
-    Doocr.t2x = t2.value.x
-    Doocr.t2y = t2.value.y
-    Doocr.strace.to_unsafe.value.dx = t2.value.x - t1.value.x
-    Doocr.strace.to_unsafe.value.dy = t2.value.y - t1.value.y
+    Doocr.strace.to_unsafe.value.x = t1.x
+    Doocr.strace.to_unsafe.value.y = t1.y
+    Doocr.t2x = t2.x
+    Doocr.t2y = t2.y
+    Doocr.strace.to_unsafe.value.dx = t2.x - t1.x
+    Doocr.strace.to_unsafe.value.dy = t2.y - t1.y
 
     # the head node is the last node output
     return CDoom.p_cross_bsp_node(Doocr.numnodes - 1)
@@ -7094,7 +7095,7 @@ module Doocr
   #  given the number of the current sector,
   #  the line number, and the side (0/1) that you want.
   #
-  def self.get_side(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : CDoom::Side*
+  def self.get_side(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : Doocr::Side
     return Doocr.sides + Doocr.sectors[current_sector].lines[line].value.sidenum[side]
   end
 
@@ -7103,7 +7104,7 @@ module Doocr
   #  given the number of the current sector,
   #  the line number and the side (0/1) that you want.
   #
-  def self.get_sector(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : CDoom::Sector*
+  def self.get_sector(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : Doocr::Sector
     return Doocr.sides[Doocr.sectors[current_sector].lines[line].value.sidenum[side]].sector
   end
 
@@ -7119,7 +7120,7 @@ module Doocr
   # Return sector_t * of sector next to current.
   # 0 if not two-sided line
   #
-  def self.get_next_sector(line : CDoom::Line*, sec : CDoom::Sector*) : CDoom::Sector*
+  def self.get_next_sector(line : Doocr::Line, sec : Doocr::Sector) : Doocr::Sector
     return Pointer(CDoom::Sector).null if line.value.flags & Doocr::ML_TWOSIDED == 0
 
     return line.value.backsector if line.value.frontsector == sec
@@ -7130,7 +7131,7 @@ module Doocr
   #
   # FIND LOWEST FLOOR HEIGHT IN SURROUNDING SECTORS
   #
-  def self.p_find_lowest_floor_surrounding(sec : CDoom::Sector*) : LibC::Int
+  def self.p_find_lowest_floor_surrounding(sec : Doocr::Sector) : LibC::Int
     floor = sec.value.floorheight
 
     sec.value.linecount.times do |i|
@@ -7148,7 +7149,7 @@ module Doocr
   #
   # FIND HIGHEST FLOOR HEIGHT IN SURROUNDING SECTORS
   #
-  def self.p_find_highest_floor_surrounding(sec : CDoom::Sector*) : LibC::Int
+  def self.p_find_highest_floor_surrounding(sec : Doocr::Sector) : LibC::Int
     floor = -500 * FRACUNIT
 
     sec.value.linecount.times do |i|
@@ -7167,7 +7168,7 @@ module Doocr
   # FIND NEXT HIGHEST FLOOR IN SURROUNDING SECTORS
   # Note: this should be doable w/o a fixed array.
   #
-  def self.p_find_next_highest_floor(sec : CDoom::Sector*, currentheight : LibC::Int) : LibC::Int
+  def self.p_find_next_highest_floor(sec : Doocr::Sector, currentheight : LibC::Int) : LibC::Int
     height = currentheight
 
     heightlist = uninitialized StaticArray(LibC::Int, Doocr::MAX_ADJOINING_SECTORS)
@@ -7209,7 +7210,7 @@ module Doocr
   #
   # FIND LOWEST CEILING IN THE SURROUNDING SECTORS
   #
-  def self.p_find_lowest_ceiling_surrounding(sec : CDoom::Sector*) : LibC::Int
+  def self.p_find_lowest_ceiling_surrounding(sec : Doocr::Sector) : LibC::Int
     height = Int32::MAX
 
     sec.value.linecount.times do |i|
@@ -7227,7 +7228,7 @@ module Doocr
   #
   # FIND HIGHEST CEILING IN THE SURROUNDING SECTORS
   #
-  def self.p_find_highest_ceiling_surrounding(sec : CDoom::Sector*) : LibC::Int
+  def self.p_find_highest_ceiling_surrounding(sec : Doocr::Sector) : LibC::Int
     height = 0
 
     sec.value.linecount.times do |i|
@@ -7245,7 +7246,7 @@ module Doocr
   #
   # RETURN NEXT SECTOR # THAT LINE TAG REFERS TO
   #
-  def self.p_find_sector_from_line_tag(line : CDoom::Line*, start : LibC::Int) : LibC::Int
+  def self.p_find_sector_from_line_tag(line : Doocr::Line, start : LibC::Int) : LibC::Int
     i = start + 1
     while i < Doocr.numsectors
       return i if Doocr.sectors[i].tag == line.value.tag
@@ -7258,7 +7259,7 @@ module Doocr
   #
   # Find minimum light from an adjacent sector
   #
-  def self.p_find_min_surrounding_light(sector : CDoom::Sector*, max : LibC::Int) : LibC::Int
+  def self.p_find_min_surrounding_light(sector : Doocr::Sector, max : LibC::Int) : LibC::Int
     min = max
     sector.value.linecount.times do |i|
       line = sector.value.lines[i]
@@ -7282,7 +7283,7 @@ module Doocr
   # Called every time a thing origin is about
   #  to cross a line with a non 0 special.
   #
-  def self.p_cross_special_line(linenum : LibC::Int, side : LibC::Int, thing : CDoom::Mobj*)
+  def self.p_cross_special_line(linenum : LibC::Int, side : LibC::Int, thing : Doocr::Mobj)
     line = Doocr.lines + linenum
 
     Mod.lines.each do |mod_line|
@@ -7594,7 +7595,7 @@ module Doocr
   #
   # Called when a thing shoots a special line.
   #
-  def self.p_shoot_special_line(thing : CDoom::Mobj*, line : CDoom::Line*)
+  def self.p_shoot_special_line(thing : Doocr::Mobj, line : Doocr::Line)
     Mod.lines.each do |mod_line|
       next if mod_line.when != Mod::Line::When::Shot ||
               mod_line.number != line.value.special
@@ -7633,7 +7634,7 @@ module Doocr
   # Called every tic frame
   #  that the player origin is in a special sector
   #
-  def self.p_player_in_special_sector(player : CDoom::Player*)
+  def self.p_player_in_special_sector(player : Doocr::Player)
     sector = player.value.mo.value.subsector.value.sector
 
     Mod.sectors.each do |mod_sector|
@@ -7750,10 +7751,10 @@ module Doocr
   #
   # Special Stuff that can not be categorized
   #
-  def self.ev_do_donut(line : CDoom::Line*) : LibC::Int
+  def self.ev_do_donut(line : Doocr::Line) : LibC::Int
     secnum = -1
     rtn = 0
-    while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
+    while (secnum = Doocr.p_find_sector_from_line_tag(line, secnum)) >= 0
       s1 = Doocr.sectors + secnum
 
       # ALREADY MOVING?  IF SO, KEEP GOING...
@@ -7929,7 +7930,7 @@ module Doocr
   #
   # Start a button counting down till it turns off.
   #
-  def self.p_start_button(line : CDoom::Line*, w : Doocr::Bwhere, origin : Doocr::Degenmobj, texture : LibC::Int, time : LibC::Int)
+  def self.p_start_button(line : Doocr::Line, w : Doocr::Bwhere, origin : Doocr::Degenmobj, texture : LibC::Int, time : LibC::Int)
     # See if button is already pressed
     Doocr::MAXBUTTONS.times do |i|
       return if @@buttonlist[i].btimer != 0 &&
@@ -7955,7 +7956,7 @@ module Doocr
   # Function that changes wall texture.
   # Tell it if switch is ok to use again (1=yes, it's a button).
   #
-  def self.p_change_switch_texture(line : CDoom::Line*, use_again : LibC::Int)
+  def self.p_change_switch_texture(line : Doocr::Line, use_again : LibC::Int)
     line.value.special = 0 if use_again == 0
 
     tex_top = Doocr.sides[line.value.sidenum[0]].toptexture
@@ -8010,7 +8011,7 @@ module Doocr
   # Called when a thing uses a special line.
   # Only the front sides of lines are usable.
   #
-  def self.p_use_special_line(thing : CDoom::Mobj*, line : CDoom::Line*, side : LibC::Int) : LibC::Int
+  def self.p_use_special_line(thing : Doocr::Mobj, line : Doocr::Line, side : LibC::Int) : LibC::Int
     Mod.lines.each do |mod_line|
       next if mod_line.when != Mod::Line::When::Used ||
               mod_line.number != line.value.special
@@ -8073,7 +8074,7 @@ module Doocr
       end
     when 9
       # Change Donut
-      if CDoom.ev_do_donut(line) != 0
+      if Doocr.ev_do_donut(line) != 0
         CDoom.p_change_switch_texture(line, 0)
       end
     when 11
@@ -8314,7 +8315,7 @@ module Doocr
     return 1
   end
 
-  def self.ev_teleport(line : CDoom::Line*, side : LibC::Int, thing : CDoom::Mobj*) : LibC::Int
+  def self.ev_teleport(line : Doocr::Line, side : LibC::Int, thing : Doocr::Mobj) : LibC::Int
     # don't teleport missiles
     return 0 if thing.value.flags & Doocr::Mobjflag::MF_MISSILE.value != 0
 
@@ -8446,7 +8447,7 @@ module Doocr
       if Doocr.playeringame[i] != 0
         @@current_thinking_player = @@players.to_unsafe + i
         Mod.update_player_action.call(@@current_thinking_player)
-        CDoom.p_player_think(@@current_thinking_player)
+        Doocr.p_player_think(@@current_thinking_player.not_nil!)
       end
     end
     @@current_thinking_player = Pointer(CDoom::Player).null
@@ -8466,7 +8467,7 @@ module Doocr
   #
   # Moves the given origin along a given angle.
   #
-  def self.p_thrust(player : CDoom::Player*, angle : LibC::UInt, move : LibC::Int)
+  def self.p_thrust(player : Doocr::Player, angle : LibC::UInt, move : LibC::Int)
     angle >>= Doocr::ANGLETOFINESHIFT
 
     player.value.mo.value.momx = player.value.mo.value.momx + CDoom.fixed_mul(move, @@finecosine[angle])
@@ -8476,7 +8477,7 @@ module Doocr
   #
   # Calculate the walking / running height adjustment
   #
-  def self.p_calc_height(player : CDoom::Player*)
+  def self.p_calc_height(player : Doocr::Player)
     # Regular movement bobbing
     # (needs to be calculated for gun swing
     # even if not on ground)
@@ -8532,7 +8533,7 @@ module Doocr
     end
   end
 
-  def self.p_move_player(player : CDoom::Player*)
+  def self.p_move_player(player : Doocr::Player)
     cmd = pointerof(player.value.@cmd)
 
     player.value.mo.value.angle = player.value.mo.value.angle &+ (cmd.value.angleturn.to_i32 << 16)
@@ -8556,8 +8557,8 @@ module Doocr
   # Decrease POV height to floor height.
   #
 
-  def self.p_death_think(player : CDoom::Player*)
-    CDoom.p_move_psprites(player)
+  def self.p_death_think(player : Doocr::Player)
+    Doocr.p_move_psprites(player)
 
     # fall to the ground
     player.value.viewheight = player.value.viewheight - FRACUNIT if player.value.viewheight > 6 * FRACUNIT
@@ -8595,7 +8596,7 @@ module Doocr
     player.value.playerstate = Doocr::Playerstate::PST_REBORN if player.value.cmd.buttons & Doocr::Buttoncode::BT_USE.value != 0
   end
 
-  def self.p_player_think(player : CDoom::Player*)
+  def self.p_player_think(player : Doocr::Player)
     if player.value.cheats & Doocr::Cheat::CF_NOCLIP.value != 0
       player.value.mo.value.flags = player.value.mo.value.flags | Doocr::Mobjflag::MF_NOCLIP.value
     else
@@ -8627,7 +8628,7 @@ module Doocr
 
     CDoom.p_calc_height(player)
 
-    CDoom.p_player_in_special_sector(player) if player.value.mo.value.subsector.value.sector.value.special != 0
+    Doocr.p_player_in_special_sector(player) if player.mo.try(&.subsector.try(&.sector.try(&.special))) != 0
 
     # Check for weapon change.
 
@@ -8669,7 +8670,7 @@ module Doocr
     # check for use
     if cmd.value.buttons & Doocr::Buttoncode::BT_USE.value != 0
       if player.value.usedown == 0
-        CDoom.p_use_lines(player)
+        Doocr.p_use_lines(player)
         player.value.usedown = 1
       end
     else
@@ -8677,7 +8678,7 @@ module Doocr
     end
 
     # cycle psprites
-    CDoom.p_move_psprites(player)
+    Doocr.p_move_psprites(player)
 
     # Counters, time dependend power ups.
 

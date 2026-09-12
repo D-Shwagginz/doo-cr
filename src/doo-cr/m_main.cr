@@ -793,37 +793,37 @@ module Doocr
   #
   # m_responder
   #
-  def self.m_responder(ev : CDoom::Event*) : LibC::Int
+  def self.m_responder(ev : Doocr::Event) : LibC::Int
     ch = -1
 
-    if ev.value.type == Doocr::Evtype::Joystick && @@joywait < CDoom.i_get_time
-      if ev.value.data3 == -1
+    if ev.type == Doocr::Evtype::Joystick && @@joywait < CDoom.i_get_time
+      if ev.data3 == -1
         ch = Doocr::KEY_UPARROW
         @@joywait = CDoom.i_get_time + 5
-      elsif ev.value.data3 == 1
+      elsif ev.data3 == 1
         ch = Doocr::KEY_DOWNARROW
         @@joywait = CDoom.i_get_time + 5
       end
 
-      if ev.value.data2 == -1
+      if ev.data2 == -1
         ch = Doocr::KEY_LEFTARROW
         @@joywait = CDoom.i_get_time + 2
-      elsif ev.value.data2 == 1
+      elsif ev.data2 == 1
         ch = Doocr::KEY_RIGHTARROW
         @@joywait = CDoom.i_get_time + 2
       end
 
-      if ev.value.data1 & 1 != 0
+      if ev.data1 & 1 != 0
         ch = Doocr::KEY_ENTER
         @@joywait = CDoom.i_get_time + 5
       end
-      if ev.value.data1 & 2 != 0
+      if ev.data1 & 2 != 0
         ch = Doocr::KEY_BACKSPACE
         @@joywait = CDoom.i_get_time + 5
       end
     else
-      if ev.value.type == Doocr::Evtype::Mouse && @@mousewait < CDoom.i_get_time
-        @@menumousey += ev.value.data3
+      if ev.type == Doocr::Evtype::Mouse && @@mousewait < CDoom.i_get_time
+        @@menumousey += ev.data3
 
         if @@menumousey < @@lasty - MENU_SCROLL_DEADZONE
           ch = Doocr::KEY_DOWNARROW
@@ -837,7 +837,7 @@ module Doocr
           @@menumousey = @@lasty
         end
 
-        @@menumousex += ev.value.data2
+        @@menumousex += ev.data2
         if @@menumousex < @@lastx - MENU_SCROLL_DEADZONE
           ch = Doocr::KEY_LEFTARROW
           @@mousewait = CDoom.i_get_time + 5
@@ -850,15 +850,15 @@ module Doocr
           @@menumousex = @@lastx
         end
 
-        if ev.value.data1 & 2 != 0
+        if ev.data1 & 2 != 0
           ch = Doocr::KEY_BACKSPACE
           @@mousewait = CDoom.i_get_time + 15
-        elsif ev.value.data1 & 1 != 0
+        elsif ev.data1 & 1 != 0
           ch = Doocr::KEY_ENTER
           @@mousewait = CDoom.i_get_time + 15
         end
       else
-        ch = ev.value.data1 if ev.value.type == Doocr::Evtype::Keydown
+        ch = ev.data1 if ev.type == Doocr::Evtype::Keydown
       end
     end
 
@@ -985,7 +985,7 @@ module Doocr
       when Doocr::KEY_F11 # gamma toggle
         Doocr.usegamma += 1
         Doocr.usegamma = 0 if Doocr.usegamma > 4
-        (@@players.to_unsafe + Doocr.consoleplayer).value.message = Doocr.gammamsg[Doocr.usegamma].to_unsafe
+        @@players[Doocr.consoleplayer].message = Doocr.gammamsg[Doocr.usegamma]
         CDoom.i_set_palette(CDoom.w_cache_lump_name("PLAYPAL", Doocr::PU_CACHE).as(UInt8*))
         return 1
       end

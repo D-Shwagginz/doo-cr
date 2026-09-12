@@ -18,7 +18,7 @@
 module Doocr::Mod
   class Sector
     getter db_name : String
-    getter action : Proc(CDoom::Sector*, CDoom::Player*, Nil)
+    getter action : Proc(Doocr::Sector, Doocr::Player, Nil)
     getter number : Int32 = 20 # I believe 17 is the last special sector number in Doom. 20 to be safe and round
 
     def initialize(@db_name, @action)

@@ -152,7 +152,7 @@ module Doocr
   # Clips the given segment
   # and adds any visible pieces to the line list.
   #
-  def self.r_addline(line : CDoom::Seg*)
+  def self.r_addline(line : Doocr::Seg)
     Doocr.curline = line
 
     # OPTIMIZE: quickly reject orthogonal back sides.
@@ -376,11 +376,11 @@ module Doocr
       @@ceilingplane = new_index
     end
 
-    CDoom.r_add_sprites(Doocr.frontsector)
+    Doocr.r_add_sprites(Doocr.frontsector.not_nil!)
 
     while count != 0
       count -= 1
-      CDoom.r_addline(line)
+      Doocr.r_addline(line)
       line += 1
     end
   end
@@ -1408,7 +1408,7 @@ module Doocr
     return 1
   end
 
-  def self.r_point_on_seg_side(x : LibC::Int, y : LibC::Int, line : CDoom::Seg*) : LibC::Int
+  def self.r_point_on_seg_side(x : LibC::Int, y : LibC::Int, line : Doocr::Seg) : LibC::Int
     lx = line.value.v1.value.x
     ly = line.value.v1.value.y
 
@@ -1796,9 +1796,9 @@ module Doocr
     Doocr.framecount = 0
   end
 
-  def self.r_point_in_subsector(x : LibC::Int, y : LibC::Int) : CDoom::Subsector*
+  def self.r_point_in_subsector(x : LibC::Int, y : LibC::Int) : Doocr::Subsector
     # single subsector is a special case
-    return Doocr.subsectors if Doocr.numnodes == 0
+    return Doocr.subsectors[0] if Doocr.numnodes == 0
 
     nodenum = Doocr.numnodes - 1
 
@@ -1808,27 +1808,27 @@ module Doocr
       nodenum = node.value.children[side]
     end
 
-    return Doocr.subsectors + (nodenum & ~Doocr::NF_SUBSECTOR)
+    return Doocr.subsectors[nodenum & ~Doocr::NF_SUBSECTOR]
   end
 
-  def self.r_setup_frame(player : CDoom::Player*)
+  def self.r_setup_frame(player : Doocr::Player)
     Doocr.viewplayer = player
-    Doocr.viewx = player.value.mo.value.x
-    Doocr.viewy = player.value.mo.value.y
-    Doocr.viewangle = player.value.mo.value.angle &+ Doocr.viewangleoffset
-    Doocr.extralight = player.value.extralight
+    Doocr.viewx = player.mo.not_nil!.x
+    Doocr.viewy = player.mo.not_nil!.y
+    Doocr.viewangle = player.mo.not_nil!.angle &+ Doocr.viewangleoffset
+    Doocr.extralight = player.extralight
 
-    Doocr.viewz = player.value.viewz
+    Doocr.viewz = player.viewz
 
     Doocr.viewsin = @@finesine[Doocr.viewangle >> Doocr::ANGLETOFINESHIFT]
     Doocr.viewcos = @@finecosine[Doocr.viewangle >> Doocr::ANGLETOFINESHIFT]
 
     Doocr.sscount = 0
 
-    if player.value.fixedcolormap != 0
+    if player.fixedcolormap != 0
       Doocr.fixedcolormap =
         Doocr.colormaps +
-          player.value.fixedcolormap * 256 * sizeof(UInt8)
+          player.fixedcolormap * 256 * sizeof(UInt8)
 
       Doocr.walllights = Doocr.scalelightfixed.to_unsafe
 
@@ -1841,9 +1841,9 @@ module Doocr
     Doocr.validcount += 1
   end
 
-  def self.r_render_player_view(player : CDoom::Player*)
+  def self.r_render_player_view(player : Doocr::Player)
     @@software_screen.fill(255) unless @@software_rendering
-    CDoom.r_setup_frame(player)
+    Doocr.r_setup_frame(player)
 
     # Clear buffers.
     CDoom.r_clear_clip_segs
@@ -2147,7 +2147,7 @@ module Doocr
     end
   end
 
-  def self.r_render_masked_seg_range(ds : CDoom::Drawseg*, x1 : LibC::Int, x2 : LibC::Int)
+  def self.r_render_masked_seg_range(ds : Doocr::Drawseg, x1 : LibC::Int, x2 : LibC::Int)
     # Calculate light table.
     # Use different light tables
     #   for horizontal / vertical / diagonal. Diagonal?
@@ -2920,7 +2920,7 @@ module Doocr
   # Generates a vissprite for a thing
   #  if it might be visible.
   #
-  def self.r_project_sprite(thing : CDoom::Mobj*)
+  def self.r_project_sprite(thing : Doocr::Mobj)
     return if thing.value.sprite == Doocr::Spritenum::SPR_TNT
 
     # transform the origin point
@@ -2947,13 +2947,13 @@ module Doocr
     # decide which patch to use for sprite relative to player
     {% if flag?("RANGECHECK") %}
       if thing.value.sprite.to_u32! >= @@sprnames.size.to_u32!
-        CDoom.i_error("Error: r_project_sprite: invalid sprite number #{thing.value.sprite.value} ")
+        CDoom.i_error("Error: r_project_sprite: invalid sprite number #{thing.sprite.value} ")
       end
     {% end %}
     sprdef = Doocr.sprites + thing.value.sprite.value
     {% if flag?("RANGECHECK") %}
       if thing.value.frame & Doocr::FF_FRAMEMASK >= sprdef.value.numframes
-        CDoom.i_error("Error: r_project_sprite: invalid sprite frame #{thing.value.sprite.value} : #{thing.value.frame} ")
+        CDoom.i_error("Error: r_project_sprite: invalid sprite frame #{thing.sprite.value} : #{thing.frame} ")
       end
     {% end %}
     sprframe = sprdef.value.spriteframes + (thing.value.frame & Doocr::FF_FRAMEMASK)
@@ -3032,7 +3032,7 @@ module Doocr
   #
   # During BSP traversal, this adds sprites by sector.
   #
-  def self.r_add_sprites(sec : CDoom::Sector*)
+  def self.r_add_sprites(sec : Doocr::Sector)
     # BSP is traversed by subsector.
     # A sector might have been split into several
     #  subsectors during BSP building.
@@ -3055,24 +3055,24 @@ module Doocr
     # Handle all things in sector.
     thing = sec.value.thinglist
     until thing.null?
-      CDoom.r_project_sprite(thing)
+      Doocr.r_project_sprite(thing)
       thing = thing.value.snext
     end
   end
 
-  def self.r_draw_psprite(psp : CDoom::Pspdef*)
+  def self.r_draw_psprite(psp : Doocr::Pspdef)
     return if psp.value.state.value.sprite == Doocr::Spritenum::SPR_TNT
 
     # decide which patch to use
     {% if flag?("RANGECHECK") %}
       if psp.value.state.value.sprite.value >= @@sprnames.size
-        CDoom.i_error("Error: r_draw_psprite: invalid sprite number #{psp.value.state.value.sprite.value} ")
+        CDoom.i_error("Error: r_draw_psprite: invalid sprite number #{psp.state.not_nil!.sprite.value} ")
       end
     {% end %}
     sprdef = Doocr.sprites + psp.value.state.value.sprite.value
     {% if flag?("RANGECHECK") %}
       if psp.value.state.value.frame & Doocr::FF_FRAMEMASK >= sprdef.value.numframes
-        CDoom.i_error("Error: r_draw_psprite: invalid sprite frame #{psp.value.state.value.sprite.value} : #{psp.value.state.value.frame} ")
+        CDoom.i_error("Error: r_draw_psprite: invalid sprite frame #{psp.state.not_nil!.sprite.value} : #{psp.state.not_nil!.frame} ")
       end
     {% end %}
     sprframe = sprdef.value.spriteframes + (psp.value.state.value.frame & Doocr::FF_FRAMEMASK)
@@ -3157,7 +3157,7 @@ module Doocr
     # add all active psprites
     psp = Doocr.viewplayer.value.psprites.to_unsafe
     Doocr::Psprnum::NUMPSPRITES.value.times do |i|
-      CDoom.r_draw_psprite(psp) unless psp.value.state.null?
+      Doocr.r_draw_psprite(psp) unless psp.state.nil?
       psp += 1
     end
   end

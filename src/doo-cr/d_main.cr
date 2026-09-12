@@ -20,8 +20,8 @@ module Doocr
   # d_post_event
   # Called by the I/O functions when input is detected
   #
-  def self.d_post_event(ev : CDoom::Event*)
-    Doocr.events[Doocr.eventhead] = ev.value
+  def self.d_post_event(ev : Doocr::Event)
+    Doocr.events[Doocr.eventhead] = ev
     Doocr.eventhead += 1
     Doocr.eventhead = (Doocr.eventhead) & (Doocr::MAXEVENTS - 1)
   end
@@ -36,8 +36,8 @@ module Doocr
               CDoom.w_check_num_for_name("map01") < 0
 
     while Doocr.eventtail != Doocr.eventhead
-      ev = Doocr.events.to_unsafe + Doocr.eventtail
-      CDoom.g_responder(ev) if m_responder(ev) == 0
+      ev = Doocr.events[Doocr.eventtail]
+      Doocr.g_responder(ev) if m_responder(ev) == 0
       # else menu ate the event
       Doocr.eventtail += 1
       Doocr.eventtail = (Doocr.eventtail) & (Doocr::MAXEVENTS - 1)
@@ -141,11 +141,11 @@ module Doocr
     if Doocr.gamestate == Doocr::Gamestate::Level && Doocr.gametic != 0
       if Doocr.automapactive != 0
         if @@amactivedraw != 0
-          CDoom.r_render_player_view(@@players.to_unsafe + Doocr.displayplayer)
+          Doocr.r_render_player_view(@@players[Doocr.displayplayer])
           Doocr.am_drawer
         end
       else
-        CDoom.r_render_player_view(@@players.to_unsafe + Doocr.displayplayer)
+        Doocr.r_render_player_view(@@players[Doocr.displayplayer])
       end
     end
 

@@ -42,24 +42,24 @@ end
 
   def self.doom_key_down(key : Doocr::DoomKey)
     @@keystates[key.value] = true
-    event = CDoom::Event.new
+    event = Doocr::Event.new
     event.type = Doocr::Evtype::Keydown
     event.data1 = key.value
-    CDoom.d_post_event(pointerof(event))
+    Doocr.d_post_event(event)
   end
 
   def self.doom_key_up(key : Doocr::DoomKey)
     @@keystates[key.value] = false
-    event = CDoom::Event.new
+    event = Doocr::Event.new
     event.type = Doocr::Evtype::Keyup
     event.data1 = key.value
-    CDoom.d_post_event(pointerof(event))
+    Doocr.d_post_event(event)
   end
 
   def self.doom_button_down(button : Doocr::DoomButton)
     Doocr.button_states[button.value] = 1
 
-    event = CDoom::Event.new
+    event = Doocr::Event.new
     event.type = Doocr::Evtype::Mouse
     event.data1 =
       (Doocr.button_states[0]) |
@@ -67,13 +67,13 @@ end
         (Doocr.button_states[2] != 0 ? 4 : 0)
     event.data2 = 0
     event.data3 = 0
-    CDoom.d_post_event(pointerof(event))
+    Doocr.d_post_event(event)
   end
 
   def self.doom_button_up(button : Doocr::DoomButton)
     Doocr.button_states[button.value] = 0
 
-    event = CDoom::Event.new
+    event = Doocr::Event.new
     event.type = Doocr::Evtype::Mouse
     event.data1 =
       (Doocr.button_states[0]) |
@@ -88,11 +88,11 @@ end
 
     event.data2 = 0
     event.data3 = 0
-    CDoom.d_post_event(pointerof(event))
+    Doocr.d_post_event(event)
   end
 
   def self.doom_mouse_move(delta_x : Int32, delta_y : Int32)
-    event = CDoom::Event.new
+    event = Doocr::Event.new
     event.type = Doocr::Evtype::Mouse
     event.data1 =
       (Doocr.button_states[0]) |
@@ -101,7 +101,7 @@ end
     event.data2 = delta_x
     event.data3 = -delta_y
 
-    CDoom.d_post_event(pointerof(event)) if event.data2 != 0 || event.data3 != 0
+    Doocr.d_post_event(event) if event.data2 != 0 || event.data3 != 0
   end
 
   def self.i_tactile(on : LibC::Int, off : LibC::Int, total : LibC::Int)

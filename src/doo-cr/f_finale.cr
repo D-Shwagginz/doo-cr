@@ -87,8 +87,8 @@ module Doocr
     Doocr.finalecount = 0
   end
 
-  def self.f_responder(event : CDoom::Event*) : LibC::Int
-    return CDoom.f_cast_responder(event) if Doocr.finalestage == 2
+  def self.f_responder(event : Doocr::Event) : LibC::Int
+    return Doocr.f_cast_responder(event) if Doocr.finalestage == 2
 
     return 0
   end
@@ -198,8 +198,8 @@ module Doocr
 
     Doocr.wipegamestate = Doocr::Gamestate::Needwipe # force a screen wipe
     Doocr.castnum = 0
-    Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
-    Doocr.casttics = Doocr.caststate.value.tics.to_i32
+    Doocr.caststate = Doocr.states[Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate]
+    Doocr.casttics = Doocr.caststate.not_nil!.tics.to_i32
     Doocr.castdeath = 0
     Doocr.finalestage = 2
     Doocr.castframes = 0
@@ -215,7 +215,7 @@ module Doocr
     Doocr.casttics -= 1
     return if Doocr.casttics > 0 # not time to change state yet
 
-    if Doocr.caststate.value.tics == -1 || Doocr.caststate.value.nextstate == Doocr::Statenum::S_NULL
+    if Doocr.caststate.not_nil!.tics == -1 || Doocr.caststate.not_nil!.nextstate == Doocr::Statenum::S_NULL
       # switch from deathstate to next monster
       Doocr.castnum += 1
       Doocr.castdeath = 0
@@ -223,21 +223,21 @@ module Doocr
       if Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seesound != 0
         Doocr.s_start_sound(Pointer(Void).null, Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seesound)
       end
-      Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
+      Doocr.caststate = Doocr.states[Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate]
       Doocr.castframes = 0
     else
       # just advance to next state in amnimation
-      if Doocr.caststate == @@states.to_unsafe + Doocr::Statenum::S_PLAY_ATK1.value
+      if Doocr.caststate == Doocr.states[Doocr::Statenum::S_PLAY_ATK1.value]
         # Yes, it is a gross hack!
         Doocr.castattacking = 0
         Doocr.castframes = 0
-        Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
-        Doocr.casttics = Doocr.caststate.value.tics.to_i32
+        Doocr.caststate = Doocr.states[Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate]
+        Doocr.casttics = Doocr.caststate.not_nil!.tics.to_i32
         Doocr.casttics = 15 if Doocr.casttics == -1
         return
       end
-      st = Doocr.caststate.value.nextstate
-      Doocr.caststate = @@states.to_unsafe + st.value
+      st = Doocr.caststate.not_nil!.nextstate
+      Doocr.caststate = Doocr.states[st.value]
       Doocr.castframes += 1
 
       sfx = 0
@@ -286,16 +286,16 @@ module Doocr
       # go into attack frame
       Doocr.castattacking = 1
       if Doocr.castonmelee != 0
-        Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].meleestate
+        Doocr.caststate = Doocr.states[Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].meleestate]
       else
-        Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].missilestate
+        Doocr.caststate = Doocr.states[Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].missilestate]
       end
       Doocr.castonmelee ^= 1
-      if Doocr.caststate == @@states.to_unsafe + Doocr::Statenum::S_NULL.value
+      if Doocr.caststate == Doocr.states[Doocr::Statenum::S_NULL.value]
         if Doocr.castonmelee != 0
-          Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].meleestate
+          Doocr.caststate = Doocr.states[Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].meleestate]
         else
-          Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].missilestate
+          Doocr.caststate = Doocr.states[Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].missilestate]
         end
       end
     end
@@ -305,24 +305,24 @@ module Doocr
          Doocr.caststate == @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
         Doocr.castattacking = 0
         Doocr.castframes = 0
-        Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate
+        Doocr.caststate = Doocr.states[Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].seestate]
       end
     end
 
-    Doocr.casttics = Doocr.caststate.value.tics.to_i32
+    Doocr.casttics = Doocr.caststate.not_nil!.tics.to_i32
     Doocr.casttics = 15 if Doocr.casttics == -1
   end
 
-  def self.f_cast_responder(ev : CDoom::Event*) : LibC::Int
-    return 0 if ev.value.type != Doocr::Evtype::Keydown &&
-                (ev.value.type != Doocr::Evtype::Mouse || ev.value.data1 == 0)
+  def self.f_cast_responder(ev : Doocr::Event) : LibC::Int
+    return 0 if ev.type != Doocr::Evtype::Keydown &&
+          (ev.type != Doocr::Evtype::Mouse || ev.data1 == 0)
 
     return 1 if Doocr.castdeath != 0 # already in dying frames
 
     # go into death frame
     Doocr.castdeath = 1
-    Doocr.caststate = @@states.to_unsafe + Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].deathstate
-    Doocr.casttics = Doocr.caststate.value.tics.to_i32
+    Doocr.caststate = Doocr.states[Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].deathstate]
+    Doocr.casttics = Doocr.caststate.not_nil!.tics.to_i32
     Doocr.castframes = 0
     Doocr.castattacking = 0
     if Doocr.mobjinfo[@@castorder[Doocr.castnum].type.value].deathsound != 0
@@ -380,8 +380,9 @@ module Doocr
     CDoom.f_cast_print(@@castorder[Doocr.castnum].name.to_unsafe)
 
     # draw the current frame in the middle of the screen
-    sprdef = Doocr.sprites + Doocr.caststate.value.sprite.value
-    sprframe = sprdef.value.spriteframes + (Doocr.caststate.value.frame & Doocr::FF_FRAMEMASK)
+    caststate = Doocr.caststate.not_nil!
+    sprdef = Doocr.sprites + caststate.sprite.value
+    sprframe = sprdef.value.spriteframes + (caststate.frame & Doocr::FF_FRAMEMASK)
     lump = sprframe.value.lump[0]
     flip = sprframe.value.flip[0]
 

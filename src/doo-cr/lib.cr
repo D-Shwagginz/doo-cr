@@ -1,42 +1,12 @@
-# Copyright (C) 2026 Devin Shwagginz
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
-# ==> The "C" side of Doo-cr. Hope to get rid of this someday.
-
-# Abs macroo
 macro doom_abs(x)
   (({{x}}) < 0 ? -({{x}}) : ({{x}}))
 end
 
-# Doocr::Cheat Scrambler
 macro scramble(a)
-  (((({{a}})&1)<<7) + ((({{a}})&2)<<5) + (({{a}})&4) + ((({{a}})&8)<<1) \
- + ((({{a}})&16)>>1) + (({{a}})&32) + ((({{a}})&64)>>5) + ((({{a}})&128)>>7))
+  (((( {{a}} & 1) << 7) + (({{a}} & 2) << 5) + ({{a}} & 4) + (({{a}} & 8) << 1) + (({{a}} & 16) >> 1) + ({{a}} & 32) + (({{a}} & 64) >> 5) + (({{a}} & 128) >> 7)))
 end
 
-#
-# This is used to get the local FILE:LINE info from CPP
-# prior to really call the function in question.
-#
 macro z_change_tag(p, t)
-  if (({{p}}.as(UInt8*)) - sizeof(CDoom::Memblock)).as(CDoom::Memblock*).value.id != 0x1d4a11
-    buf = Pointer(UInt8).malloc(260)
-    CDoom.doom_strcpy(buf, "Error: Z_CT at #{__FILE__} :")
-    CDoom.doom_concat(buf, doom_itoa(__LINE__, 10))
-    CDoom.i_error(buf)
-  end
   CDoom.z_change_tag2({{p}}, {{t}})
 end
 
@@ -91,6 +61,80 @@ macro ng_statsx
 end
 
 lib CDoom
+  fun a_baby_metal = A_BabyMetal
+  fun a_bfg_sound = A_BFGsound
+  fun a_bfg_spray = A_BFGSpray
+  fun a_boss_death = A_BossDeath
+  fun a_brain_awake = A_BrainAwake
+  fun a_brain_die = A_BrainDie
+  fun a_brain_explode = A_BrainExplode
+  fun a_brain_pain = A_BrainPain
+  fun a_brain_scream = A_BrainScream
+  fun a_brain_spit = A_BrainSpit
+  fun a_bruis_attack = A_BruisAttack
+  fun a_bspi_attack = A_BspiAttack
+  fun a_chase = A_Chase
+  fun a_check_reload = A_CheckReload
+  fun a_close_shotgun2 = A_CloseShotgun2
+  fun a_cpos_attack = A_CPosAttack
+  fun a_cpos_refire = A_CPosRefire
+  fun a_cyber_attack = A_CyberAttack
+  fun a_explode = A_Explode
+  fun a_face_target = A_FaceTarget
+  fun a_fall = A_Fall
+  fun a_fat_attack1 = A_FatAttack1
+  fun a_fat_attack2 = A_FatAttack2
+  fun a_fat_attack3 = A_FatAttack3
+  fun a_fat_raise = A_FatRaise
+  fun a_fire = A_Fire
+  fun a_fire_bfg = A_FireBFG
+  fun a_fire_cgun = A_FireCGun
+  fun a_fire_crackle = A_FireCrackle
+  fun a_fire_missile = A_FireMissile
+  fun a_fire_pistol = A_FirePistol
+  fun a_fire_plasma = A_FirePlasma
+  fun a_fire_shotgun = A_FireShotgun
+  fun a_fire_shotgun2 = A_FireShotgun2
+  fun a_gun_flash = A_GunFlash
+  fun a_head_attack = A_HeadAttack
+  fun a_hoof = A_Hoof
+  fun a_keen_die = A_KeenDie
+  fun a_look = A_Look
+  fun a_light0 = A_Light0
+  fun a_light1 = A_Light1
+  fun a_light2 = A_Light2
+  fun a_lower = A_Lower
+  fun a_load_shotgun2 = A_LoadShotgun2
+  fun a_metal = A_Metal
+  fun a_open_shotgun2 = A_OpenShotgun2
+  fun a_pain = A_Pain
+  fun a_punch = A_Punch
+  fun a_pain_attack = A_PainAttack
+  fun a_pain_die = A_PainDie
+  fun a_player_scream = A_PlayerScream
+  fun a_pos_attack = A_PosAttack
+  fun a_raise = A_Raise
+  fun a_refire = A_ReFire
+  fun a_sarg_attack = A_SargAttack
+  fun a_saw = A_Saw
+  fun a_scream = A_Scream
+  fun a_skel_fist = A_SkelFist
+  fun a_skel_missile = A_SkelMissile
+  fun a_skel_whoosh = A_SkelWhoosh
+  fun a_skull_attack = A_SkullAttack
+  fun a_spawn_fly = A_SpawnFly
+  fun a_spawn_sound = A_SpawnSound
+  fun a_spid_refire = A_SpidRefire
+  fun a_spos_attack = A_SPosAttack
+  fun a_start_fire = A_StartFire
+  fun a_tracer = A_Tracer
+  fun a_troop_attack = A_TroopAttack
+  fun a_vile_attack = A_VileAttack
+  fun a_vile_chase = A_VileChase
+  fun a_vile_start = A_VileStart
+  fun a_vile_target = A_VileTarget
+  fun a_weapon_ready = A_WeaponReady
+  fun a_xscream = A_XScream
   DOOM_SAMPLERATE = Doocr::DOOM_SAMPLERATE
   DOOM_MIDI_RATE = Doocr::DOOM_MIDI_RATE
   DOOM_FLAG_HIDE_MOUSE_OPTIONS = Doocr::DOOM_FLAG_HIDE_MOUSE_OPTIONS
@@ -98,36 +142,19 @@ lib CDoom
   DOOM_FLAG_HIDE_MUSIC_OPTIONS = Doocr::DOOM_FLAG_HIDE_MUSIC_OPTIONS
   DOOM_FLAG_MENU_DARKEN_BG = Doocr::DOOM_FLAG_MENU_DARKEN_BG
 
-
-
   union Actionf
-    acp1 : Proc(Void*, Nil)
-    acv : Proc(Nil)
-    acp2 : Proc(Void*, Void*, Nil)
+    acp1 : Doocr::ActionfP1
+    acv : Doocr::ActionfV
+    acp2 : Doocr::ActionfP2
   end
 
-
-  # Doubly linked list of actors.
   struct Thinker
     prev : Thinker*
     next : Thinker*
     function : Actionf
-    # padded so that Proc#closure_data doesn't overwrite
-    # the 8 bytes after the function pointer (think)
-    # This is bullshit
     pad : LibC::LongLong
     remove : UInt8
   end
-
-  # __DOOM_CONFIG_H__
-
-  {% if flag?(:windows) %}
-    DOOM_WIN32 = true
-  {% elsif flag?(:macosx) %}
-    DOOM_APPLE = true
-  {% else %}
-    DOOM_LINUX = true
-  {% end %}
 
   fun doom_itoa(i : LibC::Int, radix : LibC::Int) : LibC::Char*
   fun doom_ctoa(c : LibC::Char) : LibC::Char*
@@ -194,86 +221,6 @@ lib CDoom
 
   # The current state of the game: whether we are
   # playing, gazing at the intermission screen,
-  # the game final animation, or a demo.
-
-  #
-  # Difficulty/skill settings/filters.
-  #
-
-  # Doocr::Skill flags.
-  MTF_EASY   = Doocr::MTF_EASY
-  MTF_NORMAL = Doocr::MTF_NORMAL
-  MTF_HARD   = Doocr::MTF_HARD
-
-  # Deaf monsters/do not react to sound.
-  MTF_AMBUSH = Doocr::MTF_AMBUSH
-
-
-  #
-  # Key card.
-  #
-
-  # The defined weapons,
-  # including a marker indicating
-  # user has not changed weapon.
-
-  # Ammunition types defined.
-
-  # Power up artifacts.
-
-  #
-  # Power up durations,
-  #  how many seconds till expiration,
-  #  assuming TICRATE is 35 ticks/second.
-  #
-
-  #
-  # DOOM keyboard definition.
-  # This is the stuff configured by Setup.Exe.
-  # Most key data are simple ascii (uppercased).
-  #
-
-  # __D_ITEMS__
-
-  # __DOOMTYPE__
-
-  # Types are already defined in the Crystal int classes
-
-  # __D_EVENT__
-
-  #
-  # Event handling.
-  #
-
-  # Input event types.
-
-  # Event structure.
-  struct Event
-    type : Doocr::Evtype
-    data1 : LibC::Int # keys / mouse/joystick buttons
-    data2 : LibC::Int # mouse/joystick x move
-    data3 : LibC::Int # mouse/joystick y move
-  end
-
-
-  #
-  # GLOBAL VARIABLES
-
-  # __AMMAP_H__
-
-  # Used by ST StatusBar stuff.
-
-  # __D_MAIN__
-
-
-
-  fun d_add_file = D_AddFile(file : LibC::Char*)
-
-  # Called by IO functions when input is detected.
-  fun d_post_event = D_PostEvent(ev : Event*)
-
-  #
-  # BASE LEVEL
   #
   fun d_page_ticker = D_PageTicker
   fun d_page_drawer = D_PageDrawer
@@ -459,7 +406,6 @@ lib CDoom
   #
 
   # Called by main loop.
-  fun f_responder = F_Responder(ev : Event*) : LibC::Int
 
   # Called by main loop.
   fun f_ticker = F_Ticker
@@ -520,7 +466,6 @@ lib CDoom
   fun g_world_done = G_WorldDone
 
   fun g_ticker = G_Ticker
-  fun g_responder = G_Responder(ev : Event*) : LibC::Int
 
   fun g_screenshot = G_ScreenShot
 
@@ -535,7 +480,6 @@ lib CDoom
 
   fun hu_init = HU_Init
   fun hu_start = HU_Start
-  fun hu_responder = HU_Responder(ev : Event*) : LibC::Int
   fun hu_ticker = HU_Ticker
   fun hu_drawer = HU_Drawer
   fun hu_dequeue_chat_char = HU_dequeueChatChar : LibC::Char
@@ -625,42 +569,6 @@ lib CDoom
 
 
 
-  struct State
-    sprite : Doocr::Spritenum
-    frame : LibC::LongLong
-    tics : LibC::LongLong
-    action : Void*
-    nextstate : Doocr::Statenum
-    misc1 : LibC::LongLong
-    misc2 : LibC::LongLong
-  end
-
-
-  struct Mobjinfo
-    doomednum : LibC::Int
-    spawnstate : LibC::Int
-    spawnhealth : LibC::Int
-    seestate : LibC::Int
-    seesound : LibC::Int
-    reactiontime : LibC::Int
-    attacksound : LibC::Int
-    painstate : LibC::Int
-    painchance : LibC::Int
-    painsound : LibC::Int
-    meleestate : LibC::Int
-    missilestate : LibC::Int
-    deathstate : LibC::Int
-    xdeathstate : LibC::Int
-    deathsound : LibC::Int
-    speed : LibC::Int
-    radius : LibC::Int
-    height : LibC::Int
-    mass : LibC::Int
-    damage : LibC::Int
-    activesound : LibC::Int
-    flags : LibC::Int
-    raisestate : LibC::Int
-  end
 
   # __M__ARGV__
 
@@ -832,18 +740,6 @@ lib CDoom
   #
   # SoundFX struct.
   #
-  struct Sfxinfo
-    name : LibC::Char*
-    singularity : LibC::Int
-    priority : LibC::Int
-    link : Sfxinfo*
-    pitch : LibC::Int
-    volume : LibC::Int
-    data : Void*
-    usefulness : LibC::Int
-    lumpnum : LibC::Int
-  end
-
   #
   #
   # Identifiers for all music in game.
@@ -863,7 +759,6 @@ lib CDoom
   #
 
   # Called by main loop.
-  fun st_responder = ST_Responder(ev : Event*) : LibC::Int
 
   # Called by main loop.
   fun st_ticker = ST_Ticker
@@ -968,86 +863,9 @@ lib CDoom
   # Misc. mobj flags
   #
 
-  # Map Object definition.
-  struct Mobj
-    # List: thinker links.
-    thinker : Thinker
+  # Native Mobj storage has moved to Doocr::Mobj.
 
-    # Info for drawing: position.
-    x : LibC::Int
-    y : LibC::Int
-    z : LibC::Int
-
-    # More list: links in sector (if needed)
-    snext : Mobj*
-    sprev : Mobj*
-
-    # More drawing info: to determine current sprite.
-    angle : LibC::UInt      # orientation
-    sprite : Doocr::Spritenum # used to find patch_t and flip value
-    frame : LibC::Int  # might be ORed with FF_FULLBRIGHT
-
-    # Interaction info, by BLOCKMAP.
-    # Links in blocks (if needed).
-    bnext : Mobj*
-    bprev : Mobj*
-
-    subsector : Subsector*
-
-    # The closest interval over all contacted Sectors.
-    floorz : LibC::Int
-    ceilingz : LibC::Int
-
-    # For movement checking.
-    radius : LibC::Int
-    height : LibC::Int
-
-    # Momentums, used to update position.
-    momx : LibC::Int
-    momy : LibC::Int
-    momz : LibC::Int
-
-    # If == validcount, already checked.
-    # increment every time a check is made
-    validcount : LibC::Int
-
-    type : Doocr::Mobjtype
-    info : Mobjinfo* # &mobjinfo[mobj->type]
-
-    tics : LibC::Int # state tic counter
-    state : State*
-    flags : LibC::Int
-    health : LibC::Int
-
-    # Movement direction, movement generation (zig-zagging).
-    movedir : LibC::Int   # 0-7
-    movecount : LibC::Int # when 0, select a new dir
-
-    # Thing being chased/attacked (or 0),
-    # also the originator for missiles.
-    target : Mobj*
-
-    # Reaction time: if non 0, don't attack yet.
-    # Used by player to freeze a bit after teleporting.
-    reactiontime : LibC::Int
-
-    # If >0, the target will be chased
-    # no matter what (even if shot)
-    threshold : LibC::Int
-
-    # Additional info record for player avatars only.
-    # Only valid if type == MT_PLAYER
-    player : Player*
-
-    # Player number last looked for.
-    lastlook : LibC::Int
-
-    # For nightmare respawn.
-    spawnpoint : Mapthing
-
-    # Thing being chased/attacked for tracers.
-    tracer : Mobj*
-  end
+    # Native Mobj fields are owned by Doocr::Mobj.
 
   # __P_PSPR__
 
@@ -1061,13 +879,6 @@ lib CDoom
   # drawn directly on the view screen,
   # coordinates are given for a 320*200 view screen.
   #
-  struct Pspdef
-    state : State* # a 0 state means not active
-    tics : LibC::Int
-    sx : LibC::Int
-    sy : LibC::Int
-  end
-
   # __D_PLAYER__
 
   #
@@ -1077,91 +888,6 @@ lib CDoom
   # Player internal flags, for cheats and debug.
   #
   #
-  # Extended player object info: player_t
-  #
-  struct Player
-    mo : Mobj*
-    playerstate : Doocr::Playerstate
-    cmd : Ticcmd
-
-    # Determine POV,
-    #  including viewpoint bobbing during movement.
-    # Focal origin above r.z
-    viewz : LibC::Int
-    # Base height above floor for viewz.
-    viewheight : LibC::Int
-    # Bob/squat speed.
-    deltaviewheight : LibC::Int
-    # bounded/scaled total momentum.
-    bob : LibC::Int
-
-    # This is only used between levels,
-    # mo->health is used during levels.
-    health : LibC::Int
-    armorpoints : LibC::Int
-    # Armor type is 0-2.
-    armortype : LibC::Int
-
-    # Power ups. invinc and invis are tic counters.
-    powers : LibC::Int[Doocr::Powertype::NUMPOWERS]
-    cards : LibC::Int[Doocr::Card::NUMCARDS]
-    backpack : LibC::Int
-
-    # Frags, kills of other players.
-    frags : LibC::Int[MAXPLAYERS]
-    readyweapon : Doocr::Weapontype
-
-    # Is wp_nochange if not changing.
-    pendingweapon : Doocr::Weapontype
-
-    weaponowned : LibC::Int[Doocr::Weapontype::NUMWEAPONS]
-    ammo : LibC::Int[Doocr::Ammotype::NUMAMMO]
-    maxammo : LibC::Int[Doocr::Ammotype::NUMAMMO]
-
-    # True if button down last tic.
-    attackdown : LibC::Int
-    usedown : LibC::Int
-
-    # Bit flags, for cheats and debug.
-    # See cheat_t, above.
-    cheats : LibC::Int
-
-    # Refired shots are less accurate.
-    refire : LibC::Int
-
-    # For intermission stats.
-    killcount : LibC::Int
-    itemcount : LibC::Int
-    secretcount : LibC::Int
-
-    # Hint messages.
-    message : LibC::Char*
-
-    # For screen flashing (red or bright).
-    damagecount : LibC::Int
-    bonuscount : LibC::Int
-
-    # Who did damage (0 for floors/ceilings).
-    attacker : Mobj*
-
-    # So gun flashes light up areas.
-    extralight : LibC::Int
-
-    # Current PLAYPAL, ???
-    #  can be set to REDCOLORMAP for pain, etc.
-    fixedcolormap : LibC::Int
-
-    # Player skin colorshift,
-    #  0-3 for which color to draw player.
-    colormap : LibC::Int
-
-    # Overlay view sprites (gun, etc).
-    psprites : Pspdef[Doocr::Psprnum::NUMPSPRITES]
-
-    # True if secret level has been done.
-    didsecret : LibC::Int
-  end
-
   # __D_NET__
 
   #
@@ -1376,7 +1102,6 @@ lib CDoom
   fun i_set_channels = I_SetChannels
 
   # Get raw data lump index for sound descriptor.
-  fun i_get_sfx_lump_num = I_GetSfxLumpNum(sfx : Sfxinfo*) : LibC::Int
 
   # Starts a sound in a particular sound channel.
   fun i_start_sound = I_StartSound(id : LibC::Int, vol : LibC::Int, sep : LibC::Int, pitch : LibC::Int, priority : LibC::Int) : LibC::Int
@@ -1426,7 +1151,6 @@ lib CDoom
 
   # __P_INTER__
 
-  fun p_give_power = P_GivePower(player : Player*, power : LibC::Int) : LibC::Int
 
   # __R_DEFS__
 
@@ -1466,100 +1190,12 @@ lib CDoom
   # The SECTORS record, at runtime.
   # Stores things/mobjs.
   #
-  struct Sector
-    floorheight : LibC::Int
-    ceilingheight : LibC::Int
-    floorpic : LibC::Short
-    ceilingpic : LibC::Short
-    lightlevel : LibC::Short
-    special : LibC::Short
-    tag : LibC::Short
-
-    # 0 = untraversed, 1,2 = sndlines - 1
-    soundtraversed : LibC::Int
-
-    # thing that made a sound (or null)
-    soundtarget : Mobj*
-
-    # mapblock bounding box for height changes
-    blockbox : LibC::Int[4]
-
-    # origin for any sounds played by the sector
-    soundorg : Degenmobj
-
-    # if == validcount, already checked
-    validcount : LibC::Int
-
-    # list of mobjs in sector
-    thinglist : Mobj*
-
-    # thinker_t for reversable actions
-    specialdata : Void*
-
-    linecount : LibC::Int
-    lines : Line** # [linecount] size
-  end
-
   #
   # The SideDef.
   #
-  struct Side
-    # add this to the calculated texture column
-    textureoffset : LibC::Int
-
-    # add this to the calculated texture top
-    rowoffset : LibC::Int
-
-    # Texture indices.
-    # We do not maintain names here.
-    toptexture : LibC::Short
-    bottomtexture : LibC::Short
-    midtexture : LibC::Short
-
-    # Sector the SideDef is facing.
-    sector : Sector*
-  end
-
   #
   # Move clipping aid for LineDefs.
   #
-  struct Line
-    # Vertices, from v1 to v2.
-    v1 : Vertex*
-    v2 : Vertex*
-
-    # Precalculated v2 - v1 for side checking.
-    dx : LibC::Int
-    dy : LibC::Int
-
-    # Animation related.
-    flags : LibC::Short
-    special : LibC::Short
-    tag : LibC::Short
-
-    # Visual appearance: SideDefs.
-    # sidenum[1] will be -1 if one sided
-    sidenum : LibC::Short[2]
-
-    # Neat. Another bounding box, for the extent
-    # of the LineDef.
-    bbox : LibC::Int[4]
-
-    # To aid move clipping.
-    slopetype : Doocr::Slopetype
-
-    # Front and back sector.
-    # Note: redundant? Can be retrieved from SideDefs.
-    frontsector : Sector*
-    backsector : Sector*
-
-    # if == validcount, already checked
-    validcount : LibC::Int
-
-    # thinker_t for reversable actions
-    specialdata : Void*
-  end
-
   #
   # A SubSector.
   # References a Sector.
@@ -1567,33 +1203,9 @@ lib CDoom
   # indicating the visible walls that define
   # (all or some) sides of a convex BSP leaf.
   #
-  struct Subsector
-    sector : Sector*
-    numlines : LibC::Short
-    firstline : LibC::Short
-  end
-
   #
   # The LineSeg.
   #
-  struct Seg
-    v1 : Vertex*
-    v2 : Vertex*
-
-    offset : LibC::Int
-
-    angle : LibC::UInt
-
-    sidedef : Side*
-    linedef : Line*
-
-    # Sector references.
-    # Could be retrieved from linedef, too.
-    # backsector is 0 for one sided lines
-    frontsector : Sector*
-    backsector : Sector*
-  end
-
   #
   # BSP node.
   #
@@ -1632,31 +1244,6 @@ lib CDoom
   #
   # ?
   #
-  struct Drawseg
-    curline : Seg*
-    x1 : LibC::Int
-    x2 : LibC::Int
-
-    scale1 : LibC::Int
-    scale2 : LibC::Int
-    scalestep : LibC::Int
-
-    # 0=none, 1=bottom, 2=top, 3=both
-    silhouette : LibC::Int
-
-    # do not clip sprites above this
-    bsilheight : LibC::Int
-
-    # do not clip sprites below this
-    tsilheight : LibC::Int
-
-    # Pointers to lists for sprite clipping,
-    #  all three adjusted so [x1] is first value.
-    sprtopclip : LibC::Short*
-    sprbottomclip : LibC::Short*
-    maskedtexturecol : LibC::Short*
-  end
-
   # Patches.
   # A patch holds one or more columns.
   # Patches are used for sprites and all masked pictures,
@@ -1924,81 +1511,21 @@ lib CDoom
   fun p_update_specials = P_UpdateSpecials
 
   # when needed
-  fun p_use_special_line = P_UseSpecialLine(thing : Mobj*, line : Line*, side : LibC::Int) : LibC::Int
 
-  fun p_shoot_special_line = P_ShootSpecialLine(thing : Mobj*, line : Line*)
-  fun p_cross_special_line = P_CrossSpecialLine(linenum : LibC::Int, side : LibC::Int, thing : Mobj*)
-  fun p_player_in_special_sector = P_PlayerInSpecialSector(player : Player*)
   fun two_sided = twoSided(sector : LibC::Int, line : LibC::Int) : LibC::Int
-  fun get_sector = getSector(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : Sector*
-  fun get_side = getSide(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : Side*
-  fun p_find_lowest_floor_surrounding = P_FindLowestFloorSurrounding(sec : Sector*) : LibC::Int
-  fun p_find_highest_floor_surrounding = P_FindHighestFloorSurrounding(sec : Sector*) : LibC::Int
-  fun p_find_next_highest_floor = P_FindNextHighestFloor(sec : Sector*, currentheight : LibC::Int) : LibC::Int
-  fun p_find_lowest_ceiling_surrounding = P_FindLowestCeilingSurrounding(sec : Sector*) : LibC::Int
-  fun p_find_highest_ceiling_surrounding = P_FindHighestCeilingSurrounding(sec : Sector*) : LibC::Int
-  fun p_find_sector_from_line_tag = P_FindSectorFromLineTag(line : Line*, start : LibC::Int) : LibC::Int
-  fun p_find_min_surrounding_light = P_FindMinSurroundingLight(sector : Sector*, max : LibC::Int) : LibC::Int
-  fun get_next_sector = getNextSector(line : Line*, sec : Sector*) : Sector*
 
   #
   # SPECIAL
   #
-  fun ev_do_donut = EV_DoDonut(line : Line*) : LibC::Int
 
   #
   # P_LIGHTS
   #
-  struct Fireflicker
-    thinker : Thinker
-    sector : Sector*
-    count : LibC::Int
-    maxlight : LibC::Int
-    minlight : LibC::Int
-  end
-
-  struct Lightflash
-    thinker : Thinker
-    sector : Sector*
-    count : LibC::Int
-    maxlight : LibC::Int
-    minlight : LibC::Int
-    maxtime : LibC::Int
-    mintime : LibC::Int
-  end
-
-  struct Strobe
-    thinker : Thinker
-    sector : Sector*
-    count : LibC::Int
-    minlight : LibC::Int
-    maxlight : LibC::Int
-    darktime : LibC::Int
-    brighttime : LibC::Int
-  end
-
-  struct Glow
-    thinker : Thinker
-    sector : Sector*
-    minlight : LibC::Int
-    maxlight : LibC::Int
-    direction : LibC::Int
-  end
 
 
-  fun p_spawn_fire_flicker = P_SpawnFireFlicker(sector : Sector*)
-  fun t_light_flash = T_LightFlash(flash : Lightflash*)
-  fun p_spawn_light_flash = P_SpawnLightFlash(sector : Sector*)
-  fun t_strobe_flash = T_StrobeFlash(flash : Strobe*)
+  
 
-  fun p_spawn_strobe_flash = P_SpawnStrobeFlash(sector : Sector*, fast_or_slow : LibC::Int, in_sync : LibC::Int)
-  fun ev_start_light_strobing = EV_StartLightStrobing(line : Line*)
-  fun ev_turn_tag_lights_off = EV_TurnTagLightsOff(line : Line*)
 
-  fun ev_light_turn_on = EV_LightTurnOn(line : Line*, bright : LibC::Int)
-
-  fun t_glow = T_Glow(g : Glow*)
-  fun p_spawn_glowing_light = P_SpawnGlowingLight(sector : Sector*)
 
   #
   # P_SWITCH
@@ -2009,119 +1536,32 @@ lib CDoom
 
   # 1 second, in ticks.
 
-  fun p_change_switch_texture = P_ChangeSwitchTexture(line : Line*, use_again : LibC::Int)
   fun p_init_switch_list = P_InitSwitchList
 
   #
   # P_PLATS
   #
-  struct Plat
-    thinker : Thinker
-    sector : Sector*
-    speed : LibC::Int
-    low : LibC::Int
-    high : LibC::Int
-    wait : LibC::Int
-    count : LibC::Int
-    status : Doocr::Platenum
-    oldstatus : Doocr::Platenum
-    crush : LibC::Int
-    tag : LibC::Int
-    type : Doocr::Plattype
-  end
-
-
-
-  fun t_plat_raise = T_PlatRaise(plat : Plat*)
-  fun ev_do_plat = EV_DoPlat(line : Line*, type : Doocr::Plattype, amount : LibC::Int) : LibC::Int
-  fun p_add_active_plat = P_AddActivePlat(plat : Plat*)
-  fun p_remove_active_plat = P_RemoveActivePlat(plat : Plat*)
-  fun ev_stop_plat = EV_StopPlat(line : Line*)
   fun p_activate_in_stasis = P_ActivateInStasis(tag : LibC::Int)
 
   #
   # P_DOORS
   #
-  struct Vldoor
-    thinker : Thinker
-    type : Doocr::Vldoorenum
-    sector : Sector*
-    topheight : LibC::Int
-    speed : LibC::Int
 
-    # 1 = up, 0 = waiting at top, -1 = down
-    direction : LibC::Int
-
-    # tics to wait at the top
-    topwait : LibC::Int
-
-    # (keep in case a door going down is reset)
-    # when it reaches 0, start going down
-    topcountdown : LibC::Int
-  end
-
-
-  fun ev_vertical_door = EV_VerticalDoor(line : Line*, thing : Mobj*)
-  fun ev_do_door = EV_DoDoor(line : Line*, type : Doocr::Vldoorenum) : LibC::Int
-  fun ev_do_locked_door = EV_DoLockedDoor(line : Line*, type : Doocr::Vldoorenum, thing : Mobj*) : LibC::Int
-  fun t_vertical_door = T_VerticalDoor(door : Vldoor*)
-  fun p_spawn_door_close_in_30 = P_SpawnDoorCloseIn30(sec : Sector*)
-  fun p_spawn_door_raise_in_5_mins = P_SpawnDoorRaiseIn5Mins(sec : Sector*, secnum : LibC::Int)
 
   #
   # P_CEILNG
   #
-  struct Ceiling
-    thinker : Thinker
-    type : Doocr::Ceilingenum
-    sector : Sector*
-    bottomheight : LibC::Int
-    topheight : LibC::Int
-    speed : LibC::Int
-    crush : LibC::Int
-
-    # 1 = up, 0 = waiting, -1 = down
-    direction : LibC::Int
-
-    # ID
-    tag : LibC::Int
-    olddirection : LibC::Int
-  end
 
 
-
-  fun ev_do_ceiling = EV_DoCeiling(line : Line*, type : Doocr::Ceilingenum) : LibC::Int
-  fun t_move_ceiling = T_MoveCeiling(ceiling : Ceiling*)
-  fun p_add_active_ceiling = P_AddActiveCeiling(c : Ceiling*)
-  fun p_remove_active_ceiling = P_RemoveActiveCeiling(c : Ceiling*)
-  fun ev_ceiling_crush_stop = EV_CeilingCrushStop(line : Line*) : LibC::Int
-  fun p_activate_in_stasis_ceiling = P_ActivateInStasisCeiling(line : Line*)
 
   #
   # P_FLOOR
   #
-  struct Floormove
-    thinker : Thinker
-    type : Doocr::Floorenum
-    crush : LibC::Int
-    sector : Sector*
-    direction : LibC::Int
-    newspecial : LibC::Int
-    texture : LibC::Short
-    floordestheight : LibC::Int
-    speed : LibC::Int
-  end
 
-
-  fun t_move_plane = T_MovePlane(sector : Sector*, speed : LibC::Int, dest : LibC::Int, crush : LibC::Int, floor_or_ceiling : LibC::Int, direction : LibC::Int) : Doocr::Result
-  fun ev_build_stairs = EV_BuildStairs(line : Line*, type : Doocr::Stairenum) : LibC::Int
-  fun ev_do_floor = EV_DoFloor(line : Line*, floortype : Doocr::Floorenum) : LibC::Int
-  fun t_move_floor = T_MoveFloor(floor : Floormove*)
 
   #
   # P_TELEPT
   #
-  fun ev_teleport = EV_Teleport(line : Line*, side : LibC::Int, thing : Mobj*) : LibC::Int
 
   # __R_BSP__
 
@@ -2186,7 +1626,6 @@ lib CDoom
 
   # __R_SEGS__
 
-  fun r_render_masked_seg_range = R_RenderMaskedSegRange(ds : Drawseg*, x1 : LibC::Int, x2 : LibC::Int)
 
   # __R_STATE__
 
@@ -2276,12 +1715,10 @@ lib CDoom
   #
   # Utility functions.
   fun r_point_on_side = R_PointOnSide(x : LibC::Int, y : LibC::Int, node : Node*) : LibC::Int
-  fun r_point_on_seg_side = R_PointOnSegSide(x : LibC::Int, y : LibC::Int, line : Seg*) : LibC::Int
   fun r_point_to_angle = R_PointToAngle(x : LibC::Int, y : LibC::Int) : LibC::UInt
   fun r_point_to_angle2 = R_PointToAngle2(x1 : LibC::Int, y1 : LibC::Int, x2 : LibC::Int, y2 : LibC::Int) : LibC::UInt
   fun r_point_to_dist = R_PointToDist(x : LibC::Int, y : LibC::Int) : LibC::Int
   fun r_scale_from_global_angle = R_ScaleFromGlobalAngle(visangle : LibC::UInt) : LibC::Int
-  fun r_point_in_subsector = R_PointInSubsector(x : LibC::Int, y : LibC::Int) : Subsector*
   fun r_add_point_to_box = R_AddPointToBox(x : LibC::Int, y : LibC::Int, box : LibC::Int*)
 
   #
@@ -2289,7 +1726,6 @@ lib CDoom
   #
 
   # Called by G_Drawer.
-  fun r_render_player_view = R_RenderPlayerView(player : Player*)
 
   # Called by startup code.
   fun r_init = R_Init
@@ -2321,7 +1757,6 @@ lib CDoom
 
   fun r_draw_masked_column = R_DrawMaskedColumn(column : Post*)
   fun r_sort_vis_sprites = R_SortVisSprites
-  fun r_add_sprites = R_AddSprites(sec : Sector*)
   fun r_clear_sprites = R_ClearSprites
   fun r_draw_masked = R_DrawMasked
 
@@ -2351,14 +1786,10 @@ lib CDoom
   #
   # P_PSPR
   #
-  fun p_setup_psprites = P_SetupPsprites(curplayer : Player*)
-  fun p_move_psprites = P_MovePsprites(curplayer : Player*)
-  fun p_drop_weapon = P_DropWeapon(player : Player*)
 
   #
   # P_USER
   #
-  fun p_player_think = P_PlayerThink(player : Player*)
 
   #
   # P_MOBJ
@@ -2368,19 +1799,12 @@ lib CDoom
 
 
   fun p_respawn_specials = P_RespawnSpecials
-  fun p_spawn_mobj = P_SpawnMobj(x : LibC::Int, y : LibC::Int, z : LibC::Int, type : Doocr::Mobjtype) : Mobj*
-  fun p_remove_mobj = P_RemoveMobj(mobj : Mobj*)
-  fun p_set_mobj_state = P_SetMobjState(mobj : Mobj*, state : Doocr::Statenum) : LibC::Int
-  fun p_mobj_thinker = P_MobjThinker(mobj : Mobj*)
   fun p_spawn_puff = P_SpawnPuff(x : LibC::Int, y : LibC::Int, z : LibC::Int)
   fun p_spawn_blood = P_SpawnBlood(x : LibC::Int, y : LibC::Int, z : LibC::Int, damage : LibC::Int)
-  fun p_spawn_missile = P_SpawnMissile(source : Mobj*, dest : Mobj*, type : Doocr::Mobjtype) : Mobj*
-  fun p_spawn_player_missile = P_SpawnPlayerMissile(source : Mobj*, type : Doocr::Mobjtype)
 
   #
   # P_ENEMY
   #
-  fun p_noise_alert = P_NoiseAlert(target : Mobj*, emmiter : Mobj*)
 
   #
   # P_MAPUTL
@@ -2392,37 +1816,17 @@ lib CDoom
     dy : LibC::Int
   end
 
-  union InterceptD
-    thing : Mobj*
-    line : Line*
-  end
-
-  struct Intercept
-    frac : LibC::Int # along trace line
-    isaline : LibC::Int
-    d : InterceptD
-  end
-
 
 
   fun p_aprox_distance = P_AproxDistance(dx : LibC::Int, dy : LibC::Int) : LibC::Int
-  fun p_point_on_line_side = P_PointOnLineSide(x : LibC::Int, y : LibC::Int, line : Line*) : LibC::Int
   fun p_point_on_divline_side = P_PointOnDivlineSide(x : LibC::Int, y : LibC::Int, line : Divline*) : LibC::Int
-  fun p_make_divline = P_MakeDivline(li : Line*, dl : Divline*)
   fun p_intercept_vector = P_InterceptVector(v2 : Divline*, v1 : Divline*) : LibC::Int
-  fun p_box_on_line_side = P_BoxOnLineSide(tmbox : LibC::Int*, ld : Line*) : LibC::Int
-
-
-  fun p_line_opening = P_LineOpening(linedef : Line*)
-
-  fun p_block_lines_iterator = P_BlockLinesIterator(x : LibC::Int, y : LibC::Int, func : Proc(Line*, LibC::Int)) : LibC::Int
-  fun p_block_things_iterator = P_BlockThingsIterator(x : LibC::Int, y : LibC::Int, func : Proc(Mobj*, LibC::Int)) : LibC::Int
 
 
 
-  fun p_path_traverse = P_PathTraverse(x1 : LibC::Int, y1 : LibC::Int, x2 : LibC::Int, y2 : LibC::Int, flags : LibC::Int, trav : Proc(Intercept*, LibC::Int)) : LibC::Int
-  fun p_unset_thing_position = P_UnsetThingPosition(thing : Mobj*)
-  fun p_set_thing_position = P_SetThingPosition(thing : Mobj*)
+
+
+
 
   #
   # P_MAP
@@ -2434,18 +1838,8 @@ lib CDoom
   # keep track of the line that lowers the ceiling,
   # so missiles don't explode against sky hack walls
 
-  fun p_check_position = P_CheckPosition(thing : Mobj*, x : LibC::Int, y : LibC::Int) : LibC::Int
-  fun p_try_move = P_TryMove(thing : Mobj*, x : LibC::Int, y : LibC::Int) : LibC::Int
-  fun p_teleport_move = P_TeleportMove(thing : Mobj*, x : LibC::Int, y : LibC::Int) : LibC::Int
-  fun p_slide_move = P_SlideMove(mo : Mobj*)
-  fun p_check_sight = P_CheckSight(t1 : Mobj*, t2 : Mobj*) : LibC::Int
-  fun p_use_lines = P_UseLines(player : Player*)
-  fun p_change_sector = P_ChangeSector(sector : Sector*, crunch : LibC::Int) : LibC::Int
 
 
-  fun p_aim_line_attack = P_AimLineAttack(t1 : Mobj*, angle : LibC::UInt, distance : LibC::Int) : LibC::Int
-  fun p_line_attack = P_LineAttack(t1 : Mobj*, angle : LibC::UInt, distance : LibC::Int, slope : LibC::Int, damage : LibC::Int)
-  fun p_radius_attack = P_RadiusAttack(spot : Mobj*, source : Mobj*, damage : LibC::Int)
 
   #
   # P_SETUP
@@ -2455,8 +1849,6 @@ lib CDoom
   # P_INTER
   #
 
-  fun p_touch_special_thing = P_TouchSpecialThing(special : Mobj*, toucher : Mobj*)
-  fun p_damage_mobj = P_DamageMobj(target : Mobj*, inflictor : Mobj*, source : Mobj*, damage : LibC::Int)
 
   # __STLIB__
 
@@ -2468,137 +1860,10 @@ lib CDoom
   # Typedefs of widgets
   #
 
-  # Number widget
-  struct ST_Number
-    # upper right-hand corner
-    #  of the number (right-justified)
-    x : LibC::Int
-    y : LibC::Int
-
-    # max # of digits in number
-    width : LibC::Int
-
-    # last number value
-    oldnum : LibC::Int
-
-    # pointer to current value
-    num : LibC::Int*
-
-    # pointer to doom_boolean stating
-    #  whether to update number
-    on : LibC::Int*
-
-    # list of patches for 0-9
-    p : Patch**
-
-    # user data
-    data : LibC::Int
-  end
-
-  # Percent widget ("child" of number widget,
-  #  or, more precisely, contains a number widget.)
-  struct ST_Percent
-    # number information
-    n : ST_Number
-
-    # percent sign graphic
-    p : Patch*
-  end
-
-  # Multiple Icon widget
-  struct ST_Multicon
-    # center-justified location of icons
-    x : LibC::Int
-    y : LibC::Int
-
-    # last icon number
-    oldinum : LibC::Int
-
-    # pointer to current icon
-    inum : LibC::Int*
-
-    # pointer to doom_boolean stating
-    #  whether to update icon
-    on : LibC::Int*
-
-    # list of icons
-    p : Patch**
-
-    # user data
-    data : LibC::Int
-  end
-
-  # Binary Icon widget
-  struct ST_Binicon
-    # center-justified location of icons
-    x : LibC::Int
-    y : LibC::Int
-
-    # last icon value
-    oldval : LibC::Int
-
-    # pointer to current icon status
-    val : LibC::Int*
-
-    # pointer to bool
-    #  stating whether to update icon
-    on : LibC::Int*
-
-    p : Patch*       # icon
-    data : LibC::Int # user data
-  end
 
   #
   # Widget creation, access, and update routines
   #
-
-  # Initializes widget library.
-  # More precisely, initialize STMINUS,
-  # everything else is done somewhere else.
-  #
-  fun stlib_init = STlib_init
-
-  # Number widget routines
-  fun stlib_init_num = STlib_initNum(n : ST_Number*,
-                                     x : LibC::Int,
-                                     y : LibC::Int,
-                                     pl : Patch**,
-                                     num : LibC::Int*,
-                                     on : LibC::Int*,
-                                     width : LibC::Int)
-
-  fun stlib_update_num = STlib_updateNum(n : ST_Number*, refresh : LibC::Int)
-
-  # Percent widget routines
-  fun stlib_init_percent = STlib_initPercent(p : ST_Percent*,
-                                             x : LibC::Int,
-                                             y : LibC::Int,
-                                             pl : Patch**,
-                                             num : LibC::Int*,
-                                             on : LibC::Int*,
-                                             percent : Patch*)
-
-  fun stlib_update_percent = STlib_updatePercent(per : ST_Percent*, refresh : LibC::Int)
-
-  # Multiple Icon widget routines
-  fun stlib_init_mult_icon = STlib_initMultIcon(mi : ST_Multicon*,
-                                                x : LibC::Int,
-                                                y : LibC::Int,
-                                                il : Patch**,
-                                                inum : LibC::Int*,
-                                                on : LibC::Int*)
-
-  fun stlib_update_mult_icon = STlib_updateMultIcon(mi : ST_Multicon*, refresh : LibC::Int)
-
-  # Binary Icon widget routines
-  fun stlib_init_bin_icon = STlib_initBinIcon(b : ST_Binicon*,
-                                              x : LibC::Int,
-                                              y : LibC::Int,
-                                              i : Patch*,
-                                              val : LibC::Int*,
-                                              on : LibC::Int*)
-
-  fun stlib_update_bin_icon = STlib_updateBinIcon(bi : ST_Binicon*, refresh : LibC::Int)
 
   # __V_VIDEO__
 
@@ -2795,7 +2060,6 @@ lib CDoom
   fun g_build_ticcmd = G_BuildTiccmd(cmd : Ticcmd*)
   fun d_do_advance_demo = D_DoAdvanceDemo
 
-  fun d_post_event = D_PostEvent(ev : Event*)
 
   fun d_process_events = D_ProcessEvents
 
@@ -2867,13 +2131,11 @@ lib CDoom
 
   fun f_start_cast = F_StartCast
   fun f_cast_ticker = F_CastTicker
-  fun f_cast_responder = F_CastResponder(ev : Event*) : LibC::Int
   fun f_cast_drawer = F_CastDrawer
   fun v_draw_patch_flipped = V_DrawPatchFlipped(x : LibC::Int, y : LibC::Int, scrn : LibC::Int, patch : Patch*)
 
   fun f_start_finale = F_StartFinale
 
-  fun f_responder = F_Responder(event : Event*) : LibC::Int
 
   fun f_ticker = F_Ticker
 
@@ -2883,7 +2145,6 @@ lib CDoom
 
   fun f_cast_ticker = F_CastTicker
 
-  fun f_cast_responder = F_CastResponder(ev : Event*) : LibC::Int
 
   fun f_cast_print = F_CastPrint(text : LibC::Char*)
 
@@ -3054,81 +2315,6 @@ lib CDoom
 
   fun i_get_heap_size = I_GetHeapSize : LibC::Int
 
-  fun a_light0 = A_Light0(player : Player*, psp : Pspdef*)
-  fun a_weapon_ready = A_WeaponReady(player : Player*, psp : Pspdef*)
-  fun a_lower = A_Lower(player : Player*, psp : Pspdef*)
-  fun a_raise = A_Raise(player : Player*, psp : Pspdef*)
-  fun a_punch = A_Punch(player : Player*, psp : Pspdef*)
-  fun a_refire = A_ReFire(player : Player*, psp : Pspdef*)
-  fun a_fire_pistol = A_FirePistol(player : Player*, psp : Pspdef*)
-  fun a_light1 = A_Light1(player : Player*, psp : Pspdef*)
-  fun a_fire_shotgun = A_FireShotgun(player : Player*, psp : Pspdef*)
-  fun a_light2 = A_Light2(player : Player*, psp : Pspdef*)
-  fun a_fire_shotgun2 = A_FireShotgun2(player : Player*, psp : Pspdef*)
-  fun a_check_reload = A_CheckReload(player : Player*, psp : Pspdef*)
-  fun a_open_shotgun2 = A_OpenShotgun2(player : Player*, psp : Pspdef*)
-  fun a_load_shotgun2 = A_LoadShotgun2(player : Player*, psp : Pspdef*)
-  fun a_close_shotgun2 = A_CloseShotgun2(player : Player*, psp : Pspdef*)
-  fun a_fire_cgun = A_FireCGun(player : Player*, psp : Pspdef*)
-  fun a_gun_flash = A_GunFlash(player : Player*, psp : Pspdef*)
-  fun a_fire_missile = A_FireMissile(player : Player*, psp : Pspdef*)
-  fun a_saw = A_Saw(player : Player*, psp : Pspdef*)
-  fun a_fire_plasma = A_FirePlasma(player : Player*, psp : Pspdef*)
-  fun a_bfg_sound = A_BFGsound(player : Player*, psp : Pspdef*)
-  fun a_fire_bfg = A_FireBFG(player : Player*, psp : Pspdef*)
-  fun a_bfg_spray = A_BFGSpray(mo : Mobj*)
-  fun a_explode = A_Explode(thingy : Mobj*)
-  fun a_pain = A_Pain(actor : Mobj*)
-  fun a_player_scream = A_PlayerScream(mo : Mobj*)
-  fun a_fall = A_Fall(actor : Mobj*)
-  fun a_xscream = A_XScream(actor : Mobj*)
-  fun a_look = A_Look(actor : Mobj*)
-  fun a_chase = A_Chase(actor : Mobj*)
-  fun a_face_target = A_FaceTarget(actor : Mobj*)
-  fun a_pos_attack = A_PosAttack(actor : Mobj*)
-  fun a_scream = A_Scream(actor : Mobj*)
-  fun a_spos_attack = A_SPosAttack(actor : Mobj*)
-  fun a_vile_chase = A_VileChase(actor : Mobj*)
-  fun a_vile_start = A_VileStart(actor : Mobj*)
-  fun a_vile_target = A_VileTarget(actor : Mobj*)
-  fun a_vile_attack = A_VileAttack(actor : Mobj*)
-  fun a_start_fire = A_StartFire(actor : Mobj*)
-  fun a_fire = A_Fire(actor : Mobj*)
-  fun a_fire_crackle = A_FireCrackle(actor : Mobj*)
-  fun a_tracer = A_Tracer(actor : Mobj*)
-  fun a_skel_whoosh = A_SkelWhoosh(actor : Mobj*)
-  fun a_skel_fist = A_SkelFist(actor : Mobj*)
-  fun a_skel_missile = A_SkelMissile(actor : Mobj*)
-  fun a_fat_raise = A_FatRaise(actor : Mobj*)
-  fun a_fat_attack1 = A_FatAttack1(actor : Mobj*)
-  fun a_fat_attack2 = A_FatAttack2(actor : Mobj*)
-  fun a_fat_attack3 = A_FatAttack3(actor : Mobj*)
-  fun a_boss_death = A_BossDeath(mo : Mobj*)
-  fun a_cpos_attack = A_CPosAttack(actor : Mobj*)
-  fun a_cpos_refire = A_CPosRefire(actor : Mobj*)
-  fun a_troop_attack = A_TroopAttack(actor : Mobj*)
-  fun a_sarg_attack = A_SargAttack(actor : Mobj*)
-  fun a_head_attack = A_HeadAttack(actor : Mobj*)
-  fun a_bruis_attack = A_BruisAttack(actor : Mobj*)
-  fun a_skull_attack = A_SkullAttack(actor : Mobj*)
-  fun a_metal = A_Metal(mo : Mobj*)
-  fun a_spid_refire = A_SpidRefire(actor : Mobj*)
-  fun a_baby_metal = A_BabyMetal(mo : Mobj*)
-  fun a_bspi_attack = A_BspiAttack(actor : Mobj*)
-  fun a_hoof = A_Hoof(mo : Mobj*)
-  fun a_cyber_attack = A_CyberAttack(actor : Mobj*)
-  fun a_pain_attack = A_PainAttack(actor : Mobj*)
-  fun a_pain_die = A_PainDie(actor : Mobj*)
-  fun a_keen_die = A_KeenDie(mo : Mobj*)
-  fun a_brain_pain = A_BrainPain(mo : Mobj*)
-  fun a_brain_scream = A_BrainScream(mo : Mobj*)
-  fun a_brain_die = A_BrainDie(mo : Mobj*)
-  fun a_brain_awake = A_BrainAwake(mo : Mobj*)
-  fun a_brain_spit = A_BrainSpit(mo : Mobj*)
-  fun a_spawn_sound = A_SpawnSound(mo : Mobj*)
-  fun a_spawn_fly = A_SpawnFly(mo : Mobj*)
-  fun a_brain_explode = A_BrainExplode(mo : Mobj*)
-
 
   #
   # MENU TYPEDEFS
@@ -3217,34 +2403,18 @@ lib CDoom
   # keep track of special lines as they are hit,
   # but don't process them until the move is proven valid
 
-  fun p_recursive_sound = P_RecursiveSound(sec : Sector*, soundblocks : LibC::Int)
-
-  fun p_check_melee_range = P_CheckMeleeRange(actor : Mobj*) : LibC::Int
-
-  fun p_check_missile_range = P_CheckMissileRange(actor : Mobj*) : LibC::Int
-
-  fun p_move = P_Move(actor : Mobj*) : LibC::Int
-
-  fun p_try_walk = P_TryWalk(actor : Mobj*) : LibC::Int
-
-  fun p_new_chase_dir = P_NewChaseDir(actor : Mobj*)
-
-  fun p_look_for_players = P_LookForPlayers(actor : Mobj*, allaround : LibC::Int) : LibC::Int
-
-  fun pit_vile_check = PIT_VileCheck(thing : Mobj*) : LibC::Int
-
-  fun a_pain_shoot_skull = A_PainShootSkull(actor : Mobj*, angle : LibC::UInt)
 
 
-  fun p_give_ammo = P_GiveAmmo(player : Player*, ammo : Doocr::Ammotype, num : LibC::Int) : LibC::Int
-  fun p_give_weapon = P_GiveWeapon(player : Player*, weapon : Doocr::Weapontype, dropped : LibC::Int) : LibC::Int
-  fun p_give_body = P_GiveBody(player : Player*, num : LibC::Int) : LibC::Int
-  fun p_give_armor = P_GiveArmor(player : Player*, armortype : LibC::Int) : LibC::Int
-  fun p_give_card = P_GiveCard(player : Player*, card : Doocr::Card)
 
-  fun p_kill_mobj = P_KillMobj(source : Mobj*, target : Mobj*)
 
-  fun t_fire_flicker = T_FireFlicker(flick : Fireflicker*)
+
+
+
+
+
+
+
+
 
 
   # Height if not aiming up or down
@@ -3254,50 +2424,25 @@ lib CDoom
 
   # slopes to top and bottom of target
 
-  fun pit_stomp_thing = PIT_StompThing(thing : Mobj*) : LibC::Int
-  fun pit_check_line = PIT_CheckLine(ld : Line*) : LibC::Int
-
-  fun pit_check_thing = PIT_CheckThing(thing : Mobj*) : LibC::Int
-  fun p_thing_height_clip = P_ThingHeightClip(thing : Mobj*) : LibC::Int
 
 
 
 
 
-  fun p_hit_slide_line = P_HitSlideLine(ld : Line*)
-  fun ptr_slide_traverse = PTR_SlideTraverse(int : Intercept*) : LibC::Int
-  fun ptr_aim_traverse = PTR_AimTraverse(int : Intercept*) : LibC::Int
-  fun ptr_shoot_traverse = PTR_ShootTraverse(int : Intercept*) : LibC::Int
-  fun ptr_use_traverse = PTR_UseTraverse(int : Intercept*) : LibC::Int
-
-  fun pit_radius_attack = PIT_RadiusAttack(thing : Mobj*) : LibC::Int
-  fun pit_change_sector = PIT_ChangeSector(thing : Mobj*) : LibC::Int
 
 
-  fun pit_add_line_intercepts = PIT_AddLineIntercepts(ld : Line*) : LibC::Int
-  fun pit_add_thing_intercepts = PIT_AddThingIntercepts(thing : Mobj*) : LibC::Int
-  fun p_traverse_intercepts = P_TraverseIntercepts(func : Proc(Intercept*, LibC::Int), maxfrac : LibC::Int) : LibC::Int
 
 
-  fun p_explode_missile = P_ExplodeMissile(mo : Mobj*)
 
-  fun p_xymovement = P_XYMovement(mo : Mobj*)
-  fun p_zmovement = P_ZMovement(mo : Mobj*)
 
-  fun p_nightmare_respawn = P_NightmareRespawn(mobj : Mobj*)
+
+
 
   fun p_spawn_map_thing = P_SpawnMapThing(mthing : Mapthing*)
 
-  fun p_check_missile_spawn = P_CheckMissileSpawn(th : Mobj*)
 
 
 
-  fun p_set_psprite = P_SetPsprite(player : Player*, position : LibC::Int, stnum : Doocr::Statenum)
-  fun p_bring_up_weapon = P_BringUpWeapon(player : Player*)
-  fun p_check_ammo = P_CheckAmmo(player : Player*) : LibC::Int
-  fun p_fire_weapon = P_FireWeapon(player : Player*)
-  fun p_bullet_slope = P_BulletSlope(mo : Mobj*)
-  fun p_gunshot = P_GunShot(mo : Mobj*, accurate : LibC::Int)
 
 
 
@@ -3326,17 +2471,12 @@ lib CDoom
   # There is another anim_t used in wi_stuff, unrelated.
   #
 
-  fun p_start_button = P_StartButton(line : Line*, w : Doocr::Bwhere, texture : LibC::Int, time : LibC::Int)
   fun p_run_thinkers = P_RunThinkers
 
   # 16 pixels of bob
 
 
 
-  fun p_thrust = P_Thrust(player : Player*, angle : LibC::UInt, move : LibC::Int)
-  fun p_calc_height = P_CalcHeight(player : Player*)
-  fun p_move_player = P_MovePlayer(player : Player*)
-  fun p_death_think = P_DeathThink(player : Player*)
 
 
   #
@@ -3346,7 +2486,6 @@ lib CDoom
   fun r_store_wall_range = R_StoreWallRange(start : LibC::Int, stop : LibC::Int)
   fun r_clip_solid_wall_segment = R_ClipSolidWallSegment(first : LibC::Int, last : LibC::Int)
   fun r_clip_pass_wall_segment = R_ClipPassWallSegment(first : LibC::Int, last : LibC::Int)
-  fun r_addline = R_AddLine(line : Seg*)
   fun r_check_bbox = R_CheckBBox(bspcoord : LibC::Int*) : LibC::Int
   fun r_subsector = R_Subsector(num : LibC::Int)
 
@@ -3439,7 +2578,6 @@ lib CDoom
   fun r_init_texture_mapping = R_InitTextureMapping
   fun r_init_light_tables = R_InitLightTables
 
-  fun r_setup_frame = R_SetupFrame(player : Player*)
 
 
 
@@ -3490,8 +2628,6 @@ lib CDoom
 
   fun r_new_vis_sprite = R_NewVisSprite : Vissprite*
   fun r_draw_vis_sprite = R_DrawVisSprite(vis : Vissprite*, x1 : LibC::Int, x2 : LibC::Int)
-  fun r_project_sprite = R_ProjectSprite(thing : Mobj*)
-  fun r_draw_psprite = R_DrawPSprite(psp : Pspdef*)
   fun r_draw_player_sprites = R_DrawPlayerSprites
   fun r_draw_sprite = R_DrawSprite(spr : Vissprite*)
 
@@ -3516,17 +2652,12 @@ lib CDoom
 
   # music currently being played
 
-  fun s_get_channel = S_getChannel(origin : Void*, sfxinfo : Sfxinfo*) : LibC::Int
-  fun s_adjust_sound_params = S_AdjustSoundParams(listener : Mobj*, source : Mobj*, vol : LibC::Int*, sep : LibC::Int*, pitch : LibC::Int*) : LibC::Int
   fun s_stop_channel = S_StopChannel(cnum : LibC::Int)
 
   #
   # Hack display negative frags.
   #  Loads and store the stminus lump.
   #
-
-  fun stlib_draw_num = STlib_drawNum(n : ST_Number*, refresh : LibC::Int)
-
 
   # Location of status bar
 

@@ -177,7 +177,7 @@ module Doocr
         Doocr.nodeingame[netnode] = 0
         Doocr.playeringame[netconsole] = 0
         Doocr.exitmsg = "Player #{netconsole + 1} left the game"
-        (@@players.to_unsafe + Doocr.consoleplayer).value.message = Doocr.exitmsg.to_unsafe
+        @@players[Doocr.consoleplayer].message = Doocr.exitmsg
         if netconsole != Doocr.consoleplayer
           # Despawn the player
           g_despawn_player(netconsole)

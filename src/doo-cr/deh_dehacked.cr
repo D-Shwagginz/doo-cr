@@ -265,8 +265,33 @@ module Doocr
             # Set thing data. Thing is laid out 1 to 1 with dehacked header hash
             when DehBlocks::Thing
               next if cur_num < 1 || cur_num > @@mobjinfo.size
-              ((@@mobjinfo.to_unsafe + cur_num - 1).as(Int32*) + loc).value =
-                line[start.size..].to_i(strict: false)
+              info = @@mobjinfo[cur_num - 1]
+              value = line[start.size..].to_i(strict: false)
+              case loc
+              when 0 then info.doomednum = value
+              when 1 then info.spawnstate = value
+              when 2 then info.spawnhealth = value
+              when 3 then info.seestate = value
+              when 4 then info.seesound = value
+              when 5 then info.reactiontime = value
+              when 6 then info.attacksound = value
+              when 7 then info.painstate = value
+              when 8 then info.painchance = value
+              when 9 then info.painsound = value
+              when 10 then info.meleestate = value
+              when 11 then info.missilestate = value
+              when 12 then info.deathstate = value
+              when 13 then info.xdeathstate = value
+              when 14 then info.deathsound = value
+              when 15 then info.speed = value
+              when 16 then info.radius = value
+              when 17 then info.height = value
+              when 18 then info.mass = value
+              when 19 then info.damage = value
+              when 20 then info.activesound = value
+              when 21 then info.flags = value
+              when 22 then info.raisestate = value
+              end
               # Fame is not all Int32 unlike thing, so parse it manually
             when DehBlocks::Frame
               next if cur_num < 0 || cur_num >= @@states.size

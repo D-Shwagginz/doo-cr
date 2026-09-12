@@ -41,8 +41,8 @@ module Doocr
       Doocr.m_x = Doocr.old_m_x
       Doocr.m_y = Doocr.old_m_y
     else
-      Doocr.m_x = Doocr.plr.value.mo.value.x - Doocr.m_w // 2
-      Doocr.m_y = Doocr.plr.value.mo.value.y - Doocr.m_h // 2
+      Doocr.m_x = Doocr.plr.mo.not_nil!.x - Doocr.m_w // 2
+      Doocr.m_y = Doocr.plr.mo.not_nil!.y - Doocr.m_h // 2
     end
     Doocr.m_x2 = Doocr.m_x + Doocr.m_w
     Doocr.m_y2 = Doocr.m_y + Doocr.m_h
@@ -150,9 +150,9 @@ module Doocr
       end
     end
 
-    Doocr.plr = @@players.to_unsafe.as(CDoom::Player*) + pnum
-    Doocr.m_x = Doocr.plr.value.mo.value.x - Doocr.m_w // 2
-    Doocr.m_y = Doocr.plr.value.mo.value.y - Doocr.m_h // 2
+    Doocr.plr = @@players[pnum]
+    Doocr.m_x = Doocr.plr.mo.not_nil!.x - Doocr.m_w // 2
+    Doocr.m_y = Doocr.plr.mo.not_nil!.y - Doocr.m_h // 2
     am_change_window_loc
 
     # for saving & restoring
@@ -162,7 +162,7 @@ module Doocr
     Doocr.old_m_h = Doocr.m_h
 
     # inform the status bar of the change
-    CDoom.st_responder(pointerof(@@st_notify))
+    Doocr.st_responder(@@st_notify)
   end
 
   def self.am_load_pics
@@ -211,7 +211,7 @@ module Doocr
 
     am_unload_pics
     Doocr.automapactive = 0
-    CDoom.st_responder(pointerof(@@st_notify))
+    Doocr.st_responder(@@st_notify)
     Doocr.stopped = 1
   end
 
@@ -248,18 +248,18 @@ module Doocr
   #
   # Handle events (user inputs) in automap mode
   #
-  def self.am_responder(ev : CDoom::Event*) : LibC::Int
+  def self.am_responder(ev : Doocr::Event) : LibC::Int
     rc = 0
 
     if Doocr.automapactive == 0
-      if ev.value.type == Doocr::Evtype::Keydown && ev.value.data1 == Doocr::AM_STARTKEY
+      if ev.type == Doocr::Evtype::Keydown && ev.data1 == Doocr::AM_STARTKEY
         am_start
         Doocr.viewactive = 0
         rc = 1
       end
-    elsif ev.value.type == Doocr::Evtype::Keydown
+    elsif ev.type == Doocr::Evtype::Keydown
       rc = 1
-      case ev.value.data1
+      case ev.data1
       when Doocr::AM_PANRIGHTKEY # pan right
         if Doocr.followplayer == 0
           @@m_paninc.x = ftom(Doocr::F_PANINC)
@@ -323,13 +323,13 @@ module Doocr
         @@cheatstate = 0
         rc = 0
       end
-      if Doocr.netgame == 0 && Doocr.cht_check_cheat(Doocr.cheat_amap, ev.value.data1.to_u8!) != 0
+      if Doocr.netgame == 0 && Doocr.cht_check_cheat(Doocr.cheat_amap, ev.data1.to_u8!) != 0
         rc = 0
         Doocr.cheating = (Doocr.cheating + 1) % 3
       end
-    elsif ev.value.type == Doocr::Evtype::Keyup
+    elsif ev.type == Doocr::Evtype::Keyup
       rc = 0
-      case ev.value.data1
+      case ev.data1
       when Doocr::AM_PANRIGHTKEY
         @@m_paninc.x = 0 if Doocr.followplayer == 0
       when Doocr::AM_PANLEFTKEY
@@ -365,13 +365,13 @@ module Doocr
   end
 
   def self.am_do_follow_player
-    if @@f_oldloc.x != Doocr.plr.value.mo.value.x || @@f_oldloc.y != Doocr.plr.value.mo.value.y
-      Doocr.m_x = ftom(mtof(Doocr.plr.value.mo.value.x)) - Doocr.m_w // 2
-      Doocr.m_y = ftom(mtof(Doocr.plr.value.mo.value.y)) - Doocr.m_h // 2
+    if @@f_oldloc.x != Doocr.plr.mo.not_nil!.x || @@f_oldloc.y != Doocr.plr.mo.not_nil!.y
+      Doocr.m_x = ftom(mtof(Doocr.plr.mo.not_nil!.x)) - Doocr.m_w // 2
+      Doocr.m_y = ftom(mtof(Doocr.plr.mo.not_nil!.y)) - Doocr.m_h // 2
       Doocr.m_x2 = Doocr.m_x + Doocr.m_w
       Doocr.m_y2 = Doocr.m_y + Doocr.m_h
-      @@f_oldloc.x = Doocr.plr.value.mo.value.x
-      @@f_oldloc.y = Doocr.plr.value.mo.value.y
+      @@f_oldloc.x = Doocr.plr.mo.not_nil!.x
+      @@f_oldloc.y = Doocr.plr.mo.not_nil!.y
     end
   end
 
@@ -683,7 +683,7 @@ module Doocr
       @@l.b.not_nil!.y = Doocr.lines[i].v2.value.y
       if Doocr.cheating != 0 || (Doocr.lines[i].flags & Doocr::ML_MAPPED) != 0
         next if (Doocr.lines[i].flags & Doocr::LINE_NEVERSEE) != 0 && Doocr.cheating == 0
-        if Doocr.lines[i].backsector.null?
+        if Doocr.lines[i].not_nil!.backsector.nil?
           am_draw_mline(@@l, Doocr::WALLCOLORS + Doocr.lightlev)
         else
           if Doocr.lines[i].special == 39
@@ -695,9 +695,9 @@ module Doocr
             else
               am_draw_mline(@@l, Doocr::WALLCOLORS + Doocr.lightlev)
             end
-          elsif Doocr.lines[i].backsector.value.floorheight != Doocr.lines[i].frontsector.value.floorheight
+          elsif Doocr.lines[i].backsector.not_nil!.floorheight != Doocr.lines[i].frontsector.not_nil!.floorheight
             am_draw_mline(@@l, Doocr::FDWALLCOLORS + Doocr.lightlev) # floor level change
-          elsif Doocr.lines[i].backsector.value.ceilingheight != Doocr.lines[i].frontsector.value.ceilingheight
+          elsif Doocr.lines[i].backsector.not_nil!.ceilingheight != Doocr.lines[i].frontsector.not_nil!.ceilingheight
             am_draw_mline(@@l, Doocr::CDWALLCOLORS + Doocr.lightlev) # ceiling level change
           elsif Doocr.cheating != 0
             am_draw_mline(@@l, Doocr::TSWALLCOLORS + Doocr.lightlev)
@@ -761,7 +761,7 @@ module Doocr
   end
 
   def self.am_draw_players
-    p : CDoom::Player* = Pointer(CDoom::Player).null
+    p : Doocr::Player? = nil
     their_colors = [Doocr::GREENS, Doocr::GRAYS, Doocr::BROWNS, Doocr::REDS]
     their_color = -1
     color = 0
@@ -770,13 +770,13 @@ module Doocr
       if Doocr.cheating != 0
         am_draw_line_character(
           @@cheat_player_arrow, @@cheat_player_arrow.size, 0,
-          Doocr.plr.value.mo.value.angle, Doocr::WHITE,
-          Doocr.plr.value.mo.value.x, Doocr.plr.value.mo.value.y
+          Doocr.plr.mo.not_nil!.angle, Doocr::WHITE,
+          Doocr.plr.mo.not_nil!.x, Doocr.plr.mo.not_nil!.y
         )
       else
         am_draw_line_character(
-          @@player_arrow, @@player_arrow.size, 0, Doocr.plr.value.mo.value.angle,
-          Doocr::WHITE, Doocr.plr.value.mo.value.x, Doocr.plr.value.mo.value.y
+          @@player_arrow, @@player_arrow.size, 0, Doocr.plr.mo.not_nil!.angle,
+          Doocr::WHITE, Doocr.plr.mo.not_nil!.x, Doocr.plr.mo.not_nil!.y
         )
       end
       return
@@ -784,20 +784,20 @@ module Doocr
 
     CDoom::MAXPLAYERS.times do |i|
       their_color += 1
-      p = @@players.to_unsafe + i
+      p = @@players[i]
 
       next if (Doocr.deathmatch != 0 && Doocr.singledemo == 0) && p != Doocr.plr
       next if Doocr.playeringame[i] == 0
 
-      if p.value.powers[Doocr::Powertype::Invisibility.value] != 0
+      if p.not_nil!.powers[Doocr::Powertype::Invisibility.value] != 0
         color = 246 # *close* to black
       else
         color = their_colors[their_color]
       end
 
       am_draw_line_character(
-        @@player_arrow, @@player_arrow.size, 0, p.value.mo.value.angle,
-        color, p.value.mo.value.x, p.value.mo.value.y
+        @@player_arrow, @@player_arrow.size, 0, p.not_nil!.mo.not_nil!.angle,
+        color, p.not_nil!.mo.not_nil!.x, p.not_nil!.mo.not_nil!.y
       )
     end
   end
@@ -805,13 +805,13 @@ module Doocr
   def self.am_draw_things(colors : Int32, colorrange : Int32)
     Doocr.numsectors.times do |i|
       t = Doocr.sectors[i].thinglist
-      until t.null?
+      until t.nil?
         am_draw_line_character(
           @@thintriangle_guy, @@thintriangle_guy.size,
-          16 << FRACBITS, t.value.angle, colors + Doocr.lightlev,
-          t.value.x, t.value.y
+          16 << FRACBITS, t.not_nil!.angle, colors + Doocr.lightlev,
+          t.not_nil!.x, t.not_nil!.y
         )
-        t = t.value.snext
+        t = t.not_nil!.snext
       end
     end
   end

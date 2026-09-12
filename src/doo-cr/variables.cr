@@ -94,7 +94,7 @@ module Doocr
 
   class_getter keystates = Array(Bool).new(Doocr::NUMKEYS, false)
 
-  @@st_notify : CDoom::Event = CDoom::Event.new
+  @@st_notify : Doocr::Event = Doocr::Event.new
   @@st_notify
   @@lastlevel = -1
   @@lastepisode = -1
@@ -135,13 +135,13 @@ module Doocr
 
   @@headless : Bool = false
 
-  class_getter current_thinking_player : Pointer(CDoom::Player) = Pointer(CDoom::Player).null
-  class_getter current_thinking_mobj : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+  class_getter current_thinking_player : Doocr::Player? = nil
+  class_getter current_thinking_mobj : Doocr::Mobj? = nil
 
-  @@players = StaticArray(CDoom::Player, CDoom::MAXPLAYERS).new(CDoom::Player.new)
+  @@players = StaticArray(Doocr::Player, CDoom::MAXPLAYERS).new { Doocr::Player.new }
 
   protected def self.players
-    @@players.to_unsafe
+    @@players
   end
 
   @@software_screen = Bytes.new(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
@@ -1065,18 +1065,18 @@ module Doocr
 
   @@statedata : Array(Tuple(Doocr::Spritenum, Int32, Int32, Void*, Doocr::Statenum, Int32, Int32)) = [
     {Doocr::Spritenum::SPR_TROO, 0, -1, Pointer(Void).null, Doocr::Statenum::S_NULL, 0, 0},                        # S_NULL
-    {Doocr::Spritenum::SPR_SHTG, 4, 0, (->CDoom.a_light0).pointer, Doocr::Statenum::S_NULL, 0, 0},                 # S_LIGHTDONE
-    {Doocr::Spritenum::SPR_PUNG, 0, 1, (->CDoom.a_weapon_ready).pointer, Doocr::Statenum::S_PUNCH, 0, 0},          # S_PUNCH
-    {Doocr::Spritenum::SPR_PUNG, 0, 1, (->CDoom.a_lower).pointer, Doocr::Statenum::S_PUNCHDOWN, 0, 0},             # S_PUNCHDOWN
-    {Doocr::Spritenum::SPR_PUNG, 0, 1, (->CDoom.a_raise).pointer, Doocr::Statenum::S_PUNCHUP, 0, 0},               # S_PUNCHUP
+    {Doocr::Spritenum::SPR_SHTG, 4, 0, (->Doocr.state_a_light0(Void*, Void*)).pointer, Doocr::Statenum::S_NULL, 0, 0},                 # S_LIGHTDONE
+    {Doocr::Spritenum::SPR_PUNG, 0, 1, (->Doocr.state_a_weapon_ready(Void*, Void*)).pointer, Doocr::Statenum::S_PUNCH, 0, 0},          # S_PUNCH
+    {Doocr::Spritenum::SPR_PUNG, 0, 1, (->Doocr.state_a_lower(Void*, Void*)).pointer, Doocr::Statenum::S_PUNCHDOWN, 0, 0},             # S_PUNCHDOWN
+    {Doocr::Spritenum::SPR_PUNG, 0, 1, (->Doocr.state_a_raise(Void*, Void*)).pointer, Doocr::Statenum::S_PUNCHUP, 0, 0},               # S_PUNCHUP
     {Doocr::Spritenum::SPR_PUNG, 1, 4, Pointer(Void).null, Doocr::Statenum::S_PUNCH2, 0, 0},                       # S_PUNCH1
-    {Doocr::Spritenum::SPR_PUNG, 2, 4, (->CDoom.a_punch).pointer, Doocr::Statenum::S_PUNCH3, 0, 0},                # S_PUNCH2
+    {Doocr::Spritenum::SPR_PUNG, 2, 4, (->Doocr.state_a_punch(Void*, Void*)).pointer, Doocr::Statenum::S_PUNCH3, 0, 0},                # S_PUNCH2
     {Doocr::Spritenum::SPR_PUNG, 3, 5, Pointer(Void).null, Doocr::Statenum::S_PUNCH4, 0, 0},                       # S_PUNCH3
     {Doocr::Spritenum::SPR_PUNG, 2, 4, Pointer(Void).null, Doocr::Statenum::S_PUNCH5, 0, 0},                       # S_PUNCH4
-    {Doocr::Spritenum::SPR_PUNG, 1, 5, (->CDoom.a_refire).pointer, Doocr::Statenum::S_PUNCH, 0, 0},                # S_PUNCH5
-    {Doocr::Spritenum::SPR_PISG, 0, 1, (->CDoom.a_weapon_ready).pointer, Doocr::Statenum::S_PISTOL, 0, 0},         # S_PISTOL
-    {Doocr::Spritenum::SPR_PISG, 0, 1, (->CDoom.a_lower).pointer, Doocr::Statenum::S_PISTOLDOWN, 0, 0},            # S_PISTOLDOWN
-    {Doocr::Spritenum::SPR_PISG, 0, 1, (->CDoom.a_raise).pointer, Doocr::Statenum::S_PISTOLUP, 0, 0},              # S_PISTOLUP
+    {Doocr::Spritenum::SPR_PUNG, 1, 5, (->Doocr.state_a_refire(Void*, Void*)).pointer, Doocr::Statenum::S_PUNCH, 0, 0},                # S_PUNCH5
+    {Doocr::Spritenum::SPR_PISG, 0, 1, (->Doocr.state_a_weapon_ready(Void*, Void*)).pointer, Doocr::Statenum::S_PISTOL, 0, 0},         # S_PISTOL
+    {Doocr::Spritenum::SPR_PISG, 0, 1, (->Doocr.state_a_lower(Void*, Void*)).pointer, Doocr::Statenum::S_PISTOLDOWN, 0, 0},            # S_PISTOLDOWN
+    {Doocr::Spritenum::SPR_PISG, 0, 1, (->Doocr.state_a_raise(Void*, Void*)).pointer, Doocr::Statenum::S_PISTOLUP, 0, 0},              # S_PISTOLUP
     {Doocr::Spritenum::SPR_PISG, 0, 4, Pointer(Void).null, Doocr::Statenum::S_PISTOL2, 0, 0},                      # S_PISTOL1
     {Doocr::Spritenum::SPR_PISG, 1, 6, (->CDoom.a_fire_pistol).pointer, Doocr::Statenum::S_PISTOL3, 0, 0},         # S_PISTOL2
     {Doocr::Spritenum::SPR_PISG, 2, 4, Pointer(Void).null, Doocr::Statenum::S_PISTOL4, 0, 0},                      # S_PISTOL3
@@ -2032,15 +2032,16 @@ module Doocr
     {Doocr::Spritenum::SPR_TLP2, 32770, 4, Pointer(Void).null, Doocr::Statenum::S_TECH2LAMP4, 0, 0},               # S_TECH2LAMP3
     {Doocr::Spritenum::SPR_TLP2, 32771, 4, Pointer(Void).null, Doocr::Statenum::S_TECH2LAMP, 0, 0},                # S_TECH2LAMP4
   ]
-  class_getter states : Array(CDoom::State) = Array.new(Doocr::Statenum::NUMSTATES.value, CDoom::State.new)
+  class_getter states : Array(Doocr::State) = Array.new(Doocr::Statenum::NUMSTATES.value) { Doocr::State.new }
   @@statedata.each_with_index do |elm, i|
-    (@@states.to_unsafe + i).value.sprite = elm[0]
-    (@@states.to_unsafe + i).value.frame = elm[1]
-    (@@states.to_unsafe + i).value.tics = elm[2]
-    (@@states.to_unsafe + i).value.action = elm[3]
-    (@@states.to_unsafe + i).value.nextstate = elm[4]
-    (@@states.to_unsafe + i).value.misc1 = elm[5]
-    (@@states.to_unsafe + i).value.misc2 = elm[6]
+    state = @@states[i]
+    state.sprite = elm[0]
+    state.frame = elm[1]
+    state.tics = elm[2]
+    state.action = elm[3]
+    state.nextstate = elm[4]
+    state.misc1 = elm[5]
+    state.misc2 = elm[6]
   end
 
   @@mobjinfo_data : Array(Tuple(
@@ -5494,31 +5495,35 @@ module Doocr
       Doocr::Statenum::S_NULL.value,        # raisestate
     },
   ]
-  class_getter mobjinfo : Array(CDoom::Mobjinfo) = Array.new(Doocr::Mobjtype::NUMMOBJTYPES.value, CDoom::Mobjinfo.new)
+  @@mobjinfo : Array(Doocr::Mobjinfo) = Array.new(Doocr::Mobjtype::NUMMOBJTYPES.value) { Doocr::Mobjinfo.new }
+  def self.mobjinfo : Array(Doocr::Mobjinfo)
+    @@mobjinfo
+  end
   @@mobjinfo_data.each_with_index do |elm, i|
-    (@@mobjinfo.to_unsafe + i).value.doomednum = elm[0]
-    (@@mobjinfo.to_unsafe + i).value.spawnstate = elm[1]
-    (@@mobjinfo.to_unsafe + i).value.spawnhealth = elm[2]
-    (@@mobjinfo.to_unsafe + i).value.seestate = elm[3]
-    (@@mobjinfo.to_unsafe + i).value.seesound = elm[4]
-    (@@mobjinfo.to_unsafe + i).value.reactiontime = elm[5]
-    (@@mobjinfo.to_unsafe + i).value.attacksound = elm[6]
-    (@@mobjinfo.to_unsafe + i).value.painstate = elm[7]
-    (@@mobjinfo.to_unsafe + i).value.painchance = elm[8]
-    (@@mobjinfo.to_unsafe + i).value.painsound = elm[9]
-    (@@mobjinfo.to_unsafe + i).value.meleestate = elm[10]
-    (@@mobjinfo.to_unsafe + i).value.missilestate = elm[11]
-    (@@mobjinfo.to_unsafe + i).value.deathstate = elm[12]
-    (@@mobjinfo.to_unsafe + i).value.xdeathstate = elm[13]
-    (@@mobjinfo.to_unsafe + i).value.deathsound = elm[14]
-    (@@mobjinfo.to_unsafe + i).value.speed = elm[15]
-    (@@mobjinfo.to_unsafe + i).value.radius = elm[16]
-    (@@mobjinfo.to_unsafe + i).value.height = elm[17]
-    (@@mobjinfo.to_unsafe + i).value.mass = elm[18]
-    (@@mobjinfo.to_unsafe + i).value.damage = elm[19]
-    (@@mobjinfo.to_unsafe + i).value.activesound = elm[20]
-    (@@mobjinfo.to_unsafe + i).value.flags = elm[21]
-    (@@mobjinfo.to_unsafe + i).value.raisestate = elm[22]
+    info = @@mobjinfo[i]
+    info.doomednum = elm[0]
+    info.spawnstate = elm[1]
+    info.spawnhealth = elm[2]
+    info.seestate = elm[3]
+    info.seesound = elm[4]
+    info.reactiontime = elm[5]
+    info.attacksound = elm[6]
+    info.painstate = elm[7]
+    info.painchance = elm[8]
+    info.painsound = elm[9]
+    info.meleestate = elm[10]
+    info.missilestate = elm[11]
+    info.deathstate = elm[12]
+    info.xdeathstate = elm[13]
+    info.deathsound = elm[14]
+    info.speed = elm[15]
+    info.radius = elm[16]
+    info.height = elm[17]
+    info.mass = elm[18]
+    info.damage = elm[19]
+    info.activesound = elm[20]
+    info.flags = elm[21]
+    info.raisestate = elm[22]
   end
 
   Doocr.gammamsg[0] = @@deh_gammalvl0
@@ -6054,128 +6059,129 @@ module Doocr
   ]
   @@s_music = @@s_music_data.map { |elm| Musicinfo.new(elm[0], elm[1]) }
 
-  @@s_sfx_data : Array(Tuple(String, Bool, Int32, Pointer(CDoom::Sfxinfo), Int32, Int32, Int32)) = [
+  @@s_sfx_data : Array(Tuple(String, Bool, Int32, Int32, Int32, Int32)) = [
     # S_sfx[0] needs to be a dummy for odd reasons.
-    {"none", false, 0, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"pistol", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"shotgn", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"sgcock", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"dshtgn", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"dbopn", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"dbcls", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"dbload", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"plasma", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bfg", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"sawup", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"sawidl", false, 118, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"sawful", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"sawhit", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"rlaunc", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"rxplod", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"firsht", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"firxpl", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"pstart", false, 100, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"pstop", false, 100, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"doropn", false, 100, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"dorcls", false, 100, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"stnmov", false, 119, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"swtchn", false, 78, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"swtchx", false, 78, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"plpain", false, 96, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"dmpain", false, 96, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"popain", false, 96, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"vipain", false, 96, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"mnpain", false, 96, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"pepain", false, 96, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"slop", false, 78, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"itemup", true, 78, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"wpnup", true, 78, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"oof", false, 96, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"telept", false, 32, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"posit1", true, 98, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"posit2", true, 98, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"posit3", true, 98, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bgsit1", true, 98, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bgsit2", true, 98, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"sgtsit", true, 98, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"cacsit", true, 98, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"brssit", true, 94, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"cybsit", true, 92, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"spisit", true, 90, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bspsit", true, 90, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"kntsit", true, 90, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"vilsit", true, 90, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"mansit", true, 90, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"pesit", true, 90, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"sklatk", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"sgtatk", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"skepch", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"vilatk", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"claw", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"skeswg", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"pldeth", false, 32, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"pdiehi", false, 32, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"podth1", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"podth2", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"podth3", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bgdth1", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bgdth2", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"sgtdth", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"cacdth", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"skldth", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"brsdth", false, 32, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"cybdth", false, 32, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"spidth", false, 32, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bspdth", false, 32, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"vildth", false, 32, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"kntdth", false, 32, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"pedth", false, 32, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"skedth", false, 32, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"posact", true, 120, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bgact", true, 120, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"dmact", true, 120, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bspact", true, 100, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bspwlk", true, 100, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"vilact", true, 100, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"noway", false, 78, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"barexp", false, 60, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"punch", false, 64, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"hoof", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"metal", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"chgun", false, 64, @@s_sfx.to_unsafe + Doocr::Sfxenum::SFX_pistol.value, 150, 0, 0},
-    {"tink", false, 60, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bdopn", false, 100, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bdcls", false, 100, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"itmbk", false, 100, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"flame", false, 32, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"flamst", false, 32, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"getpow", false, 60, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bospit", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"boscub", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bossit", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bospn", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"bosdth", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"manatk", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"mandth", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"sssit", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"ssdth", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"keenpn", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"keendt", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"skeact", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"skesit", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"skeatk", false, 70, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
-    {"radio", false, 60, Pointer(CDoom::Sfxinfo).null, -1, -1, 0},
+    {"none", false, 0, -1, -1, 0},
+    {"pistol", false, 64, -1, -1, 0},
+    {"shotgn", false, 64, -1, -1, 0},
+    {"sgcock", false, 64, -1, -1, 0},
+    {"dshtgn", false, 64, -1, -1, 0},
+    {"dbopn", false, 64, -1, -1, 0},
+    {"dbcls", false, 64, -1, -1, 0},
+    {"dbload", false, 64, -1, -1, 0},
+    {"plasma", false, 64, -1, -1, 0},
+    {"bfg", false, 64, -1, -1, 0},
+    {"sawup", false, 64, -1, -1, 0},
+    {"sawidl", false, 118, -1, -1, 0},
+    {"sawful", false, 64, -1, -1, 0},
+    {"sawhit", false, 64, -1, -1, 0},
+    {"rlaunc", false, 64, -1, -1, 0},
+    {"rxplod", false, 70, -1, -1, 0},
+    {"firsht", false, 70, -1, -1, 0},
+    {"firxpl", false, 70, -1, -1, 0},
+    {"pstart", false, 100, -1, -1, 0},
+    {"pstop", false, 100, -1, -1, 0},
+    {"doropn", false, 100, -1, -1, 0},
+    {"dorcls", false, 100, -1, -1, 0},
+    {"stnmov", false, 119, -1, -1, 0},
+    {"swtchn", false, 78, -1, -1, 0},
+    {"swtchx", false, 78, -1, -1, 0},
+    {"plpain", false, 96, -1, -1, 0},
+    {"dmpain", false, 96, -1, -1, 0},
+    {"popain", false, 96, -1, -1, 0},
+    {"vipain", false, 96, -1, -1, 0},
+    {"mnpain", false, 96, -1, -1, 0},
+    {"pepain", false, 96, -1, -1, 0},
+    {"slop", false, 78, -1, -1, 0},
+    {"itemup", true, 78, -1, -1, 0},
+    {"wpnup", true, 78, -1, -1, 0},
+    {"oof", false, 96, -1, -1, 0},
+    {"telept", false, 32, -1, -1, 0},
+    {"posit1", true, 98, -1, -1, 0},
+    {"posit2", true, 98, -1, -1, 0},
+    {"posit3", true, 98, -1, -1, 0},
+    {"bgsit1", true, 98, -1, -1, 0},
+    {"bgsit2", true, 98, -1, -1, 0},
+    {"sgtsit", true, 98, -1, -1, 0},
+    {"cacsit", true, 98, -1, -1, 0},
+    {"brssit", true, 94, -1, -1, 0},
+    {"cybsit", true, 92, -1, -1, 0},
+    {"spisit", true, 90, -1, -1, 0},
+    {"bspsit", true, 90, -1, -1, 0},
+    {"kntsit", true, 90, -1, -1, 0},
+    {"vilsit", true, 90, -1, -1, 0},
+    {"mansit", true, 90, -1, -1, 0},
+    {"pesit", true, 90, -1, -1, 0},
+    {"sklatk", false, 70, -1, -1, 0},
+    {"sgtatk", false, 70, -1, -1, 0},
+    {"skepch", false, 70, -1, -1, 0},
+    {"vilatk", false, 70, -1, -1, 0},
+    {"claw", false, 70, -1, -1, 0},
+    {"skeswg", false, 70, -1, -1, 0},
+    {"pldeth", false, 32, -1, -1, 0},
+    {"pdiehi", false, 32, -1, -1, 0},
+    {"podth1", false, 70, -1, -1, 0},
+    {"podth2", false, 70, -1, -1, 0},
+    {"podth3", false, 70, -1, -1, 0},
+    {"bgdth1", false, 70, -1, -1, 0},
+    {"bgdth2", false, 70, -1, -1, 0},
+    {"sgtdth", false, 70, -1, -1, 0},
+    {"cacdth", false, 70, -1, -1, 0},
+    {"skldth", false, 70, -1, -1, 0},
+    {"brsdth", false, 32, -1, -1, 0},
+    {"cybdth", false, 32, -1, -1, 0},
+    {"spidth", false, 32, -1, -1, 0},
+    {"bspdth", false, 32, -1, -1, 0},
+    {"vildth", false, 32, -1, -1, 0},
+    {"kntdth", false, 32, -1, -1, 0},
+    {"pedth", false, 32, -1, -1, 0},
+    {"skedth", false, 32, -1, -1, 0},
+    {"posact", true, 120, -1, -1, 0},
+    {"bgact", true, 120, -1, -1, 0},
+    {"dmact", true, 120, -1, -1, 0},
+    {"bspact", true, 100, -1, -1, 0},
+    {"bspwlk", true, 100, -1, -1, 0},
+    {"vilact", true, 100, -1, -1, 0},
+    {"noway", false, 78, -1, -1, 0},
+    {"barexp", false, 60, -1, -1, 0},
+    {"punch", false, 64, -1, -1, 0},
+    {"hoof", false, 70, -1, -1, 0},
+    {"metal", false, 70, -1, -1, 0},
+    {"chgun", false, 64, 150, 0, 0},
+    {"tink", false, 60, -1, -1, 0},
+    {"bdopn", false, 100, -1, -1, 0},
+    {"bdcls", false, 100, -1, -1, 0},
+    {"itmbk", false, 100, -1, -1, 0},
+    {"flame", false, 32, -1, -1, 0},
+    {"flamst", false, 32, -1, -1, 0},
+    {"getpow", false, 60, -1, -1, 0},
+    {"bospit", false, 70, -1, -1, 0},
+    {"boscub", false, 70, -1, -1, 0},
+    {"bossit", false, 70, -1, -1, 0},
+    {"bospn", false, 70, -1, -1, 0},
+    {"bosdth", false, 70, -1, -1, 0},
+    {"manatk", false, 70, -1, -1, 0},
+    {"mandth", false, 70, -1, -1, 0},
+    {"sssit", false, 70, -1, -1, 0},
+    {"ssdth", false, 70, -1, -1, 0},
+    {"keenpn", false, 70, -1, -1, 0},
+    {"keendt", false, 70, -1, -1, 0},
+    {"skeact", false, 70, -1, -1, 0},
+    {"skesit", false, 70, -1, -1, 0},
+    {"skeatk", false, 70, -1, -1, 0},
+    {"radio", false, 60, -1, -1, 0},
   ]
-  class_getter s_sfx : Array(CDoom::Sfxinfo) = Array(CDoom::Sfxinfo).new(109, CDoom::Sfxinfo.new)
-  @@s_sfx_data.each_with_index do |elm, i|
-    (@@s_sfx.to_unsafe + i).value.name = elm[0].to_unsafe
-    (@@s_sfx.to_unsafe + i).value.singularity = elm[1].to_unsafe
-    (@@s_sfx.to_unsafe + i).value.priority = elm[2]
-    (@@s_sfx.to_unsafe + i).value.link = elm[3]
-    (@@s_sfx.to_unsafe + i).value.pitch = elm[4]
-    (@@s_sfx.to_unsafe + i).value.volume = elm[5]
-    (@@s_sfx.to_unsafe + i).value.data = Pointer(Void).new(elm[6].to_u64!)
+  @@s_sfx : Array(Doocr::Sfxinfo) = @@s_sfx_data.map do |elm|
+    Doocr::Sfxinfo.new(elm[0], elm[1] ? 1 : 0, elm[2], nil, elm[3], elm[4], Pointer(Void).null, -1)
   end
+
+  def self.s_sfx : Array(Doocr::Sfxinfo)
+    @@s_sfx
+  end
+  @@s_sfx_data.each_with_index do |elm, i|
+    @@s_sfx[i].data = Pointer(Void).new(elm[5].to_u64!)
+  end
+  @@s_sfx[Doocr::Sfxenum::SFX_chgun.value].link = @@s_sfx[Doocr::Sfxenum::SFX_pistol.value]
   class_getter lengths : Array(Int32) = Array(Int32).new(@@s_sfx.size, 0)
 
   Doocr.veryfirsttime = 1

@@ -23,7 +23,7 @@ module Doocr::Mod
     @goto_num = 0
     getter state_index = -1
 
-    getter states : Array(CDoom::State) = [] of CDoom::State
+    getter states : Array(Doocr::State) = [] of Doocr::State
 
     # Adds a state into this handler given the name of the sprite,
     # the frame letter or number, the tics/length of the state, and the action it performs.
@@ -41,14 +41,13 @@ module Doocr::Mod
       end
       next_state = @states.size + 1
       @state_index = @states.size if @state_index == -1
-      @states << CDoom::State.new(
-        sprite: Doocr::Spritenum.new(Doocr.sprnames.index!(name)),
-        frame: (frame.is_a?(Char) ? frame.upcase - 'A' : frame),
-        tics: tics,
-        action: action.pointer,
-        nextstate: Doocr::Statenum.new(next_state),
-        misc1: 0, misc2: 0
-      )
+      state = Doocr::State.new
+      state.sprite = Doocr::Spritenum.new(Doocr.sprnames.index!(name))
+      state.frame = frame.is_a?(Char) ? frame.upcase - 'A' : frame
+      state.tics = tics
+      state.action = action.pointer
+      state.nextstate = Doocr::Statenum.new(next_state)
+      @states << state
     end
 
     # Adds a state into this handler given the name of the sprite,
@@ -67,14 +66,13 @@ module Doocr::Mod
       end
       next_state = @states.size + 1
       @state_index = @states.size if @state_index == -1
-      @states << CDoom::State.new(
-        sprite: Doocr::Spritenum.new(Doocr.sprnames.index!(name)),
-        frame: (frame.is_a?(Char) ? frame.upcase - 'A' : frame),
-        tics: tics,
-        action: action,
-        nextstate: Doocr::Statenum.new(next_state),
-        misc1: 0, misc2: 0
-      )
+      state = Doocr::State.new
+      state.sprite = Doocr::Spritenum.new(Doocr.sprnames.index!(name))
+      state.frame = frame.is_a?(Char) ? frame.upcase - 'A' : frame
+      state.tics = tics
+      state.action = action.as(Void*)
+      state.nextstate = Doocr::Statenum.new(next_state)
+      @states << state
     end
 
     # Adds a state into this handler given the name of the sprite,
@@ -93,14 +91,13 @@ module Doocr::Mod
       end
       next_state = @states.size + 1
       @state_index = @states.size if @state_index == -1
-      @states << CDoom::State.new(
-        sprite: Doocr::Spritenum.new(Doocr.sprnames.index!(name)),
-        frame: (frame.is_a?(Char) ? frame.upcase - 'A' : frame),
-        tics: tics,
-        action: action,
-        nextstate: Doocr::Statenum.new(next_state),
-        misc1: 0, misc2: 0
-      )
+      state = Doocr::State.new
+      state.sprite = Doocr::Spritenum.new(Doocr.sprnames.index!(name))
+      state.frame = frame.is_a?(Char) ? frame.upcase - 'A' : frame
+      state.tics = tics
+      state.action = action
+      state.nextstate = Doocr::Statenum.new(next_state)
+      @states << state
     end
 
     # Adds a state into this handler given the name of the sprite,
@@ -119,14 +116,13 @@ module Doocr::Mod
       end
       next_state = @states.size + 1
       @state_index = @states.size if @state_index == -1
-      @states << CDoom::State.new(
-        sprite: Doocr::Spritenum.new(Doocr.sprnames.index!(name)),
-        frame: (frame.is_a?(Char) ? frame.upcase - 'A' : frame),
-        tics: tics,
-        action: Pointer(Void).null,
-        nextstate: Doocr::Statenum.new(next_state),
-        misc1: 0, misc2: 0
-      )
+      state = Doocr::State.new
+      state.sprite = Doocr::Spritenum.new(Doocr.sprnames.index!(name))
+      state.frame = frame.is_a?(Char) ? frame.upcase - 'A' : frame
+      state.tics = tics
+      state.action = Pointer(Void).null
+      state.nextstate = Doocr::Statenum.new(next_state)
+      @states << state
     end
 
     # Adds a fullbright state into this handler given the name of the sprite,

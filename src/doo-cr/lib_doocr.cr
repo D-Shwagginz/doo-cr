@@ -1,9 +1,30 @@
 module Doocr
+	macro define_state_callback_stubs(*names)
+		{% for name in names %}
+			def self.{{name}}
+			end
+		{% end %}
+	end
+
+	define_state_callback_stubs a_baby_metal, a_bfg_sound, a_bfg_spray, a_boss_death,
+		a_brain_awake, a_brain_die, a_brain_explode, a_brain_pain, a_brain_scream,
+		a_brain_spit, a_bruis_attack, a_bspi_attack, a_chase, a_check_reload,
+		a_close_shotgun2, a_cpos_attack, a_cpos_refire, a_cyber_attack, a_explode,
+		a_face_target, a_fall, a_fat_attack1, a_fat_attack2, a_fat_attack3, a_fat_raise,
+		a_fire, a_fire_bfg, a_fire_cgun, a_fire_crackle, a_fire_missile, a_fire_pistol,
+		a_fire_plasma, a_fire_shotgun, a_fire_shotgun2, a_gun_flash, a_head_attack,
+		a_hoof, a_keen_die, a_light1, a_light2, a_load_shotgun2, a_metal, a_open_shotgun2,
+		a_pain, a_pain_attack, a_pain_die, a_player_scream, a_pos_attack, a_raise,
+		a_refire, a_sarg_attack, a_saw, a_scream, a_skel_fist, a_skel_missile,
+		a_skel_whoosh, a_skull_attack, a_spawn_fly, a_spawn_sound, a_spid_refire,
+		a_spos_attack, a_start_fire, a_tracer, a_troop_attack, a_vile_attack,
+		a_vile_chase, a_vile_start, a_vile_target, a_weapon_ready, a_xscream
+
 	alias ActionfV = Proc(Nil)
 	alias ActionfP1 = Proc(Void*, Nil)
 	alias ActionfP2 = Proc(Void*, Void*, Nil)
+	alias Actionf = ActionfV | ActionfP1 | ActionfP2
 
-	alias Traverser = Proc(Pointer(CDoom::Intercept), LibC::Int)
 
 enum Spritenum
   SPR_TROO
@@ -1594,6 +1615,65 @@ end
 		def initialize(@width : UInt8 = 0, @height : UInt8 = 0, @data : UInt8 = 0)
 		end
 	end
+
+	class ST_Number
+		property x : Int32 = 0
+		property y : Int32 = 0
+		property width : Int32 = 0
+		property oldnum : Int32 = 0
+		property num : Int32*
+		property on : Int32*
+		property p : Pointer(Pointer(CDoom::Patch))
+		property data : Int32 = 0
+
+		def initialize
+			@num = Pointer(Int32).null
+			@on = Pointer(Int32).null
+			@p = Pointer(Pointer(CDoom::Patch)).null
+		end
+	end
+
+	class ST_Percent
+		property n : ST_Number
+		property p : Pointer(CDoom::Patch)
+
+		def initialize
+			@n = ST_Number.new
+			@p = Pointer(CDoom::Patch).null
+		end
+	end
+
+	class ST_Multicon
+		property x : Int32 = 0
+		property y : Int32 = 0
+		property oldinum : Int32 = -1
+		property inum : Int32*
+		property on : Int32*
+		property p : Pointer(Pointer(CDoom::Patch))
+		property data : Int32 = 0
+
+		def initialize
+			@inum = Pointer(Int32).null
+			@on = Pointer(Int32).null
+			@p = Pointer(Pointer(CDoom::Patch)).null
+		end
+	end
+
+	class ST_Binicon
+		property x : Int32 = 0
+		property y : Int32 = 0
+		property oldval : Int32 = 0
+		property val : Int32*
+		property on : Int32*
+		property p : Pointer(CDoom::Patch)
+		property data : Int32 = 0
+
+		def initialize
+			@val = Pointer(Int32).null
+			@on = Pointer(Int32).null
+			@p = Pointer(CDoom::Patch).null
+		end
+	end
 	class AltNetData
 		property gametic : Int32
 		property maketic : Int32
@@ -2549,7 +2629,7 @@ end
 	end
 
 	class Button
-		property line : Pointer(CDoom::Line)?
+		property line : Line?
 		property where : Doocr::Bwhere
 		property btexture : Int32
 		property btimer : Int32
@@ -2981,24 +3061,24 @@ end
 	class_property sightzstart : Int32 = 0
 	class_property bestslidefrac : Int32 = 0
 	class_property secondslidefrac : Int32 = 0
-	class_property bestslideline : Pointer(CDoom::Line) = Pointer(CDoom::Line).null
-	class_property secondslideline : Pointer(CDoom::Line) = Pointer(CDoom::Line).null
-	class_property slidemo : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
-	class_property bombsource : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
-	class_property bombspot : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
-	class_property ceilingline : Pointer(CDoom::Line) = Pointer(CDoom::Line).null
-	class_property linetarget : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
-	class_property shootthing : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
-	class_property tmthing : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+	class_property bestslideline : Line? = nil
+	class_property secondslideline : Line? = nil
+	class_property slidemo : Mobj? = nil
+	class_property bombsource : Mobj? = nil
+	class_property bombspot : Mobj? = nil
+	class_property ceilingline : Line? = nil
+	class_property linetarget : Mobj? = nil
+	class_property shootthing : Mobj? = nil
+	class_property tmthing : Mobj = Mobj.new
 	class_getter tmbbox : Array(Int32) = Array.new(4, 0)
-	class_property soundtarget : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
-	class_property corpsehit : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
-	class_property vileobj : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
+	class_property soundtarget : Mobj? = nil
+	class_property corpsehit : Mobj? = nil
+	class_property vileobj : Mobj? = nil
 	class_property viletryx : Int32 = 0
 	class_property viletryy : Int32 = 0
-	class_getter braintargets : Array(Pointer(CDoom::Mobj)) = Array.new(32, Pointer(CDoom::Mobj).null)
-	class_property usething : Pointer(CDoom::Mobj) = Pointer(CDoom::Mobj).null
-	class_getter spechit : Array(Pointer(CDoom::Line)) = Array.new(Doocr::MAXSPECIALCROSS, Pointer(CDoom::Line).null)
+	class_getter braintargets : Array(Mobj?) = Array(Mobj?).new(32, nil)
+	class_property usething : Mobj? = nil
+	class_getter spechit : Array(Line?) = Array(Line?).new(Doocr::MAXSPECIALCROSS, nil)
 	class_property level_timer : Int32 = 0
 	class_property level_time_count : Int32 = 0
 	class_property defaultfile : String = "default.cfg"
@@ -3006,42 +3086,683 @@ end
 	class_property num_channels : Int32 = 16
 	class_getter wadfiles : Array(String) = [] of String
 	class_property deathmatch_p : Int32 = 0
-	class_getter activeplats : Array(Pointer(CDoom::Plat)) = Array.new(Doocr::MAXPLATS, Pointer(CDoom::Plat).null)
-	class_getter activeceilings : Array(Pointer(CDoom::Ceiling)) = Array.new(Doocr::MAXCEILINGS, Pointer(CDoom::Ceiling).null)
+	class_getter activeplats : Array(Plat?) = Array(Plat?).new(Doocr::MAXPLATS, nil)
+	class_getter activeceilings : Array(Ceiling?) = Array(Ceiling?).new(Doocr::MAXCEILINGS, nil)
 	class_getter itemrespawnque : Array(CDoom::Mapthing) = Array.new(Doocr::ITEMQUESIZE) { CDoom::Mapthing.new }
-	class_getter blocklinks : Array(Pointer(CDoom::Mobj)) = [] of Pointer(CDoom::Mobj)
+	class_getter blocklinks : Array(Mobj?) = [] of Mobj?
 	class_getter channels : Array(Pointer(UInt8)) = Array.new(Doocr::NUM_CHANNELS, Pointer(UInt8).null)
 	class SoundChannel
-		property sfxinfo : Pointer(CDoom::Sfxinfo)
+		property sfxinfo : Sfxinfo?
 		property origin : Void*
 		property handle : Int32
 
 		def initialize
-			@sfxinfo = Pointer(CDoom::Sfxinfo).null
+			@sfxinfo = nil
 			@origin = Pointer(Void).null
 			@handle = 0
 		end
 	end
 
+	class Sfxinfo
+		property name : String
+		property singularity : Int32
+		property priority : Int32
+		property link : Sfxinfo?
+		property pitch : Int32
+		property volume : Int32
+		property data : Void*
+		property usefulness : Int32
+		property lumpnum : Int32
+
+		def initialize(@name : String = "", @singularity : Int32 = 0, @priority : Int32 = 0,
+		               @link : Sfxinfo? = nil, @pitch : Int32 = 0, @volume : Int32 = 0,
+		               @data : Void* = Pointer(Void).null, @usefulness : Int32 = 0, @lumpnum : Int32 = -1)
+		end
+	end
+
+	class Mobjinfo
+		property doomednum : Int32 = 0
+		property spawnstate : Int32 = 0
+		property spawnhealth : Int32 = 0
+		property seestate : Int32 = 0
+		property seesound : Int32 = 0
+		property reactiontime : Int32 = 0
+		property attacksound : Int32 = 0
+		property painstate : Int32 = 0
+		property painchance : Int32 = 0
+		property painsound : Int32 = 0
+		property meleestate : Int32 = 0
+		property missilestate : Int32 = 0
+		property deathstate : Int32 = 0
+		property xdeathstate : Int32 = 0
+		property deathsound : Int32 = 0
+		property speed : Int32 = 0
+		property radius : Int32 = 0
+		property height : Int32 = 0
+		property mass : Int32 = 0
+		property damage : Int32 = 0
+		property activesound : Int32 = 0
+		property flags : Int32 = 0
+		property raisestate : Int32 = 0
+
+		def initialize(@doomednum : Int32 = 0, @spawnstate : Int32 = 0, @spawnhealth : Int32 = 0,
+		               @seestate : Int32 = 0, @seesound : Int32 = 0, @reactiontime : Int32 = 0,
+		               @attacksound : Int32 = 0, @painstate : Int32 = 0, @painchance : Int32 = 0,
+		               @painsound : Int32 = 0, @meleestate : Int32 = 0, @missilestate : Int32 = 0,
+		               @deathstate : Int32 = 0, @xdeathstate : Int32 = 0, @deathsound : Int32 = 0,
+		               @speed : Int32 = 0, @radius : Int32 = 0, @height : Int32 = 0,
+		               @mass : Int32 = 0, @damage : Int32 = 0, @activesound : Int32 = 0,
+		               @flags : Int32 = 0, @raisestate : Int32 = 0)
+		end
+	end
+
+	class Event
+		property type : Doocr::Evtype
+		property data1 : Int32
+		property data2 : Int32
+		property data3 : Int32
+
+		def initialize
+			@type = Doocr::Evtype::Keydown
+			@data1 = 0
+			@data2 = 0
+			@data3 = 0
+		end
+	end
+
+	class State
+		property sprite : Doocr::Spritenum
+		property frame : Int64
+		property tics : Int64
+		property action : Void*
+		property nextstate : Doocr::Statenum
+		property misc1 : Int64
+		property misc2 : Int64
+
+		def initialize
+			@sprite = Doocr::Spritenum::SPR_TROO
+			@frame = 0_i64
+			@tics = 0_i64
+			@action = Pointer(Void).null
+			@nextstate = Doocr::Statenum::S_NULL
+			@misc1 = 0_i64
+			@misc2 = 0_i64
+		end
+	end
+
+	class Pspdef
+		property state : State?
+		property tics : Int32
+		property sx : Int32
+		property sy : Int32
+
+		def initialize
+			@state = nil
+			@tics = 0
+			@sx = 0
+			@sy = 0
+		end
+	end
+
+	def self.state_a_light0(player : Void*, psp : Void*)
+		a_light0(player.as(Player), psp.as(Pspdef))
+	end
+
+	def self.state_a_weapon_ready(player : Void*, psp : Void*)
+		a_weapon_ready(player.as(Player), psp.as(Pspdef))
+	end
+
+	def self.state_a_lower(player : Void*, psp : Void*)
+		a_lower(player.as(Player), psp.as(Pspdef))
+	end
+
+	def self.state_a_raise(player : Void*, psp : Void*)
+		a_raise(player.as(Player), psp.as(Pspdef))
+	end
+
+	def self.state_a_punch(player : Void*, psp : Void*)
+		a_punch(player.as(Player), psp.as(Pspdef))
+	end
+
+	def self.state_a_refire(player : Void*, psp : Void*)
+		a_refire(player.as(Player), psp.as(Pspdef))
+	end
+
+	class Sector
+		property floorheight : Int16
+		property ceilingheight : Int16
+		property floorpic : Int16
+		property ceilingpic : Int16
+		property lightlevel : Int16
+		property special : Int16
+		property tag : Int16
+		property soundtraversed : Int32
+		property soundtarget : Mobj?
+		property blockbox : StaticArray(Int32, 4)
+		property soundorg : Degenmobj
+		property validcount : Int32
+		property thinglist : Mobj?
+		property specialdata : (Ceiling | Vldoor | Floormove | Plat | Fireflicker | Lightflash | Strobe | Glow)?
+		property linecount : Int32
+		property lines : Array(Line?)
+
+		def initialize
+			@floorheight = 0
+			@ceilingheight = 0
+			@floorpic = 0
+			@ceilingpic = 0
+			@lightlevel = 0
+			@special = 0
+			@tag = 0
+			@soundtraversed = 0
+			@soundtarget = nil
+			@blockbox = StaticArray(Int32, 4).new(0)
+			@soundorg = Degenmobj.new
+			@validcount = 0
+			@thinglist = nil
+			@specialdata = nil
+			@linecount = 0
+			@lines = [] of Line?
+		end
+	end
+
+	class Side
+		property textureoffset : Int32
+		property rowoffset : Int32
+		property toptexture : Int16
+		property bottomtexture : Int16
+		property midtexture : Int16
+		property sector : Sector?
+
+		def initialize
+			@textureoffset = 0
+			@rowoffset = 0
+			@toptexture = 0
+			@bottomtexture = 0
+			@midtexture = 0
+			@sector = nil
+		end
+	end
+
+	class Line
+		property v1 : Pointer(CDoom::Vertex)
+		property v2 : Pointer(CDoom::Vertex)
+		property dx : Int32
+		property dy : Int32
+		property flags : Int16
+		property special : Int16
+		property tag : Int16
+		property sidenum : StaticArray(Int16, 2)
+		property bbox : StaticArray(Int32, 4)
+		property slopetype : Doocr::Slopetype
+		property frontsector : Sector?
+		property backsector : Sector?
+		property validcount : Int32
+		property specialdata : Void*
+
+		def initialize
+			@v1 = Pointer(CDoom::Vertex).null
+			@v2 = Pointer(CDoom::Vertex).null
+			@dx = 0
+			@dy = 0
+			@flags = 0
+			@special = 0
+			@tag = 0
+			@sidenum = StaticArray(Int16, 2).new(0)
+			@bbox = StaticArray(Int32, 4).new(0)
+			@slopetype = Doocr::Slopetype::HORIZONTAL
+			@frontsector = nil
+			@backsector = nil
+			@validcount = 0
+			@specialdata = Pointer(Void).null
+		end
+	end
+
+	class Seg
+		property v1 : Pointer(CDoom::Vertex)
+		property v2 : Pointer(CDoom::Vertex)
+		property offset : Int32
+		property angle : UInt32
+		property sidedef : Side?
+		property linedef : Line?
+		property frontsector : Sector?
+		property backsector : Sector?
+
+		def initialize
+			@v1 = Pointer(CDoom::Vertex).null
+			@v2 = Pointer(CDoom::Vertex).null
+			@offset = 0
+			@angle = 0_u32
+			@sidedef = nil
+			@linedef = nil
+			@frontsector = nil
+			@backsector = nil
+		end
+	end
+
+	class Subsector
+		property sector : Sector?
+		property numlines : Int16
+		property firstline : Int16
+
+		def initialize
+			@sector = nil
+			@numlines = 0
+			@firstline = 0
+		end
+	end
+
+	class InterceptD
+		property thing : Mobj?
+		property line : Line?
+
+		def initialize
+			@thing = nil
+			@line = nil
+		end
+	end
+
+	class Intercept
+		property frac : Int32
+		property isaline : Int32
+		property d : InterceptD
+
+		def initialize
+			@frac = 0
+			@isaline = 0
+			@d = InterceptD.new
+		end
+	end
+
+	alias Traverser = Proc(Intercept, LibC::Int)
+
+	class Drawseg
+		property curline : Seg?
+		property x1 : Int32
+		property x2 : Int32
+		property scale1 : Int32
+		property scale2 : Int32
+		property scalestep : Int32
+		property silhouette : Int32
+		property bsilheight : Int32
+		property tsilheight : Int32
+		property sprtopclip : Pointer(Int16)
+		property sprbottomclip : Pointer(Int16)
+		property maskedtexturecol : Pointer(Int16)
+
+		def initialize
+			@curline = nil
+			@x1 = 0
+			@x2 = 0
+			@scale1 = 0
+			@scale2 = 0
+			@scalestep = 0
+			@silhouette = 0
+			@bsilheight = 0
+			@tsilheight = 0
+			@sprtopclip = Pointer(Int16).null
+			@sprbottomclip = Pointer(Int16).null
+			@maskedtexturecol = Pointer(Int16).null
+		end
+	end
+
+	class Fireflicker
+		property thinker : CDoom::Thinker
+		property sector : Sector?
+		property count : Int32
+		property maxlight : Int32
+		property minlight : Int32
+		def initialize
+			@thinker = CDoom::Thinker.new
+			@sector = nil
+			@count = 0
+			@maxlight = 0
+			@minlight = 0
+		end
+	end
+
+	class Lightflash
+		property thinker : CDoom::Thinker
+		property sector : Sector?
+		property count : Int32
+		property maxlight : Int32
+		property minlight : Int32
+		property maxtime : Int32
+		property mintime : Int32
+		def initialize
+			@thinker = CDoom::Thinker.new
+			@sector = nil
+			@count = 0
+			@maxlight = 0
+			@minlight = 0
+			@maxtime = 0
+			@mintime = 0
+		end
+	end
+
+	class Strobe
+		property thinker : CDoom::Thinker
+		property sector : Sector?
+		property count : Int32
+		property minlight : Int32
+		property maxlight : Int32
+		property darktime : Int32
+		property brighttime : Int32
+		def initialize
+			@thinker = CDoom::Thinker.new
+			@sector = nil
+			@count = 0
+			@minlight = 0
+			@maxlight = 0
+			@darktime = 0
+			@brighttime = 0
+		end
+	end
+
+	class Glow
+		property thinker : CDoom::Thinker
+		property sector : Sector?
+		property minlight : Int32
+		property maxlight : Int32
+		property direction : Int32
+		def initialize
+			@thinker = CDoom::Thinker.new
+			@sector = nil
+			@minlight = 0
+			@maxlight = 0
+			@direction = 0
+		end
+	end
+
+	class Plat
+		def value
+			self
+		end
+		property thinker : CDoom::Thinker
+		property sector : Sector?
+		property speed : Int32
+		property low : Int32
+		property high : Int32
+		property wait : Int32
+		property count : Int32
+		property status : Doocr::Platenum
+		property oldstatus : Doocr::Platenum
+		property crush : Int32
+		property tag : Int32
+		property type : Doocr::Plattype
+
+		def initialize
+			@thinker = CDoom::Thinker.new
+			@sector = nil
+			@speed = 0
+			@low = 0
+			@high = 0
+			@wait = 0
+			@count = 0
+			@status = Doocr::Platenum::Up
+			@oldstatus = Doocr::Platenum::Up
+			@crush = 0
+			@tag = 0
+			@type = Doocr::Plattype::PerpetualRaise
+		end
+	end
+
+	class Vldoor
+		def value
+			self
+		end
+		property thinker : CDoom::Thinker
+		property type : Doocr::Vldoorenum
+		property sector : Sector?
+		property topheight : Int32
+		property speed : Int32
+		property direction : Int32
+		property topwait : Int32
+		property topcountdown : Int32
+
+		def initialize
+			@thinker = CDoom::Thinker.new
+			@type = Doocr::Vldoorenum::DoorNormal
+			@sector = nil
+			@topheight = 0
+			@speed = 0
+			@direction = 0
+			@topwait = 0
+			@topcountdown = 0
+		end
+	end
+
+	class Ceiling
+		property thinker : CDoom::Thinker
+		property type : Doocr::Ceilingenum
+		property sector : Sector?
+		property bottomheight : Int32
+		property topheight : Int32
+		property speed : Int32
+		property crush : Int32
+		property direction : Int32
+		property tag : Int32
+		property olddirection : Int32
+
+		def initialize
+			@thinker = CDoom::Thinker.new
+			@type = Doocr::Ceilingenum::LowerToFloor
+			@sector = nil
+			@bottomheight = 0
+			@topheight = 0
+			@speed = 0
+			@crush = 0
+			@direction = 0
+			@tag = 0
+			@olddirection = 0
+		end
+	end
+
+	class Floormove
+		property thinker : CDoom::Thinker
+		property type : Doocr::Floorenum
+		property crush : Int32
+		property sector : Sector?
+		property direction : Int32
+		property newspecial : Int32
+		property texture : Int16
+		property floordestheight : Int32
+		property speed : Int32
+
+		def initialize
+			@thinker = CDoom::Thinker.new
+			@type = Doocr::Floorenum::LowerFloor
+			@crush = 0
+			@sector = nil
+			@direction = 0
+			@newspecial = 0
+			@texture = 0
+			@floordestheight = 0
+			@speed = 0
+		end
+	end
+
+	class Mobj
+		def value
+			self
+		end
+		property thinker : CDoom::Thinker
+		property x : Int32
+		property y : Int32
+		property z : Int32
+		property snext : Mobj?
+		property sprev : Mobj?
+		property angle : UInt32
+		property sprite : Doocr::Spritenum
+		property frame : Int32
+		property bnext : Mobj?
+		property bprev : Mobj?
+		property subsector : Subsector?
+		property floorz : Int32
+		property ceilingz : Int32
+		property radius : Int32
+		property height : Int32
+		property momx : Int32
+		property momy : Int32
+		property momz : Int32
+		property validcount : Int32
+		property type : Doocr::Mobjtype
+		property tics : Int32
+		property state : State?
+		property info : Mobjinfo
+		property flags : Int32
+		property health : Int32
+		property movedir : Int32
+		property movecount : Int32
+		property target : Mobj?
+		property reactiontime : Int32
+		property threshold : Int32
+		property player : Player?
+		property lastlook : Int32
+		property spawnpoint : CDoom::Mapthing
+		property tracer : Mobj?
+
+		def initialize
+			@thinker = CDoom::Thinker.new
+			@x = 0
+			@y = 0
+			@z = 0
+			@snext = nil
+			@sprev = nil
+			@angle = 0_u32
+			@sprite = Doocr::Spritenum::SPR_TROO
+			@frame = 0
+			@bnext = nil
+			@bprev = nil
+			@subsector = nil
+			@floorz = 0
+			@ceilingz = 0
+			@radius = 0
+			@height = 0
+			@momx = 0
+			@momy = 0
+			@momz = 0
+			@validcount = 0
+			@type = Doocr::Mobjtype::MT_PLAYER
+			@tics = 0
+			@state = nil
+			@info = Mobjinfo.new
+			@flags = 0
+			@health = 0
+			@movedir = 0
+			@movecount = 0
+			@target = nil
+			@reactiontime = 0
+			@threshold = 0
+			@player = nil
+			@lastlook = 0
+			@spawnpoint = CDoom::Mapthing.new
+			@tracer = nil
+		end
+	end
+
+	class Player
+		def value
+			self
+		end
+		property mo : Mobj?
+		property playerstate : Doocr::Playerstate
+		property cmd : CDoom::Ticcmd
+		property viewz : Int32
+		property viewheight : Int32
+		property deltaviewheight : Int32
+		property bob : Int32
+		property health : Int32
+		property armorpoints : Int32
+		property armortype : Int32
+		property powers : StaticArray(Int32, Doocr::Powertype::NUMPOWERS)
+		property cards : StaticArray(Int32, Doocr::Card::NUMCARDS)
+		property backpack : Int32
+		property frags : StaticArray(Int32, CDoom::MAXPLAYERS)
+		property readyweapon : Doocr::Weapontype
+		property pendingweapon : Doocr::Weapontype
+		property weaponowned : StaticArray(Int32, Doocr::Weapontype::NUMWEAPONS)
+		property ammo : StaticArray(Int32, Doocr::Ammotype::NUMAMMO)
+		property maxammo : StaticArray(Int32, Doocr::Ammotype::NUMAMMO)
+		property attackdown : Int32
+		property usedown : Int32
+		property cheats : Int32
+		property refire : Int32
+		property killcount : Int32
+		property itemcount : Int32
+		property secretcount : Int32
+		property message : String?
+		property damagecount : Int32
+		property bonuscount : Int32
+		property attacker : Mobj?
+		property extralight : Int32
+		property fixedcolormap : Int32
+		property colormap : Int32
+		property psprites : StaticArray(Pspdef, Doocr::Psprnum::NUMPSPRITES)
+		property didsecret : Int32
+
+		def initialize
+			@mo = nil
+			@playerstate = Doocr::Playerstate::PST_LIVE
+			@cmd = CDoom::Ticcmd.new
+			@viewz = 0
+			@viewheight = 0
+			@deltaviewheight = 0
+			@bob = 0
+			@health = 0
+			@armorpoints = 0
+			@armortype = 0
+			@powers = StaticArray(Int32, Doocr::Powertype::NUMPOWERS).new(0)
+			@cards = StaticArray(Int32, Doocr::Card::NUMCARDS).new(0)
+			@backpack = 0
+			@frags = StaticArray(Int32, CDoom::MAXPLAYERS).new(0)
+			@readyweapon = Doocr::Weapontype::Fist
+			@pendingweapon = Doocr::Weapontype::Nochange
+			@weaponowned = StaticArray(Int32, Doocr::Weapontype::NUMWEAPONS).new(0)
+			@ammo = StaticArray(Int32, Doocr::Ammotype::NUMAMMO).new(0)
+			@maxammo = StaticArray(Int32, Doocr::Ammotype::NUMAMMO).new(0)
+			@attackdown = 0
+			@usedown = 0
+			@cheats = 0
+			@refire = 0
+			@killcount = 0
+			@itemcount = 0
+			@secretcount = 0
+			@message = nil
+			@damagecount = 0
+			@bonuscount = 0
+			@attacker = nil
+			@extralight = 0
+			@fixedcolormap = 0
+			@colormap = 0
+			@psprites = StaticArray(Pspdef, Doocr::Psprnum::NUMPSPRITES).new { Pspdef.new }
+			@didsecret = 0
+		end
+	end
+
+	def self.mobjinfo_for(mobj : Mobj) : Mobjinfo
+		mobjinfo[mobj.type.value]
+	end
+
 	class_getter channels_s_sound : Array(SoundChannel) = Array.new(Doocr::NUM_CHANNELS) { SoundChannel.new }
 	class_property mainzone : Pointer(CDoom::Memzone) = Pointer(CDoom::Memzone).null
-	class_property plr : Pointer(CDoom::Player) = Pointer(CDoom::Player).null
-	class_property plyr : Pointer(CDoom::Player) = Pointer(CDoom::Player).null
+	class_property plr : Player = Player.new
+	class_property plyr : Player = Player.new
 	class_getter reboundstore : Array(CDoom::Doomdata) = [CDoom::Doomdata.new]
 	class_getter w_title : Array(CDoom::HU_Textline) = [CDoom::HU_Textline.new]
 	class_getter w_chat : Array(CDoom::HU_Itext) = [CDoom::HU_Itext.new]
 	class_getter w_inputbuffer : Array(CDoom::HU_Itext) = Array.new(CDoom::MAXPLAYERS) { CDoom::HU_Itext.new }
 	class_getter w_message : Array(CDoom::HU_Stext) = [CDoom::HU_Stext.new]
-	class_getter w_ready : Array(CDoom::ST_Number) = [CDoom::ST_Number.new]
-	class_getter w_frags : Array(CDoom::ST_Number) = [CDoom::ST_Number.new]
-	class_getter w_health : Array(CDoom::ST_Percent) = [CDoom::ST_Percent.new]
-	class_getter w_armsbg : Array(CDoom::ST_Binicon) = [CDoom::ST_Binicon.new]
-	class_getter w_arms : Array(CDoom::ST_Multicon) = Array.new(6) { CDoom::ST_Multicon.new }
-	class_getter w_faces : Array(CDoom::ST_Multicon) = [CDoom::ST_Multicon.new]
-	class_getter w_keyboxes : Array(CDoom::ST_Multicon) = Array.new(3) { CDoom::ST_Multicon.new }
-	class_getter w_armor : Array(CDoom::ST_Percent) = [CDoom::ST_Percent.new]
-	class_getter w_ammo : Array(CDoom::ST_Number) = Array.new(4) { CDoom::ST_Number.new }
-	class_getter w_maxammo : Array(CDoom::ST_Number) = Array.new(4) { CDoom::ST_Number.new }
+	class_getter w_ready : Array(ST_Number) = [ST_Number.new]
+	class_getter w_frags : Array(ST_Number) = [ST_Number.new]
+	class_getter w_health : Array(ST_Percent) = [ST_Percent.new]
+	class_getter w_armsbg : Array(ST_Binicon) = [ST_Binicon.new]
+	class_getter w_arms : Array(ST_Multicon) = Array.new(6) { ST_Multicon.new }
+	class_getter w_faces : Array(ST_Multicon) = [ST_Multicon.new]
+	class_getter w_keyboxes : Array(ST_Multicon) = Array.new(3) { ST_Multicon.new }
+	class_getter w_armor : Array(ST_Percent) = [ST_Percent.new]
+	class_getter w_ammo : Array(ST_Number) = Array.new(4) { ST_Number.new }
+	class_getter w_maxammo : Array(ST_Number) = Array.new(4) { ST_Number.new }
 	class_property fb : Pointer(UInt8) = Pointer(UInt8).null
 	class_property wipe_scr_start : Pointer(UInt8) = Pointer(UInt8).null
 	class_property wipe_scr_end : Pointer(UInt8) = Pointer(UInt8).null
@@ -3053,18 +3774,18 @@ end
 	class_getter zlight : Array(Pointer(UInt8)) = Array.new(Doocr::LIGHTLEVELS * Doocr::MAXLIGHTZ, Pointer(UInt8).null)
 	class_property sprites : Pointer(CDoom::Spritedef) = Pointer(CDoom::Spritedef).null
 	class_property vertexes : Pointer(CDoom::Vertex) = Pointer(CDoom::Vertex).null
-	class_property segs : Pointer(CDoom::Seg) = Pointer(CDoom::Seg).null
-	class_property sectors : Pointer(CDoom::Sector) = Pointer(CDoom::Sector).null
-	class_property subsectors : Pointer(CDoom::Subsector) = Pointer(CDoom::Subsector).null
+	class_property segs : Array(Seg) = [] of Seg
+	class_property sectors : Array(Sector) = [] of Sector
+	class_property subsectors : Array(Subsector) = [] of Subsector
 	class_property nodes : Pointer(CDoom::Node) = Pointer(CDoom::Node).null
-	class_property lines : Pointer(CDoom::Line) = Pointer(CDoom::Line).null
-	class_property sides : Pointer(CDoom::Side) = Pointer(CDoom::Side).null
-	class_getter drawsegs : Array(CDoom::Drawseg) = Array.new(Doocr::MAXDRAWSEGS) { CDoom::Drawseg.new }
-	class_property ds_p : Pointer(CDoom::Drawseg) = Pointer(CDoom::Drawseg).null
+	class_property lines : Array(Line) = [] of Line
+	class_property sides : Array(Side) = [] of Side
+	class_getter drawsegs : Array(Drawseg) = Array.new(Doocr::MAXDRAWSEGS) { Drawseg.new }
+	class_property ds_p : Drawseg? = nil
 	class_getter vissprites : Array(CDoom::Vissprite) = Array.new(Doocr::MAXVISSPRITES) { CDoom::Vissprite.new }
 	class_getter vsprsortedhead : Array(CDoom::Vissprite) = [CDoom::Vissprite.new]
-	class_getter intercepts : Array(CDoom::Intercept) = Array.new(Doocr::MAXINTERCEPTS) { CDoom::Intercept.new }
-	class_property intercept_p : Pointer(CDoom::Intercept) = Pointer(CDoom::Intercept).null
+	class_getter intercepts : Array(Intercept) = Array.new(Doocr::MAXINTERCEPTS) { Intercept.new }
+	class_property intercept_p : Int32 = 0
 	class_getter thinkercap : Array(CDoom::Thinker) = [CDoom::Thinker.new]
 	class_property doomcom : Pointer(CDoom::Doomcom) = Pointer(CDoom::Doomcom).null
 	class_property netbuffer : Pointer(CDoom::Doomdata) = Pointer(CDoom::Doomdata).null
@@ -3074,7 +3795,7 @@ end
 	class_property demo_p : Pointer(UInt8) = Pointer(UInt8).null
 	class_property demoend : Pointer(UInt8) = Pointer(UInt8).null
 	class_getter textures : Array(Pointer(CDoom::Texture)) = [] of Pointer(CDoom::Texture)
-	class_getter events : Array(CDoom::Event) = Array.new(Doocr::MAXEVENTS) { CDoom::Event.new }
+	class_getter events : Array(Event) = Array.new(Doocr::MAXEVENTS) { Event.new }
 	class_getter screens : Array(Pointer(UInt8)) = Array.new(5, Pointer(UInt8).null)
 	class_property numcmaps : Int32 = 0
 	class_getter deathmatchstarts : Array(CDoom::Mapthing) = Array.new(Doocr::MAX_DM_STARTS) { CDoom::Mapthing.new }
@@ -3160,17 +3881,17 @@ end
 	class_getter lnames : Array(Pointer(CDoom::Patch)) = [] of Pointer(CDoom::Patch)
 	class_getter hu_font : Array(Pointer(CDoom::Patch)) = Array.new(Doocr::HU_FONTSIZE, Pointer(CDoom::Patch).null)
 	class_property sttminus : Pointer(CDoom::Patch) = Pointer(CDoom::Patch).null
-	class_property caststate : Pointer(CDoom::State) = Pointer(CDoom::State).null
+	class_property caststate : State? = nil
 	class_property vissprite_count : Int32 = 0
 	class_property fixedcolormap : Pointer(UInt8) = Pointer(UInt8).null
 	class_property planezlight : Pointer(Pointer(UInt8)) = Pointer(Pointer(UInt8)).null
 	class_getter scalelightfixed : Array(Pointer(UInt8)) = Array.new(Doocr::MAXLIGHTSCALE, Pointer(UInt8).null)
 	class_getter scalelight : Array(Array(Pointer(UInt8))) = Array.new(Doocr::LIGHTLEVELS) { Array.new(Doocr::MAXLIGHTSCALE, Pointer(UInt8).null) }
-	class_property curline : Pointer(CDoom::Seg) = Pointer(CDoom::Seg).null
-	class_property sidedef : Pointer(CDoom::Side) = Pointer(CDoom::Side).null
-	class_property linedef : Pointer(CDoom::Line) = Pointer(CDoom::Line).null
-	class_property frontsector : Pointer(CDoom::Sector) = Pointer(CDoom::Sector).null
-	class_property backsector : Pointer(CDoom::Sector) = Pointer(CDoom::Sector).null
+	class_property curline : Seg? = nil
+	class_property sidedef : Side? = nil
+	class_property linedef : Line? = nil
+	class_property frontsector : Sector? = nil
+	class_property backsector : Sector? = nil
 	class_property dc_colormap : Pointer(UInt8) = Pointer(UInt8).null
 	class_property ds_colormap : Pointer(UInt8) = Pointer(UInt8).null
 	class_property dc_source : Pointer(UInt8) = Pointer(UInt8).null
@@ -3180,7 +3901,7 @@ end
 	class_property mfloorclip : Pointer(Int16) = Pointer(Int16).null
 	class_property mceilingclip : Pointer(Int16) = Pointer(Int16).null
 	class_property maskedtexturecol : Pointer(Int16) = Pointer(Int16).null
-	class_property viewplayer : Pointer(CDoom::Player) = Pointer(CDoom::Player).null
+	class_property viewplayer : Player? = nil
 	class_property debugfile : File? = nil
 	class_property colfunc : Proc(Nil) = ->{}
 
@@ -3330,9 +4051,9 @@ end
 
 	class_getter solidsegs : Array(Cliprange) = Array.new(Doocr::MAXSEGS) { Cliprange.new }
 	class_property newend : Int32 = 0
-	class_getter linespeciallist : Array(Pointer(CDoom::Line)) = Array.new(Doocr::MAXLINEANIMS, Pointer(CDoom::Line).null)
+	class_getter linespeciallist : Array(Line?) = Array(Line?).new(Doocr::MAXLINEANIMS, nil)
 	class_getter switchlist : Array(Int32) = Array.new(Doocr::SWITCHLIST_SIZE, -1)
-	class_getter bodyque : Array(Pointer(CDoom::Mobj)) = Array.new(Doocr::BODYQUESIZE, Pointer(CDoom::Mobj).null)
+	class_getter bodyque : Array(Mobj?) = Array(Mobj?).new(Doocr::BODYQUESIZE, nil)
 	class_getter marknums : Array(Pointer(CDoom::Patch)) = Array.new(10, Pointer(CDoom::Patch).null)
 	class_property precache : Int32 = 1
 	class_property singletics : Int32 = 0
