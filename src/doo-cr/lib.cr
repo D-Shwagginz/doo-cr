@@ -98,7 +98,6 @@ macro ng_statsx
 end
 
 # The C Library
-@[Link(ldflags: "-L#{__DIR__}/../.. -lcvars")]
 lib CDoom
   DOOM_SAMPLERATE = Doocr::DOOM_SAMPLERATE
   DOOM_MIDI_RATE = Doocr::DOOM_MIDI_RATE

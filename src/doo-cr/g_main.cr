@@ -921,9 +921,9 @@ module Doocr
 
   def self.g_do_save_game
     name = "#{@@deh_savegamename}#{Doocr.savegameslot}.dsg"
-    description = Doocr.savedescription.to_slice
+    description = Doocr.savedescription.ljust(CDoom::SAVESTRINGSIZE, '\0').to_slice
     buf = IO::Memory.new
-    buf.write_string(description[0...CDoom::SAVESTRINGSIZE])
+    buf.write_string(description)
 
     name2 = "version #{SAVEVERSION}".ljust(CDoom::VERSIONSIZE, '\0')
     buf.write_string(name2.to_slice)
