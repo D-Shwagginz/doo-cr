@@ -149,16 +149,16 @@ module Doocr
     d_doom_main
   end
 
-  def self.fixed_mul(a : LibC::Int, b : LibC::Int) : LibC::Int
+  def self.fixed_mul(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
     return ((a.to_i64 * b.to_i64) >> FRACBITS).to_i32!
   end
 
-  def self.fixed_div(a : LibC::Int, b : LibC::Int) : LibC::Int
+  def self.fixed_div(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
     return (a ^ b) < 0 ? Int32::MIN : Int32::MAX if (doom_abs(a) >> 14) >= doom_abs(b)
     return CDoom.fixed_div2(a, b)
   end
 
-  def self.fixed_div2(a : LibC::Int, b : LibC::Int) : LibC::Int
+  def self.fixed_div2(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
     c = (a.to_f64 / b.to_f64) * FRACUNIT
 
     CDoom.i_error("Error: fixed_div: divide by zero") if c >= 2147483648.0 || c < -2147483648.0

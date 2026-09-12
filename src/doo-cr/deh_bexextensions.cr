@@ -1262,7 +1262,7 @@ module Doocr
 
     while frame >= @@states.size
       i = @@states.size
-      @@states << CDoom::State.new(sprite: Doocr::Spritenum::SPR_TNT, tics: -1, nextstate: Doocr::Statenum.new(i))
+      @@states << CDoom::State.new(sprite: CDoom::Spritenum::SPR_TNT, tics: -1, nextstate: CDoom::Statenum.new(i))
     end
 
     name = parts[1]

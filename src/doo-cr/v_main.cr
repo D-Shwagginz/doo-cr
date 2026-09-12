@@ -97,7 +97,7 @@ module Doocr
     w = patch.value.width
 
     while col < w
-      column = (patch.as(UInt8*) + (patch.value.columnofs.to_unsafe + col).value).as(CDoom::Post*)
+      column = (patch.as(UInt8*) + (patch.value.columnofs.to_unsafe + col).value).as(CDoom::Column*)
 
       # step through the posts in a column
       until column.value.topdelta == 0xff
@@ -111,7 +111,7 @@ module Doocr
           source += 1
           dest += CDoom::SCREENWIDTH
         end
-        column = (column.as(UInt8*) + column.value.length + 4).as(CDoom::Post*)
+        column = (column.as(UInt8*) + column.value.length + 4).as(CDoom::Column*)
       end
 
       x += 1
@@ -151,7 +151,7 @@ module Doocr
     w = patch.value.width
 
     while col < w
-      column = (patch.as(UInt8*) + (patch.value.columnofs.to_unsafe + (w - 1 - col)).value).as(CDoom::Post*)
+      column = (patch.as(UInt8*) + (patch.value.columnofs.to_unsafe + (w - 1 - col)).value).as(CDoom::Column*)
 
       # step through the posts in a column
       until column.value.topdelta == 0xff
@@ -165,7 +165,7 @@ module Doocr
           source += 1
           dest += CDoom::SCREENWIDTH
         end
-        column = (column.as(UInt8*) + column.value.length + 4).as(CDoom::Post*)
+        column = (column.as(UInt8*) + column.value.length + 4).as(CDoom::Column*)
       end
 
       x += 1
@@ -200,7 +200,7 @@ module Doocr
     w = src_w
 
     while col < w
-      column = (patch.as(UInt8*) + (patch.value.columnofs.to_unsafe + (col + src_x)).value).as(CDoom::Post*)
+      column = (patch.as(UInt8*) + (patch.value.columnofs.to_unsafe + (col + src_x)).value).as(CDoom::Column*)
 
       # step through the posts in a column
       until column.value.topdelta == 0xff
@@ -214,7 +214,7 @@ module Doocr
           source += 1
           dest += CDoom::SCREENWIDTH
         end
-        column = (column.as(UInt8*) + column.value.length + 4).as(CDoom::Post*)
+        column = (column.as(UInt8*) + column.value.length + 4).as(CDoom::Column*)
       end
 
       x += 1
@@ -241,7 +241,7 @@ module Doocr
                         scrn : LibC::Int,
                         width : LibC::Int,
                         height : LibC::Int,
-                        src : UInt8*)
+                        src : CDoom::Byte*)
     {% if flag?("RANGECHECK") %}
       if x < 0 ||
          x > CDoom::SCREENWIDTH ||
@@ -269,7 +269,7 @@ module Doocr
                        scrn : LibC::Int,
                        width : LibC::Int,
                        height : LibC::Int,
-                       dest : UInt8*)
+                       dest : CDoom::Byte*)
     {% if flag?("RANGECHECK") %}
       if x < 0 ||
          x > CDoom::SCREENWIDTH ||

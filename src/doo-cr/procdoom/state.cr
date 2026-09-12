@@ -42,11 +42,11 @@ module Doocr::Mod
       next_state = @states.size + 1
       @state_index = @states.size if @state_index == -1
       @states << CDoom::State.new(
-        sprite: Doocr::Spritenum.new(Doocr.sprnames.index!(name)),
+        sprite: CDoom::Spritenum.new(Doocr.sprnames.index!(name)),
         frame: (frame.is_a?(Char) ? frame.upcase - 'A' : frame),
         tics: tics,
         action: action.pointer,
-        nextstate: Doocr::Statenum.new(next_state),
+        nextstate: CDoom::Statenum.new(next_state),
         misc1: 0, misc2: 0
       )
     end
@@ -68,11 +68,11 @@ module Doocr::Mod
       next_state = @states.size + 1
       @state_index = @states.size if @state_index == -1
       @states << CDoom::State.new(
-        sprite: Doocr::Spritenum.new(Doocr.sprnames.index!(name)),
+        sprite: CDoom::Spritenum.new(Doocr.sprnames.index!(name)),
         frame: (frame.is_a?(Char) ? frame.upcase - 'A' : frame),
         tics: tics,
         action: action,
-        nextstate: Doocr::Statenum.new(next_state),
+        nextstate: CDoom::Statenum.new(next_state),
         misc1: 0, misc2: 0
       )
     end
@@ -94,11 +94,11 @@ module Doocr::Mod
       next_state = @states.size + 1
       @state_index = @states.size if @state_index == -1
       @states << CDoom::State.new(
-        sprite: Doocr::Spritenum.new(Doocr.sprnames.index!(name)),
+        sprite: CDoom::Spritenum.new(Doocr.sprnames.index!(name)),
         frame: (frame.is_a?(Char) ? frame.upcase - 'A' : frame),
         tics: tics,
         action: action,
-        nextstate: Doocr::Statenum.new(next_state),
+        nextstate: CDoom::Statenum.new(next_state),
         misc1: 0, misc2: 0
       )
     end
@@ -120,11 +120,11 @@ module Doocr::Mod
       next_state = @states.size + 1
       @state_index = @states.size if @state_index == -1
       @states << CDoom::State.new(
-        sprite: Doocr::Spritenum.new(Doocr.sprnames.index!(name)),
+        sprite: CDoom::Spritenum.new(Doocr.sprnames.index!(name)),
         frame: (frame.is_a?(Char) ? frame.upcase - 'A' : frame),
         tics: tics,
         action: Pointer(Void).null,
-        nextstate: Doocr::Statenum.new(next_state),
+        nextstate: CDoom::Statenum.new(next_state),
         misc1: 0, misc2: 0
       )
     end
@@ -201,24 +201,24 @@ module Doocr::Mod
     def goto(@goto_num : Int32)
     end
 
-    protected def parse : Doocr::Statenum
+    protected def parse : CDoom::Statenum
       @state_index = @states.empty? ? 0 : Doocr.states.size
       @states.size.times do |i|
         (@states.to_unsafe + i).value.nextstate =
-          Doocr::Statenum.new(@states[i].nextstate.value + @state_index)
+          CDoom::Statenum.new(@states[i].nextstate.value + @state_index)
       end
       Doocr.states.concat(@states)
 
-      return Doocr::Statenum.new(state_index)
+      return CDoom::Statenum.new(state_index)
     end
 
     protected def parse_ends
       if handler = @goto
         (Doocr.states.to_unsafe + @state_index + @states.size - 1).value.nextstate =
-          Doocr::Statenum.new(handler.state_index)
+          CDoom::Statenum.new(handler.state_index)
       else
         (Doocr.states.to_unsafe + @state_index + @states.size - 1).value.nextstate =
-          Doocr::Statenum.new(@goto_num)
+          CDoom::Statenum.new(@goto_num)
       end
     end
   end

@@ -23,7 +23,7 @@ module Doocr
   def self.d_post_event(ev : CDoom::Event*)
     Doocr.events[Doocr.eventhead] = ev.value
     Doocr.eventhead += 1
-    Doocr.eventhead = (Doocr.eventhead) & (Doocr::MAXEVENTS - 1)
+    Doocr.eventhead = (Doocr.eventhead) & (CDoom::MAXEVENTS - 1)
   end
 
   #
@@ -32,7 +32,7 @@ module Doocr
   #
   def self.d_process_events
     # IF STORE DEMO, DO NOT ACCEPT INPUT
-    return if Doocr.gamemode == Doocr::GameMode::Commercial &&
+    return if Doocr.gamemode == CDoom::GameMode::Commercial &&
               CDoom.w_check_num_for_name("map01") < 0
 
     while Doocr.eventtail != Doocr.eventhead
@@ -40,7 +40,7 @@ module Doocr
       CDoom.g_responder(ev) if m_responder(ev) == 0
       # else menu ate the event
       Doocr.eventtail += 1
-      Doocr.eventtail = (Doocr.eventtail) & (Doocr::MAXEVENTS - 1)
+      Doocr.eventtail = (Doocr.eventtail) & (CDoom::MAXEVENTS - 1)
     end
   end
 
@@ -114,11 +114,11 @@ module Doocr
 
     d_display_clear_load if @@loading_disk_shown
 
-    CDoom.hu_erase if Doocr.gamestate == Doocr::Gamestate::Level && Doocr.gametic != 0
+    CDoom.hu_erase if Doocr.gamestate == CDoom::Gamestate::Level && Doocr.gametic != 0
 
     # do buffered drawing
     case Doocr.gamestate
-    when Doocr::Gamestate::Level
+    when CDoom::Gamestate::Level
       if Doocr.gametic != 0
         Doocr.am_drawer if Doocr.automapactive != 0 && @@amactivedraw == 0
         redrawsbar = true if wipe || (Doocr.viewheight != 200 && @@fullscreen)
@@ -126,11 +126,11 @@ module Doocr
         CDoom.st_drawer((Doocr.viewheight == 200).to_unsafe, redrawsbar.to_unsafe)
         @@fullscreen = Doocr.viewheight == 200
       end
-    when Doocr::Gamestate::Intermission
+    when CDoom::Gamestate::Intermission
       CDoom.wi_drawer
-    when Doocr::Gamestate::Finale
+    when CDoom::Gamestate::Finale
       CDoom.f_drawer
-    when Doocr::Gamestate::Demoscreen
+    when CDoom::Gamestate::Demoscreen
       CDoom.d_page_drawer
     end
 
@@ -138,7 +138,7 @@ module Doocr
     CDoom.i_update_no_blit
 
     # draw the view directly
-    if Doocr.gamestate == Doocr::Gamestate::Level && Doocr.gametic != 0
+    if Doocr.gamestate == CDoom::Gamestate::Level && Doocr.gametic != 0
       if Doocr.automapactive != 0
         if @@amactivedraw != 0
           CDoom.r_render_player_view(@@players.to_unsafe + Doocr.displayplayer)
@@ -149,21 +149,21 @@ module Doocr
       end
     end
 
-    CDoom.hu_drawer if Doocr.gamestate == Doocr::Gamestate::Level && Doocr.gametic != 0
+    CDoom.hu_drawer if Doocr.gamestate == CDoom::Gamestate::Level && Doocr.gametic != 0
 
     # clean up border stuff
-    if Doocr.gamestate.value != @@oldgamestate && Doocr.gamestate != Doocr::Gamestate::Level
-      CDoom.i_set_palette(CDoom.w_cache_lump_name("PLAYPAL", Doocr::PU_CACHE).as(UInt8*))
+    if Doocr.gamestate.value != @@oldgamestate && Doocr.gamestate != CDoom::Gamestate::Level
+      CDoom.i_set_palette(CDoom.w_cache_lump_name("PLAYPAL", CDoom::PU_CACHE).as(UInt8*))
     end
 
     # see if the border needs to be initially drawn
-    if Doocr.gamestate == Doocr::Gamestate::Level && @@oldgamestate != Doocr::Gamestate::Level.value
+    if Doocr.gamestate == CDoom::Gamestate::Level && @@oldgamestate != CDoom::Gamestate::Level.value
       @@viewactivestate = false # view was not active
       CDoom.r_fill_back_screen  # draw the pattern into the back screen
     end
 
     # see if the border needs to be updated to the screen
-    if Doocr.gamestate == Doocr::Gamestate::Level && Doocr.automapactive == 0 && Doocr.scaledviewwidth != 320
+    if Doocr.gamestate == CDoom::Gamestate::Level && Doocr.automapactive == 0 && Doocr.scaledviewwidth != 320
       CDoom.r_draw_view_border unless @@software_rendering
       @@borderdrawcount = 3 if Doocr.menuactive != 0 || @@menuactivestate || !@@viewactivestate
       if @@borderdrawcount != 0
@@ -187,7 +187,7 @@ module Doocr
         y = Doocr.viewwindowy + 4
       end
       CDoom.v_draw_patch_direct(Doocr.viewwindowx + (Doocr.scaledviewwidth - 68) // 2,
-        y, 0, CDoom.w_cache_lump_name("M_PAUSE", Doocr::PU_CACHE).as(CDoom::Patch*))
+        y, 0, CDoom.w_cache_lump_name("M_PAUSE", CDoom::PU_CACHE).as(CDoom::Patch*))
     end
 
     # menus go directly to the screen
@@ -225,7 +225,7 @@ module Doocr
         break if tics != 0
       end
       wipestart = nowtime
-      done = CDoom.wipe_screen_wipe(Doocr::WIPE_MELT, 0, 0, CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT, 1)
+      done = CDoom.wipe_screen_wipe(CDoom::WIPE_MELT, 0, 0, CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT, 1)
 
       i_update_no_blit
       m_drawer        # menu is drawn even on top of wipes
@@ -244,7 +244,7 @@ module Doocr
       if Doocr.singletics != 0
         i_start_tic
         CDoom.d_process_events
-        CDoom.g_build_ticcmd((Doocr.netcmds.to_unsafe + Doocr.consoleplayer).value.to_unsafe + Doocr.maketic % Doocr::BACKUPTICS)
+        CDoom.g_build_ticcmd((Doocr.netcmds.to_unsafe + Doocr.consoleplayer).value.to_unsafe + Doocr.maketic % CDoom::BACKUPTICS)
         CDoom.d_do_advance_demo if Doocr.advancedemo != 0
         CDoom.m_ticker
         CDoom.g_ticker
@@ -254,7 +254,7 @@ module Doocr
         CDoom.try_run_tics # will run at least one tic
       end
 
-      Doocr.s_update_sounds(@@players[Doocr.consoleplayer].mo) # move positional sounds
+      CDoom.s_update_sounds(@@players[Doocr.consoleplayer].mo) # move positional sounds
       # Update display, next frame, with current state.
       CDoom.d_display
     end
@@ -272,7 +272,7 @@ module Doocr
   end
 
   def self.d_page_drawer
-    CDoom.v_draw_patch(0, 0, 0, CDoom.w_cache_lump_name(Doocr.pagename.to_unsafe, Doocr::PU_CACHE).as(CDoom::Patch*))
+    CDoom.v_draw_patch(0, 0, 0, CDoom.w_cache_lump_name(Doocr.pagename.to_unsafe, CDoom::PU_CACHE).as(CDoom::Patch*))
   end
 
   #
@@ -288,13 +288,13 @@ module Doocr
   # Todo: FIXME - version dependend demo numbers?
   #
   def self.d_do_advance_demo
-    (@@players.to_unsafe + Doocr.consoleplayer).value.playerstate = Doocr::Playerstate::PST_LIVE # not reborn
+    (@@players.to_unsafe + Doocr.consoleplayer).value.playerstate = CDoom::Playerstate::PST_LIVE # not reborn
     Doocr.advancedemo = 0
     Doocr.usergame = 0 # no save / end game here
     Doocr.paused = 0
-    Doocr.gameaction = Doocr::Gameaction::Nothing
+    Doocr.gameaction = CDoom::Gameaction::Nothing
 
-    if Doocr.gamemode == Doocr::GameMode::Retail
+    if Doocr.gamemode == CDoom::GameMode::Retail
       Doocr.demosequence = (Doocr.demosequence + 1) % 7
     else
       Doocr.demosequence = (Doocr.demosequence + 1) % 6
@@ -302,36 +302,36 @@ module Doocr
 
     case Doocr.demosequence
     when 0
-      if Doocr.gamemode == Doocr::GameMode::Commercial
+      if Doocr.gamemode == CDoom::GameMode::Commercial
         Doocr.pagetic = 35 * 11
       else
         Doocr.pagetic = 170
       end
-      Doocr.gamestate = Doocr::Gamestate::Demoscreen
+      Doocr.gamestate = CDoom::Gamestate::Demoscreen
       Doocr.pagename = "TITLEPIC"
-      if Doocr.gamemode == Doocr::GameMode::Commercial
-        Doocr.s_start_music(Doocr::Musicenum::MUS_dm2ttl)
+      if Doocr.gamemode == CDoom::GameMode::Commercial
+        CDoom.s_start_music(CDoom::Musicenum::MUS_dm2ttl)
       else
-        Doocr.s_start_music(Doocr::Musicenum::MUS_intro)
+        CDoom.s_start_music(CDoom::Musicenum::MUS_intro)
       end
     when 1
       CDoom.g_defered_play_demo("demo1")
     when 2
       Doocr.pagetic = 200
-      Doocr.gamestate = Doocr::Gamestate::Demoscreen
+      Doocr.gamestate = CDoom::Gamestate::Demoscreen
       Doocr.pagename = "CREDIT"
     when 3
       CDoom.g_defered_play_demo("demo2")
     when 4
-      Doocr.gamestate = Doocr::Gamestate::Demoscreen
-      if Doocr.gamemode == Doocr::GameMode::Commercial
+      Doocr.gamestate = CDoom::Gamestate::Demoscreen
+      if Doocr.gamemode == CDoom::GameMode::Commercial
         Doocr.pagetic = 35 * 11
         Doocr.pagename = "TITLEPIC"
-        Doocr.s_start_music(Doocr::Musicenum::MUS_dm2ttl)
+        CDoom.s_start_music(CDoom::Musicenum::MUS_dm2ttl)
       else
         Doocr.pagetic = 200
 
-        if Doocr.gamemode == Doocr::GameMode::Retail
+        if Doocr.gamemode == CDoom::GameMode::Retail
           Doocr.pagename = "CREDIT"
         else
           Doocr.pagename = "HELP2"
@@ -346,7 +346,7 @@ module Doocr
   end
 
   def self.d_start_title
-    Doocr.gameaction = Doocr::Gameaction::Nothing
+    Doocr.gameaction = CDoom::Gameaction::Nothing
     Doocr.demosequence = -1
     CDoom.d_advance_demo
   end
@@ -368,29 +368,29 @@ module Doocr
        # w_check_num_for_name("map32".to_unsafe) != -1 && # Custom Wads might not have all maps
        w_check_num_for_name("interpic".to_unsafe) != -1 &&
        w_check_num_for_name("d_runnin".to_unsafe) != -1
-      Doocr.gamemode = Doocr::GameMode::Commercial
+      Doocr.gamemode = CDoom::GameMode::Commercial
       # Don't overwrite Packs
-      if Doocr.gamemission == Doocr::GameMission::None ||
-         Doocr.gamemission == Doocr::GameMission::Doom
-        Doocr.gamemission = Doocr::GameMission::Doom2
+      if Doocr.gamemission == CDoom::GameMission::None ||
+         Doocr.gamemission == CDoom::GameMission::Doom
+        Doocr.gamemission = CDoom::GameMission::Doom2
       end
       return
     end
 
     if w_check_num_for_name("e1m1".to_unsafe) != -1 # Shareware
-      Doocr.gamemission = Doocr::GameMission::Doom
+      Doocr.gamemission = CDoom::GameMission::Doom
 
       if w_check_num_for_name("e2m1".to_unsafe) != -1 && # Registered
          w_check_num_for_name("e3m1".to_unsafe) != -1
         if w_check_num_for_name("e4m1".to_unsafe) != -1 && # Retail
            w_check_num_for_name("interpic".to_unsafe) != -1
-          Doocr.gamemode = Doocr::GameMode::Retail
+          Doocr.gamemode = CDoom::GameMode::Retail
         else
-          Doocr.gamemode = Doocr::GameMode::Registered
+          Doocr.gamemode = CDoom::GameMode::Registered
         end
         return
       else
-        Doocr.gamemode = Doocr::GameMode::Shareware
+        Doocr.gamemode = CDoom::GameMode::Shareware
       end
     end
   end
@@ -459,96 +459,96 @@ module Doocr
         end
       end
 
-      Doocr.gamemode = Doocr::GameMode::Indetermined
-      Doocr.gamemission = Doocr::GameMission::None
+      Doocr.gamemode = CDoom::GameMode::Indetermined
+      Doocr.gamemission = CDoom::GameMission::None
       Doocr.d_add_file(customwad)
       return
     end
 
     if ARGV.includes?("-shdev")
-      Doocr.gamemode = Doocr::GameMode::Shareware
-      Doocr.gamemission = Doocr::GameMission::Doom
+      Doocr.gamemode = CDoom::GameMode::Shareware
+      Doocr.gamemission = CDoom::GameMission::Doom
       Doocr.devparm = 1
-      Doocr.d_add_file(Doocr::DEVDATA + "doom1.wad")
-      Doocr.d_add_file(Doocr::DEVMAPS + "data_se/texture1.lmp")
-      Doocr.d_add_file(Doocr::DEVMAPS + "data_se/pnames.lmp")
-      Doocr.basedefault = "#{Doocr::DEVDATA}/default.cfg"
+      Doocr.d_add_file(CDoom::DEVDATA + "doom1.wad")
+      Doocr.d_add_file(CDoom::DEVMAPS + "data_se/texture1.lmp")
+      Doocr.d_add_file(CDoom::DEVMAPS + "data_se/pnames.lmp")
+      Doocr.basedefault = "#{CDoom::DEVDATA}/default.cfg"
       return
     end
 
     if ARGV.includes?("-regdev")
-      Doocr.gamemode = Doocr::GameMode::Registered
-      Doocr.gamemission = Doocr::GameMission::Doom
+      Doocr.gamemode = CDoom::GameMode::Registered
+      Doocr.gamemission = CDoom::GameMission::Doom
       Doocr.devparm = 1
-      Doocr.d_add_file(Doocr::DEVDATA + "doom.wad")
-      Doocr.d_add_file(Doocr::DEVMAPS + "data_se/texture1.lmp")
-      Doocr.d_add_file(Doocr::DEVMAPS + "data_se/texture2.lmp")
-      Doocr.d_add_file(Doocr::DEVMAPS + "data_se/pnames.lmp")
-      Doocr.basedefault = "#{Doocr::DEVDATA}/default.cfg"
+      Doocr.d_add_file(CDoom::DEVDATA + "doom.wad")
+      Doocr.d_add_file(CDoom::DEVMAPS + "data_se/texture1.lmp")
+      Doocr.d_add_file(CDoom::DEVMAPS + "data_se/texture2.lmp")
+      Doocr.d_add_file(CDoom::DEVMAPS + "data_se/pnames.lmp")
+      Doocr.basedefault = "#{CDoom::DEVDATA}/default.cfg"
       return
     end
 
     if ARGV.includes?("-comdev")
-      Doocr.gamemode = Doocr::GameMode::Commercial
-      Doocr.gamemission = Doocr::GameMission::Doom2
+      Doocr.gamemode = CDoom::GameMode::Commercial
+      Doocr.gamemission = CDoom::GameMission::Doom2
       Doocr.devparm = 1
-      Doocr.d_add_file(Doocr::DEVDATA + "doom2.wad")
+      Doocr.d_add_file(CDoom::DEVDATA + "doom2.wad")
 
-      Doocr.d_add_file(Doocr::DEVMAPS + "cdata/texture1.lmp")
-      Doocr.d_add_file(Doocr::DEVMAPS + "cdata/pnames.lmp")
-      Doocr.basedefault = "#{Doocr::DEVDATA}/default.cfg"
+      Doocr.d_add_file(CDoom::DEVMAPS + "cdata/texture1.lmp")
+      Doocr.d_add_file(CDoom::DEVMAPS + "cdata/pnames.lmp")
+      Doocr.basedefault = "#{CDoom::DEVDATA}/default.cfg"
       return
     end
 
     if File.exists?(doom2fwad)
-      Doocr.gamemode = Doocr::GameMode::Commercial
-      Doocr.gamemission = Doocr::GameMission::Doom2
+      Doocr.gamemode = CDoom::GameMode::Commercial
+      Doocr.gamemission = CDoom::GameMission::Doom2
       # C'est ridicule!
       # Let's handle languages in config files, okay?
-      Doocr.language = Doocr::Language::French
+      Doocr.language = CDoom::Language::French
       puts "French version"
       Doocr.d_add_file(doom2fwad)
       return
     end
 
     if File.exists?(doom2wad)
-      Doocr.gamemode = Doocr::GameMode::Commercial
-      Doocr.gamemission = Doocr::GameMission::Doom2
+      Doocr.gamemode = CDoom::GameMode::Commercial
+      Doocr.gamemission = CDoom::GameMission::Doom2
       Doocr.d_add_file(doom2wad)
       return
     end
 
     if File.exists?(plutoniawad)
-      Doocr.gamemode = Doocr::GameMode::Commercial
-      Doocr.gamemission = Doocr::GameMission::PackPlut
+      Doocr.gamemode = CDoom::GameMode::Commercial
+      Doocr.gamemission = CDoom::GameMission::PackPlut
       Doocr.d_add_file(plutoniawad)
       return
     end
 
     if File.exists?(tntwad)
-      Doocr.gamemode = Doocr::GameMode::Commercial
-      Doocr.gamemission = Doocr::GameMission::PackTnt
+      Doocr.gamemode = CDoom::GameMode::Commercial
+      Doocr.gamemission = CDoom::GameMission::PackTnt
       Doocr.d_add_file(tntwad)
       return
     end
 
     if File.exists?(doomuwad)
-      Doocr.gamemode = Doocr::GameMode::Retail
-      Doocr.gamemission = Doocr::GameMission::Doom
+      Doocr.gamemode = CDoom::GameMode::Retail
+      Doocr.gamemission = CDoom::GameMission::Doom
       Doocr.d_add_file(doomuwad)
       return
     end
 
     if File.exists?(doomwad)
-      Doocr.gamemode = Doocr::GameMode::Registered
-      Doocr.gamemission = Doocr::GameMission::Doom
+      Doocr.gamemode = CDoom::GameMode::Registered
+      Doocr.gamemission = CDoom::GameMission::Doom
       Doocr.d_add_file(doomwad)
       return
     end
 
     if File.exists?(doom1wad)
-      Doocr.gamemode = Doocr::GameMode::Shareware
-      Doocr.gamemission = Doocr::GameMission::Doom
+      Doocr.gamemode = CDoom::GameMode::Shareware
+      Doocr.gamemission = CDoom::GameMission::Doom
       Doocr.d_add_file(doom1wad)
       return
     end
@@ -566,7 +566,7 @@ module Doocr
     return if added
 
     puts "Game mode indeterminate."
-    Doocr.gamemode = Doocr::GameMode::Indetermined
+    Doocr.gamemode = CDoom::GameMode::Indetermined
   end
 
   #
@@ -714,18 +714,18 @@ module Doocr
 
       # Map name handling
       case Doocr.gamemode
-      when Doocr::GameMode::Shareware, Doocr::GameMode::Retail, Doocr::GameMode::Registered
-        file = "~#{Doocr::DEVMAPS}E" +
+      when CDoom::GameMode::Shareware, CDoom::GameMode::Retail, CDoom::GameMode::Registered
+        file = "~#{CDoom::DEVMAPS}E" +
                ARGV[p + 1][0] + "M" + ARGV[p + 2][0] + ".wad"
         puts "Warping to Episode #{ARGV[p + 1]}" +
              ", Map #{ARGV[p + 2]}."
-        # when Doocr::GameMode::Commercial
+        # when CDoom::GameMode::Commercial
       else
         p = ARGV[p + 1].to_i
         if p < 10
-          file = "~#{Doocr::DEVMAPS}cdata/map0#{p}.wad"
+          file = "~#{CDoom::DEVMAPS}cdata/map0#{p}.wad"
         else
-          file = "~#{Doocr::DEVMAPS}cdata/map#{p}.wad"
+          file = "~#{CDoom::DEVMAPS}cdata/map#{p}.wad"
         end
       end
       Doocr.d_add_file(file)
@@ -766,14 +766,14 @@ module Doocr
     end
 
     # get skill / episode / map from parms
-    Doocr.startskill = Doocr::Skill::Medium
+    Doocr.startskill = CDoom::Skill::Medium
     Doocr.startepisode = 1
     Doocr.startmap = 1
     Doocr.autostart = 0
 
     p = ARGV.index("-skill")
     if p && p < ARGV.size - 1
-      Doocr.startskill = Doocr::Skill.new(ARGV[p + 1][0] - '1')
+      Doocr.startskill = CDoom::Skill.new(ARGV[p + 1][0] - '1')
       Doocr.autostart = 1
     end
 
@@ -797,7 +797,7 @@ module Doocr
 
     p = ARGV.index("-warp")
     if p
-      if p < ARGV.size - 1 && Doocr.gamemode == Doocr::GameMode::Commercial
+      if p < ARGV.size - 1 && Doocr.gamemode == CDoom::GameMode::Commercial
         Doocr.startmap = ARGV[p + 1].to_i
       elsif p < ARGV.size - 2
         Doocr.startepisode = ARGV[p + 1][0] - '0'
@@ -834,8 +834,8 @@ module Doocr
     CDoom.z_init
 
     puts "w_init: Init Wadfiles."
-    wadnames = uninitialized StaticArray(UInt8*, Doocr::MAXWADFILES)
-    Doocr::MAXWADFILES.times do |i|
+    wadnames = uninitialized StaticArray(UInt8*, CDoom::MAXWADFILES)
+    CDoom::MAXWADFILES.times do |i|
       wadnames[i] = i < Doocr.wadfiles.size ? Doocr.wadfiles[i].to_unsafe : Pointer(UInt8).null
     end
     CDoom.w_init_multiple_files(wadnames.to_unsafe.as(LibC::Char**))
@@ -858,17 +858,17 @@ module Doocr
       @@title = Mod.name
     else
       case Doocr.gamemode
-      when Doocr::GameMode::Retail
+      when CDoom::GameMode::Retail
         @@title = "The Ultimate DOOM Startup"
-      when Doocr::GameMode::Shareware
+      when CDoom::GameMode::Shareware
         @@title = "DOOM Shareware Startup"
-      when Doocr::GameMode::Registered
+      when CDoom::GameMode::Registered
         @@title = "DOOM Registered Startup"
-      when Doocr::GameMode::Commercial
+      when CDoom::GameMode::Commercial
         case Doocr.gamemission
-        when Doocr::GameMission::PackPlut
+        when CDoom::GameMission::PackPlut
           @@title = "Final Doom: The Plutonia Experiment"
-        when Doocr::GameMission::PackTnt
+        when CDoom::GameMission::PackTnt
           @@title = "Final Doom: TNT: Evilution"
         else
           @@title = "DOOM 2: Hell on Earth"
@@ -895,13 +895,13 @@ module Doocr
         "dphoof", "bfgga0", "heada1", "cybra1", "spida1d1",
       ]
 
-      if Doocr.gamemode == Doocr::GameMode::Shareware
+      if Doocr.gamemode == CDoom::GameMode::Shareware
         CDoom.i_error("Error: \nYou cannot -file with the shareware version. Register!")
       end
 
       # Check for fake IWAD with right name,
       # but w/o all the lumps of the registered version.
-      if Doocr.gamemode == Doocr::GameMode::Registered
+      if Doocr.gamemode == CDoom::GameMode::Registered
         23.times do |i|
           if CDoom.w_check_num_for_name(name[i]) < 0
             CDoom.i_error("Error: \nThis is not the registered version.")
@@ -974,7 +974,7 @@ module Doocr
       CDoom.g_load_game(file)
     end
 
-    if Doocr.gameaction != Doocr::Gameaction::Loadgame && !demo_deferred
+    if Doocr.gameaction != CDoom::Gameaction::Loadgame && !demo_deferred
       if Doocr.autostart != 0 || Doocr.netgame != 0
         CDoom.g_init_new(Doocr.startskill, Doocr.startepisode, Doocr.startmap)
       else

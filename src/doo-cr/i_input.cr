@@ -18,49 +18,49 @@
 module Doocr
   # -- Macros for quick key polling --
   macro poll_key(doomkey, raylibkey)
-  was_down = Doocr.keystates[Doocr::DoomKey::{{doomkey}}.value]
+  was_down = Doocr.keystates[CDoom::DoomKey::{{doomkey}}.value]
   is_down = Raylib::KeyboardKey::{{raylibkey}}.down?
 
-  Doocr.doom_key_down(Doocr::DoomKey::{{doomkey}}) if is_down && !was_down
-  Doocr.doom_key_up(Doocr::DoomKey::{{doomkey}}) if !is_down && was_down
+  Doocr.doom_key_down(CDoom::DoomKey::{{doomkey}}) if is_down && !was_down
+  Doocr.doom_key_up(CDoom::DoomKey::{{doomkey}}) if !is_down && was_down
 end
 
   macro poll_two_key(doomkey, raylibkey1, raylibkey2)
-  was_down = Doocr.keystates[Doocr::DoomKey::{{doomkey}}.value]
+  was_down = Doocr.keystates[CDoom::DoomKey::{{doomkey}}.value]
   is_down = Raylib::KeyboardKey::{{raylibkey1}}.down? || Raylib::KeyboardKey::{{raylibkey2}}.down?
   
-  Doocr.doom_key_down(Doocr::DoomKey::{{doomkey}}) if is_down && !was_down
-  Doocr.doom_key_up(Doocr::DoomKey::{{doomkey}}) if !is_down && was_down
+  Doocr.doom_key_down(CDoom::DoomKey::{{doomkey}}) if is_down && !was_down
+  Doocr.doom_key_up(CDoom::DoomKey::{{doomkey}}) if !is_down && was_down
 end
 
   macro poll_button(doombutton, raylibbutton)
-  was_down = Doocr.button_states[Doocr::DoomButton::{{doombutton}}.value] != 0
+  was_down = Doocr.button_states[CDoom::DoomButton::{{doombutton}}.value] != 0
   is_down = Raylib::MouseButton::{{raylibbutton}}.down?
-  Doocr.doom_button_down(Doocr::DoomButton::{{doombutton}}) if is_down && !was_down
-  Doocr.doom_button_up(Doocr::DoomButton::{{doombutton}}) if !is_down && was_down
+  Doocr.doom_button_down(CDoom::DoomButton::{{doombutton}}) if is_down && !was_down
+  Doocr.doom_button_up(CDoom::DoomButton::{{doombutton}}) if !is_down && was_down
 end
 
-  def self.doom_key_down(key : Doocr::DoomKey)
+  def self.doom_key_down(key : CDoom::DoomKey)
     @@keystates[key.value] = true
     event = CDoom::Event.new
-    event.type = Doocr::Evtype::Keydown
+    event.type = CDoom::Evtype::Keydown
     event.data1 = key.value
     CDoom.d_post_event(pointerof(event))
   end
 
-  def self.doom_key_up(key : Doocr::DoomKey)
+  def self.doom_key_up(key : CDoom::DoomKey)
     @@keystates[key.value] = false
     event = CDoom::Event.new
-    event.type = Doocr::Evtype::Keyup
+    event.type = CDoom::Evtype::Keyup
     event.data1 = key.value
     CDoom.d_post_event(pointerof(event))
   end
 
-  def self.doom_button_down(button : Doocr::DoomButton)
+  def self.doom_button_down(button : CDoom::DoomButton)
     Doocr.button_states[button.value] = 1
 
     event = CDoom::Event.new
-    event.type = Doocr::Evtype::Mouse
+    event.type = CDoom::Evtype::Mouse
     event.data1 =
       (Doocr.button_states[0]) |
         (Doocr.button_states[1] != 0 ? 2 : 0) |
@@ -70,11 +70,11 @@ end
     CDoom.d_post_event(pointerof(event))
   end
 
-  def self.doom_button_up(button : Doocr::DoomButton)
+  def self.doom_button_up(button : CDoom::DoomButton)
     Doocr.button_states[button.value] = 0
 
     event = CDoom::Event.new
-    event.type = Doocr::Evtype::Mouse
+    event.type = CDoom::Evtype::Mouse
     event.data1 =
       (Doocr.button_states[0]) |
         (Doocr.button_states[1] != 0 ? 2 : 0) |
@@ -93,7 +93,7 @@ end
 
   def self.doom_mouse_move(delta_x : Int32, delta_y : Int32)
     event = CDoom::Event.new
-    event.type = Doocr::Evtype::Mouse
+    event.type = CDoom::Evtype::Mouse
     event.data1 =
       (Doocr.button_states[0]) |
         (Doocr.button_states[1] != 0 ? 2 : 0) |

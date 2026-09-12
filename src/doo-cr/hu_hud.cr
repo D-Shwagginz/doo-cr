@@ -30,8 +30,8 @@ module Doocr
     CDoom.hulib_clear_text_line(t)
   end
 
-  def self.hulib_add_char_to_text_line(t : CDoom::HU_Textline*, ch : UInt8) : LibC::Int
-    if t.value.len == Doocr::HU_MAXLINELENGTH
+  def self.hulib_add_char_to_text_line(t : CDoom::HU_Textline*, ch : UInt8) : CDoom::DoomBool
+    if t.value.len == CDoom::HU_MAXLINELENGTH
       return 0
     else
       t.value.l[t.value.len] = ch
@@ -42,7 +42,7 @@ module Doocr
     end
   end
 
-  def self.hulib_del_char_from_text_line(t : CDoom::HU_Textline*) : LibC::Int
+  def self.hulib_del_char_from_text_line(t : CDoom::HU_Textline*) : CDoom::DoomBool
     if t.value.len == 0
       return 0
     else
@@ -53,7 +53,7 @@ module Doocr
     end
   end
 
-  def self.hulib_draw_text_line(l : CDoom::HU_Textline*, drawcursor : LibC::Int)
+  def self.hulib_draw_text_line(l : CDoom::HU_Textline*, drawcursor : CDoom::DoomBool)
     # draw the new stuff
     x = l.value.x
     l.value.len.times do |i|
@@ -112,7 +112,7 @@ module Doocr
                              h : Int32,
                              font : CDoom::Patch**,
                              startchar : Int32,
-                             on : LibC::Int*)
+                             on : CDoom::DoomBool*)
     s.value.h = h
     s.value.on = on
     s.value.laston = 1
@@ -180,7 +180,7 @@ module Doocr
                              y : Int32,
                              font : CDoom::Patch**,
                              startchar : Int32,
-                             on : LibC::Int*)
+                             on : CDoom::DoomBool*)
     it.value.lm = 0 # default left margin is start of text
     it.value.on = on
     it.value.laston = 1
@@ -214,13 +214,13 @@ module Doocr
 
   # wrapper function for handling general keyed input.
   # returns true if it ate the key
-  def self.hulib_key_in_i_text(it : CDoom::HU_Itext*, ch : UInt8) : LibC::Int
+  def self.hulib_key_in_i_text(it : CDoom::HU_Itext*, ch : UInt8) : CDoom::DoomBool
     if ch >= ' '.ord && ch <= '_'.ord
       CDoom.hulib_add_char_to_text_line(pointerof(it.value.@l), ch.to_i8!)
     else
-      if ch == Doocr::KEY_BACKSPACE
+      if ch == CDoom::KEY_BACKSPACE
         CDoom.hulib_del_char_from_i_text(it)
-      elsif ch != Doocr::KEY_ENTER
+      elsif ch != CDoom::KEY_ENTER
         return 0 # did not eat key
       end
     end
@@ -251,21 +251,21 @@ module Doocr
   def self.hu_init
     buffer = uninitialized StaticArray(UInt8, 9)
 
-    if Doocr.language == Doocr::Language::French
+    if Doocr.language == CDoom::Language::French
       Doocr.shiftxform = Doocr.french_shiftxform
     else
       Doocr.shiftxform = Doocr.english_shiftxform
     end
 
     # load the heads-up font
-    j = Doocr::HU_FONTSTART
-    Doocr::HU_FONTSIZE.times do |i|
+    j = CDoom::HU_FONTSTART
+    CDoom::HU_FONTSIZE.times do |i|
       CDoom.doom_strcpy(buffer, "STCFN")
       CDoom.doom_concat(buffer, "0") if j < 100
       CDoom.doom_concat(buffer, "0") if j < 10
       CDoom.doom_concat(buffer, CDoom.doom_itoa(j, 10))
       j += 1
-      Doocr.hu_font[i] = CDoom.w_cache_lump_name(buffer, Doocr::PU_STATIC).as(CDoom::Patch*)
+      Doocr.hu_font[i] = CDoom.w_cache_lump_name(buffer, CDoom::PU_STATIC).as(CDoom::Patch*)
     end
   end
 
@@ -284,23 +284,23 @@ module Doocr
 
     # create the message widget
     CDoom.hulib_init_s_text(Doocr.w_message.to_unsafe,
-      Doocr::HU_MSGX, Doocr::HU_MSGY, Doocr::HU_MSGHEIGHT,
-      Doocr.hu_font.to_unsafe.as(CDoom::Patch**), Doocr::HU_FONTSTART, pointerof(@@message_on))
+      CDoom::HU_MSGX, CDoom::HU_MSGY, CDoom::HU_MSGHEIGHT,
+      Doocr.hu_font.to_unsafe.as(CDoom::Patch**), CDoom::HU_FONTSTART, pointerof(@@message_on))
 
     # # create the map title widget
     CDoom.hulib_init_text_line(Doocr.w_title.to_unsafe,
       0, 167 - Doocr.hu_font[0].value.height.to_i16!,
-      Doocr.hu_font.to_unsafe.as(CDoom::Patch**), Doocr::HU_FONTSTART)
+      Doocr.hu_font.to_unsafe.as(CDoom::Patch**), CDoom::HU_FONTSTART)
 
     s = ""
     case Doocr.gamemode
-    when Doocr::GameMode::Shareware, Doocr::GameMode::Registered, Doocr::GameMode::Retail
+    when CDoom::GameMode::Shareware, CDoom::GameMode::Registered, CDoom::GameMode::Retail
       s = Doocr.mapnames[(Doocr.gameepisode - 1)*9 + Doocr.gamemap - 1]
-    when Doocr::GameMode::Commercial
+    when CDoom::GameMode::Commercial
       case Doocr.gamemission
-      when Doocr::GameMission::PackTnt
+      when CDoom::GameMission::PackTnt
         s = Doocr.mapnamest[Doocr.gamemap - 1]
-      when Doocr::GameMission::PackPlut
+      when CDoom::GameMission::PackPlut
         s = Doocr.mapnamesp[Doocr.gamemap - 1]
       else
         s = Doocr.mapnames2[Doocr.gamemap - 1]
@@ -312,8 +312,8 @@ module Doocr
     end
 
     # create the chat widget
-    CDoom.hulib_init_i_text(Doocr.w_chat.to_unsafe, Doocr::HU_MSGX, Doocr::HU_MSGY + Doocr::HU_MSGHEIGHT*(Doocr.hu_font[0].value.height.to_i16! + 1),
-      Doocr.hu_font.to_unsafe.as(CDoom::Patch**), Doocr::HU_FONTSTART, Doocr.chat_on_ptr)
+    CDoom.hulib_init_i_text(Doocr.w_chat.to_unsafe, CDoom::HU_MSGX, CDoom::HU_MSGY + CDoom::HU_MSGHEIGHT*(Doocr.hu_font[0].value.height.to_i16! + 1),
+      Doocr.hu_font.to_unsafe.as(CDoom::Patch**), CDoom::HU_FONTSTART, Doocr.chat_on_ptr)
 
     # create the inputbuffer widgets
     CDoom::MAXPLAYERS.times do |i|
@@ -349,7 +349,7 @@ module Doocr
         CDoom.hulib_add_message_to_s_text(Doocr.w_message.to_unsafe, Pointer(UInt8).null, Doocr.plr.value.message)
         Doocr.plr.value.message = Pointer(UInt8).null
         Doocr.message_on = 1
-        Doocr.message_counter = Doocr::HU_MSGTIMEOUT
+        Doocr.message_counter = CDoom::HU_MSGTIMEOUT
         Doocr.message_nottobefuckedwith = Doocr.message_dontfuckwithme
         Doocr.message_dontfuckwithme = 0
       end
@@ -360,28 +360,28 @@ module Doocr
       CDoom::MAXPLAYERS.times do |i|
         next if Doocr.playeringame[i] == 0
         if i != Doocr.consoleplayer && (c = @@players[i].cmd.chatchar) != 0
-          if c <= Doocr::HU_BROADCAST
+          if c <= CDoom::HU_BROADCAST
             Doocr.chat_dest[i] = c.to_u8!
           else
             if c >= 'a'.ord && c <= 'z'.ord
               c = Doocr.shiftxform[c]
             end
             rc = CDoom.hulib_key_in_i_text(Doocr.w_inputbuffer.to_unsafe + i, c)
-            if rc != 0 && c == Doocr::KEY_ENTER
+            if rc != 0 && c == CDoom::KEY_ENTER
               if Doocr.w_inputbuffer[i].l.len != 0 &&
                  (Doocr.chat_dest[i] == (Doocr.consoleplayer + 1).to_u8! ||
-                 Doocr.chat_dest[i] == Doocr::HU_BROADCAST.to_u8!)
+                 Doocr.chat_dest[i] == CDoom::HU_BROADCAST.to_u8!)
                 CDoom.hulib_add_message_to_s_text(Doocr.w_message.to_unsafe,
                   Doocr.player_names[i].to_unsafe,
                   Doocr.w_inputbuffer[i].l.l)
 
                 Doocr.message_nottobefuckedwith = 1
                 Doocr.message_on = 1
-                Doocr.message_counter = Doocr::HU_MSGTIMEOUT
-                if Doocr.gamemode == Doocr::GameMode::Commercial
-                  Doocr.s_start_sound(Pointer(CDoom::Mobj).null, Doocr::Sfxenum::SFX_radio)
+                Doocr.message_counter = CDoom::HU_MSGTIMEOUT
+                if Doocr.gamemode == CDoom::GameMode::Commercial
+                  CDoom.s_start_sound(Pointer(CDoom::Mobj).null, CDoom::Sfxenum::SFX_radio)
                 else
-                  Doocr.s_start_sound(Pointer(CDoom::Mobj).null, Doocr::Sfxenum::SFX_tink)
+                  CDoom.s_start_sound(Pointer(CDoom::Mobj).null, CDoom::Sfxenum::SFX_tink)
                 end
               end
               CDoom.hulib_reset_i_text(Doocr.w_inputbuffer.to_unsafe + i)
@@ -394,11 +394,11 @@ module Doocr
   end
 
   def self.hu_queue_chat_char(c : UInt8)
-    if ((Doocr.head + 1) & (Doocr::QUEUESIZE - 1)) == Doocr.tail
+    if ((Doocr.head + 1) & (CDoom::QUEUESIZE - 1)) == Doocr.tail
       Doocr.plr.value.message = @@deh_hustr_msgu
     else
       Doocr.chatchars[Doocr.head] = c.to_u8!
-      Doocr.head = (Doocr.head + 1) & (Doocr::QUEUESIZE - 1)
+      Doocr.head = (Doocr.head + 1) & (CDoom::QUEUESIZE - 1)
     end
   end
 
@@ -406,49 +406,49 @@ module Doocr
     c = 0_u8
     if Doocr.head != Doocr.tail
       c = Doocr.chatchars[Doocr.tail]
-      Doocr.tail = (Doocr.tail + 1) & (Doocr::QUEUESIZE - 1)
+      Doocr.tail = (Doocr.tail + 1) & (CDoom::QUEUESIZE - 1)
     end
 
     return c
   end
 
-  LASTMESSAGE_SIZE = Doocr::HU_MAXLINELENGTH + 1
+  LASTMESSAGE_SIZE = CDoom::HU_MAXLINELENGTH + 1
   @@lastmessage = uninitialized StaticArray(UInt8, LASTMESSAGE_SIZE)
   @@shiftdown = 0
   @@altdown = 0
   @@destination_keys : StaticArray(UInt8, CDoom::MAXPLAYERS) = StaticArray[
-    Doocr::HUSTR_KEYGREEN.ord.to_u8,
-    Doocr::HUSTR_KEYINDIGO.ord.to_u8,
-    Doocr::HUSTR_KEYBROWN.ord.to_u8,
-    Doocr::HUSTR_KEYRED.ord.to_u8,
+    CDoom::HUSTR_KEYGREEN.ord.to_u8,
+    CDoom::HUSTR_KEYINDIGO.ord.to_u8,
+    CDoom::HUSTR_KEYBROWN.ord.to_u8,
+    CDoom::HUSTR_KEYRED.ord.to_u8,
   ]
   @@num_nobrainers = 0
 
-  def self.hu_responder(ev : CDoom::Event*) : LibC::Int
+  def self.hu_responder(ev : CDoom::Event*) : CDoom::DoomBool
     eatkey = 0
     numplayers = 0
     CDoom::MAXPLAYERS.times { |i| numplayers += Doocr.playeringame[i] }
 
-    if ev.value.data1 == Doocr::KEY_RSHIFT
-      @@shiftdown = (ev.value.type == Doocr::Evtype::Keydown).to_unsafe
+    if ev.value.data1 == CDoom::KEY_RSHIFT
+      @@shiftdown = (ev.value.type == CDoom::Evtype::Keydown).to_unsafe
       return 0
-    elsif ev.value.data1 == Doocr::KEY_RALT || ev.value.data1 == Doocr::KEY_LALT
-      @@altdown = (ev.value.type == Doocr::Evtype::Keydown).to_unsafe
+    elsif ev.value.data1 == CDoom::KEY_RALT || ev.value.data1 == CDoom::KEY_LALT
+      @@altdown = (ev.value.type == CDoom::Evtype::Keydown).to_unsafe
       return 0
     end
 
-    return 0 if ev.value.type != Doocr::Evtype::Keydown
+    return 0 if ev.value.type != CDoom::Evtype::Keydown
 
     if Doocr.chat_on == 0
-      if ev.value.data1 == Doocr::HU_MSGREFRESH
+      if ev.value.data1 == CDoom::HU_MSGREFRESH
         Doocr.message_on = 1
-        Doocr.message_counter = Doocr::HU_MSGTIMEOUT
+        Doocr.message_counter = CDoom::HU_MSGTIMEOUT
         eatkey = 1
-      elsif Doocr.netgame != 0 && ev.value.data1 == Doocr::HU_INPUTTOGGLE
+      elsif Doocr.netgame != 0 && ev.value.data1 == CDoom::HU_INPUTTOGGLE
         eatkey = 1
         Doocr.chat_on = 1
         CDoom.hulib_reset_i_text(Doocr.w_chat.to_unsafe)
-        CDoom.hu_queue_chat_char(Doocr::HU_BROADCAST)
+        CDoom.hu_queue_chat_char(CDoom::HU_BROADCAST)
       elsif Doocr.netgame != 0 && numplayers > 2
         CDoom::MAXPLAYERS.times do |i|
           if ev.value.data1 == @@destination_keys[i]
@@ -484,13 +484,13 @@ module Doocr
         macromessage = Doocr.chat_macros[c]
 
         # kill last message with a '\n'
-        CDoom.hu_queue_chat_char(Doocr::KEY_ENTER) # DEBUG!!!
+        CDoom.hu_queue_chat_char(CDoom::KEY_ENTER) # DEBUG!!!
 
         # send the macro message
         macromessage.each_byte do |byte|
           CDoom.hu_queue_chat_char(byte)
         end
-        CDoom.hu_queue_chat_char(Doocr::KEY_ENTER)
+        CDoom.hu_queue_chat_char(CDoom::KEY_ENTER)
 
         # leave chat mode and notify that it was sent
         Doocr.chat_on = 0
@@ -498,17 +498,17 @@ module Doocr
         Doocr.plr.value.message = @@lastmessage
         eatkey = 1
       else
-        c = CDoom.foreign_translation(c) if Doocr.language == Doocr::Language::French
+        c = CDoom.foreign_translation(c) if Doocr.language == CDoom::Language::French
         c = Doocr.shiftxform[c] if @@shiftdown != 0 || (c >= 'a'.ord && c <= 'z'.ord)
         eatkey = CDoom.hulib_key_in_i_text(Doocr.w_chat.to_unsafe, c)
         CDoom.hu_queue_chat_char(c) if eatkey != 0
-        if c == Doocr::KEY_ENTER
+        if c == CDoom::KEY_ENTER
           Doocr.chat_on = 0
           if Doocr.w_chat[0].l.len != 0
             CDoom.doom_strcpy(@@lastmessage, Doocr.w_chat[0].l.l)
             Doocr.plr.value.message = @@lastmessage
           end
-        elsif c == Doocr::KEY_ESCAPE
+        elsif c == CDoom::KEY_ESCAPE
           Doocr.chat_on = 0
         end
       end
