@@ -118,7 +118,7 @@ module Doocr
   def self.addsfx(sfxid : Int32, volume : Int32, step : Int32, seperation : Int32) : Int32
     rc = -1
     @@sound_mutex.synchronize do
-      oldest = Doocr.gametic
+      oldest = CDoom.gametic
       oldestnum = 0
 
       # Chainsaw troubles.
@@ -132,9 +132,9 @@ module Doocr
         # Loop all channels, check.
         CDoom::NUM_CHANNELS.times do |i|
           # Active, and using the same SFX?
-          if !Doocr.channels[i].null? && Doocr.channelids[i] == sfxid
+          if !CDoom.channels[i].null? && CDoom.channelids[i] == sfxid
             # Reset.
-            Doocr.channels[i] = Pointer(UInt8).null
+            CDoom.channels[i] = Pointer(UInt8).null
             # We are sure that iff,
             #  there will only be one
             break
@@ -144,10 +144,10 @@ module Doocr
 
       i = 0
       # Loop all channels to find oldest SFX.
-      while i < CDoom::NUM_CHANNELS && !Doocr.channels[i].null?
-        if Doocr.channelstart[i] < oldest
+      while i < CDoom::NUM_CHANNELS && !CDoom.channels[i].null?
+        if CDoom.channelstart[i] < oldest
           oldestnum = i
-          oldest = Doocr.channelstart[i]
+          oldest = CDoom.channelstart[i]
         end
         i += 1
       end
@@ -162,26 +162,26 @@ module Doocr
       # Okay, in the less recent channel,
       #  we will handle the new SFX.
       # Set pointer to raw data.
-      Doocr.channels[slot] = (@@s_sfx.to_unsafe + sfxid).value.data.as(UInt8*)
+      CDoom.channels[slot] = (@@s_sfx.to_unsafe + sfxid).value.data.as(UInt8*)
       # Set pointer to end of raw data.
-      Doocr.channelsend[slot] = Doocr.channels[slot] + @@lengths[sfxid]
+      CDoom.channelsend[slot] = CDoom.channels[slot] + @@lengths[sfxid]
 
       # Reset current handle number, limited to 0..100.
       @@handlenums = 100 if @@handlenums == 0
 
       # Assign current handle number.
       # Preserved so sounds could be stopped (unused).
-      Doocr.channelhandles[slot] = @@handlenums
+      CDoom.channelhandles[slot] = @@handlenums
       rc = @@handlenums
       @@handlenums += 1
 
       # Set stepping???
       # Kinda getting the impression this is never used.
-      Doocr.channelstep[slot] = step.to_u32
+      CDoom.channelstep[slot] = step.to_u32
       # ???
-      Doocr.channelstepremainder[slot] = 0
+      CDoom.channelstepremainder[slot] = 0
       # Should be gametic, I presume.
-      Doocr.channelstart[slot] = Doocr.gametic
+      CDoom.channelstart[slot] = CDoom.gametic
 
       # Seperation, that is, orientation/stereo.
       #  range is: 1 - 256
@@ -200,12 +200,12 @@ module Doocr
 
       # Get the proper lookup table piece
       #  for this volume level???
-      Doocr.channelleftvol_lookup[slot] = Doocr.vol_lookup.to_unsafe + leftvol*256
-      Doocr.channelrightvol_lookup[slot] = Doocr.vol_lookup.to_unsafe + rightvol*256
+      CDoom.channelleftvol_lookup[slot] = CDoom.vol_lookup.to_unsafe + leftvol*256
+      CDoom.channelrightvol_lookup[slot] = CDoom.vol_lookup.to_unsafe + rightvol*256
 
       # Preserve sound SFX id,
       #  e.g. for avoiding duplicates of chainsaw.
-      Doocr.channelids[slot] = sfxid
+      CDoom.channelids[slot] = sfxid
     end
 
     # You tell me.
@@ -228,16 +228,16 @@ module Doocr
     # Allocating the internal channels for mixing
     # (the maximum numer of sounds rendered
     # simultaneously) within zone memory.
-    Doocr.channels_s_sound.clear
-    Doocr.num_channels.times { Doocr.channels_s_sound << CDoom::Channel.new }
+    CDoom.channels_s_sound =
+      CDoom.z_malloc(CDoom.num_channels * sizeof(CDoom::Channel), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Channel*)
 
     # Free all channels for use
-    Doocr.num_channels.times do |i|
-      (Doocr.channels_s_sound.to_unsafe + i).value.sfxinfo = Pointer(CDoom::Sfxinfo).null
+    CDoom.num_channels.times do |i|
+      (CDoom.channels_s_sound + i).value.sfxinfo = Pointer(CDoom::Sfxinfo).null
     end
 
     # no sounds are playing, and they are not mus_paused
-    Doocr.mus_paused = 0
+    CDoom.mus_paused = 0
 
     # Note that sounds have not been cached (yet)
     i = 1
@@ -270,26 +270,26 @@ module Doocr
   def self.s_start
     # kill all playing sounds at start of level
     #  (trust me - a good idea)
-    Doocr.num_channels.times do |cnum|
-      CDoom.s_stop_channel(cnum) unless Doocr.channels_s_sound[cnum].sfxinfo.null?
+    CDoom.num_channels.times do |cnum|
+      CDoom.s_stop_channel(cnum) unless CDoom.channels_s_sound[cnum].sfxinfo.null?
     end
 
     # start new music for the level
-    Doocr.mus_paused = 0
+    CDoom.mus_paused = 0
 
-    if Doocr.gamemode == CDoom::GameMode::Commercial
-      mnum = CDoom::Musicenum::MUS_runnin.value + Doocr.gamemap - 1
+    if CDoom.gamemode == CDoom::GameMode::Commercial
+      mnum = CDoom::Musicenum::MUS_runnin.value + CDoom.gamemap - 1
     else
-      if Doocr.gameepisode < 4
-        mnum = CDoom::Musicenum::MUS_e1m1.value + (Doocr.gameepisode - 1) * 9 + Doocr.gamemap - 1
+      if CDoom.gameepisode < 4
+        mnum = CDoom::Musicenum::MUS_e1m1.value + (CDoom.gameepisode - 1) * 9 + CDoom.gamemap - 1
       else
-        mnum = @@regmus[Doocr.gamemap - 1].value
+        mnum = @@regmus[CDoom.gamemap - 1].value
       end
     end
 
     CDoom.s_change_music(mnum, 1)
 
-    Doocr.nextcleanup = 15
+    CDoom.nextcleanup = 15
   end
 
   def self.s_start_sound_at_volume(origin_p : Void*, sfx_id : LibC::Int, volume : LibC::Int)
@@ -319,15 +319,15 @@ module Doocr
     # Check to see if it is audible,
     #  and if not, modify the params
     sep = CDoom::NORM_SEP
-    if !origin.null? && origin != @@players[Doocr.consoleplayer].mo
-      rc = CDoom.s_adjust_sound_params(@@players[Doocr.consoleplayer].mo,
+    if !origin.null? && origin != @@players[CDoom.consoleplayer].mo
+      rc = CDoom.s_adjust_sound_params(@@players[CDoom.consoleplayer].mo,
         origin,
         pointerof(volume),
         pointerof(sep),
         pointerof(pitch))
 
-      if origin.value.x == @@players[Doocr.consoleplayer].mo.value.x &&
-         origin.value.y == @@players[Doocr.consoleplayer].mo.value.y
+      if origin.value.x == @@players[CDoom.consoleplayer].mo.value.x &&
+         origin.value.y == @@players[CDoom.consoleplayer].mo.value.y
         sep = CDoom::NORM_SEP
       end
 
@@ -381,7 +381,7 @@ module Doocr
 
     # Assigns the handle to one of the channels in the
     #  mix/output buffer.
-    (Doocr.channels_s_sound.to_unsafe + cnum).value.handle = CDoom.i_start_sound(sfx_id,
+    (CDoom.channels_s_sound + cnum).value.handle = CDoom.i_start_sound(sfx_id,
       volume,
       sep,
       pitch,
@@ -393,8 +393,8 @@ module Doocr
   end
 
   def self.s_stop_sound(origin : Void*)
-    Doocr.num_channels.times do |cnum|
-      if !Doocr.channels_s_sound[cnum].sfxinfo.null? && Doocr.channels_s_sound[cnum].origin == origin
+    CDoom.num_channels.times do |cnum|
+      if !CDoom.channels_s_sound[cnum].sfxinfo.null? && CDoom.channels_s_sound[cnum].origin == origin
         CDoom.s_stop_channel(cnum)
         break
       end
@@ -405,20 +405,16 @@ module Doocr
   # Stop and resume music, during game PAUSE.
   #
   def self.s_pause_sound
-    if current_music = @@mus_playing_s_sound
-      if Doocr.mus_paused == 0
-        CDoom.i_pause_song(current_music.handle)
-      end
-      Doocr.mus_paused = 1
+    if !CDoom.mus_playing_s_sound.null? && CDoom.mus_paused == 0
+      CDoom.i_pause_song(CDoom.mus_playing_s_sound.value.handle)
+      CDoom.mus_paused = 1
     end
   end
 
   def self.s_resume_sound
-    if current_music = @@mus_playing_s_sound
-      if Doocr.mus_paused != 0
-        CDoom.i_resume_song(current_music.handle)
-      end
-      Doocr.mus_paused = 0
+    if !CDoom.mus_playing_s_sound.null? && CDoom.mus_paused != 0
+      CDoom.i_resume_song(CDoom.mus_playing_s_sound.value.handle)
+      CDoom.mus_paused = 0
     end
   end
 
@@ -428,8 +424,8 @@ module Doocr
   def self.s_update_sounds(listener_p : Void*)
     listener = listener_p.as(CDoom::Mobj*)
 
-    Doocr.num_channels.times do |cnum|
-      c = Doocr.channels_s_sound.to_unsafe + cnum
+    CDoom.num_channels.times do |cnum|
+      c = CDoom.channels_s_sound + cnum
       sfx = c.value.sfxinfo
 
       unless c.value.sfxinfo.null?
@@ -479,7 +475,7 @@ module Doocr
       CDoom.i_error("Error: Attempt to set music volume at #{volume}")
     end
 
-    Doocr.snd_music_volume = volume
+    CDoom.snd_music_volume = volume
     CDoom.i_set_music_volume(volume)
   end
 
@@ -491,47 +487,48 @@ module Doocr
   end
 
   def self.s_change_music(musicnum : LibC::Int, looping : LibC::Int)
+    music = CDoom.s_music + musicnum
+
     if musicnum <= CDoom::Musicenum::MUS_None.value ||
        musicnum >= CDoom::Musicenum::NUMMUSIC.value
       CDoom.i_error("Error: Bad music number #{musicnum}")
     end
 
-    music = @@s_music[musicnum]
-    return if @@mus_playing_s_sound == music
+    return if CDoom.mus_playing_s_sound == music
 
     # shutdown old music
     CDoom.s_stop_music
 
     # get lumpnum if neccessary
-    if music.lumpnum == 0
-      music.lumpnum = CDoom.w_get_num_for_name("d_#{music.name}".to_unsafe)
+    if music.value.lumpnum == 0
+      music.value.lumpnum = CDoom.w_get_num_for_name("d_#{String.new(music.value.name)}")
     end
     # load & register it
-    music.data = CDoom.w_cache_lump_num(music.lumpnum, CDoom::PU_MUSIC)
-    music.handle = CDoom.i_register_song(music.data)
+    music.value.data = CDoom.w_cache_lump_num(music.value.lumpnum, CDoom::PU_MUSIC)
+    music.value.handle = CDoom.i_register_song(music.value.data)
     # play it
-    @@mus_playing_s_sound = music
+    CDoom.mus_playing_s_sound = music
 
-    CDoom.i_play_song(music.handle, looping)
+    CDoom.i_play_song(music.value.handle, looping)
   end
 
   def self.s_stop_music
-    if current_music = @@mus_playing_s_sound
-      if Doocr.mus_paused != 0
-        CDoom.i_resume_song(current_music.handle)
+    unless CDoom.mus_playing_s_sound.null?
+      if CDoom.mus_paused != 0
+        CDoom.i_resume_song(CDoom.mus_playing_s_sound.value.handle)
       end
 
-      CDoom.i_stop_song(current_music.handle)
-      CDoom.i_unregister_song(current_music.handle)
-      z_change_tag(current_music.data, CDoom::PU_CACHE)
+      CDoom.i_stop_song(CDoom.mus_playing_s_sound.value.handle)
+      CDoom.i_unregister_song(CDoom.mus_playing_s_sound.value.handle)
+      z_change_tag(CDoom.mus_playing_s_sound.value.data, CDoom::PU_CACHE)
 
-      current_music.data = Pointer(Void).null
-      @@mus_playing_s_sound = nil
+      CDoom.mus_playing_s_sound.value.data = Pointer(Void).null
+      CDoom.mus_playing_s_sound = Pointer(CDoom::Musicinfo).null
     end
   end
 
   def self.s_stop_channel(cnum : LibC::Int)
-    c = Doocr.channels_s_sound.to_unsafe + cnum
+    c = CDoom.channels_s_sound + cnum
 
     unless c.value.sfxinfo.null?
       # stop the sound playing
@@ -540,9 +537,9 @@ module Doocr
       # check to see
       #  if other channels are playing the sound
       i = 0
-      while i < Doocr.num_channels
+      while i < CDoom.num_channels
         if cnum != i &&
-           c.value.sfxinfo == Doocr.channels_s_sound[i].sfxinfo
+           c.value.sfxinfo == CDoom.channels_s_sound[i].sfxinfo
           break
         end
 
@@ -571,7 +568,7 @@ module Doocr
     # From _GG1_ p.428. Appox. eucledian distance fast.
     approx_dist = adx &+ ady &- ((adx < ady ? adx : ady) >> 1)
 
-    return 0 if Doocr.gamemap != 8 &&
+    return 0 if CDoom.gamemap != 8 &&
                 approx_dist > CDoom::S_CLIPPING_DIST
 
     # angle of source to listener
@@ -594,7 +591,7 @@ module Doocr
     # volume calculation
     if approx_dist < CDoom::S_CLOSE_DIST
       vol.value = 15
-    elsif Doocr.gamemap == 8
+    elsif CDoom.gamemap == 8
       vol.value = 15
     else
       # distance effect
@@ -613,10 +610,10 @@ module Doocr
     cnum = 0
 
     # Find an open channel
-    while cnum < Doocr.num_channels
-      if Doocr.channels_s_sound[cnum].sfxinfo.null?
+    while cnum < CDoom.num_channels
+      if CDoom.channels_s_sound[cnum].sfxinfo.null?
         break
-      elsif !origin.null? && Doocr.channels_s_sound[cnum].origin == origin
+      elsif !origin.null? && CDoom.channels_s_sound[cnum].origin == origin
         CDoom.s_stop_channel(cnum)
         break
       end
@@ -625,18 +622,18 @@ module Doocr
     end
 
     # None available
-    if cnum == Doocr.num_channels
+    if cnum == CDoom.num_channels
       # Look for lower priority
       cnum = 0
-      while cnum < Doocr.num_channels
-        if Doocr.channels_s_sound[cnum].sfxinfo.value.priority >= sfxinfo.value.priority
+      while cnum < CDoom.num_channels
+        if CDoom.channels_s_sound[cnum].sfxinfo.value.priority >= sfxinfo.value.priority
           break
         end
 
         cnum += 1
       end
 
-      if cnum == Doocr.num_channels
+      if cnum == CDoom.num_channels
         # FUCK!  No lower priority.  Sorry, Charlie.
         return -1
       else
@@ -645,7 +642,7 @@ module Doocr
       end
     end
 
-    c = Doocr.channels_s_sound.to_unsafe + cnum
+    c = CDoom.channels_s_sound + cnum
 
     # channel is decided to be cnum.
     c.value.sfxinfo = sfxinfo

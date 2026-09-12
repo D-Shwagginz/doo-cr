@@ -112,7 +112,7 @@ module Doocr
   #         player.value.itemcount = player.value.itemcount + 1
   #         CDoom.p_remove_mobj(special)
   #         player.value.bonuscount = player.value.bonuscount + CDoom::BONUSADD
-  #         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_itemup.value) if mod.get_player_num(player) == Doocr.consoleplayer
+  #         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_itemup.value) if mod.get_player_num(player) == CDoom.consoleplayer
   #       end
   #     end
   #   end
@@ -148,11 +148,11 @@ module Doocr
     # Adds a thing into the mod
     # Takes a block which yields the thing for setup
     # Returns the index of the mobj for spawning inside of your methods
-    def self.add_thing(db_name : String, db_spawnable : Bool = true, &) : CDoom::Mobjtype
+    def self.add_thing(db_name : String, db_spawnable : Bool = true, &) : Int32
       thing = Thing.new(db_name, db_spawnable)
       yield thing
       @@things << thing
-      return CDoom::Mobjtype.new(thing.mobjtype)
+      return @@things.size - 1
     end
 
     # Adds a sound into the mod
@@ -216,7 +216,7 @@ module Doocr
 
     macro make_var(var)
       module Doocr::Mod
-        class_property {{var}}
+        property {{var}}
       end
     end
 

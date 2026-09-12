@@ -18,18 +18,18 @@
 module Doocr
   # Which one is deterministic?
   def self.p_random : Int32
-    Doocr.prndindex = (Doocr.prndindex + 1) & 0xff
-    return Doocr.rndtable[Doocr.prndindex].to_i32
+    CDoom.prndindex = (CDoom.prndindex + 1) & 0xff
+    return CDoom.rndtable[CDoom.prndindex].to_i32
   end
 
   def self.m_random : Int32
-    Doocr.rndindex = (Doocr.rndindex + 1) & 0xff
-    return Doocr.rndtable[Doocr.rndindex].to_i32
+    CDoom.rndindex = (CDoom.rndindex + 1) & 0xff
+    return CDoom.rndtable[CDoom.rndindex].to_i32
   end
 
   def self.m_clear_random
-    Doocr.rndindex = 0
-    Doocr.prndindex = 0
+    CDoom.rndindex = 0
+    CDoom.prndindex = 0
   end
 
   def self.t_move_ceiling(ceiling : CDoom::Ceiling*)
@@ -43,7 +43,7 @@ module Doocr
         ceiling.value.topheight,
         0, 1, ceiling.value.direction)
 
-      if (Doocr.leveltime & 7) == 0
+      if (CDoom.leveltime & 7) == 0
         case ceiling.value.type
         when CDoom::Ceilingenum::SilentCrushAndRaise
         else
@@ -72,7 +72,7 @@ module Doocr
         ceiling.value.bottomheight,
         ceiling.value.crush, 1, ceiling.value.direction)
 
-      if (Doocr.leveltime & 7) == 0
+      if (CDoom.leveltime & 7) == 0
         case ceiling.value.type
         when CDoom::Ceilingenum::SilentCrushAndRaise
         else
@@ -123,7 +123,7 @@ module Doocr
     end
 
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      sec = Doocr.sectors + secnum
+      sec = CDoom.sectors + secnum
       next unless sec.value.specialdata.null?
 
       # new door thinker
@@ -172,8 +172,8 @@ module Doocr
   #
   def self.p_add_active_ceiling(c : CDoom::Ceiling*)
     CDoom::MAXCEILINGS.times do |i|
-      if Doocr.activeceilings[i].null?
-        Doocr.activeceilings[i] = c
+      if CDoom.activeceilings[i].null?
+        CDoom.activeceilings[i] = c
         return
       end
     end
@@ -184,10 +184,10 @@ module Doocr
   #
   def self.p_remove_active_ceiling(c : CDoom::Ceiling*)
     CDoom::MAXCEILINGS.times do |i|
-      if Doocr.activeceilings[i] == c
-        Doocr.activeceilings[i].value.sector.value.specialdata = Pointer(Void).null
-        CDoom.p_remove_thinker(pointerof(Doocr.activeceilings[i].value.@thinker))
-        Doocr.activeceilings[i] = Pointer(CDoom::Ceiling).null
+      if CDoom.activeceilings[i] == c
+        CDoom.activeceilings[i].value.sector.value.specialdata = Pointer(Void).null
+        CDoom.p_remove_thinker(pointerof(CDoom.activeceilings[i].value.@thinker))
+        CDoom.activeceilings[i] = Pointer(CDoom::Ceiling).null
         break
       end
     end
@@ -198,11 +198,11 @@ module Doocr
   #
   def self.p_activate_in_stasis_ceiling(line : CDoom::Line*)
     CDoom::MAXCEILINGS.times do |i|
-      if !Doocr.activeceilings[i].null? &&
-         (Doocr.activeceilings[i].value.tag == line.value.tag) &&
-         (Doocr.activeceilings[i].value.direction == 0)
-        Doocr.activeceilings[i].value.direction = Doocr.activeceilings[i].value.olddirection
-        pointerof(Doocr.activeceilings[i].value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
+      if !CDoom.activeceilings[i].null? &&
+         (CDoom.activeceilings[i].value.tag == line.value.tag) &&
+         (CDoom.activeceilings[i].value.direction == 0)
+        CDoom.activeceilings[i].value.direction = CDoom.activeceilings[i].value.olddirection
+        pointerof(CDoom.activeceilings[i].value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_ceiling).pointer, Pointer(Void).null)
       end
     end
   end
@@ -213,12 +213,12 @@ module Doocr
   def self.ev_ceiling_crush_stop(line : CDoom::Line*) : LibC::Int
     rtn = 0
     CDoom::MAXCEILINGS.times do |i|
-      if !Doocr.activeceilings[i].null? &&
-         Doocr.activeceilings[i].value.tag == line.value.tag &&
-         Doocr.activeceilings[i].value.direction != 0
-        Doocr.activeceilings[i].value.olddirection = Doocr.activeceilings[i].value.direction
-        pointerof(Doocr.activeceilings[i].value.@thinker.@function).as(CDoom::ActionfV*).value = NULL_PROC
-        Doocr.activeceilings[i].value.direction = 0 # in-stasis
+      if !CDoom.activeceilings[i].null? &&
+         CDoom.activeceilings[i].value.tag == line.value.tag &&
+         CDoom.activeceilings[i].value.direction != 0
+        CDoom.activeceilings[i].value.olddirection = CDoom.activeceilings[i].value.direction
+        pointerof(CDoom.activeceilings[i].value.@thinker.@function).as(CDoom::ActionfV*).value = NULL_PROC
+        CDoom.activeceilings[i].value.direction = 0 # in-stasis
         rtn = 1
       end
     end
@@ -349,7 +349,7 @@ module Doocr
     rtn = 0
 
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      sec = Doocr.sectors + secnum
+      sec = CDoom.sectors + secnum
       next unless sec.value.specialdata.null?
 
       # new door thinker
@@ -436,8 +436,8 @@ module Doocr
     end
 
     # if the sector has an active thinker, use it
-    sec = Doocr.sides[line.value.sidenum[side ^ 1]].sector
-    secnum = (sec - Doocr.sectors).to_i32!
+    sec = CDoom.sides[line.value.sidenum[side ^ 1]].sector
+    secnum = (sec - CDoom.sectors).to_i32!
 
     unless sec.value.specialdata.null?
       door = sec.value.specialdata.as(CDoom::Vldoor*)
@@ -553,14 +553,14 @@ module Doocr
   #
   def self.p_recursive_sound(sec : CDoom::Sector*, soundblocks : LibC::Int)
     # wake up all monsters in this sector
-    if sec.value.validcount == Doocr.validcount &&
+    if sec.value.validcount == CDoom.validcount &&
        sec.value.soundtraversed <= soundblocks + 1
       return # already flooded
     end
 
-    sec.value.validcount = Doocr.validcount
+    sec.value.validcount = CDoom.validcount
     sec.value.soundtraversed = soundblocks + 1
-    sec.value.soundtarget = Doocr.soundtarget
+    sec.value.soundtarget = CDoom.soundtarget
 
     sec.value.linecount.times do |i|
       check = sec.value.lines[i]
@@ -568,11 +568,11 @@ module Doocr
 
       CDoom.p_line_opening(check)
 
-      next if Doocr.openrange <= 0 # closed door
+      next if CDoom.openrange <= 0 # closed door
 
-      other = Doocr.sides[check.value.sidenum[0]].sector
-      if Doocr.sides[check.value.sidenum[0]].sector == sec
-        other = Doocr.sides[check.value.sidenum[1]].sector
+      other = CDoom.sides[check.value.sidenum[0]].sector
+      if CDoom.sides[check.value.sidenum[0]].sector == sec
+        other = CDoom.sides[check.value.sidenum[1]].sector
       end
 
       if check.value.flags & CDoom::ML_SOUNDBLOCK != 0
@@ -588,8 +588,8 @@ module Doocr
   # it will alert other monsters to the player.
   #
   def self.p_noise_alert(target : CDoom::Mobj*, emmiter : CDoom::Mobj*)
-    Doocr.soundtarget = target
-    Doocr.validcount += 1
+    CDoom.soundtarget = target
+    CDoom.validcount += 1
     CDoom.p_recursive_sound(emmiter.value.subsector.value.sector, 0)
   end
 
@@ -654,16 +654,16 @@ module Doocr
 
     CDoom.i_error("Error: Weird actor.value.movedir!") if actor.value.movedir.to_u32! >= 8
 
-    tryx = actor.value.x + actor.value.info.value.speed * Doocr.xspeed[actor.value.movedir]
-    tryy = actor.value.y + actor.value.info.value.speed * Doocr.yspeed[actor.value.movedir]
+    tryx = actor.value.x + actor.value.info.value.speed * CDoom.xspeed[actor.value.movedir]
+    tryy = actor.value.y + actor.value.info.value.speed * CDoom.yspeed[actor.value.movedir]
 
     try_ok = CDoom.p_try_move(actor, tryx, tryy)
 
     if try_ok == 0
       # open any specials
-      if actor.value.flags & CDoom::Mobjflag::MF_FLOAT.value != 0 && Doocr.floatok != 0
+      if actor.value.flags & CDoom::Mobjflag::MF_FLOAT.value != 0 && CDoom.floatok != 0
         # must adjust height
-        if actor.value.z < Doocr.tmfloorz
+        if actor.value.z < CDoom.tmfloorz
           actor.value.z = actor.value.z + CDoom::FLOATSPEED
         else
           actor.value.z = actor.value.z - CDoom::FLOATSPEED
@@ -672,13 +672,13 @@ module Doocr
         return 1
       end
 
-      return 0 if Doocr.numspechit == 0
+      return 0 if CDoom.numspechit == 0
 
       actor.value.movedir = CDoom::Dirtype::NoDir.value
       good = 0
-      while Doocr.numspechit != 0
-        Doocr.numspechit -= 1
-        ld = Doocr.spechit[Doocr.numspechit]
+      while CDoom.numspechit != 0
+        CDoom.numspechit -= 1
+        ld = CDoom.spechit[CDoom.numspechit]
         # if the special is not a door
         # that can be opened,
         # return false
@@ -717,7 +717,7 @@ module Doocr
     CDoom.i_error("Error: p_new_chase_dir: called with no target") if actor.value.target.null?
 
     olddir = actor.value.movedir
-    turnaround = Doocr.opposite[olddir]
+    turnaround = CDoom.opposite[olddir]
 
     deltax = actor.value.target.value.x - actor.value.x
     deltay = actor.value.target.value.y - actor.value.y
@@ -741,7 +741,7 @@ module Doocr
     # try direct route
     if d[1] != CDoom::Dirtype::NoDir &&
        d[2] != CDoom::Dirtype::NoDir
-      actor.value.movedir = Doocr.diags[((deltay < 0).to_unsafe << 1) + (deltax > 0).to_unsafe].value
+      actor.value.movedir = CDoom.diags[((deltay < 0).to_unsafe << 1) + (deltax > 0).to_unsafe].value
       return if actor.value.movedir != turnaround.value && CDoom.p_try_walk(actor) != 0
     end
 
@@ -811,7 +811,7 @@ module Doocr
     stop = (actor.value.lastlook - 1) & 3
 
     loop do
-      if Doocr.playeringame[actor.value.lastlook] == 0
+      if CDoom.playeringame[actor.value.lastlook] == 0
         actor.value.lastlook = (actor.value.lastlook + 1) & 3
         next
       end
@@ -863,8 +863,8 @@ module Doocr
 
     # scan the remaining thinkers
     # to see if all Keens are dead
-    th = Doocr.thinkercap.to_unsafe.value.next
-    while th != Doocr.thinkercap.to_unsafe
+    th = CDoom.thinkercap.next
+    while th != pointerof(CDoom.thinkercap)
       if th.value.function.acp1.pointer != (->CDoom.p_mobj_thinker).pointer
         th = th.value.next
         next
@@ -976,7 +976,7 @@ module Doocr
     # do not attack twice in a row
     if actor.value.flags & CDoom::Mobjflag::MF_JUSTATTACKED.value != 0
       actor.value.flags = actor.value.flags & ~CDoom::Mobjflag::MF_JUSTATTACKED.value
-      CDoom.p_new_chase_dir(actor) if Doocr.gameskill != CDoom::Skill::Nightmare && Doocr.fastparm == 0
+      CDoom.p_new_chase_dir(actor) if CDoom.gameskill != CDoom::Skill::Nightmare && CDoom.fastparm == 0
       return
     end
 
@@ -992,8 +992,8 @@ module Doocr
     nomissile = false
     # check for missile attack
     if actor.value.info.value.missilestate != 0
-      if Doocr.gameskill < CDoom::Skill::Nightmare &&
-         Doocr.fastparm == 0 && actor.value.movecount != 0
+      if CDoom.gameskill < CDoom::Skill::Nightmare &&
+         CDoom.fastparm == 0 && actor.value.movecount != 0
         nomissile = true
       end
 
@@ -1009,7 +1009,7 @@ module Doocr
     end
 
     # possibly choose another target
-    if Doocr.netgame != 0 &&
+    if CDoom.netgame != 0 &&
        actor.value.threshold == 0 &&
        CDoom.p_check_sight(actor, actor.value.target) == 0
       return if CDoom.p_look_for_players(actor, 1) != 0 # got a new target
@@ -1196,7 +1196,7 @@ module Doocr
   end
 
   def self.a_tracer(actor : CDoom::Mobj*)
-    return if Doocr.gametic & 3 != 0
+    return if CDoom.gametic & 3 != 0
 
     # spawn a puff of smoke behind the rocket
     CDoom.p_spawn_puff(actor.value.x, actor.value.y, actor.value.z)
@@ -1222,10 +1222,10 @@ module Doocr
 
     if exact != actor.value.angle
       if exact &- actor.value.angle > 0x80000000
-        actor.value.angle = actor.value.angle &- Doocr.traceangle
+        actor.value.angle = actor.value.angle &- CDoom.traceangle
         actor.value.angle = exact if exact &- actor.value.angle < 0x80000000
       else
-        actor.value.angle = actor.value.angle &+ Doocr.traceangle
+        actor.value.angle = actor.value.angle &+ CDoom.traceangle
         actor.value.angle = exact if exact &- actor.value.angle > 0x80000000
       end
     end
@@ -1281,15 +1281,15 @@ module Doocr
 
     maxdist = thing.value.info.value.radius + Doocr.mobjinfo[CDoom::Mobjtype::MT_VILE.value].radius
 
-    return 1 if doom_abs(thing.value.x - Doocr.viletryx) > maxdist ||
-                doom_abs(thing.value.y - Doocr.viletryy) > maxdist # not actually touching
+    return 1 if doom_abs(thing.value.x - CDoom.viletryx) > maxdist ||
+                doom_abs(thing.value.y - CDoom.viletryy) > maxdist # not actually touching
 
-    Doocr.corpsehit = thing
-    Doocr.corpsehit.value.momx = 0
-    Doocr.corpsehit.value.momy = 0
-    Doocr.corpsehit.value.height = Doocr.corpsehit.value.height << 2
-    check = CDoom.p_check_position(Doocr.corpsehit, Doocr.corpsehit.value.x, Doocr.corpsehit.value.y)
-    Doocr.corpsehit.value.height = Doocr.corpsehit.value.height >> 2
+    CDoom.corpsehit = thing
+    CDoom.corpsehit.value.momx = 0
+    CDoom.corpsehit.value.momy = 0
+    CDoom.corpsehit.value.height = CDoom.corpsehit.value.height << 2
+    check = CDoom.p_check_position(CDoom.corpsehit, CDoom.corpsehit.value.x, CDoom.corpsehit.value.y)
+    CDoom.corpsehit.value.height = CDoom.corpsehit.value.height >> 2
 
     return 1 if check == 0 # doesn't fit here
 
@@ -1302,15 +1302,15 @@ module Doocr
   def self.a_vile_chase(actor : CDoom::Mobj*)
     if actor.value.movedir != CDoom::Dirtype::NoDir.value
       # check for corpses to raise
-      Doocr.viletryx =
-        actor.value.x + actor.value.info.value.speed * Doocr.xspeed[actor.value.movedir]
-      Doocr.viletryy =
-        actor.value.y + actor.value.info.value.speed * Doocr.yspeed[actor.value.movedir]
+      CDoom.viletryx =
+        actor.value.x + actor.value.info.value.speed * CDoom.xspeed[actor.value.movedir]
+      CDoom.viletryy =
+        actor.value.y + actor.value.info.value.speed * CDoom.yspeed[actor.value.movedir]
 
-      xl = (Doocr.viletryx - Doocr.bmaporgx - CDoom::MAXRADIUS * 2) >> CDoom::MAPBLOCKSHIFT
-      xh = (Doocr.viletryx - Doocr.bmaporgx + CDoom::MAXRADIUS * 2) >> CDoom::MAPBLOCKSHIFT
-      yl = (Doocr.viletryy - Doocr.bmaporgy - CDoom::MAXRADIUS * 2) >> CDoom::MAPBLOCKSHIFT
-      yh = (Doocr.viletryy - Doocr.bmaporgy + CDoom::MAXRADIUS * 2) >> CDoom::MAPBLOCKSHIFT
+      xl = (CDoom.viletryx - CDoom.bmaporgx - CDoom::MAXRADIUS * 2) >> CDoom::MAPBLOCKSHIFT
+      xh = (CDoom.viletryx - CDoom.bmaporgx + CDoom::MAXRADIUS * 2) >> CDoom::MAPBLOCKSHIFT
+      yl = (CDoom.viletryy - CDoom.bmaporgy - CDoom::MAXRADIUS * 2) >> CDoom::MAPBLOCKSHIFT
+      yh = (CDoom.viletryy - CDoom.bmaporgy + CDoom::MAXRADIUS * 2) >> CDoom::MAPBLOCKSHIFT
 
       vileobj = actor
       bx = xl
@@ -1323,19 +1323,19 @@ module Doocr
           if CDoom.p_block_things_iterator(bx, by, ->CDoom.pit_vile_check) == 0
             # got one!
             temp = actor.value.target
-            actor.value.target = Doocr.corpsehit
+            actor.value.target = CDoom.corpsehit
             CDoom.a_face_target(actor)
             actor.value.target = temp
 
             CDoom.p_set_mobj_state(actor, CDoom::Statenum::S_VILE_HEAL1)
-            CDoom.s_start_sound(Doocr.corpsehit, CDoom::Sfxenum::SFX_slop.value)
-            info = Doocr.corpsehit.value.info
+            CDoom.s_start_sound(CDoom.corpsehit, CDoom::Sfxenum::SFX_slop.value)
+            info = CDoom.corpsehit.value.info
 
-            CDoom.p_set_mobj_state(Doocr.corpsehit, CDoom::Statenum.new(info.value.raisestate))
-            Doocr.corpsehit.value.height = Doocr.corpsehit.value.height << 2
-            Doocr.corpsehit.value.flags = info.value.flags
-            Doocr.corpsehit.value.health = info.value.spawnhealth
-            Doocr.corpsehit.value.target = Pointer(CDoom::Mobj).null
+            CDoom.p_set_mobj_state(CDoom.corpsehit, CDoom::Statenum.new(info.value.raisestate))
+            CDoom.corpsehit.value.height = CDoom.corpsehit.value.height << 2
+            CDoom.corpsehit.value.flags = info.value.flags
+            CDoom.corpsehit.value.health = info.value.spawnhealth
+            CDoom.corpsehit.value.target = Pointer(CDoom::Mobj).null
 
             return
           end
@@ -1505,8 +1505,8 @@ module Doocr
     # count total number of skull currently on the level
     count = 0
 
-    currentthinker = Doocr.thinkercap.to_unsafe.value.next
-    while currentthinker != Doocr.thinkercap.to_unsafe
+    currentthinker = CDoom.thinkercap.next
+    while currentthinker != pointerof(CDoom.thinkercap)
       if (currentthinker.value.function.acp1.pointer == (->CDoom.p_mobj_thinker).pointer) &&
          currentthinker.as(CDoom::Mobj*).value.type == CDoom::Mobjtype::MT_SKULL
         count += 1
@@ -1607,24 +1607,24 @@ module Doocr
   # if on first boss level
   #
   def self.a_boss_death(mo : CDoom::Mobj*)
-    if Doocr.gamemode == CDoom::GameMode::Commercial
-      return if Doocr.gamemap != 7
+    if CDoom.gamemode == CDoom::GameMode::Commercial
+      return if CDoom.gamemap != 7
 
       return if mo.value.type != CDoom::Mobjtype::MT_FATSO &&
                 mo.value.type != CDoom::Mobjtype::MT_BABY
     else
-      case Doocr.gameepisode
+      case CDoom.gameepisode
       when 1
-        return if Doocr.gamemap != 8
+        return if CDoom.gamemap != 8
         return if mo.value.type != CDoom::Mobjtype::MT_BRUISER
       when 2
-        return if Doocr.gamemap != 8
+        return if CDoom.gamemap != 8
         return if mo.value.type != CDoom::Mobjtype::MT_CYBORG
       when 3
-        return if Doocr.gamemap != 8
+        return if CDoom.gamemap != 8
         return if mo.value.type != CDoom::Mobjtype::MT_SPIDER
       when 4
-        case Doocr.gamemap
+        case CDoom.gamemap
         when 6
           return if mo.value.type != CDoom::Mobjtype::MT_CYBORG
         when 8
@@ -1633,14 +1633,14 @@ module Doocr
           return
         end
       else
-        return if Doocr.gamemap != 8
+        return if CDoom.gamemap != 8
       end
     end
 
     # make sure there is a player alive for victory
     i = 0
     while i < CDoom::MAXPLAYERS
-      break if Doocr.playeringame[i] != 0 && @@players[i].health > 0
+      break if CDoom.playeringame[i] != 0 && @@players[i].health > 0
       i += 1
     end
 
@@ -1648,8 +1648,8 @@ module Doocr
 
     # scan the remaining thinkers to see
     # if all bosses are dead
-    th = Doocr.thinkercap.to_unsafe.value.next
-    while th != Doocr.thinkercap.to_unsafe
+    th = CDoom.thinkercap.next
+    while th != pointerof(CDoom.thinkercap)
       if th.value.function.acp1.pointer != (->CDoom.p_mobj_thinker).pointer
         th = th.value.next
         next
@@ -1668,8 +1668,8 @@ module Doocr
 
     junk = CDoom::Line.new
     # victory!
-    if Doocr.gamemode == CDoom::GameMode::Commercial
-      if Doocr.gamemap == 7
+    if CDoom.gamemode == CDoom::GameMode::Commercial
+      if CDoom.gamemap == 7
         if mo.value.type == CDoom::Mobjtype::MT_FATSO
           junk.tag = 666
           CDoom.ev_do_floor(pointerof(junk), CDoom::Floorenum::LowerFloorToLowest)
@@ -1683,13 +1683,13 @@ module Doocr
         end
       end
     else
-      case Doocr.gameepisode
+      case CDoom.gameepisode
       when 1
         junk.tag = 666
         CDoom.ev_do_floor(pointerof(junk), CDoom::Floorenum::LowerFloorToLowest)
         return
       when 4
-        case Doocr.gamemap
+        case CDoom.gamemap
         when 6
           junk.tag = 666
           CDoom.ev_do_door(pointerof(junk), CDoom::Vldoorenum::BlazeOpen)
@@ -1735,11 +1735,11 @@ module Doocr
 
   def self.a_brain_awake(mo : CDoom::Mobj*)
     # find all the target spots
-    Doocr.numbraintargets = 0
-    Doocr.braintargeton = 0
+    CDoom.numbraintargets = 0
+    CDoom.braintargeton = 0
 
-    thinker = Doocr.thinkercap.to_unsafe.value.next
-    while thinker != Doocr.thinkercap.to_unsafe
+    thinker = CDoom.thinkercap.next
+    while thinker != pointerof(CDoom.thinkercap)
       if thinker.value.function.acp1.pointer != (->CDoom.p_mobj_thinker).pointer
         thinker = thinker.value.next
         next # not a mobj
@@ -1748,8 +1748,8 @@ module Doocr
       m = thinker.as(CDoom::Mobj*)
 
       if m.value.type == CDoom::Mobjtype::MT_BOSSTARGET
-        (Doocr.braintargets.to_unsafe + Doocr.numbraintargets).value = m
-        Doocr.numbraintargets += 1
+        (CDoom.braintargets.to_unsafe + CDoom.numbraintargets).value = m
+        CDoom.numbraintargets += 1
       end
       thinker = thinker.value.next
     end
@@ -1801,11 +1801,11 @@ module Doocr
 
   def self.a_brain_spit(mo : CDoom::Mobj*)
     @@easy ^= 1
-    return if Doocr.gameskill <= CDoom::Skill::Easy && @@easy == 0
+    return if CDoom.gameskill <= CDoom::Skill::Easy && @@easy == 0
 
     # shoot a cube at current target
-    targ = Doocr.braintargets[Doocr.braintargeton]
-    Doocr.braintargeton = (Doocr.braintargeton + 1) % Doocr.numbraintargets
+    targ = CDoom.braintargets[CDoom.braintargeton]
+    CDoom.braintargeton = (CDoom.braintargeton + 1) % CDoom.numbraintargets
 
     # spawn brain missile
     newmobj = CDoom.p_spawn_missile(mo, targ, CDoom::Mobjtype::MT_SPAWNSHOT)
@@ -1874,7 +1874,7 @@ module Doocr
     # Default death sound.
     sound = CDoom::Sfxenum::SFX_pldeth
 
-    if Doocr.gamemode == CDoom::GameMode::Commercial &&
+    if CDoom.gamemode == CDoom::GameMode::Commercial &&
        mo.value.health < -50
       # IF THE PLAYER DIES
       # LESS THAN -50% WITHOUT GIBBING
@@ -2004,7 +2004,7 @@ module Doocr
       floor.value.crush, 0, floor.value.direction)
 
     CDoom.s_start_sound(pointerof(floor.value.sector.value.@soundorg),
-      CDoom::Sfxenum::SFX_stnmov) if Doocr.leveltime & 7 == 0
+      CDoom::Sfxenum::SFX_stnmov) if CDoom.leveltime & 7 == 0
 
     if res == CDoom::Result::Pastdest
       floor.value.sector.value.specialdata = Pointer(Void).null
@@ -2033,7 +2033,7 @@ module Doocr
     secnum = -1
     rtn = 0
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      sec = Doocr.sectors + secnum
+      sec = CDoom.sectors + secnum
 
       # ALREADY MOVING?  IF SO, KEEP GOING...
       next unless sec.value.specialdata.null?
@@ -2122,14 +2122,14 @@ module Doocr
           if CDoom.two_sided(secnum, i) != 0
             side = CDoom.get_side(secnum, i, 0)
             if side.value.bottomtexture >= 0
-              if Doocr.textureheight[side.value.bottomtexture] < minsize
-                minsize = Doocr.textureheight[side.value.bottomtexture]
+              if CDoom.textureheight[side.value.bottomtexture] < minsize
+                minsize = CDoom.textureheight[side.value.bottomtexture]
               end
             end
             side = CDoom.get_side(secnum, i, 1)
             if side.value.bottomtexture >= 0
-              if Doocr.textureheight[side.value.bottomtexture] < minsize
-                minsize = Doocr.textureheight[side.value.bottomtexture]
+              if CDoom.textureheight[side.value.bottomtexture] < minsize
+                minsize = CDoom.textureheight[side.value.bottomtexture]
               end
             end
           end
@@ -2146,7 +2146,7 @@ module Doocr
 
         sec.value.linecount.times do |i|
           if CDoom.two_sided(secnum, i) != 0
-            if CDoom.get_side(secnum, i, 0).value.sector - Doocr.sectors == secnum
+            if CDoom.get_side(secnum, i, 0).value.sector - CDoom.sectors == secnum
               sec = CDoom.get_sector(secnum, i, 1)
 
               if sec.value.floorheight == floor.value.floordestheight
@@ -2178,7 +2178,7 @@ module Doocr
     secnum = -1
     rtn = 0
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      sec = Doocr.sectors + secnum
+      sec = CDoom.sectors + secnum
 
       # ALREADY MOVING?  IF SO, KEEP GOING...
       next unless sec.value.specialdata.null?
@@ -2215,12 +2215,12 @@ module Doocr
           next if ((sec.value.lines[i]).value.flags & CDoom::ML_TWOSIDED) == 0
 
           tsec = (sec.value.lines[i]).value.frontsector
-          newsecnum = (tsec - Doocr.sectors).to_i32!
+          newsecnum = (tsec - CDoom.sectors).to_i32!
 
           next if secnum != newsecnum
 
           tsec = (sec.value.lines[i]).value.backsector
-          newsecnum = (tsec - Doocr.sectors).to_i32!
+          newsecnum = (tsec - CDoom.sectors).to_i32!
 
           next if tsec.value.floorpic != texture
 
@@ -2268,13 +2268,13 @@ module Doocr
     return 0 if player.value.ammo[ammo.value] == player.value.maxammo[ammo.value]
 
     if num != 0
-      num *= Doocr.clipammo[ammo.value]
+      num *= CDoom.clipammo[ammo.value]
     else
-      num = Doocr.clipammo[ammo.value] // 2
+      num = CDoom.clipammo[ammo.value] // 2
     end
 
-    if Doocr.gameskill == CDoom::Skill::Baby ||
-       Doocr.gameskill == CDoom::Skill::Nightmare
+    if CDoom.gameskill == CDoom::Skill::Baby ||
+       CDoom.gameskill == CDoom::Skill::Nightmare
       # give double ammo in trainer mode,
       # you'll need in nightmare
       num <<= 1
@@ -2305,7 +2305,7 @@ module Doocr
     when CDoom::Ammotype::Shell
       if player.value.readyweapon == CDoom::Weapontype::Fist ||
          player.value.readyweapon == CDoom::Weapontype::Pistol
-        if Doocr.gamemode == CDoom::GameMode::Commercial &&
+        if CDoom.gamemode == CDoom::GameMode::Commercial &&
            player.value.weaponowned[CDoom::Weapontype::Supershotgun.value] != 0
           player.value.pendingweapon = CDoom::Weapontype::Supershotgun
         elsif player.value.weaponowned[CDoom::Weapontype::Shotgun.value] != 0
@@ -2336,8 +2336,8 @@ module Doocr
     gaveammo = 0
     gaveweapon = 0
 
-    if Doocr.netgame != 0 &&
-       Doocr.deathmatch != 2 &&
+    if CDoom.netgame != 0 &&
+       CDoom.deathmatch != 2 &&
        dropped == 0
       # leave placed weapons forever on net games
       return 0 if player.value.weaponowned[weapon.value] != 0
@@ -2345,26 +2345,26 @@ module Doocr
       player.value.bonuscount = player.value.bonuscount + CDoom::BONUSADD
       player.value.weaponowned[weapon.value] = 1
 
-      if Doocr.deathmatch != 0
-        CDoom.p_give_ammo(player, Doocr.weaponinfo[weapon.value].ammo, 5)
+      if CDoom.deathmatch != 0
+        CDoom.p_give_ammo(player, CDoom.weaponinfo[weapon.value].ammo, 5)
       else
-        CDoom.p_give_ammo(player, Doocr.weaponinfo[weapon.value].ammo, 2)
+        CDoom.p_give_ammo(player, CDoom.weaponinfo[weapon.value].ammo, 2)
       end
       player.value.pendingweapon = weapon
 
-      if player == @@players.to_unsafe + Doocr.consoleplayer
+      if player == @@players.to_unsafe + CDoom.consoleplayer
         CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_wpnup)
       end
       return 0
     end
 
-    if Doocr.weaponinfo[weapon.value].ammo != CDoom::Ammotype::Noammo
+    if CDoom.weaponinfo[weapon.value].ammo != CDoom::Ammotype::Noammo
       # give one clip with a dropped weapon,
       # two clips with a found weapon
       if dropped != 0
-        gaveammo = CDoom.p_give_ammo(player, Doocr.weaponinfo[weapon.value].ammo, 1)
+        gaveammo = CDoom.p_give_ammo(player, CDoom.weaponinfo[weapon.value].ammo, 1)
       else
-        gaveammo = CDoom.p_give_ammo(player, Doocr.weaponinfo[weapon.value].ammo, 2)
+        gaveammo = CDoom.p_give_ammo(player, CDoom.weaponinfo[weapon.value].ammo, 2)
       end
     else
       gaveammo = 0
@@ -2499,7 +2499,7 @@ module Doocr
       player.value.message = @@deh_gotsuper
       sound = CDoom::Sfxenum::SFX_getpow
     when CDoom::Spritenum::SPR_MEGA
-      return if Doocr.gamemode != CDoom::GameMode::Commercial
+      return if CDoom.gamemode != CDoom::GameMode::Commercial
       player.value.health = @@deh_megasphere_health
       player.value.mo.value.health = player.value.health
       CDoom.p_give_armor(player, 2)
@@ -2513,37 +2513,37 @@ module Doocr
         player.value.message = @@deh_gotbluecard
       end
       CDoom.p_give_card(player, CDoom::Card::Bluecard)
-      return if Doocr.netgame != 0
+      return if CDoom.netgame != 0
     when CDoom::Spritenum::SPR_YKEY
       if player.value.cards[CDoom::Card::Yellowcard.value] == 0
         player.value.message = @@deh_gotyelwcard
       end
       CDoom.p_give_card(player, CDoom::Card::Yellowcard)
-      return if Doocr.netgame != 0
+      return if CDoom.netgame != 0
     when CDoom::Spritenum::SPR_RKEY
       if player.value.cards[CDoom::Card::Redcard.value] == 0
         player.value.message = @@deh_gotredcard
       end
       CDoom.p_give_card(player, CDoom::Card::Redcard)
-      return if Doocr.netgame != 0
+      return if CDoom.netgame != 0
     when CDoom::Spritenum::SPR_BSKU
       if player.value.cards[CDoom::Card::Blueskull.value] == 0
         player.value.message = @@deh_gotblueskul
       end
       CDoom.p_give_card(player, CDoom::Card::Blueskull)
-      return if Doocr.netgame != 0
+      return if CDoom.netgame != 0
     when CDoom::Spritenum::SPR_RSKU
       if player.value.cards[CDoom::Card::Redskull.value] == 0
         player.value.message = @@deh_gotredskull
       end
       CDoom.p_give_card(player, CDoom::Card::Redskull)
-      return if Doocr.netgame != 0
+      return if CDoom.netgame != 0
     when CDoom::Spritenum::SPR_YSKU
       if player.value.cards[CDoom::Card::Yellowskull.value] == 0
         player.value.message = @@deh_gotyelwskul
       end
       CDoom.p_give_card(player, CDoom::Card::Yellowskull)
-      return if Doocr.netgame != 0
+      return if CDoom.netgame != 0
 
       # medikits, heals
     when CDoom::Spritenum::SPR_STIM
@@ -2660,7 +2660,7 @@ module Doocr
     player.value.itemcount = player.value.itemcount + 1 if special.value.flags & CDoom::Mobjflag::MF_COUNTITEM.value != 0
     CDoom.p_remove_mobj(special)
     player.value.bonuscount = player.value.bonuscount + CDoom::BONUSADD
-    CDoom.s_start_sound(Pointer(Void).null, sound.value) if player == @@players.to_unsafe + Doocr.consoleplayer
+    CDoom.s_start_sound(Pointer(Void).null, sound.value) if player == @@players.to_unsafe + CDoom.consoleplayer
   end
 
   def self.p_kill_mobj(source : CDoom::Mobj*, target : CDoom::Mobj*)
@@ -2676,7 +2676,7 @@ module Doocr
       source.value.player.value.killcount = source.value.player.value.killcount + 1 if target.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0
 
       if !target.value.player.null?
-        unless Doocr.netgame == 0
+        unless CDoom.netgame == 0
           srcplr = source.value.player - @@players.to_unsafe
           trgtplr = target.value.player - @@players.to_unsafe
           source.value.player.value.frags[trgtplr] =
@@ -2684,24 +2684,24 @@ module Doocr
 
           if srcplr == trgtplr
             # Suicide
-            strings = Doocr.consoleplayer == srcplr ? @@suic_strings : @@suic_see_strings
+            strings = CDoom.consoleplayer == srcplr ? @@suic_strings : @@suic_see_strings
           else
-            strings = Doocr.deathmatch != 0 ? # Deathmatch strings
-(Doocr.consoleplayer == srcplr ? @@death_kill_strings : (
-              Doocr.consoleplayer == trgtplr ? @@death_dead_strings : @@death_nut_strings
+            strings = CDoom.deathmatch != 0 ? # Deathmatch strings
+(CDoom.consoleplayer == srcplr ? @@death_kill_strings : (
+              CDoom.consoleplayer == trgtplr ? @@death_dead_strings : @@death_nut_strings
             ) # Coop strings
-) : Doocr.consoleplayer == srcplr ? @@net_kill_strings : (
-              Doocr.consoleplayer == trgtplr ? @@net_dead_strings : @@net_nut_strings
+) : CDoom.consoleplayer == srcplr ? @@net_kill_strings : (
+              CDoom.consoleplayer == trgtplr ? @@net_dead_strings : @@net_nut_strings
             )
           end
 
-          (@@players.to_unsafe + Doocr.consoleplayer).value.message =
+          (@@players.to_unsafe + CDoom.consoleplayer).value.message =
             strings.sample(Random.new(CDoom.m_random)).gsub(
-              '1', Doocr.player_names[srcplr][...-2]).gsub(
-              '2', Doocr.player_names[trgtplr][...-2])
+              '1', String.new(CDoom.player_names[srcplr])[...-2]).gsub(
+              '2', String.new(CDoom.player_names[trgtplr])[...-2])
         end
       end
-    elsif Doocr.netgame == 0 && target.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0
+    elsif CDoom.netgame == 0 && target.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0
       # count all monster deaths,
       # even those caused by other monsters
       @@players.to_unsafe.value.killcount = @@players[0].killcount + 1
@@ -2709,10 +2709,10 @@ module Doocr
 
     if !target.value.player.null?
       if (source.null? || source.value.player.null?) &&                   # Player was not killed by player
-         target.value.player - @@players.to_unsafe != Doocr.consoleplayer # Isn't self. They know they died
-        (@@players.to_unsafe + Doocr.consoleplayer).value.message =
+         target.value.player - @@players.to_unsafe != CDoom.consoleplayer # Isn't self. They know they died
+        (@@players.to_unsafe + CDoom.consoleplayer).value.message =
           @@died_strings.sample(Random.new(CDoom.m_random)).gsub(
-            '1', Doocr.player_names[target.value.player - @@players.to_unsafe][...-2])
+            '1', String.new(CDoom.player_names[target.value.player - @@players.to_unsafe])[...-2])
       end
 
       # count environment kills against you
@@ -2723,11 +2723,11 @@ module Doocr
       target.value.player.value.playerstate = CDoom::Playerstate::PST_DEAD
       CDoom.p_drop_weapon(target.value.player)
 
-      if target.value.player == @@players.to_unsafe + Doocr.consoleplayer &&
-         Doocr.automapactive != 0
+      if target.value.player == @@players.to_unsafe + CDoom.consoleplayer &&
+         CDoom.automapactive != 0
         # don't die in automap,
         # siwtch view prior to dying
-        Doocr.am_stop
+        CDoom.am_stop
       end
     end
 
@@ -2788,7 +2788,7 @@ module Doocr
                     source.value.player.value.cheats & CDoom::Cheat::CF_ME.value != 0 # Double damage in me mode!
 
     player = target.value.player
-    damage >>= 1 if !player.null? && Doocr.gameskill == CDoom::Skill::Baby # take half damage in trainer mode
+    damage >>= 1 if !player.null? && CDoom.gameskill == CDoom::Skill::Baby # take half damage in trainer mode
 
     # Some close combat weapons should not
     # inflict thrust and push the victim out of reach,
@@ -2858,7 +2858,7 @@ module Doocr
 
       temp = damage < 100 ? damage : 100
 
-      if player == @@players.to_unsafe + Doocr.consoleplayer
+      if player == @@players.to_unsafe + CDoom.consoleplayer
         CDoom.i_tactile(40, 10, 40 + temp*2)
       end
     end
@@ -3016,7 +3016,7 @@ module Doocr
   def self.ev_start_light_strobing(line : CDoom::Line*)
     secnum = -1
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      sec = Doocr.sectors + secnum
+      sec = CDoom.sectors + secnum
       next if !sec.value.specialdata.null?
 
       CDoom.p_spawn_strobe_flash(sec, CDoom::SLOWDARK, 0)
@@ -3027,9 +3027,9 @@ module Doocr
   # TURN LINE'S TAG LIGHTS OFF
   #
   def self.ev_turn_tag_lights_off(line : CDoom::Line*)
-    sector = Doocr.sectors
+    sector = CDoom.sectors
 
-    Doocr.numsectors.times do |j|
+    CDoom.numsectors.times do |j|
       if sector.value.tag == line.value.tag
         min = sector.value.lightlevel
         sector.value.linecount.times do |i|
@@ -3045,9 +3045,9 @@ module Doocr
   end
 
   def self.ev_light_turn_on(line : CDoom::Line*, bright : LibC::Int)
-    sector = Doocr.sectors
+    sector = CDoom.sectors
 
-    Doocr.numsectors.times do |j|
+    CDoom.numsectors.times do |j|
       if sector.value.tag == line.value.tag
         # bright = 0 means to search
         # for highest light level
@@ -3106,57 +3106,57 @@ module Doocr
   def self.pit_stomp_thing(thing : CDoom::Mobj*) : CDoom::DoomBool
     return 1 if thing.value.flags & CDoom::Mobjflag::MF_SHOOTABLE.value == 0
 
-    blockdist = thing.value.radius + Doocr.tmthing.value.radius
+    blockdist = thing.value.radius + CDoom.tmthing.value.radius
 
-    if doom_abs(thing.value.x - Doocr.tmx) >= blockdist ||
-       doom_abs(thing.value.y - Doocr.tmy) >= blockdist
+    if doom_abs(thing.value.x - CDoom.tmx) >= blockdist ||
+       doom_abs(thing.value.y - CDoom.tmy) >= blockdist
       # didn't hit it
       return 1
     end
 
     # don't clip against self
-    return 1 if thing == Doocr.tmthing
+    return 1 if thing == CDoom.tmthing
 
     # monsters don't stomp things except on boss level
-    return 0 if Doocr.tmthing.value.player.null? && Doocr.gamemap != 30
+    return 0 if CDoom.tmthing.value.player.null? && CDoom.gamemap != 30
 
-    CDoom.p_damage_mobj(thing, Doocr.tmthing, Doocr.tmthing, 10000)
+    CDoom.p_damage_mobj(thing, CDoom.tmthing, CDoom.tmthing, 10000)
 
     return 1
   end
 
   def self.p_teleport_move(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
     # kill anything occupying the position
-    Doocr.tmthing = thing
-    Doocr.tmflags = thing.value.flags
+    CDoom.tmthing = thing
+    CDoom.tmflags = thing.value.flags
 
-    Doocr.tmx = x
-    Doocr.tmy = y
+    CDoom.tmx = x
+    CDoom.tmy = y
 
-    Doocr.tmbbox[CDoom::BOXTOP] = y + Doocr.tmthing.value.radius
-    Doocr.tmbbox[CDoom::BOXBOTTOM] = y - Doocr.tmthing.value.radius
-    Doocr.tmbbox[CDoom::BOXRIGHT] = x + Doocr.tmthing.value.radius
-    Doocr.tmbbox[CDoom::BOXLEFT] = x - Doocr.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXTOP] = y + CDoom.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXBOTTOM] = y - CDoom.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXRIGHT] = x + CDoom.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXLEFT] = x - CDoom.tmthing.value.radius
 
     newsubsec = CDoom.r_point_in_subsector(x, y)
-    Doocr.ceilingline = Pointer(CDoom::Line).null
+    CDoom.ceilingline = Pointer(CDoom::Line).null
 
     # The base floor/ceiling is from the subsector
     # that contains the point.
     # Any contacted lines the step closer together
     # will adjust them.
-    Doocr.tmfloorz = newsubsec.value.sector.value.floorheight
-    Doocr.tmdropoffz = Doocr.tmfloorz
-    Doocr.tmceilingz = newsubsec.value.sector.value.ceilingheight
+    CDoom.tmfloorz = newsubsec.value.sector.value.floorheight
+    CDoom.tmdropoffz = CDoom.tmfloorz
+    CDoom.tmceilingz = newsubsec.value.sector.value.ceilingheight
 
-    Doocr.validcount += 1
-    Doocr.numspechit = 0
+    CDoom.validcount += 1
+    CDoom.numspechit = 0
 
     # stomp on anythings contacted
-    xl = (Doocr.tmbbox[CDoom::BOXLEFT] - Doocr.bmaporgx - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
-    xh = (Doocr.tmbbox[CDoom::BOXRIGHT] - Doocr.bmaporgx + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
-    yl = (Doocr.tmbbox[CDoom::BOXBOTTOM] - Doocr.bmaporgy - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
-    yh = (Doocr.tmbbox[CDoom::BOXTOP] - Doocr.bmaporgy + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    xl = (CDoom.tmbbox[CDoom::BOXLEFT] - CDoom.bmaporgx - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    xh = (CDoom.tmbbox[CDoom::BOXRIGHT] - CDoom.bmaporgx + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    yl = (CDoom.tmbbox[CDoom::BOXBOTTOM] - CDoom.bmaporgy - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    yh = (CDoom.tmbbox[CDoom::BOXTOP] - CDoom.bmaporgy + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
 
     bx = xl
     while bx <= xh
@@ -3172,8 +3172,8 @@ module Doocr
     # so link the thing into its new position
     CDoom.p_unset_thing_position(thing)
 
-    thing.value.floorz = Doocr.tmfloorz
-    thing.value.ceilingz = Doocr.tmceilingz
+    thing.value.floorz = CDoom.tmfloorz
+    thing.value.ceilingz = CDoom.tmceilingz
     thing.value.x = x
     thing.value.y = y
 
@@ -3190,14 +3190,14 @@ module Doocr
   # Adjusts tmfloorz and tmceilingz as lines are contacted
   #
   def self.pit_check_line(ld : CDoom::Line*) : CDoom::DoomBool
-    if Doocr.tmbbox[CDoom::BOXRIGHT] <= ld.value.bbox[CDoom::BOXLEFT] ||
-       Doocr.tmbbox[CDoom::BOXLEFT] >= ld.value.bbox[CDoom::BOXRIGHT] ||
-       Doocr.tmbbox[CDoom::BOXTOP] <= ld.value.bbox[CDoom::BOXBOTTOM] ||
-       Doocr.tmbbox[CDoom::BOXBOTTOM] >= ld.value.bbox[CDoom::BOXTOP]
+    if CDoom.tmbbox[CDoom::BOXRIGHT] <= ld.value.bbox[CDoom::BOXLEFT] ||
+       CDoom.tmbbox[CDoom::BOXLEFT] >= ld.value.bbox[CDoom::BOXRIGHT] ||
+       CDoom.tmbbox[CDoom::BOXTOP] <= ld.value.bbox[CDoom::BOXBOTTOM] ||
+       CDoom.tmbbox[CDoom::BOXBOTTOM] >= ld.value.bbox[CDoom::BOXTOP]
       return 1
     end
 
-    return 1 if CDoom.p_box_on_line_side(Doocr.tmbbox, ld) != -1
+    return 1 if CDoom.p_box_on_line_side(CDoom.tmbbox, ld) != -1
 
     # A line has been hit
 
@@ -3212,29 +3212,29 @@ module Doocr
 
     return 0 if ld.value.backsector.null? # one sided line
 
-    if Doocr.tmthing.value.flags & CDoom::Mobjflag::MF_MISSILE.value == 0
+    if CDoom.tmthing.value.flags & CDoom::Mobjflag::MF_MISSILE.value == 0
       return 0 if ld.value.flags & CDoom::ML_BLOCKING != 0 # explicitly blocking everything
 
-      return 0 if Doocr.tmthing.value.player.null? && ld.value.flags & CDoom::ML_BLOCKMONSTERS != 0 # block monsters only
+      return 0 if CDoom.tmthing.value.player.null? && ld.value.flags & CDoom::ML_BLOCKMONSTERS != 0 # block monsters only
     end
 
     # set openrange, opentop, openbottom
     CDoom.p_line_opening(ld)
 
     # adjust floor / ceiling heights
-    if Doocr.opentop < Doocr.tmceilingz
-      Doocr.tmceilingz = Doocr.opentop
-      Doocr.ceilingline = ld
+    if CDoom.opentop < CDoom.tmceilingz
+      CDoom.tmceilingz = CDoom.opentop
+      CDoom.ceilingline = ld
     end
 
-    Doocr.tmfloorz = Doocr.openbottom if Doocr.openbottom > Doocr.tmfloorz
+    CDoom.tmfloorz = CDoom.openbottom if CDoom.openbottom > CDoom.tmfloorz
 
-    Doocr.tmdropoffz = Doocr.lowfloor if Doocr.lowfloor < Doocr.tmdropoffz
+    CDoom.tmdropoffz = CDoom.lowfloor if CDoom.lowfloor < CDoom.tmdropoffz
 
     # if contacted a special line, add it to the list
     if ld.value.special != 0
-      Doocr.spechit[Doocr.numspechit] = ld
-      Doocr.numspechit += 1
+      CDoom.spechit[CDoom.numspechit] = ld
+      CDoom.numspechit += 1
     end
 
     return 1
@@ -3243,46 +3243,46 @@ module Doocr
   def self.pit_check_thing(thing : CDoom::Mobj*) : CDoom::DoomBool
     return 1 if thing.value.flags & (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_SHOOTABLE.value) == 0
 
-    blockdist = thing.value.radius + Doocr.tmthing.value.radius
+    blockdist = thing.value.radius + CDoom.tmthing.value.radius
 
-    if doom_abs(thing.value.x - Doocr.tmx) >= blockdist ||
-       doom_abs(thing.value.y - Doocr.tmy) >= blockdist
+    if doom_abs(thing.value.x - CDoom.tmx) >= blockdist ||
+       doom_abs(thing.value.y - CDoom.tmy) >= blockdist
       # didn't hit it
       return 1
     end
 
     # don't clip against self
-    return 1 if thing == Doocr.tmthing
+    return 1 if thing == CDoom.tmthing
 
     # check for skulls slamming into things
-    if Doocr.tmthing.value.flags & CDoom::Mobjflag::MF_SKULLFLY.value != 0
-      damage = ((CDoom.p_random % 8) + 1) * Doocr.tmthing.value.info.value.damage
+    if CDoom.tmthing.value.flags & CDoom::Mobjflag::MF_SKULLFLY.value != 0
+      damage = ((CDoom.p_random % 8) + 1) * CDoom.tmthing.value.info.value.damage
 
-      CDoom.p_damage_mobj(thing, Doocr.tmthing, Doocr.tmthing, damage)
+      CDoom.p_damage_mobj(thing, CDoom.tmthing, CDoom.tmthing, damage)
 
-      Doocr.tmthing.value.flags = Doocr.tmthing.value.flags & ~CDoom::Mobjflag::MF_SKULLFLY.value
-      Doocr.tmthing.value.momx = 0
-      Doocr.tmthing.value.momy = 0
-      Doocr.tmthing.value.momz = 0
+      CDoom.tmthing.value.flags = CDoom.tmthing.value.flags & ~CDoom::Mobjflag::MF_SKULLFLY.value
+      CDoom.tmthing.value.momx = 0
+      CDoom.tmthing.value.momy = 0
+      CDoom.tmthing.value.momz = 0
 
-      CDoom.p_set_mobj_state(Doocr.tmthing, CDoom::Statenum.new(Doocr.tmthing.value.info.value.spawnstate))
+      CDoom.p_set_mobj_state(CDoom.tmthing, CDoom::Statenum.new(CDoom.tmthing.value.info.value.spawnstate))
 
       return 0 # stop moving
     end
 
     # missiles can hit other things
-    if Doocr.tmthing.value.flags & CDoom::Mobjflag::MF_MISSILE.value != 0
+    if CDoom.tmthing.value.flags & CDoom::Mobjflag::MF_MISSILE.value != 0
       # see if it went over / under
-      return 1 if Doocr.tmthing.value.z > thing.value.z + thing.value.height         # overhead
-      return 1 if Doocr.tmthing.value.z + Doocr.tmthing.value.height < thing.value.z # underneath
+      return 1 if CDoom.tmthing.value.z > thing.value.z + thing.value.height         # overhead
+      return 1 if CDoom.tmthing.value.z + CDoom.tmthing.value.height < thing.value.z # underneath
 
-      if !Doocr.tmthing.value.target.null? && (
-           Doocr.tmthing.value.target.value.type == thing.value.type ||
-           (Doocr.tmthing.value.target.value.type == CDoom::Mobjtype::MT_KNIGHT && thing.value.type == CDoom::Mobjtype::MT_BRUISER) ||
-           (Doocr.tmthing.value.target.value.type == CDoom::Mobjtype::MT_BRUISER && thing.value.type == CDoom::Mobjtype::MT_KNIGHT)
+      if !CDoom.tmthing.value.target.null? && (
+           CDoom.tmthing.value.target.value.type == thing.value.type ||
+           (CDoom.tmthing.value.target.value.type == CDoom::Mobjtype::MT_KNIGHT && thing.value.type == CDoom::Mobjtype::MT_BRUISER) ||
+           (CDoom.tmthing.value.target.value.type == CDoom::Mobjtype::MT_BRUISER && thing.value.type == CDoom::Mobjtype::MT_KNIGHT)
          )
         # Don't hit same species as originator.
-        return 1 if thing == Doocr.tmthing.value.target
+        return 1 if thing == CDoom.tmthing.value.target
 
         if thing.value.type != CDoom::Mobjtype::MT_PLAYER && @@deh_species_infighting == 0
           # Explode, but do no damage.
@@ -3297,8 +3297,8 @@ module Doocr
       end
 
       # damage / explode
-      damage = ((CDoom.p_random % 8) + 1) * Doocr.tmthing.value.info.value.damage
-      CDoom.p_damage_mobj(thing, Doocr.tmthing, Doocr.tmthing.value.target, damage)
+      damage = ((CDoom.p_random % 8) + 1) * CDoom.tmthing.value.info.value.damage
+      CDoom.p_damage_mobj(thing, CDoom.tmthing, CDoom.tmthing.value.target, damage)
 
       # don't traverse any more
       return 0
@@ -3307,9 +3307,9 @@ module Doocr
     # check for special pickup
     if thing.value.flags & CDoom::Mobjflag::MF_SPECIAL.value != 0
       solid = thing.value.flags & CDoom::Mobjflag::MF_SOLID.value != 0
-      if Doocr.tmflags & CDoom::Mobjflag::MF_PICKUP.value != 0
+      if CDoom.tmflags & CDoom::Mobjflag::MF_PICKUP.value != 0
         # can remove thing
-        CDoom.p_touch_special_thing(thing, Doocr.tmthing)
+        CDoom.p_touch_special_thing(thing, CDoom.tmthing)
       end
       return (!solid).to_unsafe
     end
@@ -3345,42 +3345,42 @@ module Doocr
   #  numspeciallines
   #
   def self.p_check_position(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
-    Doocr.tmthing = thing
-    Doocr.tmflags = thing.value.flags
+    CDoom.tmthing = thing
+    CDoom.tmflags = thing.value.flags
 
-    Doocr.tmx = x
-    Doocr.tmy = y
+    CDoom.tmx = x
+    CDoom.tmy = y
 
-    Doocr.tmbbox[CDoom::BOXTOP] = y &+ Doocr.tmthing.value.radius
-    Doocr.tmbbox[CDoom::BOXBOTTOM] = y &- Doocr.tmthing.value.radius
-    Doocr.tmbbox[CDoom::BOXRIGHT] = x &+ Doocr.tmthing.value.radius
-    Doocr.tmbbox[CDoom::BOXLEFT] = x &- Doocr.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXTOP] = y &+ CDoom.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXBOTTOM] = y &- CDoom.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXRIGHT] = x &+ CDoom.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXLEFT] = x &- CDoom.tmthing.value.radius
 
     newsubsec = CDoom.r_point_in_subsector(x, y)
-    Doocr.ceilingline = Pointer(CDoom::Line).null
+    CDoom.ceilingline = Pointer(CDoom::Line).null
 
     # The base floor/ceiling is from the subsector
     # that contains the point.
     # Any contacted lines the step closer together
     # will adjust them.
-    Doocr.tmfloorz = newsubsec.value.sector.value.floorheight
-    Doocr.tmdropoffz = Doocr.tmfloorz
-    Doocr.tmceilingz = newsubsec.value.sector.value.ceilingheight
+    CDoom.tmfloorz = newsubsec.value.sector.value.floorheight
+    CDoom.tmdropoffz = CDoom.tmfloorz
+    CDoom.tmceilingz = newsubsec.value.sector.value.ceilingheight
 
-    Doocr.validcount += 1
-    Doocr.numspechit = 0
+    CDoom.validcount += 1
+    CDoom.numspechit = 0
 
-    return 1 if Doocr.tmflags & CDoom::Mobjflag::MF_NOCLIP.value != 0
+    return 1 if CDoom.tmflags & CDoom::Mobjflag::MF_NOCLIP.value != 0
 
     # Check things first, possibly picking things up.
     # The bounding box is extended by MAXRADIUS
     # because mobj_ts are grouped into mapblocks
     # based on their origin point, and can overlap
     # into adjacent blocks by up to MAXRADIUS units.
-    xl = (Doocr.tmbbox[CDoom::BOXLEFT] &- Doocr.bmaporgx &- CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
-    xh = (Doocr.tmbbox[CDoom::BOXRIGHT] &- Doocr.bmaporgx &+ CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
-    yl = (Doocr.tmbbox[CDoom::BOXBOTTOM] &- Doocr.bmaporgy &- CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
-    yh = (Doocr.tmbbox[CDoom::BOXTOP] &- Doocr.bmaporgy &+ CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    xl = (CDoom.tmbbox[CDoom::BOXLEFT] &- CDoom.bmaporgx &- CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    xh = (CDoom.tmbbox[CDoom::BOXRIGHT] &- CDoom.bmaporgx &+ CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    yl = (CDoom.tmbbox[CDoom::BOXBOTTOM] &- CDoom.bmaporgy &- CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    yh = (CDoom.tmbbox[CDoom::BOXTOP] &- CDoom.bmaporgy &+ CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
 
     bx = xl
     while bx <= xh
@@ -3393,10 +3393,10 @@ module Doocr
     end
 
     # check lines
-    xl = (Doocr.tmbbox[CDoom::BOXLEFT] &- Doocr.bmaporgx) >> CDoom::MAPBLOCKSHIFT
-    xh = (Doocr.tmbbox[CDoom::BOXRIGHT] &- Doocr.bmaporgx) >> CDoom::MAPBLOCKSHIFT
-    yl = (Doocr.tmbbox[CDoom::BOXBOTTOM] &- Doocr.bmaporgy) >> CDoom::MAPBLOCKSHIFT
-    yh = (Doocr.tmbbox[CDoom::BOXTOP] &- Doocr.bmaporgy) >> CDoom::MAPBLOCKSHIFT
+    xl = (CDoom.tmbbox[CDoom::BOXLEFT] &- CDoom.bmaporgx) >> CDoom::MAPBLOCKSHIFT
+    xh = (CDoom.tmbbox[CDoom::BOXRIGHT] &- CDoom.bmaporgx) >> CDoom::MAPBLOCKSHIFT
+    yl = (CDoom.tmbbox[CDoom::BOXBOTTOM] &- CDoom.bmaporgy) >> CDoom::MAPBLOCKSHIFT
+    yh = (CDoom.tmbbox[CDoom::BOXTOP] &- CDoom.bmaporgy) >> CDoom::MAPBLOCKSHIFT
 
     bx = xl
     while bx <= xh
@@ -3416,26 +3416,26 @@ module Doocr
   # crossing special lines unless MF_TELEPORT is set.
   #
   def self.p_try_move(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
-    Doocr.floatok = 0
+    CDoom.floatok = 0
     return 0 if CDoom.p_check_position(thing, x, y) == 0 # solid wall or thing
 
     if thing.value.flags & CDoom::Mobjflag::MF_NOCLIP.value == 0
-      return 0 if Doocr.tmceilingz - Doocr.tmfloorz < thing.value.height # doesn't fit
+      return 0 if CDoom.tmceilingz - CDoom.tmfloorz < thing.value.height # doesn't fit
 
-      Doocr.floatok = 1
+      CDoom.floatok = 1
 
       if thing.value.flags & CDoom::Mobjflag::MF_TELEPORT.value == 0 &&
-         Doocr.tmceilingz - thing.value.z < thing.value.height
+         CDoom.tmceilingz - thing.value.z < thing.value.height
         return 0 # mobj must lower itself to fit
       end
 
       if thing.value.flags & CDoom::Mobjflag::MF_TELEPORT.value == 0 &&
-         Doocr.tmfloorz - thing.value.z > 24 * FRACUNIT
+         CDoom.tmfloorz - thing.value.z > 24 * FRACUNIT
         return 0 # too big a step up
       end
 
       if thing.value.flags & (CDoom::Mobjflag::MF_DROPOFF.value | CDoom::Mobjflag::MF_FLOAT.value) == 0 &&
-         Doocr.tmfloorz - Doocr.tmdropoffz > 24 * FRACUNIT
+         CDoom.tmfloorz - CDoom.tmdropoffz > 24 * FRACUNIT
         return 0 # don't stand over a dropoff
       end
     end
@@ -3446,8 +3446,8 @@ module Doocr
 
     oldx = thing.value.x
     oldy = thing.value.y
-    thing.value.floorz = Doocr.tmfloorz
-    thing.value.ceilingz = Doocr.tmceilingz
+    thing.value.floorz = CDoom.tmfloorz
+    thing.value.ceilingz = CDoom.tmceilingz
     thing.value.x = x
     thing.value.y = y
 
@@ -3455,14 +3455,14 @@ module Doocr
 
     # if any special lines were hit, do the effect
     if thing.value.flags & (CDoom::Mobjflag::MF_TELEPORT.value | CDoom::Mobjflag::MF_NOCLIP.value) == 0
-      while Doocr.numspechit != 0
-        Doocr.numspechit -= 1
+      while CDoom.numspechit != 0
+        CDoom.numspechit -= 1
         # see if the line was crossed
-        ld = Doocr.spechit[Doocr.numspechit]
+        ld = CDoom.spechit[CDoom.numspechit]
         side = CDoom.p_point_on_line_side(thing.value.x, thing.value.y, ld)
         oldside = CDoom.p_point_on_line_side(oldx, oldy, ld)
         if side != oldside
-          CDoom.p_cross_special_line((ld - Doocr.lines).to_i32!, oldside, thing) if ld.value.special != 0
+          CDoom.p_cross_special_line((ld - CDoom.lines).to_i32!, oldside, thing) if ld.value.special != 0
         end
       end
     end
@@ -3476,8 +3476,8 @@ module Doocr
     CDoom.p_check_position(thing, thing.value.x, thing.value.y)
     # what about stranding a monster partially off an edge?
 
-    thing.value.floorz = Doocr.tmfloorz
-    thing.value.ceilingz = Doocr.tmceilingz
+    thing.value.floorz = CDoom.tmfloorz
+    thing.value.ceilingz = CDoom.tmceilingz
 
     if onfloor != 0
       # walking monsters rise and fall with the floor
@@ -3505,22 +3505,22 @@ module Doocr
   #
   def self.p_hit_slide_line(ld : CDoom::Line*)
     if ld.value.slopetype == CDoom::Slopetype::HORIZONTAL
-      Doocr.tmymove = 0
+      CDoom.tmymove = 0
       return
     end
 
     if ld.value.slopetype == CDoom::Slopetype::VERTICAL
-      Doocr.tmxmove = 0
+      CDoom.tmxmove = 0
       return
     end
 
-    side = CDoom.p_point_on_line_side(Doocr.slidemo.value.x, Doocr.slidemo.value.y, ld)
+    side = CDoom.p_point_on_line_side(CDoom.slidemo.value.x, CDoom.slidemo.value.y, ld)
 
     lineangle = CDoom.r_point_to_angle2(0, 0, ld.value.dx, ld.value.dy)
 
     lineangle &+= ANG180 if side == 1
 
-    moveangle = CDoom.r_point_to_angle2(0, 0, Doocr.tmxmove, Doocr.tmymove)
+    moveangle = CDoom.r_point_to_angle2(0, 0, CDoom.tmxmove, CDoom.tmymove)
     deltaangle = moveangle &- lineangle
 
     deltaangle &+= ANG180 if deltaangle > ANG180
@@ -3528,11 +3528,11 @@ module Doocr
     lineangle >>= CDoom::ANGLETOFINESHIFT
     deltaangle >>= CDoom::ANGLETOFINESHIFT
 
-    movelen = CDoom.p_aprox_distance(Doocr.tmxmove, Doocr.tmymove)
+    movelen = CDoom.p_aprox_distance(CDoom.tmxmove, CDoom.tmymove)
     newlen = CDoom.fixed_mul(movelen, @@finecosine[deltaangle])
 
-    Doocr.tmxmove = CDoom.fixed_mul(newlen, @@finecosine[lineangle])
-    Doocr.tmymove = CDoom.fixed_mul(newlen, @@finesine[lineangle])
+    CDoom.tmxmove = CDoom.fixed_mul(newlen, @@finecosine[lineangle])
+    CDoom.tmymove = CDoom.fixed_mul(newlen, @@finesine[lineangle])
   end
 
   def self.ptr_slide_traverse(int : CDoom::Intercept*) : CDoom::DoomBool
@@ -3545,7 +3545,7 @@ module Doocr
     isblocking = false
 
     if li.value.flags & CDoom::ML_TWOSIDED == 0
-      if CDoom.p_point_on_line_side(Doocr.slidemo.value.x, Doocr.slidemo.value.y, li) != 0
+      if CDoom.p_point_on_line_side(CDoom.slidemo.value.x, CDoom.slidemo.value.y, li) != 0
         # don't hit the back side
         return 1
       end
@@ -3556,9 +3556,9 @@ module Doocr
       # set openrange, opentop, openbottom
       CDoom.p_line_opening(li)
 
-      if Doocr.openrange < Doocr.slidemo.value.height ||                       # doesn't fit
-         Doocr.opentop - Doocr.slidemo.value.z < Doocr.slidemo.value.height || # mobj is too hight
-         Doocr.openbottom - Doocr.slidemo.value.z > 24 * FRACUNIT              # too big a step up
+      if CDoom.openrange < CDoom.slidemo.value.height ||                       # doesn't fit
+         CDoom.opentop - CDoom.slidemo.value.z < CDoom.slidemo.value.height || # mobj is too hight
+         CDoom.openbottom - CDoom.slidemo.value.z > 24 * FRACUNIT              # too big a step up
         isblocking = true
       end
 
@@ -3568,11 +3568,11 @@ module Doocr
 
     # the line does block movement,
     # see if it is closer than best so far
-    if int.value.frac < Doocr.bestslidefrac
-      Doocr.secondslidefrac = Doocr.bestslidefrac
-      Doocr.secondslideline = Doocr.bestslideline
-      Doocr.bestslidefrac = int.value.frac
-      Doocr.bestslideline = li
+    if int.value.frac < CDoom.bestslidefrac
+      CDoom.secondslidefrac = CDoom.bestslidefrac
+      CDoom.secondslideline = CDoom.bestslideline
+      CDoom.bestslidefrac = int.value.frac
+      CDoom.bestslideline = li
     end
 
     return 0 # stop
@@ -3587,7 +3587,7 @@ module Doocr
   # This is a kludgy mess.
   #
   def self.p_slide_move(mo : CDoom::Mobj*)
-    Doocr.slidemo = mo
+    CDoom.slidemo = mo
     hitcount = 0
 
     loop do
@@ -3612,7 +3612,7 @@ module Doocr
           traily = mo.value.y + mo.value.radius
         end
 
-        Doocr.bestslidefrac = FRACUNIT + 1
+        CDoom.bestslidefrac = FRACUNIT + 1
 
         CDoom.p_path_traverse(leadx, leady, leadx + mo.value.momx, leady + mo.value.momy,
           CDoom::PT_ADDLINES, ->CDoom.ptr_slide_traverse)
@@ -3624,7 +3624,7 @@ module Doocr
 
       # move up to the wall
       loop do
-        if stairstep || Doocr.bestslidefrac == FRACUNIT + 1
+        if stairstep || CDoom.bestslidefrac == FRACUNIT + 1
           # the move most have hit the middle, so stairstep
           if CDoom.p_try_move(mo, mo.value.x, mo.value.y + mo.value.momy) == 0
             CDoom.p_try_move(mo, mo.value.x + mo.value.momx, mo.value.y)
@@ -3633,10 +3633,10 @@ module Doocr
         end
 
         # fudge a bit to make sure it doesn't hit
-        Doocr.bestslidefrac -= 0x800
-        if Doocr.bestslidefrac > 0
-          newx = CDoom.fixed_mul(mo.value.momx, Doocr.bestslidefrac)
-          newy = CDoom.fixed_mul(mo.value.momy, Doocr.bestslidefrac)
+        CDoom.bestslidefrac -= 0x800
+        if CDoom.bestslidefrac > 0
+          newx = CDoom.fixed_mul(mo.value.momx, CDoom.bestslidefrac)
+          newy = CDoom.fixed_mul(mo.value.momy, CDoom.bestslidefrac)
 
           if CDoom.p_try_move(mo, mo.value.x + newx, mo.value.y + newy) == 0
             stairstep = true
@@ -3648,20 +3648,20 @@ module Doocr
 
       # Now continue along the wall.
       # First calculate remainder.
-      Doocr.bestslidefrac = FRACUNIT - (Doocr.bestslidefrac + 0x800)
+      CDoom.bestslidefrac = FRACUNIT - (CDoom.bestslidefrac + 0x800)
 
-      Doocr.bestslidefrac = FRACUNIT if Doocr.bestslidefrac > FRACUNIT
-      return if Doocr.bestslidefrac <= 0
+      CDoom.bestslidefrac = FRACUNIT if CDoom.bestslidefrac > FRACUNIT
+      return if CDoom.bestslidefrac <= 0
 
-      Doocr.tmxmove = CDoom.fixed_mul(mo.value.momx, Doocr.bestslidefrac)
-      Doocr.tmymove = CDoom.fixed_mul(mo.value.momy, Doocr.bestslidefrac)
+      CDoom.tmxmove = CDoom.fixed_mul(mo.value.momx, CDoom.bestslidefrac)
+      CDoom.tmymove = CDoom.fixed_mul(mo.value.momy, CDoom.bestslidefrac)
 
-      CDoom.p_hit_slide_line(Doocr.bestslideline) # clip the moves
+      CDoom.p_hit_slide_line(CDoom.bestslideline) # clip the moves
 
-      mo.value.momx = Doocr.tmxmove
-      mo.value.momy = Doocr.tmymove
+      mo.value.momx = CDoom.tmxmove
+      mo.value.momy = CDoom.tmymove
 
-      next if CDoom.p_try_move(mo, mo.value.x + Doocr.tmxmove, mo.value.y + Doocr.tmymove) == 0
+      next if CDoom.p_try_move(mo, mo.value.x + CDoom.tmxmove, mo.value.y + CDoom.tmymove) == 0
 
       break
     end
@@ -3681,47 +3681,47 @@ module Doocr
       # the possible target ranges.
       CDoom.p_line_opening(li)
 
-      return 0 if Doocr.openbottom >= Doocr.opentop # stop
+      return 0 if CDoom.openbottom >= CDoom.opentop # stop
 
-      dist = CDoom.fixed_mul(Doocr.attackrange, int.value.frac)
+      dist = CDoom.fixed_mul(CDoom.attackrange, int.value.frac)
 
       if li.value.frontsector.value.floorheight != li.value.backsector.value.floorheight
-        slope = CDoom.fixed_div(Doocr.openbottom - Doocr.shootz, dist)
-        Doocr.bottomslope = slope if slope > Doocr.bottomslope
+        slope = CDoom.fixed_div(CDoom.openbottom - CDoom.shootz, dist)
+        CDoom.bottomslope = slope if slope > CDoom.bottomslope
       end
 
       if li.value.frontsector.value.ceilingheight != li.value.backsector.value.ceilingheight
-        slope = CDoom.fixed_div(Doocr.opentop - Doocr.shootz, dist)
-        Doocr.topslope = slope if slope < Doocr.topslope
+        slope = CDoom.fixed_div(CDoom.opentop - CDoom.shootz, dist)
+        CDoom.topslope = slope if slope < CDoom.topslope
       end
 
-      return 0 if Doocr.topslope <= Doocr.bottomslope # stop
+      return 0 if CDoom.topslope <= CDoom.bottomslope # stop
 
       return 1 # shot continues
     end
 
     # shoot a thing
     th = int.value.d.thing
-    return 1 if th == Doocr.shootthing # can't shoot self
+    return 1 if th == CDoom.shootthing # can't shoot self
 
     return 1 if th.value.flags & CDoom::Mobjflag::MF_SHOOTABLE.value == 0 # corpse or something
 
     # check angles to see if the thing can be aimed at
-    dist = CDoom.fixed_mul(Doocr.attackrange, int.value.frac)
-    thingtopslope = CDoom.fixed_div(th.value.z + th.value.height - Doocr.shootz, dist)
+    dist = CDoom.fixed_mul(CDoom.attackrange, int.value.frac)
+    thingtopslope = CDoom.fixed_div(th.value.z + th.value.height - CDoom.shootz, dist)
 
-    return 1 if thingtopslope < Doocr.bottomslope # shot over the thing
+    return 1 if thingtopslope < CDoom.bottomslope # shot over the thing
 
-    thingbottomslope = CDoom.fixed_div(th.value.z - Doocr.shootz, dist)
+    thingbottomslope = CDoom.fixed_div(th.value.z - CDoom.shootz, dist)
 
-    return 1 if thingbottomslope > Doocr.topslope # shot under the thing
+    return 1 if thingbottomslope > CDoom.topslope # shot under the thing
 
     # this thing can be hit!
-    thingtopslope = Doocr.topslope if thingtopslope > Doocr.topslope
-    thingbottomslope = Doocr.bottomslope if thingbottomslope < Doocr.bottomslope
+    thingtopslope = CDoom.topslope if thingtopslope > CDoom.topslope
+    thingbottomslope = CDoom.bottomslope if thingbottomslope < CDoom.bottomslope
 
-    Doocr.aimslope = (thingtopslope + thingbottomslope).tdiv(2)
-    Doocr.linetarget = th
+    CDoom.aimslope = (thingtopslope + thingbottomslope).tdiv(2)
+    CDoom.linetarget = th
 
     return 0 # don't go any farther
   end
@@ -3730,7 +3730,7 @@ module Doocr
     if int.value.isaline != 0
       li = int.value.d.line
 
-      CDoom.p_shoot_special_line(Doocr.shootthing, li) if li.value.special != 0
+      CDoom.p_shoot_special_line(CDoom.shootthing, li) if li.value.special != 0
 
       hitline = li.value.flags & CDoom::ML_TWOSIDED == 0 ? true : false
 
@@ -3738,16 +3738,16 @@ module Doocr
         # crosses a two sided line
         CDoom.p_line_opening(li)
 
-        dist = CDoom.fixed_mul(Doocr.attackrange, int.value.frac)
+        dist = CDoom.fixed_mul(CDoom.attackrange, int.value.frac)
 
         if li.value.frontsector.value.floorheight != li.value.backsector.value.floorheight
-          slope = CDoom.fixed_div(Doocr.openbottom - Doocr.shootz, dist)
-          hitline = slope > Doocr.aimslope
+          slope = CDoom.fixed_div(CDoom.openbottom - CDoom.shootz, dist)
+          hitline = slope > CDoom.aimslope
         end
 
         if !hitline && li.value.frontsector.value.ceilingheight != li.value.backsector.value.ceilingheight
-          slope = CDoom.fixed_div(Doocr.opentop - Doocr.shootz, dist)
-          hitline = slope < Doocr.aimslope
+          slope = CDoom.fixed_div(CDoom.opentop - CDoom.shootz, dist)
+          hitline = slope < CDoom.aimslope
         end
 
         return 1 unless hitline # shot continues
@@ -3755,17 +3755,17 @@ module Doocr
 
       # hit line
       # position a bit closer
-      frac = int.value.frac - CDoom.fixed_div(4 * FRACUNIT, Doocr.attackrange)
-      x = Doocr.trace[0].x + CDoom.fixed_mul(Doocr.trace[0].dx, frac)
-      y = Doocr.trace[0].y + CDoom.fixed_mul(Doocr.trace[0].dy, frac)
-      z = Doocr.shootz + CDoom.fixed_mul(Doocr.aimslope, CDoom.fixed_mul(frac, Doocr.attackrange))
+      frac = int.value.frac - CDoom.fixed_div(4 * FRACUNIT, CDoom.attackrange)
+      x = CDoom.trace.x + CDoom.fixed_mul(CDoom.trace.dx, frac)
+      y = CDoom.trace.y + CDoom.fixed_mul(CDoom.trace.dy, frac)
+      z = CDoom.shootz + CDoom.fixed_mul(CDoom.aimslope, CDoom.fixed_mul(frac, CDoom.attackrange))
 
-      if li.value.frontsector.value.ceilingpic == Doocr.skyflatnum
+      if li.value.frontsector.value.ceilingpic == CDoom.skyflatnum
         # don't shoot the sky!
         return 0 if z > li.value.frontsector.value.ceilingheight
 
         # it's a sky hack wall
-        return 0 if !li.value.backsector.null? && li.value.backsector.value.ceilingpic == Doocr.skyflatnum
+        return 0 if !li.value.backsector.null? && li.value.backsector.value.ceilingpic == CDoom.skyflatnum
       end
 
       # Spawn bullet puffs.
@@ -3777,37 +3777,37 @@ module Doocr
 
     # shoot a thing
     th = int.value.d.thing
-    return 1 if th == Doocr.shootthing # can't shoot self
+    return 1 if th == CDoom.shootthing # can't shoot self
 
     return 1 if th.value.flags & CDoom::Mobjflag::MF_SHOOTABLE.value == 0 # corpse or something
 
     # check angles to see if the thing can be aimed at
-    dist = CDoom.fixed_mul(Doocr.attackrange, int.value.frac)
-    thingtopslope = CDoom.fixed_div(th.value.z + th.value.height - Doocr.shootz, dist)
+    dist = CDoom.fixed_mul(CDoom.attackrange, int.value.frac)
+    thingtopslope = CDoom.fixed_div(th.value.z + th.value.height - CDoom.shootz, dist)
 
-    return 1 if thingtopslope < Doocr.aimslope # shot over the thing
+    return 1 if thingtopslope < CDoom.aimslope # shot over the thing
 
-    thingbottomslope = CDoom.fixed_div(th.value.z - Doocr.shootz, dist)
+    thingbottomslope = CDoom.fixed_div(th.value.z - CDoom.shootz, dist)
 
-    return 1 if thingbottomslope > Doocr.aimslope # shot under the thing
+    return 1 if thingbottomslope > CDoom.aimslope # shot under the thing
 
     # hit thing
     # position a bit closer
-    frac = int.value.frac - CDoom.fixed_div(10 * FRACUNIT, Doocr.attackrange)
+    frac = int.value.frac - CDoom.fixed_div(10 * FRACUNIT, CDoom.attackrange)
 
-    x = Doocr.trace[0].x + CDoom.fixed_mul(Doocr.trace[0].dx, frac)
-    y = Doocr.trace[0].y + CDoom.fixed_mul(Doocr.trace[0].dy, frac)
-    z = Doocr.shootz + CDoom.fixed_mul(Doocr.aimslope, CDoom.fixed_mul(frac, Doocr.attackrange))
+    x = CDoom.trace.x + CDoom.fixed_mul(CDoom.trace.dx, frac)
+    y = CDoom.trace.y + CDoom.fixed_mul(CDoom.trace.dy, frac)
+    z = CDoom.shootz + CDoom.fixed_mul(CDoom.aimslope, CDoom.fixed_mul(frac, CDoom.attackrange))
 
     # Spawn bullet puffs or blod spots,
     # depending on target type.
     if int.value.d.thing.value.flags & CDoom::Mobjflag::MF_NOBLOOD.value != 0
       CDoom.p_spawn_puff(x, y, z)
     else
-      CDoom.p_spawn_blood(x, y, z, Doocr.la_damage)
+      CDoom.p_spawn_blood(x, y, z, CDoom.la_damage)
     end
 
-    CDoom.p_damage_mobj(th, Doocr.shootthing, Doocr.shootthing, Doocr.la_damage) if Doocr.la_damage != 0
+    CDoom.p_damage_mobj(th, CDoom.shootthing, CDoom.shootthing, CDoom.la_damage) if CDoom.la_damage != 0
 
     # don't go any farther
     return 0
@@ -3815,25 +3815,25 @@ module Doocr
 
   def self.p_aim_line_attack(t1 : CDoom::Mobj*, angle : CDoom::Angle, distance : CDoom::Fixed) : CDoom::Fixed
     angle >>= CDoom::ANGLETOFINESHIFT
-    Doocr.shootthing = t1
+    CDoom.shootthing = t1
 
     x2 = t1.value.x + (distance >> FRACBITS) * @@finecosine[angle]
     y2 = t1.value.y + (distance >> FRACBITS) * @@finesine[angle]
-    Doocr.shootz = t1.value.z + (t1.value.height >> 1) + 8 * FRACUNIT
+    CDoom.shootz = t1.value.z + (t1.value.height >> 1) + 8 * FRACUNIT
 
     # can't shoot outside view angles
-    Doocr.topslope = 100 * FRACUNIT // 160
-    Doocr.bottomslope = -100 * FRACUNIT // 160
+    CDoom.topslope = 100 * FRACUNIT // 160
+    CDoom.bottomslope = -100 * FRACUNIT // 160
 
-    Doocr.attackrange = distance
-    Doocr.linetarget = Pointer(CDoom::Mobj).null
+    CDoom.attackrange = distance
+    CDoom.linetarget = Pointer(CDoom::Mobj).null
 
     CDoom.p_path_traverse(t1.value.x, t1.value.y,
       x2, y2,
       CDoom::PT_ADDLINES | CDoom::PT_ADDTHINGS,
       ->CDoom.ptr_aim_traverse)
 
-    return Doocr.aimslope unless Doocr.linetarget.null?
+    return CDoom.aimslope unless CDoom.linetarget.null?
 
     return 0
   end
@@ -3844,13 +3844,13 @@ module Doocr
   #
   def self.p_line_attack(t1 : CDoom::Mobj*, angle : CDoom::Angle, distance : CDoom::Fixed, slope : CDoom::Fixed, damage : LibC::Int)
     angle >>= CDoom::ANGLETOFINESHIFT
-    Doocr.shootthing = t1
-    Doocr.la_damage = damage
+    CDoom.shootthing = t1
+    CDoom.la_damage = damage
     x2 = t1.value.x + (distance >> FRACBITS) * @@finecosine[angle]
     y2 = t1.value.y + (distance >> FRACBITS) * @@finesine[angle]
-    Doocr.shootz = t1.value.z + (t1.value.height >> 1) + 8 * FRACUNIT
-    Doocr.attackrange = distance
-    Doocr.aimslope = slope
+    CDoom.shootz = t1.value.z + (t1.value.height >> 1) + 8 * FRACUNIT
+    CDoom.attackrange = distance
+    CDoom.aimslope = slope
 
     CDoom.p_path_traverse(t1.value.x, t1.value.y,
       x2, y2,
@@ -3861,8 +3861,8 @@ module Doocr
   def self.ptr_use_traverse(int : CDoom::Intercept*) : CDoom::DoomBool
     if int.value.d.line.value.special == 0
       CDoom.p_line_opening(int.value.d.line)
-      if Doocr.openrange <= 0
-        CDoom.s_start_sound(Doocr.usething, CDoom::Sfxenum::SFX_noway.value)
+      if CDoom.openrange <= 0
+        CDoom.s_start_sound(CDoom.usething, CDoom::Sfxenum::SFX_noway.value)
 
         # can't use through a wall
         return 0
@@ -3872,9 +3872,9 @@ module Doocr
     end
 
     side = 0
-    side = 1 if CDoom.p_point_on_line_side(Doocr.usething.value.x, Doocr.usething.value.y, int.value.d.line) == 1
+    side = 1 if CDoom.p_point_on_line_side(CDoom.usething.value.x, CDoom.usething.value.y, int.value.d.line) == 1
 
-    CDoom.p_use_special_line(Doocr.usething, int.value.d.line, side)
+    CDoom.p_use_special_line(CDoom.usething, int.value.d.line, side)
 
     # can't use for than one special line in a row
     return 0
@@ -3884,7 +3884,7 @@ module Doocr
   # Looks for special lines in front of the player to activate.
   #
   def self.p_use_lines(player : CDoom::Player*)
-    Doocr.usething = player.value.mo
+    CDoom.usething = player.value.mo
 
     angle = player.value.mo.value.angle >> CDoom::ANGLETOFINESHIFT
 
@@ -3912,19 +3912,19 @@ module Doocr
     return 1 if thing.value.type == CDoom::Mobjtype::MT_CYBORG ||
                 thing.value.type == CDoom::Mobjtype::MT_SPIDER
 
-    dx = doom_abs(thing.value.x - Doocr.bombspot.value.x)
-    dy = doom_abs(thing.value.y - Doocr.bombspot.value.y)
+    dx = doom_abs(thing.value.x - CDoom.bombspot.value.x)
+    dy = doom_abs(thing.value.y - CDoom.bombspot.value.y)
 
     dist = dx > dy ? dx : dy
     dist = (dist - thing.value.radius) >> FRACBITS
 
     dist = 0 if dist < 0
 
-    return 1 if dist >= Doocr.bombdamage # out of range
+    return 1 if dist >= CDoom.bombdamage # out of range
 
-    if CDoom.p_check_sight(thing, Doocr.bombspot) != 0
+    if CDoom.p_check_sight(thing, CDoom.bombspot) != 0
       # must be in direct path
-      CDoom.p_damage_mobj(thing, Doocr.bombspot, Doocr.bombsource, Doocr.bombdamage - dist)
+      CDoom.p_damage_mobj(thing, CDoom.bombspot, CDoom.bombsource, CDoom.bombdamage - dist)
     end
 
     return 1
@@ -3935,13 +3935,13 @@ module Doocr
   #
   def self.p_radius_attack(spot : CDoom::Mobj*, source : CDoom::Mobj*, damage : LibC::Int)
     dist = (damage + CDoom::MAXRADIUS) << FRACBITS
-    yh = (spot.value.y + dist - Doocr.bmaporgy) >> CDoom::MAPBLOCKSHIFT
-    yl = (spot.value.y - dist - Doocr.bmaporgy) >> CDoom::MAPBLOCKSHIFT
-    xh = (spot.value.x + dist - Doocr.bmaporgx) >> CDoom::MAPBLOCKSHIFT
-    xl = (spot.value.x - dist - Doocr.bmaporgx) >> CDoom::MAPBLOCKSHIFT
-    Doocr.bombspot = spot
-    Doocr.bombsource = source
-    Doocr.bombdamage = damage
+    yh = (spot.value.y + dist - CDoom.bmaporgy) >> CDoom::MAPBLOCKSHIFT
+    yl = (spot.value.y - dist - CDoom.bmaporgy) >> CDoom::MAPBLOCKSHIFT
+    xh = (spot.value.x + dist - CDoom.bmaporgx) >> CDoom::MAPBLOCKSHIFT
+    xl = (spot.value.x - dist - CDoom.bmaporgx) >> CDoom::MAPBLOCKSHIFT
+    CDoom.bombspot = spot
+    CDoom.bombsource = source
+    CDoom.bombdamage = damage
 
     y = yl
     while y <= yh
@@ -3982,9 +3982,9 @@ module Doocr
       return 1
     end
 
-    Doocr.nofit = 1
+    CDoom.nofit = 1
 
-    if Doocr.crushchange != 0 && Doocr.leveltime & 3 == 0
+    if CDoom.crushchange && CDoom.leveltime & 3 == 0
       CDoom.p_damage_mobj(thing, Pointer(CDoom::Mobj).null, Pointer(CDoom::Mobj).null, 10)
 
       # spray blood in a random direction
@@ -4001,8 +4001,8 @@ module Doocr
   end
 
   def self.p_change_sector(sector : CDoom::Sector*, crunch : CDoom::DoomBool) : CDoom::DoomBool
-    Doocr.nofit = 0
-    Doocr.crushchange = crunch
+    CDoom.nofit = 0
+    CDoom.crushchange = crunch
 
     # re-check heights for all things near the moving sector
     x = sector.value.blockbox[CDoom::BOXLEFT]
@@ -4016,7 +4016,7 @@ module Doocr
       x += 1
     end
 
-    return Doocr.nofit
+    return CDoom.nofit
   end
 
   #
@@ -4151,7 +4151,7 @@ module Doocr
   def self.p_line_opening(linedef : CDoom::Line*)
     if linedef.value.sidenum[1] == -1
       # single sided line
-      Doocr.openrange = 0
+      CDoom.openrange = 0
       return
     end
 
@@ -4159,20 +4159,20 @@ module Doocr
     back = linedef.value.backsector
 
     if front.value.ceilingheight < back.value.ceilingheight
-      Doocr.opentop = front.value.ceilingheight
+      CDoom.opentop = front.value.ceilingheight
     else
-      Doocr.opentop = back.value.ceilingheight
+      CDoom.opentop = back.value.ceilingheight
     end
 
     if front.value.floorheight > back.value.floorheight
-      Doocr.openbottom = front.value.floorheight
-      Doocr.lowfloor = back.value.floorheight
+      CDoom.openbottom = front.value.floorheight
+      CDoom.lowfloor = back.value.floorheight
     else
-      Doocr.openbottom = back.value.floorheight
-      Doocr.lowfloor = front.value.floorheight
+      CDoom.openbottom = back.value.floorheight
+      CDoom.lowfloor = front.value.floorheight
     end
 
-    Doocr.openrange = Doocr.opentop - Doocr.openbottom
+    CDoom.openrange = CDoom.opentop - CDoom.openbottom
   end
 
   #
@@ -4206,12 +4206,12 @@ module Doocr
       if !thing.value.bprev.null?
         thing.value.bprev.value.bnext = thing.value.bnext
       else
-        blockx = (thing.value.x - Doocr.bmaporgx) >> CDoom::MAPBLOCKSHIFT
-        blocky = (thing.value.y - Doocr.bmaporgy) >> CDoom::MAPBLOCKSHIFT
+        blockx = (thing.value.x - CDoom.bmaporgx) >> CDoom::MAPBLOCKSHIFT
+        blocky = (thing.value.y - CDoom.bmaporgy) >> CDoom::MAPBLOCKSHIFT
 
-        if blockx >= 0 && blockx < Doocr.bmapwidth &&
-           blocky >= 0 && blocky < Doocr.bmapheight
-          Doocr.blocklinks[blocky * Doocr.bmapwidth + blockx] = thing.value.bnext
+        if blockx >= 0 && blockx < CDoom.bmapwidth &&
+           blocky >= 0 && blocky < CDoom.bmapheight
+          CDoom.blocklinks[blocky * CDoom.bmapwidth + blockx] = thing.value.bnext
         end
       end
     end
@@ -4237,12 +4237,12 @@ module Doocr
     # link into blockmap
     if thing.value.flags & CDoom::Mobjflag::MF_NOBLOCKMAP.value == 0
       # inert things don't need to be in blockmap
-      blockx = (thing.value.x - Doocr.bmaporgx) >> CDoom::MAPBLOCKSHIFT
-      blocky = (thing.value.y - Doocr.bmaporgy) >> CDoom::MAPBLOCKSHIFT
+      blockx = (thing.value.x - CDoom.bmaporgx) >> CDoom::MAPBLOCKSHIFT
+      blocky = (thing.value.y - CDoom.bmaporgy) >> CDoom::MAPBLOCKSHIFT
 
-      if blockx >= 0 && blockx < Doocr.bmapwidth &&
-         blocky >= 0 && blocky < Doocr.bmapheight
-        link = Doocr.blocklinks.to_unsafe + (blocky * Doocr.bmapwidth + blockx)
+      if blockx >= 0 && blockx < CDoom.bmapwidth &&
+         blocky >= 0 && blocky < CDoom.bmapheight
+        link = CDoom.blocklinks + (blocky * CDoom.bmapwidth + blockx)
         thing.value.bprev = Pointer(CDoom::Mobj).null
         thing.value.bnext = link.value
         link.value.value.bprev = thing unless link.value.null?
@@ -4272,22 +4272,22 @@ module Doocr
   # to it.
   #
   def self.p_block_lines_iterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Line*, CDoom::DoomBool)) : CDoom::DoomBool
-    return 1 if x < 0 || y < 0 || x >= Doocr.bmapwidth || y >= Doocr.bmapheight
+    return 1 if x < 0 || y < 0 || x >= CDoom.bmapwidth || y >= CDoom.bmapheight
 
-    offset = y * Doocr.bmapwidth + x
+    offset = y * CDoom.bmapwidth + x
 
-    offset = (Doocr.blockmap + offset).value
+    offset = (CDoom.blockmap + offset).value
 
-    list = Doocr.blockmaplump + offset
+    list = CDoom.blockmaplump + offset
     while list.value != -1
-      ld = Doocr.lines + list.value
+      ld = CDoom.lines + list.value
 
-      if ld.value.validcount == Doocr.validcount
+      if ld.value.validcount == CDoom.validcount
         list += 1
         next # line has already been checked
       end
 
-      ld.value.validcount = Doocr.validcount
+      ld.value.validcount = CDoom.validcount
 
       return 0 if func.call(ld) == 0
 
@@ -4298,9 +4298,9 @@ module Doocr
   end
 
   def self.p_block_things_iterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Mobj*, CDoom::DoomBool)) : CDoom::DoomBool
-    return 1 if x < 0 || y < 0 || x >= Doocr.bmapwidth || y >= Doocr.bmapheight
+    return 1 if x < 0 || y < 0 || x >= CDoom.bmapwidth || y >= CDoom.bmapheight
 
-    mobj = Doocr.blocklinks[y * Doocr.bmapwidth + x]
+    mobj = CDoom.blocklinks[y * CDoom.bmapwidth + x]
     while !mobj.null?
       return 0 if func.call(mobj) == 0
 
@@ -4328,43 +4328,43 @@ module Doocr
     s2 = 0
     dl = CDoom::Divline.new
     # avoid precision problems with two routines
-    if Doocr.trace[0].dx > FRACUNIT * 16 ||
-       Doocr.trace[0].dy > FRACUNIT * 16 ||
-       Doocr.trace[0].dx < -FRACUNIT * 16 ||
-       Doocr.trace[0].dy < -FRACUNIT * 16
-      s1 = CDoom.p_point_on_divline_side(ld.value.v1.value.x, ld.value.v1.value.y, Doocr.trace.to_unsafe)
-      s2 = CDoom.p_point_on_divline_side(ld.value.v2.value.x, ld.value.v2.value.y, Doocr.trace.to_unsafe)
+    if CDoom.trace.dx > FRACUNIT * 16 ||
+       CDoom.trace.dy > FRACUNIT * 16 ||
+       CDoom.trace.dx < -FRACUNIT * 16 ||
+       CDoom.trace.dy < -FRACUNIT * 16
+      s1 = CDoom.p_point_on_divline_side(ld.value.v1.value.x, ld.value.v1.value.y, pointerof(CDoom.trace))
+      s2 = CDoom.p_point_on_divline_side(ld.value.v2.value.x, ld.value.v2.value.y, pointerof(CDoom.trace))
     else
-      s1 = CDoom.p_point_on_line_side(Doocr.trace[0].x, Doocr.trace[0].y, ld)
-      s2 = CDoom.p_point_on_line_side(Doocr.trace[0].x + Doocr.trace[0].dx, Doocr.trace[0].y + Doocr.trace[0].dy, ld)
+      s1 = CDoom.p_point_on_line_side(CDoom.trace.x, CDoom.trace.y, ld)
+      s2 = CDoom.p_point_on_line_side(CDoom.trace.x + CDoom.trace.dx, CDoom.trace.y + CDoom.trace.dy, ld)
     end
 
     return 1 if s1 == s2 # line isn't crossed
 
     # hit the line
     CDoom.p_make_divline(ld, pointerof(dl))
-    frac = CDoom.p_intercept_vector(Doocr.trace.to_unsafe, pointerof(dl))
+    frac = CDoom.p_intercept_vector(pointerof(CDoom.trace), pointerof(dl))
 
     return 1 if frac < 0 # behind source
 
     # try to early out the check
-    if Doocr.earlyout != 0 &&
+    if CDoom.earlyout != 0 &&
        frac < FRACUNIT &&
        ld.value.backsector.null?
       return 0 # stop checking
     end
 
-    Doocr.intercept_p.value.frac = frac
-    Doocr.intercept_p.value.isaline = 1
-    Doocr.intercept_p.value.d.line = ld
+    CDoom.intercept_p.value.frac = frac
+    CDoom.intercept_p.value.isaline = 1
+    CDoom.intercept_p.value.d.line = ld
 
-    Doocr.intercept_p += 1
+    CDoom.intercept_p += 1
 
     return 1 # continue
   end
 
   def self.pit_add_thing_intercepts(thing : CDoom::Mobj*) : CDoom::DoomBool
-    tracepositive = ((Doocr.trace[0].dx ^ Doocr.trace[0].dy) > 0).to_unsafe
+    tracepositive = ((CDoom.trace.dx ^ CDoom.trace.dy) > 0).to_unsafe
 
     # check a corner to corner crossection for hit
     if tracepositive != 0
@@ -4381,8 +4381,8 @@ module Doocr
       y2 = thing.value.y + thing.value.radius
     end
 
-    s1 = CDoom.p_point_on_divline_side(x1, y1, Doocr.trace.to_unsafe)
-    s2 = CDoom.p_point_on_divline_side(x2, y2, Doocr.trace.to_unsafe)
+    s1 = CDoom.p_point_on_divline_side(x1, y1, pointerof(CDoom.trace))
+    s2 = CDoom.p_point_on_divline_side(x2, y2, pointerof(CDoom.trace))
 
     return 1 if s1 == s2 # line isn't crossed
 
@@ -4393,15 +4393,15 @@ module Doocr
       dy: y2 - y1
     )
 
-    frac = CDoom.p_intercept_vector(Doocr.trace.to_unsafe, pointerof(dl))
+    frac = CDoom.p_intercept_vector(pointerof(CDoom.trace), pointerof(dl))
 
     return 1 if frac < 0 # behind source
 
-    Doocr.intercept_p.value.frac = frac
-    Doocr.intercept_p.value.isaline = 0
-    Doocr.intercept_p.value.d.thing = thing
+    CDoom.intercept_p.value.frac = frac
+    CDoom.intercept_p.value.isaline = 0
+    CDoom.intercept_p.value.d.thing = thing
 
-    Doocr.intercept_p += 1
+    CDoom.intercept_p += 1
 
     return 1 # keep going
   end
@@ -4411,15 +4411,15 @@ module Doocr
   # for all lines.
   #
   def self.p_traverse_intercepts(func : CDoom::Traverser, maxfrac : CDoom::Fixed) : CDoom::DoomBool
-    count = (Doocr.intercept_p - Doocr.intercepts.to_unsafe).to_i32!
+    count = (CDoom.intercept_p - CDoom.intercepts.to_unsafe).to_i32!
 
     int = Pointer(CDoom::Intercept).null # shut up compiler warning
 
     while count != 0
       count -= 1
       dist = Int32::MAX
-      scan = Doocr.intercepts.to_unsafe
-      while scan < Doocr.intercept_p
+      scan = CDoom.intercepts.to_unsafe
+      while scan < CDoom.intercept_p
         if scan.value.frac < dist
           dist = scan.value.frac
           int = scan
@@ -4446,27 +4446,27 @@ module Doocr
   # for all lines.
   #
   def self.p_path_traverse(x1 : CDoom::Fixed, y1 : CDoom::Fixed, x2 : CDoom::Fixed, y2 : CDoom::Fixed, flags : LibC::Int, trav : Proc(CDoom::Intercept*, CDoom::DoomBool)) : CDoom::DoomBool
-    Doocr.earlyout = (flags & CDoom::PT_EARLYOUT != 0).to_unsafe
+    CDoom.earlyout = flags & CDoom::PT_EARLYOUT != 0
 
-    Doocr.validcount += 1
-    Doocr.intercept_p = Doocr.intercepts.to_unsafe
+    CDoom.validcount += 1
+    CDoom.intercept_p = CDoom.intercepts.to_unsafe
 
-    x1 += FRACUNIT if (x1 - Doocr.bmaporgx) & (CDoom::MAPBLOCKSIZE - 1) == 0 # don't side exactly on a line
+    x1 += FRACUNIT if (x1 - CDoom.bmaporgx) & (CDoom::MAPBLOCKSIZE - 1) == 0 # don't side exactly on a line
 
-    y1 += FRACUNIT if (y1 - Doocr.bmaporgy) & (CDoom::MAPBLOCKSIZE - 1) == 0 # don't side exactly on a line
+    y1 += FRACUNIT if (y1 - CDoom.bmaporgy) & (CDoom::MAPBLOCKSIZE - 1) == 0 # don't side exactly on a line
 
-    Doocr.trace.to_unsafe.value.x = x1
-    Doocr.trace.to_unsafe.value.y = y1
-    Doocr.trace.to_unsafe.value.dx = x2 - x1
-    Doocr.trace.to_unsafe.value.dy = y2 - y1
+    CDoom.trace.x = x1
+    CDoom.trace.y = y1
+    CDoom.trace.dx = x2 - x1
+    CDoom.trace.dy = y2 - y1
 
-    x1 -= Doocr.bmaporgx
-    y1 -= Doocr.bmaporgy
+    x1 -= CDoom.bmaporgx
+    y1 -= CDoom.bmaporgy
     xt1 = x1 >> CDoom::MAPBLOCKSHIFT
     yt1 = y1 >> CDoom::MAPBLOCKSHIFT
 
-    x2 -= Doocr.bmaporgx
-    y2 -= Doocr.bmaporgy
+    x2 -= CDoom.bmaporgx
+    y2 -= CDoom.bmaporgy
     xt2 = x2 >> CDoom::MAPBLOCKSHIFT
     yt2 = y2 >> CDoom::MAPBLOCKSHIFT
 
@@ -4629,9 +4629,9 @@ module Doocr
           CDoom.p_slide_move(mo) # try to slide along it
         elsif mo.value.flags & CDoom::Mobjflag::MF_MISSILE.value != 0
           # explode a missile
-          if !Doocr.ceilingline.null? &&
-             !Doocr.ceilingline.value.backsector.null? &&
-             Doocr.ceilingline.value.backsector.value.ceilingpic == Doocr.skyflatnum
+          if !CDoom.ceilingline.null? &&
+             !CDoom.ceilingline.value.backsector.null? &&
+             CDoom.ceilingline.value.backsector.value.ceilingpic == CDoom.skyflatnum
             # Hack to prevent missiles exploding
             # against the sky.
             # Does not handle sky floors.
@@ -4860,13 +4860,13 @@ module Doocr
       # check for nightmare respawn
       return if mobj.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value == 0
 
-      return if Doocr.respawnmonsters == 0
+      return if CDoom.respawnmonsters == 0
 
       mobj.value.movecount = mobj.value.movecount + 1
 
       return if mobj.value.movecount < 12 * 35
 
-      return if Doocr.leveltime & 31 != 0
+      return if CDoom.leveltime & 31 != 0
 
       return if CDoom.p_random > 4
 
@@ -4890,7 +4890,7 @@ module Doocr
     mobj.value.flags = info.value.flags
     mobj.value.health = info.value.spawnhealth
 
-    mobj.value.reactiontime = info.value.reactiontime if Doocr.gameskill != CDoom::Skill::Nightmare
+    mobj.value.reactiontime = info.value.reactiontime if CDoom.gameskill != CDoom::Skill::Nightmare
 
     mobj.value.lastlook = CDoom.p_random % CDoom::MAXPLAYERS
     # do not set the state with p_set_mobj_state,
@@ -4928,12 +4928,12 @@ module Doocr
        mobj.value.flags & CDoom::Mobjflag::MF_DROPPED.value == 0 &&
        mobj.value.type != CDoom::Mobjtype::MT_INV &&
        mobj.value.type != CDoom::Mobjtype::MT_INS
-      Doocr.itemrespawnque[Doocr.iquehead] = mobj.value.spawnpoint
-      Doocr.itemrespawntime[Doocr.iquehead] = Doocr.leveltime
-      Doocr.iquehead = (Doocr.iquehead + 1) & (CDoom::ITEMQUESIZE - 1)
+      CDoom.itemrespawnque[CDoom.iquehead] = mobj.value.spawnpoint
+      CDoom.itemrespawntime[CDoom.iquehead] = CDoom.leveltime
+      CDoom.iquehead = (CDoom.iquehead + 1) & (CDoom::ITEMQUESIZE - 1)
 
       # lose one off the end?
-      Doocr.iquetail = (Doocr.iquetail + 1) & (CDoom::ITEMQUESIZE - 1) if Doocr.iquehead == Doocr.iquetail
+      CDoom.iquetail = (CDoom.iquetail + 1) & (CDoom::ITEMQUESIZE - 1) if CDoom.iquehead == CDoom.iquetail
     end
 
     # unlink from sector and block lists
@@ -4948,15 +4948,15 @@ module Doocr
 
   def self.p_respawn_specials
     # only respawn items in deathmatch
-    return if Doocr.deathmatch != 2
+    return if CDoom.deathmatch != 2
 
     # nothing left to respawn?
-    return if Doocr.iquehead == Doocr.iquetail
+    return if CDoom.iquehead == CDoom.iquetail
 
     # wait at least 30 seconds
-    return if Doocr.leveltime - Doocr.itemrespawntime[Doocr.iquetail] < 30 * 35
+    return if CDoom.leveltime - CDoom.itemrespawntime[CDoom.iquetail] < 30 * 35
 
-    mthing = Doocr.itemrespawnque.to_unsafe + Doocr.iquetail
+    mthing = CDoom.itemrespawnque.to_unsafe + CDoom.iquetail
 
     x = mthing.value.x.to_i32 << FRACBITS
     y = mthing.value.y.to_i32 << FRACBITS
@@ -4986,7 +4986,7 @@ module Doocr
     mo.value.angle = ANG45 &* (mthing.value.angle.tdiv(45))
 
     # pull it from the que
-    Doocr.iquetail = (Doocr.iquetail + 1) & (CDoom::ITEMQUESIZE - 1)
+    CDoom.iquetail = (CDoom.iquetail + 1) & (CDoom::ITEMQUESIZE - 1)
   end
 
   #
@@ -4996,7 +4996,7 @@ module Doocr
   #
   def self.p_spawn_player(mthing : CDoom::Mapthing*)
     # not playing?
-    return if Doocr.playeringame[mthing.value.type - 1] == 0
+    return if CDoom.playeringame[mthing.value.type - 1] == 0
 
     p = @@players.to_unsafe + mthing.value.type - 1
 
@@ -5032,13 +5032,13 @@ module Doocr
     CDoom.p_setup_psprites(p)
 
     # give all cards in death match mode
-    if Doocr.deathmatch != 0
+    if CDoom.deathmatch != 0
       CDoom::Card::NUMCARDS.value.times do |i|
         p.value.cards[i] = 1
       end
     end
 
-    if mthing.value.type - 1 == Doocr.consoleplayer
+    if mthing.value.type - 1 == CDoom.consoleplayer
       # wake up the status bar
       CDoom.st_start
       # wake up the heads up text
@@ -5053,9 +5053,9 @@ module Doocr
   def self.p_spawn_map_thing(mthing : CDoom::Mapthing*)
     # count deathmatch start positions
     if mthing.value.type == 11
-      if Doocr.deathmatch_p < 10
-        CDoom.doom_memcpy(Doocr.deathmatchstarts.to_unsafe + Doocr.deathmatch_p, mthing, sizeof(CDoom::Mapthing))
-        Doocr.deathmatch_p += 1
+      if CDoom.deathmatch_p < CDoom.deathmatchstarts.to_unsafe + 10
+        CDoom.doom_memcpy(CDoom.deathmatch_p, mthing, sizeof(CDoom::Mapthing))
+        CDoom.deathmatch_p += 1
       end
       return
     end
@@ -5063,21 +5063,21 @@ module Doocr
     # check for players specially
     if mthing.value.type <= 4
       # save spots for respawning in network games
-      (Doocr.playerstarts.to_unsafe + (mthing.value.type - 1)).value = mthing.value
-      CDoom.p_spawn_player(mthing) if Doocr.deathmatch == 0
+      (CDoom.playerstarts.to_unsafe + (mthing.value.type - 1)).value = mthing.value
+      CDoom.p_spawn_player(mthing) if CDoom.deathmatch == 0
 
       return
     end
 
     # check for apropriate skill level
-    return if Doocr.netgame == 0 && mthing.value.options & 16 != 0
+    return if CDoom.netgame == 0 && mthing.value.options & 16 != 0
 
-    if Doocr.gameskill == CDoom::Skill::Baby
+    if CDoom.gameskill == CDoom::Skill::Baby
       bit = 1
-    elsif Doocr.gameskill == CDoom::Skill::Nightmare
+    elsif CDoom.gameskill == CDoom::Skill::Nightmare
       bit = 4
     else
-      bit = 1 << (Doocr.gameskill.value - 1)
+      bit = 1 << (CDoom.gameskill.value - 1)
     end
 
     return if mthing.value.options & bit == 0
@@ -5094,10 +5094,10 @@ module Doocr
     end
 
     # don't spawn keycards and players in deathmatch
-    return if Doocr.deathmatch != 0 && Doocr.mobjinfo[i].flags & CDoom::Mobjflag::MF_NOTDMATCH.value != 0
+    return if CDoom.deathmatch != 0 && Doocr.mobjinfo[i].flags & CDoom::Mobjflag::MF_NOTDMATCH.value != 0
 
     # don't spawn any monsters if -nomonsters
-    if Doocr.nomonsters != 0 &&
+    if CDoom.nomonsters != 0 &&
        (i == CDoom::Mobjtype::MT_SKULL.value ||
        (Doocr.mobjinfo[i].flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0))
       return
@@ -5120,10 +5120,10 @@ module Doocr
       mobj.value.tics = 1 + (CDoom.p_random % mobj.value.tics)
     end
     if mobj.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0
-      Doocr.totalkills += 1
+      CDoom.totalkills += 1
     end
     if mobj.value.flags & CDoom::Mobjflag::MF_COUNTITEM.value != 0
-      Doocr.totalitems += 1
+      CDoom.totalitems += 1
     end
 
     mobj.value.angle = ANG45 &* (mthing.value.angle.tdiv(45))
@@ -5146,7 +5146,7 @@ module Doocr
     th.value.tics = 1 if th.value.tics < 1
 
     # don't make punches spark on the wall
-    CDoom.p_set_mobj_state(th, CDoom::Statenum::S_PUFF3) if Doocr.attackrange == CDoom::MELEERANGE
+    CDoom.p_set_mobj_state(th, CDoom::Statenum::S_PUFF3) if CDoom.attackrange == CDoom::MELEERANGE
   end
 
   def self.p_spawn_blood(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, damage : Int32)
@@ -5218,16 +5218,16 @@ module Doocr
     an = source.value.angle
     slope = CDoom.p_aim_line_attack(source, an, 16 * 64 * FRACUNIT)
 
-    if Doocr.linetarget.null?
+    if CDoom.linetarget.null?
       an &+= 1 << 26
       slope = CDoom.p_aim_line_attack(source, an, 16 * 64 * FRACUNIT)
 
-      if Doocr.linetarget.null?
+      if CDoom.linetarget.null?
         an &-= 2 << 26
         slope = CDoom.p_aim_line_attack(source, an, 16 * 64 * FRACUNIT)
       end
 
-      if Doocr.linetarget.null?
+      if CDoom.linetarget.null?
         an = source.value.angle
         slope = 0
       end
@@ -5266,7 +5266,7 @@ module Doocr
       if plat.value.type == CDoom::Plattype::RaiseAndChange ||
          plat.value.type == CDoom::Plattype::RaiseToNearestAndChange
         CDoom.s_start_sound(pointerof(plat.value.sector.value.@soundorg),
-          CDoom::Sfxenum::SFX_stnmov) if Doocr.leveltime & 7 == 0
+          CDoom::Sfxenum::SFX_stnmov) if CDoom.leveltime & 7 == 0
       end
 
       if res == CDoom::Result::Crushed && plat.value.crush == 0
@@ -5328,7 +5328,7 @@ module Doocr
     end
 
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      sec = Doocr.sectors + secnum
+      sec = CDoom.sectors + secnum
 
       next if !sec.value.specialdata.null?
 
@@ -5347,7 +5347,7 @@ module Doocr
       case type
       when CDoom::Plattype::RaiseToNearestAndChange
         plat.value.speed = CDoom::PLATSPEED // 2
-        sec.value.floorpic = Doocr.sides[line.value.sidenum[0]].sector.value.floorpic
+        sec.value.floorpic = CDoom.sides[line.value.sidenum[0]].sector.value.floorpic
         plat.value.high = CDoom.p_find_next_highest_floor(sec, sec.value.floorheight)
         plat.value.wait = 0
         plat.value.status = CDoom::Platenum::Up
@@ -5357,7 +5357,7 @@ module Doocr
           CDoom::Sfxenum::SFX_stnmov)
       when CDoom::Plattype::RaiseAndChange
         plat.value.speed = CDoom::PLATSPEED // 2
-        sec.value.floorpic = Doocr.sides[line.value.sidenum[0]].sector.value.floorpic
+        sec.value.floorpic = CDoom.sides[line.value.sidenum[0]].sector.value.floorpic
         plat.value.high = sec.value.floorheight + amount * FRACUNIT
         plat.value.wait = 0
         plat.value.status = CDoom::Platenum::Up
@@ -5409,31 +5409,31 @@ module Doocr
 
   def self.p_activate_in_stasis(tag : LibC::Int)
     CDoom::MAXPLATS.times do |i|
-      if !Doocr.activeplats[i].null? &&
-         Doocr.activeplats[i].value.tag == tag &&
-         Doocr.activeplats[i].value.status == CDoom::Platenum::InStasis
-        Doocr.activeplats[i].value.status = Doocr.activeplats[i].value.oldstatus
-        pointerof(Doocr.activeplats[i].value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
+      if !CDoom.activeplats[i].null? &&
+         CDoom.activeplats[i].value.tag == tag &&
+         CDoom.activeplats[i].value.status == CDoom::Platenum::InStasis
+        CDoom.activeplats[i].value.status = CDoom.activeplats[i].value.oldstatus
+        pointerof(CDoom.activeplats[i].value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
       end
     end
   end
 
   def self.ev_stop_plat(line : CDoom::Line*)
     CDoom::MAXPLATS.times do |i|
-      if !Doocr.activeplats[i].null? &&
-         Doocr.activeplats[i].value.status != CDoom::Platenum::InStasis &&
-         Doocr.activeplats[i].value.tag == line.value.tag
-        Doocr.activeplats[i].value.oldstatus = Doocr.activeplats[i].value.status
-        Doocr.activeplats[i].value.status = CDoom::Platenum::InStasis
-        pointerof(Doocr.activeplats[i].value.@thinker.@function).as(CDoom::ActionfV*).value = NULL_PROC
+      if !CDoom.activeplats[i].null? &&
+         CDoom.activeplats[i].value.status != CDoom::Platenum::InStasis &&
+         CDoom.activeplats[i].value.tag == line.value.tag
+        CDoom.activeplats[i].value.oldstatus = CDoom.activeplats[i].value.status
+        CDoom.activeplats[i].value.status = CDoom::Platenum::InStasis
+        pointerof(CDoom.activeplats[i].value.@thinker.@function).as(CDoom::ActionfV*).value = NULL_PROC
       end
     end
   end
 
   def self.p_add_active_plat(plat : CDoom::Plat*)
     CDoom::MAXPLATS.times do |i|
-      if Doocr.activeplats[i].null?
-        Doocr.activeplats[i] = plat
+      if CDoom.activeplats[i].null?
+        CDoom.activeplats[i] = plat
         return
       end
     end
@@ -5442,10 +5442,10 @@ module Doocr
 
   def self.p_remove_active_plat(plat : CDoom::Plat*)
     CDoom::MAXPLATS.times do |i|
-      if plat == Doocr.activeplats[i]
-        Doocr.activeplats[i].value.sector.value.specialdata = Pointer(Void).null
-        CDoom.p_remove_thinker(pointerof(Doocr.activeplats[i].value.@thinker))
-        Doocr.activeplats[i] = Pointer(CDoom::Plat).null
+      if plat == CDoom.activeplats[i]
+        CDoom.activeplats[i].value.sector.value.specialdata = Pointer(Void).null
+        CDoom.p_remove_thinker(pointerof(CDoom.activeplats[i].value.@thinker))
+        CDoom.activeplats[i] = Pointer(CDoom::Plat).null
 
         return
       end
@@ -5497,7 +5497,7 @@ module Doocr
 
     CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_sawup.value) if player.value.pendingweapon == CDoom::Weapontype::Chainsaw
 
-    newstate = Doocr.weaponinfo[player.value.pendingweapon.value].upstate
+    newstate = CDoom.weaponinfo[player.value.pendingweapon.value].upstate
 
     player.value.pendingweapon = CDoom::Weapontype::Nochange
     (player.value.psprites.to_unsafe + CDoom::Psprnum::Weapon.value).value.sy = CDoom::WEAPONBOTTOM
@@ -5510,7 +5510,7 @@ module Doocr
   # If not, selects the next weapon to use.
   #
   def self.p_check_ammo(player : CDoom::Player*) : CDoom::DoomBool
-    ammo = CDoom::Ammotype.new(Doocr.weaponinfo[player.value.readyweapon.value].ammo)
+    ammo = CDoom::Ammotype.new(CDoom.weaponinfo[player.value.readyweapon.value].ammo)
 
     # Minimal amount for one shot varies.
     if player.value.readyweapon == CDoom::Weapontype::Bfg
@@ -5530,11 +5530,11 @@ module Doocr
     loop do
       if player.value.weaponowned[CDoom::Weapontype::Plasma.value] != 0 &&
          player.value.ammo[CDoom::Ammotype::Cell.value] != 0 &&
-         Doocr.gamemode != CDoom::GameMode::Shareware
+         CDoom.gamemode != CDoom::GameMode::Shareware
         player.value.pendingweapon = CDoom::Weapontype::Plasma
       elsif player.value.weaponowned[CDoom::Weapontype::Supershotgun.value] != 0 &&
             player.value.ammo[CDoom::Ammotype::Shell.value] > 2 &&
-            Doocr.gamemode == CDoom::GameMode::Commercial
+            CDoom.gamemode == CDoom::GameMode::Commercial
         player.value.pendingweapon = CDoom::Weapontype::Supershotgun
       elsif player.value.weaponowned[CDoom::Weapontype::Chaingun.value] != 0 &&
             player.value.ammo[CDoom::Ammotype::Clip.value] != 0
@@ -5551,7 +5551,7 @@ module Doocr
         player.value.pendingweapon = CDoom::Weapontype::Missile
       elsif player.value.weaponowned[CDoom::Weapontype::Bfg.value] != 0 &&
             player.value.ammo[CDoom::Ammotype::Cell.value] > 40 &&
-            Doocr.gamemode != CDoom::GameMode::Shareware
+            CDoom.gamemode != CDoom::GameMode::Shareware
         player.value.pendingweapon = CDoom::Weapontype::Bfg
       else
         # If everything fails.
@@ -5564,7 +5564,7 @@ module Doocr
     # Now set appropriate weapon overlay.
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Weapon,
-      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].downstate))
+      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].downstate))
 
     return 0
   end
@@ -5573,7 +5573,7 @@ module Doocr
     return if CDoom.p_check_ammo(player) == 0
 
     CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK1)
-    newstate = CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].atkstate)
+    newstate = CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].atkstate)
     CDoom.p_set_psprite(player, CDoom::Psprnum::Weapon, newstate)
     CDoom.p_noise_alert(player.value.mo, player.value.mo)
 
@@ -5591,7 +5591,7 @@ module Doocr
   def self.p_drop_weapon(player : CDoom::Player*)
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Weapon,
-      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].downstate))
+      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].downstate))
   end
 
   #
@@ -5617,7 +5617,7 @@ module Doocr
     if player.value.pendingweapon != CDoom::Weapontype::Nochange || player.value.health == 0
       # change weapon
       #  (pending weapon should allready be validated)
-      newstate = CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].downstate)
+      newstate = CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].downstate)
       CDoom.p_set_psprite(player, CDoom::Psprnum::Weapon, newstate)
       return
     end
@@ -5637,7 +5637,7 @@ module Doocr
     end
 
     # bob the weapon based on movement speed
-    angle = (128 * Doocr.leveltime) & CDoom::FINEMASK
+    angle = (128 * CDoom.leveltime) & CDoom::FINEMASK
     psp.value.sx = FRACUNIT + CDoom.fixed_mul(player.value.bob, @@finecosine[angle])
     angle &= CDoom::FINEANGLES.tdiv(2) - 1
     psp.value.sy = CDoom::WEAPONTOP + CDoom.fixed_mul(player.value.bob, @@finesine[angle])
@@ -5705,14 +5705,14 @@ module Doocr
 
     # The weapon has been raised all the way,
     #  so change to the ready state.
-    newstate = CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].readystate)
+    newstate = CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].readystate)
 
     CDoom.p_set_psprite(player, CDoom::Psprnum::Weapon, newstate)
   end
 
   def self.a_gun_flash(player : CDoom::Player*, psp : CDoom::Pspdef*)
     CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
-    CDoom.p_set_psprite(player, CDoom::Psprnum::Flash, CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].flashstate))
+    CDoom.p_set_psprite(player, CDoom::Psprnum::Flash, CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate))
   end
 
   #
@@ -5730,12 +5730,12 @@ module Doocr
     CDoom.p_line_attack(player.value.mo, angle, CDoom::MELEERANGE, slope, damage)
 
     # turn to face target
-    if !Doocr.linetarget.null?
+    if !CDoom.linetarget.null?
       CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_punch.value)
       player.value.mo.value.angle = CDoom.r_point_to_angle2(player.value.mo.value.x,
         player.value.mo.value.y,
-        Doocr.linetarget.value.x,
-        Doocr.linetarget.value.y)
+        CDoom.linetarget.value.x,
+        CDoom.linetarget.value.y)
     end
   end
 
@@ -5748,7 +5748,7 @@ module Doocr
     slope = CDoom.p_aim_line_attack(player.value.mo, angle, CDoom::MELEERANGE + 1)
     CDoom.p_line_attack(player.value.mo, angle, CDoom::MELEERANGE + 1, slope, damage)
 
-    if Doocr.linetarget.null?
+    if CDoom.linetarget.null?
       CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_sawful.value)
       return
     end
@@ -5757,8 +5757,8 @@ module Doocr
     # turn to face target
     angle = CDoom.r_point_to_angle2(player.value.mo.value.x,
       player.value.mo.value.y,
-      Doocr.linetarget.value.x,
-      Doocr.linetarget.value.y)
+      CDoom.linetarget.value.x,
+      CDoom.linetarget.value.y)
     if angle &- player.value.mo.value.angle > ANG180
       if angle &- player.value.mo.value.angle < (-ANG90).tdiv(20)
         player.value.mo.value.angle = angle &+ ANG90.tdiv(21)
@@ -5776,23 +5776,23 @@ module Doocr
   end
 
   def self.a_fire_missile(player : CDoom::Player*, psp : CDoom::Pspdef*)
-    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
     CDoom.p_spawn_player_missile(player.value.mo, CDoom::Mobjtype::MT_ROCKET)
   end
 
   def self.a_fire_bfg(player : CDoom::Player*, psp : CDoom::Pspdef*)
-    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - @@deh_bfg_cells_per_shot
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - @@deh_bfg_cells_per_shot
     CDoom.p_spawn_player_missile(player.value.mo, CDoom::Mobjtype::MT_BFG)
   end
 
   def self.a_fire_plasma(player : CDoom::Player*, psp : CDoom::Pspdef*)
-    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Flash,
-      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].flashstate + (CDoom.p_random & 1)))
+      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate + (CDoom.p_random & 1)))
 
     CDoom.p_spawn_player_missile(player.value.mo, CDoom::Mobjtype::MT_PLASMA)
   end
@@ -5804,14 +5804,14 @@ module Doocr
   def self.p_bullet_slope(mo : CDoom::Mobj*)
     # see which target is to be aimed at
     an = mo.value.angle
-    Doocr.bulletslope = CDoom.p_aim_line_attack(mo, an, 16 * 64 * FRACUNIT)
+    CDoom.bulletslope = CDoom.p_aim_line_attack(mo, an, 16 * 64 * FRACUNIT)
 
-    if Doocr.linetarget.null?
+    if CDoom.linetarget.null?
       an &+= 1 << 26
-      Doocr.bulletslope = CDoom.p_aim_line_attack(mo, an, 16 * 64 * FRACUNIT)
-      if Doocr.linetarget.null?
+      CDoom.bulletslope = CDoom.p_aim_line_attack(mo, an, 16 * 64 * FRACUNIT)
+      if CDoom.linetarget.null?
         an &-= 2 << 26
-        Doocr.bulletslope = CDoom.p_aim_line_attack(mo, an, 16 * 64 * FRACUNIT)
+        CDoom.bulletslope = CDoom.p_aim_line_attack(mo, an, 16 * 64 * FRACUNIT)
       end
     end
   end
@@ -5822,19 +5822,19 @@ module Doocr
 
     angle &+= (CDoom.p_random - CDoom.p_random) << 18 if accurate == 0
 
-    CDoom.p_line_attack(mo, angle, CDoom::MISSILERANGE, Doocr.bulletslope, damage)
+    CDoom.p_line_attack(mo, angle, CDoom::MISSILERANGE, CDoom.bulletslope, damage)
   end
 
   def self.a_fire_pistol(player : CDoom::Player*, psp : CDoom::Pspdef*)
     CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_pistol.value)
 
     CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
-    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
 
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Flash,
-      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].flashstate))
+      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate))
 
     CDoom.p_bullet_slope(player.value.mo)
     CDoom.p_gunshot(player.value.mo, (player.value.refire == 0).to_unsafe)
@@ -5844,12 +5844,12 @@ module Doocr
     CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_shotgn.value)
     CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
 
-    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
 
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Flash,
-      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].flashstate))
+      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate))
 
     CDoom.p_bullet_slope(player.value.mo)
 
@@ -5862,12 +5862,12 @@ module Doocr
     CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_dshtgn.value)
     CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
 
-    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 2
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 2
 
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Flash,
-      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].flashstate))
+      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate))
 
     CDoom.p_bullet_slope(player.value.mo)
 
@@ -5878,22 +5878,22 @@ module Doocr
       CDoom.p_line_attack(player.value.mo,
         angle,
         CDoom::MISSILERANGE,
-        Doocr.bulletslope + ((CDoom.p_random - CDoom.p_random) << 5), damage)
+        CDoom.bulletslope + ((CDoom.p_random - CDoom.p_random) << 5), damage)
     end
   end
 
   def self.a_fire_cgun(player : CDoom::Player*, psp : CDoom::Pspdef*)
     CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_pistol.value)
 
-    return if player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] == 0
+    return if player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] == 0
 
     CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
-    player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] =
-      player.value.ammo[Doocr.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+      player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
 
     CDoom.p_set_psprite(player,
       CDoom::Psprnum::Flash,
-      CDoom::Statenum.new(Doocr.weaponinfo[player.value.readyweapon.value].flashstate +
+      CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate +
                           (psp.value.state - (@@states.to_unsafe + CDoom::Statenum::S_CHAIN1.value)).to_i32!))
 
     CDoom.p_bullet_slope(player.value.mo)
@@ -5925,11 +5925,11 @@ module Doocr
       #  of the missile
       CDoom.p_aim_line_attack(mo.value.target, an, 16 * 64 * FRACUNIT)
 
-      next if Doocr.linetarget.null?
+      next if CDoom.linetarget.null?
 
-      CDoom.p_spawn_mobj(Doocr.linetarget.value.x,
-        Doocr.linetarget.value.y,
-        Doocr.linetarget.value.z + (Doocr.linetarget.value.height >> 2),
+      CDoom.p_spawn_mobj(CDoom.linetarget.value.x,
+        CDoom.linetarget.value.y,
+        CDoom.linetarget.value.z + (CDoom.linetarget.value.height >> 2),
         CDoom::Mobjtype::MT_EXTRABFG)
 
       damage = 0
@@ -5937,7 +5937,7 @@ module Doocr
         damage += (CDoom.p_random & 7) + 1
       end
 
-      CDoom.p_damage_mobj(Doocr.linetarget, mo.value.target, mo.value.target, damage)
+      CDoom.p_damage_mobj(CDoom.linetarget, mo.value.target, mo.value.target, damage)
     end
   end
 
@@ -5984,7 +5984,7 @@ module Doocr
 
   def self.p_archive_players(file : IO)
     CDoom::MAXPLAYERS.times do |i|
-      next if Doocr.playeringame[i] == 0
+      next if CDoom.playeringame[i] == 0
 
       player = @@players[i]
       CDoom::Psprnum::NUMPSPRITES.value.times do |j|
@@ -5999,7 +5999,7 @@ module Doocr
 
   def self.p_unarchive_players(file : IO)
     CDoom::MAXPLAYERS.times do |i|
-      next if Doocr.playeringame[i] == 0
+      next if CDoom.playeringame[i] == 0
 
       player = Slice.new((@@players.to_unsafe + i).as(UInt8*), sizeof(CDoom::Player))
       file.read_fully(player)
@@ -6019,9 +6019,9 @@ module Doocr
   end
 
   def self.p_archive_world(file : IO)
-    sec = Doocr.sectors
+    sec = CDoom.sectors
     # do sectors
-    Doocr.numsectors.times do |i|
+    CDoom.numsectors.times do |i|
       file.write_bytes((sec.value.floorheight >> FRACBITS).to_i16!)
       file.write_bytes((sec.value.ceilingheight >> FRACBITS).to_i16!)
       file.write_bytes(sec.value.floorpic)
@@ -6033,16 +6033,16 @@ module Doocr
       sec += 1
     end
 
-    li = Doocr.lines
+    li = CDoom.lines
     # do lines
-    Doocr.numlines.times do |i|
+    CDoom.numlines.times do |i|
       file.write_bytes(li.value.flags)
       file.write_bytes(li.value.special)
       file.write_bytes(li.value.tag)
       2.times do |j|
         next if li.value.sidenum[j] == -1
 
-        si = Doocr.sides + li.value.sidenum[j]
+        si = CDoom.sides + li.value.sidenum[j]
 
         file.write_bytes((si.value.textureoffset >> FRACBITS).to_i16!)
         file.write_bytes((si.value.rowoffset >> FRACBITS).to_i16!)
@@ -6055,9 +6055,9 @@ module Doocr
   end
 
   def self.p_unarchive_world(file : IO)
-    sec = Doocr.sectors
+    sec = CDoom.sectors
     # do sectors
-    Doocr.numsectors.times do |i|
+    CDoom.numsectors.times do |i|
       sec.value.floorheight = file.read_bytes(Int16).to_i32 << FRACBITS
       sec.value.ceilingheight = file.read_bytes(Int16).to_i32 << FRACBITS
       sec.value.floorpic = file.read_bytes(Int16)
@@ -6071,15 +6071,15 @@ module Doocr
       sec += 1
     end
 
-    li = Doocr.lines
+    li = CDoom.lines
     # do lines
-    Doocr.numlines.times do |i|
+    CDoom.numlines.times do |i|
       li.value.flags = file.read_bytes(Int16)
       li.value.special = file.read_bytes(Int16)
       li.value.tag = file.read_bytes(Int16)
       2.times do |j|
         next if li.value.sidenum[j] == -1
-        si = Doocr.sides + li.value.sidenum[j]
+        si = CDoom.sides + li.value.sidenum[j]
         si.value.textureoffset = file.read_bytes(Int16).to_i32 << FRACBITS
         si.value.rowoffset = file.read_bytes(Int16).to_i32 << FRACBITS
         si.value.toptexture = file.read_bytes(Int16)
@@ -6093,8 +6093,8 @@ module Doocr
 
   def self.p_archive_thinkers(file : IO)
     # save off the current thinkers
-    th = Doocr.thinkercap.to_unsafe.value.next
-    while th != Doocr.thinkercap.to_unsafe
+    th = CDoom.thinkercap.next
+    while th != pointerof(CDoom.thinkercap)
       if th.value.function.acp1.pointer == (->CDoom.p_mobj_thinker).pointer
         file.write_byte(CDoom::Thinkerclass::Mobj.value)
         mobj = th.as(CDoom::Mobj*).value
@@ -6114,8 +6114,8 @@ module Doocr
 
   def self.p_unarchive_thinkers(file : IO)
     # remove all the current thinkers
-    currentthinker = Doocr.thinkercap.to_unsafe.value.next
-    while currentthinker != Doocr.thinkercap.to_unsafe
+    currentthinker = CDoom.thinkercap.next
+    while currentthinker != pointerof(CDoom.thinkercap)
       nextt = currentthinker.value.next
 
       if currentthinker.value.function.acp1.pointer == (->CDoom.p_mobj_thinker).pointer
@@ -6172,19 +6172,19 @@ module Doocr
   #
   def self.p_archive_specials(file : IO)
     # save off the current thinkers
-    th = Doocr.thinkercap.to_unsafe.value.next
-    while th != Doocr.thinkercap.to_unsafe
+    th = CDoom.thinkercap.next
+    while th != pointerof(CDoom.thinkercap)
       if th.value.function.acv.pointer.null?
         i = 0
         while i < CDoom::MAXCEILINGS
-          break if Doocr.activeceilings[i] == th.as(CDoom::Ceiling*)
+          break if CDoom.activeceilings[i] == th.as(CDoom::Ceiling*)
           i += 1
         end
 
         if i < CDoom::MAXCEILINGS
           file.write_byte(CDoom::Specials::Ceiling.value)
           ceiling = th.as(CDoom::Ceiling*).value
-          ceiling.sector = Pointer(CDoom::Sector).new((ceiling.sector - Doocr.sectors).to_u64!)
+          ceiling.sector = Pointer(CDoom::Sector).new((ceiling.sector - CDoom.sectors).to_u64!)
           file.write(pointerof(ceiling).as(UInt8*).to_slice(sizeof(CDoom::Ceiling)))
         end
         th = th.value.next
@@ -6194,7 +6194,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_move_ceiling).pointer
         file.write_byte(CDoom::Specials::Ceiling.value)
         ceiling = th.as(CDoom::Ceiling*).value
-        ceiling.sector = Pointer(CDoom::Sector).new((ceiling.sector - Doocr.sectors).to_u64!)
+        ceiling.sector = Pointer(CDoom::Sector).new((ceiling.sector - CDoom.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(ceiling).as(UInt8*).to_slice(sizeof(CDoom::Ceiling)))
         next
@@ -6203,7 +6203,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_vertical_door).pointer
         file.write_byte(CDoom::Specials::Door.value)
         door = th.as(CDoom::Vldoor*).value
-        door.sector = Pointer(CDoom::Sector).new((door.sector - Doocr.sectors).to_u64!)
+        door.sector = Pointer(CDoom::Sector).new((door.sector - CDoom.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(door).as(UInt8*).to_slice(sizeof(CDoom::Vldoor)))
         next
@@ -6212,7 +6212,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_move_floor).pointer
         file.write_byte(CDoom::Specials::Floor.value)
         floor = th.as(CDoom::Floormove*).value
-        floor.sector = Pointer(CDoom::Sector).new((floor.sector - Doocr.sectors).to_u64!)
+        floor.sector = Pointer(CDoom::Sector).new((floor.sector - CDoom.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(floor).as(UInt8*).to_slice(sizeof(CDoom::Floormove)))
 
@@ -6222,7 +6222,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_plat_raise).pointer
         file.write_byte(CDoom::Specials::Plat.value)
         plat = th.as(CDoom::Plat*).value
-        plat.sector = Pointer(CDoom::Sector).new((plat.sector - Doocr.sectors).to_u64!)
+        plat.sector = Pointer(CDoom::Sector).new((plat.sector - CDoom.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(plat).as(UInt8*).to_slice(sizeof(CDoom::Plat)))
         next
@@ -6231,7 +6231,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_light_flash).pointer
         file.write_byte(CDoom::Specials::Flash.value)
         flash = th.as(CDoom::Lightflash*).value
-        flash.sector = Pointer(CDoom::Sector).new((flash.sector - Doocr.sectors).to_u64!)
+        flash.sector = Pointer(CDoom::Sector).new((flash.sector - CDoom.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(flash).as(UInt8*).to_slice(sizeof(CDoom::Lightflash)))
         next
@@ -6240,7 +6240,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_strobe_flash).pointer
         file.write_byte(CDoom::Specials::Strobe.value)
         strobe = th.as(CDoom::Strobe*).value
-        strobe.sector = Pointer(CDoom::Sector).new((strobe.sector - Doocr.sectors).to_u64!)
+        strobe.sector = Pointer(CDoom::Sector).new((strobe.sector - CDoom.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(strobe).as(UInt8*).to_slice(sizeof(CDoom::Strobe)))
 
@@ -6250,7 +6250,7 @@ module Doocr
       if th.value.function.acp1.pointer == (->CDoom.t_glow).pointer
         file.write_byte(CDoom::Specials::Glow.value)
         glow = th.as(CDoom::Glow*).value
-        glow.sector = Pointer(CDoom::Sector).new((glow.sector - Doocr.sectors).to_u64!)
+        glow.sector = Pointer(CDoom::Sector).new((glow.sector - CDoom.sectors).to_u64!)
         th = th.value.next
         file.write(pointerof(glow).as(UInt8*).to_slice(sizeof(CDoom::Glow)))
         next
@@ -6275,7 +6275,7 @@ module Doocr
         slice = Slice.new(ceiling.as(UInt8*), sizeof(CDoom::Ceiling))
         file.read_fully(slice)
 
-        ceiling.value.sector = Doocr.sectors + ceiling.value.sector.address
+        ceiling.value.sector = CDoom.sectors + ceiling.value.sector.address
 
         ceiling.value.sector.value.specialdata = ceiling
 
@@ -6289,7 +6289,7 @@ module Doocr
         door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Vldoor*)
         slice = Slice.new(door.as(UInt8*), sizeof(CDoom::Vldoor))
         file.read_fully(slice)
-        door.value.sector = Doocr.sectors + door.value.sector.address
+        door.value.sector = CDoom.sectors + door.value.sector.address
         door.value.sector.value.specialdata = door
         pointerof(door.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
 
@@ -6298,7 +6298,7 @@ module Doocr
         floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Floormove*)
         slice = Slice.new(floor.as(UInt8*), sizeof(CDoom::Floormove))
         file.read_fully(slice)
-        floor.value.sector = Doocr.sectors + floor.value.sector.address
+        floor.value.sector = CDoom.sectors + floor.value.sector.address
         floor.value.sector.value.specialdata = floor
         pointerof(floor.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
 
@@ -6307,7 +6307,7 @@ module Doocr
         plat = CDoom.z_malloc(sizeof(CDoom::Plat), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Plat*)
         slice = Slice.new(plat.as(UInt8*), sizeof(CDoom::Plat))
         file.read_fully(slice)
-        plat.value.sector = Doocr.sectors + plat.value.sector.address
+        plat.value.sector = CDoom.sectors + plat.value.sector.address
         plat.value.sector.value.specialdata = plat
         if !plat.value.thinker.function.acp1.pointer.null?
           pointerof(plat.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_plat_raise).pointer, Pointer(Void).null)
@@ -6319,7 +6319,7 @@ module Doocr
         flash = CDoom.z_malloc(sizeof(CDoom::Lightflash), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Lightflash*)
         slice = Slice.new(flash.as(UInt8*), sizeof(CDoom::Lightflash))
         file.read_fully(slice)
-        flash.value.sector = Doocr.sectors + flash.value.sector.address
+        flash.value.sector = CDoom.sectors + flash.value.sector.address
         pointerof(flash.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_light_flash).pointer, Pointer(Void).null)
 
         CDoom.p_add_thinker(pointerof(flash.value.@thinker))
@@ -6327,7 +6327,7 @@ module Doocr
         strobe = CDoom.z_malloc(sizeof(CDoom::Strobe), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Strobe*)
         slice = Slice.new(strobe.as(UInt8*), sizeof(CDoom::Strobe))
         file.read_fully(slice)
-        strobe.value.sector = Doocr.sectors + strobe.value.sector.address
+        strobe.value.sector = CDoom.sectors + strobe.value.sector.address
         pointerof(strobe.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_strobe_flash).pointer, Pointer(Void).null)
 
         CDoom.p_add_thinker(pointerof(strobe.value.@thinker))
@@ -6335,7 +6335,7 @@ module Doocr
         glow = CDoom.z_malloc(sizeof(CDoom::Glow), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Glow*)
         slice = Slice.new(glow.as(UInt8*), sizeof(CDoom::Glow))
         file.read_fully(slice)
-        glow.value.sector = Doocr.sectors + glow.value.sector.address
+        glow.value.sector = CDoom.sectors + glow.value.sector.address
         pointerof(glow.value.@thinker.@function).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_glow).pointer, Pointer(Void).null)
 
         CDoom.p_add_thinker(pointerof(glow.value.@thinker))
@@ -6348,20 +6348,20 @@ module Doocr
   def self.p_load_vertexes(lump : LibC::Int)
     # Determine number of lumps:
     #  total lump length / vertex record length.
-    Doocr.numvertexes = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapvertex)
+    CDoom.numvertexes = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapvertex)
 
     # Allocate zone memory for buffer.
-    Doocr.vertexes = CDoom.z_malloc(Doocr.numvertexes * sizeof(CDoom::Vertex), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Vertex*)
+    CDoom.vertexes = CDoom.z_malloc(CDoom.numvertexes * sizeof(CDoom::Vertex), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Vertex*)
 
     # Load data into cache.
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     ml = data.as(CDoom::Mapvertex*)
-    li = Doocr.vertexes
+    li = CDoom.vertexes
 
     # Copy and convert vertex coordinates,
     # internal representation as fixed.
-    Doocr.numvertexes.times do |i|
+    CDoom.numvertexes.times do |i|
       li.value.x = ml.value.x.to_i32 << FRACBITS
       li.value.y = ml.value.y.to_i32 << FRACBITS
 
@@ -6374,27 +6374,27 @@ module Doocr
   end
 
   def self.p_load_segs(lump : LibC::Int)
-    Doocr.numsegs = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapseg)
-    Doocr.segs = CDoom.z_malloc(Doocr.numsegs * sizeof(CDoom::Seg), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Seg*)
-    CDoom.doom_memset(Doocr.segs, 0, Doocr.numsegs * sizeof(CDoom::Seg))
+    CDoom.numsegs = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapseg)
+    CDoom.segs = CDoom.z_malloc(CDoom.numsegs * sizeof(CDoom::Seg), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Seg*)
+    CDoom.doom_memset(CDoom.segs, 0, CDoom.numsegs * sizeof(CDoom::Seg))
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     ml = data.as(CDoom::Mapseg*)
-    li = Doocr.segs
-    Doocr.numsegs.times do |i|
-      li.value.v1 = Doocr.vertexes + ml.value.v1
-      li.value.v2 = Doocr.vertexes + ml.value.v2
+    li = CDoom.segs
+    CDoom.numsegs.times do |i|
+      li.value.v1 = CDoom.vertexes + ml.value.v1
+      li.value.v2 = CDoom.vertexes + ml.value.v2
 
       li.value.angle = ml.value.angle.to_i32 << 16
       li.value.offset = ml.value.offset.to_i32 << 16
       linedef = ml.value.linedef
-      ldef = Doocr.lines + linedef
+      ldef = CDoom.lines + linedef
       li.value.linedef = ldef
       side = ml.value.side
-      li.value.sidedef = Doocr.sides + ldef.value.sidenum[side]
-      li.value.frontsector = Doocr.sides[ldef.value.sidenum[side]].sector
+      li.value.sidedef = CDoom.sides + ldef.value.sidenum[side]
+      li.value.frontsector = CDoom.sides[ldef.value.sidenum[side]].sector
       if ldef.value.flags & CDoom::ML_TWOSIDED != 0
-        li.value.backsector = Doocr.sides[ldef.value.sidenum[side ^ 1]].sector
+        li.value.backsector = CDoom.sides[ldef.value.sidenum[side ^ 1]].sector
       else
         li.value.backsector = Pointer(CDoom::Sector).null
       end
@@ -6407,15 +6407,15 @@ module Doocr
   end
 
   def self.p_load_subsectors(lump : LibC::Int)
-    Doocr.numsubsectors = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapsubsector)
-    Doocr.subsectors = CDoom.z_malloc(Doocr.numsubsectors * sizeof(CDoom::Subsector), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Subsector*)
+    CDoom.numsubsectors = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapsubsector)
+    CDoom.subsectors = CDoom.z_malloc(CDoom.numsubsectors * sizeof(CDoom::Subsector), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Subsector*)
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     ms = data.as(CDoom::Mapsubsector*)
-    CDoom.doom_memset(Doocr.subsectors, 0, Doocr.numsubsectors * sizeof(CDoom::Subsector))
-    ss = Doocr.subsectors
+    CDoom.doom_memset(CDoom.subsectors, 0, CDoom.numsubsectors * sizeof(CDoom::Subsector))
+    ss = CDoom.subsectors
 
-    Doocr.numsubsectors.times do |i|
+    CDoom.numsubsectors.times do |i|
       ss.value.numlines = ms.value.numsegs
       ss.value.firstline = ms.value.firstseg
 
@@ -6427,15 +6427,15 @@ module Doocr
   end
 
   def self.p_load_sectors(lump : LibC::Int)
-    Doocr.numsectors = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapsector)
-    Doocr.sectors = CDoom.z_malloc(Doocr.numsectors * sizeof(CDoom::Sector), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Sector*)
-    CDoom.doom_memset(Doocr.sectors, 0, Doocr.numsectors * sizeof(CDoom::Sector))
+    CDoom.numsectors = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapsector)
+    CDoom.sectors = CDoom.z_malloc(CDoom.numsectors * sizeof(CDoom::Sector), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Sector*)
+    CDoom.doom_memset(CDoom.sectors, 0, CDoom.numsectors * sizeof(CDoom::Sector))
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     ms = data.as(CDoom::Mapsector*)
-    ss = Doocr.sectors
+    ss = CDoom.sectors
 
-    Doocr.numsectors.times do |i|
+    CDoom.numsectors.times do |i|
       ss.value.floorheight = ms.value.floorheight.to_i32 << FRACBITS
       ss.value.ceilingheight = ms.value.ceilingheight.to_i32 << FRACBITS
       ss.value.floorpic = CDoom.r_flat_num_for_name(ms.value.floorpic)
@@ -6453,14 +6453,14 @@ module Doocr
   end
 
   def self.p_load_nodes(lump : LibC::Int)
-    Doocr.numnodes = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapnode)
-    Doocr.nodes = CDoom.z_malloc(Doocr.numnodes * sizeof(CDoom::Node), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Node*)
+    CDoom.numnodes = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapnode)
+    CDoom.nodes = CDoom.z_malloc(CDoom.numnodes * sizeof(CDoom::Node), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Node*)
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     mn = data.as(CDoom::Mapnode*)
-    no = Doocr.nodes
+    no = CDoom.nodes
 
-    Doocr.numnodes.times do |i|
+    CDoom.numnodes.times do |i|
       no.value.x = mn.value.x.to_i32 << FRACBITS
       no.value.y = mn.value.y.to_i32 << FRACBITS
       no.value.dx = mn.value.dx.to_i32 << FRACBITS
@@ -6490,7 +6490,7 @@ module Doocr
       spawnt = true
 
       # Do not spawn cool, new monsters if !commercial
-      if Doocr.gamemode != CDoom::GameMode::Commercial
+      if CDoom.gamemode != CDoom::GameMode::Commercial
         case mt.value.type
         when 68, # Arachnotron
              64, # Archvile
@@ -6530,21 +6530,21 @@ module Doocr
   # Also counts secret lines for intermissions.
   #
   def self.p_load_linedefs(lump : LibC::Int)
-    Doocr.numlines = CDoom.w_lump_length(lump) // sizeof(CDoom::Maplinedef)
-    Doocr.lines = CDoom.z_malloc(Doocr.numlines * sizeof(CDoom::Line), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Line*)
-    CDoom.doom_memset(Doocr.lines, 0, Doocr.numlines * sizeof(CDoom::Line))
+    CDoom.numlines = CDoom.w_lump_length(lump) // sizeof(CDoom::Maplinedef)
+    CDoom.lines = CDoom.z_malloc(CDoom.numlines * sizeof(CDoom::Line), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Line*)
+    CDoom.doom_memset(CDoom.lines, 0, CDoom.numlines * sizeof(CDoom::Line))
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     mld = data.as(CDoom::Maplinedef*)
-    ld = Doocr.lines
+    ld = CDoom.lines
 
-    Doocr.numlines.times do |i|
+    CDoom.numlines.times do |i|
       ld.value.flags = mld.value.flags
       ld.value.special = mld.value.special
       ld.value.tag = mld.value.tag
-      v1 = Doocr.vertexes + mld.value.v1
+      v1 = CDoom.vertexes + mld.value.v1
       ld.value.v1 = v1
-      v2 = Doocr.vertexes + mld.value.v2
+      v2 = CDoom.vertexes + mld.value.v2
       ld.value.v2 = v2
       ld.value.dx = v2.value.x - v1.value.x
       ld.value.dy = v2.value.y - v1.value.y
@@ -6581,13 +6581,13 @@ module Doocr
       ld.value.sidenum[1] = mld.value.sidenum[1]
 
       if ld.value.sidenum[0] != -1
-        ld.value.frontsector = Doocr.sides[ld.value.sidenum[0]].sector
+        ld.value.frontsector = CDoom.sides[ld.value.sidenum[0]].sector
       else
         ld.value.frontsector = Pointer(CDoom::Sector).null
       end
 
       if ld.value.sidenum[1] != -1
-        ld.value.backsector = Doocr.sides[ld.value.sidenum[1]].sector
+        ld.value.backsector = CDoom.sides[ld.value.sidenum[1]].sector
       else
         ld.value.backsector = Pointer(CDoom::Sector).null
       end
@@ -6600,21 +6600,21 @@ module Doocr
   end
 
   def self.p_load_sidedefs(lump : LibC::Int)
-    Doocr.numsides = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapsidedef)
-    Doocr.sides = CDoom.z_malloc(Doocr.numsides * sizeof(CDoom::Side), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Side*)
-    CDoom.doom_memset(Doocr.sides, 0, Doocr.numsides * sizeof(CDoom::Side))
+    CDoom.numsides = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapsidedef)
+    CDoom.sides = CDoom.z_malloc(CDoom.numsides * sizeof(CDoom::Side), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Side*)
+    CDoom.doom_memset(CDoom.sides, 0, CDoom.numsides * sizeof(CDoom::Side))
     data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
 
     msd = data.as(CDoom::Mapsidedef*)
-    sd = Doocr.sides
+    sd = CDoom.sides
 
-    Doocr.numsides.times do |i|
+    CDoom.numsides.times do |i|
       sd.value.textureoffset = msd.value.textureoffset.to_i32 << FRACBITS
       sd.value.rowoffset = msd.value.rowoffset.to_i32 << FRACBITS
       sd.value.toptexture = CDoom.r_texture_num_for_name(msd.value.toptexture)
       sd.value.bottomtexture = CDoom.r_texture_num_for_name(msd.value.bottomtexture)
       sd.value.midtexture = CDoom.r_texture_num_for_name(msd.value.midtexture)
-      sd.value.sector = Doocr.sectors + msd.value.sector
+      sd.value.sector = CDoom.sectors + msd.value.sector
 
       msd += 1
       sd += 1
@@ -6624,18 +6624,18 @@ module Doocr
   end
 
   def self.p_load_blockmap(lump : LibC::Int)
-    Doocr.blockmaplump = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(Int16*)
-    Doocr.blockmap = Doocr.blockmaplump + 4
+    CDoom.blockmaplump = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(Int16*)
+    CDoom.blockmap = CDoom.blockmaplump + 4
 
-    Doocr.bmaporgx = Doocr.blockmaplump[0].to_i32 << FRACBITS
-    Doocr.bmaporgy = Doocr.blockmaplump[1].to_i32 << FRACBITS
-    Doocr.bmapwidth = Doocr.blockmaplump[2]
-    Doocr.bmapheight = Doocr.blockmaplump[3]
+    CDoom.bmaporgx = CDoom.blockmaplump[0].to_i32 << FRACBITS
+    CDoom.bmaporgy = CDoom.blockmaplump[1].to_i32 << FRACBITS
+    CDoom.bmapwidth = CDoom.blockmaplump[2]
+    CDoom.bmapheight = CDoom.blockmaplump[3]
 
     # clear out mobj chains
-    count = sizeof(CDoom::Mobj*) * Doocr.bmapwidth * Doocr.bmapheight
-    Doocr.blocklinks.clear
-    (Doocr.bmapwidth * Doocr.bmapheight).times { Doocr.blocklinks << Pointer(CDoom::Mobj).null }
+    count = sizeof(CDoom::Mobj*) * CDoom.bmapwidth * CDoom.bmapheight
+    CDoom.blocklinks = CDoom.z_malloc(count, CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Mobj**)
+    CDoom.doom_memset(CDoom.blocklinks, 0, count)
   end
 
   #
@@ -6644,18 +6644,18 @@ module Doocr
   #
   def self.p_group_lines
     # look up sector number for each subsector
-    ss = Doocr.subsectors
-    Doocr.numsubsectors.times do |i|
-      seg = Doocr.segs + ss.value.firstline
+    ss = CDoom.subsectors
+    CDoom.numsubsectors.times do |i|
+      seg = CDoom.segs + ss.value.firstline
       ss.value.sector = seg.value.sidedef.value.sector
 
       ss += 1
     end
 
     # count number of lines in each sector
-    li = Doocr.lines
+    li = CDoom.lines
     total = 0
-    Doocr.numlines.times do |i|
+    CDoom.numlines.times do |i|
       total += 1
       li.value.frontsector.value.linecount = li.value.frontsector.value.linecount + 1
 
@@ -6669,13 +6669,13 @@ module Doocr
 
     # build line tables for each sector
     linebuffer = CDoom.z_malloc(total * sizeof(CDoom::Line*), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Line**)
-    sector = Doocr.sectors
+    sector = CDoom.sectors
     bbox = Pointer(CDoom::Fixed).malloc(4)
-    Doocr.numsectors.times do |i|
+    CDoom.numsectors.times do |i|
       CDoom.m_clear_box(bbox)
       sector.value.lines = linebuffer
-      li = Doocr.lines
-      Doocr.numlines.times do |j|
+      li = CDoom.lines
+      CDoom.numlines.times do |j|
         if li.value.frontsector == sector || li.value.backsector == sector
           linebuffer.value = li
           linebuffer += 1
@@ -6695,19 +6695,19 @@ module Doocr
       soundorg.value.y = (bbox[CDoom::BOXTOP] &+ bbox[CDoom::BOXBOTTOM]) // 2
 
       # adjust bounding box to map blocks
-      block = (bbox[CDoom::BOXTOP] &- Doocr.bmaporgy + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
-      block = block >= Doocr.bmapheight ? Doocr.bmapheight - 1 : block
+      block = (bbox[CDoom::BOXTOP] &- CDoom.bmaporgy + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+      block = block >= CDoom.bmapheight ? CDoom.bmapheight - 1 : block
       sector.value.blockbox[CDoom::BOXTOP] = block
 
-      block = (bbox[CDoom::BOXBOTTOM] &- Doocr.bmaporgy - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+      block = (bbox[CDoom::BOXBOTTOM] &- CDoom.bmaporgy - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
       block = block < 0 ? 0 : block
       sector.value.blockbox[CDoom::BOXBOTTOM] = block
 
-      block = (bbox[CDoom::BOXRIGHT] &- Doocr.bmaporgx + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
-      block = block >= Doocr.bmapwidth ? Doocr.bmapwidth - 1 : block
+      block = (bbox[CDoom::BOXRIGHT] &- CDoom.bmaporgx + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+      block = block >= CDoom.bmapwidth ? CDoom.bmapwidth - 1 : block
       sector.value.blockbox[CDoom::BOXRIGHT] = block
 
-      block = (bbox[CDoom::BOXLEFT] &- Doocr.bmaporgx - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+      block = (bbox[CDoom::BOXLEFT] &- CDoom.bmaporgx - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
       block = block < 0 ? 0 : block
       sector.value.blockbox[CDoom::BOXLEFT] = block
 
@@ -6718,11 +6718,11 @@ module Doocr
   def self.p_setup_level(episode : LibC::Int, map : LibC::Int, playermask : LibC::Int, skill : CDoom::Skill)
     lumpname = Pointer(UInt8).malloc(9)
 
-    Doocr.totalkills = 0
-    Doocr.totalitems = 0
-    Doocr.totalsecret = 0
-    @@wminfo.maxfrags = 0
-    @@wminfo.partime = 180
+    CDoom.totalkills = 0
+    CDoom.totalitems = 0
+    CDoom.totalsecret = 0
+    CDoom.wminfo.maxfrags = 0
+    CDoom.wminfo.partime = 180
     CDoom::MAXPLAYERS.times do |i|
       (@@players.to_unsafe + i).value.killcount = 0
       (@@players.to_unsafe + i).value.secretcount = 0
@@ -6731,7 +6731,7 @@ module Doocr
 
     # Initial height of PointOfView
     # will be set by player think.
-    (@@players.to_unsafe + Doocr.consoleplayer).value.viewz = 1
+    (@@players.to_unsafe + CDoom.consoleplayer).value.viewz = 1
 
     # Make sure all sounds are stopped before Z_FreeTags.
     CDoom.s_start
@@ -6744,7 +6744,7 @@ module Doocr
     CDoom.w_reload
 
     # find map name
-    if Doocr.gamemode == CDoom::GameMode::Commercial
+    if CDoom.gamemode == CDoom::GameMode::Commercial
       if map < 10
         CDoom.doom_strcpy(lumpname, "map0")
         CDoom.doom_concat(lumpname, CDoom.doom_itoa(map, 10))
@@ -6762,7 +6762,7 @@ module Doocr
 
     lumpnum = CDoom.w_get_num_for_name(lumpname)
 
-    Doocr.leveltime = 0
+    CDoom.leveltime = 0
 
     # note: most of this ordering is important
     p_load_blockmap(lumpnum + CDoom::ML_BLOCKMAP) unless ARGV.includes?("-blockmap")
@@ -6777,17 +6777,17 @@ module Doocr
     CDoom.p_load_nodes(lumpnum + CDoom::ML_NODES)
     CDoom.p_load_segs(lumpnum + CDoom::ML_SEGS)
 
-    Doocr.rejectmatrix = CDoom.w_cache_lump_num(lumpnum + CDoom::ML_REJECT, CDoom::PU_LEVEL).as(UInt8*)
+    CDoom.rejectmatrix = CDoom.w_cache_lump_num(lumpnum + CDoom::ML_REJECT, CDoom::PU_LEVEL).as(UInt8*)
     CDoom.p_group_lines
 
-    Doocr.bodyqueslot = 0
-    Doocr.deathmatch_p = 0
+    CDoom.bodyqueslot = 0
+    CDoom.deathmatch_p = CDoom.deathmatchstarts.to_unsafe
     CDoom.p_load_things(lumpnum + CDoom::ML_THINGS)
 
     # if deathmatch, randomly spawn the active players
-    if Doocr.deathmatch != 0
+    if CDoom.deathmatch != 0
       CDoom::MAXPLAYERS.times do |i|
-        if Doocr.playeringame[i] != 0
+        if CDoom.playeringame[i] != 0
           (@@players.to_unsafe + i).value.mo = Pointer(CDoom::Mobj).null
           CDoom.g_deathmatch_spawn_player(i)
         end
@@ -6795,14 +6795,14 @@ module Doocr
     end
 
     # clear special respawning que
-    Doocr.iquehead = 0
-    Doocr.iquetail = 0
+    CDoom.iquehead = 0
+    CDoom.iquetail = 0
 
     # set up world state
     CDoom.p_spawn_specials
 
     # preload graphics
-    CDoom.r_precache_level if Doocr.precache != 0
+    CDoom.r_precache_level if CDoom.precache != 0
   end
 
   def self.p_init
@@ -6866,16 +6866,16 @@ module Doocr
   #
   def self.p_cross_subsector(num : LibC::Int) : CDoom::DoomBool
     {% if flag?("RANGECHECK") %}
-      if num >= Doocr.numsubsectors
-        CDoom.i_error("Error: p_cross_subsector: ss #{num} with numss = #{Doocr.numsubsectors}")
+      if num >= CDoom.numsubsectors
+        CDoom.i_error("Error: p_cross_subsector: ss #{num} with numss = #{CDoom.numsubsectors}")
       end
     {% end %}
 
-    sub = Doocr.subsectors + num
+    sub = CDoom.subsectors + num
 
     # check lines
     count = sub.value.numlines
-    seg = Doocr.segs + sub.value.firstline
+    seg = CDoom.segs + sub.value.firstline
 
     divl = CDoom::Divline.new
 
@@ -6883,18 +6883,18 @@ module Doocr
       line = seg.value.linedef
 
       # allready checked other size?
-      if line.value.validcount == Doocr.validcount
+      if line.value.validcount == CDoom.validcount
         seg += 1
         count -= 1
         next
       end
 
-      line.value.validcount = Doocr.validcount
+      line.value.validcount = CDoom.validcount
 
       v1 = line.value.v1
       v2 = line.value.v2
-      s1 = CDoom.p_divline_side(v1.value.x, v1.value.y, Doocr.strace.to_unsafe)
-      s2 = CDoom.p_divline_side(v2.value.x, v2.value.y, Doocr.strace.to_unsafe)
+      s1 = CDoom.p_divline_side(v1.value.x, v1.value.y, pointerof(CDoom.strace))
+      s2 = CDoom.p_divline_side(v2.value.x, v2.value.y, pointerof(CDoom.strace))
 
       # line isn't crossed?
       if s1 == s2
@@ -6907,8 +6907,8 @@ module Doocr
       divl.y = v1.value.y
       divl.dx = v2.value.x - v1.value.x
       divl.dy = v2.value.y - v1.value.y
-      s1 = CDoom.p_divline_side(Doocr.strace[0].x, Doocr.strace[0].y, pointerof(divl))
-      s2 = CDoom.p_divline_side(Doocr.t2x, Doocr.t2y, pointerof(divl))
+      s1 = CDoom.p_divline_side(CDoom.strace.x, CDoom.strace.y, pointerof(divl))
+      s2 = CDoom.p_divline_side(CDoom.t2x, CDoom.t2y, pointerof(divl))
 
       # line isn't crossed?
       if s1 == s2
@@ -6951,19 +6951,19 @@ module Doocr
       # quick test for totally closed doors
       return 0 if openbottom >= opentop # stop
 
-      frac = CDoom.p_intercept_vector2(Doocr.strace.to_unsafe, pointerof(divl))
+      frac = CDoom.p_intercept_vector2(pointerof(CDoom.strace), pointerof(divl))
 
       if front.value.floorheight != back.value.floorheight
-        slope = CDoom.fixed_div(openbottom - Doocr.sightzstart, frac)
-        Doocr.bottomslope = slope if slope > Doocr.bottomslope
+        slope = CDoom.fixed_div(openbottom - CDoom.sightzstart, frac)
+        CDoom.bottomslope = slope if slope > CDoom.bottomslope
       end
 
       if front.value.ceilingheight != back.value.ceilingheight
-        slope = CDoom.fixed_div(opentop - Doocr.sightzstart, frac)
-        Doocr.topslope = slope if slope < Doocr.topslope
+        slope = CDoom.fixed_div(opentop - CDoom.sightzstart, frac)
+        CDoom.topslope = slope if slope < CDoom.topslope
       end
 
-      return 0 if Doocr.topslope <= Doocr.bottomslope # stop
+      return 0 if CDoom.topslope <= CDoom.bottomslope # stop
 
       seg += 1
       count -= 1
@@ -6986,17 +6986,17 @@ module Doocr
       end
     end
 
-    bsp = Doocr.nodes + bspnum
+    bsp = CDoom.nodes + bspnum
 
     # decide which side the start point is on
-    side = CDoom.p_divline_side(Doocr.strace[0].x, Doocr.strace[0].y, bsp.as(CDoom::Divline*))
+    side = CDoom.p_divline_side(CDoom.strace.x, CDoom.strace.y, bsp.as(CDoom::Divline*))
     side = 0 if side == 2 # an "on" should cross both sides
 
     # cross the starting side
     return 0 if CDoom.p_cross_bsp_node(bsp.value.children[side]) == 0
 
     # the partition plane is crossed here
-    if side == CDoom.p_divline_side(Doocr.t2x, Doocr.t2y, bsp.as(CDoom::Divline*))
+    if side == CDoom.p_divline_side(CDoom.t2x, CDoom.t2y, bsp.as(CDoom::Divline*))
       # the line doesn't touch the other side
       return 1
     end
@@ -7014,15 +7014,15 @@ module Doocr
     # First check for trivial rejection.
 
     # Determine subsector entries in REJECT table.
-    s1 = t1.value.subsector.value.sector - Doocr.sectors
-    s2 = t2.value.subsector.value.sector - Doocr.sectors
-    pnum = s1 * Doocr.numsectors + s2
+    s1 = t1.value.subsector.value.sector - CDoom.sectors
+    s2 = t2.value.subsector.value.sector - CDoom.sectors
+    pnum = s1 * CDoom.numsectors + s2
     bytenum = pnum >> 3
     bitnum = 1 << (pnum & 7)
 
     # Check in REJECT table.
-    if Doocr.rejectmatrix[bytenum] & bitnum != 0
-      Doocr.sightcounts[0] += 1
+    if CDoom.rejectmatrix[bytenum] & bitnum != 0
+      CDoom.sightcounts[0] = CDoom.sightcounts[0] + 1
 
       # can't possibly be connected
       return 0
@@ -7030,60 +7030,58 @@ module Doocr
 
     # An unobstructed LOS is possible.
     # Now look from eyes of t1 to any part of t2.
-    Doocr.sightcounts[1] += 1
+    CDoom.sightcounts[1] = CDoom.sightcounts[1] + 1
 
-    Doocr.validcount += 1
+    CDoom.validcount += 1
 
-    Doocr.sightzstart = t1.value.z + t1.value.height - (t1.value.height >> 2)
-    Doocr.topslope = (t2.value.z + t2.value.height) - Doocr.sightzstart
-    Doocr.bottomslope = (t2.value.z) - Doocr.sightzstart
+    CDoom.sightzstart = t1.value.z + t1.value.height - (t1.value.height >> 2)
+    CDoom.topslope = (t2.value.z + t2.value.height) - CDoom.sightzstart
+    CDoom.bottomslope = (t2.value.z) - CDoom.sightzstart
 
-    Doocr.strace.to_unsafe.value.x = t1.value.x
-    Doocr.strace.to_unsafe.value.y = t1.value.y
-    Doocr.t2x = t2.value.x
-    Doocr.t2y = t2.value.y
-    Doocr.strace.to_unsafe.value.dx = t2.value.x - t1.value.x
-    Doocr.strace.to_unsafe.value.dy = t2.value.y - t1.value.y
+    CDoom.strace.x = t1.value.x
+    CDoom.strace.y = t1.value.y
+    CDoom.t2x = t2.value.x
+    CDoom.t2y = t2.value.y
+    CDoom.strace.dx = t2.value.x - t1.value.x
+    CDoom.strace.dy = t2.value.y - t1.value.y
 
     # the head node is the last node output
-    return CDoom.p_cross_bsp_node(Doocr.numnodes - 1)
+    return CDoom.p_cross_bsp_node(CDoom.numnodes - 1)
   end
 
   def self.p_init_pic_anims
     # Init animation
-    Doocr.lastanim = 0
+    CDoom.lastanim = CDoom.anims
     i = 0
-    while @@animdefs[i].istexture != -1
-      if @@animdefs[i].istexture != 0
+    while CDoom.animdefs[i].istexture != -1
+      if CDoom.animdefs[i].istexture != 0
         # different episode ?
-        if CDoom.r_check_texture_num_for_name(@@animdefs[i].startname.to_unsafe) == -1
+        if CDoom.r_check_texture_num_for_name(CDoom.animdefs[i].startname) == -1
           i += 1
           next
         end
 
-        anim = Doocr.anims[Doocr.lastanim]
-        anim.picnum = CDoom.r_texture_num_for_name(@@animdefs[i].endname.to_unsafe)
-        anim.basepic = CDoom.r_texture_num_for_name(@@animdefs[i].startname.to_unsafe)
+        CDoom.lastanim.value.picnum = CDoom.r_texture_num_for_name(CDoom.animdefs[i].endname)
+        CDoom.lastanim.value.basepic = CDoom.r_texture_num_for_name(CDoom.animdefs[i].startname)
       else
-        if CDoom.w_check_num_for_name(@@animdefs[i].startname.to_unsafe) == -1
+        if CDoom.w_check_num_for_name(CDoom.animdefs[i].startname) == -1
           i += 1
           next
         end
 
-        anim = Doocr.anims[Doocr.lastanim]
-        anim.picnum = CDoom.r_flat_num_for_name(@@animdefs[i].endname.to_unsafe)
-        anim.basepic = CDoom.r_flat_num_for_name(@@animdefs[i].startname.to_unsafe)
+        CDoom.lastanim.value.picnum = CDoom.r_flat_num_for_name(CDoom.animdefs[i].endname)
+        CDoom.lastanim.value.basepic = CDoom.r_flat_num_for_name(CDoom.animdefs[i].startname)
       end
 
-      anim.istexture = @@animdefs[i].istexture
-      anim.numpics = anim.picnum - anim.basepic + 1
+      CDoom.lastanim.value.istexture = CDoom.animdefs[i].istexture
+      CDoom.lastanim.value.numpics = CDoom.lastanim.value.picnum - CDoom.lastanim.value.basepic + 1
 
-      if anim.numpics < 2
-        CDoom.i_error("Error: p_init_pic_anims: bad cycle from #{@@animdefs[i].startname} to #{@@animdefs[i].endname}")
+      if CDoom.lastanim.value.numpics < 2
+        CDoom.i_error("Error: p_init_pic_anims: bad cycle from #{String.new(CDoom.animdefs[i].startname)} to #{String.new(CDoom.animdefs[i].endname)}")
       end
 
-      anim.speed = @@animdefs[i].speed
-      Doocr.lastanim += 1
+      CDoom.lastanim.value.speed = CDoom.animdefs[i].speed
+      CDoom.lastanim += 1
 
       i += 1
     end
@@ -7095,7 +7093,7 @@ module Doocr
   #  the line number, and the side (0/1) that you want.
   #
   def self.get_side(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : CDoom::Side*
-    return Doocr.sides + Doocr.sectors[current_sector].lines[line].value.sidenum[side]
+    return CDoom.sides + CDoom.sectors[current_sector].lines[line].value.sidenum[side]
   end
 
   #
@@ -7104,7 +7102,7 @@ module Doocr
   #  the line number and the side (0/1) that you want.
   #
   def self.get_sector(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : CDoom::Sector*
-    return Doocr.sides[Doocr.sectors[current_sector].lines[line].value.sidenum[side]].sector
+    return CDoom.sides[CDoom.sectors[current_sector].lines[line].value.sidenum[side]].sector
   end
 
   #
@@ -7112,7 +7110,7 @@ module Doocr
   #  it will tell you whether the line is two-sided or not.
   #
   def self.two_sided(sector : LibC::Int, line : LibC::Int) : LibC::Int
-    return Doocr.sectors[sector].lines[line].value.flags.to_i32 & CDoom::ML_TWOSIDED
+    return CDoom.sectors[sector].lines[line].value.flags.to_i32 & CDoom::ML_TWOSIDED
   end
 
   #
@@ -7247,8 +7245,8 @@ module Doocr
   #
   def self.p_find_sector_from_line_tag(line : CDoom::Line*, start : LibC::Int) : LibC::Int
     i = start + 1
-    while i < Doocr.numsectors
-      return i if Doocr.sectors[i].tag == line.value.tag
+    while i < CDoom.numsectors
+      return i if CDoom.sectors[i].tag == line.value.tag
       i += 1
     end
 
@@ -7283,7 +7281,7 @@ module Doocr
   #  to cross a line with a non 0 special.
   #
   def self.p_cross_special_line(linenum : LibC::Int, side : LibC::Int, thing : CDoom::Mobj*)
-    line = Doocr.lines + linenum
+    line = CDoom.lines + linenum
 
     Mod.lines.each do |mod_line|
       next if mod_line.when != Mod::Line::When::Crossed ||
@@ -7650,19 +7648,19 @@ module Doocr
     when 5
       # HELLSLIME DAMAGE
       if player.value.powers[CDoom::Powertype::Ironfeet.value] == 0 &&
-         Doocr.leveltime & 0x1f == 0
+         CDoom.leveltime & 0x1f == 0
         CDoom.p_damage_mobj(player.value.mo, Pointer(CDoom::Mobj).null, Pointer(CDoom::Mobj).null, 10)
       end
     when 7
       # NUKAGE DAMAGE
       if player.value.powers[CDoom::Powertype::Ironfeet.value] == 0 &&
-         Doocr.leveltime & 0x1f == 0
+         CDoom.leveltime & 0x1f == 0
         CDoom.p_damage_mobj(player.value.mo, Pointer(CDoom::Mobj).null, Pointer(CDoom::Mobj).null, 5)
       end
     when 16, # SUPER HELLSLIME DAMAGE
          4   # STROBE HURT
       if (player.value.powers[CDoom::Powertype::Ironfeet.value] == 0 ||
-         CDoom.p_random < 5) && Doocr.leveltime & 0x1f == 0
+         CDoom.p_random < 5) && CDoom.leveltime & 0x1f == 0
         CDoom.p_damage_mobj(player.value.mo, Pointer(CDoom::Mobj).null, Pointer(CDoom::Mobj).null, 20)
       end
     when 9
@@ -7675,7 +7673,7 @@ module Doocr
       # EXIT SUPER DAMAGE! (for E1M8 finale)
       player.value.cheats = player.value.cheats & ~CDoom::Cheat::CF_GODMODE.value
 
-      CDoom.p_damage_mobj(player.value.mo, Pointer(CDoom::Mobj).null, Pointer(CDoom::Mobj).null, 20) if Doocr.leveltime & 0x1f == 0
+      CDoom.p_damage_mobj(player.value.mo, Pointer(CDoom::Mobj).null, Pointer(CDoom::Mobj).null, 20) if CDoom.leveltime & 0x1f == 0
 
       CDoom.g_exit_level if player.value.health <= 10
     else
@@ -7688,60 +7686,58 @@ module Doocr
   #
   def self.p_update_specials
     # LEVEL TIMER
-    if Doocr.level_timer != 0
-      Doocr.level_time_count -= 1
-      CDoom.g_exit_level if Doocr.level_time_count == 0
+    if CDoom.level_timer != 0
+      CDoom.level_time_count -= 1
+      CDoom.g_exit_level if CDoom.level_time_count == 0
     end
 
     # ANIMATE FLATS AND TEXTURES GLOBALLY
-    anim_index = 0
-    while anim_index < Doocr.lastanim
-      anim = Doocr.anims[anim_index]
-      i = anim.basepic
-      while i < anim.basepic + anim.numpics
-        pic = anim.basepic + ((Doocr.leveltime // anim.speed + i) % anim.numpics)
-        if anim.istexture != 0
-          Doocr.texturetranslation[i] = pic
+    anim = CDoom.anims.to_unsafe
+    while anim < CDoom.lastanim
+      i = anim.value.basepic
+      while i < anim.value.basepic + anim.value.numpics
+        pic = anim.value.basepic + ((CDoom.leveltime // anim.value.speed + i) % anim.value.numpics)
+        if anim.value.istexture != 0
+          CDoom.texturetranslation[i] = pic
         else
-          Doocr.flattranslation[i] = pic
+          CDoom.flattranslation[i] = pic
         end
 
         i += 1
       end
 
-      anim_index += 1
+      anim += 1
     end
 
     # ANIMATE LINE SPECIALS
-    Doocr.numlinespecials.times do |i|
-      line = Doocr.linespeciallist[i]
+    CDoom.numlinespecials.times do |i|
+      line = CDoom.linespeciallist[i]
       case line.value.special
       when 48
         # EFFECT FIRSTCOL SCROLL +
-        (Doocr.sides + line.value.sidenum[0]).value.textureoffset = Doocr.sides[line.value.sidenum[0]].textureoffset &+ FRACUNIT
+        (CDoom.sides + line.value.sidenum[0]).value.textureoffset = CDoom.sides[line.value.sidenum[0]].textureoffset &+ FRACUNIT
       end
     end
 
     # DO BUTTONS
     CDoom::MAXBUTTONS.times do |i|
-      button = @@buttonlist[i]
-      if button.btimer != 0
-        button.btimer -= 1
-        if button.btimer == 0
-          case button.where
+      if CDoom.buttonlist[i].btimer != 0
+        (CDoom.buttonlist.to_unsafe + i).value.btimer = CDoom.buttonlist[i].btimer - 1
+        if CDoom.buttonlist[i].btimer == 0
+          case CDoom.buttonlist[i].where
           when CDoom::Bwhere::Top
-            line = button.line.not_nil!
-            (Doocr.sides + line.value.sidenum[0]).value.toptexture = button.btexture
+            (CDoom.sides + CDoom.buttonlist[i].line.value.sidenum[0]).value.toptexture =
+              CDoom.buttonlist[i].btexture
           when CDoom::Bwhere::Middle
-            line = button.line.not_nil!
-            (Doocr.sides + line.value.sidenum[0]).value.midtexture = button.btexture
+            (CDoom.sides + CDoom.buttonlist[i].line.value.sidenum[0]).value.midtexture =
+              CDoom.buttonlist[i].btexture
           when CDoom::Bwhere::Bottom
-            line = button.line.not_nil!
-            (Doocr.sides + line.value.sidenum[0]).value.bottomtexture = button.btexture
+            (CDoom.sides + CDoom.buttonlist[i].line.value.sidenum[0]).value.bottomtexture =
+              CDoom.buttonlist[i].btexture
           end
-          CDoom.s_start_sound(button.soundorg.not_nil!,
+          CDoom.s_start_sound(pointerof((CDoom.buttonlist.to_unsafe + i).value.@soundorg),
             CDoom::Sfxenum::SFX_swtchn.value)
-          button.reset
+          CDoom.doom_memset(CDoom.buttonlist.to_unsafe + i, 0, sizeof(CDoom::Button))
         end
       end
     end
@@ -7754,7 +7750,7 @@ module Doocr
     secnum = -1
     rtn = 0
     while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
-      s1 = Doocr.sectors + secnum
+      s1 = CDoom.sectors + secnum
 
       # ALREADY MOVING?  IF SO, KEEP GOING...
       next if !s1.value.specialdata.null?
@@ -7815,24 +7811,24 @@ module Doocr
     episode = 2 if CDoom.w_check_num_for_name("texture2") >= 0
 
     # See if -TIMER needs to be used.
-    Doocr.level_timer = 0
+    CDoom.level_timer = 0
 
     i = ARGV.index("-avg")
-    if i && Doocr.deathmatch != 0
-      Doocr.level_timer = 1
-      Doocr.level_time_count = 20 * 60 * 35
+    if i && CDoom.deathmatch != 0
+      CDoom.level_timer = 1
+      CDoom.level_time_count = 20 * 60 * 35
     end
 
     i = ARGV.index("-timer")
-    if i && Doocr.deathmatch != 0
+    if i && CDoom.deathmatch != 0
       time = CDoom.doom_atoi(ARGV[i + 1]) * 60 * 35
-      Doocr.level_timer = 1
-      Doocr.level_time_count = time
+      CDoom.level_timer = 1
+      CDoom.level_time_count = time
     end
 
     #        Init special SECTORs.
-    sector = Doocr.sectors
-    Doocr.numsectors.times do |i|
+    sector = CDoom.sectors
+    CDoom.numsectors.times do |i|
       if sector.value.special == 0
         sector += 1
         next
@@ -7856,7 +7852,7 @@ module Doocr
         CDoom.p_spawn_glowing_light(sector)
       when 9
         # SECRET SECTOR
-        Doocr.totalsecret += 1
+        CDoom.totalsecret += 1
       when 10
         # DOOR CLOSE IN 30 SECONDS
         CDoom.p_spawn_door_close_in_30(sector)
@@ -7877,22 +7873,22 @@ module Doocr
     end
 
     # Init line EFFECTs
-    Doocr.numlinespecials = 0
-    Doocr.numlines.times do |i|
-      case Doocr.lines[i].special
+    CDoom.numlinespecials = 0
+    CDoom.numlines.times do |i|
+      case CDoom.lines[i].special
       when 48
         # EFFECT FIRSTCOL SCROLL+
-        Doocr.linespeciallist[Doocr.numlinespecials] = Doocr.lines + i
-        Doocr.numlinespecials += 1
+        CDoom.linespeciallist[CDoom.numlinespecials] = CDoom.lines + i
+        CDoom.numlinespecials += 1
       end
     end
 
     # Init other misc stuff
-    CDoom::MAXCEILINGS.times { |i| Doocr.activeceilings[i] = Pointer(CDoom::Ceiling).null }
+    CDoom::MAXCEILINGS.times { |i| CDoom.activeceilings[i] = Pointer(CDoom::Ceiling).null }
 
-    CDoom::MAXPLATS.times { |i| Doocr.activeplats[i] = Pointer(CDoom::Plat).null }
+    CDoom::MAXPLATS.times { |i| CDoom.activeplats[i] = Pointer(CDoom::Plat).null }
 
-    CDoom::MAXBUTTONS.times { |i| @@buttonlist[i].reset }
+    CDoom::MAXBUTTONS.times { |i| CDoom.doom_memset(CDoom.buttonlist.to_unsafe + i, 0, sizeof(CDoom::Button)) }
   end
 
   #
@@ -7901,29 +7897,29 @@ module Doocr
   def self.p_init_switch_list
     episode = 1
 
-    if Doocr.gamemode == CDoom::GameMode::Registered || Doocr.gamemode == CDoom::GameMode::Retail
+    if CDoom.gamemode == CDoom::GameMode::Registered || CDoom.gamemode == CDoom::GameMode::Retail
       episode = 2
     else
-      episode = 3 if Doocr.gamemode == CDoom::GameMode::Commercial
+      episode = 3 if CDoom.gamemode == CDoom::GameMode::Commercial
     end
 
     index = 0
     CDoom::MAXSWITCHES.times do |i|
-      if @@alph_switch_list[i].episode == 0
-        Doocr.numswitches = index // 2
-        Doocr.switchlist[index] = -1
+      if CDoom.alph_switch_list[i].episode == 0
+        CDoom.numswitches = index // 2
+        CDoom.switchlist[index] = -1
         break
       end
 
-      if @@alph_switch_list[i].episode <= episode
-        Doocr.switchlist[index] = CDoom.r_texture_num_for_name(@@alph_switch_list[i].name1.to_unsafe)
+      if CDoom.alph_switch_list[i].episode <= episode
+        CDoom.switchlist[index] = CDoom.r_texture_num_for_name(CDoom.alph_switch_list[i].name1)
         index += 1
-        Doocr.switchlist[index] = CDoom.r_texture_num_for_name(@@alph_switch_list[i].name2.to_unsafe)
+        CDoom.switchlist[index] = CDoom.r_texture_num_for_name(CDoom.alph_switch_list[i].name2)
         index += 1
       end
     end
 
-    Doocr.numswitches.times { |i| @@switch_origins << CDoom::Degenmobj.new }
+    CDoom.numswitches.times { |i| @@switch_origins << CDoom::Degenmobj.new }
   end
 
   #
@@ -7932,17 +7928,17 @@ module Doocr
   def self.p_start_button(line : CDoom::Line*, w : CDoom::Bwhere, origin : CDoom::Degenmobj*, texture : LibC::Int, time : LibC::Int)
     # See if button is already pressed
     CDoom::MAXBUTTONS.times do |i|
-      return if @@buttonlist[i].btimer != 0 &&
-            @@buttonlist[i].line == line
+      return if CDoom.buttonlist[i].btimer != 0 &&
+                CDoom.buttonlist[i].line == line
     end
 
     CDoom::MAXBUTTONS.times do |i|
-      if @@buttonlist[i].btimer == 0
-        @@buttonlist[i].line = line
-        @@buttonlist[i].where = w
-        @@buttonlist[i].btexture = texture
-        @@buttonlist[i].btimer = time
-        @@buttonlist[i].soundorg = origin.as(CDoom::Mobj*)
+      if CDoom.buttonlist[i].btimer == 0
+        (CDoom.buttonlist.to_unsafe + i).value.line = line
+        (CDoom.buttonlist.to_unsafe + i).value.where = w
+        (CDoom.buttonlist.to_unsafe + i).value.btexture = texture
+        (CDoom.buttonlist.to_unsafe + i).value.btimer = time
+        (CDoom.buttonlist.to_unsafe + i).value.soundorg = origin.as(CDoom::Mobj*)
 
         return
       end
@@ -7958,9 +7954,9 @@ module Doocr
   def self.p_change_switch_texture(line : CDoom::Line*, use_again : LibC::Int)
     line.value.special = 0 if use_again == 0
 
-    tex_top = Doocr.sides[line.value.sidenum[0]].toptexture
-    tex_mid = Doocr.sides[line.value.sidenum[0]].midtexture
-    tex_bot = Doocr.sides[line.value.sidenum[0]].bottomtexture
+    tex_top = CDoom.sides[line.value.sidenum[0]].toptexture
+    tex_mid = CDoom.sides[line.value.sidenum[0]].midtexture
+    tex_bot = CDoom.sides[line.value.sidenum[0]].bottomtexture
     sound = CDoom::Sfxenum::SFX_swtchn.value
 
     # EXIT SWITCH?
@@ -7968,38 +7964,38 @@ module Doocr
       sound = CDoom::Sfxenum::SFX_swtchx.value
     end
 
-    (Doocr.numswitches * 2).times do |i|
-      if Doocr.switchlist[i] == tex_top
+    (CDoom.numswitches * 2).times do |i|
+      if CDoom.switchlist[i] == tex_top
         origin = (@@switch_origins.to_unsafe + (i // 2))
         origin.value.x = (line.value.v1.value.x &+ line.value.v2.value.x) // 2
         origin.value.y = (line.value.v1.value.y &+ line.value.v2.value.y) // 2
 
         CDoom.s_start_sound(origin.as(CDoom::Mobj*), sound)
-        (Doocr.sides + line.value.sidenum[0]).value.toptexture = Doocr.switchlist[i ^ 1]
+        (CDoom.sides + line.value.sidenum[0]).value.toptexture = CDoom.switchlist[i ^ 1]
 
-        p_start_button(line, CDoom::Bwhere::Top, origin, Doocr.switchlist[i], CDoom::BUTTONTIME) if use_again != 0
+        p_start_button(line, CDoom::Bwhere::Top, origin, CDoom.switchlist[i], CDoom::BUTTONTIME) if use_again != 0
 
         return
-      elsif Doocr.switchlist[i] == tex_mid
+      elsif CDoom.switchlist[i] == tex_mid
         origin = (@@switch_origins.to_unsafe + (i // 2))
         origin.value.x = (line.value.v1.value.x &+ line.value.v2.value.x) // 2
         origin.value.y = (line.value.v1.value.y &+ line.value.v2.value.y) // 2
 
         CDoom.s_start_sound(origin.as(CDoom::Mobj*), sound)
-        (Doocr.sides + line.value.sidenum[0]).value.midtexture = Doocr.switchlist[i ^ 1]
+        (CDoom.sides + line.value.sidenum[0]).value.midtexture = CDoom.switchlist[i ^ 1]
 
-        p_start_button(line, CDoom::Bwhere::Middle, origin, Doocr.switchlist[i], CDoom::BUTTONTIME) if use_again != 0
+        p_start_button(line, CDoom::Bwhere::Middle, origin, CDoom.switchlist[i], CDoom::BUTTONTIME) if use_again != 0
 
         return
-      elsif Doocr.switchlist[i] == tex_bot
+      elsif CDoom.switchlist[i] == tex_bot
         origin = (@@switch_origins.to_unsafe + (i // 2))
         origin.value.x = (line.value.v1.value.x &+ line.value.v2.value.x) // 2
         origin.value.y = (line.value.v1.value.y &+ line.value.v2.value.y) // 2
 
         CDoom.s_start_sound(origin.as(CDoom::Mobj*), sound)
-        (Doocr.sides + line.value.sidenum[0]).value.bottomtexture = Doocr.switchlist[i ^ 1]
+        (CDoom.sides + line.value.sidenum[0]).value.bottomtexture = CDoom.switchlist[i ^ 1]
 
-        p_start_button(line, CDoom::Bwhere::Bottom, origin, Doocr.switchlist[i], CDoom::BUTTONTIME) if use_again != 0
+        p_start_button(line, CDoom::Bwhere::Bottom, origin, CDoom.switchlist[i], CDoom::BUTTONTIME) if use_again != 0
 
         return
       end
@@ -8323,10 +8319,10 @@ module Doocr
     return 0 if side == 1
 
     tag = line.value.tag
-    Doocr.numsectors.times do |i|
-      if Doocr.sectors[i].tag == tag
-        thinker = Doocr.thinkercap.to_unsafe.value.next
-        while thinker != Doocr.thinkercap.to_unsafe
+    CDoom.numsectors.times do |i|
+      if CDoom.sectors[i].tag == tag
+        thinker = CDoom.thinkercap.next
+        while thinker != pointerof(CDoom.thinkercap)
           # not a mobj
           if thinker.value.function.acp1.pointer != (->CDoom.p_mobj_thinker).pointer
             thinker = thinker.value.next
@@ -8343,7 +8339,7 @@ module Doocr
 
           sector = m.value.subsector.value.sector
           # wrong sector
-          if sector - Doocr.sectors != i
+          if sector - CDoom.sectors != i
             thinker = thinker.value.next
             next
           end
@@ -8393,18 +8389,18 @@ module Doocr
   #
 
   def self.p_init_thinkers
-    Doocr.thinkercap.to_unsafe.value.prev = Doocr.thinkercap.to_unsafe
-    Doocr.thinkercap.to_unsafe.value.next = Doocr.thinkercap.to_unsafe
+    CDoom.thinkercap.prev = pointerof(CDoom.thinkercap)
+    CDoom.thinkercap.next = pointerof(CDoom.thinkercap)
   end
 
   #
   # Adds a new thinker at the end of the list.
   #
   def self.p_add_thinker(thinker : CDoom::Thinker*)
-    Doocr.thinkercap.to_unsafe.value.prev.value.next = thinker
-    thinker.value.next = Doocr.thinkercap.to_unsafe
-    thinker.value.prev = Doocr.thinkercap.to_unsafe.value.prev
-    Doocr.thinkercap.to_unsafe.value.prev = thinker
+    CDoom.thinkercap.prev.value.next = thinker
+    thinker.value.next = pointerof(CDoom.thinkercap)
+    thinker.value.prev = CDoom.thinkercap.prev
+    CDoom.thinkercap.prev = thinker
     thinker.value.remove = 0
   end
 
@@ -8417,8 +8413,8 @@ module Doocr
   end
 
   def self.p_run_thinkers
-    currentthinker = Doocr.thinkercap.to_unsafe.value.next
-    while currentthinker != Doocr.thinkercap.to_unsafe
+    currentthinker = CDoom.thinkercap.next
+    while currentthinker != pointerof(CDoom.thinkercap)
       if currentthinker.value.remove != 0
         # time to remove it
         currentthinker.value.next.value.prev = currentthinker.value.prev
@@ -8433,17 +8429,17 @@ module Doocr
 
   def self.p_ticker
     # run the tic
-    return if Doocr.paused != 0
+    return if CDoom.paused != 0
 
     # pause if in menu and at least one tic has been run
-    if Doocr.netgame == 0 &&
-       Doocr.menuactive != 0 &&
-       Doocr.demoplayback == 0 &&
-       @@players[Doocr.consoleplayer].viewz != 1
+    if CDoom.netgame == 0 &&
+       CDoom.menuactive != 0 &&
+       CDoom.demoplayback == 0 &&
+       @@players[CDoom.consoleplayer].viewz != 1
       return
     end
     CDoom::MAXPLAYERS.times do |i|
-      if Doocr.playeringame[i] != 0
+      if CDoom.playeringame[i] != 0
         @@current_thinking_player = @@players.to_unsafe + i
         Mod.update_player_action.call(@@current_thinking_player)
         CDoom.p_player_think(@@current_thinking_player)
@@ -8456,7 +8452,7 @@ module Doocr
     CDoom.p_respawn_specials
 
     # for par times
-    Doocr.leveltime += 1
+    CDoom.leveltime += 1
   end
 
   #
@@ -8491,7 +8487,7 @@ module Doocr
 
     player.value.bob = CDoom::MAXBOB if player.value.bob > CDoom::MAXBOB
 
-    if player.value.cheats & CDoom::Cheat::CF_NOMOMENTUM.value != 0 || Doocr.onground == 0
+    if player.value.cheats & CDoom::Cheat::CF_NOMOMENTUM.value != 0 || CDoom.onground == 0
       player.value.viewz = player.value.mo.value.z + CDoom::VIEWHEIGHT
 
       if player.value.viewz > player.value.mo.value.ceilingz - 4 * FRACUNIT
@@ -8502,7 +8498,7 @@ module Doocr
       return
     end
 
-    angle = (CDoom::FINEANGLES.tdiv(20) * Doocr.leveltime) & CDoom::FINEMASK
+    angle = (CDoom::FINEANGLES.tdiv(20) * CDoom.leveltime) & CDoom::FINEMASK
     bob = CDoom.fixed_mul(player.value.bob.tdiv(2), @@finesine[angle])
 
     # move viewheight
@@ -8539,11 +8535,11 @@ module Doocr
 
     # Do not let the player control movement
     #  if not onground.
-    Doocr.onground = (player.value.mo.value.z <= player.value.mo.value.floorz).to_unsafe
+    CDoom.onground = (player.value.mo.value.z <= player.value.mo.value.floorz).to_unsafe
 
-    CDoom.p_thrust(player, player.value.mo.value.angle, cmd.value.forwardmove.to_i32 * 2048) if cmd.value.forwardmove != 0 && Doocr.onground != 0
+    CDoom.p_thrust(player, player.value.mo.value.angle, cmd.value.forwardmove.to_i32 * 2048) if cmd.value.forwardmove != 0 && CDoom.onground != 0
 
-    CDoom.p_thrust(player, player.value.mo.value.angle &- ANG90, cmd.value.sidemove.to_i32 * 2048) if cmd.value.sidemove != 0 && Doocr.onground != 0
+    CDoom.p_thrust(player, player.value.mo.value.angle &- ANG90, cmd.value.sidemove.to_i32 * 2048) if cmd.value.sidemove != 0 && CDoom.onground != 0
 
     if (cmd.value.forwardmove != 0 || cmd.value.sidemove != 0) &&
        player.value.mo.value.state == @@states.to_unsafe + CDoom::Statenum::S_PLAY.value
@@ -8565,7 +8561,7 @@ module Doocr
     player.value.viewheight = 6 * FRACUNIT if player.value.viewheight < 6 * FRACUNIT
 
     player.value.deltaviewheight = 0
-    Doocr.onground = (player.value.mo.value.z <= player.value.mo.value.floorz).to_unsafe
+    CDoom.onground = (player.value.mo.value.z <= player.value.mo.value.floorz).to_unsafe
     CDoom.p_calc_height(player)
 
     if !player.value.attacker.null? && player.value.attacker != player.value.mo &&
@@ -8647,7 +8643,7 @@ module Doocr
         newweapon = CDoom::Weapontype::Chainsaw
       end
 
-      if Doocr.gamemode == CDoom::GameMode::Commercial &&
+      if CDoom.gamemode == CDoom::GameMode::Commercial &&
          newweapon == CDoom::Weapontype::Shotgun &&
          player.value.weaponowned[CDoom::Weapontype::Supershotgun.value] != 0 &&
          player.value.readyweapon != CDoom::Weapontype::Supershotgun
@@ -8660,7 +8656,7 @@ module Doocr
         #  even if cheated.
         if (newweapon != CDoom::Weapontype::Plasma &&
            newweapon != CDoom::Weapontype::Bfg) ||
-           Doocr.gamemode != CDoom::GameMode::Shareware
+           CDoom.gamemode != CDoom::GameMode::Shareware
           player.value.pendingweapon = newweapon
         end
       end

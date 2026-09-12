@@ -28,8 +28,8 @@ module Doocr
                        y : LibC::Int,
                        width : LibC::Int,
                        height : LibC::Int)
-    CDoom.m_add_to_box(Doocr.dirtybox.to_unsafe, x, y)
-    CDoom.m_add_to_box(Doocr.dirtybox.to_unsafe, x + width - 1, y + height - 1)
+    CDoom.m_add_to_box(CDoom.dirtybox, x, y)
+    CDoom.m_add_to_box(CDoom.dirtybox, x + width - 1, y + height - 1)
   end
 
   def self.v_copy_rect(srcx : LibC::Int,
@@ -54,8 +54,8 @@ module Doocr
     {% end %}
     CDoom.v_mark_rect(destx, desty, width, height)
 
-    src = Doocr.screens[srcscrn] + CDoom::SCREENWIDTH * srcy + srcx
-    dest = Doocr.screens[destscrn] + CDoom::SCREENWIDTH * desty + destx
+    src = CDoom.screens[srcscrn] + CDoom::SCREENWIDTH * srcy + srcx
+    dest = CDoom.screens[destscrn] + CDoom::SCREENWIDTH * desty + destx
 
     while height > 0
       CDoom.doom_memcpy(dest, src, width)
@@ -92,7 +92,7 @@ module Doocr
     end
 
     col = 0
-    desttop = Doocr.screens[scrn] + y * CDoom::SCREENWIDTH + x
+    desttop = CDoom.screens[scrn] + y * CDoom::SCREENWIDTH + x
 
     w = patch.value.width
 
@@ -146,7 +146,7 @@ module Doocr
     end
 
     col = 0
-    desttop = Doocr.screens[scrn] + y * CDoom::SCREENWIDTH + x
+    desttop = CDoom.screens[scrn] + y * CDoom::SCREENWIDTH + x
 
     w = patch.value.width
 
@@ -195,7 +195,7 @@ module Doocr
     end
 
     col = 0
-    desttop = Doocr.screens[scrn] + y * CDoom::SCREENWIDTH + x
+    desttop = CDoom.screens[scrn] + y * CDoom::SCREENWIDTH + x
 
     w = src_w
 
@@ -254,7 +254,7 @@ module Doocr
 
     CDoom.v_mark_rect(x, y, width, height)
 
-    dest = Doocr.screens[scrn] + y * CDoom::SCREENWIDTH + x
+    dest = CDoom.screens[scrn] + y * CDoom::SCREENWIDTH + x
 
     while height != 0
       height -= 1
@@ -280,7 +280,7 @@ module Doocr
       end
     {% end %}
 
-    src = Doocr.screens[scrn] + y * CDoom::SCREENWIDTH + x
+    src = CDoom.screens[scrn] + y * CDoom::SCREENWIDTH + x
 
     while height != 0
       height -= 1
@@ -296,7 +296,7 @@ module Doocr
     base = CDoom.i_alloc_low(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT * 4)
 
     4.times do |i|
-      Doocr.screens[i] = base + i * CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT
+      CDoom.screens[i] = base + i * CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT
     end
   end
 end

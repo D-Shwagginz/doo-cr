@@ -27,6 +27,8 @@ module Doocr
   NULL_PROC   = Proc(Nil).new(Pointer(Void).null, Pointer(Void).null)
   NULL_PROCP1 = Proc(Int32, Nil).new(Pointer(Void).null, Pointer(Void).null)
 
+  alias DoomHandle = {String, IO::Memory, Bool} # path, buffer, write_mode
+
   def self.open(filename : String, mode : String) : IO
     response = Channel({Bytes, Bool}).new
     @@io_jobs.send({filename, "rb", nil, response})
@@ -36,6 +38,67 @@ module Doocr
 
   def self.open(filename : String, mode : String, &)
     yield open(filename, mode)
+  end
+
+  def self.doom_open(filename : UInt8*, mode : UInt8*) : Void*
+    path = String.new(filename)
+    m = String.new(mode)
+    write_mode = m.includes?('w') || m.includes?('a')
+    begin
+      if write_mode
+        return Box.box({path, IO::Memory.new, true})
+      else
+        response = Channel({Bytes, Bool}).new
+        @@io_jobs.send({path, "rb", nil, response})
+        data, ok = response.receive
+        return Pointer(Void).null unless ok
+        return Box.box({path, IO::Memory.new(data), false})
+      end
+    rescue
+    end
+    return Pointer(Void).null
+  end
+
+  def self.doom_close(handle : Void*)
+    path, io, write_mode = Box(DoomHandle).unbox(handle)
+    return unless write_mode
+
+    response = Channel({Bytes, Bool}).new
+    @@io_jobs.send({path, "wb", io.to_slice, response})
+    response.receive
+  end
+
+  def self.doom_read(handle : Void*, buf : Void*, count : Int32) : Int32
+    slice = Slice.new(buf.as(UInt8*), count)
+    _, io, _ = Box(DoomHandle).unbox(handle)
+    return io.read(slice)
+  end
+
+  def self.doom_write(handle : Void*, buf : Void*, count : Int32) : Int32
+    slice = Slice.new(buf.as(UInt8*), count)
+    _, io, _ = Box(DoomHandle).unbox(handle)
+    io.write(slice)
+    return count
+  end
+
+  def self.doom_seek(handle : Void*, offset : Int32, origin : CDoom::DoomSeek) : Int32
+    _, io, _ = Box(DoomHandle).unbox(handle)
+    begin
+      io.seek(offset, IO::Seek.from_value(origin.value))
+    rescue
+      return 1
+    end
+    return 0
+  end
+
+  def self.doom_tell(handle : Void*) : Int32
+    _, io, _ = Box(DoomHandle).unbox(handle)
+    return io.pos.to_i32
+  end
+
+  def self.doom_eof(handle : Void*) : Int32
+    _, io, _ = Box(DoomHandle).unbox(handle)
+    return io.pos >= io.size ? 1 : 0
   end
 
   def self.doom_memset(ptr : Void*, value : Int32, num : Int32)
@@ -118,33 +181,32 @@ module Doocr
 
   def self.doom_itoa(k : Int32, radix : Int32) : UInt8*
     a = k.to_s(radix)
-      a.to_slice.copy_to(Doocr.itoa_buf.to_unsafe, a.bytesize)
-      Doocr.itoa_buf[a.bytesize] = 0
-      return Doocr.itoa_buf.to_unsafe
+    a.to_slice.copy_to(CDoom.itoa_buf.to_unsafe, a.bytesize)
+    CDoom.itoa_buf[a.bytesize] = 0
+    return CDoom.itoa_buf.to_unsafe
   end
 
   def self.doom_ctoa(c : UInt8) : UInt8*
-    Doocr.itoa_buf[0] = c
-    Doocr.itoa_buf[1] = 0
-    return Doocr.itoa_buf.to_unsafe
+    CDoom.itoa_buf[0] = c
+    CDoom.itoa_buf[1] = 0
+    return CDoom.itoa_buf.to_unsafe
   end
 
   def self.doom_ptoa(p : Void*) : UInt8*
     a = "0x" + p.address.to_s(16).upcase
-      a.to_slice.copy_to(Doocr.itoa_buf.to_unsafe, a.bytesize)
-      Doocr.itoa_buf[a.bytesize] = 0
-      return Doocr.itoa_buf.to_unsafe
+    a.to_slice.copy_to(CDoom.itoa_buf.to_unsafe, a.bytesize)
+    CDoom.itoa_buf[a.bytesize] = 0
+    return CDoom.itoa_buf.to_unsafe
   end
 
   def self.doom_fprint(handle : Void*, str : UInt8*) : Int32
-    io = Box(File).unbox(handle)
-    text = String.new(str)
-    io << text
-    text.bytesize
+    return doom_write(handle, str.as(Void*), doom_strlen(str))
   end
 
   def self.doom_init
-    Doocr.last_update_time = CDoom.i_get_time
+    CDoom.screen_buffer = GC.malloc(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT).as(UInt8*)
+    CDoom.final_screen_buffer = GC.malloc(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT * 4).as(UInt8*)
+    CDoom.last_update_time = CDoom.i_get_time
 
     d_doom_main
   end

@@ -27,6 +27,6 @@ module Doocr
 
   def self.doom_get_sound_buffer : Int16*
     CDoom.i_update_sound
-    return Doocr.mixbuffer.to_unsafe
+    return CDoom.mixbuffer.to_unsafe
   end
 end

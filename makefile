@@ -55,7 +55,7 @@ all: libcvars.$(LIB_EXT) libraylib.$(LIB_EXT) libADLMIDI.$(LIB_EXT) $(addprefix 
 	test -d $(OUTDIR) || mkdir $(OUTDIR) && \
 	shards install
 	shards update
-	crystal build src/doo-cr.cr $(CRYSTAL_FLAGS) --no-debug -o $(OUTDIR)/$(EXEC) --link-flags="-L$(CURRENT_DIR) -LC:/msys64/clangarm64/lib"
+	crystal build src/doo-cr.cr $(CRYSTAL_FLAGS) -o $(OUTDIR)/$(EXEC) --link-flags="-L$(CURRENT_DIR) -LC:/msys64/clangarm64/lib"
 	mv -f libcvars.$(LIB_EXT) $(OUTDIR)
 	cp -f libraylib.$(LIB_EXT) $(OUTDIR)
 	cp -f libADLMIDI.$(LIB_EXT) $(OUTDIR)

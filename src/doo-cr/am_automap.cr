@@ -17,48 +17,48 @@
 
 module Doocr
   def self.am_activate_new_scale
-    Doocr.m_x += Doocr.m_w // 2
-    Doocr.m_y += Doocr.m_h // 2
-    Doocr.m_w = ftom(Doocr.f_w)
-    Doocr.m_h = ftom(Doocr.f_h)
-    Doocr.m_x -= Doocr.m_w // 2
-    Doocr.m_y -= Doocr.m_h // 2
-    Doocr.m_x2 = Doocr.m_x + Doocr.m_w
-    Doocr.m_y2 = Doocr.m_y + Doocr.m_h
+    CDoom.m_x += CDoom.m_w // 2
+    CDoom.m_y += CDoom.m_h // 2
+    CDoom.m_w = ftom(CDoom.f_w)
+    CDoom.m_h = ftom(CDoom.f_h)
+    CDoom.m_x -= CDoom.m_w // 2
+    CDoom.m_y -= CDoom.m_h // 2
+    CDoom.m_x2 = CDoom.m_x + CDoom.m_w
+    CDoom.m_y2 = CDoom.m_y + CDoom.m_h
   end
 
   def self.am_save_scale_and_loc
-    Doocr.old_m_x = Doocr.m_x
-    Doocr.old_m_y = Doocr.m_y
-    Doocr.old_m_w = Doocr.m_w
-    Doocr.old_m_h = Doocr.m_h
+    CDoom.old_m_x = CDoom.m_x
+    CDoom.old_m_y = CDoom.m_y
+    CDoom.old_m_w = CDoom.m_w
+    CDoom.old_m_h = CDoom.m_h
   end
 
   def self.am_restore_scale_and_loc
-    Doocr.m_w = Doocr.old_m_w
-    Doocr.m_h = Doocr.old_m_h
-    if Doocr.followplayer == 0
-      Doocr.m_x = Doocr.old_m_x
-      Doocr.m_y = Doocr.old_m_y
+    CDoom.m_w = CDoom.old_m_w
+    CDoom.m_h = CDoom.old_m_h
+    if CDoom.followplayer == 0
+      CDoom.m_x = CDoom.old_m_x
+      CDoom.m_y = CDoom.old_m_y
     else
-      Doocr.m_x = Doocr.plr.value.mo.value.x - Doocr.m_w // 2
-      Doocr.m_y = Doocr.plr.value.mo.value.y - Doocr.m_h // 2
+      CDoom.m_x = CDoom.plr.value.mo.value.x - CDoom.m_w // 2
+      CDoom.m_y = CDoom.plr.value.mo.value.y - CDoom.m_h // 2
     end
-    Doocr.m_x2 = Doocr.m_x + Doocr.m_w
-    Doocr.m_y2 = Doocr.m_y + Doocr.m_h
+    CDoom.m_x2 = CDoom.m_x + CDoom.m_w
+    CDoom.m_y2 = CDoom.m_y + CDoom.m_h
 
     # Change the scaling multipliers
-    Doocr.scale_mtof = CDoom.fixed_div(Doocr.f_w << FRACBITS, Doocr.m_w)
-    Doocr.scale_ftom = CDoom.fixed_div(FRACUNIT, Doocr.scale_mtof)
+    CDoom.scale_mtof = CDoom.fixed_div(CDoom.f_w << FRACBITS, CDoom.m_w)
+    CDoom.scale_ftom = CDoom.fixed_div(FRACUNIT, CDoom.scale_mtof)
   end
 
   #
   # adds a marker at the current location
   #
   def self.am_add_mark
-    @@markpoints[Doocr.markpointnum].x = Doocr.m_x + Doocr.m_w // 2
-    @@markpoints[Doocr.markpointnum].y = Doocr.m_y + Doocr.m_h // 2
-    Doocr.markpointnum = (Doocr.markpointnum + 1) % CDoom::AM_NUMMARKPOINTS
+    (CDoom.markpoints.to_unsafe.as(CDoom::Mpoint*) + CDoom.markpointnum).value.x = CDoom.m_x + CDoom.m_w // 2
+    (CDoom.markpoints.to_unsafe.as(CDoom::Mpoint*) + CDoom.markpointnum).value.y = CDoom.m_y + CDoom.m_h // 2
+    CDoom.markpointnum = (CDoom.markpointnum + 1) % CDoom::AM_NUMMARKPOINTS
   end
 
   #
@@ -66,100 +66,100 @@ module Doocr
   # sets global variables controlling zoom range.
   #
   def self.am_find_min_max_boundaries
-    Doocr.min_x = Int32::MAX
-    Doocr.min_y = Int32::MAX
-    Doocr.max_x = -Int32::MAX
-    Doocr.max_y = -Int32::MAX
+    CDoom.min_x = Int32::MAX
+    CDoom.min_y = Int32::MAX
+    CDoom.max_x = -Int32::MAX
+    CDoom.max_y = -Int32::MAX
 
-    Doocr.numvertexes.times do |i|
-      if Doocr.vertexes[i].x < Doocr.min_x
-        Doocr.min_x = Doocr.vertexes[i].x
-      elsif Doocr.vertexes[i].x > Doocr.max_x
-        Doocr.max_x = Doocr.vertexes[i].x
+    CDoom.numvertexes.times do |i|
+      if CDoom.vertexes[i].x < CDoom.min_x
+        CDoom.min_x = CDoom.vertexes[i].x
+      elsif CDoom.vertexes[i].x > CDoom.max_x
+        CDoom.max_x = CDoom.vertexes[i].x
       end
 
-      if Doocr.vertexes[i].y < Doocr.min_y
-        Doocr.min_y = Doocr.vertexes[i].y
-      elsif Doocr.vertexes[i].y > Doocr.max_y
-        Doocr.max_y = Doocr.vertexes[i].y
+      if CDoom.vertexes[i].y < CDoom.min_y
+        CDoom.min_y = CDoom.vertexes[i].y
+      elsif CDoom.vertexes[i].y > CDoom.max_y
+        CDoom.max_y = CDoom.vertexes[i].y
       end
     end
 
-    Doocr.max_w = Doocr.max_x - Doocr.min_x
-    Doocr.max_h = Doocr.max_y - Doocr.min_y
+    CDoom.max_w = CDoom.max_x - CDoom.min_x
+    CDoom.max_h = CDoom.max_y - CDoom.min_y
 
-    Doocr.min_w = 2 * CDoom::PLAYERRADIUS # const? never changed?
-    Doocr.min_h = 2 * CDoom::PLAYERRADIUS
+    CDoom.min_w = 2 * CDoom::PLAYERRADIUS # const? never changed?
+    CDoom.min_h = 2 * CDoom::PLAYERRADIUS
 
-    a = CDoom.fixed_div(Doocr.f_w << FRACBITS, Doocr.max_w)
-    b = CDoom.fixed_div(Doocr.f_h << FRACBITS, Doocr.max_h)
+    a = CDoom.fixed_div(CDoom.f_w << FRACBITS, CDoom.max_w)
+    b = CDoom.fixed_div(CDoom.f_h << FRACBITS, CDoom.max_h)
 
-    Doocr.min_scale_mtof = a < b ? a : b
-    Doocr.max_scale_mtof = CDoom.fixed_div(Doocr.f_h << FRACBITS, 2 * CDoom::PLAYERRADIUS)
+    CDoom.min_scale_mtof = a < b ? a : b
+    CDoom.max_scale_mtof = CDoom.fixed_div(CDoom.f_h << FRACBITS, 2 * CDoom::PLAYERRADIUS)
   end
 
   def self.am_change_window_loc
-    if @@m_paninc.x != 0 || @@m_paninc.y != 0
-      Doocr.followplayer = 0
-      @@f_oldloc.x = Int32::MAX
+    if CDoom.m_paninc.x != 0 || CDoom.m_paninc.y != 0
+      CDoom.followplayer = 0
+      CDoom.f_oldloc.x = Int32::MAX
     end
 
-    Doocr.m_x += @@m_paninc.x
-    Doocr.m_y += @@m_paninc.y
+    CDoom.m_x += CDoom.m_paninc.x
+    CDoom.m_y += CDoom.m_paninc.y
 
-    if Doocr.m_x + Doocr.m_w // 2 > Doocr.max_x
-      Doocr.m_x = Doocr.max_x - Doocr.m_w // 2
-    elsif Doocr.m_x + Doocr.m_w // 2 < Doocr.min_x
-      Doocr.m_x = Doocr.min_x - Doocr.m_w // 2
+    if CDoom.m_x + CDoom.m_w // 2 > CDoom.max_x
+      CDoom.m_x = CDoom.max_x - CDoom.m_w // 2
+    elsif CDoom.m_x + CDoom.m_w // 2 < CDoom.min_x
+      CDoom.m_x = CDoom.min_x - CDoom.m_w // 2
     end
 
-    if Doocr.m_y + Doocr.m_h // 2 > Doocr.max_y
-      Doocr.m_y = Doocr.max_y - Doocr.m_h // 2
-    elsif Doocr.m_y + Doocr.m_h // 2 < Doocr.min_y
-      Doocr.m_y = Doocr.min_y - Doocr.m_h // 2
+    if CDoom.m_y + CDoom.m_h // 2 > CDoom.max_y
+      CDoom.m_y = CDoom.max_y - CDoom.m_h // 2
+    elsif CDoom.m_y + CDoom.m_h // 2 < CDoom.min_y
+      CDoom.m_y = CDoom.min_y - CDoom.m_h // 2
     end
 
-    Doocr.m_x2 = Doocr.m_x + Doocr.m_w
-    Doocr.m_y2 = Doocr.m_y + Doocr.m_h
+    CDoom.m_x2 = CDoom.m_x + CDoom.m_w
+    CDoom.m_y2 = CDoom.m_y + CDoom.m_h
   end
 
   def self.am_init_variables
     @@st_notify.type = CDoom::Evtype::Keyup
     @@st_notify.data1 = CDoom::AM_MSGENTERED
 
-    Doocr.automapactive = 1
-    Doocr.fb = Doocr.screens[0]
-    @@f_oldloc.x = Int32::MAX
-    Doocr.amclock = 0
-    Doocr.lightlev = 0
+    CDoom.automapactive = 1
+    CDoom.fb = CDoom.screens[0]
+    CDoom.f_oldloc.x = Int32::MAX
+    CDoom.amclock = 0
+    CDoom.lightlev = 0
 
-    @@m_paninc.x = 0
-    @@m_paninc.y = 0
-    Doocr.ftom_zoommul = FRACUNIT
-    Doocr.mtof_zoommul = FRACUNIT
+    CDoom.m_paninc.x = 0
+    CDoom.m_paninc.y = 0
+    CDoom.ftom_zoommul = FRACUNIT
+    CDoom.mtof_zoommul = FRACUNIT
 
-    Doocr.m_w = ftom(Doocr.f_w)
-    Doocr.m_h = ftom(Doocr.f_h)
+    CDoom.m_w = ftom(CDoom.f_w)
+    CDoom.m_h = ftom(CDoom.f_h)
 
-    pnum = Doocr.consoleplayer
+    pnum = CDoom.consoleplayer
     # find player to center on initially
-    if Doocr.playeringame[pnum] == 0
+    if CDoom.playeringame[pnum] == 0
       CDoom::MAXPLAYERS.times do |i|
         pnum = i
-        break if Doocr.playeringame[pnum] != 0
+        break if CDoom.playeringame[pnum] != 0
       end
     end
 
-    Doocr.plr = @@players.to_unsafe.as(CDoom::Player*) + pnum
-    Doocr.m_x = Doocr.plr.value.mo.value.x - Doocr.m_w // 2
-    Doocr.m_y = Doocr.plr.value.mo.value.y - Doocr.m_h // 2
-    am_change_window_loc
+    CDoom.plr = @@players.to_unsafe.as(CDoom::Player*) + pnum
+    CDoom.m_x = CDoom.plr.value.mo.value.x - CDoom.m_w // 2
+    CDoom.m_y = CDoom.plr.value.mo.value.y - CDoom.m_h // 2
+    CDoom.am_change_window_loc
 
     # for saving & restoring
-    Doocr.old_m_x = Doocr.m_x
-    Doocr.old_m_y = Doocr.m_y
-    Doocr.old_m_w = Doocr.m_w
-    Doocr.old_m_h = Doocr.m_h
+    CDoom.old_m_x = CDoom.m_x
+    CDoom.old_m_y = CDoom.m_y
+    CDoom.old_m_w = CDoom.m_w
+    CDoom.old_m_h = CDoom.m_h
 
     # inform the status bar of the change
     CDoom.st_responder(pointerof(@@st_notify))
@@ -169,19 +169,19 @@ module Doocr
     namebuf = uninitialized StaticArray(UInt8, 9)
 
     10.times do |i|
-      Doocr.marknums[i] = CDoom.w_cache_lump_name("AMMNUM#{i}", CDoom::PU_STATIC).as(CDoom::Patch*)
+      CDoom.marknums[i] = CDoom.w_cache_lump_name("AMMNUM#{i}", CDoom::PU_STATIC).as(CDoom::Patch*)
     end
   end
 
   def self.am_unload_pics
-    10.times { |i| z_change_tag(Doocr.marknums[i], CDoom::PU_CACHE) }
+    10.times { |i| z_change_tag(CDoom.marknums[i], CDoom::PU_CACHE) }
   end
 
   def self.am_clear_marks
     CDoom::AM_NUMMARKPOINTS.times do |i|
-      @@markpoints[i].x = -1
+      (CDoom.markpoints.to_unsafe.as(CDoom::Mpoint*) + i).value.x = -1
     end
-    Doocr.markpointnum = 0
+    CDoom.markpointnum = 0
   end
 
   #
@@ -189,19 +189,19 @@ module Doocr
   # right now, i figure it out myself
   #
   def self.am_level_init
-    Doocr.leveljuststarted = 0
+    CDoom.leveljuststarted = 0
 
-    Doocr.f_x = 0
-    Doocr.f_y = 0
-    Doocr.f_w = Doocr.finit_width
-    Doocr.f_h = Doocr.finit_height
+    CDoom.f_x = 0
+    CDoom.f_y = 0
+    CDoom.f_w = CDoom.finit_width
+    CDoom.f_h = CDoom.finit_height
 
-    am_clear_marks
+    CDoom.am_clear_marks
 
-    am_find_min_max_boundaries
-    Doocr.scale_mtof = CDoom.fixed_div(Doocr.min_scale_mtof, (0.7 * FRACUNIT).to_i32!)
-    Doocr.scale_mtof = Doocr.min_scale_mtof if Doocr.scale_mtof > Doocr.max_scale_mtof
-    Doocr.scale_ftom = CDoom.fixed_div(FRACUNIT, Doocr.scale_mtof)
+    CDoom.am_find_min_max_boundaries
+    CDoom.scale_mtof = CDoom.fixed_div(CDoom.min_scale_mtof, (0.7 * FRACUNIT).to_i32!)
+    CDoom.scale_mtof = CDoom.min_scale_mtof if CDoom.scale_mtof > CDoom.max_scale_mtof
+    CDoom.scale_ftom = CDoom.fixed_div(FRACUNIT, CDoom.scale_mtof)
   end
 
   def self.am_stop
@@ -209,40 +209,40 @@ module Doocr
     @@st_notify.data1 = CDoom::Evtype::Keyup.value
     @@st_notify.data2 = CDoom::AM_MSGENTERED
 
-    am_unload_pics
-    Doocr.automapactive = 0
+    CDoom.am_unload_pics
+    CDoom.automapactive = 0
     CDoom.st_responder(pointerof(@@st_notify))
-    Doocr.stopped = 1
+    CDoom.stopped = 1
   end
 
   def self.am_start
-    am_stop if Doocr.stopped == 0
-    Doocr.stopped = 0
-    if @@lastlevel != Doocr.gamemap || @@lastepisode != Doocr.gameepisode
-      am_level_init
-      @@lastlevel = Doocr.gamemap
-      @@lastepisode = Doocr.gameepisode
+    CDoom.am_stop if CDoom.stopped == 0
+    CDoom.stopped = 0
+    if @@lastlevel != CDoom.gamemap || @@lastepisode != CDoom.gameepisode
+      CDoom.am_level_init
+      @@lastlevel = CDoom.gamemap
+      @@lastepisode = CDoom.gameepisode
     end
-    am_init_variables
-    am_load_pics
+    CDoom.am_init_variables
+    CDoom.am_load_pics
   end
 
   #
   # set the window scale to the maximum size
   #
   def self.am_min_out_window_scale
-    Doocr.scale_mtof = Doocr.min_scale_mtof
-    Doocr.scale_ftom = CDoom.fixed_div(FRACUNIT, Doocr.scale_mtof)
-    am_activate_new_scale
+    CDoom.scale_mtof = CDoom.min_scale_mtof
+    CDoom.scale_ftom = CDoom.fixed_div(FRACUNIT, CDoom.scale_mtof)
+    CDoom.am_activate_new_scale
   end
 
   #
   # set the window scale to the minimum size
   #
   def self.am_max_out_window_scale
-    Doocr.scale_mtof = Doocr.max_scale_mtof
-    Doocr.scale_ftom = CDoom.fixed_div(FRACUNIT, Doocr.scale_mtof)
-    am_activate_new_scale
+    CDoom.scale_mtof = CDoom.max_scale_mtof
+    CDoom.scale_ftom = CDoom.fixed_div(FRACUNIT, CDoom.scale_mtof)
+    CDoom.am_activate_new_scale
   end
 
   #
@@ -251,96 +251,96 @@ module Doocr
   def self.am_responder(ev : CDoom::Event*) : CDoom::DoomBool
     rc = 0
 
-    if Doocr.automapactive == 0
+    if CDoom.automapactive == 0
       if ev.value.type == CDoom::Evtype::Keydown && ev.value.data1 == CDoom::AM_STARTKEY
-        am_start
-        Doocr.viewactive = 0
+        CDoom.am_start
+        CDoom.viewactive = 0
         rc = 1
       end
     elsif ev.value.type == CDoom::Evtype::Keydown
       rc = 1
       case ev.value.data1
       when CDoom::AM_PANRIGHTKEY # pan right
-        if Doocr.followplayer == 0
-          @@m_paninc.x = ftom(CDoom::F_PANINC)
+        if CDoom.followplayer == 0
+          CDoom.m_paninc.x = ftom(CDoom::F_PANINC)
         else
           rc = 0
         end
       when CDoom::AM_PANLEFTKEY # pan left
-        if Doocr.followplayer == 0
-          @@m_paninc.x = -ftom(CDoom::F_PANINC)
+        if CDoom.followplayer == 0
+          CDoom.m_paninc.x = -ftom(CDoom::F_PANINC)
         else
           rc = 0
         end
       when CDoom::AM_PANUPKEY # pan up
-        if Doocr.followplayer == 0
-          @@m_paninc.y = ftom(CDoom::F_PANINC)
+        if CDoom.followplayer == 0
+          CDoom.m_paninc.y = ftom(CDoom::F_PANINC)
         else
           rc = 0
         end
       when CDoom::AM_PANDOWNKEY # pan down
-        if Doocr.followplayer == 0
-          @@m_paninc.y = -ftom(CDoom::F_PANINC)
+        if CDoom.followplayer == 0
+          CDoom.m_paninc.y = -ftom(CDoom::F_PANINC)
         else
           rc = 0
         end
       when CDoom::AM_ZOOMOUTKEY # zoom out
-        Doocr.mtof_zoommul = CDoom::M_ZOOMOUT
-        Doocr.ftom_zoommul = CDoom::M_ZOOMIN
+        CDoom.mtof_zoommul = CDoom::M_ZOOMOUT
+        CDoom.ftom_zoommul = CDoom::M_ZOOMIN
       when CDoom::AM_ZOOMINKEY # zoom in
-        Doocr.mtof_zoommul = CDoom::M_ZOOMIN
-        Doocr.ftom_zoommul = CDoom::M_ZOOMOUT
+        CDoom.mtof_zoommul = CDoom::M_ZOOMIN
+        CDoom.ftom_zoommul = CDoom::M_ZOOMOUT
       when CDoom::AM_ENDKEY
         @@bigstate = 0
-        Doocr.viewactive = 1
-        am_stop
+        CDoom.viewactive = 1
+        CDoom.am_stop
       when CDoom::AM_GOBIGKEY
         @@bigstate = @@bigstate != 0 ? 0 : 1
         if @@bigstate != 0
-          am_save_scale_and_loc
-          am_min_out_window_scale
+          CDoom.am_save_scale_and_loc
+          CDoom.am_min_out_window_scale
         else
-          am_restore_scale_and_loc
+          CDoom.am_restore_scale_and_loc
         end
       when CDoom::AM_FOLLOWKEY
-        Doocr.followplayer = Doocr.followplayer != 0 ? 0 : 1
-        if Doocr.followplayer != 0 # Neat fix!
-          @@m_paninc.x = 0
-          @@m_paninc.y = 0
+        CDoom.followplayer = CDoom.followplayer != 0 ? 0 : 1
+        if CDoom.followplayer != 0 # Neat fix!
+          CDoom.m_paninc.x = 0
+          CDoom.m_paninc.y = 0
         end
-        @@f_oldloc.x = Int32::MAX
-        Doocr.plr.value.message = Doocr.followplayer != 0 ? @@deh_amstr_followon : @@deh_amstr_followoff
+        CDoom.f_oldloc.x = Int32::MAX
+        CDoom.plr.value.message = CDoom.followplayer != 0 ? @@deh_amstr_followon : @@deh_amstr_followoff
       when CDoom::AM_GRIDKEY
-        Doocr.grid = Doocr.grid != 0 ? 0 : 1
-        Doocr.plr.value.message = Doocr.grid != 0 ? @@deh_amstr_gridon : @@deh_amstr_gridoff
+        CDoom.grid = CDoom.grid != 0 ? 0 : 1
+        CDoom.plr.value.message = CDoom.grid != 0 ? @@deh_amstr_gridon : @@deh_amstr_gridoff
       when CDoom::AM_MARKKEY
-        Doocr.plr.value.message = "#{@@deh_amstr_markedspot} #{Doocr.markpointnum}"
-        am_add_mark
+        CDoom.plr.value.message = "#{@@deh_amstr_markedspot} #{CDoom.markpointnum}"
+        CDoom.am_add_mark
       when CDoom::AM_CLEARMARKKEY
-        am_clear_marks
-        Doocr.plr.value.message = @@deh_amstr_markscleared
+        CDoom.am_clear_marks
+        CDoom.plr.value.message = @@deh_amstr_markscleared
       else
         @@cheatstate = 0
         rc = 0
       end
-      if Doocr.netgame == 0 && Doocr.cht_check_cheat(Doocr.cheat_amap, ev.value.data1.to_u8!) != 0
+      if CDoom.netgame == 0 && CDoom.cht_check_cheat(pointerof(CDoom.cheat_amap), ev.value.data1) != 0
         rc = 0
-        Doocr.cheating = (Doocr.cheating + 1) % 3
+        CDoom.cheating = (CDoom.cheating + 1) % 3
       end
     elsif ev.value.type == CDoom::Evtype::Keyup
       rc = 0
       case ev.value.data1
       when CDoom::AM_PANRIGHTKEY
-        @@m_paninc.x = 0 if Doocr.followplayer == 0
+        CDoom.m_paninc.x = 0 if CDoom.followplayer == 0
       when CDoom::AM_PANLEFTKEY
-        @@m_paninc.x = 0 if Doocr.followplayer == 0
+        CDoom.m_paninc.x = 0 if CDoom.followplayer == 0
       when CDoom::AM_PANUPKEY
-        @@m_paninc.y = 0 if Doocr.followplayer == 0
+        CDoom.m_paninc.y = 0 if CDoom.followplayer == 0
       when CDoom::AM_PANDOWNKEY
-        @@m_paninc.y = 0 if Doocr.followplayer == 0
+        CDoom.m_paninc.y = 0 if CDoom.followplayer == 0
       when CDoom::AM_ZOOMOUTKEY, CDoom::AM_ZOOMINKEY
-        Doocr.mtof_zoommul = FRACUNIT
-        Doocr.ftom_zoommul = FRACUNIT
+        CDoom.mtof_zoommul = FRACUNIT
+        CDoom.ftom_zoommul = FRACUNIT
       end
     end
 
@@ -352,36 +352,36 @@ module Doocr
   #
   def self.am_change_window_scale
     # Change the scaling multipliers
-    Doocr.scale_mtof = CDoom.fixed_mul(Doocr.scale_mtof, Doocr.mtof_zoommul)
-    Doocr.scale_ftom = CDoom.fixed_div(FRACUNIT, Doocr.scale_mtof)
+    CDoom.scale_mtof = CDoom.fixed_mul(CDoom.scale_mtof, CDoom.mtof_zoommul)
+    CDoom.scale_ftom = CDoom.fixed_div(FRACUNIT, CDoom.scale_mtof)
 
-    if Doocr.scale_mtof < Doocr.min_scale_mtof
-      am_min_out_window_scale
-    elsif Doocr.scale_mtof > Doocr.max_scale_mtof
-      am_max_out_window_scale
+    if CDoom.scale_mtof < CDoom.min_scale_mtof
+      CDoom.am_min_out_window_scale
+    elsif CDoom.scale_mtof > CDoom.max_scale_mtof
+      CDoom.am_max_out_window_scale
     else
-      am_activate_new_scale
+      CDoom.am_activate_new_scale
     end
   end
 
   def self.am_do_follow_player
-    if @@f_oldloc.x != Doocr.plr.value.mo.value.x || @@f_oldloc.y != Doocr.plr.value.mo.value.y
-      Doocr.m_x = ftom(mtof(Doocr.plr.value.mo.value.x)) - Doocr.m_w // 2
-      Doocr.m_y = ftom(mtof(Doocr.plr.value.mo.value.y)) - Doocr.m_h // 2
-      Doocr.m_x2 = Doocr.m_x + Doocr.m_w
-      Doocr.m_y2 = Doocr.m_y + Doocr.m_h
-      @@f_oldloc.x = Doocr.plr.value.mo.value.x
-      @@f_oldloc.y = Doocr.plr.value.mo.value.y
+    if CDoom.f_oldloc.x != CDoom.plr.value.mo.value.x || CDoom.f_oldloc.y != CDoom.plr.value.mo.value.y
+      CDoom.m_x = ftom(mtof(CDoom.plr.value.mo.value.x)) - CDoom.m_w // 2
+      CDoom.m_y = ftom(mtof(CDoom.plr.value.mo.value.y)) - CDoom.m_h // 2
+      CDoom.m_x2 = CDoom.m_x + CDoom.m_w
+      CDoom.m_y2 = CDoom.m_y + CDoom.m_h
+      CDoom.f_oldloc.x = CDoom.plr.value.mo.value.x
+      CDoom.f_oldloc.y = CDoom.plr.value.mo.value.y
     end
   end
 
   def self.am_update_light_lev
     # Change light level
-    if Doocr.amclock > @@nexttic
-      Doocr.lightlev = @@litelevels[@@litelevelscnt]
+    if CDoom.amclock > @@nexttic
+      CDoom.lightlev = @@litelevels[@@litelevelscnt]
       @@litelevelscnt += 1
       @@litelevelscnt = 0 if @@litelevelscnt == @@litelevels.size
-      @@nexttic = Doocr.amclock + 6 - (Doocr.amclock % 6)
+      @@nexttic = CDoom.amclock + 6 - (CDoom.amclock % 6)
     end
   end
 
@@ -389,27 +389,27 @@ module Doocr
   # Updates on Game Tick
   #
   def self.am_ticker
-    return if Doocr.automapactive == 0
+    return if CDoom.automapactive == 0
 
-    Doocr.amclock += 1
+    CDoom.amclock += 1
 
-    am_do_follow_player if Doocr.followplayer != 0
+    CDoom.am_do_follow_player if CDoom.followplayer != 0
 
     # Change the zoom if necessary
-    am_change_window_scale if Doocr.ftom_zoommul != FRACUNIT
+    CDoom.am_change_window_scale if CDoom.ftom_zoommul != FRACUNIT
 
     # Change x,y location
-    am_change_window_loc if @@m_paninc.x != 0 || @@m_paninc.y != 0
+    CDoom.am_change_window_loc if CDoom.m_paninc.x != 0 || CDoom.m_paninc.y != 0
 
     # Update light level
-    # Lighting is updated by the status bar path.
+    # CDoom.am_update_light_lev
   end
 
   #
   # Clear automap frame buffer.
   #
   def self.am_clear_fb(color : Int32)
-    CDoom.doom_memset(Doocr.fb, color, Doocr.f_w * Doocr.f_h)
+    CDoom.doom_memset(CDoom.fb, color, CDoom.f_w * CDoom.f_h)
   end
 
   LEFT   = 1
@@ -421,12 +421,12 @@ module Doocr
     {{oc}} = 0
     if ({{my}} < 0)
       {{oc}} |= TOP
-    elsif ({{my}} >= Doocr.f_h)
+    elsif ({{my}} >= CDoom.f_h)
       {{oc}} |= BOTTOM
     end
     if ({{mx}} < 0)
       {{oc}} |= LEFT
-    elsif ({{mx}} >= Doocr.f_w)
+    elsif ({{mx}} >= CDoom.f_w)
       {{oc}} |= RIGHT
     end
   end
@@ -438,56 +438,52 @@ module Doocr
   # faster reject and precalculated slopes.  If the speed is needed,
   # use a hash algorithm to handle  the common cases.
   #
-  def self.am_clip_mline(ml : Mline, fl : Fline) : CDoom::DoomBool
-    ma = ml.a.not_nil!
-    mb = ml.b.not_nil!
-    fa = fl.a.not_nil!
-    fb = fl.b.not_nil!
+  def self.am_clip_mline(ml : CDoom::Mline*, fl : CDoom::Fline*) : CDoom::DoomBool
     outcode1 = 0
     outcode2 = 0
     outside = 0
 
-    tmp = Fpoint.new
+    tmp = CDoom::Fpoint.new
     dx = 0
     dy = 0
 
     # do trivial rejects and outcodes
-    if ma.y > Doocr.m_y2
+    if ml.value.a.y > CDoom.m_y2
       outcode1 = TOP
-    elsif ma.y < Doocr.m_y
+    elsif ml.value.a.y < CDoom.m_y
       outcode1 = BOTTOM
     end
 
-    if mb.y > Doocr.m_y2
+    if ml.value.b.y > CDoom.m_y2
       outcode2 = TOP
-    elsif mb.y < Doocr.m_y
+    elsif ml.value.b.y < CDoom.m_y
       outcode2 = BOTTOM
     end
 
     return 0 if (outcode1 & outcode2) != 0 # trivially outside
 
-    if ma.x < Doocr.m_x
+    if ml.value.a.x < CDoom.m_x
       outcode1 |= LEFT
-    elsif ma.x > Doocr.m_x2
+    elsif ml.value.a.x > CDoom.m_x2
       outcode1 |= RIGHT
     end
 
-    if mb.x < Doocr.m_x
+    if ml.value.b.x < CDoom.m_x
       outcode2 |= LEFT
-    elsif mb.x > Doocr.m_x2
+    elsif ml.value.b.x > CDoom.m_x2
       outcode2 |= RIGHT
     end
 
     return 0 if (outcode1 & outcode2) != 0 # trivially outside
 
     # transform to frame-buffer coodinates.
-    fa.x = cxmtof(ma.x)
-    fa.y = cymtof(ma.y)
-    fb.x = cxmtof(mb.x)
-    fb.y = cymtof(mb.y)
+    fl.value.a.x = cxmtof(ml.value.a.x)
+    fl.value.a.y = cymtof(ml.value.a.y)
+    fl.value.b.x = cxmtof(ml.value.b.x)
+    fl.value.b.y = cymtof(ml.value.b.y)
 
-    dooutcode(outcode1, fa.x, fa.y)
-    dooutcode(outcode2, fb.x, fb.y)
+    dooutcode(outcode1, fl.value.a.x, fl.value.a.y)
+    dooutcode(outcode2, fl.value.b.x, fl.value.b.y)
 
     return 0 if (outcode1 & outcode2) != 0
 
@@ -502,35 +498,33 @@ module Doocr
 
       # clip to each side
       if outside & TOP != 0
-        dy = fa.y - fb.y
-        dx = fb.x - fa.x
-        tmp.x = fa.x + (dx * fa.y) // dy
+        dy = fl.value.a.y - fl.value.b.y
+        dx = fl.value.b.x - fl.value.a.x
+        tmp.x = fl.value.a.x + (dx * fl.value.a.y) // dy
         tmp.y = 0
       elsif outside & BOTTOM != 0
-        dy = fa.y - fb.y
-        dx = fb.x - fa.x
-        tmp.x = fa.x + (dx * (fa.y - Doocr.f_h)) // dy
-        tmp.y = Doocr.f_h - 1
+        dy = fl.value.a.y - fl.value.b.y
+        dx = fl.value.b.x - fl.value.a.x
+        tmp.x = fl.value.a.x + (dx * (fl.value.a.y - CDoom.f_h)) // dy
+        tmp.y = CDoom.f_h - 1
       elsif outside & RIGHT != 0
-        dy = fb.y - fa.y
-        dx = fb.x - fa.x
-        tmp.y = fa.y + (dy * (Doocr.f_w - 1 - fa.x)) // dx
-        tmp.x = Doocr.f_w - 1
+        dy = fl.value.b.y - fl.value.a.y
+        dx = fl.value.b.x - fl.value.a.x
+        tmp.y = fl.value.a.y + (dy * (CDoom.f_w - 1 - fl.value.a.x)) // dx
+        tmp.x = CDoom.f_w - 1
       elsif outside & LEFT != 0
-        dy = fb.y - fa.y
-        dx = fb.x - fa.x
-        tmp.y = fa.y + (dy * (-fa.x)) // dx
+        dy = fl.value.b.y - fl.value.a.y
+        dx = fl.value.b.x - fl.value.a.x
+        tmp.y = fl.value.a.y + (dy * (-fl.value.a.x)) // dx
         tmp.x = 0
       end
 
       if outside == outcode1
-        fa.x = tmp.x
-        fa.y = tmp.y
-        dooutcode(outcode1, fa.x, fa.y)
+        fl.value.a = tmp
+        dooutcode(outcode1, fl.value.a.x, fl.value.a.y)
       else
-        fb.x = tmp.x
-        fb.y = tmp.y
-        dooutcode(outcode2, fb.x, fb.y)
+        fl.value.b = tmp
+        dooutcode(outcode2, fl.value.b.x, fl.value.b.y)
       end
 
       return 0 if (outcode1 & outcode2) != 0 # trivially outside
@@ -540,7 +534,7 @@ module Doocr
   end
 
   macro putdot(xx, yy, cc)
-    Doocr.fb[{{yy}}*Doocr.f_w+{{xx}}]={{cc}}
+    CDoom.fb[{{yy}}*CDoom.f_w+{{xx}}]={{cc}}
   end
 
   @@fuck = 0
@@ -548,9 +542,7 @@ module Doocr
   #
   # Classic Bresenham w/ whatever optimizations needed for speed
   #
-  def self.am_draw_fline(fl : Fline, color : Int32)
-    fa = fl.a.not_nil!
-    fb = fl.b.not_nil!
+  def self.am_draw_fline(fl : CDoom::Fline*, color : Int32)
     x = 0
     y = 0
     dx = 0
@@ -564,32 +556,32 @@ module Doocr
     # For debugging only
     {% if false %}
       # [pd] Don't waste CPU cycles testing this then
-      if (fa.x < 0 || fa.x >= Doocr.f_w ||
-        fa.y < 0 || fa.y >= Doocr.f_h ||
-        fb.x < 0 || fb.x >= Doocr.f_w ||
-        fb.y < 0 || fb.y >= Doocr.f_h)
+      if (fl.value.a.x < 0 || fl.value.a.x >= CDoom.f_w ||
+         fl.value.a.y < 0 || fl.value.a.y >= CDoom.f_h ||
+         fl.value.b.x < 0 || fl.value.b.x >= CDoom.f_w ||
+         fl.value.b.y < 0 || fl.value.b.y >= CDoom.f_h)
         print "fuck #{fuck}\r"
         @@fuck += 1
         return
       end
     {% end %}
 
-    dx = fb.x - fa.x
+    dx = fl.value.b.x - fl.value.a.x
     ax = 2 * (dx < 0 ? -dx : dx)
     sx = dx < 0 ? -1 : 1
 
-    dy = fb.y - fa.y
+    dy = fl.value.b.y - fl.value.a.y
     ay = 2 * (dy < 0 ? -dy : dy)
     sy = dy < 0 ? -1 : 1
 
-    x = fa.x
-    y = fa.y
+    x = fl.value.a.x
+    y = fl.value.a.y
 
     if ax > ay
       d = ay - ax // 2
       while true
         putdot(x, y, color.to_u8!)
-        return if x == fb.x
+        return if x == fl.value.b.x
         if d >= 0
           y += sy
           d -= ax
@@ -601,7 +593,7 @@ module Doocr
       d = ax - ay // 2
       while true
         putdot(x, y, color.to_u8!)
-        return if y == fb.y
+        return if y == fl.value.b.y
         if d >= 0
           x += sx
           d -= ay
@@ -612,14 +604,14 @@ module Doocr
     end
   end
 
-  @@fl = Fline.new(Fpoint.new, Fpoint.new)
+  @@fl : CDoom::Fline* = Pointer(CDoom::Fline).malloc
 
   #
   # Clip lines, draw visible part sof lines.
   #
-  def self.am_draw_mline(ml : Mline, color : Int32)
-    if am_clip_mline(ml, @@fl) != 0
-      am_draw_fline(@@fl, color)
+  def self.am_draw_mline(ml : CDoom::Mline*, color : Int32)
+    if CDoom.am_clip_mline(ml, @@fl) != 0
+      CDoom.am_draw_fline(@@fl, color)
     end
   end
 
@@ -628,47 +620,47 @@ module Doocr
   #
   def self.am_draw_grid(color : Int32)
     # Figure out start of vertical gridlines
-    start = Doocr.m_x
-    ml = Mline.new(Mpoint.new, Mpoint.new)
+    start = CDoom.m_x
+    ml = CDoom::Mline.new
 
-    if (start - Doocr.bmaporgx).remainder(CDoom::MAPBLOCKUNITS << FRACBITS) != 0
+    if (start - CDoom.bmaporgx).remainder(CDoom::MAPBLOCKUNITS << FRACBITS) != 0
       start += (CDoom::MAPBLOCKUNITS << FRACBITS) -
-               (start - Doocr.bmaporgx).remainder(CDoom::MAPBLOCKUNITS << FRACBITS)
+               (start - CDoom.bmaporgx).remainder(CDoom::MAPBLOCKUNITS << FRACBITS)
     end
-    en = Doocr.m_x + Doocr.m_w
+    en = CDoom.m_x + CDoom.m_w
 
     # draw vertical gridlines
-    ml.a.not_nil!.y = Doocr.m_y
-    ml.b.not_nil!.y = Doocr.m_y + Doocr.m_h
+    ml.a.y = CDoom.m_y
+    ml.b.y = CDoom.m_y + CDoom.m_h
     x = start
     while x < en
-      ml.a.not_nil!.x = x
-      ml.b.not_nil!.x = x
-      am_draw_mline(ml, color)
+      ml.a.x = x
+      ml.b.x = x
+      CDoom.am_draw_mline(pointerof(ml), color)
       x += CDoom::MAPBLOCKUNITS << FRACBITS
     end
 
     # Figure out start of horizontal gridlines
-    start = Doocr.m_y
-    if (start - Doocr.bmaporgy) % (CDoom::MAPBLOCKUNITS << FRACBITS)
+    start = CDoom.m_y
+    if (start - CDoom.bmaporgy) % (CDoom::MAPBLOCKUNITS << FRACBITS)
       start += (CDoom::MAPBLOCKUNITS << FRACBITS) -
-               ((start - Doocr.bmaporgy) % (CDoom::MAPBLOCKUNITS << FRACBITS))
+               ((start - CDoom.bmaporgy) % (CDoom::MAPBLOCKUNITS << FRACBITS))
     end
-    en = Doocr.m_y + Doocr.m_h
+    en = CDoom.m_y + CDoom.m_h
 
     # draw horizontal gridlines
-    ml.a.not_nil!.x = Doocr.m_x
-    ml.b.not_nil!.x = Doocr.m_x + Doocr.m_w
+    ml.a.x = CDoom.m_x
+    ml.b.x = CDoom.m_x + CDoom.m_w
     y = start
     while y < en
-      ml.a.not_nil!.y = y
-      ml.b.not_nil!.y = y
-      am_draw_mline(ml, color)
+      ml.a.y = y
+      ml.b.y = y
+      CDoom.am_draw_mline(pointerof(ml), color)
       y += (CDoom::MAPBLOCKUNITS << FRACBITS)
     end
   end
 
-  @@l = Mline.new(Mpoint.new, Mpoint.new)
+  @@l : CDoom::Mline = CDoom::Mline.new
   @@l
 
   #
@@ -676,35 +668,35 @@ module Doocr
   # This is LineDef based, not LineSeg based.
   #
   def self.am_draw_walls
-    Doocr.numlines.times do |i|
-      @@l.a.not_nil!.x = Doocr.lines[i].v1.value.x
-      @@l.a.not_nil!.y = Doocr.lines[i].v1.value.y
-      @@l.b.not_nil!.x = Doocr.lines[i].v2.value.x
-      @@l.b.not_nil!.y = Doocr.lines[i].v2.value.y
-      if Doocr.cheating != 0 || (Doocr.lines[i].flags & CDoom::ML_MAPPED) != 0
-        next if (Doocr.lines[i].flags & CDoom::LINE_NEVERSEE) != 0 && Doocr.cheating == 0
-        if Doocr.lines[i].backsector.null?
-          am_draw_mline(@@l, CDoom::WALLCOLORS + Doocr.lightlev)
+    CDoom.numlines.times do |i|
+      @@l.a.x = CDoom.lines[i].v1.value.x
+      @@l.a.y = CDoom.lines[i].v1.value.y
+      @@l.b.x = CDoom.lines[i].v2.value.x
+      @@l.b.y = CDoom.lines[i].v2.value.y
+      if CDoom.cheating != 0 || (CDoom.lines[i].flags & CDoom::ML_MAPPED) != 0
+        next if (CDoom.lines[i].flags & CDoom::LINE_NEVERSEE) != 0 && CDoom.cheating == 0
+        if CDoom.lines[i].backsector.null?
+          CDoom.am_draw_mline(pointerof(@@l), CDoom::WALLCOLORS + CDoom.lightlev)
         else
-          if Doocr.lines[i].special == 39
+          if CDoom.lines[i].special == 39
             # teleporters
-            am_draw_mline(@@l, CDoom::WALLCOLORS + CDoom::WALLRANGE // 2)
-          elsif Doocr.lines[i].flags & CDoom::ML_SECRET != 0 # secret door
-            if Doocr.cheating != 0
-              am_draw_mline(@@l, CDoom::SECRETWALLCOLORS + Doocr.lightlev)
+            CDoom.am_draw_mline(pointerof(@@l), CDoom::WALLCOLORS + CDoom::WALLRANGE // 2)
+          elsif CDoom.lines[i].flags & CDoom::ML_SECRET != 0 # secret door
+            if CDoom.cheating != 0
+              CDoom.am_draw_mline(pointerof(@@l), CDoom::SECRETWALLCOLORS + CDoom.lightlev)
             else
-              am_draw_mline(@@l, CDoom::WALLCOLORS + Doocr.lightlev)
+              CDoom.am_draw_mline(pointerof(@@l), CDoom::WALLCOLORS + CDoom.lightlev)
             end
-          elsif Doocr.lines[i].backsector.value.floorheight != Doocr.lines[i].frontsector.value.floorheight
-            am_draw_mline(@@l, CDoom::FDWALLCOLORS + Doocr.lightlev) # floor level change
-          elsif Doocr.lines[i].backsector.value.ceilingheight != Doocr.lines[i].frontsector.value.ceilingheight
-            am_draw_mline(@@l, CDoom::CDWALLCOLORS + Doocr.lightlev) # ceiling level change
-          elsif Doocr.cheating != 0
-            am_draw_mline(@@l, CDoom::TSWALLCOLORS + Doocr.lightlev)
+          elsif CDoom.lines[i].backsector.value.floorheight != CDoom.lines[i].frontsector.value.floorheight
+            CDoom.am_draw_mline(pointerof(@@l), CDoom::FDWALLCOLORS + CDoom.lightlev) # floor level change
+          elsif CDoom.lines[i].backsector.value.ceilingheight != CDoom.lines[i].frontsector.value.ceilingheight
+            CDoom.am_draw_mline(pointerof(@@l), CDoom::CDWALLCOLORS + CDoom.lightlev) # ceiling level change
+          elsif CDoom.cheating != 0
+            CDoom.am_draw_mline(pointerof(@@l), CDoom::TSWALLCOLORS + CDoom.lightlev)
           end
         end
-      elsif Doocr.plr.value.powers[CDoom::Powertype::Allmap.value] != 0
-        am_draw_mline(@@l, CDoom::GRAYS + 3) if Doocr.lines[i].flags & CDoom::LINE_NEVERSEE == 0
+      elsif CDoom.plr.value.powers[CDoom::Powertype::Allmap.value] != 0
+        CDoom.am_draw_mline(pointerof(@@l), CDoom::GRAYS + 3) if CDoom.lines[i].flags & CDoom::LINE_NEVERSEE == 0
       end
     end
   end
@@ -713,50 +705,60 @@ module Doocr
   # Rotation in 2D.
   # Used to rotate player arrow line character.
   #
-    def self.am_rotate(x : CDoom::Fixed, y : CDoom::Fixed, a : CDoom::Angle) : Tuple(CDoom::Fixed, CDoom::Fixed)
-      tmpx = CDoom.fixed_mul(x, @@finecosine[a >> CDoom::ANGLETOFINESHIFT]) -
-        CDoom.fixed_mul(y, @@finesine[a >> CDoom::ANGLETOFINESHIFT])
-      tmpy = CDoom.fixed_mul(x, @@finesine[a >> CDoom::ANGLETOFINESHIFT]) +
-        CDoom.fixed_mul(y, @@finecosine[a >> CDoom::ANGLETOFINESHIFT])
-      {tmpx, tmpy}
+  def self.am_rotate(x : CDoom::Fixed*, y : CDoom::Fixed*, a : CDoom::Angle)
+    tmpx = CDoom.fixed_mul(x.value, @@finecosine[a >> CDoom::ANGLETOFINESHIFT]) -
+           CDoom.fixed_mul(y.value, @@finesine[a >> CDoom::ANGLETOFINESHIFT])
+
+    y.value = CDoom.fixed_mul(x.value, @@finesine[a >> CDoom::ANGLETOFINESHIFT]) +
+              CDoom.fixed_mul(y.value, @@finecosine[a >> CDoom::ANGLETOFINESHIFT])
+
+    x.value = tmpx
   end
 
-    def self.am_draw_line_character(lineguy : Array(Mline),
+  def self.am_draw_line_character(lineguy : CDoom::Mline*,
                                   lineguylines : Int32,
                                   scale : CDoom::Fixed,
                                   angle : CDoom::Angle,
                                   color : Int32,
                                   x : CDoom::Fixed,
                                   y : CDoom::Fixed)
-    l = Mline.new(Mpoint.new, Mpoint.new)
+    l = CDoom::Mline.new
     lineguylines.times do |i|
-      source_a = lineguy[i].a.not_nil!
-      source_b = lineguy[i].b.not_nil!
-      ax = source_a.x
-      ay = source_a.y
+      ax = lineguy[i].a.x
+      ay = lineguy[i].a.y
 
       if scale != 0
         ax = CDoom.fixed_mul(scale, ax)
         ay = CDoom.fixed_mul(scale, ay)
       end
 
-      ax, ay = am_rotate(ax, ay, angle) if angle != 0
-      l.a.not_nil!.x = ax + x
-      l.a.not_nil!.y = ay + y
+      l.a = CDoom::Mpoint.new(x: ax, y: ay)
 
-      bx = source_b.x
-      by = source_b.y
+      CDoom.am_rotate(
+        pointerof(l.@a.@x),
+        pointerof(l.@a.@y),
+        angle) if angle != 0
+
+      l.a = CDoom::Mpoint.new(x: l.a.x + x, y: l.a.y + y)
+
+      bx = lineguy[i].b.x
+      by = lineguy[i].b.y
 
       if scale != 0
         bx = CDoom.fixed_mul(scale, bx)
         by = CDoom.fixed_mul(scale, by)
       end
 
-      bx, by = am_rotate(bx, by, angle) if angle != 0
-      l.b.not_nil!.x = bx + x
-      l.b.not_nil!.y = by + y
+      l.b = CDoom::Mpoint.new(x: bx, y: by)
 
-      am_draw_mline(l, color)
+      CDoom.am_rotate(
+        pointerof(l.@b.@x),
+        pointerof(l.@b.@y),
+        angle) if angle != 0
+
+      l.b = CDoom::Mpoint.new(x: l.b.x + x, y: l.b.y + y)
+
+      CDoom.am_draw_mline(pointerof(l), color)
     end
   end
 
@@ -766,17 +768,17 @@ module Doocr
     their_color = -1
     color = 0
 
-    if Doocr.netgame == 0
-      if Doocr.cheating != 0
-        am_draw_line_character(
-          @@cheat_player_arrow, @@cheat_player_arrow.size, 0,
-          Doocr.plr.value.mo.value.angle, CDoom::WHITE,
-          Doocr.plr.value.mo.value.x, Doocr.plr.value.mo.value.y
+    if CDoom.netgame == 0
+      if CDoom.cheating != 0
+        CDoom.am_draw_line_character(
+          CDoom.cheat_player_arrow, CDoom::NUMCHEATPLYRLINES, 0,
+          CDoom.plr.value.mo.value.angle, CDoom::WHITE,
+          CDoom.plr.value.mo.value.x, CDoom.plr.value.mo.value.y
         )
       else
-        am_draw_line_character(
-          @@player_arrow, @@player_arrow.size, 0, Doocr.plr.value.mo.value.angle,
-          CDoom::WHITE, Doocr.plr.value.mo.value.x, Doocr.plr.value.mo.value.y
+        CDoom.am_draw_line_character(
+          CDoom.player_arrow, CDoom::NUMPLYRLINES, 0, CDoom.plr.value.mo.value.angle,
+          CDoom::WHITE, CDoom.plr.value.mo.value.x, CDoom.plr.value.mo.value.y
         )
       end
       return
@@ -786,8 +788,8 @@ module Doocr
       their_color += 1
       p = @@players.to_unsafe + i
 
-      next if (Doocr.deathmatch != 0 && Doocr.singledemo == 0) && p != Doocr.plr
-      next if Doocr.playeringame[i] == 0
+      next if (CDoom.deathmatch != 0 && CDoom.singledemo == 0) && p != CDoom.plr
+      next if CDoom.playeringame[i] == 0
 
       if p.value.powers[CDoom::Powertype::Invisibility.value] != 0
         color = 246 # *close* to black
@@ -795,20 +797,20 @@ module Doocr
         color = their_colors[their_color]
       end
 
-      am_draw_line_character(
-        @@player_arrow, @@player_arrow.size, 0, p.value.mo.value.angle,
+      CDoom.am_draw_line_character(
+        CDoom.player_arrow, CDoom::NUMPLYRLINES, 0, p.value.mo.value.angle,
         color, p.value.mo.value.x, p.value.mo.value.y
       )
     end
   end
 
   def self.am_draw_things(colors : Int32, colorrange : Int32)
-    Doocr.numsectors.times do |i|
-      t = Doocr.sectors[i].thinglist
+    CDoom.numsectors.times do |i|
+      t = CDoom.sectors[i].thinglist
       until t.null?
-        am_draw_line_character(
-          @@thintriangle_guy, @@thintriangle_guy.size,
-          16 << FRACBITS, t.value.angle, colors + Doocr.lightlev,
+        CDoom.am_draw_line_character(
+          CDoom.thintriangle_guy, CDoom::NUMTHINTRIANGLEGUYLINES,
+          16 << FRACBITS, t.value.angle, colors + CDoom.lightlev,
           t.value.x, t.value.y
         )
         t = t.value.snext
@@ -818,36 +820,36 @@ module Doocr
 
   def self.am_draw_marks
     CDoom::AM_NUMMARKPOINTS.times do |i|
-      if @@markpoints[i].x != -1
-        # w = Doocr.marknums[i].value.width.to_i16!
-        # h = Doocr.marknums[i].value.height.to_i16!
+      if CDoom.markpoints[i].x != -1
+        # w = CDoom.marknums[i].value.width.to_i16!
+        # h = CDoom.marknums[i].value.height.to_i16!
         w = 5 # because somethings wrong with the wad, i guess
         h = 6 # because somethings wrong with the wad, i guess
-        fx = cxmtof(@@markpoints[i].x)
-        fy = cymtof(@@markpoints[i].y)
-        if fx >= Doocr.f_x && fx <= Doocr.f_w - w && fy >= Doocr.f_y && fy <= Doocr.f_h - h
-          CDoom.v_draw_patch(fx, fy, CDoom::FB, Doocr.marknums[i])
+        fx = cxmtof(CDoom.markpoints[i].x)
+        fy = cymtof(CDoom.markpoints[i].y)
+        if fx >= CDoom.f_x && fx <= CDoom.f_w - w && fy >= CDoom.f_y && fy <= CDoom.f_h - h
+          CDoom.v_draw_patch(fx, fy, CDoom::FB, CDoom.marknums[i])
         end
       end
     end
   end
 
   def self.am_draw_crosshair(color : Int32)
-    Doocr.fb[(Doocr.f_w * (Doocr.f_h + 1)) // 2] = color.to_u8! # single point for now
+    CDoom.fb[(CDoom.f_w * (CDoom.f_h + 1)) // 2] = color.to_u8! # single point for now
   end
 
   def self.am_drawer
-    return if Doocr.automapactive == 0
+    return if CDoom.automapactive == 0
 
-    am_clear_fb(CDoom::BACKGROUND)
-    am_draw_grid(CDoom::GRIDCOLORS.to_i32) if Doocr.grid != 0
-    am_draw_walls
-    am_draw_players
-    am_draw_things(CDoom::THINGCOLORS, CDoom::THINGRANGE) if Doocr.cheating == 2
-    am_draw_crosshair(CDoom::XHAIRCOLORS)
+    CDoom.am_clear_fb(CDoom::BACKGROUND)
+    CDoom.am_draw_grid(CDoom::GRIDCOLORS) if CDoom.grid != 0
+    CDoom.am_draw_walls
+    CDoom.am_draw_players
+    CDoom.am_draw_things(CDoom::THINGCOLORS, CDoom::THINGRANGE) if CDoom.cheating == 2
+    CDoom.am_draw_crosshair(CDoom::XHAIRCOLORS)
 
-    am_draw_marks
+    CDoom.am_draw_marks
 
-    CDoom.v_mark_rect(Doocr.f_x, Doocr.f_y, Doocr.f_w, Doocr.f_h)
+    CDoom.v_mark_rect(CDoom.f_x, CDoom.f_y, CDoom.f_w, CDoom.f_h)
   end
 end

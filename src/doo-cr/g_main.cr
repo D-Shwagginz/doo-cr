@@ -23,7 +23,7 @@ module Doocr
   #
   def self.try_run_tics
     # get real tics
-    entertic = CDoom.i_get_time // Doocr.ticdup
+    entertic = CDoom.i_get_time // CDoom.ticdup
     realtics = entertic - @@oldentertics
     @@oldentertics = entertic
 
@@ -32,13 +32,13 @@ module Doocr
 
     lowtic = Int32::MAX
     numplaying = 0
-    Doocr.doomcom.value.numnodes.times do |i|
-      if Doocr.nodeingame[i] != 0
+    CDoom.doomcom.value.numnodes.times do |i|
+      if CDoom.nodeingame[i] != 0
         numplaying += 1
-        lowtic = Doocr.nettics[i] if Doocr.nettics[i] < lowtic
+        lowtic = CDoom.nettics[i] if CDoom.nettics[i] < lowtic
       end
     end
-    availabletics = lowtic - Doocr.gametic // Doocr.ticdup
+    availabletics = lowtic - CDoom.gametic // CDoom.ticdup
 
     counts = availabletics
     # decide how many tics to run
@@ -50,52 +50,52 @@ module Doocr
 
     counts = 1 if counts < 1
 
-    Doocr.frameon += 1
+    CDoom.frameon += 1
 
-    if Doocr.debugfile
-      Doocr.debug_fprint("=======real: ")
-      Doocr.debug_fprint(CDoom.doom_itoa(realtics, 10))
-      Doocr.debug_fprint("  avail: ")
-      Doocr.debug_fprint(CDoom.doom_itoa(availabletics, 10))
-      Doocr.debug_fprint("  game: ")
-      Doocr.debug_fprint(CDoom.doom_itoa(counts, 10))
-      Doocr.debug_fprint("\n")
+    if !CDoom.debugfile.null?
+      CDoom.doom_fprint(CDoom.debugfile, "=======real: ")
+      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(realtics, 10))
+      CDoom.doom_fprint(CDoom.debugfile, "  avail: ")
+      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(availabletics, 10))
+      CDoom.doom_fprint(CDoom.debugfile, "  game: ")
+      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(counts, 10))
+      CDoom.doom_fprint(CDoom.debugfile, "\n")
     end
 
-    if Doocr.demoplayback == 0
+    if CDoom.demoplayback == 0
       i = 0
       while i < CDoom::MAXPLAYERS
-        break if Doocr.playeringame[i] != 0
+        break if CDoom.playeringame[i] != 0
         i += 1
       end
-      if Doocr.consoleplayer == i
+      if CDoom.consoleplayer == i
         # the key player does not adapt
       else
-        if Doocr.nettics[0] <= Doocr.nettics[Doocr.nodeforplayer[i]]
-          Doocr.gametime -= 1
+        if CDoom.nettics[0] <= CDoom.nettics[CDoom.nodeforplayer[i]]
+          CDoom.gametime -= 1
         end
-        Doocr.frameskip[Doocr.frameon & 3] = (Doocr.oldnettics > Doocr.nettics[Doocr.nodeforplayer[i]]).to_unsafe
-        Doocr.oldnettics = Doocr.nettics[0]
-        if Doocr.frameskip[0] != 0 && Doocr.frameskip[1] != 0 && Doocr.frameskip[2] != 0 && Doocr.frameskip[3] != 0
-          Doocr.skiptics = 1
+        CDoom.frameskip[CDoom.frameon & 3] = (CDoom.oldnettics > CDoom.nettics[CDoom.nodeforplayer[i]]).to_unsafe
+        CDoom.oldnettics = CDoom.nettics[0]
+        if CDoom.frameskip[0] != 0 && CDoom.frameskip[1] != 0 && CDoom.frameskip[2] != 0 && CDoom.frameskip[3] != 0
+          CDoom.skiptics = 1
         end
       end
     end
 
     # wait for new tics if needed
-    while lowtic < Doocr.gametic // Doocr.ticdup + counts
+    while lowtic < CDoom.gametic // CDoom.ticdup + counts
       i_poll_mouse
       CDoom.net_update
       lowtic = Int32::MAX
 
-      Doocr.doomcom.value.numnodes.times do |i|
-        lowtic = Doocr.nettics[i] if Doocr.nodeingame[i] != 0 && Doocr.nettics[i] < lowtic
+      CDoom.doomcom.value.numnodes.times do |i|
+        lowtic = CDoom.nettics[i] if CDoom.nodeingame[i] != 0 && CDoom.nettics[i] < lowtic
       end
 
-      CDoom.i_error("Error: try_run_tics: lowtic < Doocr.gametic") if lowtic < Doocr.gametic // Doocr.ticdup
+      CDoom.i_error("Error: try_run_tics: lowtic < CDoom.gametic") if lowtic < CDoom.gametic // CDoom.ticdup
 
       # don't stay in here forever -- give the menu a chance to work
-      if CDoom.i_get_time // Doocr.ticdup - entertic >= 20
+      if CDoom.i_get_time // CDoom.ticdup - entertic >= 20
         CDoom.m_ticker
         return
       end
@@ -103,18 +103,18 @@ module Doocr
 
     # run the count * ticdup dics
     while counts != 0
-      Doocr.ticdup.times do |i|
-        CDoom.i_error("Error: gametic>lowtic") if Doocr.gametic // Doocr.ticdup > lowtic
-        CDoom.d_do_advance_demo if Doocr.advancedemo != 0
+      CDoom.ticdup.times do |i|
+        CDoom.i_error("Error: gametic>lowtic") if CDoom.gametic // CDoom.ticdup > lowtic
+        CDoom.d_do_advance_demo if CDoom.advancedemo != 0
         CDoom.m_ticker
         CDoom.g_ticker
-        Doocr.gametic &+= 1
+        CDoom.gametic &+= 1
 
         # modify command for duplicated tics
-        if i != Doocr.ticdup - 1
-          buf = (Doocr.gametic // Doocr.ticdup) % CDoom::BACKUPTICS
+        if i != CDoom.ticdup - 1
+          buf = (CDoom.gametic // CDoom.ticdup) % CDoom::BACKUPTICS
           CDoom::MAXPLAYERS.times do |j|
-            cmd = (Doocr.netcmds.to_unsafe + j).value.to_unsafe + buf
+            cmd = (CDoom.netcmds.to_unsafe + j).value.to_unsafe + buf
             cmd.value.chatchar = 0
             cmd.value.buttons = 0 if cmd.value.buttons & CDoom::Buttoncode::BT_SPECIAL.value != 0
           end
@@ -137,70 +137,70 @@ module Doocr
     CDoom.doom_memcpy(cmd, base, sizeof(typeof(cmd.value)))
 
     cmd.value.consistancy =
-      Doocr.consistancy[Doocr.consoleplayer][Doocr.maketic % CDoom::BACKUPTICS]
+      CDoom.consistancy[CDoom.consoleplayer][CDoom.maketic % CDoom::BACKUPTICS]
 
-    unless Doocr.menuactive != 0
-      strafe = (Doocr.gamekeydown[Doocr.key_strafe] != 0 || Doocr.mousebuttons[Doocr.mousebstrafe] != 0 ||
-                Doocr.joybuttons[Doocr.joybstrafe] != 0).to_unsafe
+    unless CDoom.menuactive != 0
+      strafe = (CDoom.gamekeydown[CDoom.key_strafe] != 0 || CDoom.mousebuttons[CDoom.mousebstrafe] != 0 ||
+                CDoom.joybuttons[CDoom.joybstrafe] != 0).to_unsafe
 
-      running = Doocr.always_run != 0 ? (Doocr.gamekeydown[Doocr.key_speed] != 0 ? false : true) : (Doocr.gamekeydown[Doocr.key_speed] != 0 ? true : false)
-      speed = (running || Doocr.joybuttons[Doocr.joybspeed] != 0).to_unsafe
+      running = CDoom.always_run != 0 ? (CDoom.gamekeydown[CDoom.key_speed] != 0 ? false : true) : (CDoom.gamekeydown[CDoom.key_speed] != 0 ? true : false)
+      speed = (running || CDoom.joybuttons[CDoom.joybspeed] != 0).to_unsafe
 
       forward = 0
       side = 0
 
       # use two stage accelerative turning
       # on the keyboard and joystick
-      if Doocr.joyxmove < 0 ||
-         Doocr.joyxmove > 0 ||
-         Doocr.gamekeydown[Doocr.key_right] != 0 ||
-         Doocr.gamekeydown[Doocr.key_left] != 0
-        Doocr.turnheld += Doocr.ticdup
+      if CDoom.joyxmove < 0 ||
+         CDoom.joyxmove > 0 ||
+         CDoom.gamekeydown[CDoom.key_right] != 0 ||
+         CDoom.gamekeydown[CDoom.key_left] != 0
+        CDoom.turnheld += CDoom.ticdup
       else
-        Doocr.turnheld = 0
+        CDoom.turnheld = 0
       end
 
       tspeed = speed
-      tspeed = 2 if Doocr.turnheld < CDoom::SLOWTURNTICS # slow turn
+      tspeed = 2 if CDoom.turnheld < CDoom::SLOWTURNTICS # slow turn
 
       # let movement keys cancel each other out
       if strafe != 0
-        side += Doocr.sidemove[speed] if Doocr.gamekeydown[Doocr.key_right] != 0
-        side -= Doocr.sidemove[speed] if Doocr.gamekeydown[Doocr.key_left] != 0
-        side += Doocr.sidemove[speed] if Doocr.joyxmove > 0
-        side -= Doocr.sidemove[speed] if Doocr.joyxmove < 0
+        side += CDoom.sidemove[speed] if CDoom.gamekeydown[CDoom.key_right] != 0
+        side -= CDoom.sidemove[speed] if CDoom.gamekeydown[CDoom.key_left] != 0
+        side += CDoom.sidemove[speed] if CDoom.joyxmove > 0
+        side -= CDoom.sidemove[speed] if CDoom.joyxmove < 0
       else
-        cmd.value.angleturn = cmd.value.angleturn - Doocr.angleturn[tspeed] if Doocr.gamekeydown[Doocr.key_right] != 0
-        cmd.value.angleturn = cmd.value.angleturn + Doocr.angleturn[tspeed] if Doocr.gamekeydown[Doocr.key_left] != 0
-        cmd.value.angleturn = cmd.value.angleturn - Doocr.angleturn[tspeed] if Doocr.joyxmove > 0
-        cmd.value.angleturn = cmd.value.angleturn + Doocr.angleturn[tspeed] if Doocr.joyxmove < 0
+        cmd.value.angleturn = cmd.value.angleturn - CDoom.angleturn[tspeed] if CDoom.gamekeydown[CDoom.key_right] != 0
+        cmd.value.angleturn = cmd.value.angleturn + CDoom.angleturn[tspeed] if CDoom.gamekeydown[CDoom.key_left] != 0
+        cmd.value.angleturn = cmd.value.angleturn - CDoom.angleturn[tspeed] if CDoom.joyxmove > 0
+        cmd.value.angleturn = cmd.value.angleturn + CDoom.angleturn[tspeed] if CDoom.joyxmove < 0
       end
 
-      forward += Doocr.forwardmove[speed] if Doocr.gamekeydown[Doocr.key_up] != 0
-      forward -= Doocr.forwardmove[speed] if Doocr.gamekeydown[Doocr.key_down] != 0
-      forward += Doocr.forwardmove[speed] if Doocr.joyymove < 0
-      forward -= Doocr.forwardmove[speed] if Doocr.joyymove > 0
+      forward += CDoom.forwardmove[speed] if CDoom.gamekeydown[CDoom.key_up] != 0
+      forward -= CDoom.forwardmove[speed] if CDoom.gamekeydown[CDoom.key_down] != 0
+      forward += CDoom.forwardmove[speed] if CDoom.joyymove < 0
+      forward -= CDoom.forwardmove[speed] if CDoom.joyymove > 0
 
-      side += Doocr.sidemove[speed] if Doocr.gamekeydown[Doocr.key_straferight] != 0
-      side -= Doocr.sidemove[speed] if Doocr.gamekeydown[Doocr.key_strafeleft] != 0
+      side += CDoom.sidemove[speed] if CDoom.gamekeydown[CDoom.key_straferight] != 0
+      side -= CDoom.sidemove[speed] if CDoom.gamekeydown[CDoom.key_strafeleft] != 0
 
       # buttons
       cmd.value.chatchar = CDoom.hu_dequeue_chat_char
 
-      if Doocr.gamekeydown[Doocr.key_fire] != 0 || Doocr.mousebuttons[Doocr.mousebfire] != 0 ||
-         Doocr.joybuttons[Doocr.joybfire] != 0
+      if CDoom.gamekeydown[CDoom.key_fire] != 0 || CDoom.mousebuttons[CDoom.mousebfire] != 0 ||
+         CDoom.joybuttons[CDoom.joybfire] != 0
         cmd.value.buttons = cmd.value.buttons | CDoom::Buttoncode::BT_ATTACK.value
       end
 
-      if Doocr.gamekeydown[Doocr.key_use] != 0 || Doocr.joybuttons[Doocr.joybuse] != 0
+      if CDoom.gamekeydown[CDoom.key_use] != 0 || CDoom.joybuttons[CDoom.joybuse] != 0
         cmd.value.buttons = cmd.value.buttons | CDoom::Buttoncode::BT_USE.value
         # clear double clicks if hit use button
-        Doocr.dclicks = 0
+        CDoom.dclicks = 0
       end
 
       # chainsaw overrides
       (CDoom::Weapontype::NUMWEAPONS.value - 1).times do |i|
-        if Doocr.gamekeydown['1'.ord + i] != 0
+        if CDoom.gamekeydown['1'.ord + i] != 0
           cmd.value.buttons = cmd.value.buttons | CDoom::Buttoncode::BT_CHANGE.value
           cmd.value.buttons = cmd.value.buttons | i << CDoom::Buttoncode::BT_WEAPONSHIFT.value
           break
@@ -208,48 +208,48 @@ module Doocr
       end
 
       # mouse
-      forward += Doocr.forwardmove[speed] if Doocr.mousebuttons[Doocr.mousebforward] != 0
+      forward += CDoom.forwardmove[speed] if CDoom.mousebuttons[CDoom.mousebforward] != 0
 
       # forward double click
-      if Doocr.mousebuttons[Doocr.mousebforward] != Doocr.dclickstate && Doocr.dclicktime > 1
-        Doocr.dclickstate = Doocr.mousebuttons[Doocr.mousebforward]
-        Doocr.dclicks += 1 if Doocr.dclickstate != 0
-        if Doocr.dclicks == 2
+      if CDoom.mousebuttons[CDoom.mousebforward] != CDoom.dclickstate && CDoom.dclicktime > 1
+        CDoom.dclickstate = CDoom.mousebuttons[CDoom.mousebforward]
+        CDoom.dclicks += 1 if CDoom.dclickstate != 0
+        if CDoom.dclicks == 2
           cmd.value.buttons = cmd.value.buttons | CDoom::Buttoncode::BT_USE.value
-          Doocr.dclicks = 0
+          CDoom.dclicks = 0
         else
-          Doocr.dclicktime = 0
+          CDoom.dclicktime = 0
         end
       else
-        Doocr.dclicktime += Doocr.ticdup
-        if Doocr.dclicktime > 20
-          Doocr.dclicks = 0
-          Doocr.dclickstate = 0
+        CDoom.dclicktime += CDoom.ticdup
+        if CDoom.dclicktime > 20
+          CDoom.dclicks = 0
+          CDoom.dclickstate = 0
         end
       end
 
       # strafe double click
       bstrafe =
-        (Doocr.mousebuttons[Doocr.mousebstrafe] != 0 ||
-          Doocr.joybuttons[Doocr.joybstrafe] != 0).to_unsafe
-      if bstrafe != Doocr.dclickstate2 && Doocr.dclicktime2 > 1
-        Doocr.dclickstate2 = bstrafe
-        Doocr.dclicks2 += 1 if Doocr.dclickstate2 != 0
-        if Doocr.dclicks2 == 2
+        (CDoom.mousebuttons[CDoom.mousebstrafe] != 0 ||
+          CDoom.joybuttons[CDoom.joybstrafe] != 0).to_unsafe
+      if bstrafe != CDoom.dclickstate2 && CDoom.dclicktime2 > 1
+        CDoom.dclickstate2 = bstrafe
+        CDoom.dclicks2 += 1 if CDoom.dclickstate2 != 0
+        if CDoom.dclicks2 == 2
           cmd.value.buttons = cmd.value.buttons | CDoom::Buttoncode::BT_USE.value
-          Doocr.dclicks2 = 0
+          CDoom.dclicks2 = 0
         else
-          Doocr.dclicktime2 = 0
+          CDoom.dclicktime2 = 0
         end
       else
-        Doocr.dclicktime2 += Doocr.ticdup
-        if Doocr.dclicktime2 > 20
-          Doocr.dclicks2 = 0
-          Doocr.dclickstate2 = 0
+        CDoom.dclicktime2 += CDoom.ticdup
+        if CDoom.dclicktime2 > 20
+          CDoom.dclicks2 = 0
+          CDoom.dclickstate2 = 0
         end
       end
 
-      forward += @@mousey if Doocr.mousemove != 0
+      forward += @@mousey if CDoom.mousemove != 0
       if strafe != 0
         side += @@mousex * 2
       else
@@ -259,7 +259,7 @@ module Doocr
       @@mousex = 0
       @@mousey = 0
 
-      maxplmove = Doocr.forwardmove[1]
+      maxplmove = CDoom.forwardmove[1]
 
       if forward > maxplmove
         forward = maxplmove
@@ -277,14 +277,14 @@ module Doocr
     end
 
     # special buttons
-    if Doocr.sendpause != 0
-      Doocr.sendpause = 0
+    if CDoom.sendpause != 0
+      CDoom.sendpause = 0
       cmd.value.buttons = CDoom::Buttoncode::BT_SPECIAL.value | CDoom::Buttoncode::BTS_PAUSE.value
     end
 
-    if Doocr.sendsave != 0
-      Doocr.sendsave = 0
-      cmd.value.buttons = CDoom::Buttoncode::BT_SPECIAL.value | CDoom::Buttoncode::BTS_SAVEGAME.value | (Doocr.savegameslot << CDoom::Buttoncode::BTS_SAVESHIFT.value)
+    if CDoom.sendsave != 0
+      CDoom.sendsave = 0
+      cmd.value.buttons = CDoom::Buttoncode::BT_SPECIAL.value | CDoom::Buttoncode::BTS_SAVEGAME.value | (CDoom.savegameslot << CDoom::Buttoncode::BTS_SAVESHIFT.value)
     end
   end
 
@@ -297,51 +297,51 @@ module Doocr
     #  a flat. The data is in the WAD only because
     #  we look for an actual index, instead of simply
     #  setting one.
-    Doocr.skyflatnum = CDoom.r_flat_num_for_name(CDoom::SKYFLATNAME)
+    CDoom.skyflatnum = CDoom.r_flat_num_for_name(CDoom::SKYFLATNAME)
 
     # DOOM determines the sky texture to be used
     # depending on the current episode, and the game version.
-    if Doocr.gamemode == CDoom::GameMode::Commercial ||
-       Doocr.gamemission == CDoom::GameMission::PackTnt ||
-       Doocr.gamemission == CDoom::GameMission::PackPlut
-      Doocr.skytexture = CDoom.r_texture_num_for_name("SKY3")
-      if Doocr.gamemap < 12
-        Doocr.skytexture = CDoom.r_texture_num_for_name("SKY1")
-      elsif Doocr.gamemap < 21
-        Doocr.skytexture = CDoom.r_texture_num_for_name("SKY2")
+    if CDoom.gamemode == CDoom::GameMode::Commercial ||
+       CDoom.gamemission == CDoom::GameMission::PackTnt ||
+       CDoom.gamemission == CDoom::GameMission::PackPlut
+      CDoom.skytexture = CDoom.r_texture_num_for_name("SKY3")
+      if CDoom.gamemap < 12
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY1")
+      elsif CDoom.gamemap < 21
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY2")
       end
     end
 
-    Doocr.levelstarttic = Doocr.gametic # for time calculation
+    CDoom.levelstarttic = CDoom.gametic # for time calculation
 
-    Doocr.wipegamestate = CDoom::Gamestate::Needwipe if Doocr.wipegamestate == CDoom::Gamestate::Level # force a wipe
+    CDoom.wipegamestate = CDoom::Gamestate::Needwipe if CDoom.wipegamestate == CDoom::Gamestate::Level # force a wipe
 
-    Doocr.gamestate = CDoom::Gamestate::Level
+    CDoom.gamestate = CDoom::Gamestate::Level
 
     CDoom::MAXPLAYERS.times do |i|
-      if Doocr.playeringame[i] != 0 && @@players[i].playerstate == CDoom::Playerstate::PST_DEAD
+      if CDoom.playeringame[i] != 0 && @@players[i].playerstate == CDoom::Playerstate::PST_DEAD
         (@@players.to_unsafe + i).value.playerstate = CDoom::Playerstate::PST_REBORN
       end
       CDoom.doom_memset(@@players[i].frags, 0, sizeof(typeof(@@players[i].frags)))
     end
 
-    CDoom.p_setup_level(Doocr.gameepisode, Doocr.gamemap, 0, Doocr.gameskill)
-    Doocr.displayplayer = Doocr.consoleplayer # view the guy you are playing
-    Doocr.starttime = CDoom.i_get_time
-    Doocr.gameaction = CDoom::Gameaction::Nothing
+    CDoom.p_setup_level(CDoom.gameepisode, CDoom.gamemap, 0, CDoom.gameskill)
+    CDoom.displayplayer = CDoom.consoleplayer # view the guy you are playing
+    CDoom.starttime = CDoom.i_get_time
+    CDoom.gameaction = CDoom::Gameaction::Nothing
     CDoom.z_check_heap
 
     # clear cmd building stuff
-    Doocr.gamekeydown.fill(0)
-    Doocr.joyxmove = 0
-    Doocr.joyymove = 0
+    CDoom.doom_memset(CDoom.gamekeydown, 0, sizeof(typeof(CDoom.gamekeydown)))
+    CDoom.joyxmove = 0
+    CDoom.joyymove = 0
     @@mousex = 0
     @@mousey = 0
-    Doocr.sendpause = 0
-    Doocr.sendsave = 0
-    Doocr.paused = 0
-    Doocr.mousebuttons.fill(0)
-    Doocr.joybuttons.fill(0)
+    CDoom.sendpause = 0
+    CDoom.sendsave = 0
+    CDoom.paused = 0
+    CDoom.doom_memset(CDoom.mousebuttons, 0, sizeof(typeof(CDoom.mousebuttons.value)) * 3)
+    CDoom.doom_memset(CDoom.joybuttons, 0, sizeof(typeof(CDoom.joybuttons.value)) * 3)
   end
 
   @@mouse_scale_remx = 0
@@ -349,21 +349,21 @@ module Doocr
 
   def self.g_responder(ev : CDoom::Event*) : CDoom::DoomBool
     # allow spy mode changes even during the demo
-    if Doocr.gamestate == CDoom::Gamestate::Level && ev.value.type == CDoom::Evtype::Keydown &&
-       ev.value.data1 == CDoom::KEY_F12 && (Doocr.singledemo != 0 || Doocr.deathmatch == 0)
+    if CDoom.gamestate == CDoom::Gamestate::Level && ev.value.type == CDoom::Evtype::Keydown &&
+       ev.value.data1 == CDoom::KEY_F12 && (CDoom.singledemo != 0 || CDoom.deathmatch == 0)
       # spy mode
       loop do
-        Doocr.displayplayer += 1
-        Doocr.displayplayer = 0 if Doocr.displayplayer == CDoom::MAXPLAYERS
+        CDoom.displayplayer += 1
+        CDoom.displayplayer = 0 if CDoom.displayplayer == CDoom::MAXPLAYERS
 
-        break unless Doocr.playeringame[Doocr.displayplayer] == 0 && Doocr.displayplayer != Doocr.consoleplayer
+        break unless CDoom.playeringame[CDoom.displayplayer] == 0 && CDoom.displayplayer != CDoom.consoleplayer
       end
       return 1
     end
 
     # any other key pops up menu if in demos
-    if Doocr.gameaction == CDoom::Gameaction::Nothing && Doocr.singledemo == 0 &&
-       (Doocr.demoplayback != 0 || Doocr.gamestate == CDoom::Gamestate::Demoscreen)
+    if CDoom.gameaction == CDoom::Gameaction::Nothing && CDoom.singledemo == 0 &&
+       (CDoom.demoplayback != 0 || CDoom.gamestate == CDoom::Gamestate::Demoscreen)
       if ev.value.type == CDoom::Evtype::Keydown ||
          (ev.value.type == CDoom::Evtype::Mouse && ev.value.data1 != 0) ||
          (ev.value.type == CDoom::Evtype::Joystick && ev.value.data1 != 0)
@@ -373,51 +373,51 @@ module Doocr
       return 0
     end
 
-    if Doocr.gamestate == CDoom::Gamestate::Level
+    if CDoom.gamestate == CDoom::Gamestate::Level
       {% if false %}
-        if Doocr.devparm != 0 && ev.value.type == CDoom::Evtype::Keydown && ev.value.data1 == ';'.ord
+        if CDoom.devparm != 0 && ev.value.type == CDoom::Evtype::Keydown && ev.value.data1 == ';'.ord
           CDoom.g_deathmatch_spawn_player(0)
           return 1
         end
       {% end %}
       return 1 if CDoom.hu_responder(ev) != 0 # chat ate the event
       return 1 if CDoom.st_responder(ev) != 0 # status window ate it
-      return 1 if Doocr.am_responder(ev) != 0 # automap ate it
+      return 1 if CDoom.am_responder(ev) != 0 # automap ate it
     end
 
-    if Doocr.gamestate == CDoom::Gamestate::Finale
+    if CDoom.gamestate == CDoom::Gamestate::Finale
       return 1 if CDoom.f_responder(ev) != 0 # finale ate the event
     end
 
     case ev.value.type
     when CDoom::Evtype::Keydown
       if ev.value.data1 == CDoom::KEY_PAUSE
-        Doocr.sendpause = 1
+        CDoom.sendpause = 1
         return 1
       end
-      Doocr.gamekeydown[ev.value.data1] = 1 if ev.value.data1 < CDoom::NUMKEYS
+      CDoom.gamekeydown[ev.value.data1] = 1 if ev.value.data1 < CDoom::NUMKEYS
       return 1 # eat key down events
     when CDoom::Evtype::Keyup
-      Doocr.gamekeydown[ev.value.data1] = 0 if ev.value.data1 < CDoom::NUMKEYS
+      CDoom.gamekeydown[ev.value.data1] = 0 if ev.value.data1 < CDoom::NUMKEYS
       return 0 # always let key up events filter down
     when CDoom::Evtype::Mouse
-      Doocr.mousebuttons[0] = ev.value.data1 & 1
-      Doocr.mousebuttons[1] = ev.value.data1 & 2
-      Doocr.mousebuttons[2] = ev.value.data1 & 4
-      scaled_x = ev.value.data2 * (Doocr.mouse_sensitivity + 5) + @@mouse_scale_remx
-      scaled_y = ev.value.data3 * (Doocr.mouse_sensitivity + 5) + @@mouse_scale_remy
+      CDoom.mousebuttons[0] = ev.value.data1 & 1
+      CDoom.mousebuttons[1] = ev.value.data1 & 2
+      CDoom.mousebuttons[2] = ev.value.data1 & 4
+      scaled_x = ev.value.data2 * (CDoom.mouse_sensitivity + 5) + @@mouse_scale_remx
+      scaled_y = ev.value.data3 * (CDoom.mouse_sensitivity + 5) + @@mouse_scale_remy
       @@mousex = scaled_x // 10
       @@mousey = scaled_y // 10
       @@mouse_scale_remx = scaled_x % 10
       @@mouse_scale_remy = scaled_y % 10
       return 1 # eat events
     when CDoom::Evtype::Joystick
-      Doocr.joybuttons[0] = ev.value.data1 & 1
-      Doocr.joybuttons[1] = ev.value.data1 & 2
-      Doocr.joybuttons[2] = ev.value.data1 & 4
-      Doocr.joybuttons[3] = ev.value.data1 & 8
-      Doocr.joyxmove = ev.value.data2
-      Doocr.joyymove = ev.value.data3
+      CDoom.joybuttons[0] = ev.value.data1 & 1
+      CDoom.joybuttons[1] = ev.value.data1 & 2
+      CDoom.joybuttons[2] = ev.value.data1 & 4
+      CDoom.joybuttons[3] = ev.value.data1 & 8
+      CDoom.joyxmove = ev.value.data2
+      CDoom.joyymove = ev.value.data3
       return 1 # eat events
     end
 
@@ -432,12 +432,12 @@ module Doocr
   def self.g_ticker
     # do player reborns if needed
     CDoom::MAXPLAYERS.times do |i|
-      CDoom.g_do_reborn(i) if Doocr.playeringame[i] != 0 && @@players[i].playerstate == CDoom::Playerstate::PST_REBORN
+      CDoom.g_do_reborn(i) if CDoom.playeringame[i] != 0 && @@players[i].playerstate == CDoom::Playerstate::PST_REBORN
     end
 
     # do things to change the game state
-    while Doocr.gameaction != CDoom::Gameaction::Nothing
-      case Doocr.gameaction
+    while CDoom.gameaction != CDoom::Gameaction::Nothing
+      case CDoom.gameaction
       when CDoom::Gameaction::Loadlevel
         CDoom.g_do_load_level
       when CDoom::Gameaction::Newgame
@@ -456,41 +456,41 @@ module Doocr
         CDoom.g_do_world_done
       when CDoom::Gameaction::Screenshot
         CDoom.m_screenshot
-        Doocr.gameaction = CDoom::Gameaction::Nothing
+        CDoom.gameaction = CDoom::Gameaction::Nothing
       when CDoom::Gameaction::Nothing
       end
     end
 
     # get commands, check consistancy,
     # and build new consistancy check
-    buf = (Doocr.gametic // Doocr.ticdup) % CDoom::BACKUPTICS
+    buf = (CDoom.gametic // CDoom.ticdup) % CDoom::BACKUPTICS
 
     CDoom::MAXPLAYERS.times do |i|
-      if Doocr.playeringame[i] != 0
+      if CDoom.playeringame[i] != 0
         cmd = (pointerof((@@players.to_unsafe + i).value.@cmd)) # THERE WAS A BETTER WAY TO DO THIS
 
-        CDoom.doom_memcpy(cmd, (Doocr.netcmds.to_unsafe + i).value.to_unsafe + buf, sizeof(CDoom::Ticcmd))
+        CDoom.doom_memcpy(cmd, (CDoom.netcmds.to_unsafe + i).value.to_unsafe + buf, sizeof(CDoom::Ticcmd))
 
-        CDoom.g_read_demo_ticcmd(cmd) if Doocr.demoplayback != 0
-        CDoom.g_write_demo_ticcmd(cmd) if Doocr.demorecording != 0
+        CDoom.g_read_demo_ticcmd(cmd) if CDoom.demoplayback != 0
+        CDoom.g_write_demo_ticcmd(cmd) if CDoom.demorecording != 0
 
         # check for turbo cheats
         if cmd.value.forwardmove > CDoom::TURBOTHRESHOLD &&
-           (Doocr.gametic & 31) == 0 && (Doocr.gametic >> 5) & 3 == i
-          CDoom.doom_strcpy(@@turbomessage, Doocr.player_names[i].to_unsafe)
+           (CDoom.gametic & 31) == 0 && (CDoom.gametic >> 5) & 3 == i
+          CDoom.doom_strcpy(@@turbomessage, CDoom.player_names[i])
           CDoom.doom_concat(@@turbomessage, " is turbo!")
-          (@@players.to_unsafe + Doocr.consoleplayer).value.message = @@turbomessage
+          (@@players.to_unsafe + CDoom.consoleplayer).value.message = @@turbomessage
         end
 
-        if Doocr.netgame != 0 && Doocr.netdemo == 0 && (Doocr.gametic % Doocr.ticdup) == 0
-          if Doocr.gametic > CDoom::BACKUPTICS &&
-             Doocr.consistancy[i][buf] != cmd.value.consistancy
-            CDoom.i_error("Error: consistency failure (#{cmd.value.consistancy} should be #{Doocr.consistancy[i][buf]})")
+        if CDoom.netgame != 0 && CDoom.netdemo == 0 && (CDoom.gametic % CDoom.ticdup) == 0
+          if CDoom.gametic > CDoom::BACKUPTICS &&
+             CDoom.consistancy[i][buf] != cmd.value.consistancy
+            CDoom.i_error("Error: consistency failure (#{cmd.value.consistancy} should be #{CDoom.consistancy[i][buf]})")
           end
           if !@@players[i].mo.null?
-            Doocr.consistancy[i][buf] = @@players[i].mo.value.x.to_i16!
+            CDoom.consistancy[i][buf] = @@players[i].mo.value.x.to_i16!
           else
-            Doocr.consistancy[i][buf] = Doocr.rndindex.to_i16!
+            CDoom.consistancy[i][buf] = CDoom.rndindex.to_i16!
           end
         end
       end
@@ -498,35 +498,35 @@ module Doocr
 
     # check for special buttons
     CDoom::MAXPLAYERS.times do |i|
-      if Doocr.playeringame[i] != 0
+      if CDoom.playeringame[i] != 0
         if @@players[i].cmd.buttons & CDoom::Buttoncode::BT_SPECIAL.value != 0
           case CDoom::Buttoncode.new(@@players[i].cmd.buttons & CDoom::Buttoncode::BT_SPECIALMASK.value)
           when CDoom::Buttoncode::BTS_PAUSE
-            Doocr.paused ^= 1
-            if Doocr.paused != 0
+            CDoom.paused ^= 1
+            if CDoom.paused != 0
               CDoom.s_pause_sound
             else
               CDoom.s_resume_sound
             end
           when CDoom::Buttoncode::BTS_SAVEGAME
-            if Doocr.savedescription.empty? && Doocr.netgame != 0
+            if CDoom.savedescription[0] == '\0'.ord && CDoom.netgame != 0
               # Let single player game save empty descriptions
-              Doocr.savedescription = "NET GAME"
+              CDoom.doom_strcpy(CDoom.savedescription, "NET GAME")
             end
-            Doocr.savegameslot =
+            CDoom.savegameslot =
               (@@players[i].cmd.buttons & CDoom::Buttoncode::BTS_SAVEMASK.value) >> CDoom::Buttoncode::BTS_SAVESHIFT.value
-            Doocr.gameaction = CDoom::Gameaction::Savegame
+            CDoom.gameaction = CDoom::Gameaction::Savegame
           end
         end
       end
     end
 
     # do main actions
-    case Doocr.gamestate
+    case CDoom.gamestate
     when CDoom::Gamestate::Level
       CDoom.p_ticker
       CDoom.st_ticker
-      Doocr.am_ticker
+      CDoom.am_ticker
       CDoom.hu_ticker
     when CDoom::Gamestate::Intermission
       CDoom.wi_ticker
@@ -598,7 +598,7 @@ module Doocr
     p.value.ammo[CDoom::Ammotype::Clip.value] = @@deh_initial_bullets
 
     CDoom::Ammotype::NUMAMMO.value.times do |i|
-      p.value.maxammo[i] = Doocr.maxammo[i]
+      p.value.maxammo[i] = CDoom.maxammo[i]
     end
   end
 
@@ -618,11 +618,11 @@ module Doocr
     return 0 if CDoom.p_check_position(@@players[playernum].mo, x, y) == 0
 
     # flush an old corpse if needed
-    if Doocr.bodyqueslot >= CDoom::BODYQUESIZE
-      CDoom.p_remove_mobj(Doocr.bodyque[Doocr.bodyqueslot % CDoom::BODYQUESIZE])
+    if CDoom.bodyqueslot >= CDoom::BODYQUESIZE
+      CDoom.p_remove_mobj(CDoom.bodyque[CDoom.bodyqueslot % CDoom::BODYQUESIZE])
     end
-    Doocr.bodyque[Doocr.bodyqueslot % CDoom::BODYQUESIZE] = @@players[playernum].mo
-    Doocr.bodyqueslot += 1
+    CDoom.bodyque[CDoom.bodyqueslot % CDoom::BODYQUESIZE] = @@players[playernum].mo
+    CDoom.bodyqueslot += 1
 
     # spawn a teleport fog
     ss = CDoom.r_point_in_subsector(x, y)
@@ -631,28 +631,28 @@ module Doocr
     mo = CDoom.p_spawn_mobj(x + 20 * @@finecosine[an], y + 20 * @@finesine[an],
       ss.value.sector.value.floorheight, CDoom::Mobjtype::MT_TFOG)
 
-    CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept) if @@players[Doocr.consoleplayer].viewz != 1 # don't start sound on first frame
+    CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept) if @@players[CDoom.consoleplayer].viewz != 1 # don't start sound on first frame
 
     return 1
   end
 
   def self.g_deathmatch_spawn_player(playernum : Int32)
-    selections = Doocr.deathmatch_p
+    selections = (CDoom.deathmatch_p - CDoom.deathmatchstarts.to_unsafe).to_i32!
     if selections < 4
       CDoom.i_error("Error: Only #{selections} deathmatch spots, 4 required")
     end
 
     selections.times do |j|
       i = CDoom.p_random % selections
-      if CDoom.g_check_spot(playernum, Doocr.deathmatchstarts.to_unsafe + i) != 0
-        (Doocr.deathmatchstarts.to_unsafe + i).value.type = playernum + 1
-        CDoom.p_spawn_player(Doocr.deathmatchstarts.to_unsafe + i)
+      if CDoom.g_check_spot(playernum, CDoom.deathmatchstarts.to_unsafe + i) != 0
+        (CDoom.deathmatchstarts.to_unsafe + i).value.type = playernum + 1
+        CDoom.p_spawn_player(CDoom.deathmatchstarts.to_unsafe + i)
         return
       end
     end
 
     # no good spot, so the player will probably get stuck
-    CDoom.p_spawn_player(Doocr.playerstarts.to_unsafe + playernum)
+    CDoom.p_spawn_player(CDoom.playerstarts.to_unsafe + playernum)
   end
 
   def self.g_despawn_player(playernum : Int32)
@@ -668,7 +668,7 @@ module Doocr
     mo = CDoom.p_spawn_mobj(x + 20 * @@finecosine[an], y + 20 * @@finesine[an],
       ss.value.sector.value.floorheight, CDoom::Mobjtype::MT_TFOG)
 
-    CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept) if @@players[Doocr.consoleplayer].viewz != 1 # don't start sound on first frame
+    CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept) if @@players[CDoom.consoleplayer].viewz != 1 # don't start sound on first frame
 
     # Despawn player mobj
     p_remove_mobj(pmo)
@@ -679,9 +679,9 @@ module Doocr
   # g_do_reborn
   #
   def self.g_do_reborn(playernum : Int32)
-    if Doocr.netgame == 0
+    if CDoom.netgame == 0
       # reload the level from scatch
-      Doocr.gameaction = CDoom::Gameaction::Loadlevel
+      CDoom.gameaction = CDoom::Gameaction::Loadlevel
     else
       # respawn at the start
 
@@ -689,64 +689,64 @@ module Doocr
       @@players[playernum].mo.value.player = Pointer(CDoom::Player).null
 
       # spawn at random spot if in death match
-      if Doocr.deathmatch != 0
+      if CDoom.deathmatch != 0
         CDoom.g_deathmatch_spawn_player(playernum)
         return
       end
 
-      if CDoom.g_check_spot(playernum, Doocr.playerstarts.to_unsafe + playernum) != 0
-        CDoom.p_spawn_player(Doocr.playerstarts.to_unsafe + playernum)
+      if CDoom.g_check_spot(playernum, CDoom.playerstarts.to_unsafe + playernum) != 0
+        CDoom.p_spawn_player(CDoom.playerstarts.to_unsafe + playernum)
         return
       end
 
       # try to spawn at one of the other players spots
       CDoom::MAXPLAYERS.times do |i|
-        if CDoom.g_check_spot(playernum, Doocr.playerstarts.to_unsafe + i) != 0
-          (Doocr.playerstarts.to_unsafe + i).value.type = playernum + 1 # fake as other player
-          CDoom.p_spawn_player(Doocr.playerstarts.to_unsafe + i)        # restore
+        if CDoom.g_check_spot(playernum, CDoom.playerstarts.to_unsafe + i) != 0
+          (CDoom.playerstarts.to_unsafe + i).value.type = playernum + 1 # fake as other player
+          CDoom.p_spawn_player(CDoom.playerstarts.to_unsafe + i)        # restore
           return
         end
         # he's going to be inside something. Too bad.
       end
-      CDoom.p_spawn_player(Doocr.playerstarts.to_unsafe + playernum)
+      CDoom.p_spawn_player(CDoom.playerstarts.to_unsafe + playernum)
     end
   end
 
   def self.g_screenshot
-    Doocr.gameaction = CDoom::Gameaction::Screenshot
+    CDoom.gameaction = CDoom::Gameaction::Screenshot
   end
 
   def self.g_exit_level
-    Doocr.secretexit = 0
-    Doocr.gameaction = CDoom::Gameaction::Completed
+    CDoom.secretexit = 0
+    CDoom.gameaction = CDoom::Gameaction::Completed
   end
 
   # Here's for the german edition. Literally 1984
   def self.g_secret_exit_level
     # IF NO WOLF3D LEVELS, NO SECRET EXIT!
-    if Doocr.gamemode == CDoom::GameMode::Commercial &&
+    if CDoom.gamemode == CDoom::GameMode::Commercial &&
        CDoom.w_check_num_for_name("map31") < 0
-      Doocr.secretexit = 0
+      CDoom.secretexit = 0
     else
-      Doocr.secretexit = 1
+      CDoom.secretexit = 1
     end
-    Doocr.gameaction = CDoom::Gameaction::Completed
+    CDoom.gameaction = CDoom::Gameaction::Completed
   end
 
   def self.g_do_completed
-    Doocr.gameaction = CDoom::Gameaction::Nothing
+    CDoom.gameaction = CDoom::Gameaction::Nothing
 
     CDoom::MAXPLAYERS.times do |i|
-      CDoom.g_player_finish_level(i) if Doocr.playeringame[i] != 0 # take away cards and stuff
+      CDoom.g_player_finish_level(i) if CDoom.playeringame[i] != 0 # take away cards and stuff
     end
 
-    Doocr.am_stop if Doocr.automapactive != 0
+    CDoom.am_stop if CDoom.automapactive != 0
 
-    if Doocr.gamemode != CDoom::GameMode::Commercial
-      case Doocr.gamemap
+    if CDoom.gamemode != CDoom::GameMode::Commercial
+      case CDoom.gamemap
       when 8
         # victory
-        Doocr.gameaction = CDoom::Gameaction::Victory
+        CDoom.gameaction = CDoom::Gameaction::Victory
         return
       when 9
         # exit secret level
@@ -756,85 +756,90 @@ module Doocr
       end
     end
 
-    @@wminfo.didsecret = (@@players.to_unsafe + Doocr.consoleplayer).value.didsecret
-    @@wminfo.epsd = Doocr.gameepisode - 1
-    @@wminfo.last = Doocr.gamemap - 1
+    CDoom.wminfo.didsecret = (@@players.to_unsafe + CDoom.consoleplayer).value.didsecret
+    CDoom.wminfo.epsd = CDoom.gameepisode - 1
+    CDoom.wminfo.last = CDoom.gamemap - 1
 
     # wminfo.next is 0 biased, unlike gamemap
-    if Doocr.gamemode == CDoom::GameMode::Commercial
-      if Doocr.secretexit != 0
-        case Doocr.gamemap
+    if CDoom.gamemode == CDoom::GameMode::Commercial
+      if CDoom.secretexit != 0
+        case CDoom.gamemap
         when 15
-          @@wminfo.next = 30
+          CDoom.wminfo.next = 30
         when 31
-          @@wminfo.next = 31
+          CDoom.wminfo.next = 31
         end
       else
-        case Doocr.gamemap
+        case CDoom.gamemap
         when 31, 32
-          @@wminfo.next = 15
-        else @@wminfo.next = Doocr.gamemap
+          CDoom.wminfo.next = 15
+        else CDoom.wminfo.next = CDoom.gamemap
         end
       end
     else
-      if Doocr.secretexit != 0
-        @@wminfo.next = 8 # go to secret level
-      elsif Doocr.gamemap == 9
+      if CDoom.secretexit != 0
+        CDoom.wminfo.next = 8 # go to secret level
+      elsif CDoom.gamemap == 9
         # returning from secret level
-        case Doocr.gameepisode
+        case CDoom.gameepisode
         when 1
-          @@wminfo.next = 3
+          CDoom.wminfo.next = 3
         when 2
-          @@wminfo.next = 5
+          CDoom.wminfo.next = 5
         when 3
-          @@wminfo.next = 6
+          CDoom.wminfo.next = 6
         when 4
-          @@wminfo.next = 2
+          CDoom.wminfo.next = 2
         end
       else
-        @@wminfo.next = Doocr.gamemap # go to next level
+        CDoom.wminfo.next = CDoom.gamemap # go to next level
       end
     end
 
-    @@wminfo.maxkills = Doocr.totalkills
-    @@wminfo.maxitems = Doocr.totalitems
-    @@wminfo.maxsecret = Doocr.totalsecret
-    @@wminfo.maxfrags = 0
-    if Doocr.gamemode == CDoom::GameMode::Commercial
-      @@wminfo.partime = 35 * Doocr.cpars[Doocr.gamemap - 1]
+    CDoom.wminfo.maxkills = CDoom.totalkills
+    CDoom.wminfo.maxitems = CDoom.totalitems
+    CDoom.wminfo.maxsecret = CDoom.totalsecret
+    CDoom.wminfo.maxfrags = 0
+    if CDoom.gamemode == CDoom::GameMode::Commercial
+      CDoom.wminfo.partime = 35 * CDoom.cpars[CDoom.gamemap - 1]
     else
-      @@wminfo.partime = 35 * Doocr.pars[Doocr.gameepisode - 1][Doocr.gamemap - 1]
+      CDoom.wminfo.partime = 35 * CDoom.pars[CDoom.gameepisode - 1][CDoom.gamemap - 1]
     end
-    @@wminfo.pnum = Doocr.consoleplayer
+    CDoom.wminfo.pnum = CDoom.consoleplayer
 
     CDoom::MAXPLAYERS.times do |i|
-      @@wminfo.plyr[i].in = Doocr.playeringame[i]
-      @@wminfo.plyr[i].skills = @@players[i].killcount
-      @@wminfo.plyr[i].sitems = @@players[i].itemcount
-      @@wminfo.plyr[i].ssecret = @@players[i].secretcount
-      @@wminfo.plyr[i].stime = Doocr.leveltime
-      4.times { |j| @@wminfo.plyr[i].frags[j] = @@players[i].frags[j] }
+      (CDoom.wminfo.plyr.to_unsafe + i).value.in = CDoom.playeringame[i]
+      (CDoom.wminfo.plyr.to_unsafe + i).value.skills = @@players[i].killcount
+      (CDoom.wminfo.plyr.to_unsafe + i).value.sitems = @@players[i].itemcount
+      (CDoom.wminfo.plyr.to_unsafe + i).value.ssecret = @@players[i].secretcount
+      (CDoom.wminfo.plyr.to_unsafe + i).value.stime = CDoom.leveltime
+      CDoom.doom_memcpy((CDoom.wminfo.plyr.to_unsafe + i).value.frags, @@players[i].frags,
+        sizeof(typeof(CDoom.wminfo.plyr[i].frags)))
     end
 
-    Doocr.gamestate = CDoom::Gamestate::Intermission
-    Doocr.viewactive = 0
-    Doocr.automapactive = 0
+    CDoom.gamestate = CDoom::Gamestate::Intermission
+    CDoom.viewactive = 0
+    CDoom.automapactive = 0
 
-    Doocr.wi_start(@@wminfo)
+    if !CDoom.statcopy.null?
+      CDoom.doom_memcpy(CDoom.statcopy, pointerof(CDoom.wminfo), sizeof(typeof(CDoom.wminfo)))
+    end
+
+    CDoom.wi_start(pointerof(CDoom.wminfo))
   end
 
   #
   # g_world_done
   #
   def self.g_world_done
-    Doocr.gameaction = CDoom::Gameaction::Worlddone
+    CDoom.gameaction = CDoom::Gameaction::Worlddone
 
-    (@@players.to_unsafe + Doocr.consoleplayer).value.didsecret = 1 if Doocr.secretexit != 0
+    (@@players.to_unsafe + CDoom.consoleplayer).value.didsecret = 1 if CDoom.secretexit != 0
 
-    if Doocr.gamemode == CDoom::GameMode::Commercial
-      case Doocr.gamemap
+    if CDoom.gamemode == CDoom::GameMode::Commercial
+      case CDoom.gamemap
       when 15, 31
-        CDoom.f_start_finale if Doocr.secretexit == 0
+        CDoom.f_start_finale if CDoom.secretexit == 0
       when 6, 11, 20, 30
         CDoom.f_start_finale
       end
@@ -845,11 +850,11 @@ module Doocr
   # g_do_world_done
   #
   def self.g_do_world_done
-    Doocr.gamestate = CDoom::Gamestate::Level
-    Doocr.gamemap = @@wminfo.next + 1
+    CDoom.gamestate = CDoom::Gamestate::Level
+    CDoom.gamemap = CDoom.wminfo.next + 1
     CDoom.g_do_load_level
-    Doocr.gameaction = CDoom::Gameaction::Nothing
-    Doocr.viewactive = 1
+    CDoom.gameaction = CDoom::Gameaction::Nothing
+    CDoom.viewactive = 1
   end
 
   #
@@ -857,17 +862,17 @@ module Doocr
   # Can be called by the startup code or the menu task.
   #
   def self.g_load_game(name : UInt8*)
-    Doocr.savename = String.new(name)
-    Doocr.gameaction = CDoom::Gameaction::Loadgame
+    CDoom.doom_strcpy(CDoom.savename, name)
+    CDoom.gameaction = CDoom::Gameaction::Loadgame
   end
 
   @@saveleveltime = 0
 
   def self.g_do_load_game
-    Doocr.gameaction = CDoom::Gameaction::Nothing
+    CDoom.gameaction = CDoom::Gameaction::Nothing
 
     response = Channel({Bytes, Bool}).new
-    @@io_jobs.send({Doocr.savename, "rb", nil, response})
+    @@io_jobs.send({String.new(CDoom.savename.to_unsafe), "rb", nil, response})
     data, ok = response.receive
     return unless ok
 
@@ -877,21 +882,21 @@ module Doocr
       vcheck = "version #{SAVEVERSION}".ljust(CDoom::VERSIONSIZE, '\0')
       return if CDoom.doom_strcmp(file.read_string(CDoom::VERSIONSIZE).to_unsafe, vcheck.to_unsafe) != 0 # bad version
 
-      Doocr.gameskill = CDoom::Skill.new(file.read_bytes(UInt8))
-      Doocr.gameepisode = file.read_bytes(UInt8)
-      Doocr.gamemap = file.read_bytes(UInt8)
+      CDoom.gameskill = CDoom::Skill.new(file.read_bytes(UInt8))
+      CDoom.gameepisode = file.read_bytes(UInt8)
+      CDoom.gamemap = file.read_bytes(UInt8)
       CDoom::MAXPLAYERS.times do |i|
-        Doocr.playeringame[i] = file.read_bytes(UInt8)
+        CDoom.playeringame[i] = file.read_bytes(UInt8)
       end
 
       # load a base level
-      CDoom.g_init_new(Doocr.gameskill, Doocr.gameepisode, Doocr.gamemap)
+      CDoom.g_init_new(CDoom.gameskill, CDoom.gameepisode, CDoom.gamemap)
 
       # get the times
       a = file.read_bytes(UInt8).to_u32
       b = file.read_bytes(UInt8).to_u32
       c = file.read_bytes(UInt8).to_u32
-      Doocr.leveltime = ((a << 16) + (b << 8) + c).to_i32
+      CDoom.leveltime = (a << 16) + (b << 8) + c
 
       # dearchive all the modifications
       p_unarchive_players(file)
@@ -902,7 +907,7 @@ module Doocr
       CDoom.i_error("Error: Bad savegame") if file.read_bytes(UInt8) != 0x1d
     end
 
-    CDoom.r_execute_set_view_size if Doocr.setsizeneeded != 0
+    CDoom.r_execute_set_view_size if CDoom.setsizeneeded != 0
 
     # draw the pattern into the back screen
     CDoom.r_fill_back_screen
@@ -914,30 +919,30 @@ module Doocr
   # Description is a 24 byte text string
   #
   def self.g_save_game(slot : Int32, description : UInt8*)
-    Doocr.savegameslot = slot
-    Doocr.savedescription = String.new(description)
-    Doocr.sendsave = 1
+    CDoom.savegameslot = slot
+    CDoom.doom_strcpy(CDoom.savedescription, description)
+    CDoom.sendsave = 1
   end
 
   def self.g_do_save_game
-    name = "#{@@deh_savegamename}#{Doocr.savegameslot}.dsg"
-    description = Doocr.savedescription.to_slice
+    name = "#{@@deh_savegamename}#{CDoom.savegameslot}.dsg"
+    description = CDoom.savedescription.to_slice
     buf = IO::Memory.new
     buf.write_string(description[0...CDoom::SAVESTRINGSIZE])
 
     name2 = "version #{SAVEVERSION}".ljust(CDoom::VERSIONSIZE, '\0')
     buf.write_string(name2.to_slice)
 
-    buf.write_byte(Doocr.gameskill.value.to_u8!)
-    buf.write_byte(Doocr.gameepisode.to_u8!)
-    buf.write_byte(Doocr.gamemap.to_u8!)
+    buf.write_byte(CDoom.gameskill.value.to_u8!)
+    buf.write_byte(CDoom.gameepisode.to_u8!)
+    buf.write_byte(CDoom.gamemap.to_u8!)
 
     CDoom::MAXPLAYERS.times do |i|
-      buf.write_byte(Doocr.playeringame[i].to_u8!)
+      buf.write_byte(CDoom.playeringame[i].to_u8!)
     end
-    buf.write_byte((Doocr.leveltime >> 16).to_u8!)
-    buf.write_byte((Doocr.leveltime >> 8).to_u8!)
-    buf.write_byte((Doocr.leveltime).to_u8!)
+    buf.write_byte((CDoom.leveltime >> 16).to_u8!)
+    buf.write_byte((CDoom.leveltime >> 8).to_u8!)
+    buf.write_byte((CDoom.leveltime).to_u8!)
 
     p_archive_players(buf)
     p_archive_world(buf)
@@ -950,10 +955,10 @@ module Doocr
     @@io_jobs.send({name, "wb", buf.to_slice, response})
     response.receive
 
-    Doocr.gameaction = CDoom::Gameaction::Nothing
-    Doocr.savedescription = ""
+    CDoom.gameaction = CDoom::Gameaction::Nothing
+    CDoom.savedescription[0] = 0
 
-    (@@players.to_unsafe + Doocr.consoleplayer).value.message = @@deh_ggsaved
+    (@@players.to_unsafe + CDoom.consoleplayer).value.message = @@deh_ggsaved
 
     # draw the pattern into the back screen
     CDoom.r_fill_back_screen
@@ -965,31 +970,31 @@ module Doocr
   # consoleplayer, displayplayer, playeringame[] should be set.
   #
   def self.g_defered_init_new(skill : CDoom::Skill, episode : Int32, map : Int32)
-    Doocr.d_skill = skill
-    Doocr.d_episode = episode
-    Doocr.d_map = map
-    Doocr.gameaction = CDoom::Gameaction::Newgame
+    CDoom.d_skill = skill
+    CDoom.d_episode = episode
+    CDoom.d_map = map
+    CDoom.gameaction = CDoom::Gameaction::Newgame
   end
 
   def self.g_do_new_game
-    Doocr.demoplayback = 0
-    Doocr.netdemo = 0
-    Doocr.netgame = 0
-    Doocr.deathmatch = 0
-    Doocr.playeringame[1] = 0
-    Doocr.playeringame[2] = 0
-    Doocr.playeringame[3] = 0
-    Doocr.respawnparm = 0
-    Doocr.fastparm = 0
-    Doocr.nomonsters = 0
-    Doocr.consoleplayer = 0
-    CDoom.g_init_new(Doocr.d_skill, Doocr.d_episode, Doocr.d_map)
-    Doocr.gameaction = CDoom::Gameaction::Nothing
+    CDoom.demoplayback = 0
+    CDoom.netdemo = 0
+    CDoom.netgame = 0
+    CDoom.deathmatch = 0
+    CDoom.playeringame[1] = 0
+    CDoom.playeringame[2] = 0
+    CDoom.playeringame[3] = 0
+    CDoom.respawnparm = 0
+    CDoom.fastparm = 0
+    CDoom.nomonsters = 0
+    CDoom.consoleplayer = 0
+    CDoom.g_init_new(CDoom.d_skill, CDoom.d_episode, CDoom.d_map)
+    CDoom.gameaction = CDoom::Gameaction::Nothing
   end
 
   def self.g_init_new(skill : CDoom::Skill, episode : Int32, map : Int32)
-    if Doocr.paused != 0
-      Doocr.paused = 0
+    if CDoom.paused != 0
+      CDoom.paused = 0
       CDoom.s_resume_sound
     end
 
@@ -1000,9 +1005,9 @@ module Doocr
     # It might not work properly.
     episode = 1 if episode < 1
 
-    if Doocr.gamemode == CDoom::GameMode::Retail
+    if CDoom.gamemode == CDoom::GameMode::Retail
       episode = 4 if episode > 4
-    elsif Doocr.gamemode == CDoom::GameMode::Shareware
+    elsif CDoom.gamemode == CDoom::GameMode::Shareware
       episode = 1 if episode > 1 # only start episode 1 on shareware
     else
       episode = 3 if episode > 3
@@ -1010,17 +1015,17 @@ module Doocr
 
     map = 1 if map < 1
 
-    map = 9 if map > 9 && Doocr.gamemode != CDoom::GameMode::Commercial
+    map = 9 if map > 9 && CDoom.gamemode != CDoom::GameMode::Commercial
 
     CDoom.m_clear_random
 
-    if skill == CDoom::Skill::Nightmare || Doocr.respawnparm != 0
-      Doocr.respawnmonsters = 1
+    if skill == CDoom::Skill::Nightmare || CDoom.respawnparm != 0
+      CDoom.respawnmonsters = 1
     else
-      Doocr.respawnmonsters = 0
+      CDoom.respawnmonsters = 0
     end
 
-    if Doocr.fastparm != 0 || (skill == CDoom::Skill::Nightmare && Doocr.gameskill != CDoom::Skill::Nightmare)
+    if CDoom.fastparm != 0 || (skill == CDoom::Skill::Nightmare && CDoom.gameskill != CDoom::Skill::Nightmare)
       i = CDoom::Statenum::S_SARG_RUN1.value
       while i <= CDoom::Statenum::S_SARG_PAIN2.value
         (@@states.to_unsafe + i).value.tics = @@states[i].tics >> 1
@@ -1029,7 +1034,7 @@ module Doocr
       (Doocr.mobjinfo.to_unsafe + CDoom::Mobjtype::MT_BRUISERSHOT.value).value.speed = 20 * FRACUNIT
       (Doocr.mobjinfo.to_unsafe + CDoom::Mobjtype::MT_HEADSHOT.value).value.speed = 20 * FRACUNIT
       (Doocr.mobjinfo.to_unsafe + CDoom::Mobjtype::MT_TROOPSHOT.value).value.speed = 20 * FRACUNIT
-    elsif skill != CDoom::Skill::Nightmare && Doocr.gameskill == CDoom::Skill::Nightmare
+    elsif skill != CDoom::Skill::Nightmare && CDoom.gameskill == CDoom::Skill::Nightmare
       i = CDoom::Statenum::S_SARG_RUN1.value
       while i <= CDoom::Statenum::S_SARG_PAIN2.value
         (@@states.to_unsafe + i).value.tics = @@states[i].tics << 1
@@ -1043,33 +1048,33 @@ module Doocr
     # force players to be initialized upon first level load
     CDoom::MAXPLAYERS.times { |i| (@@players.to_unsafe + i).value.playerstate = CDoom::Playerstate::PST_REBORN }
 
-    Doocr.usergame = 1 # will be set false if a demo
-    Doocr.paused = 0
-    Doocr.demoplayback = 0
-    Doocr.automapactive = 0
-    Doocr.viewactive = 1
-    Doocr.gameepisode = episode
-    Doocr.gamemap = map
-    Doocr.gameskill = skill
+    CDoom.usergame = 1 # will be set false if a demo
+    CDoom.paused = 0
+    CDoom.demoplayback = 0
+    CDoom.automapactive = 0
+    CDoom.viewactive = 1
+    CDoom.gameepisode = episode
+    CDoom.gamemap = map
+    CDoom.gameskill = skill
 
     # set the sky map for the episode
-    if Doocr.gamemode == CDoom::GameMode::Commercial
-      Doocr.skytexture = CDoom.r_texture_num_for_name("SKY3")
-      if Doocr.gamemap < 12
-        Doocr.skytexture = CDoom.r_texture_num_for_name("SKY1")
-      elsif Doocr.gamemap < 21
-        Doocr.skytexture = CDoom.r_texture_num_for_name("SKY2")
+    if CDoom.gamemode == CDoom::GameMode::Commercial
+      CDoom.skytexture = CDoom.r_texture_num_for_name("SKY3")
+      if CDoom.gamemap < 12
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY1")
+      elsif CDoom.gamemap < 21
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY2")
       end
     else
       case episode
       when 1
-        Doocr.skytexture = CDoom.r_texture_num_for_name("SKY1")
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY1")
       when 2
-        Doocr.skytexture = CDoom.r_texture_num_for_name("SKY2")
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY2")
       when 3
-        Doocr.skytexture = CDoom.r_texture_num_for_name("SKY3")
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY3")
       when 4 # Special Edition sky
-        Doocr.skytexture = CDoom.r_texture_num_for_name("SKY4")
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY4")
       end
     end
 
@@ -1080,39 +1085,39 @@ module Doocr
   # DEMO RECORDING
   #
   def self.g_read_demo_ticcmd(cmd : CDoom::Ticcmd*)
-    if Doocr.demo_p.value == CDoom::DEMOMARKER
+    if CDoom.demo_p.value == CDoom::DEMOMARKER
       # end of demo data stream
       CDoom.g_check_demo_status
       return
     end
-    cmd.value.forwardmove = Doocr.demo_p.value.to_i8!
-    Doocr.demo_p += 1
-    cmd.value.sidemove = Doocr.demo_p.value.to_i8!
-    Doocr.demo_p += 1
-    cmd.value.angleturn = (Doocr.demo_p.value.to_u8!).to_i32 << 8
-    Doocr.demo_p += 1
-    cmd.value.buttons = Doocr.demo_p.value.to_u8!
-    Doocr.demo_p += 1
+    cmd.value.forwardmove = CDoom.demo_p.value.to_i8!
+    CDoom.demo_p += 1
+    cmd.value.sidemove = CDoom.demo_p.value.to_i8!
+    CDoom.demo_p += 1
+    cmd.value.angleturn = (CDoom.demo_p.value.to_u8!).to_i32 << 8
+    CDoom.demo_p += 1
+    cmd.value.buttons = CDoom.demo_p.value.to_u8!
+    CDoom.demo_p += 1
   end
 
   @@prevstate : CDoom::Playerstate = CDoom::Playerstate::PST_LIVE
 
   def self.g_write_demo_ticcmd(cmd : CDoom::Ticcmd*)
-    pstate = @@players[Doocr.consoleplayer].playerstate
-    CDoom.g_check_demo_status if Doocr.gamekeydown['q'.ord] != 0 # ||                                                         # press q to end demo recording
+    pstate = @@players[CDoom.consoleplayer].playerstate
+    CDoom.g_check_demo_status if CDoom.gamekeydown['q'.ord] != 0 # ||                                                         # press q to end demo recording
     # (@@prevstate == CDoom::Playerstate::PST_DEAD && pstate == CDoom::Playerstate::PST_LIVE) || # or if player is respawning
-    # Doocr.gamestate != CDoom::Gamestate::Level                                                 # or if we are no longer on a level
+    # CDoom.gamestate != CDoom::Gamestate::Level                                                 # or if we are no longer on a level
     @@prevstate = pstate
-    Doocr.demo_p.value = cmd.value.forwardmove.to_u8!
-    Doocr.demo_p += 1
-    Doocr.demo_p.value = cmd.value.sidemove.to_u8!
-    Doocr.demo_p += 1
-    Doocr.demo_p.value = ((cmd.value.angleturn.to_i32 + 128) >> 8).to_u8!
-    Doocr.demo_p += 1
-    Doocr.demo_p.value = cmd.value.buttons.to_u8!
-    Doocr.demo_p += 1
-    Doocr.demo_p -= 4
-    if Doocr.demo_p > Doocr.demoend - 16
+    CDoom.demo_p.value = cmd.value.forwardmove.to_u8!
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = cmd.value.sidemove.to_u8!
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = ((cmd.value.angleturn.to_i32 + 128) >> 8).to_u8!
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = cmd.value.buttons.to_u8!
+    CDoom.demo_p += 1
+    CDoom.demo_p -= 4
+    if CDoom.demo_p > CDoom.demoend - 16
       # no more space
       CDoom.g_check_demo_status
       return
@@ -1125,44 +1130,45 @@ module Doocr
   # g_record_demo
   #
   def self.g_record_demo(name : UInt8*)
-    Doocr.usergame = 0
-    Doocr.demoname = String.new(name) + ".lmp"
+    CDoom.usergame = 0
+    CDoom.doom_strcpy(CDoom.demoname, name)
+    CDoom.doom_concat(CDoom.demoname, ".lmp")
     maxsize = 0x20000
     i = ARGV.index("-maxdemo")
     maxsize = ARGV[i + 1].to_i * 1024 if i && i < ARGV.size - 1
-    Doocr.demobuffer = CDoom.z_malloc(maxsize, CDoom::PU_STATIC, Pointer(Void).null).as(UInt8*)
-    Doocr.demoend = Doocr.demobuffer + maxsize
+    CDoom.demobuffer = CDoom.z_malloc(maxsize, CDoom::PU_STATIC, Pointer(Void).null).as(UInt8*)
+    CDoom.demoend = CDoom.demobuffer + maxsize
 
-    Doocr.demorecording = 1
+    CDoom.demorecording = 1
   end
 
   def self.g_begin_recording
     @@prevstate = CDoom::Playerstate::PST_LIVE
 
-    Doocr.demo_p = Doocr.demobuffer
+    CDoom.demo_p = CDoom.demobuffer
 
-    Doocr.demo_p.value = DEMOVERSION.to_u8
-    Doocr.demo_p += 1
-    Doocr.demo_p.value = Doocr.gameskill.value.to_u8
-    Doocr.demo_p += 1
-    Doocr.demo_p.value = Doocr.gameepisode.to_u8
-    Doocr.demo_p += 1
-    Doocr.demo_p.value = Doocr.gamemap.to_u8
-    Doocr.demo_p += 1
-    Doocr.demo_p.value = Doocr.deathmatch.to_u8
-    Doocr.demo_p += 1
-    Doocr.demo_p.value = Doocr.respawnparm.to_u8
-    Doocr.demo_p += 1
-    Doocr.demo_p.value = Doocr.fastparm.to_u8
-    Doocr.demo_p += 1
-    Doocr.demo_p.value = Doocr.nomonsters.to_u8
-    Doocr.demo_p += 1
-    Doocr.demo_p.value = Doocr.consoleplayer.to_u8
-    Doocr.demo_p += 1
+    CDoom.demo_p.value = DEMOVERSION.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.gameskill.value.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.gameepisode.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.gamemap.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.deathmatch.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.respawnparm.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.fastparm.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.nomonsters.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.consoleplayer.to_u8
+    CDoom.demo_p += 1
 
     CDoom::MAXPLAYERS.times do |i|
-      Doocr.demo_p.value = Doocr.playeringame[i].to_u8
-      Doocr.demo_p += 1
+      CDoom.demo_p.value = CDoom.playeringame[i].to_u8
+      CDoom.demo_p += 1
     end
   end
 
@@ -1171,68 +1177,68 @@ module Doocr
   #
 
   def self.g_defered_play_demo(name : UInt8*)
-    Doocr.defdemoname = String.new(name)
-    Doocr.gameaction = CDoom::Gameaction::Playdemo
+    CDoom.defdemoname = name
+    CDoom.gameaction = CDoom::Gameaction::Playdemo
   end
 
   def self.g_do_play_demo
-    Doocr.gameaction = CDoom::Gameaction::Nothing
-    Doocr.demobuffer = CDoom.w_cache_lump_name(Doocr.defdemoname.to_unsafe, CDoom::PU_STATIC).as(UInt8*)
-    Doocr.demo_p = Doocr.demobuffer
-    demo_version = Doocr.demo_p.value
-    Doocr.demo_p += 1
+    CDoom.gameaction = CDoom::Gameaction::Nothing
+    CDoom.demobuffer = CDoom.w_cache_lump_name(CDoom.defdemoname, CDoom::PU_STATIC).as(UInt8*)
+    CDoom.demo_p = CDoom.demobuffer
+    demo_version = CDoom.demo_p.value
+    CDoom.demo_p += 1
     if demo_version != DEMOVERSION && demo_version != 109 # Demos seem to run fine with version 109
       puts "Demo is from a different game version! Demo Verson = #{demo_version}, this version = #{DEMOVERSION}"
-      Doocr.gameaction = CDoom::Gameaction::Nothing
+      CDoom.gameaction = CDoom::Gameaction::Nothing
       return
     end
 
-    skill = CDoom::Skill.new(Doocr.demo_p.value)
-    Doocr.demo_p += 1
-    episode = Doocr.demo_p.value
-    Doocr.demo_p += 1
-    map = Doocr.demo_p.value
-    Doocr.demo_p += 1
-    Doocr.deathmatch = Doocr.demo_p.value
-    Doocr.demo_p += 1
-    Doocr.respawnparm = Doocr.demo_p.value
-    Doocr.demo_p += 1
-    Doocr.fastparm = Doocr.demo_p.value
-    Doocr.demo_p += 1
-    Doocr.nomonsters = Doocr.demo_p.value
-    Doocr.demo_p += 1
-    Doocr.consoleplayer = Doocr.demo_p.value
-    Doocr.demo_p += 1
+    skill = CDoom::Skill.new(CDoom.demo_p.value)
+    CDoom.demo_p += 1
+    episode = CDoom.demo_p.value
+    CDoom.demo_p += 1
+    map = CDoom.demo_p.value
+    CDoom.demo_p += 1
+    CDoom.deathmatch = CDoom.demo_p.value
+    CDoom.demo_p += 1
+    CDoom.respawnparm = CDoom.demo_p.value
+    CDoom.demo_p += 1
+    CDoom.fastparm = CDoom.demo_p.value
+    CDoom.demo_p += 1
+    CDoom.nomonsters = CDoom.demo_p.value
+    CDoom.demo_p += 1
+    CDoom.consoleplayer = CDoom.demo_p.value
+    CDoom.demo_p += 1
 
     CDoom::MAXPLAYERS.times do |i|
-      Doocr.playeringame[i] = Doocr.demo_p.value
-      Doocr.demo_p += 1
+      CDoom.playeringame[i] = CDoom.demo_p.value
+      CDoom.demo_p += 1
     end
-    if Doocr.playeringame[1] != 0
-      Doocr.netgame = 1
-      Doocr.netdemo = 1
+    if CDoom.playeringame[1] != 0
+      CDoom.netgame = 1
+      CDoom.netdemo = 1
     end
 
     # don't spend a lot of time in loadlevel
-    Doocr.precache = 0
+    CDoom.precache = 0
     CDoom.g_init_new(skill, episode, map)
-    Doocr.precache = 1
+    CDoom.precache = 1
 
-    Doocr.usergame = 0
-    Doocr.demoplayback = 1
+    CDoom.usergame = 0
+    CDoom.demoplayback = 1
   end
 
   #
   # g_time_demo
   #
   def self.g_time_demo(name : UInt8*)
-    Doocr.nodrawers = ARGV.includes?("-nodraw") ? 1 : 0
-    Doocr.noblit = ARGV.includes?("-noblit") ? 1 : 0
-    Doocr.timingdemo = 1
-    Doocr.singletics = 1
+    CDoom.nodrawers = ARGV.includes?("-nodraw") ? 1 : 0
+    CDoom.noblit = ARGV.includes?("-noblit") ? 1 : 0
+    CDoom.timingdemo = 1
+    CDoom.singletics = 1
 
-    Doocr.defdemoname = String.new(name)
-    Doocr.gameaction = CDoom::Gameaction::Playdemo
+    CDoom.defdemoname = name
+    CDoom.gameaction = CDoom::Gameaction::Playdemo
   end
 
   # ===================
@@ -1243,40 +1249,40 @@ module Doocr
   # = Returns true if a new demo loop action will take place
   # ===================
   def self.g_check_demo_status : CDoom::DoomBool
-    if Doocr.timingdemo != 0
+    if CDoom.timingdemo != 0
       endtime = CDoom.i_get_time
 
-      puts " Timed #{Doocr.gametic} gametics in #{endtime - Doocr.starttime} realtics"
+      puts " Timed #{CDoom.gametic} gametics in #{endtime - CDoom.starttime} realtics"
       i_quit
     end
 
-    if Doocr.demoplayback != 0
-      CDoom.i_quit if Doocr.singledemo != 0
+    if CDoom.demoplayback != 0
+      CDoom.i_quit if CDoom.singledemo != 0
 
-      z_change_tag(Doocr.demobuffer, CDoom::PU_CACHE)
-      Doocr.demoplayback = 0
-      Doocr.netdemo = 0
-      Doocr.netgame = 0
-      Doocr.deathmatch = 0
-      Doocr.playeringame[1] = 0
-      Doocr.playeringame[2] = 0
-      Doocr.playeringame[3] = 0
-      Doocr.respawnparm = 0
-      Doocr.fastparm = 0
-      Doocr.nomonsters = 0
-      Doocr.consoleplayer = 0
+      z_change_tag(CDoom.demobuffer, CDoom::PU_CACHE)
+      CDoom.demoplayback = 0
+      CDoom.netdemo = 0
+      CDoom.netgame = 0
+      CDoom.deathmatch = 0
+      CDoom.playeringame[1] = 0
+      CDoom.playeringame[2] = 0
+      CDoom.playeringame[3] = 0
+      CDoom.respawnparm = 0
+      CDoom.fastparm = 0
+      CDoom.nomonsters = 0
+      CDoom.consoleplayer = 0
       CDoom.d_advance_demo
       return 1
     end
 
-    if Doocr.demorecording != 0
-      Doocr.demo_p.value = CDoom::DEMOMARKER.to_u8
-      Doocr.demo_p += 1
-      CDoom.m_write_file(Doocr.demoname.to_unsafe, Doocr.demobuffer, (Doocr.demo_p - Doocr.demobuffer).to_i32!)
-      CDoom.z_free(Doocr.demobuffer)
-      Doocr.demorecording = 0
+    if CDoom.demorecording != 0
+      CDoom.demo_p.value = CDoom::DEMOMARKER.to_u8
+      CDoom.demo_p += 1
+      CDoom.m_write_file(CDoom.demoname, CDoom.demobuffer, (CDoom.demo_p - CDoom.demobuffer).to_i32!)
+      CDoom.z_free(CDoom.demobuffer)
+      CDoom.demorecording = 0
 
-      puts " Demo #{Doocr.demoname} recorded"
+      puts " Demo #{String.new(CDoom.demoname.to_unsafe)} recorded"
       i_quit
     end
 

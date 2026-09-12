@@ -58,8 +58,8 @@ module Doocr::Nodebuilder
     bottom = Int32::MAX
     right = Int32::MIN
     top = Int32::MIN
-    Doocr.numvertexes.times do |i|
-      vertex = Doocr.vertexes[i]
+    CDoom.numvertexes.times do |i|
+      vertex = CDoom.vertexes[i]
       x = vertex.x >> FRACBITS
       y = vertex.y >> FRACBITS
       right = x if x > right
@@ -68,21 +68,21 @@ module Doocr::Nodebuilder
       bottom = y if y < bottom
     end
 
-    Doocr.bmaporgx = left << FRACBITS
-    Doocr.bmaporgy = bottom << FRACBITS
+    CDoom.bmaporgx = left << FRACBITS
+    CDoom.bmaporgy = bottom << FRACBITS
 
-    Doocr.bmapwidth = ((right - left) // 128) + 1
-    Doocr.bmapheight = ((top - bottom) // 128) + 1
+    CDoom.bmapwidth = ((right - left) // 128) + 1
+    CDoom.bmapheight = ((top - bottom) // 128) + 1
 
     # Build the blockmap starting from the bottom left
-    Doocr.bmapheight.times do |y|
-      Doocr.bmapwidth.times do |x|
+    CDoom.bmapheight.times do |y|
+      CDoom.bmapwidth.times do |x|
         offsets.write_bytes (blockmap.pos // 2).to_i16!
         bstart = Raylib::Vector2.new(x: left + x * 128, y: bottom + y * 128)
         bend = Raylib::Vector2.new(x: bstart.x + 128, y: bstart.y + 128)
 
-        Doocr.numlines.times do |lin|
-          line = Doocr.lines[lin]
+        CDoom.numlines.times do |lin|
+          line = CDoom.lines[lin]
           v1 = Raylib::Vector2.new(
             x: line.v1.value.x >> FRACBITS,
             y: line.v1.value.y >> FRACBITS
@@ -102,12 +102,12 @@ module Doocr::Nodebuilder
     end
 
     # Load blockmap normally
-    Doocr.blockmaplump = blockmap.to_slice.to_unsafe.as(Int16*)
-    Doocr.blockmap = offsets.to_slice.to_unsafe.as(Int16*)
+    CDoom.blockmaplump = blockmap.to_slice.to_unsafe.as(Int16*)
+    CDoom.blockmap = offsets.to_slice.to_unsafe.as(Int16*)
 
     # clear out mobj chains
-    count = sizeof(CDoom::Mobj*) * Doocr.bmapwidth * Doocr.bmapheight
-    Doocr.blocklinks.clear
-    (Doocr.bmapwidth * Doocr.bmapheight).times { Doocr.blocklinks << Pointer(CDoom::Mobj).null }
+    count = sizeof(CDoom::Mobj*) * CDoom.bmapwidth * CDoom.bmapheight
+    CDoom.blocklinks = CDoom.z_malloc(count, CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Mobj**)
+    CDoom.doom_memset(CDoom.blocklinks, 0, count)
   end
 end
