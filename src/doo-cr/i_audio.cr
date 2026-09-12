@@ -20,13 +20,11 @@ module Doocr
     # Init internal lookups (raw data, mixing buffer, channels).
     # This function sets up internal lookups used during
     #  the mixing process.
-    steptablemid = CDoom.steptable.to_unsafe + 128
-
     # This table provides step widths for pitch parameters.
     # I fail to see that this is currently used.
     i = -128
     while i < 128
-      steptablemid[i] = ((2**(i / 64.0)) * 65536).floor.to_i32!
+      Doocr.steptable[i + 128] = ((2**(i / 64.0)) * 65536).floor.to_i32!
       i += 1
     end
 
@@ -35,14 +33,14 @@ module Doocr
     #  into signed samples.
     128.times do |i|
       256.times do |j|
-        CDoom.vol_lookup[i * 256 + j] = (i * (j - 128) * 256) // 127
+        Doocr.vol_lookup[i * 256 + j] = (i * (j - 128) * 256) // 127
       end
     end
   end
 
   # MUSIC API - dummy. Some code from DOS version.
   def self.i_set_music_volume(volume : Int32)
-    CDoom.mus_volume = CDoom.snd_music_volume * 8
+    Doocr.mus_volume = Doocr.snd_music_volume * 8
   end
 
   def self.i_get_sfx_lump_num(sfx : CDoom::Sfxinfo*) : Int32
@@ -68,15 +66,15 @@ module Doocr
   def self.i_start_sound(id : Int32, vol : Int32, sep : Int32, pitch : Int32, priority : Int32) : Int32
     # Returns a handle (not used).
     pitch = CDoom::NORM_PITCH if @@randompitch == 0
-    id = CDoom.addsfx(id, vol, CDoom.steptable[pitch], sep)
+    id = CDoom.addsfx(id, vol, Doocr.steptable[pitch], sep)
     return id
   end
 
   def self.i_stop_sound(handle : Int32)
     @@sound_mutex.synchronize do
       CDoom::NUM_CHANNELS.times do |chan|
-        if CDoom.channelhandles[chan] == handle && !CDoom.channels[chan].null?
-          CDoom.channels[chan] = Pointer(UInt8).null
+        if Doocr.channelhandles[chan] == handle && !Doocr.channels[chan].null?
+          Doocr.channels[chan] = Pointer(UInt8).null
           break
         end
       end
@@ -86,7 +84,7 @@ module Doocr
   def self.i_sound_is_playing(handle : Int32) : Int32
     @@sound_mutex.synchronize do
       CDoom::NUM_CHANNELS.times do |chan|
-        return (!CDoom.channels[chan].null?).to_unsafe if CDoom.channelhandles[chan] == handle
+        return (!Doocr.channels[chan].null?).to_unsafe if Doocr.channelhandles[chan] == handle
       end
     end
 
@@ -109,13 +107,13 @@ module Doocr
   def self.i_update_sound
     # Left and right channel
     #  are in global mixbuffer, alternating.
-    leftout = CDoom.mixbuffer.to_unsafe
-    rightout = CDoom.mixbuffer.to_unsafe + 1
+    leftout = Doocr.mixbuffer.to_unsafe
+    rightout = Doocr.mixbuffer.to_unsafe + 1
     step = 2
 
     # Determine end, for left channel only
     #  (right channel is implicit).
-    leftend = CDoom.mixbuffer.to_unsafe + CDoom::SAMPLECOUNT * step
+    leftend = Doocr.mixbuffer.to_unsafe + CDoom::SAMPLECOUNT * step
 
     @@sound_mutex.synchronize do
       # Mix sounds into the mixing buffer.
@@ -132,23 +130,23 @@ module Doocr
         #  as well. Thus loop those  channels.
         CDoom::NUM_CHANNELS.times do |chan|
           # Check channel, if active.
-          if !CDoom.channels[chan].null?
+          if !Doocr.channels[chan].null?
             # Get the raw data from the channel.
-            sample = CDoom.channels[chan].value
+            sample = Doocr.channels[chan].value
             # Add left and right part
             #  for this channel (sound)
             #  to the current data.
             # Adjust volume accordingly.
-            dl += CDoom.channelleftvol_lookup[chan][sample]
-            dr += CDoom.channelrightvol_lookup[chan][sample]
+            dl += Doocr.channelleftvol_lookup[chan][sample]
+            dr += Doocr.channelrightvol_lookup[chan][sample]
             # Increment index ???
-            CDoom.channelstepremainder[chan] = CDoom.channelstepremainder[chan] + CDoom.channelstep[chan]
+            Doocr.channelstepremainder[chan] = Doocr.channelstepremainder[chan] + Doocr.channelstep[chan]
             # MSB is next sample???
-            CDoom.channels[chan] = CDoom.channels[chan] + (CDoom.channelstepremainder[chan] >> 16)
+            Doocr.channels[chan] = Doocr.channels[chan] + (Doocr.channelstepremainder[chan] >> 16)
             # Limit to LSB???
-            CDoom.channelstepremainder[chan] = CDoom.channelstepremainder[chan] & (65536 - 1)
+            Doocr.channelstepremainder[chan] = Doocr.channelstepremainder[chan] & (65536 - 1)
             # Check whether we are done.
-            CDoom.channels[chan] = Pointer(UInt8).null if CDoom.channels[chan] >= CDoom.channelsend[chan]
+            Doocr.channels[chan] = Pointer(UInt8).null if Doocr.channels[chan] >= Doocr.channelsend[chan]
           end
         end
 
@@ -190,11 +188,11 @@ module Doocr
       #  and resetting the channel parameters.
       CDoom::NUM_CHANNELS.times do |chan|
         # Found channel
-        if CDoom.channelhandles[chan] == handle
+        if Doocr.channelhandles[chan] == handle
           pitch = 128 if @@randompitch == 0
-          step = CDoom.steptable[pitch]
-          CDoom.channelstep[chan] = step.to_u32
-          CDoom.channelstart[chan] = CDoom.gametic
+          step = Doocr.steptable[pitch]
+          Doocr.channelstep[chan] = step.to_u32
+          Doocr.channelstart[chan] = Doocr.gametic
 
           sep += 1
 
@@ -205,8 +203,8 @@ module Doocr
           CDoom.i_error("Error: rightvol out of bounds") if rightvol < 0 || rightvol > 127
           CDoom.i_error("Error: leftvol out of bounds") if leftvol < 0 || leftvol > 127
 
-          CDoom.channelleftvol_lookup[chan] = CDoom.vol_lookup.to_unsafe + leftvol*256
-          CDoom.channelrightvol_lookup[chan] = CDoom.vol_lookup.to_unsafe + rightvol*256
+          Doocr.channelleftvol_lookup[chan] = Doocr.vol_lookup.to_unsafe + leftvol*256
+          Doocr.channelrightvol_lookup[chan] = Doocr.vol_lookup.to_unsafe + rightvol*256
 
           break
         end
@@ -223,8 +221,8 @@ module Doocr
     # loop do
     #   done = true
 
-    #   CDoom.num_channels.times do |i|
-    #     next if CDoom.channels[i].null?
+    #   Doocr.num_channels.times do |i|
+    #     next if Doocr.channels[i].null?
     #     done = false
     #   end
 
@@ -311,9 +309,9 @@ module Doocr
       end
 
       return if @@closing
-      unless CDoom.mus_playing == 0
+      unless Doocr.mus_playing == 0
         @@music_stream.try do |m|
-          RAudio.set_audio_stream_volume(m, CDoom.snd_music_volume / 15.0)
+          RAudio.set_audio_stream_volume(m, Doocr.snd_music_volume / 15.0)
           @@adl_player.try do |ap|
             if RAudio.audio_stream_processed?(m)
               if @@mus_is_midi
@@ -367,7 +365,7 @@ module Doocr
     print "Pre-cached all sound data - "
 
     # Now initialize mixbuffer with zero.
-    CDoom::MIXBUFFERSIZE.times { |i| CDoom.mixbuffer[i] = 0 }
+    CDoom::MIXBUFFERSIZE.times { |i| Doocr.mixbuffer[i] = 0 }
 
     # Finished initialization.
     puts "sound module ready."
@@ -383,38 +381,40 @@ module Doocr
   end
 
   def self.i_play_song(handle : Int32, looping : Int32)
-    i_set_music_volume(CDoom.snd_music_volume)
+    i_set_music_volume(Doocr.snd_music_volume)
     @@midi_tick_accumulator = 0
 
-    CDoom.musicdies = CDoom.gametic + CDoom::TICRATE * 30
+    Doocr.musicdies = Doocr.gametic + CDoom::TICRATE * 30
 
-    CDoom.mus_loop = looping != 0 ? 1 : 0
-    CDoom.mus_playing = 1
+    Doocr.mus_loop = looping != 0 ? 1 : 0
+    Doocr.mus_playing = 1
     if @@mus_is_midi
-      @@adl_player.try { |ap| ADLMIDI.adl_openData(ap, CDoom.mus_data, w_lump_length(CDoom.mus_playing_s_sound.value.lumpnum)) }
+      if current_music = @@mus_playing_s_sound
+        @@adl_player.try { |ap| ADLMIDI.adl_openData(ap, Doocr.mus_data, w_lump_length(current_music.lumpnum)) }
+      end
     end
   end
 
   def self.i_pause_song(handle : Int32)
-    CDoom.mus_playing = 0
+    Doocr.mus_playing = 0
   end
 
   def self.i_resume_song(handle : Int32)
-    CDoom.mus_playing = 1 if !CDoom.mus_data.null?
+    Doocr.mus_playing = 1 if !Doocr.mus_data.null?
   end
 
   def self.reset_all_channels
     16.times do |i|
-      CDoom.queued_midi_msgs[CDoom.queue_midi_tail % CDoom::MAX_QUEUED_MIDI_MSGS] = 0b10110000_u32 | i | (123_u32 << 8)
-      CDoom.queue_midi_tail += 1
+      Doocr.queued_midi_msgs[Doocr.queue_midi_tail % CDoom::MAX_QUEUED_MIDI_MSGS] = 0b10110000_u64 | i.to_u64 | (123_u64 << 8)
+      Doocr.queue_midi_tail += 1
     end
   end
 
   def self.i_stop_song(handle : LibC::Int)
-    CDoom.mus_data = Pointer(UInt8).null
-    CDoom.mus_delay = 0
-    CDoom.mus_offset = 0
-    CDoom.mus_playing = 0
+    Doocr.mus_data = Pointer(UInt8).null
+    Doocr.mus_delay = 0
+    Doocr.mus_offset = 0
+    Doocr.mus_playing = 0
     @@mus_is_midi = false
     @@adl_player.try { |ap| ADLMIDI.adl_panic(ap) }
     @@adl_player.try { |ap| ADLMIDI.adl_reset(ap) }
@@ -430,9 +430,9 @@ module Doocr
     @@mus_is_midi = false
     @@mus_channel_volume.fill(127)
 
-    CDoom.doom_memcpy(pointerof(CDoom.mus_header), data, sizeof(CDoom::MusHeader))
-    if (CDoom.doom_strncmp(CDoom.mus_header.id, "MUS", 3) != 0 || CDoom.mus_header.id[3] != 0x1A)
-      if (CDoom.doom_strncmp(CDoom.mus_header.id, "MThd", 4) != 0)
+    @@mus_header.read(data.as(UInt8*))
+    if (!@@mus_header.id.starts_with?("MUS") || @@mus_header.id.bytes[3] != 0x1A)
+      if !@@mus_header.id.starts_with?("MThd")
         # Not a midi either
         return 0
       else
@@ -440,17 +440,17 @@ module Doocr
       end
     end
 
-    CDoom.mus_data = data.as(UInt8*)
-    CDoom.mus_delay = 0
-    CDoom.mus_offset = CDoom.mus_header.score_start
-    CDoom.mus_playing = 0
+    Doocr.mus_data = data.as(UInt8*)
+    Doocr.mus_delay = 0
+    Doocr.mus_offset = @@mus_header.score_start
+    Doocr.mus_playing = 0
 
     return 1
   end
 
   # Is the song playing?
   def self.i_qry_song_playing(handle : LibC::Int) : LibC::Int
-    return CDoom.mus_playing
+    return Doocr.mus_playing
   end
 
   @@mus_channel_volume = Array(Int32).new(16, 127)
@@ -461,19 +461,19 @@ module Doocr
     midi_event : UInt64 | UInt32 = 0
 
     # Dequeue MIDI events
-    if CDoom.queue_midi_head != CDoom.queue_midi_tail
-      CDoom.queue_midi_head += 1
-      r = CDoom.queued_midi_msgs[(CDoom.queue_midi_head - 1).remainder(CDoom::MAX_QUEUED_MIDI_MSGS)]
+    if Doocr.queue_midi_head != Doocr.queue_midi_tail
+      Doocr.queue_midi_head += 1
+      r = Doocr.queued_midi_msgs[(Doocr.queue_midi_head - 1).remainder(CDoom::MAX_QUEUED_MIDI_MSGS)]
       r.to_u64!
     end
 
-    if CDoom.mus_playing == 0 || CDoom.mus_data.null?
+    if Doocr.mus_playing == 0 || Doocr.mus_data.null?
       return 0_u64
     end
 
-    if CDoom.mus_delay <= 0
-      event = CDoom.mus_data[CDoom.mus_offset].to_i32
-      CDoom.mus_offset += 1
+    if Doocr.mus_delay <= 0
+      event = Doocr.mus_data[Doocr.mus_offset].to_i32
+      Doocr.mus_offset += 1
       type = (event & 0b01110000) >> 4
       channel = event & 0b00001111
 
@@ -485,28 +485,28 @@ module Doocr
 
       case type
       when CDoom::EVENT_RELEASE_NOTE
-        note = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
-        CDoom.mus_offset += 1
+        note = Doocr.mus_data[Doocr.mus_offset].to_i32 & 0b01111111
+        Doocr.mus_offset += 1
         midi_event = (0x00000080_u32 | channel | (note << 8))
       when CDoom::EVENT_PLAY_NOTE
-        note_bytes = CDoom.mus_data[CDoom.mus_offset].to_i32
-        CDoom.mus_offset += 1
+        note_bytes = Doocr.mus_data[Doocr.mus_offset].to_i32
+        Doocr.mus_offset += 1
         note = note_bytes & 0b01111111
         if note_bytes & 0b10000000 != 0
-          @@mus_channel_volume[channel] = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
-          CDoom.mus_offset += 1
+          @@mus_channel_volume[channel] = Doocr.mus_data[Doocr.mus_offset].to_i32 & 0b01111111
+          Doocr.mus_offset += 1
         end
         vol = @@mus_channel_volume[channel]
         midi_event = (0x00000090_u32 | channel | (note << 8) | (vol << 16))
       when CDoom::EVENT_PITCH_BEND
-        bend_amount = CDoom.mus_data[CDoom.mus_offset].to_i32 * 64
-        CDoom.mus_offset += 1
+        bend_amount = Doocr.mus_data[Doocr.mus_offset].to_i32 * 64
+        Doocr.mus_offset += 1
         l = bend_amount & 0b01111111
         m = (bend_amount & 0b1111111110000000) >> 7
         midi_event = (0x000000E0_u32 | channel | (l << 8) | (m << 16))
       when CDoom::EVENT_SYSTEM_EVENT
-        controller = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
-        CDoom.mus_offset += 1
+        controller = Doocr.mus_data[Doocr.mus_offset].to_i32 & 0b01111111
+        Doocr.mus_offset += 1
         case controller
         when CDoom::CONTROLLER_EVENT_ALL_SOUNDS_OFF
           midi_event = (0x000000B0_u32 | channel | (120 << 8))
@@ -522,10 +522,10 @@ module Doocr
         when CDoom::CONTROLLER_EVENT_EVENT # Doom never implemented
         end
       when CDoom::EVENT_CONTROLLER
-        controller = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
-        CDoom.mus_offset += 1
-        value = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
-        CDoom.mus_offset += 1
+        controller = Doocr.mus_data[Doocr.mus_offset].to_i32 & 0b01111111
+        Doocr.mus_offset += 1
+        value = Doocr.mus_data[Doocr.mus_offset].to_i32 & 0b01111111
+        Doocr.mus_offset += 1
         case controller
         when CDoom::CONTROLLER_CHANGE_INSTRUMENT
           midi_event = (0x000000C0_u32 | channel | (value << 8))
@@ -551,25 +551,25 @@ module Doocr
       when CDoom::EVENT_END_OF_MEASURE
       when CDoom::EVENT_FINISH
         # Loop
-        if CDoom.mus_loop != 0
-          CDoom.mus_delay = 0
-          CDoom.mus_offset = CDoom.mus_header.score_start
+        if Doocr.mus_loop != 0
+          Doocr.mus_delay = 0
+          Doocr.mus_offset = @@mus_header.score_start
         else
-          CDoom.mus_playing = 0
+          Doocr.mus_playing = 0
           return 0_u64
         end
       when CDoom::EVENT_UNUSED
-        dummy = CDoom.mus_data[CDoom.mus_offset].to_i32
-        CDoom.mus_offset += 1
+        dummy = Doocr.mus_data[Doocr.mus_offset].to_i32
+        Doocr.mus_offset += 1
       end
 
       if event & 0b10000000 != 0 # Followed by delay
-        CDoom.mus_delay = 0
+        Doocr.mus_delay = 0
         delay_byte = 0
         loop do
-          delay_byte = CDoom.mus_data[CDoom.mus_offset]
-          CDoom.mus_offset += 1
-          CDoom.mus_delay = CDoom.mus_delay * 128 + (delay_byte & 0b01111111)
+          delay_byte = Doocr.mus_data[Doocr.mus_offset]
+          Doocr.mus_offset += 1
+          Doocr.mus_delay = Doocr.mus_delay * 128 + (delay_byte & 0b01111111)
 
           break unless delay_byte & 0b10000000 != 0
         end
@@ -578,7 +578,7 @@ module Doocr
       end
     end
 
-    CDoom.mus_delay -= 1
+    Doocr.mus_delay -= 1
 
     return midi_event.to_u64!
   end

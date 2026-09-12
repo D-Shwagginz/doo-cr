@@ -1239,10 +1239,10 @@ module Doocr
 
       if pars.size == 2
         # Map
-        CDoom.cpars[pars[0]] = pars[1]
+        Doocr.cpars[pars[0]] = pars[1]
       else
         # Episode, Mission
-        (CDoom.pars.to_unsafe + pars[0]).value[pars[1]] = pars[2]
+        Doocr.pars[pars[0]][pars[1]] = pars[2]
       end
     end
   end

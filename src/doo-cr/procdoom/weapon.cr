@@ -63,7 +63,7 @@ module Doocr::Mod
       atk_num = @atk.parse
       flash_num = @flash.parse
 
-      CDoom.weaponinfo[@slot.value] = CDoom::Weaponinfo.new(
+      Doocr.weaponinfo[@slot.value] = Doocr::Weaponinfo.new(
         ammo: CDoom::Ammotype.from_value(@ammo_type.value),
         upstate: CDoom::Statenum.new(up_num),
         downstate: CDoom::Statenum.new(down_num),

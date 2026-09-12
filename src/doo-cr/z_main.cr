@@ -18,26 +18,26 @@
 module Doocr
   def self.z_init
     size = 0
-    CDoom.mainzone = CDoom.i_zone_base(pointerof(size)).as(CDoom::Memzone*)
-    CDoom.mainzone.value.size = size
+    Doocr.mainzone = CDoom.i_zone_base(pointerof(size)).as(CDoom::Memzone*)
+    Doocr.mainzone.value.size = size
 
     # set the entire zone to one free block
-    block = (CDoom.mainzone.as(UInt8*) + sizeof(CDoom::Memzone)).as(CDoom::Memblock*)
-    CDoom.mainzone.value.blocklist.next = block
-    CDoom.mainzone.value.blocklist.prev = block
+    block = (Doocr.mainzone.as(UInt8*) + sizeof(CDoom::Memzone)).as(CDoom::Memblock*)
+    Doocr.mainzone.value.blocklist.next = block
+    Doocr.mainzone.value.blocklist.prev = block
 
-    CDoom.mainzone.value.blocklist.user = CDoom.mainzone.as(Void**)
-    CDoom.mainzone.value.blocklist.tag = CDoom::PU_STATIC
-    CDoom.mainzone.value.rover = block
+    Doocr.mainzone.value.blocklist.user = Doocr.mainzone.as(Void**)
+    Doocr.mainzone.value.blocklist.tag = CDoom::PU_STATIC
+    Doocr.mainzone.value.rover = block
 
-    block.value.prev = pointerof(CDoom.mainzone.value.@blocklist)
+    block.value.prev = pointerof(Doocr.mainzone.value.@blocklist)
     block.value.next = block.value.prev
 
     # 0 indicates a free block.
     block.value.user = Pointer(Void*).null
 
-    block.value.size = CDoom.mainzone.value.size - sizeof(CDoom::Memzone)
-    puts "#{CDoom.mb_used}MBs of memory allocated."
+    block.value.size = Doocr.mainzone.value.size - sizeof(CDoom::Memzone)
+    puts "#{Doocr.mb_used}MBs of memory allocated."
   end
 
   def self.z_free(ptr : Void*)
@@ -67,7 +67,7 @@ module Doocr
       other.value.next = block.value.next
       other.value.next.value.prev = other
 
-      CDoom.mainzone.value.rover = other if block == CDoom.mainzone.value.rover
+      Doocr.mainzone.value.rover = other if block == Doocr.mainzone.value.rover
 
       block = other
     end
@@ -79,7 +79,7 @@ module Doocr
       block.value.next = other.value.next
       block.value.next.value.prev = block
 
-      CDoom.mainzone.value.rover = block if other == CDoom.mainzone.value.rover
+      Doocr.mainzone.value.rover = block if other == Doocr.mainzone.value.rover
     end
   end
 
@@ -96,7 +96,7 @@ module Doocr
 
     # if there is a free block behind the rover,
     #  back up over them
-    base = CDoom.mainzone.value.rover
+    base = Doocr.mainzone.value.rover
 
     base = base.value.prev if base.value.prev.value.user.null?
 
@@ -165,7 +165,7 @@ module Doocr
     base.value.tag = tag
 
     # next allocation will start looking here
-    CDoom.mainzone.value.rover = base.value.next
+    Doocr.mainzone.value.rover = base.value.next
 
     base.value.id = CDoom::ZONEID
 
@@ -173,8 +173,8 @@ module Doocr
   end
 
   def self.z_free_tags(lowtag : LibC::Int, hightag : LibC::Int)
-    block = CDoom.mainzone.value.blocklist.next
-    while block != pointerof(CDoom.mainzone.value.@blocklist)
+    block = Doocr.mainzone.value.blocklist.next
+    while block != pointerof(Doocr.mainzone.value.@blocklist)
       # get link before freeing
       nextb = block.value.next
 
@@ -193,10 +193,10 @@ module Doocr
   end
 
   def self.z_check_heap
-    block = CDoom.mainzone.value.blocklist.next
+    block = Doocr.mainzone.value.blocklist.next
 
     loop do
-      if block.value.next == pointerof(CDoom.mainzone.value.@blocklist)
+      if block.value.next == pointerof(Doocr.mainzone.value.@blocklist)
         # all blocks have been hit
         break
       end

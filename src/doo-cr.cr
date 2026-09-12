@@ -17,6 +17,7 @@
 
 require "socket"
 
+require "./doo-cr/lib_doocr.cr"
 require "./doo-cr/lib.cr"
 require "./doo-cr/**"
 
@@ -88,8 +89,8 @@ module Doocr
     end
   end
 
-  alias IOJob = {String, String, Bytes?, Channel({Bytes, Bool})} # path, mode, write_data (nil=read), response
-  @@io_jobs = Channel(IOJob).new
+  alias IOJob = {String, String, Bytes?, ::Channel({Bytes, Bool})} # path, mode, write_data (nil=read), response
+  @@io_jobs = ::Channel(IOJob).new
 
   # Create a thread for File IO
   io_context = Fiber::ExecutionContext::Isolated.new("doom-io") do

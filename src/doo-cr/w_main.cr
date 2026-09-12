@@ -42,67 +42,72 @@ module Doocr
     # handle reload indicator.
     if filename[0] == '~'.ord
       filename == 1
-      CDoom.reloadname = filename
-      CDoom.reloadlump = CDoom.numlumps
+      Doocr.reloadname = String.new(filename)
+      Doocr.reloadlump = Doocr.numlumps
     end
 
-    if (handle = doom_open(filename, "rb".to_unsafe)).null?
-      puts " couldn't open #{String.new(filename)}"
+    path = String.new(filename)
+    begin
+      handle = File.open(path, "rb")
+    rescue
+      puts " couldn't open #{path}"
       return
     end
 
     puts " adding #{String.new(filename)}"
-    startlump = CDoom.numlumps
+    startlump = Doocr.numlumps
 
-    header = CDoom::Wadinfo.new
+    header = Wadinfo.new
     singleinfo = CDoom::Filelump.new
 
     if CDoom.doom_strcasecmp(filename + CDoom.doom_strlen(filename) - 3, "wad") != 0
       # single lump file
       fileinfo = pointerof(singleinfo)
       singleinfo.filepos = 0
-      doom_seek(handle, 0, CDoom::DoomSeek::DOOM_SEEK_END)
-      singleinfo.size = doom_tell(handle)
-      doom_seek(handle, 0, CDoom::DoomSeek::DOOM_SEEK_SET)
+      handle.seek(0, IO::Seek::End)
+      singleinfo.size = handle.pos.to_i32
+      handle.seek(0, IO::Seek::Set)
       CDoom.extract_file_base(filename, singleinfo.name)
-      CDoom.numlumps += 1
+      Doocr.numlumps += 1
     else
       # WAD file
-      doom_read(handle, pointerof(header).as(Void*), sizeof(typeof(header)))
-      if CDoom.doom_strncmp(header.identification, "IWAD", 4) != 0
+      header_data = Bytes.new(12)
+      handle.read_fully(header_data)
+      header.read(header_data.to_unsafe)
+      if !header.identification.starts_with?("IWAD")
         # Homebrew levels?
-        if CDoom.doom_strncmp(header.identification, "PWAD", 4) != 0
+        if !header.identification.starts_with?("PWAD")
           CDoom.i_error("Error: Wad file #{filename} doesn't have IWAD or PWAD id")
         end
 
-        # ???CDoom.modifiedgame = 1
+        # ???Doocr.modifiedgame = 1
       end
       header.numlumps = header.numlumps
       header.infotableofs = header.infotableofs
       length = header.numlumps * sizeof(CDoom::Filelump)
       fileinfo = GC.malloc(length).as(CDoom::Filelump*)
       allocated = fileinfo
-      doom_seek(handle, header.infotableofs, CDoom::DoomSeek::DOOM_SEEK_SET)
-      doom_read(handle, fileinfo.as(Void*), length)
-      CDoom.numlumps += header.numlumps
+      handle.seek(header.infotableofs, IO::Seek::Set)
+      handle.read_fully(Slice.new(fileinfo.as(UInt8*), length))
+      Doocr.numlumps += header.numlumps
     end
 
     # Fill in lumpinfo
-    storehandle = !CDoom.reloadname.null? ? Pointer(Void).null : handle
+    storehandle = Doocr.reloadname.empty? ? handle : nil
 
     i = startlump
-    while i < CDoom.numlumps.to_u32!
-      @@lumpinfo << CDoom::Lumpinfo.new
-      lump_p = @@lumpinfo.to_unsafe + i
-      lump_p.value.handle = storehandle
-      lump_p.value.position = fileinfo.value.filepos
-      lump_p.value.size = fileinfo.value.size
-      CDoom.doom_strncpy(lump_p.value.name, fileinfo.value.name, 8)
+    while i < Doocr.numlumps.to_u32!
+      @@lumpinfo << Lumpinfo.new(
+        name: String.new(fileinfo.value.name.to_unsafe, 8),
+        handle: storehandle,
+        position: fileinfo.value.filepos,
+        size: fileinfo.value.size
+      )
       i += 1
       fileinfo += 1
     end
 
-    doom_close(handle) if !CDoom.reloadname.null?
+    handle.close unless Doocr.reloadname.empty?
 
     GC.free(allocated.as(Void*)) unless allocated.null?
   end
@@ -115,25 +120,23 @@ module Doocr
     # handle reload indicator.
     if filename[0] == '~'
       filename == 1
-      CDoom.reloadname = filename
-      CDoom.reloadlump = CDoom.numlumps
+      Doocr.reloadname = filename
+      Doocr.reloadlump = Doocr.numlumps
     end
 
-    response = Channel({Bytes, Bool}).new
-    @@io_jobs.send({filename, "rb", nil, response})
-    data, ok = response.receive
-    unless ok
+    begin
+      file = File.open(filename, "rb")
+    rescue
       puts " couldn't open #{filename}"
       return
     end
 
     puts " adding #{filename}"
-    startlump = CDoom.numlumps
+    startlump = Doocr.numlumps
     num_merge_lumps = 0
 
-    header = CDoom::Wadinfo.new
+    header = Wadinfo.new
     singleinfo = CDoom::Filelump.new
-    file = IO::Memory.new(data)
     if filename[-3..-1].downcase.compare("wad") != 0
       # single lump file
       fileinfo = pointerof(singleinfo)
@@ -143,15 +146,16 @@ module Doocr
       num_merge_lumps += 1
     else
       # WAD file
-      slice = Slice.new(pointerof(header).as(UInt8*), sizeof(typeof(header)))
-      file.read(slice)
-      if CDoom.doom_strncmp(header.identification, "IWAD", 4) != 0
+      header_data = Bytes.new(12)
+      file.read(header_data)
+      header.read(header_data.to_unsafe)
+      if !header.identification.starts_with?("IWAD")
         # Homebrew levels?
-        if CDoom.doom_strncmp(header.identification, "PWAD", 4) != 0
+        if !header.identification.starts_with?("PWAD")
           CDoom.i_error("Error: Wad file #{filename} doesn't have IWAD or PWAD id")
         end
 
-        # ???CDoom.modifiedgame = 1
+        # ???Doocr.modifiedgame = 1
       end
       length = header.numlumps * sizeof(CDoom::Filelump)
       fileinfo = GC.malloc(length).as(CDoom::Filelump*)
@@ -174,52 +178,48 @@ module Doocr
          name_str == "s_end" || name_str == "ss_end" || # Don't overwrite sprite or lump stuff
          name_str == "f_start" || name_str == "ff_start" ||
          name_str == "f_end" || name_str == "ff_end"
-        lump_num = CDoom.numlumps
+        lump_num = Doocr.numlumps
       else
         # Find lump
         lump_num = 0
-        CDoom.numlumps.times do |j|
-          if String.new(@@lumpinfo[j].name.to_unsafe, 8).downcase.delete('\0') == name_str
+        Doocr.numlumps.times do |j|
+          if @@lumpinfo[j].name.downcase.delete('\0') == name_str
             break
           end
           lump_num += 1
         end
       end
 
-      if lump_num == CDoom.numlumps
+      if lump_num == Doocr.numlumps
         # Not been loaded. Initialize lump
-        CDoom.numlumps += ismap ? CDoom::ML_BLOCKMAP + 1 : 1
+        Doocr.numlumps += ismap ? CDoom::ML_BLOCKMAP + 1 : 1
 
         (ismap ? CDoom::ML_BLOCKMAP + 1 : 1).times do |i|
-          @@lumpinfo << CDoom::Lumpinfo.new
+          @@lumpinfo << Lumpinfo.new
         end
-        lump_p = @@lumpinfo.to_unsafe + startlump
-
         startlump += 1
-      else
-        # Lump exists
-        lump_p = @@lumpinfo.to_unsafe + lump_num
       end
       # Set the lump
       if ismap
         (CDoom::ML_BLOCKMAP + 1).times do |m|
-          lump_p.value.handle = !CDoom.reloadname.null? ? Pointer(Void).null : Box.box({filename, file, false})
-          lump_p.value.position = fileinfo[mlump].filepos
-          lump_p.value.size = fileinfo[mlump].size
-          CDoom.doom_strncpy(lump_p.value.name, (fileinfo + mlump).value.name, 8)
-          lump_p += 1
+          lump = @@lumpinfo[lump_num + m]
+          lump.handle = Doocr.reloadname.empty? ? file : nil
+          lump.position = fileinfo[mlump].filepos
+          lump.size = fileinfo[mlump].size
+          lump.name = String.new((fileinfo + mlump).value.name.to_unsafe, 8)
           mlump += 1
         end
       else
-        lump_p.value.handle = !CDoom.reloadname.null? ? Pointer(Void).null : Box.box({filename, file, false})
-        lump_p.value.position = fileinfo[mlump].filepos
-        lump_p.value.size = fileinfo[mlump].size
-        CDoom.doom_strncpy(lump_p.value.name, (fileinfo + mlump).value.name, 8)
+        lump = @@lumpinfo[lump_num]
+        lump.handle = Doocr.reloadname.empty? ? file : nil
+        lump.position = fileinfo[mlump].filepos
+        lump.size = fileinfo[mlump].size
+        lump.name = String.new((fileinfo + mlump).value.name.to_unsafe, 8)
         mlump += 1
       end
     end
 
-    file.close if !CDoom.reloadname.null?
+    file.close
 
     GC.free(allocated.as(Void*)) unless allocated.null?
   end
@@ -229,38 +229,37 @@ module Doocr
   #  and reloads the directory.
   #
   def self.w_reload
-    return if CDoom.reloadname.null?
+    return if Doocr.reloadname.empty?
 
-    if (handle = doom_open(CDoom.reloadname, "rb".to_unsafe)) == 0
-      CDoom.i_error("Error: w_reload: couldn't open #{CDoom.reloadname}")
+    begin
+      handle = File.open(Doocr.reloadname, "rb")
+    rescue
+      CDoom.i_error("Error: w_reload: couldn't open #{Doocr.reloadname}")
     end
 
-    header = CDoom::Wadinfo.new
-
-    doom_read(handle, pointerof(header).as(Void*), sizeof(typeof(header)))
+    header = Wadinfo.new
+    header_data = Bytes.new(12)
+    handle.not_nil!.read_fully(header_data)
+    header.read(header_data.to_unsafe)
     lumpcount = header.numlumps
     header.infotableofs = header.infotableofs
     length = lumpcount * sizeof(CDoom::Filelump)
     fileinfo = GC.malloc(length).as(CDoom::Filelump*)
-    doom_seek(handle, header.infotableofs, CDoom::DoomSeek::DOOM_SEEK_SET)
-    doom_read(handle, fileinfo.as(Void*), length)
+    handle.not_nil!.seek(header.infotableofs, IO::Seek::Set)
+    handle.not_nil!.read_fully(Slice.new(fileinfo.as(UInt8*), length))
 
-    # Fill in lumpinfo
-    lump_p = @@lumpinfo.to_unsafe + CDoom.reloadlump
+    i = Doocr.reloadlump
+    while i < (Doocr.reloadlump + lumpcount).to_u32!
+      CDoom.z_free(Doocr.lumpcache[i]) unless Doocr.lumpcache[i].null?
 
-    i = CDoom.reloadlump
-    while i < (CDoom.reloadlump + lumpcount).to_u32!
-      CDoom.z_free(CDoom.lumpcache[i]) unless CDoom.lumpcache[i].null?
-
-      lump_p.value.position = fileinfo.value.filepos
-      lump_p.value.size = fileinfo.value.size
+      @@lumpinfo[i].position = fileinfo.value.filepos
+      @@lumpinfo[i].size = fileinfo.value.size
 
       i += 1
-      lump_p += 1
       fileinfo += 1
     end
 
-    doom_close(handle)
+    handle.not_nil!.close
 
     GC.free(fileinfo.as(Void*))
   end
@@ -270,15 +269,11 @@ module Doocr
 
     filenames.each { |fn| w_merge_file(fn) }
 
-    CDoom.i_error("Error: w_merge_multiple_files: no files found") if CDoom.numlumps == 0
+    CDoom.i_error("Error: w_merge_multiple_files: no files found") if Doocr.numlumps == 0
 
     # set up caching
-    size = CDoom.numlumps * sizeof(Void*)
-    CDoom.lumpcache = GC.malloc(size).as(Void**)
-
-    CDoom.i_error("Error: Couldn't allocate lumpcache") if CDoom.lumpcache.null?
-
-    CDoom.doom_memset(CDoom.lumpcache, 0, size)
+    Doocr.lumpcache.clear
+    Doocr.numlumps.times { Doocr.lumpcache << Pointer(Void).null }
   end
 
   #
@@ -295,7 +290,7 @@ module Doocr
   #
   def self.w_init_multiple_files(filenames : LibC::Char**)
     # open all the files, load headers, and count lumps
-    CDoom.numlumps = 0
+    Doocr.numlumps = 0
 
     # will be realloced as lumps are added
     @@lumpinfo.clear
@@ -305,15 +300,11 @@ module Doocr
       filenames += 1
     end
 
-    CDoom.i_error("Error: w_init_multiple_files: no files found") if CDoom.numlumps == 0
+    CDoom.i_error("Error: w_init_multiple_files: no files found") if Doocr.numlumps == 0
 
     # set up caching
-    size = CDoom.numlumps * sizeof(Void*)
-    CDoom.lumpcache = GC.malloc(size).as(Void**)
-
-    CDoom.i_error("Error: Couldn't allocate lumpcache") if CDoom.lumpcache.null?
-
-    CDoom.doom_memset(CDoom.lumpcache, 0, size)
+    Doocr.lumpcache.clear
+    Doocr.numlumps.times { Doocr.lumpcache << Pointer(Void).null }
 
     if w_check_num_for_name("STDISK".to_unsafe) != -1
       @@loading_patch = w_cache_lump_name("STDISK".to_unsafe, CDoom::PU_STATIC).as(CDoom::Patch*)
@@ -336,26 +327,24 @@ module Doocr
   #
   def self.w_check_num_for_name(name : LibC::Char*) : LibC::Int
     # make the name into two integers for easy compares
-    name8 = CDoom::Name8.new
-    CDoom.doom_strncpy(name8.s, name, 8)
+    name8 = Name8.new
+    CDoom.doom_strncpy(name8.s.to_unsafe, name, 8)
 
     # in case the name was a fill 8 chars
     name8.s[8] = 0
 
     # case insensitive
-    CDoom.doom_strupr(name8.s)
+    CDoom.doom_strupr(name8.s.to_unsafe)
 
     v1 = name8.x[0]
     v2 = name8.x[1]
 
     # scan backwards so patch lump files take precedence
-    lump_p = @@lumpinfo.to_unsafe + CDoom.numlumps
-
-    while lump_p != @@lumpinfo.to_unsafe
-      lump_p -= 1
-      if lump_p.value.name.to_unsafe.as(Int32*).value == v1 &&
-         (lump_p.value.name.to_unsafe + 4).as(Int32*).value == v2
-        return (lump_p - @@lumpinfo.to_unsafe).to_i32!
+    (Doocr.numlumps - 1).downto(0) do |i|
+      lump = @@lumpinfo[i]
+      if lump.name.to_unsafe.as(Int32*).value == v1 &&
+         (lump.name.to_unsafe + 4).as(Int32*).value == v2
+        return i
       end
     end
 
@@ -386,7 +375,7 @@ module Doocr
   # Returns the buffer size needed to load the given lump.
   #
   def self.w_lump_length(lump : LibC::Int) : LibC::Int
-    if lump >= CDoom.numlumps
+    if lump >= Doocr.numlumps
       CDoom.i_error("Error: w_lump_length: #{lump} >= numlumps")
     end
 
@@ -398,50 +387,51 @@ module Doocr
   #  which must be >= w_lump_length().
   #
   def self.w_read_lump(lump : LibC::Int, dest : Void*)
-    if lump >= CDoom.numlumps
+    if lump >= Doocr.numlumps
       CDoom.i_error("Error: w_read_lump: #{lump} >= numlumps")
     end
 
-    l = @@lumpinfo.to_unsafe + lump
+    l = @@lumpinfo[lump]
 
-    if l.value.handle.null?
+    handle = l.handle
+    if handle.nil?
       # reloadable file, so use open / read / close
-      if (handle = doom_open(CDoom.reloadname, "rb".to_unsafe)) == 0
-        CDoom.i_error("Error: w_read_lump: couldn't open #{CDoom.reloadname}")
+      begin
+        handle = File.open(Doocr.reloadname, "rb")
+      rescue
+        CDoom.i_error("Error: w_read_lump: couldn't open #{Doocr.reloadname}")
       end
-    else
-      handle = l.value.handle
     end
 
-    doom_seek(handle, l.value.position, CDoom::DoomSeek::DOOM_SEEK_SET)
-    c = doom_read(handle, dest, l.value.size)
+    handle.not_nil!.seek(l.position, IO::Seek::Set)
+    c = handle.not_nil!.read(Slice.new(dest.as(UInt8*), l.size))
 
-    if c < l.value.size
-      CDoom.i_error("Error: w_read_lump: only read #{c} of #{l.value.size} on lump #{lump}")
+    if c < l.size
+      CDoom.i_error("Error: w_read_lump: only read #{c} of #{l.size} on lump #{lump}")
     end
 
-    doom_close(handle) if l.value.handle.null?
+    handle.not_nil!.close if l.handle.nil?
   end
 
   @@do_loading_disk = false
   @@loading_disk_shown = false
 
   def self.w_cache_lump_num(lump : LibC::Int, tag : LibC::Int) : Void*
-    if lump.to_u32! >= CDoom.numlumps.to_u32!
+    if lump.to_u32! >= Doocr.numlumps.to_u32!
       CDoom.i_error("Error: w_cache_lump_num #{lump} >= numlumps")
     end
 
-    if CDoom.lumpcache[lump].null?
+    if Doocr.lumpcache[lump].null?
       # read the lump in
       @@do_loading_disk = true
 
-      ptr = CDoom.z_malloc(CDoom.w_lump_length(lump), tag, CDoom.lumpcache + lump).as(CDoom::Byte*)
-      CDoom.w_read_lump(lump, CDoom.lumpcache[lump])
+      ptr = CDoom.z_malloc(CDoom.w_lump_length(lump), tag, Doocr.lumpcache.to_unsafe + lump).as(CDoom::Byte*)
+      CDoom.w_read_lump(lump, Doocr.lumpcache[lump])
     else
-      z_change_tag(CDoom.lumpcache[lump], tag)
+      z_change_tag(Doocr.lumpcache[lump], tag)
     end
 
-    return CDoom.lumpcache[lump]
+    return Doocr.lumpcache[lump]
   end
 
   def self.w_cache_lump_name(name : LibC::Char*, tag : LibC::Int) : Void*

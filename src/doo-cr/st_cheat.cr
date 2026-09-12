@@ -19,7 +19,7 @@ module Doocr
   @@firsttime = 1
   @@cheat_xlate_table = uninitialized StaticArray(UInt8, 256)
 
-  def self.cht_check_cheat(cht : CDoom::Cheatseq*, key : LibC::Char) : LibC::Int
+  def self.cht_check_cheat(cht : Pointer(Doocr::Cheatseq), key : UInt8) : LibC::Int
     rc = 0
     if @@firsttime != 0
       @@firsttime = 0
@@ -49,7 +49,7 @@ module Doocr
     return rc
   end
 
-  def self.cht_get_param(cht : CDoom::Cheatseq*, buffer : LibC::Char*)
+  def self.cht_get_param(cht : Pointer(Doocr::Cheatseq), buffer : LibC::Char*)
     p = cht.value.sequence
     while p.value != 1
       p += 1
