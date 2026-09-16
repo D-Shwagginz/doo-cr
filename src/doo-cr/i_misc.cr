@@ -98,9 +98,15 @@ module Doocr
   end
 
   def self.i_shutdown_graphics
-    @@screen_texture.try { |st| Raylib.unload_texture(st) }
-    @@viewport_target.try { |vt| Raylib.unload_render_texture(vt) }
-    @@render_target.try { |rt| Raylib.unload_render_texture(rt) }
+    @@screen_texture.try do |st| 
+      Raylib.unload_texture(st) if Raylib.texture_valid?(st)
+    end
+    @@viewport_target.try do |vt|
+      Raylib.unload_render_texture(vt) if Raylib.render_texture_valid?(vt)
+    end
+    @@render_target.try do |rt|
+      Raylib.unload_render_texture(rt) if Raylib.render_texture_valid?(rt)
+    end
 
     Raylib.close_window if Raylib.window_ready?
   end
