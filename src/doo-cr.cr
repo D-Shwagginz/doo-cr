@@ -15,6 +15,8 @@
 #
 # ==> The entry point for Doo-cr
 
+
+
 require "socket"
 
 require "./doo-cr/lib_doocr.cr"
@@ -25,26 +27,10 @@ require "raylib-cr"
 require "raylib-cr/audio.cr"
 require "./adlmidi.cr"
 
-# VGA DOS terminal colorings
-SHELLCOLORS = [
-  {0, 0, 0},       # 0  black
-  {0, 0, 170},     # 1  blue
-  {0, 170, 0},     # 2  green
-  {0, 170, 170},   # 3  cyan
-  {170, 0, 0},     # 4  red
-  {170, 0, 170},   # 5  magenta
-  {170, 85, 0},    # 6  brown
-  {170, 170, 170}, # 7  light gray
-  {85, 85, 85},    # 8  dark gray
-  {85, 85, 255},   # 9  bright blue
-  {85, 255, 85},   # 10 bright green
-  {85, 255, 255},  # 11 bright cyan
-  {255, 85, 85},   # 12 bright red
-  {255, 85, 255},  # 13 bright magenta
-  {255, 255, 85},  # 14 yellow
-  {255, 255, 255}, # 15 white
-]
-
+# The Doocr module housing all code
+#
+# TODO: Add mod examples into readme
+# TODO: Add infinite comments to everything ever
 module Doocr
   VERSION_STR = "1.6" # Used for displaying
   # Demo compatible version (Gameplay version)
@@ -138,84 +124,6 @@ end
 Fiber::ExecutionContext.default.resize(1)
 MAIN_THREAD = Thread.current
 
-# Terminal exit stuff (Should move raylib deinit into here?)
-at_exit do
-  print "\e7"     # save cursor position
-  print "\e[r"    # reset scrolling region
-  print "\e8"     # restore cursor position
-  print "\e[?25h" # show cursor
-
-  unless Doocr.w_check_num_for_name("ENDOOM".to_unsafe) == -1
-    endoom = Doocr.w_cache_lump_name("ENDOOM".to_unsafe, CDoom::PU_CACHE).as(UInt8*)
-
-    cp437 = [
-      " ", "☺", "☻", "♥", "♦", "♣", "♠", "•",
-      "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
-      "►", "◄", "↕", "‼", "¶", "§", "▬", "↨",
-      "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
-      " ", "!", "\"", "#", "$", "%", "&", "'",
-      "(", ")", "*", "+", ",", "-", ".", "/",
-      "0", "1", "2", "3", "4", "5", "6", "7",
-      "8", "9", ":", ";", "<", "=", ">", "?",
-      "@", "A", "B", "C", "D", "E", "F", "G",
-      "H", "I", "J", "K", "L", "M", "N", "O",
-      "P", "Q", "R", "S", "T", "U", "V", "W",
-      "X", "Y", "Z", "[", "\\", "]", "^", "_",
-      "`", "a", "b", "c", "d", "e", "f", "g",
-      "h", "i", "j", "k", "l", "m", "n", "o",
-      "p", "q", "r", "s", "t", "u", "v", "w",
-      "x", "y", "z", "{", "|", "}", "~", "⌂",
-      "Ç", "ü", "é", "â", "ä", "à", "å", "ç",
-      "ê", "ë", "è", "ï", "î", "ì", "Ä", "Å",
-      "É", "æ", "Æ", "ô", "ö", "ò", "û", "ù",
-      "ÿ", "Ö", "Ü", "¢", "£", "¥", "₧", "ƒ",
-      "á", "í", "ó", "ú", "ñ", "Ñ", "ª", "º",
-      "¿", "⌐", "¬", "½", "¼", "¡", "«", "»",
-      "░", "▒", "▓", "│", "┤", "╡", "╢", "╖",
-      "╕", "╣", "║", "╗", "╝", "╜", "╛", "┐",
-      "└", "┴", "┬", "├", "─", "┼", "╞", "╟",
-      "╚", "╔", "╩", "╦", "╠", "═", "╬", "╧",
-      "╨", "╤", "╥", "╙", "╘", "╒", "╓", "╫",
-      "╪", "┘", "┌", "█", "▄", "▌", "▐", "▀",
-      "α", "ß", "Γ", "π", "Σ", "σ", "µ", "τ",
-      "Φ", "Θ", "Ω", "δ", "∞", "φ", "ε", "∩",
-      "≡", "±", "≥", "≤", "⌠", "⌡", "÷", "≈",
-      "°", "∙", "·", "√", "ⁿ", "²", "■", " ",
-    ]
-
-    25.times do |y|
-      80.times do |x|
-        i = (y * 80 + x) * 2
-
-        ch = endoom[i]
-        attr = endoom[i + 1]
-
-        fg = attr & 0x0F
-        bg = (attr >> 4) & 0x07
-        blink = (attr & 0x80) != 0
-
-        fr, fgc, fb = SHELLCOLORS[fg]
-        br, bgc, bb = SHELLCOLORS[bg]
-
-        # Set the exact foreground/background for this DOS text cell.
-        print "\e[38;2;#{fr};#{fgc};#{fb}m"
-        print "\e[48;2;#{br};#{bgc};#{bb}m"
-
-        # DOS blink -> terminal blink.
-        print "\e[5m" if blink
-
-        # CP437 -> Unicode for the terminal.
-        print cp437[ch]
-      end
-
-      # Move to the beginning of the next row without adding an
-      # extra terminal column.
-      print "\e[0m\r\n"
-    end
-
-    print "\e[0m"
-  end
-end
 
 # Make it happen!
 Doocr.doom_init

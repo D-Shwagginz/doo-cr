@@ -641,15 +641,83 @@ module Doocr
 
   @@title = ""
 
+  SHELLCOLORS = [
+  {0, 0, 0},       # 0  black
+  {0, 0, 170},     # 1  blue
+  {0, 170, 0},     # 2  green
+  {0, 170, 170},   # 3  cyan
+  {170, 0, 0},     # 4  red
+  {170, 0, 170},   # 5  magenta
+  {170, 85, 0},    # 6  brown
+  {170, 170, 170}, # 7  light gray
+  {85, 85, 85},    # 8  dark gray
+  {85, 85, 255},   # 9  bright blue
+  {85, 255, 85},   # 10 bright green
+  {85, 255, 255},  # 11 bright cyan
+  {255, 85, 85},   # 12 bright red
+  {255, 85, 255},  # 13 bright magenta
+  {255, 255, 85},  # 14 yellow
+  {255, 255, 255}, # 15 white
+]
+
   #
   # d_doom_main
   #
   def self.d_doom_main
     Raylib.set_trace_log_level(Raylib::TraceLogLevel::Error)
 
-    if ARGV.includes?("-v")
+    if ARGV.includes?("-v") || ARGV.includes?("-version")
       puts "DOO-CR v#{VERSION_STR} - DEMO v#{DEMOVERSION} | SAVE v#{SAVEVERSION} | NET v#{NETVERSION}"
       puts "Built #{BUILD_TIME}"
+      exit(0)
+    elsif ARGV.includes?("-help") || ARGV.includes?("-h")
+      puts "Usage: doo-cr -arg <parms>
+ -v[ersion]                   | Displays the build info
+ -dbcfg                       | Generates a Doom Builder Configuration file containing all Mod info
+
+Net Args
+ -net                         | Hosts a netgame
+ -net <host ip>               | Connects to a hosts netgame
+ -deathmatch                  | Used with -net to specify a deathmatch game
+ -altdeath                    | Same as deathmatch but with features like respawning items/weapons
+ -dup <1-9>                   | Reduce the resolution of the game by a factor of n, reducing the amount of network bandwidth needed.
+ -extratic <1-4>              | Sends num extra packets for data redundancy during a netgame
+ -port <port>                 | Sets the port to use for a netgame. Default is 5029
+ -timer <num>                 | For netgames; exits each level after num minutes
+ -avg                         | End level after 20 minutes
+
+Warping Args
+ -warp <map/episode> <level>  | Will warp to a map, or to an ExMy
+ -skill <skill num>           | Sets the game skill
+ -episode <num>               | Sets the game episode
+ -nomonsters                  | Does not spawn monsters
+ -respawn                     | Allows respawning of enemies
+ -fast                        | Enables fast monsters
+
+WAD Args
+ -iwad <wad>                  | Specifies an IWAD to load
+ -fwad <wad>                  | Same as -iwad but allows using a Patch WAD
+ -file <wad 1> <wad 2>...     | Loads a WAD's assets on top of the IWAD and other files
+ -merge <wad 1> <wad 2>...    | Same as -file but will overwrite the first occurence of a Lump if it is already loaded. Otherwise load like -file
+
+Demo Args
+ -playdemo <demo>             | Will play a demo. Looks for demo.lmp in the folder first then in the loaded WADs
+ -record <demo>               | Records a demo. Ends when Q is pressed
+ -timedemo <demo>             | Same as -playdemo but runs the game with no framelimit and will print frame stats at the end of the demo
+ -nodraw                      | Used with timedemo to playback with no screen drawing
+ -noblit                      | Same as -nodraw but disabled screen blitting
+ -maxdemo <size>              | Specify the demo buffer size in KiB
+
+Other Args
+ -loadgame <slot>             | Loads the game in slot
+ -config <file>               | Specify the config file to load
+ -headless                    | Runs the game with no Raylib context (window)
+ -nosound                     | Runs without initializing RAudio (no midi or sfx)
+ -devparm                     | Enables screenshots using F1
+ -turbo <mul>                 | The player's speed is multiplied by mul%. If unspecified, x defaults to 200. Values are rounded up to 10 and down to 400
+ -mem <mb>                    | Sets the default zone memory size in MB. The default is 12MB
+ -nospectre                   | Spawns all spectres in as normal pinkies
+ -blockmap                    | Build each map's blockmap at runtime"
       exit(0)
     elsif ARGV.includes?("-dbcfg")
       Mod.build_doombuilder_cfg
@@ -991,5 +1059,84 @@ module Doocr
     end
 
     CDoom.d_doom_loop # never returns [ddos] Called by app
+  end
+
+  # An attempt to replicate VGA Endoom text printing to console
+  def self.d_endoom
+    print "\e7"     # save cursor position
+    print "\e[r"    # reset scrolling region
+    print "\e8"     # restore cursor position
+    print "\e[?25h" # show cursor
+
+    unless Doocr.w_check_num_for_name("ENDOOM".to_unsafe) == -1
+      endoom = Doocr.w_cache_lump_name("ENDOOM".to_unsafe, CDoom::PU_CACHE).as(UInt8*)
+
+      cp437 = [
+        " ", "☺", "☻", "♥", "♦", "♣", "♠", "•",
+        "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
+        "►", "◄", "↕", "‼", "¶", "§", "▬", "↨",
+        "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
+        " ", "!", "\"", "#", "$", "%", "&", "'",
+        "(", ")", "*", "+", ",", "-", ".", "/",
+        "0", "1", "2", "3", "4", "5", "6", "7",
+        "8", "9", ":", ";", "<", "=", ">", "?",
+        "@", "A", "B", "C", "D", "E", "F", "G",
+        "H", "I", "J", "K", "L", "M", "N", "O",
+        "P", "Q", "R", "S", "T", "U", "V", "W",
+        "X", "Y", "Z", "[", "\\", "]", "^", "_",
+        "`", "a", "b", "c", "d", "e", "f", "g",
+        "h", "i", "j", "k", "l", "m", "n", "o",
+        "p", "q", "r", "s", "t", "u", "v", "w",
+        "x", "y", "z", "{", "|", "}", "~", "⌂",
+        "Ç", "ü", "é", "â", "ä", "à", "å", "ç",
+        "ê", "ë", "è", "ï", "î", "ì", "Ä", "Å",
+        "É", "æ", "Æ", "ô", "ö", "ò", "û", "ù",
+        "ÿ", "Ö", "Ü", "¢", "£", "¥", "₧", "ƒ",
+        "á", "í", "ó", "ú", "ñ", "Ñ", "ª", "º",
+        "¿", "⌐", "¬", "½", "¼", "¡", "«", "»",
+        "░", "▒", "▓", "│", "┤", "╡", "╢", "╖",
+        "╕", "╣", "║", "╗", "╝", "╜", "╛", "┐",
+        "└", "┴", "┬", "├", "─", "┼", "╞", "╟",
+        "╚", "╔", "╩", "╦", "╠", "═", "╬", "╧",
+        "╨", "╤", "╥", "╙", "╘", "╒", "╓", "╫",
+        "╪", "┘", "┌", "█", "▄", "▌", "▐", "▀",
+        "α", "ß", "Γ", "π", "Σ", "σ", "µ", "τ",
+        "Φ", "Θ", "Ω", "δ", "∞", "φ", "ε", "∩",
+        "≡", "±", "≥", "≤", "⌠", "⌡", "÷", "≈",
+        "°", "∙", "·", "√", "ⁿ", "²", "■", " ",
+      ]
+
+      25.times do |y|
+        80.times do |x|
+          i = (y * 80 + x) * 2
+
+          ch = endoom[i]
+          attr = endoom[i + 1]
+
+          fg = attr & 0x0F
+          bg = (attr >> 4) & 0x07
+          blink = (attr & 0x80) != 0
+
+          fr, fgc, fb = SHELLCOLORS[fg]
+          br, bgc, bb = SHELLCOLORS[bg]
+
+          # Set the exact foreground/background for this DOS text cell.
+          print "\e[38;2;#{fr};#{fgc};#{fb}m"
+          print "\e[48;2;#{br};#{bgc};#{bb}m"
+
+          # DOS blink -> terminal blink.
+          print "\e[5m" if blink
+
+          # CP437 -> Unicode for the terminal.
+          print cp437[ch]
+        end
+
+        # Move to the beginning of the next row without adding an
+        # extra terminal column.
+        print "\e[0m\r\n"
+      end
+
+      print "\e[0m"
+    end
   end
 end

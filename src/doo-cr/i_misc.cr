@@ -54,6 +54,7 @@ module Doocr
   #
   def self.i_quit
     @@closing = true
+    d_endoom
     CDoom.d_quit_net_game
     CDoom.s_stop_music
     CDoom.i_shutdown_sound
