@@ -100,6 +100,7 @@ module Doocr
   end
 end
 
+# Creates a Fiber SpinLock mainly so that the audio fiber doesn't jump off its thread
 struct SpinLock
   def initialize
     @flag = Atomic(Bool).new(false)

@@ -16,20 +16,14 @@
 # ==> Init/General code
 
 module Doocr
-  #
-  # d_post_event
   # Called by the I/O functions when input is detected
-  #
   def self.d_post_event(ev : CDoom::Event*)
     Doocr.events[Doocr.eventhead] = ev.value
     Doocr.eventhead += 1
     Doocr.eventhead = (Doocr.eventhead) & (CDoom::MAXEVENTS - 1)
   end
 
-  #
-  # d_process_events
   # Send all the events of the given timestamp down the responder chain
-  #
   def self.d_process_events
     # IF STORE DEMO, DO NOT ACCEPT INPUT
     return if Doocr.gamemode == CDoom::GameMode::Commercial &&
@@ -51,6 +45,7 @@ module Doocr
   @@oldgamestate = -1
   @@borderdrawcount = 0
 
+  # Draws the floppy loading icon and saves what's behind it
   def self.d_display_load
     if !@@loading_patch.null?
       x = CDoom::SCREENWIDTH - @@loading_patch.value.width
@@ -65,6 +60,7 @@ module Doocr
     @@do_loading_disk = false
   end
 
+  # Clears the floppy loading icon and restores what was behind it
   def self.d_display_clear_load
     if !@@loading_patch.null?
       x = CDoom::SCREENWIDTH - @@loading_patch.value.width
@@ -76,10 +72,7 @@ module Doocr
     @@loading_disk_shown = false
   end
 
-  #
-  # d_display
   #  draw current display, possibly wiping it from the previous
-  #
   def self.d_display
     unless @@headless
       if @@was_focused != Raylib.window_focused?
@@ -235,6 +228,7 @@ module Doocr
     end
   end
 
+  # The main doom_loop. It shouldn't ever return but is anything really certain?
   def self.d_doom_loop
     until (!@@headless && Raylib.close_window?) || @@closing
       # frame syncronous IO operations
@@ -262,10 +256,7 @@ module Doocr
     i_quit
   end
 
-  #
-  # d_page_ticker
   # Handles timing for warped projection
-  #
   def self.d_page_ticker
     Doocr.pagetic -= 1
     CDoom.d_advance_demo if Doocr.pagetic < 0
@@ -275,18 +266,13 @@ module Doocr
     CDoom.v_draw_patch(0, 0, 0, CDoom.w_cache_lump_name(Doocr.pagename.to_unsafe, CDoom::PU_CACHE).as(CDoom::Patch*))
   end
 
-  #
-  # d_advance_demo
   # Called after each demo or intro demosequence finishes
-  #
   def self.d_advance_demo
     Doocr.advancedemo = 1
   end
 
-  #
   # This cycles through the demo sequences.
-  # Todo: FIXME - version dependend demo numbers?
-  #
+  # FIXME: version dependent demo numbers?
   def self.d_do_advance_demo
     (@@players.to_unsafe + Doocr.consoleplayer).value.playerstate = CDoom::Playerstate::PST_LIVE # not reborn
     Doocr.advancedemo = 0
@@ -345,24 +331,25 @@ module Doocr
     end
   end
 
+  # Begins the title sequence
   def self.d_start_title
     Doocr.gameaction = CDoom::Gameaction::Nothing
     Doocr.demosequence = -1
     CDoom.d_advance_demo
   end
 
+  # Adds a wad file
   def self.d_add_file(file : String)
     Doocr.wadfiles << file
   end
 
+  # Adds a merge wad file
   def self.d_merge_file(file : String)
     @@merge_files << file
   end
 
-  #
   # Confirms a WAD files type
   # based off of data in the WAD
-  #
   def self.confirm_version
     if w_check_num_for_name("map01".to_unsafe) != -1 && # Doom 2
        # w_check_num_for_name("map32".to_unsafe) != -1 && # Custom Wads might not have all maps
@@ -395,12 +382,10 @@ module Doocr
     end
   end
 
-  #
-  # identify_version
   # Checks availability of IWAD files by name,
   # to determine whether registered/commercial features
   # should be executed (notably loading PWAD's).
-  #
+  # TODO: Decide whether this matters since confirm_version exists
   def self.identify_version
     doomwaddir = Pointer(UInt8).null
     ENV["DOOMWADDIR"]?.try { |env| doomwaddir = env.to_unsafe }
@@ -569,9 +554,7 @@ module Doocr
     Doocr.gamemode = CDoom::GameMode::Indetermined
   end
 
-  #
   # Find a Response File
-  #
   def self.find_response_file
     (ARGV.size - 1).times do |i|
       i += 1
@@ -641,6 +624,7 @@ module Doocr
 
   @@title = ""
 
+  # VGA shell coloring
   SHELLCOLORS = [
   {0, 0, 0},       # 0  black
   {0, 0, 170},     # 1  blue
@@ -660,9 +644,7 @@ module Doocr
   {255, 255, 255}, # 15 white
 ]
 
-  #
-  # d_doom_main
-  #
+  # Doom's main function (init and loop)
   def self.d_doom_main
     Raylib.set_trace_log_level(Raylib::TraceLogLevel::Error)
 
