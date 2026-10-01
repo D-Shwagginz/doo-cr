@@ -32,6 +32,7 @@ require "./adlmidi.cr"
 # TODO: Add mod examples into readme
 # TODO: Add infinite comments to everything ever
 # TODO: Fix Linux (Ubuntu) audio bugging
+# TODO: Optimize drawing code
 module Doocr
   VERSION_STR = "1.6" # Used for displaying
   # Demo compatible version (Gameplay version)
