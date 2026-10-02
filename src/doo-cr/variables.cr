@@ -372,7 +372,6 @@ module Doocr
 
   Doocr.is_wiping_screen = 0
 
-
   Doocr.wipegamestate = CDoom::Gamestate::Demoscreen
 
   Doocr.forwardmove[0] = 0x19
@@ -5526,7 +5525,6 @@ module Doocr
   Doocr.gammamsg[2] = @@deh_gammalvl2
   Doocr.gammamsg[3] = @@deh_gammalvl3
   Doocr.gammamsg[4] = @@deh_gammalvl4
-
 
   c_array(Doocr.quitsounds,
     CDoom::Sfxenum::SFX_pldeth.value,

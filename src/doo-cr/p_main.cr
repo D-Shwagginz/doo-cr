@@ -7933,7 +7933,7 @@ module Doocr
     # See if button is already pressed
     CDoom::MAXBUTTONS.times do |i|
       return if @@buttonlist[i].btimer != 0 &&
-            @@buttonlist[i].line == line
+                @@buttonlist[i].line == line
     end
 
     CDoom::MAXBUTTONS.times do |i|

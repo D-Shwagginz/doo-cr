@@ -112,8 +112,6 @@ fun doom_mouse_move(delta_x : Int32, delta_y : Int32)
   Doocr.doom_mouse_move(delta_x, delta_y)
 end
 
- 
-
 fun d_post_event = D_PostEvent(ev : CDoom::Event*)
   Doocr.d_post_event(ev)
 end
@@ -964,7 +962,6 @@ end
 fun m_load_defaults = M_LoadDefaults
   Doocr.m_load_defaults
 end
-
 
 fun m_screenshot = M_ScreenShot
   Doocr.m_screenshot

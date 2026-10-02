@@ -16,6 +16,7 @@
 # ==> Backend video stuff
 
 module Doocr
+  # Calcs the tangent slope between two coordinates
   def self.slope_div(num : LibC::UInt, den : LibC::UInt) : LibC::Int
     return SLOPERANGE if den < 512
 

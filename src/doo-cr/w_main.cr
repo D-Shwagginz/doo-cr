@@ -32,8 +32,10 @@ module Doocr
   #  specially to allow map reloads.
   # But: the reload feature is a fragile hack...
   #
+
   @@previous_realloc_size = 1
 
+  # Pushes a file's data (lump or wad) onto the loaded data
   def self.w_add_file(filename : LibC::Char*)
     allocated = Pointer(CDoom::Filelump).null
 
@@ -112,6 +114,9 @@ module Doocr
     GC.free(allocated.as(Void*)) unless allocated.null?
   end
 
+  # Merges a file's data (lump or wad) with the loaded data
+  #  The first occurence of a name will be overwritten if it exists,
+  #  otherwise it will just push onto the loaded data like `w_add_file`
   def self.w_merge_file(filename : String)
     allocated = Pointer(CDoom::Filelump).null
 
@@ -224,10 +229,8 @@ module Doocr
     GC.free(allocated.as(Void*)) unless allocated.null?
   end
 
-  #
   # Flushes any of the reloadable lumps in memory
   #  and reloads the directory.
-  #
   def self.w_reload
     return if Doocr.reloadname.empty?
 
@@ -264,6 +267,7 @@ module Doocr
     GC.free(fileinfo.as(Void*))
   end
 
+  # Merges an array of lump/wad files
   def self.w_merge_multiple_files(filenames : Array(String))
     # will be realloced as lumps are added
 
@@ -276,7 +280,6 @@ module Doocr
     Doocr.numlumps.times { Doocr.lumpcache << Pointer(Void).null }
   end
 
-  #
   # Pass a null terminated list of files to use.
   # All files are optional, but at least one file
   #  must be found.
@@ -287,7 +290,6 @@ module Doocr
   # Lump names can appear multiple times.
   # The name searcher looks backwards, so a later file
   #  does override all earlier ones.
-  #
   def self.w_init_multiple_files(filenames : LibC::Char**)
     # open all the files, load headers, and count lumps
     Doocr.numlumps = 0
@@ -311,9 +313,7 @@ module Doocr
     end
   end
 
-  #
   # Just initialize from a single file.
-  #
   def self.w_init_file(filename : LibC::Char*)
     names = Pointer(UInt8*).malloc(2)
 
@@ -322,9 +322,7 @@ module Doocr
     CDoom.w_init_multiple_files(names)
   end
 
-  #
   # Returns -1 if name not found.
-  #
   def self.w_check_num_for_name(name : LibC::Char*) : LibC::Int
     # make the name into two integers for easy compares
     name8 = Name8.new
@@ -352,9 +350,7 @@ module Doocr
     return -1
   end
 
-  #
   # Calls w_check_num_for_name, but bombs out if not found.
-  #
   def self.w_get_num_for_name(name : LibC::Char*) : LibC::Int
     i = CDoom.w_check_num_for_name(name)
 
@@ -371,9 +367,7 @@ module Doocr
     return i
   end
 
-  #
   # Returns the buffer size needed to load the given lump.
-  #
   def self.w_lump_length(lump : LibC::Int) : LibC::Int
     if lump >= Doocr.numlumps
       CDoom.i_error("Error: w_lump_length: #{lump} >= numlumps")
@@ -382,10 +376,8 @@ module Doocr
     return @@lumpinfo[lump].size
   end
 
-  #
   # Loads the lump into the given buffer,
   #  which must be >= w_lump_length().
-  #
   def self.w_read_lump(lump : LibC::Int, dest : Void*)
     if lump >= Doocr.numlumps
       CDoom.i_error("Error: w_read_lump: #{lump} >= numlumps")
@@ -416,6 +408,7 @@ module Doocr
   @@do_loading_disk = false
   @@loading_disk_shown = false
 
+  # Caches a lump with the type (tag) of cache it will occupy
   def self.w_cache_lump_num(lump : LibC::Int, tag : LibC::Int) : Void*
     if lump.to_u32! >= Doocr.numlumps.to_u32!
       CDoom.i_error("Error: w_cache_lump_num #{lump} >= numlumps")
@@ -434,6 +427,7 @@ module Doocr
     return Doocr.lumpcache[lump]
   end
 
+  # Same as `w_cache_lump_num` but uses a name
   def self.w_cache_lump_name(name : LibC::Char*, tag : LibC::Int) : Void*
     return CDoom.w_cache_lump_num(CDoom.w_get_num_for_name(name), tag)
   end

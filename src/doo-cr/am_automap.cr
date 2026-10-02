@@ -565,9 +565,9 @@ module Doocr
     {% if false %}
       # [pd] Don't waste CPU cycles testing this then
       if (fa.x < 0 || fa.x >= Doocr.f_w ||
-        fa.y < 0 || fa.y >= Doocr.f_h ||
-        fb.x < 0 || fb.x >= Doocr.f_w ||
-        fb.y < 0 || fb.y >= Doocr.f_h)
+         fa.y < 0 || fa.y >= Doocr.f_h ||
+         fb.x < 0 || fb.x >= Doocr.f_w ||
+         fb.y < 0 || fb.y >= Doocr.f_h)
         print "fuck #{fuck}\r"
         @@fuck += 1
         return
@@ -713,15 +713,15 @@ module Doocr
   # Rotation in 2D.
   # Used to rotate player arrow line character.
   #
-    def self.am_rotate(x : CDoom::Fixed, y : CDoom::Fixed, a : CDoom::Angle) : Tuple(CDoom::Fixed, CDoom::Fixed)
-      tmpx = CDoom.fixed_mul(x, @@finecosine[a >> CDoom::ANGLETOFINESHIFT]) -
-        CDoom.fixed_mul(y, @@finesine[a >> CDoom::ANGLETOFINESHIFT])
-      tmpy = CDoom.fixed_mul(x, @@finesine[a >> CDoom::ANGLETOFINESHIFT]) +
-        CDoom.fixed_mul(y, @@finecosine[a >> CDoom::ANGLETOFINESHIFT])
-      {tmpx, tmpy}
+  def self.am_rotate(x : CDoom::Fixed, y : CDoom::Fixed, a : CDoom::Angle) : Tuple(CDoom::Fixed, CDoom::Fixed)
+    tmpx = CDoom.fixed_mul(x, @@finecosine[a >> CDoom::ANGLETOFINESHIFT]) -
+           CDoom.fixed_mul(y, @@finesine[a >> CDoom::ANGLETOFINESHIFT])
+    tmpy = CDoom.fixed_mul(x, @@finesine[a >> CDoom::ANGLETOFINESHIFT]) +
+           CDoom.fixed_mul(y, @@finecosine[a >> CDoom::ANGLETOFINESHIFT])
+    {tmpx, tmpy}
   end
 
-    def self.am_draw_line_character(lineguy : Array(Mline),
+  def self.am_draw_line_character(lineguy : Array(Mline),
                                   lineguylines : Int32,
                                   scale : CDoom::Fixed,
                                   angle : CDoom::Angle,

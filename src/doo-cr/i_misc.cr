@@ -99,7 +99,7 @@ module Doocr
   end
 
   def self.i_shutdown_graphics
-    @@screen_texture.try do |st| 
+    @@screen_texture.try do |st|
       Raylib.unload_texture(st) if Raylib.texture_valid?(st)
     end
     @@viewport_target.try do |vt|

@@ -16,14 +16,13 @@
 # ==> Intermission screen
 
 module Doocr
+  # Copies the intermission screen framebuffer to the main buffer
   def self.wi_slam_background
     CDoom.doom_memcpy(Doocr.screens[0], Doocr.screens[1], CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
     CDoom.v_mark_rect(0, 0, CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT)
   end
 
-  #
   # Draws "<Levelname> Finished!"
-  #
   def self.wi_draw_lf
     y = CDoom::WI_TITLEY
 
@@ -38,9 +37,7 @@ module Doocr
       y, CDoom::FB, Doocr.finished)
   end
 
-  #
   # Draws "Entering <LevelName>"
-  #
   def self.wi_draw_el
     y = CDoom::WI_TITLEY
 
@@ -55,6 +52,7 @@ module Doocr
       y, CDoom::FB, Doocr.lnames[@@wbs.next])
   end
 
+  # Draws a patch onto an predifined node on the screen (for dynamic sprite stuff)
   def self.wi_draw_on_lnode(n : LibC::Int, c : CDoom::Patch**)
     fits = false
 
@@ -87,6 +85,7 @@ module Doocr
     end
   end
 
+  # Inits the times for animations
   def self.wi_init_animated_back
     return if Doocr.gamemode == CDoom::GameMode::Commercial
 
@@ -109,6 +108,7 @@ module Doocr
     end
   end
 
+  # Updates the animations
   def self.wi_update_animated_back
     return if Doocr.gamemode == CDoom::GameMode::Commercial
 
@@ -143,6 +143,7 @@ module Doocr
     end
   end
 
+  # Draws the animations
   def self.wi_draw_animated_back
     return if Doocr.gamemode == CDoom::GameMode::Commercial
 
@@ -158,12 +159,10 @@ module Doocr
     end
   end
 
-  #
   # Draws a number.
   # If digits > 0, then use that many digits minimum,
   #  otherwise only use as many as necessary.
   # Returns new x position.
-  #
   def self.wi_draw_num(x : LibC::Int, y : LibC::Int, n : LibC::Int, digits : LibC::Int) : LibC::Int
     fontwidth = Doocr.num[0].value.width
 
@@ -204,6 +203,7 @@ module Doocr
     return x
   end
 
+  # Draws a percent symbol
   def self.wi_draw_percent(x : LibC::Int, y : LibC::Int, p : LibC::Int)
     return if p < 0
 
@@ -211,10 +211,8 @@ module Doocr
     CDoom.wi_draw_num(x, y, p, -1)
   end
 
-  #
   # Display level completion time and par,
   #  or "sucks" message if overflow.
-  #
   def self.wi_draw_time(x : LibC::Int, y : LibC::Int, t : LibC::Int)
     return if t < 0
 
@@ -237,16 +235,19 @@ module Doocr
     end
   end
 
+  # Unloads intermission
   def self.wi_end
     CDoom.wi_unload_data
   end
 
+  # Inits with no state
   def self.wi_init_no_state
-          Doocr.state = CDoom::Stateenum::NoState
+    Doocr.state = CDoom::Stateenum::NoState
     Doocr.acceleratestage = 0
     Doocr.cnt = 10
   end
 
+  # Updates intermission
   def self.wi_update_no_state
     CDoom.wi_update_animated_back
 
@@ -256,6 +257,7 @@ module Doocr
     end
   end
 
+  # Sets intermission to show the next location
   def self.wi_init_show_next_loc
     Doocr.state = CDoom::Stateenum::ShowNextLoc
     Doocr.acceleratestage = 0
@@ -264,6 +266,7 @@ module Doocr
     CDoom.wi_init_animated_back
   end
 
+  # Updates the intermission to show next location
   def self.wi_update_show_next_loc
     CDoom.wi_update_animated_back
 
@@ -274,6 +277,7 @@ module Doocr
     end
   end
 
+  # Draws the show next loc
   def self.wi_draw_show_next_loc
     CDoom.wi_slam_background
 
@@ -302,16 +306,18 @@ module Doocr
 
     # draws which level yo uare entering..
     if Doocr.gamemode != CDoom::GameMode::Commercial ||
-      @@wbs.next != 30
+       @@wbs.next != 30
       CDoom.wi_draw_el
     end
   end
 
+  # Draws with no state
   def self.wi_draw_no_state
     Doocr.snl_pointeron = 1
     CDoom.wi_draw_show_next_loc
   end
 
+  # Sets the sum of player frags
   def self.wi_frag_sum(playernum : LibC::Int) : LibC::Int
     frags = 0
 
@@ -328,6 +334,7 @@ module Doocr
     return frags
   end
 
+  # Sets up deathmatch player stats
   def self.wi_init_deathmatch_stats
     Doocr.state = CDoom::Stateenum::StatCount
     Doocr.acceleratestage = 0
@@ -348,6 +355,7 @@ module Doocr
     CDoom.wi_init_animated_back
   end
 
+  # Updates the deathmatch stats screen
   def self.wi_update_deathmatch_stats
     CDoom.wi_update_animated_back
 
@@ -422,6 +430,7 @@ module Doocr
     end
   end
 
+  # Draws the deathmatch stats screen
   def self.wi_draw_deathmatch_stats
     lh = CDoom::WI_SPACINGY # line height
 
@@ -486,6 +495,7 @@ module Doocr
     end
   end
 
+  # Inits the netgame stats screen (co-op)
   def self.wi_init_netgame_stats
     Doocr.state = CDoom::Stateenum::StatCount
     Doocr.acceleratestage = 0
@@ -509,6 +519,7 @@ module Doocr
     CDoom.wi_init_animated_back
   end
 
+  # Updates the netgame stats screen
   def self.wi_update_netgame_stats
     CDoom.wi_update_animated_back
 
@@ -629,6 +640,7 @@ module Doocr
     end
   end
 
+  # Draes the netgame stats screen
   def self.wi_draw_netgame_stats
     pwidth = Doocr.percent.value.width
 
@@ -681,6 +693,7 @@ module Doocr
     end
   end
 
+  # Inits all intermissions stats
   def self.wi_init_stats
     Doocr.state = CDoom::Stateenum::StatCount
     Doocr.acceleratestage = 0
@@ -695,6 +708,7 @@ module Doocr
     CDoom.wi_init_animated_back
   end
 
+  # Updates the player stats
   def self.wi_update_stats
     CDoom.wi_update_animated_back
 
@@ -776,6 +790,7 @@ module Doocr
     end
   end
 
+  # Draws the player stats
   def self.wi_draw_stats
     lh = (3 * Doocr.num[0].value.height) // 2
 
@@ -802,6 +817,7 @@ module Doocr
     CDoom.wi_draw_time(CDoom::SCREENWIDTH - CDoom::SP_TIMEX, CDoom::SP_TIMEY, Doocr.cnt_par)
   end
 
+  # Checks to see if the intermission should accelerate (skip)
   def self.wi_check_for_accelerate
     # check for button presses to skip delays
     player = @@players.to_unsafe
@@ -825,9 +841,7 @@ module Doocr
     end
   end
 
-  #
   # Updates stuff each tick
-  #
   def self.wi_ticker
     # counter for general background animation
     Doocr.bcnt += 1
@@ -859,6 +873,7 @@ module Doocr
     end
   end
 
+  # Loads/sets up the current intermission screens base data
   def self.wi_load_data
     name = Pointer(UInt8).malloc(9)
 
@@ -870,7 +885,7 @@ module Doocr
     end
 
     if Doocr.gamemode == CDoom::GameMode::Retail &&
-      @@wbs.epsd == 3
+       @@wbs.epsd == 3
       CDoom.doom_strcpy(name, "INTERPIC")
     end
 
@@ -1010,6 +1025,7 @@ module Doocr
     end
   end
 
+  # Unloads the loaded intermission data
   def self.wi_unload_data
     z_change_tag(Doocr.wiminus, CDoom::PU_CACHE)
 
@@ -1068,6 +1084,7 @@ module Doocr
     end
   end
 
+  # Draws the intermission's state
   def self.wi_drawer
     case Doocr.state
     when CDoom::Stateenum::StatCount
@@ -1085,6 +1102,7 @@ module Doocr
     end
   end
 
+  # Inits the variables for the base intermission
   def self.wi_init_variables(wbstartstruct : Wbstart)
     @@wbs = wbstartstruct
     Doocr.acceleratestage = 0
@@ -1103,6 +1121,7 @@ module Doocr
     end
   end
 
+  # Starts the intermission
   def self.wi_start(wbstartstruct : Wbstart)
     wi_init_variables(wbstartstruct)
     CDoom.wi_load_data

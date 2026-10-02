@@ -15,8 +15,6 @@
 #
 # ==> The entry point for Doo-cr
 
-
-
 require "socket"
 
 require "./doo-cr/lib_doocr.cr"
@@ -50,16 +48,16 @@ module Doocr
   @@sres_x = 320
   @@sres_y = 240
 
+  # Create seperate thread so audio updates seperately from game code
   unless ARGV.includes?("-headless") || ARGV.includes?("-nosound")
-    # Create seperate thread so audio updates seperately from game code
     audio_context = Fiber::ExecutionContext::Isolated.new("doom-audio") do
       Doocr.update_audio
     end
   end
 
   @@pause_socket = false
+  # Create a seperate thread for the packets-in buffer during a netgame
   if ARGV.includes?("-net")
-    # Create a seperate thread for the packets-in buffer during a netgame
     net_context = Fiber::ExecutionContext::Isolated.new("doom-net") do
       until @@insocket
       end
@@ -102,7 +100,7 @@ module Doocr
   end
 end
 
-# Creates a Fiber SpinLock mainly so that the audio fiber doesn't jump off its thread
+# A Fiber SpinLock mainly so that the audio fiber doesn't jump off its thread
 struct SpinLock
   def initialize
     @flag = Atomic(Bool).new(false)
@@ -126,7 +124,6 @@ end
 
 Fiber::ExecutionContext.default.resize(1)
 MAIN_THREAD = Thread.current
-
 
 # Make it happen!
 Doocr.doom_init

@@ -67,7 +67,7 @@ module Doocr
           end
 
           # Draw crosshair
-           if (Doocr.crosshair != 0 &&
+          if (Doocr.crosshair != 0 &&
              Doocr.menuactive == 0 &&
              Doocr.gamestate == CDoom::Gamestate::Level &&
              Doocr.automapactive == 0)

@@ -99,12 +99,12 @@ end
 
 # The C Library
 lib CDoom
-  DOOM_SAMPLERATE = Doocr::DOOM_SAMPLERATE
-  DOOM_MIDI_RATE = Doocr::DOOM_MIDI_RATE
+  DOOM_SAMPLERATE              = Doocr::DOOM_SAMPLERATE
+  DOOM_MIDI_RATE               = Doocr::DOOM_MIDI_RATE
   DOOM_FLAG_HIDE_MOUSE_OPTIONS = Doocr::DOOM_FLAG_HIDE_MOUSE_OPTIONS
   DOOM_FLAG_HIDE_SOUND_OPTIONS = Doocr::DOOM_FLAG_HIDE_SOUND_OPTIONS
   DOOM_FLAG_HIDE_MUSIC_OPTIONS = Doocr::DOOM_FLAG_HIDE_MUSIC_OPTIONS
-  DOOM_FLAG_MENU_DARKEN_BG = Doocr::DOOM_FLAG_MENU_DARKEN_BG
+  DOOM_FLAG_MENU_DARKEN_BG     = Doocr::DOOM_FLAG_MENU_DARKEN_BG
 
   alias DoomBool = LibC::Int
   alias Default = Doocr::Default
@@ -437,7 +437,6 @@ lib CDoom
   # __D_MAIN__
 
   MAXWADFILES = 20
-
 
   fun d_add_file = D_AddFile(file : LibC::Char*)
 
@@ -2232,7 +2231,6 @@ lib CDoom
   fun p_archive_specials = P_ArchiveSpecials
   fun p_unarchive_specials = P_UnArchiveSpecials
 
-
   # __P_SETUP__
 
   # NOT called by W_Ticker. Fixme.
@@ -3153,7 +3151,6 @@ lib CDoom
   # ?
   # debug flag to cancel adaptiveness
 
-
   # Needed to store the number of the dummy sky flat.
   # Used for rendering,
   #  as well as tracking projectiles etc.
@@ -3164,9 +3161,6 @@ lib CDoom
   # doomcom is owned by Doocr.
 
   # This points inside doomcom.
-
-
-
 
   # __I_SOUND__
 
@@ -3892,7 +3886,6 @@ lib CDoom
   PLATSPEED = Doocr::FRACUNIT
   MAXPLATS  = 30
 
-
   fun t_plat_raise = T_PlatRaise(plat : Plat*)
   fun ev_do_plat = EV_DoPlat(line : Line*, type : Plattype, amount : LibC::Int) : LibC::Int
   fun p_add_active_plat = P_AddActivePlat(plat : Plat*)
@@ -3975,7 +3968,6 @@ lib CDoom
   CEILWAIT    = 150
   MAXCEILINGS =  30
 
-
   fun ev_do_ceiling = EV_DoCeiling(line : Line*, type : Ceilingenum) : LibC::Int
   fun t_move_ceiling = T_MoveCeiling(ceiling : Ceiling*)
   fun p_add_active_ceiling = P_AddActiveCeiling(c : Ceiling*)
@@ -4056,13 +4048,7 @@ lib CDoom
 
   # __R_BSP__
 
-
-
   # false if the back side is the same plane
-
-
-
-
 
   alias Drawfunc = Proc(LibC::Int, LibC::Int, Nil)
 
@@ -4072,7 +4058,6 @@ lib CDoom
   fun r_render_bsp_node = R_RenderBSPNode(bspnum : LibC::Int)
 
   # __R_DRAW__
-
 
   # first pixel in a column
 
@@ -4091,11 +4076,7 @@ lib CDoom
 
   fun r_video_erase = R_VideoErase(ofs : LibC::UInt, count : LibC::Int)
 
-
-
-
   # start of a 64*64 tile image
-
 
   # Span blitting for rows, floor/ceiling.
   # No Sepctre effect needed.
@@ -4126,10 +4107,6 @@ lib CDoom
 
   # needed for pre rendering (fracs)
 
-
-
-
-
   # for global animation
 
   # Sprite....
@@ -4142,12 +4119,10 @@ lib CDoom
   # POV data.
   #
 
-
   # ?
 
   VIEWANGLETOX_SIZE = FINEANGLES//2
   XTOVIEWANGLE_SIZE = SCREENWIDTH + 1
-
 
   # angle to line origin
 
@@ -4178,11 +4153,6 @@ lib CDoom
   # POV related.
   #
 
-
-
-
-
-
   #
   # Lighting LUT.
   # Used for z-depth cuing per column/row,
@@ -4198,8 +4168,6 @@ lib CDoom
   LIGHTSCALESHIFT =  12
   MAXLIGHTZ       = 128
   LIGHTZSHIFT     =  20
-
-
 
   # Number of diminishing brightness levels.
   # There a 0-31, i.e. 32 LUT in the COLORMAP lump.
@@ -4247,8 +4215,6 @@ lib CDoom
 
   # Visplane related.
 
-
-
   fun r_init_planes = R_InitPlanes
   fun r_clear_planes = R_ClearPlanes
   fun r_map_plane = R_MapPlane(y : LibC::Int, x1 : LibC::Int, x2 : LibC::Int)
@@ -4259,12 +4225,10 @@ lib CDoom
 
   MAXVISSPRITES = 128
 
-
   # Constant arrays used for psprite clipping
   # and initializing clipping.
 
   # vars for R_DrawMaskedColumn
-
 
   fun r_draw_masked_column = R_DrawMaskedColumn(column : Column*)
   fun r_sort_vis_sprites = R_SortVisSprites
@@ -4336,7 +4300,6 @@ lib CDoom
   # Time interval for item respawning.
   ITEMQUESIZE = 128
 
-
   fun p_respawn_specials = P_RespawnSpecials
   fun p_spawn_mobj = P_SpawnMobj(x : Fixed, y : Fixed, z : Fixed, type : Mobjtype) : Mobj*
   fun p_remove_mobj = P_RemoveMobj(mobj : Mobj*)
@@ -4384,7 +4347,6 @@ lib CDoom
   fun p_intercept_vector = P_InterceptVector(v2 : Divline*, v1 : Divline*) : Fixed
   fun p_box_on_line_side = P_BoxOnLineSide(tmbox : Fixed*, ld : Line*) : LibC::Int
 
-
   fun p_line_opening = P_LineOpening(linedef : Line*)
 
   fun p_block_lines_iterator = P_BlockLinesIterator(x : LibC::Int, y : LibC::Int, func : Proc(Line*, DoomBool)) : DoomBool
@@ -4393,7 +4355,6 @@ lib CDoom
   PT_ADDLINES  = 1
   PT_ADDTHINGS = 2
   PT_EARLYOUT  = 4
-
 
   fun p_path_traverse = P_PathTraverse(x1 : Fixed, y1 : Fixed, x2 : Fixed, y2 : Fixed, flags : LibC::Int, trav : Proc(Intercept*, DoomBool)) : DoomBool
   fun p_unset_thing_position = P_UnsetThingPosition(thing : Mobj*)
@@ -4416,7 +4377,6 @@ lib CDoom
   fun p_check_sight = P_CheckSight(t1 : Mobj*, t2 : Mobj*) : DoomBool
   fun p_use_lines = P_UseLines(player : Player*)
   fun p_change_sector = P_ChangeSector(sector : Sector*, crunch : DoomBool) : DoomBool
-
 
   fun p_aim_line_attack = P_AimLineAttack(t1 : Mobj*, angle : Angle, distance : Fixed) : Fixed
   fun p_line_attack = P_LineAttack(t1 : Mobj*, angle : Angle, distance : Fixed, slope : Fixed, damage : LibC::Int)
@@ -4713,8 +4673,6 @@ lib CDoom
 
   SCREEN_PALETTE_SIZE = 256 * 3
 
-
-
   fun d_doom_loop = D_DoomLoop
   fun d_update_wipe = D_UpdateWipe
 
@@ -4793,20 +4751,15 @@ lib CDoom
   # starting from the middle.
   #
   R                 = ((8*PLAYERRADIUS)//7)
-  NUMPLYRLINES      = 7
+  NUMPLYRLINES      =  7
   NUMCHEATPLYRLINES = 16
 
   NUMTRIANGLEGUYLINES     = 3
   NUMTHINTRIANGLEGUYLINES = 3
 
-
-
-
   # location of window on screen
 
   # size of window on screen
-
-
 
   # LL x,y where the window is on the map (map coords)
   # UR x,y where the window is on the map (map coords)
@@ -4817,9 +4770,7 @@ lib CDoom
 
   # based on level size
 
-
   # based on player size
-
 
   # old stuff for recovery later
 
@@ -4827,20 +4778,7 @@ lib CDoom
   # used by MTOF to scale from map-to-frame-buffer coords
   # used by FTOM to scale from frame-buffer-to-map coords (=1/scale_mtof)
 
-
-
-
-
-
-
   MAXARGVS = 100
-
-
-
-
-
-
-
 
   #
   # EVENT HANDLING
@@ -4889,10 +4827,6 @@ lib CDoom
 
   fun find_response_file = FindResponseFile
 
-
-
-
-
   fun d_process_events = D_ProcessEvents
   fun g_build_ticcmd = G_BuildTiccmd(cmd : Ticcmd*)
   fun d_do_advance_demo = D_DoAdvanceDemo
@@ -4923,9 +4857,6 @@ lib CDoom
 
   TEXTSPEED =   3
   TEXTWAIT  = 250
-
-
-
 
   #
   # f_start_cast
@@ -4960,9 +4891,6 @@ lib CDoom
   fun f_bunny_scroll = F_BunnyScroll
 
   fun f_drawer = F_Drawer
-
-
-
 
   fun wipe_shitty_col_major_x_form = wipe_shittyColMajorXform(array : LibC::Short*, width : LibC::Int, height : LibC::Int)
 
@@ -5010,28 +4938,13 @@ lib CDoom
   fun p_spawn_player = P_SpawnPlayer(mthing : Mapthing*)
   fun r_execute_set_view_size = R_ExecuteSetViewSize
 
-
-
-
-
   #
   # controls (have defaults)
   #
 
-
-
-
   # joystick values are repeated
 
-
-
-
   # DOOM Par Times
-
-
-
-
-
 
   fun g_build_ticcmd = G_BuildTiccmd(cmd : Ticcmd*)
 
@@ -5053,20 +4966,9 @@ lib CDoom
   HU_INPUTHEIGHT =   1
   QUEUESIZE      = 128
 
-
-
-
-
-
-
-
-
-
   # DOOM shareware/registered/retail (Ultimate) names.
 
   # DOOM 2 map names.
-
-
 
   fun foreign_translation = ForeignTranslation(ch : LibC::Char) : LibC::Char
 
@@ -5118,8 +5020,6 @@ lib CDoom
   # synchronous mix buffer updates and asynchronous
   # audio writes. Probably redundant with gametic.
 
-
-
   # The number of internal mixing channels,
   #  the samples calculated for each mixing step,
   #  the size of the 16bit, 2 hardware channel (stereo)
@@ -5155,7 +5055,6 @@ lib CDoom
 
   # Hardware left and right channel volume lookup.
 
-
   fun tick_song = TickSong
 
   fun getsfx(sfxname : LibC::Char*, len : LibC::Int*) : Void*
@@ -5166,7 +5065,6 @@ lib CDoom
   fun reset_all_channels
 
   fun i_qry_song_playing = I_QrySongPlaying(handle : LibC::Int) : LibC::Int
-
 
   fun i_get_heap_size = I_GetHeapSize : LibC::Int
 
@@ -5265,11 +5163,7 @@ lib CDoom
 
   # timed message = no input from user
 
-
-
   # we are going to be entering a savegame string
-
-
 
   # graphic name of skulls
   # warning: initializer-string for array of chars is too long
@@ -5278,10 +5172,6 @@ lib CDoom
 
   # We create new menu text by cutting into existing graphics and pasting them to create the new text.
   # This way we don't ship code with embeded graphics that come from WAD files.
-
-
-
-
 
   # DOOM MENU
   #
@@ -5398,10 +5288,6 @@ lib CDoom
   # SCREEN SHOTS
   #
 
-
-
-
-
   fun p_random = P_Random : LibC::Int
 
   MAXSPECIALCROSS = 8
@@ -5420,8 +5306,6 @@ lib CDoom
     NoDir
     NUMDIRS
   end
-
-
 
   # keep track of special lines as they are hit,
   # but don't process them until the move is proven valid
@@ -5456,11 +5340,8 @@ lib CDoom
 
   fun t_fire_flicker = T_FireFlicker(flick : Fireflicker*)
 
-
   # Height if not aiming up or down
   # ???: use slope for monsters?
-
-
 
   # slopes to top and bottom of target
 
@@ -5470,10 +5351,6 @@ lib CDoom
   fun pit_check_thing = PIT_CheckThing(thing : Mobj*) : DoomBool
   fun p_thing_height_clip = P_ThingHeightClip(thing : Mobj*) : DoomBool
 
-
-
-
-
   fun p_hit_slide_line = P_HitSlideLine(ld : Line*)
   fun ptr_slide_traverse = PTR_SlideTraverse(int : Intercept*) : DoomBool
   fun ptr_aim_traverse = PTR_AimTraverse(int : Intercept*) : DoomBool
@@ -5482,7 +5359,6 @@ lib CDoom
 
   fun pit_radius_attack = PIT_RadiusAttack(thing : Mobj*) : DoomBool
   fun pit_change_sector = PIT_ChangeSector(thing : Mobj*) : DoomBool
-
 
   fun pit_add_line_intercepts = PIT_AddLineIntercepts(ld : Line*) : DoomBool
   fun pit_add_thing_intercepts = PIT_AddThingIntercepts(thing : Mobj*) : DoomBool
@@ -5511,14 +5387,12 @@ lib CDoom
   # plasma cells for a bfg attack
   BFGCELLS = 40
 
-
   fun p_set_psprite = P_SetPsprite(player : Player*, position : LibC::Int, stnum : Statenum)
   fun p_bring_up_weapon = P_BringUpWeapon(player : Player*)
   fun p_check_ammo = P_CheckAmmo(player : Player*) : DoomBool
   fun p_fire_weapon = P_FireWeapon(player : Player*)
   fun p_bullet_slope = P_BulletSlope(mo : Mobj*)
   fun p_gunshot = P_GunShot(mo : Mobj*, accurate : DoomBool)
-
 
   enum Thinkerclass : Byte
     End
@@ -5548,8 +5422,6 @@ lib CDoom
   fun p_load_sidedefs = P_LoadSideDefs(lump : LibC::Int)
   fun p_group_lines = P_GroupLines
 
-
-
   fun p_divline_side = P_DivlineSide(x : Fixed, y : Fixed, node : Divline*) : LibC::Int
   fun p_intercept_vector2 = P_InterceptVector2(v2 : Divline*, v1 : Divline*) : Fixed
   fun p_cross_subsector = P_CrossSubsector(num : LibC::Int) : DoomBool
@@ -5575,7 +5447,6 @@ lib CDoom
   MAXBOB = 0x100000
 
   ANG5 = Doocr::ANG90//18
-
 
   fun p_thrust = P_Thrust(player : Player*, angle : Angle, move : Fixed)
   fun p_calc_height = P_CalcHeight(player : Player*)
@@ -5653,11 +5524,6 @@ lib CDoom
     patches : Texpatch[1]
   end
 
-
-
-
-
-
   fun r_draw_column_in_cache = R_DrawColumnInCache(patch : Column*, cache : Byte*, originy : LibC::Int, cacheheight : LibC::Int)
   fun r_generate_composite = R_GenerateComposite(texnum : LibC::Int)
   fun r_generate_lookup = R_GenerateLookup(texnum : LibC::Int)
@@ -5675,9 +5541,7 @@ lib CDoom
   FUZZTABLE = 50
   FUZZOFF   = SCREENWIDTH
 
-
   # just for profiling
-
 
   # just for profiling
 
@@ -5685,7 +5549,6 @@ lib CDoom
   DISTMAP     =    2
 
   # just for profiling purposes
-
 
   fun r_init_tables = R_InitTables
   fun r_init_texture_mapping = R_InitTextureMapping
@@ -5696,13 +5559,11 @@ lib CDoom
   MAXVISPLANES = 128
   MAXOPENINGS  = SCREENWIDTH*64
 
-
   #
   # opening
   #
 
   # Here comes the obnoxious "visplane".
-
 
   #
   # spanstart holds the start of a plane span
@@ -5713,20 +5574,10 @@ lib CDoom
   # texture mapping
   #
 
-  
-
-
-
   HEIGHTBITS = 12
   HEIGHTUNIT = 1 << HEIGHTBITS
 
   # OPTIMIZE: closed two sided lines as single sided
-
-
-
-
-
-
 
   fun r_render_seg_loop = R_RenderSegLoop
 
@@ -5750,10 +5601,7 @@ lib CDoom
   # There was a lot of stuff grabbed wrong, so I changed it...
   #
 
-
-
   fun r_install_sprite_lump = R_InstallSpriteLump(lump : LibC::Int, frame : LibC::UInt, rotation : LibC::UInt, flipped : DoomBool)
-
 
   fun r_new_vis_sprite = R_NewVisSprite : Vissprite*
   fun r_draw_vis_sprite = R_DrawVisSprite(vis : Vissprite*, x1 : LibC::Int, x2 : LibC::Int)
@@ -5936,20 +5784,15 @@ lib CDoom
   # Dimensions given in characters.
   ST_MSGWIDTH = 52
 
-
   # Massive bunches of cheat shit
   #  to keep it from being easy to figure them out.
   # Yeah, right...
 
   # Smashing Pumpkins Into Samml Piles Of Putried Debris.
 
-
-
   # my position cheat
 
   # Now what?
-
-
 
   fun st_stop = ST_Stop
 
@@ -5968,7 +5811,6 @@ lib CDoom
   fun st_unload_data = ST_unloadData
   fun st_init_data = ST_initData
   fun st_create_widgets = ST_createWidgets
-
 
   fun doom_strupr(s : LibC::Char*)
 
@@ -6053,7 +5895,6 @@ lib CDoom
 
   # signals to refresh everything for one frame
 
-
   # # of commercial levels
 
   #
@@ -6091,7 +5932,6 @@ lib CDoom
   # "gray P[1..MAXPLAYERS]"
 
   # Name graphics of each level (centered)
-
 
   #
   # CODE
@@ -6143,7 +5983,6 @@ lib CDoom
 
     rover : Memblock*
   end
-
 
   fun z_clear_zone = Z_ClearZone(zone : Memzone*)
 end

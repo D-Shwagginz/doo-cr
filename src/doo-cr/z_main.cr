@@ -16,6 +16,7 @@
 # ==> Zone memory management
 
 module Doocr
+  # Initializes the Zone memory block
   def self.z_init
     size = 0
     Doocr.mainzone = CDoom.i_zone_base(pointerof(size)).as(CDoom::Memzone*)
@@ -40,6 +41,7 @@ module Doocr
     puts "#{Doocr.mb_used}MBs of memory allocated."
   end
 
+  # Frees a Zone block
   def self.z_free(ptr : Void*)
     block = (ptr.as(UInt8*) - sizeof(CDoom::Memblock)).as(CDoom::Memblock*)
 
@@ -83,6 +85,7 @@ module Doocr
     end
   end
 
+  # Allocate a Zone block
   def self.z_malloc(size : LibC::Int, tag : LibC::Int, user : Void*) : Void*
     size = (size + CDoom::MEM_ALIGN - 1) & ~(CDoom::MEM_ALIGN - 1)
 
@@ -172,6 +175,7 @@ module Doocr
     return (base.as(UInt8*) + sizeof(CDoom::Memblock)).as(Void*)
   end
 
+  # Frees blocks between tags
   def self.z_free_tags(lowtag : LibC::Int, hightag : LibC::Int)
     block = Doocr.mainzone.value.blocklist.next
     while block != pointerof(Doocr.mainzone.value.@blocklist)
@@ -192,6 +196,7 @@ module Doocr
     end
   end
 
+  # Checks the Zone for any errors
   def self.z_check_heap
     block = Doocr.mainzone.value.blocklist.next
 
@@ -217,6 +222,7 @@ module Doocr
     end
   end
 
+  # Changes a block's tag
   def self.z_change_tag2(ptr : Void*, tag : LibC::Int)
     block = (ptr.as(UInt8*) - sizeof(CDoom::Memblock)).as(CDoom::Memblock*)
 

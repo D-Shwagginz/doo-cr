@@ -16,11 +16,12 @@
 # ==> Status bar
 
 module Doocr
+  # Inits the status bar
   def self.stlib_init
     Doocr.sttminus = CDoom.w_cache_lump_name("STTMINUS", CDoom::PU_STATIC).as(CDoom::Patch*)
   end
 
-  # ?
+  # # Just sets the oldnum seperate from given parms
   def self.stlib_init_num(n : CDoom::ST_Number*,
                           x : LibC::Int,
                           y : LibC::Int,
@@ -37,11 +38,9 @@ module Doocr
     n.value.p = pl
   end
 
-  #
   # A fairly efficient way to draw a number
   #  based on differences from the old number.
   # Note: worth the trouble?
-  #
   def self.stlib_draw_num(n : CDoom::ST_Number*, refresh : CDoom::DoomBool)
     numdigits = n.value.width
     num = n.value.num.value
@@ -97,10 +96,12 @@ module Doocr
     end
   end
 
+  # Redraws a number if it is on
   def self.stlib_update_num(n : CDoom::ST_Number*, refresh : CDoom::DoomBool)
     CDoom.stlib_draw_num(n, refresh) if n.value.on.value != 0
   end
 
+  # Sets up a percentage
   def self.stlib_init_percent(p : CDoom::ST_Percent*,
                               x : LibC::Int,
                               y : LibC::Int,
@@ -367,8 +368,8 @@ module Doocr
 
           # Simplified, accepting both "noclip" and "idspispopd".
           # no clipping mode cheat
-                elsif Doocr.cht_check_cheat(Doocr.cheat_noclip, ev.value.data1.to_u8!) != 0 ||
-                  Doocr.cht_check_cheat(Doocr.cheat_commercial_noclip, ev.value.data1.to_u8!) != 0
+        elsif Doocr.cht_check_cheat(Doocr.cheat_noclip, ev.value.data1.to_u8!) != 0 ||
+              Doocr.cht_check_cheat(Doocr.cheat_commercial_noclip, ev.value.data1.to_u8!) != 0
           Doocr.plyr.value.cheats = Doocr.plyr.value.cheats ^ CDoom::Cheat::CF_NOCLIP.value
 
           if Doocr.plyr.value.cheats & CDoom::Cheat::CF_NOCLIP.value != 0
