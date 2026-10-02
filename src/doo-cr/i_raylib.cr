@@ -48,7 +48,7 @@ module Doocr
 
     return unless Raylib.window_ready? || @@headless
     # Pointers for speed. "Oh! But it's oop!". I don't see you having a source port of Doom.
-    screen_ptr = CDoom.screens[0]
+    screen_ptr = Doocr.screens[0]
     buf_ptr = @@raylibbuffer.to_unsafe.as(UInt32*)
     palette_ptr = @@palette_rgba.to_unsafe
     p255 = @@palette_rgba[255]
@@ -63,6 +63,23 @@ module Doocr
               buf_ptr[p] = 0_u32
             else
               buf_ptr[p] = palette_ptr[pix]
+            end
+          end
+
+          # Draw crosshair
+          if (Doocr.crosshair != 0 &&
+             Doocr.menuactive == 0 &&
+             Doocr.gamestate == CDoom::Gamestate::Level &&
+             Doocr.automapactive == 0)
+            y = CDoom::SCREENHEIGHT // 2
+            y += Doocr.setblocks == 11 ? 8 : Doocr.setblocks < 10 ? -(10 - Doocr.setblocks) : 0
+            2.times do |i|
+              buf_ptr[CDoom::SCREENWIDTH // 2 - 1 - i + y * CDoom::SCREENWIDTH] = 0xffffffff_u32
+              buf_ptr[CDoom::SCREENWIDTH // 2 + 1 + i + y * CDoom::SCREENWIDTH] = 0xffffffff_u32
+            end
+            2.times do |i|
+              buf_ptr[CDoom::SCREENWIDTH // 2 + (y - 1 - i) * CDoom::SCREENWIDTH] = 0xffffffff_u32
+              buf_ptr[CDoom::SCREENWIDTH // 2 + (y + 1 + i) * CDoom::SCREENWIDTH] = 0xffffffff_u32
             end
           end
 
@@ -102,22 +119,6 @@ module Doocr
               width: rt.texture.width.to_f * scale, height: rt.texture.height.to_f * scale),
             Raylib::Vector2.new, 0, Raylib::WHITE)
 
-          # Draw crosshair
-          if (CDoom.crosshair != 0 &&
-             CDoom.menuactive == 0 &&
-             CDoom.gamestate == CDoom::Gamestate::Level &&
-             CDoom.automapactive == 0)
-            y = CDoom::SCREENHEIGHT // 2
-            y += CDoom.setblocks == 11 ? 8 : -8
-            2.times do |i|
-              Raylib.draw_pixel(CDoom::SCREENWIDTH // 2 - 2 - i, y, Raylib::RAYWHITE)
-              Raylib.draw_pixel(CDoom::SCREENWIDTH // 2 + 2 + i, y, Raylib::RAYWHITE)
-            end
-            2.times do |i|
-              Raylib.draw_pixel(CDoom::SCREENWIDTH // 2, (y - 2 - i), Raylib::RAYWHITE)
-              Raylib.draw_pixel(CDoom::SCREENWIDTH // 2, (y + 2 + i), Raylib::RAYWHITE)
-            end
-          end
           Raylib.end_drawing
         end
       end

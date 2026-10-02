@@ -13,20 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-# ==> Midi stuff
+# ==> Doocr's nodebuilder
 
-module Doocr
-  # Midi info
-  MIDI_BUFFER_SIZE =  1024
-  MIDI_SAMPLE_RATE = 44100
-  MIDI_TICK_TIME   = 1.0 / 140.0
-
-  def self.doom_tick_midi : UInt64
-    return CDoom.i_tick_song
-  end
-
-  def self.doom_get_sound_buffer : Int16*
-    CDoom.i_update_sound
-    return Doocr.mixbuffer.to_unsafe
-  end
+module Doocr::Nodebuilder
 end
