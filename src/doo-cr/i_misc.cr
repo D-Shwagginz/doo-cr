@@ -17,11 +17,11 @@
 
 module Doocr
   def self.i_get_heap_size : LibC::Int
-    return CDoom.mb_used * 1024 * 1024
+    return Doocr.mb_used * 1024 * 1024
   end
 
   def self.i_zone_base(size : LibC::Int*) : CDoom::Byte*
-    size.value = CDoom.mb_used * 1024 * 1024
+    size.value = Doocr.mb_used * 1024 * 1024
     return GC.malloc(size.value).as(CDoom::Byte*)
   end
 
@@ -54,6 +54,7 @@ module Doocr
   #
   def self.i_quit
     @@closing = true
+    d_endoom
     CDoom.d_quit_net_game
     CDoom.s_stop_music
     CDoom.i_shutdown_sound
@@ -87,7 +88,7 @@ module Doocr
     STDERR.puts error
 
     # Shutdown. Here might be other errors.
-    CDoom.g_check_demo_status if CDoom.demorecording != 0
+    CDoom.g_check_demo_status if Doocr.demorecording != 0
 
     CDoom.d_quit_net_game
     CDoom.i_shutdown_sound
@@ -98,9 +99,15 @@ module Doocr
   end
 
   def self.i_shutdown_graphics
-    @@screen_texture.try { |st| Raylib.unload_texture(st) }
-    @@viewport_target.try { |vt| Raylib.unload_render_texture(vt) }
-    @@render_target.try { |rt| Raylib.unload_render_texture(rt) }
+    @@screen_texture.try do |st|
+      Raylib.unload_texture(st) if Raylib.texture_valid?(st)
+    end
+    @@viewport_target.try do |vt|
+      Raylib.unload_render_texture(vt) if Raylib.render_texture_valid?(vt)
+    end
+    @@render_target.try do |rt|
+      Raylib.unload_render_texture(rt) if Raylib.render_texture_valid?(rt)
+    end
 
     Raylib.close_window if Raylib.window_ready?
   end
@@ -201,7 +208,7 @@ module Doocr
 
   def self.i_finish_update
     # draws little dots on the bottom of the screen
-    if CDoom.devparm != 0
+    if Doocr.devparm != 0
       i = CDoom.i_get_time
       tics = i - @@lasttic
       @@lasttic = i
@@ -209,11 +216,11 @@ module Doocr
 
       i = 0
       while i < tics * 2
-        CDoom.screens[0][(CDoom::SCREENHEIGHT - 1) * CDoom::SCREENWIDTH + i] = 0xff
+        Doocr.screens[0][(CDoom::SCREENHEIGHT - 1) * CDoom::SCREENWIDTH + i] = 0xff
         i += 2
       end
       while i < 20 * 2
-        CDoom.screens[0][(CDoom::SCREENHEIGHT - 1) * CDoom::SCREENWIDTH + i] = 0x0
+        Doocr.screens[0][(CDoom::SCREENHEIGHT - 1) * CDoom::SCREENWIDTH + i] = 0x0
         i += 2
       end
     end
@@ -232,9 +239,9 @@ module Doocr
     best_idx = 0
     best_dist = Int32::MAX
     256.times do |i|
-      pr = CDoom.screen_palette[i * 3].to_i32
-      pg = CDoom.screen_palette[i * 3 + 1].to_i32
-      pb = CDoom.screen_palette[i * 3 + 2].to_i32
+      pr = Doocr.screen_palette[i * 3].to_i32
+      pg = Doocr.screen_palette[i * 3 + 1].to_i32
+      pb = Doocr.screen_palette[i * 3 + 2].to_i32
       d = color_distance(r, g, b, pr, pg, pb)
       if d < best_dist
         best_dist = d
@@ -246,10 +253,10 @@ module Doocr
 
   def self.i_read_screen(scr : CDoom::Byte*)
     if @@software_rendering
-      CDoom.doom_memcpy(scr, CDoom.screens[0], CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
+      CDoom.doom_memcpy(scr, Doocr.screens[0], CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
     else
       @@viewport_target.try do |vt|
-        hud_ptr = CDoom.screens[0]
+        hud_ptr = Doocr.screens[0]
 
         vpimage = Raylib.load_image_from_texture(vt.texture)
 
@@ -272,24 +279,28 @@ module Doocr
 
   def self.i_set_palette(palette : CDoom::Byte*)
     256.times do |i|
-      r = CDoom.gammatable[CDoom.usegamma][palette.value] & ~3
+      r = Doocr.gammatable[Doocr.usegamma][palette.value] & ~3
       palette += 1
-      g = CDoom.gammatable[CDoom.usegamma][palette.value] & ~3
+      g = Doocr.gammatable[Doocr.usegamma][palette.value] & ~3
       palette += 1
-      b = CDoom.gammatable[CDoom.usegamma][palette.value] & ~3
+      b = Doocr.gammatable[Doocr.usegamma][palette.value] & ~3
       palette += 1
-      CDoom.screen_palette[i*3] = r
-      CDoom.screen_palette[i*3 + 1] = g
-      CDoom.screen_palette[i*3 + 2] = b
+      Doocr.screen_palette[i*3] = r
+      Doocr.screen_palette[i*3 + 1] = g
+      Doocr.screen_palette[i*3 + 2] = b
       @@palette_rgba[i] = (255_u32 << 24) | (b.to_u32 << 16) | (g.to_u32 << 8) | r.to_u32
     end
+  end
+
+  def self.float_to_fixed(f : Float64) : CDoom::Fixed
+    (f * FRACUNIT).round.to_i32
   end
 
   @@was_focused = false
 
   def self.i_init_graphics
-    CDoom.screens[0] = GC.malloc(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT).as(UInt8*)
-    CDoom.screens[0].clear(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
+    Doocr.screens[0] = GC.malloc(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT).as(UInt8*)
+    Doocr.screens[0].clear(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
 
     unless @@headless
       Raylib.set_config_flags(Raylib::ConfigFlags::WindowResizable)

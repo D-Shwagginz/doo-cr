@@ -11,11 +11,11 @@ A DOOM source port written in Crystal Lang based on [PureDoom](https://github.co
 ## Features
 
 - Full DOOM, DOOM II, and Final Doom compatibility
-- Working networked multiplayer
+- Working networked multiplayer with a rendezvous server implementation
 - Extra in-game settings
 - Bug fixes and little additions <sup>[ask me about them!](mailto:devin@shwaggi.nz)</sup>
 - A handful of limits removed
-- midi music support
+- .MIDI (as opposed to .MUS) music support
 - Command line args (see below)
 - A scary look into what very unsafe low level Crystal code looks like!
 - Somewhat compatible demo playback
@@ -23,69 +23,19 @@ A DOOM source port written in Crystal Lang based on [PureDoom](https://github.co
 - Smooth midi panning <sup>Thanks ADLMDI!</sup>
 - DeHackEd and BEX support
 - Multiple sprite and flat section support
+- Custom Mod API for use in Crystal
 
 ## Usage
 Running doo-cr will boot up an autodetected .wad file and will place the config file in the current directory.
 
 To specify a wad file use -iwad, or if wanting to load a patch wad file as an iwad, like Chex Quest for example, use -fwad (force wad)
 
-Common command line arguments are:
-- -net \
-  Creates a netgame. Port 5029 must but forwarded, see -port
-- -net \<host.i.p.address> \
-  Connects to a netgame
-- -port \<port> \
-  Sets the port to use for all I/O in a net game. Host must port forward this
-- -extratic \<1-4> \
-  Sends num extra packets for data redundancy during a netgame
-- -iwad \<file> \
-  Specify iwad to load
-- -fwad \<file> \
-  Forces loading of a wad as an iwad
-- -file \<file> \
-  Loads in a wad or lump on top of iwad and other -file's
-- -merge \<file> \
-  Will overwrite lumps already loaded with same name<br>
-  If a lump doesn't exist yet, it will add it in like -file<br>
-  Used to load a wad file as a pwad, but treat it with higher priority than an iwad
-- -deh \<file> \
-  Loads in a dehacked file
-- -deathmatch \
-  Used with -net to specify a deathmatch game
-- -altdeath \
-  Same as deathmatch but respawns items and powerups
-- -config \<file> \
-  Specify a configuration file to use
-- -warp \<episode> \<level> \
-  Starts the game at an episode and level number
-- -warp \<map> \
-  Starts the game at a map number
-- -fast \
-  Used with warp to enable fast monsters
-- -skill \<1-5> \
-  Used with warp to set the skill level
-- -respawn \
-  Used with warp to enable monster respawning
-- -mem \<MB> \
-  Sets the default zone memory size in MB. The default is 12MB
-- -nosound \
-  Runs the game without activating the sound thread
-- -headless \
-  Runs without initializing Raylib (no video or audio). Mainly only used
-  for Github Actions. Still runs underlying rendering code unlike -nodraw
-
-- -record \<name> \
-  Record a demo with name to a .lmp file. Use Q to end demo
-- -playdemo \<name> \
-  Plays a lmp out of a wad or present in the folder
-- -timedemo \<name> \
-  Same as -playdemo but plays at an uncapped ticrate for benchmarking
-- -timedemo \<name> -nodraw \
-  Same as -timedemo but without drawing the video
-
+Use the -h/-help arg to print all useful command line arguments
 
 ## How to build
-Use a unix shell, on Windows I use msys2 with UCRT64, with make, cmake and tools, Crystal, and Shards all installed and run `make`.
+Use a unix shell, on Windows I use msys2 with UCRT64, with make, cmake and tools, Crystal, and Shards all installed and run `make`. 
+
+Note that some package managers might use an outdated version of Crystal which will cause compilation errors. To fix this just [manually install Crystal](https://crystal-lang.org/install/), making sure to copy `bin` and `share`.
 
 The make file should copy over all necessary lib files for any OS
 into the bin folder.
@@ -102,11 +52,16 @@ rewrite it in Crystal as a [fun](https://crystal-lang.org/reference/1.21/syntax_
 
 Because of this, I was able to test each function I rewrote as I rewrote them. The downside is that the code is all very C-typed. It is in Crystal though!
 
-The only thing that still remains in C is just variable declarations that I have been too lazy to move over to Crystal. 
+The only C usage is bindings to [Raylib](https://github.com/sol-vin/raylib-cr) and [libADLMIDI](https://github.com/Wohlstand/libADLMIDI) <sup>rewriting those would be a completely seperate project</sup>
 
-All methods are fully written in Crystal. The only C usage is bindings to [Raylib](https://github.com/sol-vin/raylib-cr) and [libADLMIDI](https://github.com/Wohlstand/libADLMIDI) <sup>rewriting those would be a completely seperate project</sup>
+This code is extremely [unsafe](https://crystal-lang.org/reference/1.21/syntax_and_semantics/unsafe.html) due to its current C-typed nature.
 
-Do note that this code is extremely [unsafe](https://crystal-lang.org/reference/1.21/syntax_and_semantics/unsafe.html) due to its current C-typed nature.
+## AI Transparency
+The only thing AI has been used for in this project is mass converting the C variable declarations from C into Crystal. The file that contains this code can be found [here](https://github.com/D-Shwagginz/doo-cr/blob/master/src/doo-cr/lib_doocr.cr).
+
+There is also a copilot-working branch where I let AI have more freedom with the files it edits but this is mostly treated as a sandbox to let me see different ways of accomplishing something. I hand pick code out of this if any.
+
+AI was not used for any other aspect of this project.
 
 ## Plans
 - Hardware OpenGL rendering
@@ -130,7 +85,7 @@ Do note that this code is extremely [unsafe](https://crystal-lang.org/reference/
 
 - [D. Shwagginz](https://github.com/d-shwagginz) - creator and maintainer
 
-### Special thanks
+### Special thanks and credits
 - [Ian Rash](https://github.com/sol-vin) for [raylib-cr](https://github.com/sol-vin/raylib-cr) and teaching me how to code!
 - [Daivuk](https://github.com/Daivuk) for [PureDoom](https://github.com/Daivuk/PureDOOM)
 - [Wohlstand](https://github.com/Wohlstand) for [libADLMIDI](https://github.com/Wohlstand/libADLMIDI)

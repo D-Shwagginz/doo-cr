@@ -13,20 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-# ==> Midi stuff
+# ==> A custom sector tag
 
-module Doocr
-  # Midi info
-  MIDI_BUFFER_SIZE =  1024
-  MIDI_SAMPLE_RATE = 44100
-  MIDI_TICK_TIME   = 1.0 / 140.0
+module Doocr::Mod
+  class Sector
+    getter db_name : String
+    getter action : Proc(CDoom::Sector*, CDoom::Player*, Nil)
+    getter number : Int32 = 20 # I believe 17 is the last special sector number in Doom. 20 to be safe and round
 
-  def self.doom_tick_midi : UInt64
-    return CDoom.i_tick_song
-  end
-
-  def self.doom_get_sound_buffer : Int16*
-    CDoom.i_update_sound
-    return Doocr.mixbuffer.to_unsafe
+    def initialize(@db_name, @action)
+      @number += Mod.sectors.size
+    end
   end
 end
