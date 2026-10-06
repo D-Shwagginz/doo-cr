@@ -33,7 +33,14 @@ To specify a wad file use -iwad, or if wanting to load a patch wad file as an iw
 Use the -h/-help arg to print all useful command line arguments
 
 ## How to build
-Use a unix shell, on Windows I use msys2 with UCRT64, with make, cmake and tools, Crystal, and Shards all installed and run `make`. 
+Use a unix shell, on Windows I use msys2 with UCRT64, and run `make`.
+The makefile for Windows and Linux should auto install all prerequisites but for Macos
+you will need to install Crystal manually using homebrew:
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew update
+brew install crystal
+```
 
 Note that some package managers might use an outdated version of Crystal which will cause compilation errors. To fix this just [manually install Crystal](https://crystal-lang.org/install/), making sure to copy `bin` and `share`.
 
