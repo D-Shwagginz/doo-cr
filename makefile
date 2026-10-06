@@ -32,7 +32,7 @@ ifeq ($(DETECTED_OS),Windows)
 	AMOUT := libADLMIDI.dll
 	CHANGE_LIB_NAMES := 
 	CRYSTAL_LIBS := libiconv-2.dll libgc-1.dll libwinpthread-1.dll libpcre2-8-0.dll libpcre-2-8-0.dll
-	PREREQS := mingw-w64-ucrt-x86_64-gcc \
+	PREREQS := pacman -S mingw-w64-ucrt-x86_64-gcc \
             mingw-w64-ucrt-x86_64-crystal \
             mingw-w64-ucrt-x86_64-pkg-config \
             mingw-w64-ucrt-x86_64-pcre2 \
