@@ -34,7 +34,7 @@ require "./adlmidi.cr"
 # TODO: Fix game jitter on lower end hardware (less cpu cores)
 # TODO: Figure out why the game doesn't display on windows on older gpus
 module Doocr
-  VERSION_STR = "1.6" # Used for displaying
+  VERSION_STR = "1.7" # Used for displaying
   # Demo compatible version (Gameplay version)
   DEMOVERSION = 110
   # Save compatible version (Save data version)
