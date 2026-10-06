@@ -32,7 +32,7 @@ ifeq ($(DETECTED_OS),Windows)
 	AMOUT := libADLMIDI.dll
 	CHANGE_LIB_NAMES := 
 	CRYSTAL_LIBS := libiconv-2.dll libgc-1.dll libwinpthread-1.dll libpcre2-8-0.dll libpcre-2-8-0.dll
-	PREREQS := pacman -S mingw-w64-ucrt-x86_64-gcc \
+	PREREQS := pacman -S --noconfirm mingw-w64-ucrt-x86_64-gcc \
             mingw-w64-ucrt-x86_64-crystal \
             mingw-w64-ucrt-x86_64-pkg-config \
             mingw-w64-ucrt-x86_64-pcre2 \
@@ -60,9 +60,6 @@ else ifeq ($(DETECTED_OS),macOS)
 	AMOUT := libADLMIDI.1.6.3.dylib
 	CHANGE_LIB_NAMES := install_name_tool -change "@rpath/libADLMIDI.1.$(LIB_EXT)" "./libADLMIDI.$(LIB_EXT)" $(OUTDIR)/$(EXEC) && install_name_tool -change "@rpath/libraylib.600.$(LIB_EXT)" "./libraylib.$(LIB_EXT)" $(OUTDIR)/$(EXEC)
 	CRYSTAL_LIBS :=
-	PREREQS := /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && \
-	echo "y" | brew update && \
-	echo "y" | brew install crystal
 endif
 
 .PHONY: all clean prereq

@@ -18,6 +18,8 @@ jobs:
         with:
           msystem: UCRT64
           update: true
+          install: >-
+            make
       - name: Build project
         run: make
       - name: Package exe
