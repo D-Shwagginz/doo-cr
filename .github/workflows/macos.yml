@@ -11,8 +11,6 @@ jobs:
         uses: crystal-lang/install-crystal@v1
         with:
           crystal: latest
-      - name: Install Crystal libs
-        run: shards install
       - name: Build project
         run: make
       - name: Run Demos

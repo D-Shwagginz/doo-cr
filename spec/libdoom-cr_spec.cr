@@ -1,7 +1,7 @@
 require "./spec_helper"
 
 describe "Doocr renderer math" do
-  it "matches the unsigned fixed-point inverse-scale table" do
+  it "matches the unsigned fixed-point inverse-scale table", tags: "gh-actions" do
     {
       {65_536, 65_535},
       {131_072, 32_767},
@@ -12,7 +12,7 @@ describe "Doocr renderer math" do
     end
   end
 
-  it "keeps texture steps positive and decreasing as wall scale grows" do
+  it "keeps texture steps positive and decreasing as wall scale grows", tags: "gh-actions" do
     previous = Int32::MAX
 
     [65_536, 131_072, 262_144, 524_288].each do |scale|

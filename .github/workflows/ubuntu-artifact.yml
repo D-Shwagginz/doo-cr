@@ -1,25 +1,14 @@
-name: Windows Artifact
+name: Ubuntu Artifact
 on:
   push:
     branches: [ "master" ]
 jobs:
   build:
-    name: Windows Artifact
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
+    name: Ubuntu Artifact
+    runs-on: ubuntu-latest
     steps:
       - name: Download source
         uses: actions/checkout@v4
-
-      - name: Set up MSYS2 (UCRT64)
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: UCRT64
-          update: true
-          install: >-
-            make
       - name: Build project
         run: make
       - name: Package exe
@@ -30,5 +19,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: doo-cr-windows
+          name: doo-cr-ubuntu
           path: dist/
