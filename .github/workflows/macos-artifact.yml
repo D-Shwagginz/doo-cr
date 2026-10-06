@@ -1,0 +1,27 @@
+name: Macos Artifact
+on:
+  push:
+    branches: [ "master" ]
+jobs:
+  build:
+    name: Macos Artifact
+    runs-on: macos-latest
+    steps:
+      - name: Download source
+        uses: actions/checkout@v4
+      - name: Install Crystal
+        uses: crystal-lang/install-crystal@v1
+        with:
+          crystal: latest
+      - name: Build project
+        run: make
+      - name: Package exe
+        run: |
+          mkdir -p dist
+          cp DOOM1.WAD bin
+          cp bin/* dist/
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doo-cr-macos
+          path: dist/

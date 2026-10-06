@@ -34,6 +34,7 @@ jobs:
       - name: Package exe
         run: |
           mkdir -p dist
+          cp DOOM1.WAD bin
           cp bin/* dist/
       - name: Upload artifact
         uses: actions/upload-artifact@v4

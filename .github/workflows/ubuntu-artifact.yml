@@ -1,0 +1,31 @@
+name: Ubuntu Artifact
+on:
+  push:
+    branches: [ "master" ]
+jobs:
+  build:
+    name: Ubuntu Artifact
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download source
+        uses: actions/checkout@v4
+      - name: Install X11 and graphical dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev xorg-dev
+      - name: Install Crystal
+        uses: crystal-lang/install-crystal@v1
+        with:
+          crystal: latest
+      - name: Build project
+        run: make
+      - name: Package exe
+        run: |
+          mkdir -p dist
+          cp DOOM1.WAD bin
+          cp bin/* dist/
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doo-cr-ubuntu
+          path: dist/
