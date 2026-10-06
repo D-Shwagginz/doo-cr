@@ -40,7 +40,6 @@ ifeq ($(DETECTED_OS),Windows)
             mingw-w64-ucrt-x86_64-openssl \
             mingw-w64-ucrt-x86_64-cmake \
             mingw-w64-ucrt-x86_64-shards \
-            make \
             git
 else ifeq ($(DETECTED_OS),Linux)
 	LIB_EXT := so
@@ -50,7 +49,8 @@ else ifeq ($(DETECTED_OS),Linux)
 	AMOUT := libADLMIDI.so.1.6.3
 	CHANGE_LIB_NAMES := patchelf --replace-needed libADLMIDI.$(LIB_EXT).1 ./libADLMIDI.$(LIB_EXT) $(OUTDIR)/$(EXEC) && patchelf --replace-needed libraylib.$(LIB_EXT).600 ./libraylib.$(LIB_EXT) $(OUTDIR)/$(EXEC) 
 	CRYSTAL_LIBS :=
-	PREREQS := sudo apt install git make curl libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev xorg-dev && \
+	PREREQS := sudo apt update && \
+	sudo apt install git make curl libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev xorg-dev && \
 	curl -fsSL https://crystal-lang.org/install.sh | sudo bash
 else ifeq ($(DETECTED_OS),macOS)
 	LIB_EXT := dylib
