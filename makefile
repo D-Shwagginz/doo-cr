@@ -32,6 +32,16 @@ ifeq ($(DETECTED_OS),Windows)
 	AMOUT := libADLMIDI.dll
 	CHANGE_LIB_NAMES := 
 	CRYSTAL_LIBS := libiconv-2.dll libgc-1.dll libwinpthread-1.dll libpcre2-8-0.dll libpcre-2-8-0.dll
+	PREREQS := mingw-w64-ucrt-x86_64-gcc \
+            mingw-w64-ucrt-x86_64-crystal \
+            mingw-w64-ucrt-x86_64-pkg-config \
+            mingw-w64-ucrt-x86_64-pcre2 \
+            mingw-w64-ucrt-x86_64-libyaml \
+            mingw-w64-ucrt-x86_64-openssl \
+            mingw-w64-ucrt-x86_64-cmake \
+            mingw-w64-ucrt-x86_64-shards \
+            make \
+            git
 else ifeq ($(DETECTED_OS),Linux)
 	LIB_EXT := so
 	RLMAKE := make -Bj4 SHARED_RAYLIB=YES PLATFORM=PLATFORM_DESKTOP
@@ -40,6 +50,8 @@ else ifeq ($(DETECTED_OS),Linux)
 	AMOUT := libADLMIDI.so.1.6.3
 	CHANGE_LIB_NAMES := patchelf --replace-needed libADLMIDI.$(LIB_EXT).1 ./libADLMIDI.$(LIB_EXT) $(OUTDIR)/$(EXEC) && patchelf --replace-needed libraylib.$(LIB_EXT).600 ./libraylib.$(LIB_EXT) $(OUTDIR)/$(EXEC) 
 	CRYSTAL_LIBS :=
+	PREREQS := sudo apt install git make curl libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev xorg-dev && \
+	curl -fsSL https://crystal-lang.org/install.sh | sudo bash
 else ifeq ($(DETECTED_OS),macOS)
 	LIB_EXT := dylib
 	RLMAKE := make -Bj4 SHAREDLIBS="-lglfw -framework OpenGL -framework OpenAL -framework Cocoa" SHARED_RAYLIB=YES PLATFORM=PLATFORM_DESKTOP
@@ -48,10 +60,13 @@ else ifeq ($(DETECTED_OS),macOS)
 	AMOUT := libADLMIDI.1.6.3.dylib
 	CHANGE_LIB_NAMES := install_name_tool -change "@rpath/libADLMIDI.1.$(LIB_EXT)" "./libADLMIDI.$(LIB_EXT)" $(OUTDIR)/$(EXEC) && install_name_tool -change "@rpath/libraylib.600.$(LIB_EXT)" "./libraylib.$(LIB_EXT)" $(OUTDIR)/$(EXEC)
 	CRYSTAL_LIBS :=
+	PREREQS := /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && \
+	echo "y" | brew update && \
+	echo "y" | brew install crystal
 endif
 
-.PHONY: all clean
-all: libraylib.$(LIB_EXT) libADLMIDI.$(LIB_EXT) $(addprefix $(OUTDIR)/,$(CRYSTAL_LIBS))
+.PHONY: all clean prereq
+all: prereq libraylib.$(LIB_EXT) libADLMIDI.$(LIB_EXT) $(addprefix $(OUTDIR)/,$(CRYSTAL_LIBS))
 	test -d $(OUTDIR) || mkdir $(OUTDIR) && \
 	shards install
 	shards update
@@ -68,6 +83,8 @@ clean:
 	rm libraylib.$(LIB_EXT)
 	rm libADLMIDI.$(LIB_EXT)
 
+prereq:
+	$(PREREQS)
 
 define COPY_LIB
 $(OUTDIR)/$(1): $(CRYSTAL_LIBRARY_PATH)/$(2)

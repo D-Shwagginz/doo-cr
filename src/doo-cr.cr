@@ -31,6 +31,8 @@ require "./adlmidi.cr"
 # TODO: Add infinite comments to everything ever
 # TODO: Fix Linux (Ubuntu) audio bugging
 # TODO: Optimize drawing code
+# TODO: Fix game jitter on lower end hardware (less cpu cores)
+# TODO: Figure out why the game doesn't display on windows on older gpus
 module Doocr
   VERSION_STR = "1.6" # Used for displaying
   # Demo compatible version (Gameplay version)

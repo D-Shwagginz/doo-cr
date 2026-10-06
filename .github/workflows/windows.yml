@@ -16,17 +16,6 @@ jobs:
         with:
           msystem: UCRT64
           update: true
-          install: >-
-            mingw-w64-ucrt-x86_64-gcc
-            mingw-w64-ucrt-x86_64-crystal
-            mingw-w64-ucrt-x86_64-pkg-config
-            mingw-w64-ucrt-x86_64-pcre2
-            mingw-w64-ucrt-x86_64-libyaml
-            mingw-w64-ucrt-x86_64-openssl
-            mingw-w64-ucrt-x86_64-cmake
-            mingw-w64-ucrt-x86_64-shards
-            make
-            git
       - name: Build project
         run: make
       - name: Run Demos
