@@ -1,12 +1,16 @@
 ![logo](https://raw.githubusercontent.com/D-Shwagginz/doo-cr/master/logo/doo-cr.png)
 
-[![Windows Artifact](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows-artifact.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows-artifact.yml) - Download Here!
+A DOOM source port written in [Crystal Lang](https://crystal-lang.org/) based on [PureDoom](https://github.com/Daivuk/PureDOOM) and [LinuxDoom](https://github.com/id-Software/DOOM)
 
-[![Windows Demos](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows.yml)
+Download Here!<br>
+[![Windows Artifact](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows-artifact.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows-artifact.yml)<br>
+[![Macos Artifact](https://github.com/D-Shwagginz/doo-cr/actions/workflows/macos-artifact.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/macos-artifact.yml)<br>
+[![Ubuntu Artifact](https://github.com/D-Shwagginz/doo-cr/actions/workflows/ubuntu-artifact.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/ubuntu-artifact.yml)
+
+Demo Tests<br>
+[![Windows Demos](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/windows.yml)<br>
 [![Ubuntu Demos](https://github.com/D-Shwagginz/doo-cr/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/ubuntu.yml)<br>
 [![Macos Demos](https://github.com/D-Shwagginz/doo-cr/actions/workflows/macos.yml/badge.svg)](https://github.com/D-Shwagginz/doo-cr/actions/workflows/macos.yml)
-
-A DOOM source port written in Crystal Lang based on [PureDoom](https://github.com/Daivuk/PureDOOM) and [LinuxDoom](https://github.com/id-Software/DOOM)
 
 ## Features
 
