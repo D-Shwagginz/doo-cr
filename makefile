@@ -62,7 +62,7 @@ else ifeq ($(DETECTED_OS),macOS)
 	CRYSTAL_LIBS :=
 endif
 
-.PHONY: all clean prereq
+.PHONY: all clean prereq quick
 all: prereq libraylib.$(LIB_EXT) libADLMIDI.$(LIB_EXT) $(addprefix $(OUTDIR)/,$(CRYSTAL_LIBS))
 	test -d $(OUTDIR) || mkdir $(OUTDIR) && \
 	shards install
@@ -82,6 +82,17 @@ clean:
 
 prereq:
 	$(PREREQS)
+
+quick: $(addprefix $(OUTDIR)/,$(CRYSTAL_LIBS))
+	test -d $(OUTDIR) || mkdir $(OUTDIR) && \
+	shards install
+	shards update
+	crystal build src/doo-cr.cr $(CRYSTAL_FLAGS) -o $(OUTDIR)/$(EXEC) --link-flags="-L$(CURRENT_DIR) -LC:/msys64/clangarm64/lib"
+	cp -f libraylib.$(LIB_EXT) $(OUTDIR)
+	cp -f libADLMIDI.$(LIB_EXT) $(OUTDIR)
+
+	$(CHANGE_LIB_NAMES)
+
 
 define COPY_LIB
 $(OUTDIR)/$(1): $(CRYSTAL_LIBRARY_PATH)/$(2)
