@@ -445,7 +445,7 @@ module Doocr
       position = originy + patch.value.topdelta
 
       if position < 0
-        count += position
+        count &+= position
         position = 0
       end
 

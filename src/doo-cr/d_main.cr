@@ -485,56 +485,56 @@ module Doocr
       return
     end
 
-    if File.exists?(doom2fwad)
+    if f = File.exists?(doom2fwad) ? doom2fwad : File.exists?(doom2fwad.upcase) ? doom2fwad.upcase : nil
       Doocr.gamemode = CDoom::GameMode::Commercial
       Doocr.gamemission = CDoom::GameMission::Doom2
       # C'est ridicule!
       # Let's handle languages in config files, okay?
       Doocr.language = CDoom::Language::French
       puts "French version"
-      Doocr.d_add_file(doom2fwad)
+      Doocr.d_add_file(f)
       return
     end
 
-    if File.exists?(doom2wad)
+    if f = File.exists?(doom2wad) ? doom2wad : File.exists?(doom2wad.upcase) ? doom2wad.upcase : nil
       Doocr.gamemode = CDoom::GameMode::Commercial
       Doocr.gamemission = CDoom::GameMission::Doom2
-      Doocr.d_add_file(doom2wad)
+      Doocr.d_add_file(f)
       return
     end
 
-    if File.exists?(plutoniawad)
+    if f = File.exists?(plutoniawad) ? plutoniawad : File.exists?(plutoniawad.upcase) ? plutoniawad.upcase : nil
       Doocr.gamemode = CDoom::GameMode::Commercial
       Doocr.gamemission = CDoom::GameMission::PackPlut
-      Doocr.d_add_file(plutoniawad)
+      Doocr.d_add_file(f)
       return
     end
 
-    if File.exists?(tntwad)
+    if f = File.exists?(tntwad) ? tntwad : File.exists?(tntwad.upcase) ? tntwad.upcase : nil
       Doocr.gamemode = CDoom::GameMode::Commercial
       Doocr.gamemission = CDoom::GameMission::PackTnt
-      Doocr.d_add_file(tntwad)
+      Doocr.d_add_file(f)
       return
     end
 
-    if File.exists?(doomuwad)
+    if f = File.exists?(doomuwad) ? doomuwad : File.exists?(doomuwad.upcase) ? doomuwad.upcase : nil
       Doocr.gamemode = CDoom::GameMode::Retail
       Doocr.gamemission = CDoom::GameMission::Doom
-      Doocr.d_add_file(doomuwad)
+      Doocr.d_add_file(f)
       return
     end
 
-    if File.exists?(doomwad)
+    if f = File.exists?(doomwad) ? doomwad : File.exists?(doomwad.upcase) ? doomwad.upcase : nil
       Doocr.gamemode = CDoom::GameMode::Registered
       Doocr.gamemission = CDoom::GameMission::Doom
-      Doocr.d_add_file(doomwad)
+      Doocr.d_add_file(f)
       return
     end
 
-    if File.exists?(doom1wad)
+    if f = File.exists?(doom1wad) ? doom1wad : File.exists?(doom1wad.upcase) ? doom1wad.upcase : nil
       Doocr.gamemode = CDoom::GameMode::Shareware
       Doocr.gamemission = CDoom::GameMission::Doom
-      Doocr.d_add_file(doom1wad)
+      Doocr.d_add_file(f)
       return
     end
 
